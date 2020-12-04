@@ -6,6 +6,7 @@ import os
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 
+
 def setuplog(name, path=None, log_level=20, fmt=FMT):
     """Set-up the logging on sys.stdout"""
     logger = logging.getLogger(name)
@@ -17,6 +18,7 @@ def setuplog(name, path=None, log_level=20, fmt=FMT):
     if path is not None:
         add_filehandler(logger, path, log_level=log_level, fmt=fmt)
     return logger
+
 
 def add_filehandler(logger, path, log_level=20, fmt=FMT):
     """Add file handler to logger."""
@@ -34,6 +36,7 @@ def add_filehandler(logger, path, log_level=20, fmt=FMT):
         logger.debug(f"Overwriting log messages in file {path}.")
     else:
         logger.debug(f"Writing log messages to new file {path}.")
+
 
 def start_logger(verbose, quiet):
     if verbose:

@@ -4,7 +4,16 @@ import numpy as np
 import logging
 
 
-def frames(fn, dst_path, dst_prefix="", frame_int=1, start_time=0, end_time=None, lens_pars=None, logger=logging):
+def frames(
+    fn,
+    dst_path,
+    dst_prefix="",
+    frame_int=1,
+    start_time=0,
+    end_time=None,
+    lens_pars=None,
+    logger=logging,
+):
     """
 
     :param fn:  filename (str) or BytesIO object containing a movie dataset
@@ -16,14 +25,16 @@ def frames(fn, dst_path, dst_prefix="", frame_int=1, start_time=0, end_time=None
     :param lens_pars=None: set of parameters passed to lens_corr if needed (e.g. {"k1": -10.0e-6, "c": 2, "f": 8.0}
     :return: list of time since start (ms), list of files generated
     """
-    if not(os.path.isdir(dst_path)):
+    if not (os.path.isdir(dst_path)):
         try:
             os.makedirs(dst_path)
         except:
-            raise PermissionError(f"Path {os.path.abspath(dst_path)} cannot be created. Check permissions")
+            raise PermissionError(
+                f"Path {os.path.abspath(dst_path)} cannot be created. Check permissions"
+            )
     cap = cv2.VideoCapture(fn)
     _n = 0
-    _t = 0.
+    _t = 0.0
     t = []
     fns = []
     fps = cap.get(cv2.cv2.CAP_PROP_FPS)
@@ -46,14 +57,14 @@ def frames(fn, dst_path, dst_prefix="", frame_int=1, start_time=0, end_time=None
             # update frame number
             _n += 1
             # update frame time
-            _t += 1./fps
+            _t += 1.0 / fps
             t.append(_t)
             fns.append(fn_out)
         else:
             return t, fns
 
 
-def lens_corr(img, k1=0., c=2., f=1.):
+def lens_corr(img, k1=0.0, c=2.0, f=1.0):
     """
     Lens distortion correction based on lens characteristics.
     Function by Gerben Gerritsen / Sten Schurer, 2019
@@ -109,9 +120,10 @@ def color_corr(img, alpha=None, beta=None, gamma=0.5):
         corr_img = cv2.convertScaleAbs(corr_img, alpha=alpha, beta=beta)
 
     # apply gamma correction
-    invGamma = 1. / gamma
-    table = (np.array([((i / 255.0) ** invGamma) * 255
-                       for i in np.arange(0, 256)]).astype('uint8'))
+    invGamma = 1.0 / gamma
+    table = np.array(
+        [((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]
+    ).astype("uint8")
 
     corr_img = cv2.LUT(corr_img, table)
 
