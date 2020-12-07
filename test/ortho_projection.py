@@ -13,8 +13,8 @@ import cv2
 
 # it'll also include options to assess changes in orthography given changes in water levels. For this the position
 # of the camera is needed, in the same x, y, z reference system as the measurements of the GCPs.
-folder = r"c:\OpenRiverCam"
-# path = r"/home/hcwinsemius/OpenRiverCam
+# folder = r"c:\OpenRiverCam"
+folder = r"/home/hcwinsemius/OpenRiverCam"
 
 src = os.path.join(folder, "with_lens")
 dst = os.path.join(folder, "ortho_proj")
@@ -43,7 +43,7 @@ src_corners = {
 src_polygon = Polygon([src_corners[s] for s in src_corners])
 
 
-dst_polygon = ORC.ortho.get_aoi(gcps, cam_loc, src_corners, crs="EPSG:32737")
+dst_polygon = ORC.ortho.get_aoi(gcps, src_corners, crs="EPSG:32737")
 
 print(src_polygon)
 print(dst_polygon)
@@ -62,8 +62,12 @@ ax = plt.subplot(121)
 _src = np.array(gcps_a["src"])
 _dst = np.array(gcps["dst"])
 _dst2 = np.array(gcps_a["dst"])
-src_patch = PolygonPatch(src_polygon, facecolor="b", edgecolor="b", alpha=0.25, zorder=2)
-dst_patch = PolygonPatch(dst_polygon, facecolor="b", edgecolor="b", alpha=0.25, zorder=2)
+src_patch = PolygonPatch(
+    src_polygon, facecolor="b", edgecolor="b", alpha=0.25, zorder=2
+)
+dst_patch = PolygonPatch(
+    dst_polygon, facecolor="b", edgecolor="b", alpha=0.25, zorder=2
+)
 
 plt.imshow(img)
 plt.plot(_src[:, 0], _src[:, 1], ".", label="gcps")

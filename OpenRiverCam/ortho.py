@@ -62,6 +62,7 @@ def _get_M(gcps):
     return M
     # find locations of transformed image corners
 
+
 def orthorectification(img, aoi, dst_resolution=0.01):
     """
     This function takes the original gcps and water level, and uses the actual water level, defined resolution
@@ -73,9 +74,8 @@ def orthorectification(img, aoi, dst_resolution=0.01):
     """
     raise NotImplementedError("Implement me")
 
-def get_aoi(
-    gcps, cam_loc, src_corners, crs=None
-):
+
+def get_aoi(gcps, src_corners, crs=None):
     """
     Get rectangular AOI from 4 user defined points within frames.
 
@@ -84,11 +84,8 @@ def get_aoi(
     ------
     gcps - Dict containing in "src" a list of (col, row) pairs and in "dst" a list of projected (x, y) coordinates
         of the GCPs in the imagery
-    cam_loc - dict with "x", "y" and "z", location of cam in local crs [m]
-    h_a - float, actual water level at time of img
     src_corners - dict with 4 (x,y) tuples names "up_left", "down_left", "up_right", "down_right"
-    dst_resolution=0.01 - target resolution in meters
-    crs=None - project coordinate reference system, if available, results are stored into this crs in GeoTiff
+    crs=None - str, project coordinate reference system as "EPSG:XXXX", if available, results are stored into this crs in GeoTiff
 
     Output:
     -------
@@ -97,40 +94,40 @@ def get_aoi(
     Transformation matrix based on image corners
     """
 
-    # first get the x, y location of the gcps in the actual img with actual h_a
-
     # retrieve the M transformation matrix for the conditions during GCP. These are used to define the AOI so that
     # dst AOI remains the same for any movie
     M_gcp = _get_M(gcps)
-
     # prepare a simple temporary np.array of the src_corners
-    _src_corners = np.array(
+    try:
+        _src_corners = np.array(
             [
                 src_corners["up_left"],
                 src_corners["down_left"],
                 src_corners["down_right"],
                 src_corners["up_right"],
             ]
-    )
-
-    # _src_corners = np.array([[0., height], [width, height], [width, 0.], [0., 0.]])
+        )
+    except:
+        raise ValueError("src_corner coordinates not having expected format")
     # reproject corner points to the actual space in coordinates
     _dst_corners = cv2.perspectiveTransform(np.float32([_src_corners]), M_gcp)[0]
     polygon = Polygon(_dst_corners)
     coords = np.array(polygon.exterior.coords)
     # estimate the angle of the bounding box
     # retrieve average line across AOI
-    point1 = (coords[0]+coords[3])/2
-    point2 = (coords[1]+coords[2])/2
-    diff = point2-point1
+    point1 = (coords[0] + coords[3]) / 2
+    point2 = (coords[1] + coords[2]) / 2
+    diff = point2 - point1
     angle = np.arctan2(diff[1], diff[0])
     # rotate the polygon over this angle to get a proper bounding box
-    polygon_rotate = rotate(polygon, -angle, origin=_dst_corners[0], use_radians=True)
-    # TODO: make a bbox with the defined coordinate order rather than a bbox standard order.
-    bbox = box(
-        *polygon_rotate.bounds)
+    polygon_rotate = rotate(
+        polygon, -angle, origin=tuple(_dst_corners[0]), use_radians=True
+    )
+    xmin, ymin, xmax, ymax = polygon_rotate.bounds
+    bbox_coords = [(xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax)]
+    bbox = Polygon(bbox_coords)
     # now rotate back
-    aoi = rotate(bbox, angle, origin=_dst_corners[0], use_radians=True)
+    aoi = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
 
     # prepare a crs
     if crs is not None:
@@ -138,23 +135,17 @@ def get_aoi(
             crs = CRS.from_user_input(crs)
         except:
             raise ValueError(f'CRS "{crs}" is not valid')
-
+        if crs.is_geographic:
+            raise TypeError(
+                "CRS is of geographic type, a projected type (unit: meters) is required"
+            )
+        try:
+            epsg = crs.to_epsg()
+        except:
+            raise ValueError(f"CRS cannot be converted to EPSG code")
+    crs_json = {"type": "EPSG", "properties": {"code": epsg}}
     f = geojson.Feature(geometry=aoi, properties={"ID": 0})
-    fc = geojson.FeatureCollection([f])
-    # TODO: export with CRS
-    return fc
-
-
-
-    print(angle)
-
-    return bbox
-
-    print("check")
-
-    #
-    # FIXME
-    raise NotImplementedError("")
+    return geojson.FeatureCollection([f], crs=crs_json)
 
 
 def surf_velocity():
