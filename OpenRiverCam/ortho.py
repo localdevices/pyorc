@@ -1,8 +1,13 @@
 import cv2
 import numpy as np
 import copy
+import geojson
+
 from shapely.geometry import Polygon, Point, box
 from shapely.affinity import rotate
+
+from pyproj import CRS
+
 
 def _get_gcps_a(gcps, cam_loc, h_a):
     """
@@ -57,18 +62,26 @@ def _get_M(gcps):
     return M
     # find locations of transformed image corners
 
-def orthorectification(
-    img, gcps, cam_loc, h_a, src_corners, dst_resolution=0.01, crs=None
+def orthorectification(img, aoi, dst_resolution=0.01):
+    """
+    This function takes the original gcps and water level, and uses the actual water level, defined resolution
+    and AOI to determine a resulting outcoming image. Image orthorectification parameters based on 4 GCPs.
+    GCPs need to be at water level.
+
+    :return:
+    BytesIO object or written GeoTiff file
+    """
+    raise NotImplementedError("Implement me")
+
+def get_aoi(
+    gcps, cam_loc, src_corners, crs=None
 ):
     """
-    Image orthorectification using user inputs for actual water level corner pixels, and resolution
-    of outcoming image. This function takes the original gcps and water level, and uses the actual water level
-    and AOI corners to determine a resulting outcoming image. Image orthorectification parameters based on 4 GCPs.
-    GCPs need to be at water level.
+    Get rectangular AOI from 4 user defined points within frames.
+
 
     Input:
     ------
-    img - original image
     gcps - Dict containing in "src" a list of (col, row) pairs and in "dst" a list of projected (x, y) coordinates
         of the GCPs in the imagery
     cam_loc - dict with "x", "y" and "z", location of cam in local crs [m]
@@ -79,7 +92,7 @@ def orthorectification(
 
     Output:
     -------
-    BytesIO object or written GeoTiff file
+    GeoJSON - AOI
 
     Transformation matrix based on image corners
     """
@@ -89,9 +102,6 @@ def orthorectification(
     # retrieve the M transformation matrix for the conditions during GCP. These are used to define the AOI so that
     # dst AOI remains the same for any movie
     M_gcp = _get_M(gcps)
-
-    # then retrieve the M transformation matrix based upon actual conditions
-    M_a = _get_M(_get_gcps_a(gcps, cam_loc, h_a))
 
     # prepare a simple temporary np.array of the src_corners
     _src_corners = np.array(
@@ -116,8 +126,24 @@ def orthorectification(
     angle = np.arctan2(diff[1], diff[0])
     # rotate the polygon over this angle to get a proper bounding box
     polygon_rotate = rotate(polygon, -angle, origin=_dst_corners[0], use_radians=True)
+    # TODO: make a bbox with the defined coordinate order rather than a bbox standard order.
     bbox = box(
         *polygon_rotate.bounds)
+    # now rotate back
+    aoi = rotate(bbox, angle, origin=_dst_corners[0], use_radians=True)
+
+    # prepare a crs
+    if crs is not None:
+        try:
+            crs = CRS.from_user_input(crs)
+        except:
+            raise ValueError(f'CRS "{crs}" is not valid')
+
+    f = geojson.Feature(geometry=aoi, properties={"ID": 0})
+    fc = geojson.FeatureCollection([f])
+    # TODO: export with CRS
+    return fc
+
 
 
     print(angle)

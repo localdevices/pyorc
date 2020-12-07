@@ -13,9 +13,11 @@ import cv2
 
 # it'll also include options to assess changes in orthography given changes in water levels. For this the position
 # of the camera is needed, in the same x, y, z reference system as the measurements of the GCPs.
+folder = r"c:\OpenRiverCam"
+# path = r"/home/hcwinsemius/OpenRiverCam
 
-src = r"/home/hcwinsemius/OpenRiverCam/with_lens"
-dst = r"/home/hcwinsemius/OpenRiverCam/ortho_proj"
+src = os.path.join(folder, "with_lens")
+dst = os.path.join(folder, "ortho_proj")
 
 fns = glob.glob(os.path.join(src, "*.jpg"))
 gcps = {
@@ -41,7 +43,8 @@ src_corners = {
 src_polygon = Polygon([src_corners[s] for s in src_corners])
 
 
-dst_polygon = ORC.ortho.orthorectification(img, gcps, cam_loc, h_a, src_corners)
+dst_polygon = ORC.ortho.get_aoi(gcps, cam_loc, src_corners, crs="EPSG:32737")
+
 print(src_polygon)
 print(dst_polygon)
 
