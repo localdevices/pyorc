@@ -1,18 +1,14 @@
 import os
+import io
 import cv2
 import numpy as np
-import logging
-
 
 def frames(
     fn,
-    dst_path,
-    dst_prefix="",
     frame_int=1,
-    start_time=0,
-    end_time=None,
+    start_frame=0,
+    end_frame=None,
     lens_pars=None,
-    logger=logging,
 ):
     """
 
@@ -25,43 +21,42 @@ def frames(
     :param lens_pars=None: set of parameters passed to lens_corr if needed (e.g. {"k1": -10.0e-6, "c": 2, "f": 8.0}
     :return: list of time since start (ms), list of files generated
     """
-    if not (os.path.isdir(dst_path)):
-        try:
-            os.makedirs(dst_path)
-        except:
-            raise PermissionError(
-                f"Path {os.path.abspath(dst_path)} cannot be created. Check permissions"
-            )
     cap = cv2.VideoCapture(fn)
-    _n = 0
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    if end_frame is None:
+        end_frame = frame_count
+    if start_frame > frame_count:
+        raise ValueError("Start frame is larger than total amount of frames")
+    if end_frame <= start_frame:
+        raise ValueError(f"Start frame {start_frame} is larger than end frame {end_frame}")
+    # go to the right frame position
+    cap.set(cv2.CAP_PROP_POS_FRAMES, int(start_frame))
+
+    _n = start_frame
     _t = 0.0
-    t = []
-    fns = []
     fps = cap.get(cv2.cv2.CAP_PROP_FPS)
-    while cap.isOpened():
-        fn_out = os.path.join(dst_path, "{:s}_{:04d}.jpg".format(dst_prefix, _n))
+    while (cap.isOpened()) and (_n <= end_frame):
         try:
             ret, img = cap.read()
         except:
             raise IOError(f"Cannot read next frame no. {_n}")
         if ret:
-            logger.debug(f"Saving frame {_n} with ret {ret} to {fn_out}")
+            # logger.debug(f"Saving frame {_n} with ret {ret} to {fn_out}")
             if lens_pars is not None:
                 # apply lens distortion correction
                 img = lens_corr(img, **lens_pars)
             # apply gray scaling, contrast- and gamma correction
             img = color_corr(img, alpha=None, beta=None, gamma=0.4)
-
-            # save the image with name 'n'
-            cv2.imwrite(fn_out, img)
+            ret, im_en = cv2.imencode(".jpg", img)
+            buf = io.BytesIO(im_en)
             # update frame number
             _n += 1
             # update frame time
             _t += 1.0 / fps
-            t.append(_t)
-            fns.append(fn_out)
+            yield _t, buf
         else:
-            return t, fns
+            break
+    return
 
 
 def lens_corr(img, k1=0.0, c=2.0, f=1.0):

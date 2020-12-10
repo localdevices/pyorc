@@ -13,10 +13,18 @@ lens_pars = {
 }
 logger = OpenRiverCam.log.start_logger(True, False)
 # do frame extraction
-t, fns = OpenRiverCam.io.frames(fn, dst, lens_pars=lens_pars, logger=logger)
+n = 0
+for t, buf in OpenRiverCam.io.frames(fn, dst, start_frame=100, lens_pars=lens_pars):
+    print(t)
+    n += 1
+    buf.seek(0)
+    dst_fn = os.path.join(dst, '_{:04d}.jpg'.format(n))
+    with open(dst_fn, 'wb') as f:
+        f.write(buf.read())
 
+print("Done")
 # read one frame back and plot
-img = cv2.imread(fns[-1], 0)
+img = cv2.imread(dst_fn, 0)
 cv2.imshow("image", img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
