@@ -2,12 +2,37 @@ import cv2
 import numpy as np
 import copy
 import geojson
-
-from shapely.geometry import Polygon, Point, box
+import rasterio
+from shapely.geometry import Polygon, Point, MultiPoint
 from shapely.affinity import rotate
 
 from pyproj import CRS
 
+def _transform_to_bbox(coords, bbox, res):
+    """
+    transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
+    """
+    corners = np.array(bbox.exterior.coords)
+    top_left_x, top_left_y = corners[0]
+    # estimate the angle of the bounding box
+    # retrieve average line across AOI
+    point1 = corners[0]
+    point2 = corners[1]
+    diff = point2 - point1
+    angle = np.arctan2(diff[1], diff[0])
+    bbox_rotate = rotate(
+        bbox, -angle, origin=tuple(corners[0]), use_radians=True
+    )
+    # now we have a non rotated bounding box. Now also rotate the coordinates
+    points_rot = rotate(MultiPoint(coords), -angle, origin=tuple(corners[0]), use_radians=True)
+    # unravel the coordinates back into a list of tuples and deduct the x, y coordinate of the top-left corner
+    coords_rot = [(g.xy[0][0] - top_left_x, g.xy[1][0] - top_left_y) for g in points_rot]
+    # create a dummy rasterio transform
+    transform = rasterio.transform.from_origin(0, 0, res, res)
+    # retrieve the row and col coordinates of in our target raster of the coordinates
+    rows, cols = rasterio.transform.rowcol(transform, coords_rot[:, 0], coords_rot[:, 1])
+    # these are the coordinates that we will use for the warpPerspective transform
+    return rows, cols
 
 def _get_gcps_a(gcps, cam_loc, h_a):
     """
@@ -75,7 +100,7 @@ def orthorectification(img, aoi, dst_resolution=0.01):
     raise NotImplementedError("Implement me")
 
 
-def get_aoi(gcps, src_corners, crs=None):
+def get_aoi(gcps, src_corners):
     """
     Get rectangular AOI from 4 user defined points within frames.
 
@@ -89,7 +114,7 @@ def get_aoi(gcps, src_corners, crs=None):
 
     Output:
     -------
-    GeoJSON - AOI
+    AOI bbox in shapely format
 
     Transformation matrix based on image corners
     """
@@ -128,25 +153,26 @@ def get_aoi(gcps, src_corners, crs=None):
     bbox = Polygon(bbox_coords)
     # now rotate back
     aoi = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
+    return aoi
 
-    # prepare a crs
-    if crs is not None:
-        try:
-            crs = CRS.from_user_input(crs)
-        except:
-            raise ValueError(f'CRS "{crs}" is not valid')
-        if crs.is_geographic:
-            raise TypeError(
-                "CRS is of geographic type, a projected type (unit: meters) is required"
-            )
-        try:
-            epsg = crs.to_epsg()
-        except:
-            raise ValueError(f"CRS cannot be converted to EPSG code")
-    crs_json = {"type": "EPSG", "properties": {"code": epsg}}
-    f = geojson.Feature(geometry=aoi, properties={"ID": 0})
-    return geojson.FeatureCollection([f], crs=crs_json)
-
+    # # prepare a crs
+    # if crs is not None:
+    #     try:
+    #         crs = CRS.from_user_input(crs)
+    #     except:
+    #         raise ValueError(f'CRS "{crs}" is not valid')
+    #     if crs.is_geographic:
+    #         raise TypeError(
+    #             "CRS is of geographic type, a projected type (unit: meters) is required"
+    #         )
+    #     try:
+    #         epsg = crs.to_epsg()
+    #     except:
+    #         raise ValueError(f"CRS cannot be converted to EPSG code")
+    # crs_json = {"type": "EPSG", "properties": {"code": epsg}}
+    # f = geojson.Feature(geometry=aoi, properties={"ID": 0})
+    # return geojson.FeatureCollection([f], crs=crs_json)
+    #
 
 def surf_velocity():
     # FIXME
