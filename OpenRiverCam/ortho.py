@@ -1,40 +1,48 @@
 import cv2
 import numpy as np
-import copy
-import geojson
 import rasterio
-from shapely.geometry import Polygon, Point, MultiPoint
+from shapely.geometry import Polygon, LineString
 from shapely.affinity import rotate
 
-from pyproj import CRS
+def _get_shape(bbox, res=0.01, round=1):
+    coords = bbox.exterior.coords
+    box_length = LineString(coords[0:2]).length
+    box_width = LineString(coords[1:3]).length
+    cols = int(np.ceil((box_length / res) / round)) * round
+    rows = int(np.ceil((box_width / res) / round)) * round
+    return cols, rows
 
-def _transform_to_bbox(coords, bbox, res):
+def _get_transform(bbox, res=0.01):
     """
-    transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
+    return a rotated Affine transformation that fits with the bounding box and resolution
+    :param bbox: shapely Polygon, polygon of bounding box. The coordinate order is very important and has to be:
+        (upstream-left, downstream-left, downstream-right, upstream-right, upstream-left)
+    :param res=0.01: float, resolution of target grid in meters
+    :return: rasterio compatible Affine transformation matrix
     """
+
     corners = np.array(bbox.exterior.coords)
-    top_left_x, top_left_y = corners[0]
     # estimate the angle of the bounding box
+    top_left_x, top_left_y = corners[0]
     # retrieve average line across AOI
     point1 = corners[0]
     point2 = corners[1]
     diff = point2 - point1
+    # compute the angle of the projected bbox area of interest
     angle = np.arctan2(diff[1], diff[0])
-    bbox_rotate = rotate(
-        bbox, -angle, origin=tuple(corners[0]), use_radians=True
+    # compute per col the x and y diff
+    dx_col, dy_col = np.cos(angle) * res, np.sin(angle) * res
+    # compute per row the x and y offsets
+    dx_row, dy_row = (
+        np.cos(angle + 1.5 * np.pi) * res,
+        np.sin(angle + 1.5 * np.pi) * res,
     )
-    # now we have a non rotated bounding box. Now also rotate the coordinates
-    points_rot = rotate(MultiPoint(coords), -angle, origin=tuple(corners[0]), use_radians=True)
-    # unravel the coordinates back into a list of tuples and deduct the x, y coordinate of the top-left corner
-    coords_rot = [(g.xy[0][0] - top_left_x, g.xy[1][0] - top_left_y) for g in points_rot]
-    # create a dummy rasterio transform
-    transform = rasterio.transform.from_origin(0, 0, res, res)
-    # retrieve the row and col coordinates of in our target raster of the coordinates
-    rows, cols = rasterio.transform.rowcol(transform, coords_rot[:, 0], coords_rot[:, 1])
-    # these are the coordinates that we will use for the warpPerspective transform
-    return rows, cols
+    return rasterio.transform.Affine(
+        dx_col, dy_col, top_left_x, dx_row, dy_row, top_left_y
+    )
 
-def _get_gcps_a(gcps, cam_loc, h_a):
+
+def _get_gcps_a(cam_loc, h_a, dst, z_0, h_ref):
     """
     Get the actual x, y locations of ground control points at the actual water level
 
@@ -45,23 +53,23 @@ def _get_gcps_a(gcps, cam_loc, h_a):
 
     """
     # get modified gcps based on camera location and elevation values
-    dest_x, dest_y = zip(*gcps["dst"])
-    z_ref = gcps["h_ref"] + gcps["z_0"]
-    z_a = gcps["z_0"] + h_a
+    cam_x, cam_y, cam_z = cam_loc
+    dest_x, dest_y = zip(*dst)
+    z_ref = h_ref + z_0
+    z_a = z_0 + h_a
     # compute the water table to camera height difference during field referencing
-    cam_height_ref = cam_loc["z"] - z_ref
+    cam_height_ref = cam_z - z_ref
     # compute the actual water table to camera height difference
-    cam_height_a = cam_loc["z"] - z_a
+    cam_height_a = cam_z - z_a
     rel_diff = cam_height_a / cam_height_ref
     # apply the diff on all coordinate, both x, and y directions
-    _dest_x = list(cam_loc["x"] + (np.array(dest_x) - cam_loc["x"]) * rel_diff)
-    _dest_y = list(cam_loc["y"] + (np.array(dest_y) - cam_loc["y"]) * rel_diff)
-    gcps_out = copy.deepcopy(gcps)
-    gcps_out["dst"] = list(zip(_dest_x, _dest_y))
-    return gcps_out
+    _dest_x = list(cam_x + (np.array(dest_x) - cam_x) * rel_diff)
+    _dest_y = list(cam_y + (np.array(dest_y) - cam_y) * rel_diff)
+    dest_out = list(zip(_dest_x, _dest_y))
+    return dest_out
 
 
-def _get_M(gcps):
+def _get_M(src, dst):
     """
     Image orthorectification parameters based on 4 GCPs.
     GCPs need to be at water level.
@@ -80,12 +88,23 @@ def _get_M(gcps):
     # # set points to float32
     # pts1 = np.float32(df_from.values)
     # pts2 = np.float32(df_to.values * PPM)
-    _src = np.float32(gcps["src"])
-    _dst = np.float32(gcps["dst"])
+    _src = np.float32(src)
+    _dst = np.float32(dst)
     # define transformation matrix based on GCPs
     M = cv2.getPerspectiveTransform(_src, _dst)
     return M
     # find locations of transformed image corners
+
+
+def _transform_to_bbox(coords, bbox, res):
+    """
+    transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
+    """
+    # first assemble x and y coordinates
+    xs, ys = zip(*coords)
+    transform = _get_transform(bbox, res)
+    rows, cols = rasterio.transform.rowcol(transform, xs, ys)
+    return list(zip(cols, rows))
 
 
 def orthorectification(img, aoi, dst_resolution=0.01):
@@ -100,28 +119,21 @@ def orthorectification(img, aoi, dst_resolution=0.01):
     raise NotImplementedError("Implement me")
 
 
-def get_aoi(gcps, src_corners):
+def get_aoi(src, dst, src_corners):
+
     """
     Get rectangular AOI from 4 user defined points within frames.
 
+    :param src: list, (col, row) pairs of ground control points
+    :param dst: list, projected (x, y) coordinates of ground control points
+    :param src_corners: - dict with 4 (x,y) tuples names "up_left", "down_left", "up_right", "down_right"
+    :return: shapely Polygon, representing bounding box of aoi (rotated)
 
-    Input:
-    ------
-    gcps - Dict containing in "src" a list of (col, row) pairs and in "dst" a list of projected (x, y) coordinates
-        of the GCPs in the imagery
-    src_corners - dict with 4 (x,y) tuples names "up_left", "down_left", "up_right", "down_right"
-    crs=None - str, project coordinate reference system as "EPSG:XXXX", if available, results are stored into this crs in GeoTiff
-
-    Output:
-    -------
-    AOI bbox in shapely format
-
-    Transformation matrix based on image corners
     """
 
     # retrieve the M transformation matrix for the conditions during GCP. These are used to define the AOI so that
     # dst AOI remains the same for any movie
-    M_gcp = _get_M(gcps)
+    M_gcp = _get_M(src=src, dst=dst)
     # prepare a simple temporary np.array of the src_corners
     try:
         _src_corners = np.array(
@@ -174,6 +186,7 @@ def get_aoi(gcps, src_corners):
     # return geojson.FeatureCollection([f], crs=crs_json)
     #
 
+
 def surf_velocity():
     # FIXME
     raise NotImplementedError("")
@@ -182,3 +195,5 @@ def surf_velocity():
 def river_flow():
     # FIXME
     raise NotImplementedError("")
+
+
