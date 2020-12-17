@@ -1,9 +1,9 @@
-import os
 import io
 import cv2
 import numpy as np
 import rasterio
 from pyproj import CRS
+import geojson
 
 def frames(
     fn,
@@ -153,3 +153,32 @@ def to_geotiff(fn, z, transform, crs=None):
     ) as ds:
         for n, _z in enumerate(z):
             ds.write(_z, n + 1)
+
+def to_geojson(geom, crs=None):
+    """
+    Converts a single geometry in a geographically aware geojson
+    :param geom: shapely feature (single!!)
+    :param crs=None: pyproj readible crs
+    :return: str, geojson format
+    """
+    # prepare a crs
+    if crs is not None:
+        try:
+            crs = CRS.from_user_input(crs)
+        except:
+            raise ValueError(f'CRS "{crs}" is not valid')
+        if crs.is_geographic:
+            raise TypeError(
+                "CRS is of geographic type, a projected type (unit: meters) is required"
+            )
+        try:
+            epsg = crs.to_epsg()
+        except:
+            raise ValueError(f"CRS cannot be converted to EPSG code")
+    # prepare json compatible crs dict
+    crs_json = {"type": "EPSG", "properties": {"code": epsg}} if crs is not None else None
+    # prepare geojson feature
+    f = geojson.Feature(geometry=geom, properties={"ID": 0})
+    # collate all into a geojson feature collection
+    return geojson.FeatureCollection([f], crs=crs_json)
+

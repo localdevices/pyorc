@@ -167,24 +167,6 @@ def get_aoi(src, dst, src_corners):
     aoi = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
     return aoi
 
-    # # prepare a crs
-    # if crs is not None:
-    #     try:
-    #         crs = CRS.from_user_input(crs)
-    #     except:
-    #         raise ValueError(f'CRS "{crs}" is not valid')
-    #     if crs.is_geographic:
-    #         raise TypeError(
-    #             "CRS is of geographic type, a projected type (unit: meters) is required"
-    #         )
-    #     try:
-    #         epsg = crs.to_epsg()
-    #     except:
-    #         raise ValueError(f"CRS cannot be converted to EPSG code")
-    # crs_json = {"type": "EPSG", "properties": {"code": epsg}}
-    # f = geojson.Feature(geometry=aoi, properties={"ID": 0})
-    # return geojson.FeatureCollection([f], crs=crs_json)
-    #
 
 
 def surf_velocity():
