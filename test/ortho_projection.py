@@ -25,7 +25,6 @@ dst = os.path.join(folder, "ortho_proj")
 fns = glob.glob(os.path.join(src, "*.jpg"))
 gcps = {
     "src": [(992, 366), (1545, 403), (1773, 773), (943, 724)],
-    # "dst": [(0.25, 0.3), (4.25, 0.2), (4.5, 3.5), (0.0, 3.5)],
     "dst": [(0.25, 6.7), (4.25, 6.8), (4.5, 3.5), (0.0, 3.5)],
     "z_0": 100.0,  # reference height of zero water level compared to the crs used
     "h_ref": 2.0,  # actual water level during taking of the gcp points
@@ -60,31 +59,6 @@ gcps_dst_a = ORC.cv._get_gcps_a(
 
 gcps_colrow_a = ORC.cv._transform_to_bbox(gcps_dst_a, bbox, 0.01)
 
-# make reprojection parameters with new gcps
-
-# next step is to reproject
-# retrieve polygon from geojson
-# bbox = shape(dst_polygon["features"][0]["geometry"])
-# coords = list(bbox.exterior.coords)
-# estimate the angle of the bounding box
-# retrieve average line across AOI
-# point1 = coords[0]
-# point2 = coords[1]
-# diff = point2 - point1
-# angle = np.arctan2(diff[1], diff[0])
-# bbox_rotate = rotate(
-#     bbox, -angle, origin=tuple(coords[0]), use_radians=True
-# )
-#
-# # retrieve the angle of one of the lines and rotate all points and bbox around this angle to get to a surrogate projection
-#
-# gcps_dst_rot = rotate(MultiPoint(gcps_a["dst"]), -angle, origin=tuple(coords[0]), use_radians=True)
-#
-# # convert into a list of tuples
-#
-# # also rotate the "actual" gcps (i.e. after correction for water surface elevation) to the same system as the AOI bbox
-# gcps_a["dst"] = [(g.xy[0][0], g.xy[1][0]) for g in gcps_dst_rot]
-#
 # retrieve M for destination row and col
 M = ORC.cv._get_M(src=gcps["src"], dst=gcps_colrow_a)
 
