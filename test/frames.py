@@ -18,8 +18,8 @@ for t, buf in OpenRiverCam.io.frames(fn, dst, start_frame=100, lens_pars=lens_pa
     print(t)
     n += 1
     buf.seek(0)
-    dst_fn = os.path.join(dst, '_{:04d}.jpg'.format(n))
-    with open(dst_fn, 'wb') as f:
+    dst_fn = os.path.join(dst, "_{:04d}.jpg".format(n))
+    with open(dst_fn, "wb") as f:
         f.write(buf.read())
 
 print("Done")

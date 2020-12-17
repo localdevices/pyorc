@@ -4,6 +4,70 @@ import rasterio
 from shapely.geometry import Polygon, LineString
 from shapely.affinity import rotate
 
+def _corr_color(img, alpha=None, beta=None, gamma=0.5):
+    """
+    Grey scaling, contrast- and gamma correction. Both alpha and beta need to be
+    defined in order to apply contrast correction.
+
+    Input:
+    ------
+    :param img: 3D cv2 img object
+    :param alpha=None: float - gain parameter for contrast correction)
+    :param beta=None: bias parameter for contrast correction
+    :param gamma=0.5 brightness parameter for gamma correction (default: 0.5)
+    :return img 2D gray scale
+    Output:
+    -------
+    return: img gray scaled, contrast- and gamma corrected image
+    """
+    # turn image into grey scale
+    corr_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    if alpha and beta:
+        # apply contrast correction
+        corr_img = cv2.convertScaleAbs(corr_img, alpha=alpha, beta=beta)
+
+    # apply gamma correction
+    invGamma = 1.0 / gamma
+    table = np.array(
+        [((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]
+    ).astype("uint8")
+
+    corr_img = cv2.LUT(corr_img, table)
+
+    return corr_img
+
+def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
+    """
+    Lens distortion correction based on lens characteristics.
+    Function by Gerben Gerritsen / Sten Schurer, 2019
+
+    :param img:  3D cv2 img matrix
+    :param k1=0.: float - barrel lens distortion parameter
+    :param c=2.: float - optical center
+    :param f=1.: float - focal length
+    :return undistorted img
+    """
+
+    # define imagery characteristics
+    height, width, __ = img.shape
+
+    # define distortion coefficient vector
+    dist = np.zeros((4, 1), np.float64)
+    dist[0, 0] = k1
+
+    # define camera matrix
+    mtx = np.eye(3, dtype=np.float32)
+
+    mtx[0, 2] = width / c  # define center x
+    mtx[1, 2] = height / c  # define center y
+    mtx[0, 0] = f  # define focal length x
+    mtx[1, 1] = f  # define focal length y
+
+    # correct image for lens distortion
+    corr_img = cv2.undistort(img, mtx, dist)
+    return corr_img
+
 def _get_shape(bbox, res=0.01, round=1):
     coords = bbox.exterior.coords
     box_length = LineString(coords[0:2]).length
@@ -166,8 +230,6 @@ def get_aoi(src, dst, src_corners):
     # now rotate back
     aoi = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
     return aoi
-
-
 
 def surf_velocity():
     # FIXME
