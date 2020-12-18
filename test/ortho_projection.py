@@ -62,24 +62,9 @@ aoi = {
 # gcps["src"], gcps["dst"], gcps["z_0"], gcps["h_ref"]
 
 corr_img, transform = ORC.cv.orthorectification(img, lensPosition, h_a, bbox=bbox, resolution=0.01, **gcps)
-# gcps_dst_a = ORC.cv._get_gcps_a(
-#     cam_loc, h_a, **{k: gcps[k] for k in gcps if k != "src"}
-# )
-#
-
-# gcps_colrow_a = ORC.cv._transform_to_bbox(gcps_dst_a, bbox, 0.01)
-#
-# # retrieve M for destination row and col
-# M = ORC.cv._get_M(src=gcps["src"], dst=gcps_colrow_a)
-#
-# # estimate size of required grid
-# transform = ORC.cv._get_transform(bbox, res=resolution)
-# cols, rows = ORC.cv._get_shape(bbox, res=resolution, round=window_size)
-#
-# corr_img = cv2.warpPerspective(img, M, (cols, rows))
 
 # save to geotiff
-memfile = ORC.io.to_geotiff("test.tif", rasterio.plot.reshape_as_raster(corr_img), transform, crs="EPSG:32637")
+ORC.io.to_geotiff("test.tif", rasterio.plot.reshape_as_raster(corr_img), transform, crs="EPSG:32637")
 
 # TODO figure out what happens if the area is outside of the pixel domain
 

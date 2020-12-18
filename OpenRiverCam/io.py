@@ -20,6 +20,7 @@ def frames(
     :param frame_int: int - frame interval, difference between frames
     :param start_time=0: start time of first frame to extract (ms)
     :param end_time=None: end time of last frame to extract (ms). If None, it is assumed the entire movie must be extracted
+    :param grayscale=False: turn into grayscale image if set to True
     :param lens_pars=None: set of parameters passed to lens_corr if needed (e.g. {"k1": -10.0e-6, "c": 2, "f": 8.0}
     :return: list of time since start (ms), list of files generated
     """
@@ -64,11 +65,20 @@ def frames(
     return
 
 def to_geotiff(fn, z, transform, crs=None, compress=None):
+    """
+    Writes geotiff from an array (assumed 3d)
+    :param fn: filename
+    :param z: array (3-D)
+    :param transform: Affine transform
+    :param crs=None: coordinate ref system
+    :param compress: compression if needed
+    :return:
+    """
     if crs is not None:
-        # try:
-        crs = CRS.from_user_input(crs)
-        # except:
-            # raise ValueError(f'CRS "{crs}" is not valid')
+        try:
+            crs = CRS.from_user_input(crs)
+        except:
+            raise ValueError(f'CRS "{crs}" is not valid')
         if crs.is_geographic:
             raise TypeError(
                 "CRS is of geographic type, a projected type (unit: meters) is required"

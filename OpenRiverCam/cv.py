@@ -69,6 +69,13 @@ def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
     return corr_img
 
 def _get_shape(bbox, resolution=0.01, round=1):
+    """
+    defines the number of rows and columns needed in a target raster, to fit a given bounding box
+    :param bbox: shapely Polygon, bounding box
+    :param resolution: resolution of target raster
+    :param round: number of pixels to round intended shape to
+    :return: numbers of rows and columns for target raster
+    """
     coords = bbox.exterior.coords
     box_length = LineString(coords[0:2]).length
     box_width = LineString(coords[1:3]).length
@@ -115,7 +122,7 @@ def _get_gcps_a(lensPosition, h_a, coords, z_0=0., h_ref=0.):
     :param coords: list of lists [x, y] with gcp coordinates in original water level
     :param z_0: reference zero plain level, i.e. the crs amount of meters of the zero level of staff gauge
     :param h_ref: reference water level during taking of gcp coords with ref to staff gauge zero level
-    :return: coords, where dst is replaced by new dst with actual water level
+    :return: coords, in rows/cols for use in getPerspectivetransform
 
     """
     # get modified gcps based on camera location and elevation values
@@ -139,18 +146,11 @@ def _get_gcps_a(lensPosition, h_a, coords, z_0=0., h_ref=0.):
 
 def _get_M(src, dst):
     """
-    Image orthorectification parameters based on 4 GCPs.
-    GCPs need to be at water level.
 
-    Input:
-    ------
-    img - original image
-    gcps - Dict containing in "src" a list of (col, row) pairs and in "dst" a list of projected (x, y) coordinates
-        of the GCPs in the imagery
+    :param src: list of lists [x, y] with source coordinates, typically cols and rows in image
+    :param dst: list of lists [x, y] with target coordinates after reprojection, can e.g. be in crs [m]
 
-    Output:
-    -------
-    Transformation matrix based on image corners
+    :return: transformation matrix, used in cv2.warpPerspective
     """
 
     # # set points to float32
@@ -178,11 +178,22 @@ def _transform_to_bbox(coords, bbox, res):
 def orthorectification(img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resolution=0.01, round=1):
     """
     This function takes the original gcps and water level, and uses the actual water level, defined resolution
-    and AOI to determine a resulting outcoming image. Image orthorectification parameters based on 4 GCPs.
-    GCPs need to be at water level.
+    and AOI to determine a resulting projected (in crs if that was used for coordinates) image.
+    The image is rotated to be oriented along the river channel.
+    GCPs need to be taken at water level and water level during GCPs needs to be known to interpret the locations of
+    GCPS during the current img.
 
-    :return:
-    raterio ds
+    :param img: NP-array (3D), input img
+    :param lensPosition: list of floats, [x, y, z] of lens position within crs
+    :param h_a: actual water level during img
+    :param src: list of lists [x, y] ground control point source coordinates
+    :param dst: list of lists [x, y] ground control point destination coordinates
+    :param z_0: float, reference level of zero water level
+    :param h_ref: float, water level taken during gcp field work
+    :param bbox: shapely Polygon, bounding box of aoi
+    :param resolution: float, resolution of target projected image
+    :param round:
+    :return: 3D numpy array [cols, rows, bands] of img, Affine transform (rasterio)
     """
     # compute the geographical location of the gcps with the actual water level (h_a)
     dst_a = _get_gcps_a(
@@ -199,7 +210,6 @@ def orthorectification(img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resol
     cols, rows = _get_shape(bbox, resolution=resolution, round=10)  # for now hard -coded on 10, alter dependent on how PIV is done
     corr_img = cv2.warpPerspective(img, M, (cols, rows))
     return corr_img, transform
-
 
 def get_aoi(src, dst, src_corners):
 
