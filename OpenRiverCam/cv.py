@@ -68,15 +68,15 @@ def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
     corr_img = cv2.undistort(img, mtx, dist)
     return corr_img
 
-def _get_shape(bbox, res=0.01, round=1):
+def _get_shape(bbox, resolution=0.01, round=1):
     coords = bbox.exterior.coords
     box_length = LineString(coords[0:2]).length
     box_width = LineString(coords[1:3]).length
-    cols = int(np.ceil((box_length / res) / round)) * round
-    rows = int(np.ceil((box_width / res) / round)) * round
+    cols = int(np.ceil((box_length / resolution) / round)) * round
+    rows = int(np.ceil((box_width / resolution) / round)) * round
     return cols, rows
 
-def _get_transform(bbox, res=0.01):
+def _get_transform(bbox, resolution=0.01):
     """
     return a rotated Affine transformation that fits with the bounding box and resolution
     :param bbox: shapely Polygon, polygon of bounding box. The coordinate order is very important and has to be:
@@ -95,31 +95,35 @@ def _get_transform(bbox, res=0.01):
     # compute the angle of the projected bbox area of interest
     angle = np.arctan2(diff[1], diff[0])
     # compute per col the x and y diff
-    dx_col, dy_col = np.cos(angle) * res, np.sin(angle) * res
+    dx_col, dy_col = np.cos(angle) * resolution, np.sin(angle) * resolution
     # compute per row the x and y offsets
     dx_row, dy_row = (
-        np.cos(angle + 1.5 * np.pi) * res,
-        np.sin(angle + 1.5 * np.pi) * res,
+        np.cos(angle + 1.5 * np.pi) * resolution,
+        np.sin(angle + 1.5 * np.pi) * resolution,
     )
     return rasterio.transform.Affine(
         dx_col, dy_col, top_left_x, dx_row, dy_row, top_left_y
     )
 
 
-def _get_gcps_a(cam_loc, h_a, dst, z_0, h_ref):
+def _get_gcps_a(lensPosition, h_a, coords, z_0=0., h_ref=0.):
     """
     Get the actual x, y locations of ground control points at the actual water level
 
-    :param gcps:  Ground control points containing x, y, z_0 (zero water level in crs [m]) and h_ref (water level during measuring campaign)
-    :param cam_loc: dict with "x", "y" and "z", location of cam in local crs [m]
+    :param lensPosition: list with [x, y, z], location of cam in local crs [m]
     :param h_a: float - actual water level in local level measuring system [m]
-    :return: gcps, where dst is replaced by new dst with actual water level
+    :param coords: list of lists [x, y] with gcp coordinates in original water level
+    :param z_0: reference zero plain level, i.e. the crs amount of meters of the zero level of staff gauge
+    :param h_ref: reference water level during taking of gcp coords with ref to staff gauge zero level
+    :return: coords, where dst is replaced by new dst with actual water level
 
     """
     # get modified gcps based on camera location and elevation values
-    cam_x, cam_y, cam_z = cam_loc
-    dest_x, dest_y = zip(*dst)
+    cam_x, cam_y, cam_z = lensPosition
+    x, y = zip(*coords)
+    # compute the z during gcp coordinates
     z_ref = h_ref + z_0
+    # compute z during current frame
     z_a = z_0 + h_a
     # compute the water table to camera height difference during field referencing
     cam_height_ref = cam_z - z_ref
@@ -127,8 +131,8 @@ def _get_gcps_a(cam_loc, h_a, dst, z_0, h_ref):
     cam_height_a = cam_z - z_a
     rel_diff = cam_height_a / cam_height_ref
     # apply the diff on all coordinate, both x, and y directions
-    _dest_x = list(cam_x + (np.array(dest_x) - cam_x) * rel_diff)
-    _dest_y = list(cam_y + (np.array(dest_y) - cam_y) * rel_diff)
+    _dest_x = list(cam_x + (np.array(x) - cam_x) * rel_diff)
+    _dest_y = list(cam_y + (np.array(y) - cam_y) * rel_diff)
     dest_out = list(zip(_dest_x, _dest_y))
     return dest_out
 
@@ -171,16 +175,30 @@ def _transform_to_bbox(coords, bbox, res):
     return list(zip(cols, rows))
 
 
-def orthorectification(img, aoi, dst_resolution=0.01):
+def orthorectification(img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resolution=0.01, round=1):
     """
     This function takes the original gcps and water level, and uses the actual water level, defined resolution
     and AOI to determine a resulting outcoming image. Image orthorectification parameters based on 4 GCPs.
     GCPs need to be at water level.
 
     :return:
-    BytesIO object or written GeoTiff file
+    raterio ds
     """
-    raise NotImplementedError("Implement me")
+    # compute the geographical location of the gcps with the actual water level (h_a)
+    dst_a = _get_gcps_a(
+        lensPosition, h_a, dst, z_0, h_ref,
+    )
+
+    dst_colrow_a = _transform_to_bbox(dst_a, bbox, resolution)
+
+    # retrieve M for destination row and col
+    M = _get_M(src=src, dst=dst_colrow_a)
+    # estimate size of required grid
+    transform = _get_transform(bbox, resolution=resolution)
+    # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
+    cols, rows = _get_shape(bbox, resolution=resolution, round=10)  # for now hard -coded on 10, alter dependent on how PIV is done
+    corr_img = cv2.warpPerspective(img, M, (cols, rows))
+    return corr_img, transform
 
 
 def get_aoi(src, dst, src_corners):
@@ -228,8 +246,8 @@ def get_aoi(src, dst, src_corners):
     bbox_coords = [(xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax)]
     bbox = Polygon(bbox_coords)
     # now rotate back
-    aoi = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
-    return aoi
+    bbox = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
+    return bbox
 
 def surf_velocity():
     # FIXME

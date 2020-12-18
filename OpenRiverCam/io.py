@@ -1,6 +1,7 @@
 import io
 import cv2
 import rasterio
+from rasterio.io import MemoryFile
 from pyproj import CRS
 import geojson
 from OpenRiverCam.cv import _corr_lens, _corr_color
@@ -10,6 +11,7 @@ def frames(
     frame_int=1,
     start_frame=0,
     end_frame=None,
+    grayscale=False,
     lens_pars=None,
 ):
     """
@@ -50,24 +52,23 @@ def frames(
                 # apply lens distortion correction
                 img = _corr_lens(img, **lens_pars)
             # apply gray scaling, contrast- and gamma correction
-            img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
-            ret, im_en = cv2.imencode(".jpg", img)
-            buf = io.BytesIO(im_en)
+            if grayscale:
+                img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
             # update frame number
             _n += 1
             # update frame time
             _t += 1.0 / fps
-            yield _t, buf
+            yield _t, img
         else:
             break
     return
 
-def to_geotiff(fn, z, transform, crs=None):
+def to_geotiff(fn, z, transform, crs=None, compress=None):
     if crs is not None:
-        try:
-            crs = CRS.from_user_input(crs)
-        except:
-            raise ValueError(f'CRS "{crs}" is not valid')
+        # try:
+        crs = CRS.from_user_input(crs)
+        # except:
+            # raise ValueError(f'CRS "{crs}" is not valid')
         if crs.is_geographic:
             raise TypeError(
                 "CRS is of geographic type, a projected type (unit: meters) is required"
@@ -82,6 +83,7 @@ def to_geotiff(fn, z, transform, crs=None):
         dtype=z.dtype,
         crs=crs.to_proj4() if crs is not None else None,
         transform=transform,
+        compress=compress,
     ) as ds:
         for n, _z in enumerate(z):
             ds.write(_z, n + 1)
