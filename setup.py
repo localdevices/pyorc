@@ -37,6 +37,7 @@ setup(
         "rasterio",
         "matplotlib",
         "descartes",
+        "xarray"
     ],
     extras_require={
         "dev": ["pytest", "pytest-cov", "black"],
