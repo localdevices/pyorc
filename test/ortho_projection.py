@@ -29,7 +29,6 @@ gcps = {
     "z_0": 100.0,  # reference height of zero water level compared to the crs used
     "h_ref": 2.0,  # actual water level during taking of the gcp points
 }
-img = cv2.imread(fns[0])
 h_a = 2.0  # now the actual water level is 5 m above reference
 # cam_loc = {"x": -3.0, "y": 8.0, "z": 110.0}
 lensPosition = [-3.0, 8.0, 110.0]
@@ -56,15 +55,20 @@ aoi = {
     "rows": 10,
     "cols": 30,
 }
-# now we will work on an actual new image
-# first reproject the gcp locations in crs space of actual situation with current water level
-# TODO: add "round" below when we know how we should compute it.
-# gcps["src"], gcps["dst"], gcps["z_0"], gcps["h_ref"]
+if not(os.path.isdir(dst)):
+    os.makedirs(dst)
+for fn in fns:
+    img = cv2.imread(fn)
 
-corr_img, transform = ORC.cv.orthorectification(img, lensPosition, h_a, bbox=bbox, resolution=0.01, **gcps)
+    # now we will work on an actual new image
+    # first reproject the gcp locations in crs space of actual situation with current water level
+    # TODO: add "round" below when we know how we should compute it.
+    # gcps["src"], gcps["dst"], gcps["z_0"], gcps["h_ref"]
 
-# save to geotiff
-ORC.io.to_geotiff("test.tif", rasterio.plot.reshape_as_raster(corr_img), transform, crs="EPSG:32637")
+    corr_img, transform = ORC.cv.orthorectification(img, lensPosition, h_a, bbox=bbox, resolution=0.01, **gcps)
+    print(transform)
+    # save to geotiff
+    ORC.io.to_geotiff(os.path.join(dst, os.path.split(fn)[1].split(".")[0] + ".tif"), rasterio.plot.reshape_as_raster(corr_img), transform, crs="EPSG:32637")
 
 # TODO figure out what happens if the area is outside of the pixel domain
 
