@@ -9,71 +9,71 @@ import rasterio
 from rasterio import warp
 from datetime import datetime, timedelta
 import xarray as xr
-from rasterio.plot import show
+from OpenRiverCam import io
 
-def list_to_dataarray(data, name, x, y, time=None, attrs={}):
-    """
-    Converts list of data slices (per time) to a xarray DataArray with axes, name and attributes
-    :param data: list - containing all separate data slices per time step in 2D numpy arrays
-    :param time: list - containing datetime objects as retrieved from bmi model
-    :param x: 1D numpy array - x-coordinates
-    :param y: 1D numpy array - y-coordinates
-    :param name: string - name to provide to DataArray
-    :param attrs: dict - attrs to provide to DataArray
-    :return: DataArray of data
-    """
-    if time is None:
-        return xr.DataArray(data,
-                            name=name,
-                            dims=('y', 'x'),
-                            coords={
-                                    'y': y,
-                                    'x': x
-                                    },
-                            attrs=attrs
-                            )
-    else:
-        return xr.DataArray(data,
-                            name=name,
-                            dims=('time', 'y', 'x'),
-                            coords={
-                                'time': time,
-                                'y': y,
-                                'x': x
-                            },
-                            attrs=attrs
-                           )
-
-def merge_outputs(datas, time, x, y, names, attributes):
-    """
-    Converts datasets collected per time step from bmi run to xarray Dataset
-    :param datas: list of lists with collected datasets (in 2D numpy slices per time step)
-    :param time: list - containing datetime objects as retrieved from bmi model
-    :param x: 1D numpy array - x-coordinates
-    :param y: 1D numpy array - y-coordinates
-    :param names: list - containing strings with names of datas
-    :param attributes: list - containing attributes belonging to datas
-    :return: Dataset of all data in datas
-    """
-    ds = xr.merge([list_to_dataarray(data, name, x, y, time, attrs) for data, name, attrs in zip(datas, names, attributes)])
-    ds["y"] = y
-    ds["x"] = x
-    ds["time"] = time
-    ds["x"].attrs = {
-        "axis": "X",
-        "long_name": "x-coordinate in Cartesian system",
-        "units": "m",
-    }
-    ds["y"].attrs = {
-        "axis": "Y",
-        "long_name": "y-coordinate in Cartesian system",
-        "units": "m",
-    }
-    ds["time"].attrs = {
-        "standard_name": "time",
-        "long_name": "time",
-    }
-    return ds
+# def list_to_dataarray(data, name, x, y, time=None, attrs={}):
+#     """
+#     Converts list of data slices (per time) to a xarray DataArray with axes, name and attributes
+#     :param data: list - containing all separate data slices per time step in 2D numpy arrays
+#     :param time: list - containing datetime objects as retrieved from bmi model
+#     :param x: 1D numpy array - x-coordinates
+#     :param y: 1D numpy array - y-coordinates
+#     :param name: string - name to provide to DataArray
+#     :param attrs: dict - attrs to provide to DataArray
+#     :return: DataArray of data
+#     """
+#     if time is None:
+#         return xr.DataArray(data,
+#                             name=name,
+#                             dims=('y', 'x'),
+#                             coords={
+#                                     'y': y,
+#                                     'x': x
+#                                     },
+#                             attrs=attrs
+#                             )
+#     else:
+#         return xr.DataArray(data,
+#                             name=name,
+#                             dims=('time', 'y', 'x'),
+#                             coords={
+#                                 'time': time,
+#                                 'y': y,
+#                                 'x': x
+#                             },
+#                             attrs=attrs
+#                            )
+#
+# def merge_outputs(datas, time, x, y, names, attributes):
+#     """
+#     Converts datasets collected per time step from bmi run to xarray Dataset
+#     :param datas: list of lists with collected datasets (in 2D numpy slices per time step)
+#     :param time: list - containing datetime objects as retrieved from bmi model
+#     :param x: 1D numpy array - x-coordinates
+#     :param y: 1D numpy array - y-coordinates
+#     :param names: list - containing strings with names of datas
+#     :param attributes: list - containing attributes belonging to datas
+#     :return: Dataset of all data in datas
+#     """
+#     ds = xr.merge([list_to_dataarray(data, name, x, y, time, attrs) for data, name, attrs in zip(datas, names, attributes)])
+#     ds["y"] = y
+#     ds["x"] = x
+#     ds["time"] = time
+#     ds["x"].attrs = {
+#         "axis": "X",
+#         "long_name": "x-coordinate in Cartesian system",
+#         "units": "m",
+#     }
+#     ds["y"].attrs = {
+#         "axis": "Y",
+#         "long_name": "y-coordinate in Cartesian system",
+#         "units": "m",
+#     }
+#     ds["time"].attrs = {
+#         "standard_name": "time",
+#         "long_name": "time",
+#     }
+#     return ds
 
 
 folder = r"/home/hcwinsemius/OpenRiverCam"
@@ -135,16 +135,6 @@ var_attrs = [
         "coordinates": "lon lat",
     },
 ]
-lon_attrs = {
-    "long_name": "longitude",
-    "units": "degrees_east",
-}
-
-lat_attrs = {
-    "long_name": "latitude",
-    "units": "degrees_north",
-}
-
 encoding = {var: {"zlib": True} for var in var_names}
 
 arrays = [
@@ -160,28 +150,16 @@ with rasterio.open(fns[0]) as ds:
     coli, rowi = np.meshgrid(np.arange(shape[1]), np.arange(shape[0]))
     xi, yi = rasterio.transform.xy(ds.transform, rowi, coli)
     xi, yi = np.array(xi), np.array(yi)
-    trans_ = rasterio.Affine(ds.transform[0]*1e6, ds.transform[1]*1e6, ds.transform[2], ds.transform[3]*1e6, ds.transform[4]*1e6, ds.transform[5])
-    xq, yq = rasterio.transform.xy(trans_, rows, cols)
-
-    # xq, yq = rasterio.transform.xy(ds.transform, rows, cols)
-
+    # trans_ = rasterio.Affine(ds.transform[0]*1e6, ds.transform[1]*1e6, ds.transform[2], ds.transform[3]*1e6, ds.transform[4]*1e6, ds.transform[5])
+    # xq, yq = rasterio.transform.xy(trans_, rows, cols)
+    xq, yq = rasterio.transform.xy(ds.transform, rows, cols)
     xq, yq = np.array(xq), np.array(yq)
     loni, lati = warp.transform(ds.crs, dst_crs, xq.flatten(), yq.flatten())
     loni, lati = np.array(loni).reshape(xq.shape), np.array(lati).reshape(yq.shape)
 
-
-
-    # show(ds.read(1), transform=ds.transform)
-#
-#
-#
-
-dataset = merge_outputs(arrays, time, cols[0], rows[:, 0], var_names, var_attrs)
+dataset = io.to_dataset(arrays, var_names, cols[0], rows[:, 0], time=time, lat=lati, lon=loni, attrs=var_attrs)
 
 # add lat and lon
-lon_da = list_to_dataarray(loni, 'lon', cols[0], rows[:, 0], attrs=lon_attrs)
-lat_da = list_to_dataarray(lati, 'lat', cols[0], rows[:, 0], attrs=lat_attrs)
-dataset = xr.merge([dataset, lon_da, lat_da])
 
 dataset.to_netcdf(dst_fn, encoding=encoding)
 

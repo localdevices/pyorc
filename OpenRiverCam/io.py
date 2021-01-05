@@ -1,10 +1,11 @@
-import io
 import cv2
+import numpy as np
 import rasterio
-from rasterio.io import MemoryFile
 from pyproj import CRS
 import geojson
 from OpenRiverCam.cv import _corr_lens, _corr_color
+import xarray as xr
+from rasterio import warp
 
 def frames(
     fn,
@@ -125,4 +126,102 @@ def to_geojson(geom, crs=None):
     f = geojson.Feature(geometry=geom, properties={"ID": 0})
     # collate all into a geojson feature collection
     return geojson.FeatureCollection([f], crs=crs_json)
+
+def to_dataarray(data, name, x, y, time=None, attrs={}):
+    """
+    Converts list of data slices (per time) to a xarray DataArray with axes, name and attributes
+    :param data: list - containing all separate data slices per time step in 2D numpy arrays
+    :param name: string - name to provide to DataArray
+    :param x: 1D numpy array - x-coordinates
+    :param y: 1D numpy array - y-coordinates
+    :param time: list - containing datetime objects as retrieved from bmi model
+    :param attrs: dict - attrs to provide to DataArray
+    :return: DataArray of data
+    """
+    if time is None:
+        return xr.DataArray(data,
+                            name=name,
+                            dims=('y', 'x'),
+                            coords={
+                                    'y': y,
+                                    'x': x
+                                    },
+                            attrs=attrs
+                            )
+    else:
+        return xr.DataArray(data,
+                            name=name,
+                            dims=('time', 'y', 'x'),
+                            coords={
+                                'time': time,
+                                'y': y,
+                                'x': x
+                            },
+                            attrs=attrs
+                           )
+
+def to_dataset(datas, names, x, y, time, lat=None, lon=None, attrs=[]):
+    """
+    Converts lists of arrays per time step to xarray Dataset
+    :param names: list - containing strings with names of datas
+    :param datas: list of lists with collected datasets (in 2D numpy slices per time step)
+    :param x: 1D numpy array - x-coordinates
+    :param y: 1D numpy array - y-coordinates
+    :param time: list - containing datetime objects as retrieved from bmi model
+    :param attributes: list - containing attributes belonging to datas
+    :return: Dataset of all data in datas
+    """
+    # define lon and lat attributes
+    lon_attrs = {
+        "long_name": "longitude",
+        "units": "degrees_east",
+    }
+    lat_attrs = {
+        "long_name": "latitude",
+        "units": "degrees_north",
+    }
+    x_attrs = {
+        "axis": "X",
+        "long_name": "x-coordinate in Cartesian system",
+        "units": "m",
+
+    }
+    y_attrs = {
+        "axis": "Y",
+        "long_name": "y-coordinate in Cartesian system",
+        "units": "m",
+    }
+    time_attrs ={
+        "standard_name": "time",
+        "long_name": "time",
+    }
+
+    # ensure attributes are available for all datasets
+    if len(names) != len(datas):
+        raise ValueError("the amount of data arrays is different from the amount of names provided")
+    if len(attrs) < len(datas):
+        # add ampty attributes
+        for n in range(0, len(datas) - len(attrs)):
+            attrs.append({})
+    # merge arrays together into one large dataset, using names and coordinates
+    ds = xr.merge([to_dataarray(data, name, x, y, time, attrs) for data, name, attrs in zip(datas, names, attrs)])
+    ds["y"] = y
+    ds["x"] = x
+    ds["time"] = time
+    ds["x"].attrs = x_attrs
+    ds["y"].attrs = y_attrs
+    ds["time"].attrs = time_attrs
+    if (lon is not None) and (lat is not None):
+        lon_da = to_dataarray(lon, 'lon', x, y, attrs=lon_attrs)
+        lat_da = to_dataarray(lat, 'lat', x, y, attrs=lat_attrs)
+    ds = xr.merge([ds, lon_da, lat_da])
+    return ds
+
+def convert_cols_rows(fn, cols, rows, dst_crs=rasterio.crs.CRS.from_epsg(4326)):
+    with rasterio.open(fn) as ds:
+        xs, ys = rasterio.transform.xy(ds.transform, rows, cols)
+        xs, ys = np.array(xs), np.array(ys)
+        xcoords, ycoords = warp.transform(ds.crs, dst_crs, xs.flatten(), ys.flatten())
+        xcoords, ycoords = np.array(xcoords).reshape(xs.shape), np.array(ycoords).reshape(ys.shape)
+        return xcoords, ycoords
 
