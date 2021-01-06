@@ -160,7 +160,7 @@ def to_dataarray(data, name, x, y, time=None, attrs={}):
                             attrs=attrs
                            )
 
-def to_dataset(datas, names, x, y, time, lat=None, lon=None, attrs=[]):
+def to_dataset(arrays, names, x, y, time, lat=None, lon=None, attrs=[]):
     """
     Converts lists of arrays per time step to xarray Dataset
     :param names: list - containing strings with names of datas
@@ -197,14 +197,16 @@ def to_dataset(datas, names, x, y, time, lat=None, lon=None, attrs=[]):
     }
 
     # ensure attributes are available for all datasets
-    if len(names) != len(datas):
+    if len(names) != len(arrays):
         raise ValueError("the amount of data arrays is different from the amount of names provided")
-    if len(attrs) < len(datas):
+    if len(attrs) < len(arrays):
         # add ampty attributes
-        for n in range(0, len(datas) - len(attrs)):
+        for n in range(0, len(arrays) - len(attrs)):
             attrs.append({})
+    # convert list of lists to list of arrays if needed
+    arrays = [np.array(d) for d in arrays]
     # merge arrays together into one large dataset, using names and coordinates
-    ds = xr.merge([to_dataarray(data, name, x, y, time, attrs) for data, name, attrs in zip(datas, names, attrs)])
+    ds = xr.merge([to_dataarray(a, name, x, y, time, attrs) for a, name, attrs in zip(arrays, names, attrs)])
     ds["y"] = y
     ds["x"] = x
     ds["time"] = time

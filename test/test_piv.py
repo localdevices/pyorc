@@ -1,15 +1,12 @@
 import openpiv.tools
 import openpiv.pyprocess
-import cv2
-import numpy as np
 import glob
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 import rasterio
-from rasterio import warp
 from datetime import datetime, timedelta
-import xarray as xr
-from OpenRiverCam import io
+from OpenRiverCam import io, piv
 
 # def list_to_dataarray(data, name, x, y, time=None, attrs={}):
 #     """
@@ -86,13 +83,17 @@ dst = os.path.join(folder, "piv")
 
 if not(os.path.isdir(dst)):
     os.makedirs(dst)
-dst_fn = os.path.join(dst, "v.nc")
+dst_fn = os.path.join(dst, "velocity.nc")
 
 fns = glob.glob(os.path.join(src, "*.tif"))
 fns.sort()
 print(fns)
-
-
+window_size=60
+search_area_size=60
+overlap=30
+dt = 1./25
+res_x = 0.01
+res_y = 0.01
 u = []
 v = []
 sig2noise = []
@@ -101,7 +102,7 @@ for n in range(len(fns)-16):
     print(f"Treating frame {n}")
     frame_a = openpiv.tools.imread(fns[n])
     frame_b = openpiv.tools.imread(fns[n+1])
-    _u, _v, _sig2noise = openpiv.pyprocess.extended_search_area_piv( frame_a, frame_b, window_size=60, overlap=30, search_area_size=60, dt=1./25)
+    cols, rows, _u, _v, _sig2noise = piv.piv(frame_a, frame_b, res_x=res_x, res_y=res_y, window_size=window_size, sig2noise_method="peak2peak", search_area_size=search_area_size, overlap=overlap, dt=dt)
     # time
     ms = timedelta(milliseconds=int(fns[n][-10:-4]))
     time.append(t + ms)
@@ -110,7 +111,6 @@ for n in range(len(fns)-16):
     v.append(_v)
     sig2noise.append(_sig2noise)
 
-cols, rows = openpiv.pyprocess.get_coordinates(image_size=frame_a.shape, search_area_size=60, overlap=30)
 var_names = ['u', 'v', 's2n']
 var_attrs = [
     {
@@ -137,35 +137,19 @@ var_attrs = [
 ]
 encoding = {var: {"zlib": True} for var in var_names}
 
-arrays = [
-    np.array(u),
-    np.array(v),
-    np.array(sig2noise),
-]
-
-with rasterio.open(fns[0]) as ds:
-    print(ds.transform)
-    band = ds.read(1)
-    shape = band.shape
-    coli, rowi = np.meshgrid(np.arange(shape[1]), np.arange(shape[0]))
-    xi, yi = rasterio.transform.xy(ds.transform, rowi, coli)
-    xi, yi = np.array(xi), np.array(yi)
-    # trans_ = rasterio.Affine(ds.transform[0]*1e6, ds.transform[1]*1e6, ds.transform[2], ds.transform[3]*1e6, ds.transform[4]*1e6, ds.transform[5])
-    # xq, yq = rasterio.transform.xy(trans_, rows, cols)
-    xq, yq = rasterio.transform.xy(ds.transform, rows, cols)
-    xq, yq = np.array(xq), np.array(yq)
-    loni, lati = warp.transform(ds.crs, dst_crs, xq.flatten(), yq.flatten())
-    loni, lati = np.array(loni).reshape(xq.shape), np.array(lati).reshape(yq.shape)
-
-dataset = io.to_dataset(arrays, var_names, cols[0], rows[:, 0], time=time, lat=lati, lon=loni, attrs=var_attrs)
+lons, lats = io.convert_cols_rows(fns[0], cols, rows)
+spacing_x = np.diff(cols[0])[0]
+spacing_y = np.diff(rows[:, 0])[0]
+x = np.linspace(res_x/2*spacing_x, (len(cols[0])-0.5)*res_x*spacing_x, len(cols[0]))
+y = np.flipud(np.linspace(res_y/2*spacing_y, (len(rows[:, 0])-0.5)*res_y*spacing_y, len(rows[:, 0])))
+dataset = io.to_dataset([u, v, sig2noise], var_names, x, y, time=time, lat=lats, lon=lons, attrs=var_attrs)
 
 # add lat and lon
-
 dataset.to_netcdf(dst_fn, encoding=encoding)
 
-frame_cv = cv2.imread(fns[0])
-
-plt.pcolormesh(xi, yi, band)
-plt.imshow(cv2.cvtColor(frame_cv, cv2.COLOR_BGR2RGB))
-plt.quiver(xq, yq, u[0], v[0], color='r')
-plt.show()
+# frame_cv = cv2.imread(fns[0])
+#
+# plt.pcolormesh(xi, yi, band)
+# plt.imshow(cv2.cvtColor(frame_cv, cv2.COLOR_BGR2RGB))
+# plt.quiver(xq, yq, u[0], v[0], color='r')
+# plt.show()
