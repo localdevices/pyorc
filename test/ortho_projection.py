@@ -55,7 +55,7 @@ aoi = {
     "rows": 10,
     "cols": 30,
 }
-if not(os.path.isdir(dst)):
+if not (os.path.isdir(dst)):
     os.makedirs(dst)
 for fn in fns:
     img = cv2.imread(fn)
@@ -65,10 +65,17 @@ for fn in fns:
     # TODO: add "round" below when we know how we should compute it.
     # gcps["src"], gcps["dst"], gcps["z_0"], gcps["h_ref"]
 
-    corr_img, transform = ORC.cv.orthorectification(img, lensPosition, h_a, bbox=bbox, resolution=0.01, **gcps)
+    corr_img, transform = ORC.cv.orthorectification(
+        img, lensPosition, h_a, bbox=bbox, resolution=0.01, **gcps
+    )
     print(transform)
     # save to geotiff
-    ORC.io.to_geotiff(os.path.join(dst, os.path.split(fn)[1].split(".")[0] + ".tif"), rasterio.plot.reshape_as_raster(corr_img), transform, crs="EPSG:32637")
+    ORC.io.to_geotiff(
+        os.path.join(dst, os.path.split(fn)[1].split(".")[0] + ".tif"),
+        rasterio.plot.reshape_as_raster(corr_img),
+        transform,
+        crs="EPSG:32637",
+    )
 
 # TODO figure out what happens if the area is outside of the pixel domain
 

@@ -4,6 +4,7 @@ import rasterio
 from shapely.geometry import Polygon, LineString
 from shapely.affinity import rotate
 
+
 def _corr_color(img, alpha=None, beta=None, gamma=0.5):
     """
     Grey scaling, contrast- and gamma correction. Both alpha and beta need to be
@@ -37,6 +38,7 @@ def _corr_color(img, alpha=None, beta=None, gamma=0.5):
 
     return corr_img
 
+
 def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
     """
     Lens distortion correction based on lens characteristics.
@@ -68,6 +70,7 @@ def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
     corr_img = cv2.undistort(img, mtx, dist)
     return corr_img
 
+
 def _get_shape(bbox, resolution=0.01, round=1):
     """
     defines the number of rows and columns needed in a target raster, to fit a given bounding box
@@ -82,6 +85,7 @@ def _get_shape(bbox, resolution=0.01, round=1):
     cols = int(np.ceil((box_length / resolution) / round)) * round
     rows = int(np.ceil((box_width / resolution) / round)) * round
     return cols, rows
+
 
 def _get_transform(bbox, resolution=0.01):
     """
@@ -113,7 +117,7 @@ def _get_transform(bbox, resolution=0.01):
     )
 
 
-def _get_gcps_a(lensPosition, h_a, coords, z_0=0., h_ref=0.):
+def _get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
     """
     Get the actual x, y locations of ground control points at the actual water level
 
@@ -175,7 +179,9 @@ def _transform_to_bbox(coords, bbox, res):
     return list(zip(cols, rows))
 
 
-def orthorectification(img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resolution=0.01, round=1):
+def orthorectification(
+    img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resolution=0.01, round=1
+):
     """
     This function takes the original gcps and water level, and uses the actual water level, defined resolution
     and AOI to determine a resulting projected (in crs if that was used for coordinates) image.
@@ -197,7 +203,11 @@ def orthorectification(img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resol
     """
     # compute the geographical location of the gcps with the actual water level (h_a)
     dst_a = _get_gcps_a(
-        lensPosition, h_a, dst, z_0, h_ref,
+        lensPosition,
+        h_a,
+        dst,
+        z_0,
+        h_ref,
     )
 
     dst_colrow_a = _transform_to_bbox(dst_a, bbox, resolution)
@@ -207,9 +217,12 @@ def orthorectification(img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resol
     # estimate size of required grid
     transform = _get_transform(bbox, resolution=resolution)
     # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
-    cols, rows = _get_shape(bbox, resolution=resolution, round=10)  # for now hard -coded on 10, alter dependent on how PIV is done
+    cols, rows = _get_shape(
+        bbox, resolution=resolution, round=10
+    )  # for now hard -coded on 10, alter dependent on how PIV is done
     corr_img = cv2.warpPerspective(img, M, (cols, rows))
     return corr_img, transform
+
 
 def get_aoi(src, dst, src_corners):
 
@@ -259,6 +272,7 @@ def get_aoi(src, dst, src_corners):
     bbox = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
     return bbox
 
+
 def surf_velocity():
     # FIXME
     raise NotImplementedError("")
@@ -267,5 +281,3 @@ def surf_velocity():
 def river_flow():
     # FIXME
     raise NotImplementedError("")
-
-

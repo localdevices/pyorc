@@ -7,6 +7,28 @@ from OpenRiverCam.cv import _corr_lens, _corr_color
 import xarray as xr
 from rasterio import warp
 
+
+def affine_from_grid(xi, yi):
+    """
+    Retrieve the affine transformation from a gridded set of coordinates.
+    This function (unlike rasterio.transform functions) can also handle rotated grids
+
+    :param xi: 2D numpy-like gridded x-coordinates
+    :param yi: 2D numpy-like gridded y-coordinates
+
+    :return: rasterio Affine
+    """
+
+    xul, yul = xi[0, 0], yi[0, 0]
+    xcol, ycol = xi[0, 1], yi[0, 1]
+    xrow, yrow = xi[1, 0], yi[1, 0]
+    dx_col = xcol - xul
+    dy_col = ycol - yul
+    dx_row = xrow - xul
+    dy_row = yrow - yul
+    return rasterio.transform.Affine(dx_col, dy_col, xul, dx_row, dy_row, yul)
+
+
 def frames(
     fn,
     frame_int=1,
@@ -65,6 +87,7 @@ def frames(
             break
     return
 
+
 def to_geotiff(fn, z, transform, crs=None, compress=None):
     """
     Writes geotiff from an array (assumed 3d)
@@ -99,6 +122,7 @@ def to_geotiff(fn, z, transform, crs=None, compress=None):
         for n, _z in enumerate(z):
             ds.write(_z, n + 1)
 
+
 def to_geojson(geom, crs=None):
     """
     Converts a single geometry in a geographically aware geojson
@@ -121,11 +145,14 @@ def to_geojson(geom, crs=None):
         except:
             raise ValueError(f"CRS cannot be converted to EPSG code")
     # prepare json compatible crs dict
-    crs_json = {"type": "EPSG", "properties": {"code": epsg}} if crs is not None else None
+    crs_json = (
+        {"type": "EPSG", "properties": {"code": epsg}} if crs is not None else None
+    )
     # prepare geojson feature
     f = geojson.Feature(geometry=geom, properties={"ID": 0})
     # collate all into a geojson feature collection
     return geojson.FeatureCollection([f], crs=crs_json)
+
 
 def to_dataarray(data, name, x, y, time=None, attrs={}):
     """
@@ -139,28 +166,22 @@ def to_dataarray(data, name, x, y, time=None, attrs={}):
     :return: DataArray of data
     """
     if time is None:
-        return xr.DataArray(data,
-                            name=name,
-                            dims=('y', 'x'),
-                            coords={
-                                    'y': y,
-                                    'x': x
-                                    },
-                            attrs=attrs
-                            )
+        return xr.DataArray(
+            data, name=name, dims=("y", "x"), coords={"y": y, "x": x}, attrs=attrs
+        )
     else:
-        return xr.DataArray(data,
-                            name=name,
-                            dims=('time', 'y', 'x'),
-                            coords={
-                                'time': time,
-                                'y': y,
-                                'x': x
-                            },
-                            attrs=attrs
-                           )
+        return xr.DataArray(
+            data,
+            name=name,
+            dims=("time", "y", "x"),
+            coords={"time": time, "y": y, "x": x},
+            attrs=attrs,
+        )
 
-def to_dataset(arrays, names, x, y, time, lat=None, lon=None, attrs=[]):
+
+def to_dataset(
+    arrays, names, x, y, time, lat=None, lon=None, xs=None, ys=None, attrs=[]
+):
     """
     Converts lists of arrays per time step to xarray Dataset
     :param names: list - containing strings with names of datas
@@ -184,21 +205,22 @@ def to_dataset(arrays, names, x, y, time, lat=None, lon=None, attrs=[]):
         "axis": "X",
         "long_name": "x-coordinate in Cartesian system",
         "units": "m",
-
     }
     y_attrs = {
         "axis": "Y",
         "long_name": "y-coordinate in Cartesian system",
         "units": "m",
     }
-    time_attrs ={
+    time_attrs = {
         "standard_name": "time",
         "long_name": "time",
     }
 
     # ensure attributes are available for all datasets
     if len(names) != len(arrays):
-        raise ValueError("the amount of data arrays is different from the amount of names provided")
+        raise ValueError(
+            "the amount of data arrays is different from the amount of names provided"
+        )
     if len(attrs) < len(arrays):
         # add ampty attributes
         for n in range(0, len(arrays) - len(attrs)):
@@ -206,7 +228,12 @@ def to_dataset(arrays, names, x, y, time, lat=None, lon=None, attrs=[]):
     # convert list of lists to list of arrays if needed
     arrays = [np.array(d) for d in arrays]
     # merge arrays together into one large dataset, using names and coordinates
-    ds = xr.merge([to_dataarray(a, name, x, y, time, attrs) for a, name, attrs in zip(arrays, names, attrs)])
+    ds = xr.merge(
+        [
+            to_dataarray(a, name, x, y, time, attrs)
+            for a, name, attrs in zip(arrays, names, attrs)
+        ]
+    )
     ds["y"] = y
     ds["x"] = x
     ds["time"] = time
@@ -214,16 +241,75 @@ def to_dataset(arrays, names, x, y, time, lat=None, lon=None, attrs=[]):
     ds["y"].attrs = y_attrs
     ds["time"].attrs = time_attrs
     if (lon is not None) and (lat is not None):
-        lon_da = to_dataarray(lon, 'lon', x, y, attrs=lon_attrs)
-        lat_da = to_dataarray(lat, 'lat', x, y, attrs=lat_attrs)
-    ds = xr.merge([ds, lon_da, lat_da])
+        lon_da = to_dataarray(lon, "lon", x, y, attrs=lon_attrs)
+        lat_da = to_dataarray(lat, "lat", x, y, attrs=lat_attrs)
+        ds = xr.merge([ds, lon_da, lat_da])
+    if (xs is not None) and (ys is not None):
+        xs_da = to_dataarray(xs, "x_grid", x, y, attrs=x_attrs)
+        ys_da = to_dataarray(ys, "y_grid", x, y, attrs=y_attrs)
+        ds = xr.merge([ds, xs_da, ys_da])
+
     return ds
+
 
 def convert_cols_rows(fn, cols, rows, dst_crs=rasterio.crs.CRS.from_epsg(4326)):
     with rasterio.open(fn) as ds:
         xs, ys = rasterio.transform.xy(ds.transform, rows, cols)
         xs, ys = np.array(xs), np.array(ys)
-        xcoords, ycoords = warp.transform(ds.crs, dst_crs, xs.flatten(), ys.flatten())
-        xcoords, ycoords = np.array(xcoords).reshape(xs.shape), np.array(ycoords).reshape(ys.shape)
-        return xcoords, ycoords
+        lons, lats = warp.transform(ds.crs, dst_crs, xs.flatten(), ys.flatten())
+        lons, lats = (
+            np.array(lons).reshape(xs.shape),
+            np.array(lats).reshape(ys.shape),
+        )
+        return xs, ys, lons, lats
 
+
+def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
+    """
+    Interpolate all variables to supplied x and y coordinates. This function assumes that the grid
+    can be rotated and that xs and ys are supplied following the projected coordinates supplied in
+    "x_grid" and "y_grid" variables in ds. x-coordinates and y-coordinates that fall outside the
+    domain of ds, are still stored in the result. Original coordinate values supplied are stored in
+    coordinates "xcoords", "ycoords" and (if supplied) "zcoords"
+    :param ds: xarray dataset
+    :param xs: tuple or list-like, x-coordinates on which interpolation should be done
+    :param ys: tuple or list-like, y-coordinates on which interpolation should be done
+    :param zs: tuple or list-like, z-coordinates on which interpolation should be done, defaults to None
+    :param x_grid: str, name of variable that stores the x coordinates in the projection in which "xs" is supplied
+    :param y_grid: str, name of variable that stores the y coordinates in the projection in which "ys" is supplied
+    :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
+    """
+    # get the transform of the grid projected coordinated
+    transform = affine_from_grid(ds[x_grid].values, ds[y_grid].values)
+
+    # make a cols and rows temporary variable
+    coli, rowi = np.meshgrid(np.arange(len(ds["x"])), np.arange(len(ds["y"])))
+    ds["cols"], ds["rows"] = (["y", "x"], coli), (["y", "x"], rowi)
+
+    # compute rows and cols locations of coordinates (x, y)
+    rows, cols = rasterio.transform.rowcol(transform, list(xs), list(ys))
+    rows, cols = np.array(rows), np.array(cols)
+    # select x and y coordinates from axes
+    idx = np.all(
+        np.array([cols >= 0, cols < len(ds["x"]), rows >= 0, rows < len(ds["y"])]),
+        axis=0,
+    )
+    x = np.empty(len(cols))
+    x[:] = np.nan
+    y = np.empty(len(rows))
+    y[:] = np.nan
+    x[idx] = ds["x"].isel(x=cols[idx])
+    y[idx] = ds["y"].isel(y=rows[idx])
+
+    # interpolate values from grid to list of x-y coordinates to grid in xarray format
+    x = xr.DataArray(list(x), dims="points")
+    y = xr.DataArray(list(y), dims="points")
+    ds_points = ds.interp(x=x, y=y)
+    # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
+    # found back from this dataset
+    ds_points = ds_points.assign_coords(xcoords=("points", list(xs)))
+    ds_points = ds_points.assign_coords(ycoords=("points", list(ys)))
+    if zs is not None:
+        ds_points = ds_points.assign_coords(zcoords=("points", list(zs)))
+
+    return ds_points
