@@ -77,10 +77,13 @@ c_s = {
 }
 
 # open dataset
-ds = xr.open_dataset(src)
 
 # extract cross section from points
-ds_points = io.interp_coords(ds, *zip(*c_s["coords"]))
+ds_points = io.interp_coords(src, *zip(*c_s["coords"]))
+
+
+# some plotting to check
+ds = xr.open_dataset(src)
 
 # ds["v_x"][0].plot()
 # ds_points["v_x"].plot()

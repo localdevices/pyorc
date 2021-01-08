@@ -280,6 +280,10 @@ def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
     """
     # get the transform of the grid projected coordinated
+    
+    if not(isinstance(ds, xr.Dataset)):
+        # assume ds is as yet a ref to a filename or buffer and first open
+        ds = xr.open_dataset(ds)
     transform = affine_from_grid(ds[x_grid].values, ds[y_grid].values)
 
     # make a cols and rows temporary variable
