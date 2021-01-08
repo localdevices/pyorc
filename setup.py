@@ -37,9 +37,8 @@ setup(
         "rasterio",
         "matplotlib",
         "descartes",
-        "netCDF4"
-        "xarray"
-
+        "netCDF4",
+        "xarray",
     ],
     extras_require={
         "dev": ["pytest", "pytest-cov", "black"],
