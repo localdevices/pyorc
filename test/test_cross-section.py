@@ -1,16 +1,13 @@
 import os
-import xarray as xr
-import matplotlib.pyplot as plt
 import numpy as np
-import rasterio.transform
 from shapely.geometry import LineString, Point
-from shapely.affinity import rotate
 from shapely.ops import nearest_points
-
+import xarray as xr
 from OpenRiverCam import io
 import math
+import rasterio
 
-folder = r"/home/hcwinsemius/projects/OpenRiverCam/piv"
+folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam/piv"
 src = os.path.join(folder, "velocity.nc")
 
 
@@ -44,56 +41,62 @@ def vector_to_scalar(
     xs = ds_points["x"].values
     ys = ds_points["y"].values
     # find points that are located on the area of interest
-    xs = xs[np.isfinite(xs)]
-    ys = ys[np.isfinite(ys)]
-    # check if x should be predictor
-    x_pred = np.max(xs) - np.min(xs) > np.max(ys) - np.min(ys)
-    if x_pred:
-        # choose x as predictors
-        predictor = xs
-        predictant = ys
-    else:
-        predictant = xs
-        predictor = ys
+    idx = np.isfinite(xs)
+    xs = xs[idx]
+    ys = ys[idx]
+    # start with empty angle
+    angle = np.zeros(ys.shape)
+    angle_da = np.zeros(ds_points["x"].shape)
+    angle_da[:] = np.nan
 
-    # make a LineString with the most extreme points on the line
-    slope, offset = np.polyfit(predictor, predictant, 1)
-    range = np.max(predictor) - np.min(predictor)
+    for n, (x, y) in enumerate(zip(xs, ys)):
+        # determine the angle of the current point with its neighbours
+        # check if we are at left bank
+        # first estimate left bank angle
+        undefined = True  # angle is still undefined
+        m = 0
+        while undefined:
+            # go one step to the left
+            m -= 1
+            if n + m < 0:
+                angle_left = np.nan
+                undefined = False
+            else:
+                x_left, y_left = xs[n + m], ys[n + m]
+                if not ((x_left == x) and (y_left == y)):
+                    # profile points are in another pixel, so estimate angle
+                    undefined = False
+                    angle_left = np.arctan2(x - x_left, y - y_left)
 
-    # extend the line slightly to ensure it encapsulates the entire cross section
-    samples = np.array(
-        [
-            np.min(predictor) - range * line_extend,
-            np.max(predictor) + range * line_extend,
-        ]
-    )
-    predicted = samples * slope + offset
-    if x_pred:
-        line = LineString(zip(samples, predicted))
-    else:
-        line = LineString(zip(predicted, samples))
+        # estimate right bank angle
+        undefined = True  # angle is still undefined
+        m = 0
+        while undefined:
+            # go one step to the left
+            m += 1
+            if n + m >= len(xs) - 1:
+                angle_right = np.nan
+                undefined = False
+            else:
+                x_right, y_right = xs[n + m], ys[n + m]
+                if not ((x_right == x) and (y_right == y)):
+                    # profile points are in another pixel, so estimate angle
+                    undefined = False
+                    angle_right = np.arctan2(x_right - x, y_right - y)
+        angle[n] = np.nanmean([angle_left, angle_right])
+    # add angles to array meant for data array
+    angle_da[idx] = angle
 
-    # make a set of shapely Points out of the coordinates lying in the area of interest
-    coords = [Point(x, y) for x, y in zip(xs, ys)]
+    # compute angle of flow direction (i.e. the perpendicular of the cross section) and add as DataArray to ds_points
+    ds_points["flow_dir"] = ("points", angle_da - 0.5 * np.pi)
 
-    # snap the coordinates to the cross section straight line
-    coords = [nearest_points(line, p)[0] for p in coords]
-
-    # compute the angle of the cross section line assuming the first coordinate is left bank
-    left_x, left_y = coords[0].x, coords[0].y
-    right_x, right_y = coords[-1].x, coords[-1].y
-    diff_x, diff_y = right_x - left_x, right_y - left_y
-    angle_cross_section = np.arctan2(diff_x, diff_y)
-
-    # compute angle of flow direction (i.e. the perpendicular of the cross section)
-    flow_dir = angle_cross_section - 0.5 * np.pi
     # compute per velocity vector in the dataset, what its angle is
     v_angle = np.arctan2(ds_points["v_x"], ds_points["v_y"])
     # compute the scalar value of velocity
     v_scalar = (ds_points["v_x"] ** 2 + ds_points["v_y"] ** 2) ** 0.5
 
     # compute difference in angle between velocity and perpendicular of cross section
-    angle_diff = v_angle - flow_dir
+    angle_diff = v_angle - ds_points["flow_dir"]
 
     # compute effective velocity in the flow direction (i.e. perpendicular to cross section
     v_eff = np.cos(angle_diff) * v_scalar
@@ -101,9 +104,9 @@ def vector_to_scalar(
         "standard_name": "velocity",
         "long_name": "velocity in perpendicular direction of cross section, measured by angle in radians, measured from up-direction",
         "units": "m s-1",
-        "angle": flow_dir,
     }
     return v_eff
+
 
 def depth_average(ds_points, z_0, h_a, v_corr=0.85):
     # compute depth, never smaller than zero
@@ -115,7 +118,6 @@ def depth_average(ds_points, z_0, h_a, v_corr=0.85):
         "units": "m2 s-1",
     }
     return q_eff
-
 
 
 # define cross section
@@ -198,11 +200,17 @@ v_corr = 0.85  # ratio between average velocity over vertical, and surface veloc
 # open dataset
 
 # This is the main functionality tested: extract cross section from points
-ds_points = io.interp_coords(src, *zip(*c_s["coords"]))
+ds = xr.open_dataset(src)
 
+xs = np.array(c_s["coords"])[:, 0]
+ys = np.array(c_s["coords"])[:, 1]
+zs = np.array(c_s["coords"])[:, 2]
+
+
+# ds_points = io.interp_coords(ds, *zip(*c_s["coords"]))
+ds_points = io.interp_coords(ds, xs=xs, ys=ys, zs=zs)
 
 # This is secondary functionality tested: integrate to vertically integrated flow
-
 
 # now compute effective velocity in thge direction of flow
 ds_points["v_eff"] = vector_to_scalar(ds_points)
@@ -210,7 +218,6 @@ ds_points["q_eff"] = depth_average(ds_points, z_0, h_a, v_corr)
 
 # now compute the depth integrated velocity
 # some plotting to check
-ds = xr.open_dataset(src)
 
 # ds["v_x"][0].plot()
 # ds_points["v_x"].plot()
@@ -226,7 +233,7 @@ ds = xr.open_dataset(src)
 # ds_points["v_x"] = (["time", "points"], v_x)
 
 # coords = [line.intersection(rotate(LineString([(p.x-dx, p.y-dy), (p.x+dx, p.y+dy)]), 90, p)) for p in coords]
-ds_points["q_eff"].quantile([0.1, 0.5, 0.9], dim="time").plot.line(x="points")
+# ds_points["q_eff"].quantile([0.1, 0.5, 0.9], dim="time").plot.line(x="points")
 
 # plt.plot(*zip(*line.coords))
 # plt.plot(xs, ys, '.')
@@ -241,4 +248,4 @@ ds_points["q_eff"].quantile([0.1, 0.5, 0.9], dim="time").plot.line(x="points")
 
 
 # plt.plot(ds_points.xcoords, ds_points.ycoords, '.')
-plt.show()
+# plt.show()

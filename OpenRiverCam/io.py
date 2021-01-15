@@ -281,7 +281,7 @@ def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     """
     # get the transform of the grid projected coordinated
 
-    if not (isinstance(ds, xr.Dataset)):
+    if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
         ds = xr.open_dataset(ds)
     transform = affine_from_grid(ds[x_grid].values, ds[y_grid].values)
@@ -306,6 +306,7 @@ def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     y[idx] = ds["y"].isel(y=rows[idx])
 
     # interpolate values from grid to list of x-y coordinates to grid in xarray format
+
     x = xr.DataArray(list(x), dims="points")
     y = xr.DataArray(list(y), dims="points")
     ds_points = ds.interp(x=x, y=y)
