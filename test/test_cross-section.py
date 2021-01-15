@@ -1,124 +1,8 @@
 import os
 import numpy as np
-from shapely.geometry import LineString, Point
-from shapely.ops import nearest_points
 import xarray as xr
-from OpenRiverCam import io
-import math
-import rasterio
-
-folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam/piv"
-src = os.path.join(folder, "velocity.nc")
-
-
-def distance_pts(pt1, pt2):
-    v = Point(pt2.x - pt1.x, pt2.y - pt1.y)
-    dv = math.sqrt(v.x ** 2 + v.y ** 2)
-    return dv
-
-
-def snap(pt, pt1, pt2):
-    # type: (Point, Point, Point) -> Point
-    v = Point(pt2.x - pt1.x, pt2.y - pt1.y)
-    dv = distance_pts(pt1, pt2)
-    bh = ((pt.x - pt1.x) * v.x + (pt.y - pt1.y) * pt2.y) / dv
-    h = Point(pt1.x + bh * v.x / dv, pt1.y + bh * v.y / dv)
-    if 0 <= (pt1.x - h.x) / (pt2.x - h.y) < 1:
-        # in the line segment
-        return h
-    elif distance_pts(h, pt1) < distance_pts(h, pt2):
-        # near pt1
-        return pt1
-    else:
-        # near pt2
-        return pt2
-
-
-def vector_to_scalar(
-    ds_points,
-    line_extend=0.1,
-):
-    xs = ds_points["x"].values
-    ys = ds_points["y"].values
-    # find points that are located on the area of interest
-    idx = np.isfinite(xs)
-    xs = xs[idx]
-    ys = ys[idx]
-    # start with empty angle
-    angle = np.zeros(ys.shape)
-    angle_da = np.zeros(ds_points["x"].shape)
-    angle_da[:] = np.nan
-
-    for n, (x, y) in enumerate(zip(xs, ys)):
-        # determine the angle of the current point with its neighbours
-        # check if we are at left bank
-        # first estimate left bank angle
-        undefined = True  # angle is still undefined
-        m = 0
-        while undefined:
-            # go one step to the left
-            m -= 1
-            if n + m < 0:
-                angle_left = np.nan
-                undefined = False
-            else:
-                x_left, y_left = xs[n + m], ys[n + m]
-                if not ((x_left == x) and (y_left == y)):
-                    # profile points are in another pixel, so estimate angle
-                    undefined = False
-                    angle_left = np.arctan2(x - x_left, y - y_left)
-
-        # estimate right bank angle
-        undefined = True  # angle is still undefined
-        m = 0
-        while undefined:
-            # go one step to the left
-            m += 1
-            if n + m >= len(xs) - 1:
-                angle_right = np.nan
-                undefined = False
-            else:
-                x_right, y_right = xs[n + m], ys[n + m]
-                if not ((x_right == x) and (y_right == y)):
-                    # profile points are in another pixel, so estimate angle
-                    undefined = False
-                    angle_right = np.arctan2(x_right - x, y_right - y)
-        angle[n] = np.nanmean([angle_left, angle_right])
-    # add angles to array meant for data array
-    angle_da[idx] = angle
-
-    # compute angle of flow direction (i.e. the perpendicular of the cross section) and add as DataArray to ds_points
-    ds_points["flow_dir"] = ("points", angle_da - 0.5 * np.pi)
-
-    # compute per velocity vector in the dataset, what its angle is
-    v_angle = np.arctan2(ds_points["v_x"], ds_points["v_y"])
-    # compute the scalar value of velocity
-    v_scalar = (ds_points["v_x"] ** 2 + ds_points["v_y"] ** 2) ** 0.5
-
-    # compute difference in angle between velocity and perpendicular of cross section
-    angle_diff = v_angle - ds_points["flow_dir"]
-
-    # compute effective velocity in the flow direction (i.e. perpendicular to cross section
-    v_eff = np.cos(angle_diff) * v_scalar
-    v_eff.attrs = {
-        "standard_name": "velocity",
-        "long_name": "velocity in perpendicular direction of cross section, measured by angle in radians, measured from up-direction",
-        "units": "m s-1",
-    }
-    return v_eff
-
-
-def depth_average(ds_points, z_0, h_a, v_corr=0.85):
-    # compute depth, never smaller than zero
-    depth = np.maximum(z_0 + h_a - ds_points["zcoords"], 0)
-    q_eff = ds_points["v_eff"] * v_corr * depth
-    q_eff.attrs = {
-        "standard_name": "velocity_depth",
-        "long_name": "velocity averaged over depth",
-        "units": "m2 s-1",
-    }
-    return q_eff
-
+from OpenRiverCam import io, piv
+import matplotlib.pyplot as plt
 
 # define cross section
 x = np.flipud(
@@ -184,6 +68,9 @@ z = np.flipud(
         102.5,
     ]
 )
+
+folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam/piv"
+src = os.path.join(folder, "velocity.nc")
 coords = list(zip(x, y, z))
 
 
@@ -213,10 +100,61 @@ ds_points = io.interp_coords(ds, xs=xs, ys=ys, zs=zs)
 # This is secondary functionality tested: integrate to vertically integrated flow
 
 # now compute effective velocity in thge direction of flow
-ds_points["v_eff"] = vector_to_scalar(ds_points)
-ds_points["q_eff"] = depth_average(ds_points, z_0, h_a, v_corr)
+ds_points["v_eff"] = piv.vector_to_scalar(ds_points["v_x"], ds_points["v_y"])
 
-# now compute the depth integrated velocity
+# integrate over depth with vertical correction
+ds_points["q"] = piv.depth_integrate(
+    ds_points["zcoords"], ds_points["v_eff"], z_0, h_a, v_corr
+)
+
+# compute Q per time step
+# inputs
+Q = piv.integrate_flow(ds_points["q"], quantile=np.linspace(0.01, 0.99, 99))
+
+
+print(Q)
+Q.plot()
+
+# q = ds_points["q"]
+#
+# quantile = [0.1, 0.5, 0.9]
+#
+# q = q.quantile(quantile, dim="time")
+#
+# # for x, y in zip(q.xcoords.values, q.ycoords.values)
+# # depth_av = [0.]
+# # v_av = [0.]
+#
+# dist = [0.]
+#
+# for n, (x1, y1, x2, y2) in enumerate(zip(q.xcoords[:-1], q.ycoords[:-1], q.xcoords[1:], q.ycoords[1:])):
+#     _dist = distance_pts((x1, y1), (x2, y2))
+#     dist.append(dist[n] + _dist)
+#
+# # assign coordinates for distance
+# ds_points = ds_points.assign_coords(dist=("points", dist))
+# Q = ds_points["q"].quantile(quantile, dim="time").integrate(dim="dist")
+
+# for n, (q1, q2, depth1, depth2) in enumerate(zip(v_d[:-1], v_d[1:], depth[:-1], depth[1:])):
+#     _dist = distance_pts((q1.xcoords, q1.ycoords), (q2.xcoords, q2.ycoords))
+#     _depth_av = np.nanmean([depth1, depth2])
+#     _v_av = np.nanmean([q1, q2])
+#     dist.append(np.mean([_dist]))
+#     depth_av.append(_depth_av)
+#     v_av.append(_v_av)
+
+# # make arrays
+# dist, depth_av, v_av = np.array(dist), np.array(depth_av), np.array(v_av)
+#
+# q = v_av*depth_av*dist
+#
+# # FUNCTION ENDS HERE ADD INFO TO ds_points
+# ds_points["q"] = ("points", q)
+
+
+# make temporary dataset
+
+
 # some plotting to check
 
 # ds["v_x"][0].plot()
@@ -248,4 +186,4 @@ ds_points["q_eff"] = depth_average(ds_points, z_0, h_a, v_corr)
 
 
 # plt.plot(ds_points.xcoords, ds_points.ycoords, '.')
-# plt.show()
+plt.show()
