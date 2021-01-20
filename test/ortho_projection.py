@@ -17,7 +17,7 @@ import rasterio.plot
 # it'll also include options to assess changes in orthography given changes in water levels. For this the position
 # of the camera is needed, in the same x, y, z reference system as the measurements of the GCPs.
 # folder = r"c:\OpenRiverCam"
-folder = r"/home/hcwinsemius/OpenRiverCam"
+folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam"
 
 src = os.path.join(folder, "with_lens")
 dst = os.path.join(folder, "ortho_proj")
@@ -25,13 +25,22 @@ dst = os.path.join(folder, "ortho_proj")
 fns = glob.glob(os.path.join(src, "*.jpg"))
 gcps = {
     "src": [[992, 366], [1545, 403], [1773, 773], [943, 724]],
-    "dst": [[0.25, 6.7], [4.25, 6.8], [4.5, 3.5], [0.0, 3.5]],
+    "dst": [
+        [192087 + 0.25, 313192 + 6.7],
+        [192087 + 4.25, 313192 + 6.8],
+        [192087 + 4.5, 313192 + 3.5],
+        [192087 + 0.0, 313192 + 3.5],
+    ],
     "z_0": 100.0,  # reference height of zero water level compared to the crs used
     "h_ref": 2.0,  # actual water level during taking of the gcp points
 }
 h_a = 2.0  # now the actual water level is 5 m above reference
 # cam_loc = {"x": -3.0, "y": 8.0, "z": 110.0}
-lensPosition = [-3.0, 8.0, 110.0]
+lensPosition = [
+        -3.0 + 192087,
+        8.0 + 313192,
+        110.0,
+    ]
 resolution = 0.01  # m
 window_size = 10  # int
 
@@ -47,9 +56,12 @@ src_corners = {
 src_polygon = Polygon([src_corners[s] for s in src_corners])
 bbox = ORC.cv.get_aoi(gcps["src"], gcps["dst"], src_corners)
 
-print(src_polygon)
-print(bbox)
+prefix = "proj"
+dt = 0.004
 
+# print(src_polygon)
+# print(bbox)
+_t = 0
 aoi = {
     "bbox": bbox,
     "rows": 10,
@@ -57,9 +69,12 @@ aoi = {
 }
 if not (os.path.isdir(dst)):
     os.makedirs(dst)
-for fn in fns:
-    img = cv2.imread(fn)
 
+fns.sort()
+for n, fn in enumerate(fns):
+    dest_fn = "{:s}_{:04d}_{:06d}.tif".format(prefix, n, int(_t * 1000))
+    img = cv2.imread(fn)
+    print(f"Creating {dest_fn}")
     # now we will work on an actual new image
     # first reproject the gcp locations in crs space of actual situation with current water level
     # TODO: add "round" below when we know how we should compute it.
@@ -68,18 +83,18 @@ for fn in fns:
     corr_img, transform = ORC.cv.orthorectification(
         img, lensPosition, h_a, bbox=bbox, resolution=0.01, **gcps
     )
-    print(transform)
+    # print(transform)
     # save to geotiff
     ORC.io.to_geotiff(
-        os.path.join(dst, os.path.split(fn)[1].split(".")[0] + ".tif"),
+        os.path.join(dst, dest_fn),
         rasterio.plot.reshape_as_raster(corr_img),
         transform,
-        crs="EPSG:32637",
+        compress="deflate",
+        crs="EPSG:32737",
     )
+    _t += dt
 
 # TODO figure out what happens if the area is outside of the pixel domain
-
-
 plt.figure()
 ax = plt.subplot(121)
 _src = np.array(gcps["src"])

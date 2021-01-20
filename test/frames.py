@@ -14,7 +14,7 @@ lens_pars = {
 logger = OpenRiverCam.log.start_logger(True, False)
 # do frame extraction
 n = 0
-for t, img in OpenRiverCam.io.frames(fn, dst, start_frame=0, lens_pars=lens_pars):
+for t, img in OpenRiverCam.io.frames(fn, dst, start_frame=0, grayscale=True, lens_pars=lens_pars):
     print(t)
     n += 1
     ret, im_en = cv2.imencode(".jpg", img)

@@ -8,7 +8,7 @@ import rasterio
 from datetime import datetime, timedelta
 from OpenRiverCam import io, piv
 
-folder = r"/home/hcwinsemius/projects/OpenRiverCam"
+folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam"
 start_time = "2020-12-17 07:45:00"
 t = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
 
@@ -33,7 +33,7 @@ u = []
 v = []
 sig2noise = []
 time = []
-for n in range(len(fns) - 16):
+for n in range(len(fns)-1):
     print(f"Treating frame {n}")
     frame_a = openpiv.tools.imread(fns[n])
     frame_b = openpiv.tools.imread(fns[n + 1])
@@ -56,7 +56,7 @@ for n in range(len(fns) - 16):
     v.append(_v)
     sig2noise.append(_sig2noise)
 
-var_names = ["u", "v", "s2n"]
+var_names = ["v_x", "v_y", "s2n"]
 var_attrs = [
     {
         "standard_name": "sea_water_x_velocity",
@@ -82,7 +82,7 @@ var_attrs = [
 ]
 encoding = {var: {"zlib": True} for var in var_names}
 
-lons, lats = io.convert_cols_rows(fns[0], cols, rows)
+xs, ys, lons, lats = io.convert_cols_rows(fns[0], cols, rows)
 spacing_x = np.diff(cols[0])[0]
 spacing_y = np.diff(rows[:, 0])[0]
 x = np.linspace(
