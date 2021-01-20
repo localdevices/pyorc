@@ -2,9 +2,9 @@ import OpenRiverCam
 import cv2
 import os
 
-fn = os.path.abspath("../../PIV.TUDelft/Example notebooks/example_video.mp4")
+fn = os.path.abspath("/home/hcwinsemius/Media/projects/OpenRiverCam/example_video.mp4")
 print(fn)
-dst = r"/home/hcwinsemius/OpenRiverCam/with_lens"
+dst = r"/home/hcwinsemius/Media/projects/OpenRiverCam/with_lens"
 
 lens_pars = {
     "k1": -10.0e-6,
@@ -14,13 +14,14 @@ lens_pars = {
 logger = OpenRiverCam.log.start_logger(True, False)
 # do frame extraction
 n = 0
-for t, buf in OpenRiverCam.io.frames(fn, dst, start_frame=100, lens_pars=lens_pars):
+for t, img in OpenRiverCam.io.frames(fn, dst, start_frame=0, lens_pars=lens_pars):
     print(t)
     n += 1
-    buf.seek(0)
+    ret, im_en = cv2.imencode(".jpg", img)
+    # buf.seek(0)
     dst_fn = os.path.join(dst, "_{:04d}.jpg".format(n))
     with open(dst_fn, "wb") as f:
-        f.write(buf.read())
+        f.write(im_en)
 
 print("Done")
 # read one frame back and plot
