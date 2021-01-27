@@ -70,7 +70,7 @@ z = np.flipud(
 )
 
 folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam/piv"
-src = os.path.join(folder, "velocity.nc")
+src = os.path.join(folder, "velocity_filter.nc")
 coords = list(zip(x, y, z))
 
 
@@ -113,7 +113,7 @@ Q = piv.integrate_flow(ds_points["q"], quantile=np.linspace(0.01, 0.99, 99))
 
 
 print(Q)
-Q.plot()
+# Q.plot()
 
 # q = ds_points["q"]
 #
@@ -171,7 +171,7 @@ Q.plot()
 # ds_points["v_x"] = (["time", "points"], v_x)
 
 # coords = [line.intersection(rotate(LineString([(p.x-dx, p.y-dy), (p.x+dx, p.y+dy)]), 90, p)) for p in coords]
-# ds_points["q_eff"].quantile([0.1, 0.5, 0.9], dim="time").plot.line(x="points")
+ds_points["v_eff"].quantile([0.1, 0.5, 0.9], dim="time").plot.line(x="points")
 
 # plt.plot(*zip(*line.coords))
 # plt.plot(xs, ys, '.')

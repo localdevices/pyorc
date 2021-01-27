@@ -19,8 +19,8 @@ import rasterio.plot
 # folder = r"c:\OpenRiverCam"
 folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam"
 
-src = os.path.join(folder, "with_lens")
-dst = os.path.join(folder, "ortho_proj")
+src = os.path.join(folder, "with_lens_color")
+dst = os.path.join(folder, "ortho_proj_color")
 
 fns = glob.glob(os.path.join(src, "*.jpg"))
 gcps = {
@@ -37,10 +37,10 @@ gcps = {
 h_a = 2.0  # now the actual water level is 5 m above reference
 # cam_loc = {"x": -3.0, "y": 8.0, "z": 110.0}
 lensPosition = [
-        -3.0 + 192087,
-        8.0 + 313192,
-        110.0,
-    ]
+    -3.0 + 192087,
+    8.0 + 313192,
+    110.0,
+]
 resolution = 0.01  # m
 window_size = 10  # int
 
