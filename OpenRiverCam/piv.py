@@ -1,7 +1,7 @@
 import openpiv.tools
 import openpiv.pyprocess
 import numpy as np
-
+import xarray as xr
 
 def depth_integrate(z, v, z_0, h_a, v_corr=0.85):
     """
@@ -244,14 +244,18 @@ def piv_filter(
     s_min=0.1,
     s_max=5.0,
     corr="corr",
-    corr_min=0.0,
+    corr_min=0.3,
 
 ):
-    ds = piv_filter_variance(ds, v_x=v_x, v_y=v_y, var_thres=var_thres)
-    ds = piv_filter_angle(ds, v_x=v_x, v_y=v_y, angle_expected=angle_expected, angle_bounds=angle_bounds)
-    ds = piv_filter_velocity(ds, v_x=v_x, v_y=v_y, s_min=s_min, s_max=s_max)
-    ds = piv_filter_corr(ds, v_x=v_x, v_y=v_y, corr=corr, corr_min=corr_min)
-    return ds
+    if not isinstance(ds, xr.Dataset):
+        # assume ds is as yet a ref to a filename or buffer and first open
+        ds = xr.open_dataset(ds)
+
+    ds_filter = piv_filter_variance(ds, v_x=v_x, v_y=v_y, var_thres=var_thres)
+    ds_filter = piv_filter_angle(ds_filter, v_x=v_x, v_y=v_y, angle_expected=angle_expected, angle_bounds=angle_bounds)
+    ds_filter = piv_filter_velocity(ds_filter, v_x=v_x, v_y=v_y, s_min=s_min, s_max=s_max)
+    ds_filter = piv_filter_corr(ds_filter, v_x=v_x, v_y=v_y, corr=corr, corr_min=corr_min)
+    return ds_filter
 
 
 def piv_filter_angle(
