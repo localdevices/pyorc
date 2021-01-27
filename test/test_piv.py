@@ -23,21 +23,27 @@ dst_fn = os.path.join(dst, "velocity.nc")
 fns = glob.glob(os.path.join(src, "*.tif"))
 fns.sort()
 print(fns)
-window_size = 60
-search_area_size = 60
-overlap = 30
+window_size = 30
+search_area_size = 30
+overlap = 15
 dt = 1.0 / 25
 res_x = 0.01
 res_y = 0.01
+correlation = True
+correlation_method = "circular"
+normalized_correlation = True
+
 u = []
 v = []
 sig2noise = []
+corr = []
 time = []
-for n in range(len(fns)-1):
+# for n in range(10):
+for n in range(len(fns) - 1):
     print(f"Treating frame {n}")
     frame_a = openpiv.tools.imread(fns[n])
     frame_b = openpiv.tools.imread(fns[n + 1])
-    cols, rows, _u, _v, _sig2noise = piv.piv(
+    cols, rows, _u, _v, _sig2noise, _corr = piv.piv(
         frame_a,
         frame_b,
         res_x=res_x,
@@ -48,6 +54,7 @@ for n in range(len(fns)-1):
         overlap=overlap,
         dt=dt,
     )
+
     # time
     ms = timedelta(milliseconds=int(fns[n][-10:-4]))
     time.append(t + ms)
@@ -55,8 +62,9 @@ for n in range(len(fns)-1):
     u.append(_u)
     v.append(_v)
     sig2noise.append(_sig2noise)
+    corr.append(_corr)
 
-var_names = ["v_x", "v_y", "s2n"]
+var_names = ["v_x", "v_y", "s2n", "corr"]
 var_attrs = [
     {
         "standard_name": "sea_water_x_velocity",
@@ -79,6 +87,13 @@ var_attrs = [
         # "grid_mapping": "projected_coordinate_system",
         "coordinates": "lon lat",
     },
+    {
+        "standard_name": "correlation_coefficient",
+        "long_name": "correlation coefficient between frames",
+        "units": "",
+        # "grid_mapping": "projected_coordinate_system",
+        "coordinates": "lon lat",
+    },
 ]
 encoding = {var: {"zlib": True} for var in var_names}
 
@@ -96,7 +111,16 @@ y = np.flipud(
     )
 )
 dataset = io.to_dataset(
-    [u, v, sig2noise], var_names, x, y, time=time, lat=lats, lon=lons, attrs=var_attrs
+    [u, v, sig2noise, corr],
+    var_names,
+    x,
+    y,
+    time=time,
+    lat=lats,
+    lon=lons,
+    xs=xs,
+    ys=ys,
+    attrs=var_attrs,
 )
 
 # add lat and lon

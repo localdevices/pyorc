@@ -156,7 +156,7 @@ def vector_to_scalar(v_x, v_y):
 
 
 def piv(
-    frame_a, frame_b, res_x=1.0, res_y=1.0, search_area_size=60, overlap=30, **kwargs
+    frame_a, frame_b, res_x=1.0, res_y=1.0, search_area_size=60, overlap=30, correlation=True, **kwargs
 ):
     """
     Typical kwargs are for instance
@@ -174,4 +174,136 @@ def piv(
     cols, rows = openpiv.pyprocess.get_coordinates(
         image_size=frame_a.shape, search_area_size=search_area_size, overlap=overlap
     )
-    return cols, rows, v_x * res_x, v_y * res_y, s2n
+    if correlation:
+        corr = piv_corr(
+            frame_a,
+            frame_b,
+            search_area_size,
+            overlap,
+            **kwargs
+        )
+    else:
+        corr = np.zeros(s2n.shape)
+        corr[:] = np.nan
+
+    return cols, rows, v_x * res_x, v_y * res_y, s2n, corr
+
+
+def piv_corr(
+    frame_a,
+    frame_b,
+    search_area_size,
+    overlap,
+    window_size=None,
+    correlation_method="circular",
+    normalized_correlation=True,
+    **kwargs
+):
+    # extract the correlation matrix
+    window_size = search_area_size if window_size is None else window_size
+    # get field shape
+
+    n_rows, n_cols = openpiv.pyprocess.get_field_shape(
+        frame_a.shape, search_area_size, overlap
+    )
+
+    # We implement the new vectorized code
+    aa = openpiv.pyprocess.moving_window_array(frame_a, search_area_size, overlap)
+    bb = openpiv.pyprocess.moving_window_array(frame_b, search_area_size, overlap)
+
+    if search_area_size > window_size:
+        # before masking with zeros we need to remove
+        # edges
+
+        aa = openpiv.pyprocess.normalize_intensity(aa)
+        bb = openpiv.pyprocess.normalize_intensity(bb)
+
+        mask = np.zeros((search_area_size, search_area_size)).astype(aa.dtype)
+        pad = np.int((search_area_size - window_size) / 2)
+        mask[slice(pad, search_area_size - pad), slice(pad, search_area_size - pad)] = 1
+        mask = np.broadcast_to(mask, aa.shape)
+        aa *= mask
+
+    corr = openpiv.pyprocess.fft_correlate_strided_images(
+        aa,
+        bb,
+        correlation_method=correlation_method,
+        normalized_correlation=normalized_correlation,
+    )
+
+    corr = corr.max(axis=-1).max(axis=-1).reshape((n_rows, n_cols))
+    return corr
+
+def piv_filter(
+    ds,
+    v_x="v_x",
+    v_y="v_y",
+    angle_expected=0.5 * np.pi,
+    angle_bounds=0.25 * np.pi,
+    var_thres=1.0,
+    s_min=0.1,
+    s_max=5.0,
+    corr="corr",
+    corr_min=0.0,
+
+):
+    ds = piv_filter_variance(ds, v_x=v_x, v_y=v_y, var_thres=var_thres)
+    ds = piv_filter_angle(ds, v_x=v_x, v_y=v_y, angle_expected=angle_expected, angle_bounds=angle_bounds)
+    ds = piv_filter_velocity(ds, v_x=v_x, v_y=v_y, s_min=s_min, s_max=s_max)
+    ds = piv_filter_corr(ds, v_x=v_x, v_y=v_y, corr=corr, corr_min=corr_min)
+    return ds
+
+
+def piv_filter_angle(
+    ds,
+    v_x="v_x",
+    v_y="v_y",
+    angle_expected=0.5 * np.pi,
+    angle_bounds=0.25 * np.pi,
+    filter_per_timestep=True,
+
+):
+    angle = np.arctan2(ds[v_x], ds[v_y])
+    angle_mean = angle.mean(dim="time")
+    ds[v_x] = ds[v_x].where(np.abs(angle_mean - angle_expected) < angle_bounds)
+    ds[v_y] = ds[v_y].where(np.abs(angle_mean - angle_expected) < angle_bounds)
+    if filter_per_timestep:
+        ds[v_x] = ds[v_x].where(np.abs(angle - angle_mean) < angle_bounds)
+        ds[v_y] = ds[v_y].where(np.abs(angle - angle_mean) < angle_bounds)
+    # now filter values in time that deviate too much from the average angle.
+    # if filter_angle_var:
+    #     angle_std = angle.std(dim="time")
+    #     angle_var = angle_std/angle_mean
+    #     ds[v_x] = ds[v_x].where(angle - angle_mean < var_thres)
+    #     ds[v_y] = ds[v_y].where(s_var < var_thres)
+
+    return ds
+
+
+def piv_filter_variance(
+    ds, v_x="v_x", v_y="v_y", var_thres=1.0, filter_per_timestep=True
+):
+    s = (ds[v_x] ** 2 + ds[v_x] ** 2) ** 0.5
+    s_std = s.std(dim="time")
+    s_mean = s.mean(dim="time")
+    s_var = s_std / s_mean
+
+    ds[v_x] = ds[v_x].where(s_var < var_thres)
+    ds[v_y] = ds[v_y].where(s_var < var_thres)
+    if filter_per_timestep:
+        ds[v_x] = ds[v_x].where((s - s_mean) / s_std < var_thres)
+        ds[v_y] = ds[v_y].where((s - s_mean) / s_std < var_thres)
+
+    return ds
+
+
+def piv_filter_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
+    s = (ds[v_x] ** 2 + ds[v_x] ** 2) ** 0.5
+    ds[v_x] = ds[v_x].where(s > s_min)
+    ds[v_y] = ds[v_y].where(s < s_max)
+    return ds
+
+def piv_filter_corr(ds, v_x="v_x", v_y="v_y", corr="corr", corr_min=0.4):
+    ds[v_x] = ds[v_x].where(ds[corr] > corr_min)
+    ds[v_y] = ds[v_y].where(ds[corr] > corr_min)
+    return ds
