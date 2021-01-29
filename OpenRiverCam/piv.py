@@ -224,7 +224,7 @@ def piv_corr(
         mask = np.broadcast_to(mask, aa.shape)
         aa *= mask
 
-    corr = openpiv.pyprocess.fft_correlate_strided_images(
+    corr = openpiv.pyprocess.fft_correlate_images(
         aa,
         bb,
         correlation_method=correlation_method,
