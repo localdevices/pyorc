@@ -48,7 +48,7 @@ for n in range(len(fns) - 1):
         frame_b,
         res_x=res_x,
         res_y=res_y,
-        window_size=window_size,
+        # window_size=window_size,
         sig2noise_method="peak2peak",
         search_area_size=search_area_size,
         overlap=overlap,

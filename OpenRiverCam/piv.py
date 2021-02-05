@@ -168,13 +168,13 @@ def piv(
     :param kwargs:
     :return:
     """
+    window_size = search_area_size if window_size is None else window_size
     v_x, v_y, s2n = openpiv.pyprocess.extended_search_area_piv(
-        frame_a, frame_b, search_area_size=search_area_size, overlap=overlap, **kwargs
+        frame_a, frame_b, search_area_size=search_area_size, overlap=overlap, window_size=window_size, **kwargs
     )
     cols, rows = openpiv.pyprocess.get_coordinates(
         image_size=frame_a.shape, search_area_size=search_area_size, overlap=overlap
     )
-    window_size = search_area_size if window_size is None else window_size
 
     if correlation:
         corr = piv_corr(
