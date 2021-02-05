@@ -156,7 +156,7 @@ def vector_to_scalar(v_x, v_y):
 
 
 def piv(
-    frame_a, frame_b, res_x=1.0, res_y=1.0, search_area_size=60, overlap=30, correlation=True, **kwargs
+    frame_a, frame_b, res_x=1.0, res_y=1.0, search_area_size=60, overlap=30, correlation=True, window_size=None, **kwargs
 ):
     """
     Typical kwargs are for instance
@@ -174,12 +174,15 @@ def piv(
     cols, rows = openpiv.pyprocess.get_coordinates(
         image_size=frame_a.shape, search_area_size=search_area_size, overlap=overlap
     )
+    window_size = search_area_size if window_size is None else window_size
+
     if correlation:
         corr = piv_corr(
             frame_a,
             frame_b,
             search_area_size,
             overlap,
+            window_size,
             **kwargs
         )
     else:
