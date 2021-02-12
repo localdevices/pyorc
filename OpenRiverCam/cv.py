@@ -180,7 +180,7 @@ def _transform_to_bbox(coords, bbox, res):
 
 
 def orthorectification(
-    img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resolution=0.01, round=1
+    img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resolution=0.01, flags=cv2.INTER_AREA
 ):
     """
     This function takes the original gcps and water level, and uses the actual water level, defined resolution
@@ -220,7 +220,7 @@ def orthorectification(
     cols, rows = _get_shape(
         bbox, resolution=resolution, round=10
     )  # for now hard -coded on 10, alter dependent on how PIV is done
-    corr_img = cv2.warpPerspective(img, M, (cols, rows))
+    corr_img = cv2.warpPerspective(img, M, (cols, rows), flags=flags)  #
     return corr_img, transform
 
 
