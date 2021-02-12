@@ -31,15 +31,19 @@ def movie(f, ax, fns, ds, movie_fn, video_args):
     im_data = cv2.imread(fns[0])
     im = ax.imshow(im_data)
     x, y = ds["x"].values, ds["y"].values
-    _u, _v = ds["v_x"][0].values, ds["v_y"][0].values
+#    _u, _v = ds["v_x"][0].values, ds["v_y"][0].values
+    _u, _v = ds["v_x"].mean(axis=0).values, ds["v_y"].mean(axis=0).values
     # make a local mesh
     xi, yi = np.meshgrid(x / 0.01, np.flipud(y) / 0.01)
-    q = ax.quiver(xi, yi, _u, _v, color="w", alpha=0.5, scale=100, width=0.0015)
+    q = ax.quiver(xi, yi, _u, _v, color="w", alpha=0.5, scale=150, width=0.0010)
+    plt.savefig(movie_fn.split('.')[0] + ".png", dpi=300, bbox_inches="tight")
 
     anim = FuncAnimation(
         f, animate, init_func=init, frames=len(fns)-1, interval=20, blit=False
     )  # interval=40 defaults to 25fps (40ms per frame)
     anim.save(movie_fn, **video_args)
+    # im.set_data(im_data)
+    # q.set_UVC(_u, _v)
 
 
 import numpy as np
@@ -51,7 +55,7 @@ out_fn = os.path.join(folder, "velocity_filter_func.nc")
 
 # set the arguments for storing video (used by anim.save(...))
 video_args = {
-    "fps": 10,
+    "fps": 4,
     "extra_args": ["-vcodec", "libx264"],
     #               'extra_args': ['-pix_fmt', 'yuv420p'],
     "dpi": 120,
@@ -63,8 +67,10 @@ fns.sort()
 # open file for reading
 ds = xr.open_dataset(src)
 
-ds = piv.piv_filter(ds)
-
+ds = piv.filter_temporal(ds)
+ds = piv.filter_spatial(ds)
+ds_g = ds.groupby("time")
+# ds_g.apply(piv.replace_outliers, stride=1, max_iter=1)
 ds.to_netcdf(out_fn)
 angle = np.arctan2(ds["v_x"], ds["v_y"])
 angle_mean = angle.mean(dim="time")
@@ -77,5 +83,5 @@ f.patch.set_facecolor("k")
 f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
 ax = plt.subplot(111)
 
-movie_fn = "example_PIV_high_res_func.mp4"
+movie_fn = "example_PIV_high_res_func_spatial.mp4"
 movie(f, ax, fns, ds, movie_fn, video_args=video_args)

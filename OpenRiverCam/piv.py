@@ -3,6 +3,8 @@ import openpiv.pyprocess
 import numpy as np
 import xarray as xr
 
+from scipy.signal import convolve2d
+
 def depth_integrate(z, v, z_0, h_a, v_corr=0.85):
     """
 
@@ -74,6 +76,31 @@ def integrate_flow(q, quantile=0.5):
     # set name
     Q.name = "Q"
     return Q
+
+def neighbour_stack(array, stride=1, missing=-9999.):
+    """
+    Builds a stack of arrays from a 2-D input array, with its neighbours using a provided stride
+    :param array: 2-D numpy array with values (may contain NaN)
+    :param stride: int, stride used to determine relevant neighbours
+    :param missing: float, a temporary missing value, used to be able to convolve NaNs
+    :return:
+    stack of arrays, with all neighbours included
+
+    """
+    array = np.copy(array)
+    array[np.isnan(array)] = missing
+    array_move = []
+    for vert in range(-stride, stride+1):
+        for horz in range(-stride, stride+1):
+            conv_arr = np.zeros((abs(vert)*2+1, abs(horz)*2+1))
+            _y = int(np.floor((abs(vert)*2+1)/2)) + vert
+            _x = int(np.floor((abs(horz)*2+1)/2)) + horz
+            conv_arr[_y, _x] = 1
+            array_move.append(convolve2d(array, conv_arr, mode="same"))
+    array_move = np.stack(array_move)
+    # replace missings by Nan
+    array_move[np.isclose(array_move, missing)] = np.nan
+    return array_move
 
 
 def vector_to_scalar(v_x, v_y):
@@ -237,80 +264,200 @@ def piv_corr(
     corr = corr.max(axis=-1).max(axis=-1).reshape((n_rows, n_cols))
     return corr
 
-def piv_filter(
+def filter_temporal(
     ds,
     v_x="v_x",
     v_y="v_y",
-    angle_expected=0.5 * np.pi,
-    angle_bounds=0.25 * np.pi,
-    var_thres=1.0,
-    s_min=0.1,
-    s_max=5.0,
-    corr="corr",
-    corr_min=0.3,
-
+    filter_std=True,
+    filter_angle=True,
+    filter_velocity=True,
+    filter_corr=True,
+    filter_neighbour=True,
+    kwargs_std={},
+    kwargs_angle={},
+    kwargs_velocity={},
+    kwargs_corr={},
+    kwargs_neighbour={},
 ):
+    """
+    Implementation of several filters that use temporal variations or comparison as basis
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param filter_std: boolean, if True (default, filtering on variance is applied)
+    :param filter_angle: boolean, if True (default, filtering on angles is applied)
+    :param filter_velocity: boolean, if True (default, filtering on velocity is applied)
+    :param filter_corr: boolean, if True (default, filtering on correlation is applied)
+    :param kwargs_std: dict, set of key-word arguments to pass on to filter_temporal_std
+    :param kwargs_angle: dict, set of key-word arguments to pass on to filter_temporal_angle
+    :param kwargs_velocity: dict, set of key-word arguments to pass on to filter_temporal_velocity
+    :param kwargs_corr: dict, set of key-word arguments to pass on to filter_temporal_corr
+    :return: xarray Dataset, containing temporally filtered velocity vectors as [time, y, x]
+    """
     if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
         ds = xr.open_dataset(ds)
+    if filter_std:
+        ds = filter_temporal_std(ds, v_x=v_x, v_y=v_y, **kwargs_std)
+    if filter_angle:
+        ds = filter_temporal_angle(ds, v_x=v_x, v_y=v_y, **kwargs_angle)
+    if filter_velocity:
+        ds = filter_temporal_velocity(ds, v_x=v_x, v_y=v_y, **kwargs_velocity)
+    if filter_corr:
+        ds = filter_temporal_corr(ds, v_x=v_x, v_y=v_y, **kwargs_corr)
+    if filter_neighbour:
+        ds = filter_temporal_neighbour(ds, v_x=v_x, v_y=v_y, **kwargs_neighbour)
+    return ds
 
-    ds_filter = piv_filter_variance(ds, v_x=v_x, v_y=v_y, var_thres=var_thres)
-    ds_filter = piv_filter_angle(ds_filter, v_x=v_x, v_y=v_y, angle_expected=angle_expected, angle_bounds=angle_bounds)
-    ds_filter = piv_filter_velocity(ds_filter, v_x=v_x, v_y=v_y, s_min=s_min, s_max=s_max)
-    ds_filter = piv_filter_corr(ds_filter, v_x=v_x, v_y=v_y, corr=corr, corr_min=corr_min)
-    return ds_filter
-
-
-def piv_filter_angle(
+def filter_temporal_angle(
     ds,
     v_x="v_x",
     v_y="v_y",
     angle_expected=0.5 * np.pi,
-    angle_bounds=0.25 * np.pi,
+    angle_tolerance=0.25 * np.pi,
     filter_per_timestep=True,
-
 ):
+    """
+    filters on the expected angle. The function filters points entirely where the mean angle over time
+    deviates more than input parameter angle_bounds (in radians). The function also filters individual
+    estimates in time, in case the user wants this (filter_per_timestep=True), in case the angle on
+    a specific time step deviates more than the defined amount from the average.
+    note: this function does not work appropriately, if the expected angle (+/- anglebounds) are within
+    range of zero, as zero is the same as 2*pi. This exception may be resolved in the future if necessary
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param angle_expected (=0.5*np.pi, assumes that flow is from left to right): angle [radians, 0-2*pi],
+        measured clock-wise from vertical upwards direction, expected in the velocites
+    :param angle_tolerance: float [0-2*pi] maximum deviation from expected angle allowed.
+    :param filter_per_timestep (=True): if set to True, tolerances are also checked per individual time step
+    :return: xarray Dataset, containing angle filtered velocity vectors as [time, y, x]
+    """
+    # TODO: make function working appropriately, if angles are close to zero (2*pi)
     angle = np.arctan2(ds[v_x], ds[v_y])
     angle_mean = angle.mean(dim="time")
-    ds[v_x] = ds[v_x].where(np.abs(angle_mean - angle_expected) < angle_bounds)
-    ds[v_y] = ds[v_y].where(np.abs(angle_mean - angle_expected) < angle_bounds)
+    ds[v_x] = ds[v_x].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
+    ds[v_y] = ds[v_y].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
     if filter_per_timestep:
-        ds[v_x] = ds[v_x].where(np.abs(angle - angle_mean) < angle_bounds)
-        ds[v_y] = ds[v_y].where(np.abs(angle - angle_mean) < angle_bounds)
-    # now filter values in time that deviate too much from the average angle.
-    # if filter_angle_var:
-    #     angle_std = angle.std(dim="time")
-    #     angle_var = angle_std/angle_mean
-    #     ds[v_x] = ds[v_x].where(angle - angle_mean < var_thres)
-    #     ds[v_y] = ds[v_y].where(s_var < var_thres)
+        ds[v_x] = ds[v_x].where(np.abs(angle - angle_expected) < angle_tolerance)
+        ds[v_y] = ds[v_y].where(np.abs(angle - angle_expected) < angle_tolerance)
+    return ds
 
+def filter_temporal_neighbour(ds, v_x="v_x", v_y="v_y", roll=5, tolerance=0.5):
+    """
+    Filters values if neighbours over a certain rolling length before and after, have a
+    significantly higher velocity, measured by tolerance
+    :param ds:
+    :param v_x:
+    :param v_y:
+    :param stride:
+    :param tolerance: Relative acceptable velocity of maximum found within stride
+    :return: ds
+    """
+    s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
+
+    s_roll = s.fillna(0.).rolling(time=roll, center=True).max()
+    ds[v_x] = ds[v_x].where(s > tolerance*s_roll)
+    ds[v_y] = ds[v_y].where(s > tolerance*s_roll)
     return ds
 
 
-def piv_filter_variance(
-    ds, v_x="v_x", v_y="v_y", var_thres=1.0, filter_per_timestep=True
+def filter_temporal_std(
+    ds, v_x="v_x", v_y="v_y", std_thres=1.0, filter_per_timestep=True
 ):
-    s = (ds[v_x] ** 2 + ds[v_x] ** 2) ** 0.5
+    """
+
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param std_thres: float, representing a maximum standard
+    :param filter_per_timestep:
+    :return:
+    """
+    s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
     s_std = s.std(dim="time")
     s_mean = s.mean(dim="time")
     s_var = s_std / s_mean
 
-    ds[v_x] = ds[v_x].where(s_var < var_thres)
-    ds[v_y] = ds[v_y].where(s_var < var_thres)
+    ds[v_x] = ds[v_x].where(s_var < std_thres)
+    ds[v_y] = ds[v_y].where(s_var < std_thres)
     if filter_per_timestep:
-        ds[v_x] = ds[v_x].where((s - s_mean) / s_std < var_thres)
-        ds[v_y] = ds[v_y].where((s - s_mean) / s_std < var_thres)
+        ds[v_x] = ds[v_x].where((s - s_mean) / s_std < std_thres)
+        ds[v_y] = ds[v_y].where((s - s_mean) / s_std < std_thres)
 
     return ds
 
 
-def piv_filter_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
-    s = (ds[v_x] ** 2 + ds[v_x] ** 2) ** 0.5
+def filter_temporal_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
+    s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
     ds[v_x] = ds[v_x].where(s > s_min)
     ds[v_y] = ds[v_y].where(s < s_max)
     return ds
 
-def piv_filter_corr(ds, v_x="v_x", v_y="v_y", corr="corr", corr_min=0.4):
+def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", corr_min=0.4):
     ds[v_x] = ds[v_x].where(ds[corr] > corr_min)
     ds[v_y] = ds[v_y].where(ds[corr] > corr_min)
+    return ds
+
+def filter_spatial(
+    ds,
+    kwargs_nan={},
+    kwargs_median={},
+    v_x="v_x",
+    v_y="v_y",
+):
+    if not isinstance(ds, xr.Dataset):
+        # assume ds is as yet a ref to a filename or buffer and first open
+        ds = xr.open_dataset(ds)
+    ds_g = ds.groupby("time")
+    ds = ds_g.apply(filter_spatial_nan, v_x=v_x, v_y=v_y, **kwargs_nan)
+    ds_g = ds.groupby("time")
+    ds = ds_g.apply(filter_spatial_median, v_x=v_x, v_y=v_y, **kwargs_median)
+    return ds
+
+
+def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", max_nan_frac=0.8, stride=1, missing=-9999.):
+    u, v = ds[v_x].values, ds[v_y].values
+    u_move = neighbour_stack(u, stride=stride)
+    # replace missings by Nan
+    nan_frac = np.float64(np.isnan(u_move)).sum(axis=0)/float(len(u_move))
+    u[nan_frac > max_nan_frac] = np.nan
+    v[nan_frac > max_nan_frac] = np.nan
+
+    # u, v, mask = validation.local_median_val(v_x, v_y, 0.5, 0.5, size=1)
+    ds[v_x][:] = u
+    ds[v_y][:] = v
+    return ds
+
+def filter_spatial_median(ds, v_x="v_x", v_y="v_y", max_rel_diff=0.7, stride=1, missing=-9999.):
+    u, v = ds[v_x].values, ds[v_y].values
+    s = (u**2 + v**2)**0.5
+    s_move = neighbour_stack(s, stride=stride)
+    # replace missings by Nan
+    s_median = np.nanmedian(s_move, axis=0)
+    # now filter points that are very far off from the median
+    filter = np.abs(s - s_median)/s_median > max_rel_diff
+    u[filter] = np.nan
+    v[filter] = np.nan
+
+    # u, v, mask = validation.local_median_val(v_x, v_y, 0.5, 0.5, size=1)
+    ds[v_x][:] = u
+    ds[v_y][:] = v
+    return ds
+
+def replace_outliers(ds, v_x="v_x", v_y="v_y", stride=1, max_iter=1):
+    u, v = ds[v_x].values, ds[v_y].values
+    for n in range(max_iter):
+        u_move = neighbour_stack(u, stride=stride)
+        v_move = neighbour_stack(v, stride=stride)
+        # compute mean
+        u_mean = np.nanmean(u_move, axis=0)
+        v_mean = np.nanmean(v_move, axis=0)
+        u[np.isnan(u)] = u_mean[np.isnan(u)]
+        v[np.isnan(v)] = v_mean[np.isnan(v)]
+        # all values with stride distance from edge have to be made NaN
+        u[0:stride, :] = np.nan; u[-stride:, :] = np.nan; u[:, 0:stride] = np.nan; u[:, -stride:] = np.nan
+        v[0:stride, :] = np.nan; v[-stride:, :] = np.nan; v[:, 0:stride] = np.nan; v[:, -stride:] = np.nan
+    ds[v_x][:] = u
+    ds[v_y][:] = v
     return ds
