@@ -63,15 +63,17 @@ video_args = {
 fns = glob.glob(os.path.join(folder, "..", "ortho_proj_color", "proj*.*"))
 fns.sort()
 
-
 # open file for reading
 ds = xr.open_dataset(src)
 
 ds = piv.filter_temporal(ds)
 ds = piv.filter_spatial(ds)
 ds_g = ds.groupby("time")
-# ds_g.apply(piv.replace_outliers, stride=1, max_iter=1)
 ds.to_netcdf(out_fn)
+v_x_median = ds["v_x"].median(dim="time")
+v_y_median = ds["v_y"].median(dim="time")
+ds["v_x"] = ds["v_x"].fillna(v_x_median)
+ds["v_y"] = ds["v_y"].fillna(v_y_median)
 angle = np.arctan2(ds["v_x"], ds["v_y"])
 angle_mean = angle.mean(dim="time")
 # ds["v_x"].where(np.abs(angle - angle_mean) < 0.25*np.pi)
