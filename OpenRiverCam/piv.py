@@ -80,11 +80,10 @@ def integrate_flow(q, quantile=0.5):
 def neighbour_stack(array, stride=1, missing=-9999.):
     """
     Builds a stack of arrays from a 2-D input array, with its neighbours using a provided stride
-    :param array: 2-D numpy array with values (may contain NaN)
+    :param array: 2-D numpy array, any values (may contain NaN)
     :param stride: int, stride used to determine relevant neighbours
     :param missing: float, a temporary missing value, used to be able to convolve NaNs
-    :return:
-    stack of arrays, with all neighbours included
+    :return: 3-D numpy array, stack of 2-D arrays, with strided neighbours
 
     """
     array = np.copy(array)
@@ -186,14 +185,28 @@ def piv(
     frame_a, frame_b, res_x=1.0, res_y=1.0, search_area_size=60, overlap=30, correlation=True, window_size=None, **kwargs
 ):
     """
-    Typical kwargs are for instance
+    PIV analysis following keyword arguments from openpiv. This function also computes the correlations per
+    interrogation window, so that poorly correlated values can be filtered out. Furthermore, the resolution is used to convert
+    pixel per second velocity estimates, into meter per second velocity estimates. The centre of search area columns
+    and rows are also returned so that a georeferenced grid can be written from the results.
+
+    Note: Typical openpiv kwargs are for instance
     window_size=60, overlap=30, search_area_size=60, dt=1./25
-    :param fn1:
-    :param fn2:
+    :param frame_a: 2-D numpy array, containing first frame
+    :param frame_b: 2-D numpy array, containing second frame
     :param res_x: float, resolution of x-dir pixels in a user-defined unit per pixel (e.g. m pixel-1)
     :param res_y: float, resolution of y-dir pixels in a user-defined unit per pixel (e.g. m pixel-1)
-    :param kwargs:
-    :return:
+    :param kwargs: dict, several keyword arguments related to openpiv. See openpiv manual for further information
+    :return cols: 1-D numpy array, col number of centre of interrogation windows
+    :return rows: 1-D numpy array, row number of centre of interrogation windows
+    :return v_x: 2-D numpy array, raw x-dir velocities [m s-1] in interrogation windows (requires filtering to get
+        valid velocities)
+    :return v_y: 2-D numpy array, raw y-dir velocities [m s-1] in interrogation windows (requires filtering to get
+        valid velocities)
+    :return s2n: 2-D numpy array, signal to noise ratio, measured as maximum correlation found divided by the mean
+        correlation (method="peak2mean") or second to maximum correlation (method="peak2peak") found within search area
+    :return corr: 2-D numpy array, correlation values in interrogation windows
+
     """
     window_size = search_area_size if window_size is None else window_size
     v_x, v_y, s2n = openpiv.pyprocess.extended_search_area_piv(
@@ -227,8 +240,19 @@ def piv_corr(
     window_size=None,
     correlation_method="circular",
     normalized_correlation=True,
-    **kwargs
 ):
+    """
+    Estimate the maximum correlation in piv analyses over two frames. Function taken from openpiv library.
+    This is a temporary fix. If correlation can be exported from openpiv, then this function can be removed.
+    :param frame_a: 2-D numpy array, containing first frame
+    :param frame_b: 2-D numpy array, containing second frame
+    :param search_area_size: int, size of search area in pixels (square shape)
+    :param overlap: int, amount of overlapping pixels between search areas
+    :param window_size: int, size of window to search for correlations
+    :param correlation_method: method for correlation used, as openpiv setting
+    :param normalized_correlation: return a normalized correlation number between zero and one.
+    :return: maximum correlations found in search areas
+    """
     # extract the correlation matrix
     window_size = search_area_size if window_size is None else window_size
     # get field shape
@@ -280,7 +304,7 @@ def filter_temporal(
     kwargs_neighbour={},
 ):
     """
-    Implementation of several filters that use temporal variations or comparison as basis
+    Masks values using several filters that use temporal variations or comparison as basis
     :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
@@ -345,17 +369,16 @@ def filter_temporal_angle(
 
 def filter_temporal_neighbour(ds, v_x="v_x", v_y="v_y", roll=5, tolerance=0.5):
     """
-    Filters values if neighbours over a certain rolling length before and after, have a
-    significantly higher velocity, measured by tolerance
-    :param ds:
-    :param v_x:
-    :param v_y:
-    :param stride:
+    Masks values if neighbours over a certain rolling length before and after, have a
+    significantly higher velocity than value under consideration, measured by tolerance
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param roll: amount of time steps in rolling window (centred)
     :param tolerance: Relative acceptable velocity of maximum found within stride
-    :return: ds
+    :return: xarray Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
     """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
-
     s_roll = s.fillna(0.).rolling(time=roll, center=True).max()
     ds[v_x] = ds[v_x].where(s > tolerance*s_roll)
     ds[v_y] = ds[v_y].where(s > tolerance*s_roll)
@@ -363,89 +386,145 @@ def filter_temporal_neighbour(ds, v_x="v_x", v_y="v_y", roll=5, tolerance=0.5):
 
 
 def filter_temporal_std(
-    ds, v_x="v_x", v_y="v_y", std_thres=1.0, filter_per_timestep=True
-):
+    ds, v_x="v_x", v_y="v_y", tolerance=1.0):
     """
-
+    Masks values if they deviate more than x standard deviations from the mean.
     :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
-    :param std_thres: float, representing a maximum standard
+    :param tolerance: float, representing amount of standard deviations
     :param filter_per_timestep:
-    :return:
+    :return: xarray Dataset, containing standard deviation filtered velocity vectors as [time, y, x]
     """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
     s_std = s.std(dim="time")
     s_mean = s.mean(dim="time")
     s_var = s_std / s_mean
-
-    ds[v_x] = ds[v_x].where(s_var < std_thres)
-    ds[v_y] = ds[v_y].where(s_var < std_thres)
-    if filter_per_timestep:
-        ds[v_x] = ds[v_x].where((s - s_mean) / s_std < std_thres)
-        ds[v_y] = ds[v_y].where((s - s_mean) / s_std < std_thres)
+    ds[v_x] = ds[v_x].where((s - s_mean) / s_std < tolerance)
+    ds[v_y] = ds[v_y].where((s - s_mean) / s_std < tolerance)
 
     return ds
 
 
 def filter_temporal_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
+    """
+    Masks values if the velocity scalar lies outside a user-defined valid range
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param s_min: minimum scalar velocity [m s-1]
+    :param s_max: maximum scalar velocity [m s-1]
+    :return: xarray Dataset, containing velocity-range filtered velocity vectors as [time, y, x]
+    """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
     ds[v_x] = ds[v_x].where(s > s_min)
     ds[v_y] = ds[v_y].where(s < s_max)
     return ds
 
-def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", corr_min=0.4):
-    ds[v_x] = ds[v_x].where(ds[corr] > corr_min)
-    ds[v_y] = ds[v_y].where(ds[corr] > corr_min)
+def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.4):
+    """
+    Masks values with a too low correlation
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param corr: str, name of correlation variable
+    :param tolerance: tolerance for correlation value. If correlation is lower than tolerance, it is masked
+    :return: xarray Dataset, containing correlation filtered velocity vectors as [time, y, x]
+    """
+    ds[v_x] = ds[v_x].where(ds[corr] > tolerance)
+    ds[v_y] = ds[v_y].where(ds[corr] > tolerance)
     return ds
 
 def filter_spatial(
     ds,
-    kwargs_nan={},
-    kwargs_median={},
     v_x="v_x",
     v_y="v_y",
+    filter_nan=True,
+    filter_median=True,
+    kwargs_nan={},
+    kwargs_median={},
 ):
+    """
+    Masks velocity values on a number of spatial filters
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param kwargs_nan: dict, keyword arguments to pass to filter_spatial_nan
+    :param kwargs_median: dict, keyword arguments to pass to filter_spatial_median
+    :return: xarray Dataset, containing spatially filtered velocity vectors as [time, y, x]
+    """
     if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
         ds = xr.open_dataset(ds)
-    ds_g = ds.groupby("time")
-    ds = ds_g.apply(filter_spatial_nan, v_x=v_x, v_y=v_y, **kwargs_nan)
-    ds_g = ds.groupby("time")
-    ds = ds_g.apply(filter_spatial_median, v_x=v_x, v_y=v_y, **kwargs_median)
+    if filter_nan:
+        ds_g = ds.groupby("time")
+        ds = ds_g.apply(filter_spatial_nan, v_x=v_x, v_y=v_y, **kwargs_nan)
+    if filter_median:
+        ds_g = ds.groupby("time")
+        ds = ds_g.apply(filter_spatial_median, v_x=v_x, v_y=v_y, **kwargs_median)
     return ds
 
 
-def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", max_nan_frac=0.8, stride=1, missing=-9999.):
+def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", tolerance=0.8, stride=1, missing=-9999.):
+    """
+    Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated
+    velocity estimates
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param tolerance: float, amount of NaNs in search window measured as a fraction of total amount of values [0-1]
+    :param stride: int, stride used to determine relevant neighbours
+    :param missing: float, a temporary missing value, used to be able to convolve NaNs
+    :return: xarray Dataset, containing NaN filtered velocity vectors as [time, y, x]
+    """
     u, v = ds[v_x].values, ds[v_y].values
-    u_move = neighbour_stack(u, stride=stride)
+    u_move = neighbour_stack(u, stride=stride, missing=missing)
     # replace missings by Nan
     nan_frac = np.float64(np.isnan(u_move)).sum(axis=0)/float(len(u_move))
-    u[nan_frac > max_nan_frac] = np.nan
-    v[nan_frac > max_nan_frac] = np.nan
-
-    # u, v, mask = validation.local_median_val(v_x, v_y, 0.5, 0.5, size=1)
+    u[nan_frac > tolerance] = np.nan
+    v[nan_frac > tolerance] = np.nan
     ds[v_x][:] = u
     ds[v_y][:] = v
     return ds
 
-def filter_spatial_median(ds, v_x="v_x", v_y="v_y", max_rel_diff=0.7, stride=1, missing=-9999.):
+def filter_spatial_median(ds, v_x="v_x", v_y="v_y", tolerance=0.7, stride=1, missing=-9999.):
+    """
+    Masks values when their value deviates more than x standard deviations from the median of its neighbours
+        (inc. itself).
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param tolerance: amount of standard deviations tolerance
+    :param stride: int, stride used to determine relevant neighbours
+    :param missing: float, a temporary missing value, used to be able to convolve NaNs
+    :return: xarray Dataset, containing std filtered velocity vectors as [time, y, x]
+    """
     u, v = ds[v_x].values, ds[v_y].values
     s = (u**2 + v**2)**0.5
     s_move = neighbour_stack(s, stride=stride)
     # replace missings by Nan
     s_median = np.nanmedian(s_move, axis=0)
     # now filter points that are very far off from the median
-    filter = np.abs(s - s_median)/s_median > max_rel_diff
+    filter = np.abs(s - s_median)/s_median > tolerance
     u[filter] = np.nan
     v[filter] = np.nan
-
-    # u, v, mask = validation.local_median_val(v_x, v_y, 0.5, 0.5, size=1)
     ds[v_x][:] = u
     ds[v_y][:] = v
     return ds
 
 def replace_outliers(ds, v_x="v_x", v_y="v_y", stride=1, max_iter=1):
+    """
+    Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples
+    in time are available to derive a mean or median velocity from, consider using a reducer on those samples instead
+    of a spatial infilling method such as suggested here.
+    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param v_x: str, name of x-directional velocity
+    :param v_y: str, name of y-directional velocity
+    :param stride: int, stride used to determine relevant neighbours
+    :param max_iter: number of iterations for replacement
+    :return:
+    """
+    # TO-DO: make replacement decision dependent on amount of non-NaN values in neighbourhood
     u, v = ds[v_x].values, ds[v_y].values
     for n in range(max_iter):
         u_move = neighbour_stack(u, stride=stride)
