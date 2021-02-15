@@ -68,8 +68,8 @@ ds = xr.open_dataset(src)
 
 ds = piv.filter_temporal(ds)
 ds = piv.filter_spatial(ds)
-ds_g = ds.groupby("time")
-ds.to_netcdf(out_fn)
+encoding = {var: {"zlib": True} for var in ds}
+ds.to_netcdf(out_fn, encoding=encoding)
 v_x_median = ds["v_x"].median(dim="time")
 v_y_median = ds["v_y"].median(dim="time")
 ds["v_x"] = ds["v_x"].fillna(v_x_median)

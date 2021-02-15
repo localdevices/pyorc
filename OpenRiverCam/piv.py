@@ -220,10 +220,9 @@ def piv(
         corr = piv_corr(
             frame_a,
             frame_b,
-            search_area_size,
-            overlap,
-            window_size,
-            **kwargs
+            search_area_size=search_area_size,
+            overlap=overlap,
+            window_size=window_size,
         )
     else:
         corr = np.zeros(s2n.shape)
@@ -305,7 +304,7 @@ def filter_temporal(
 ):
     """
     Masks values using several filters that use temporal variations or comparison as basis
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param ds: xarray Dataset, or file containing, with velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param filter_std: boolean, if True (default, filtering on variance is applied)
@@ -375,7 +374,7 @@ def filter_temporal_neighbour(ds, v_x="v_x", v_y="v_y", roll=5, tolerance=0.5):
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param roll: amount of time steps in rolling window (centred)
-    :param tolerance: Relative acceptable velocity of maximum found within stride
+    :param tolerance: Relative acceptable velocity of maximum found within rolling window
     :return: xarray Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
     """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
@@ -446,7 +445,7 @@ def filter_spatial(
 ):
     """
     Masks velocity values on a number of spatial filters
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    :param ds: xarray Dataset, or file containing, with velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param kwargs_nan: dict, keyword arguments to pass to filter_spatial_nan
@@ -456,12 +455,16 @@ def filter_spatial(
     if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
         ds = xr.open_dataset(ds)
+    # work on v_x and v_y only
+    ds_temp = ds[[v_x, v_y]]
     if filter_nan:
-        ds_g = ds.groupby("time")
-        ds = ds_g.apply(filter_spatial_nan, v_x=v_x, v_y=v_y, **kwargs_nan)
+        ds_g = ds_temp.groupby("time")
+        ds_temp = ds_g.apply(filter_spatial_nan, v_x=v_x, v_y=v_y, **kwargs_nan)
     if filter_median:
-        ds_g = ds.groupby("time")
-        ds = ds_g.apply(filter_spatial_median, v_x=v_x, v_y=v_y, **kwargs_median)
+        ds_g = ds_temp.groupby("time")
+        ds_temp = ds_g.apply(filter_spatial_median, v_x=v_x, v_y=v_y, **kwargs_median)
+    # merge the temporary set with the original
+    ds = xr.merge([ds.drop_vars([v_x, v_y]), ds_temp])
     return ds
 
 
