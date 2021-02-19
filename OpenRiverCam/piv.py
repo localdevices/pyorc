@@ -182,7 +182,8 @@ def vector_to_scalar(v_x, v_y):
 
 
 def piv(
-    frame_a, frame_b, res_x=1.0, res_y=1.0, search_area_size=60, overlap=30, correlation=True, window_size=None, **kwargs
+    frame_a, frame_b, res_x=0.01, res_y=0.01, search_area_size=30, overlap=15, correlation=True, window_size=None,
+        **kwargs
 ):
     """
     PIV analysis following keyword arguments from openpiv. This function also computes the correlations per
