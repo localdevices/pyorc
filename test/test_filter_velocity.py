@@ -32,7 +32,7 @@ def movie(f, ax, fns, ds, movie_fn, video_args):
     im = ax.imshow(im_data)
     x, y = ds["x"].values, ds["y"].values
 #    _u, _v = ds["v_x"][0].values, ds["v_y"][0].values
-    _u, _v = ds["v_x"].mean(axis=0).values, ds["v_y"].mean(axis=0).values
+    _u, _v = ds["v_x"].median(axis=0).values, ds["v_y"].median(axis=0).values
     # make a local mesh
     xi, yi = np.meshgrid(x / 0.01, np.flipud(y) / 0.01)
     q = ax.quiver(xi, yi, _u, _v, color="w", alpha=0.5, scale=150, width=0.0010)
