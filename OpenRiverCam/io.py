@@ -34,7 +34,7 @@ def frames(
     frame_int=1,
     start_frame=0,
     end_frame=125,
-    grayscale=False,
+    grayscale=True,
     lens_pars=None,
 ):
     """
