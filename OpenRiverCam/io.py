@@ -33,7 +33,7 @@ def frames(
     fn,
     frame_int=1,
     start_frame=0,
-    end_frame=None,
+    end_frame=125,
     grayscale=False,
     lens_pars=None,
 ):
@@ -53,7 +53,7 @@ def frames(
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if end_frame is None:
         end_frame = frame_count
-    if start_frame > frame_count:
+    if (start_frame > frame_count and frame_count > 0) :
         raise ValueError("Start frame is larger than total amount of frames")
     if end_frame <= start_frame:
         raise ValueError(
