@@ -34,7 +34,7 @@ def frames(
     frame_int=1,
     start_frame=0,
     end_frame=125,
-    grayscale=True,
+    grayscale=False,
     lens_pars=None,
 ):
     """
@@ -55,7 +55,7 @@ def frames(
         end_frame = frame_count
     if (start_frame > frame_count and frame_count > 0) :
         raise ValueError("Start frame is larger than total amount of frames")
-    if end_frame <= start_frame:
+    if end_frame < start_frame:
         raise ValueError(
             f"Start frame {start_frame} is larger than end frame {end_frame}"
         )
@@ -77,7 +77,8 @@ def frames(
                 img = _corr_lens(img, **lens_pars)
             # apply gray scaling, contrast- and gamma correction
             if grayscale:
-                img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
+                # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
+                img = img.mean(axis=2)
             # update frame number
             _n += 1
             # update frame time
