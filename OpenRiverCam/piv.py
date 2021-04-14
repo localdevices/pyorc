@@ -422,7 +422,7 @@ def filter_temporal_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
     ds[v_y] = ds[v_y].where(s < s_max)
     return ds
 
-def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.4):
+def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.1):
     """
     Masks values with a too low correlation
     :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
