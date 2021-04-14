@@ -182,7 +182,7 @@ def vector_to_scalar(v_x, v_y):
 
 
 def piv(
-    frame_a, frame_b, res_x=0.01, res_y=0.01, search_area_size=30, overlap=15, correlation=True, window_size=None,
+    frame_a, frame_b, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None, overlap=None,
         **kwargs
 ):
     """
@@ -210,6 +210,7 @@ def piv(
 
     """
     window_size = search_area_size if window_size is None else window_size
+    overlap = int(round(window_size)/2) if overlap is None else overlap
     v_x, v_y, s2n = openpiv.pyprocess.extended_search_area_piv(
         frame_a, frame_b, search_area_size=search_area_size, overlap=overlap, window_size=window_size, **kwargs
     )
