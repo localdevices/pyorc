@@ -102,12 +102,15 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     return array_move
 
 
-def vector_to_scalar(v_x, v_y):
+def vector_to_scalar(v_x, v_y, angle_method=0):
     """
     Turns velocity vectors into effective velocities over cross-section, by computing the perpendicular velocity component
     :param v_x: DataArray(t, points), time series in cross section points with x-directional velocities
     :param v_y: DataArray(t, points), time series in cross section points with y-directional velocities
+    :param angle_method: if set to 0, then angle of cross section is determined with left to right bank coordinates,
+        otherwise, it is determined per section
     :return: v_eff: DataArray(t, points), time series in cross section points with velocities perpendicular to cross section
+
     """
     xs = v_x["x"].values
     ys = v_x["y"].values
@@ -115,48 +118,55 @@ def vector_to_scalar(v_x, v_y):
     idx = np.isfinite(xs)
     xs = xs[idx]
     ys = ys[idx]
-    # start with empty angle
-    angle = np.zeros(ys.shape)
-    angle_da = np.zeros(v_x["x"].shape)
-    angle_da[:] = np.nan
+    if angle_method == 0:
+        x_left, y_left = xs[0], ys[0]
+        x_right, y_right = xs[-1], ys[-1]
+        angle_da = np.arctan2(x_right - x_left, y_right - y_left)
+    else:
+        # start with empty angle
+        angle = np.zeros(ys.shape)
+        angle_da = np.zeros(v_x["x"].shape)
+        angle_da[:] = np.nan
 
-    for n, (x, y) in enumerate(zip(xs, ys)):
-        # determine the angle of the current point with its neighbours
-        # check if we are at left bank
-        # first estimate left bank angle
-        undefined = True  # angle is still undefined
-        m = 0
-        while undefined:
-            # go one step to the left
-            m -= 1
-            if n + m < 0:
-                angle_left = np.nan
-                undefined = False
-            else:
-                x_left, y_left = xs[n + m], ys[n + m]
-                if not ((x_left == x) and (y_left == y)):
-                    # profile points are in another pixel, so estimate angle
+        for n, (x, y) in enumerate(zip(xs, ys)):
+            # determine the angle of the current point with its neighbours
+            # check if we are at left bank
+            # first estimate left bank angle
+            undefined = True  # angle is still undefined
+            m = 0
+            while undefined:
+                # go one step to the left
+                m -= 1
+                if n + m < 0:
+                    # we are at the left bank, so angle with left neighbour is non-existing.
+                    x_left, y_left = xs[n], ys[n]
+                    # angle_left = np.nan
                     undefined = False
-                    angle_left = np.arctan2(x - x_left, y - y_left)
+                else:
+                    x_left, y_left = xs[n + m], ys[n + m]
+                    if not ((x_left == x) and (y_left == y)):
+                        # profile points are in another pixel, so estimate angle
+                        undefined = False
+                        angle_left = np.arctan2(x - x_left, y - y_left)
 
-        # estimate right bank angle
-        undefined = True  # angle is still undefined
-        m = 0
-        while undefined:
-            # go one step to the left
-            m += 1
-            if n + m >= len(xs) - 1:
-                angle_right = np.nan
-                undefined = False
-            else:
-                x_right, y_right = xs[n + m], ys[n + m]
-                if not ((x_right == x) and (y_right == y)):
-                    # profile points are in another pixel, so estimate angle
+            # estimate right bank angle
+            undefined = True  # angle is still undefined
+            m = 0
+            while undefined:
+                # go one step to the left
+                m += 1
+                if n + m >= len(xs) - 1:
+                    angle_right = np.nan
                     undefined = False
-                    angle_right = np.arctan2(x_right - x, y_right - y)
-        angle[n] = np.nanmean([angle_left, angle_right])
-    # add angles to array meant for data array
-    angle_da[idx] = angle
+                else:
+                    x_right, y_right = xs[n + m], ys[n + m]
+                    if not ((x_right == x) and (y_right == y)):
+                        # profile points are in another pixel, so estimate angle
+                        undefined = False
+                        angle_right = np.arctan2(x_right - x, y_right - y)
+            angle[n] = np.nanmean([angle_left, angle_right])
+        # add angles to array meant for data array
+        angle_da[idx] = angle
 
     # compute angle of flow direction (i.e. the perpendicular of the cross section) and add as DataArray to ds_points
     flow_dir = angle_da - 0.5 * np.pi
@@ -168,7 +178,6 @@ def vector_to_scalar(v_x, v_y):
 
     # compute difference in angle between velocity and perpendicular of cross section
     angle_diff = v_angle - flow_dir
-
     # compute effective velocity in the flow direction (i.e. perpendicular to cross section
     v_eff = np.cos(angle_diff) * v_scalar
     v_eff.attrs = {
