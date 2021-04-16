@@ -8,10 +8,12 @@ import matplotlib.pyplot as plt
 import rasterio
 from datetime import datetime, timedelta
 from rasterio.plot import reshape_as_raster
-from example_data import movie
 import OpenRiverCam as ORC
 import cv2
 from matplotlib.animation import FuncAnimation, FFMpegWriter
+
+# import example data
+from example_data import movie
 
 
 def proj_frames(movie, dst, prefix="proj"):
@@ -34,7 +36,7 @@ def proj_frames(movie, dst, prefix="proj"):
             lensPosition=lensPosition,
             h_a=movie["h_a"],
             bbox=movie["camera_config"]["aoi_bbox"],
-            resolution=movie["camera_config"]["projection_pixel_size"],
+            resolution=movie["camera_config"]["resolution"],
             **movie["camera_config"]["gcps"],
         )
         if len(corr_img.shape) == 3:
@@ -224,6 +226,68 @@ def filter_piv(
     ds.to_netcdf(os.path.join(dst, "velocity_filter.nc"), encoding=encoding)
     print(f"velocity_filter.nc successfully written in {dst}")
 
+def compute_q(
+    movie, dst, v_corr=0.85, quantile=[0.05, 0.25, 0.5, 0.75, 0.95],
+):
+    """
+    compute velocities over provided bathymetric cross section points, depth integrated velocities and river flow
+    over several quantiles.
+
+    :param movie: dict, contains file dictionary and camera_config
+    :param v_corr: float (range: 0-1, typically close to 1), correction factor from surface to depth-average
+           (default: 0.85)
+    :param quantile: float or list of floats (range: 0-1)  (default: 0.5)
+    :return: None
+    """
+    encoding = {}
+    # open S3 bucket
+    # open file from bucket in memory
+    bucket = movie["file"]["bucket"]
+    fn = os.path.join(dst, "velocity_filter.nc")
+    print(
+        f"Extracting cross section from velocities in {fn}"
+    )
+
+    # retrieve velocities over cross section only (ds_points has time, points as dimension)
+    ds_points = ORC.io.interp_coords(
+        fn, *zip(*movie["bathymetry"]["coords"])
+    )
+
+    # add the effective velocity perpendicular to cross-section
+    ds_points["v_eff"] = ORC.piv.vector_to_scalar(
+        ds_points["v_x"], ds_points["v_y"]
+    )
+
+    # integrate over depth with vertical correction
+    ds_points["q"] = ORC.piv.depth_integrate(
+        ds_points["zcoords"],
+        ds_points["v_eff"],
+        movie["camera_config"]["gcps"]["z_0"],
+        movie["h_a"],
+        v_corr=v_corr,
+    )
+
+    # integrate over the width of the cross-section
+    Q = ORC.piv.integrate_flow(ds_points["q"], quantile=quantile)
+
+    # extract a callback from Q
+    Q_dict = {
+        "discharge_q{:02d}".format(int(float(q) * 100)): float(Q.sel(quantile=q))
+        for q in Q["quantile"]
+    }
+
+    # overwrite gridded netCDF with cross section netCDF
+    dst_q_depth = os.path.join(dst, "q_depth.nc")
+    ds_points.to_netcdf(dst_q_depth, encoding=encoding)
+    print(f"Interpolated velocities successfully written to {dst_q_depth}")
+
+    dst_Q = os.path.join(dst, "Q.nc")
+    # overwrite gridded netCDF with cross section netCDF
+    Q.to_netcdf(dst_Q, encoding=encoding)
+
+    print(f"Discharge successfully written in {dst_Q}")
+    return Q_dict
+
 
 def make_video(movie, dst, video_args):
     def init():
@@ -267,7 +331,7 @@ def make_video(movie, dst, video_args):
 #    _u, _v = ds["v_x"][0].values, ds["v_y"][0].values
     _u, _v = ds["v_x"].median(axis=0).values, ds["v_y"].median(axis=0).values
     # make a local mesh
-    xi, yi = np.meshgrid(x / 0.01, np.flipud(y) / 0.01)
+    xi, yi = np.meshgrid(x / movie["camera_config"]["resolution"], np.flipud(y) / movie["camera_config"]["resolution"])
     q = ax.quiver(xi, yi, _u, _v, color="r", alpha=0.5, scale=75, width=0.0010)
     plt.savefig(movie_fn.split('.')[0] + ".png", dpi=300, bbox_inches="tight")
 
@@ -292,10 +356,10 @@ movie['file']['bucket'] = r'/home/hcwinsemius/Media/projects/OpenRiverCam/tutori
 movie['file']['identifier'] = 'clip_schedule_20210327_113240.mkv'
 movie['h_a'] = 1.25  # this value is simply what you read on the staff gauge
 
-movie['camera_config']['projection_pixel_size'] = 0.02
-movie['camera_config']['aoi_window_size'] = 15
+movie['camera_config']['resolution'] = 0.005
+movie['camera_config']['aoi_window_size'] = 60
 
-dst = os.path.join(movie['file']['bucket'], 'win_size_15_res_2_mean_gray')
+dst = os.path.join(movie['file']['bucket'], 'win_size_60_res_05_mean_gray')
 
 # make destination folder if not existing
 if not(os.path.isdir(dst)):
@@ -303,11 +367,13 @@ if not(os.path.isdir(dst)):
 
 
 # # extract and project frames
-# proj_frames(movie, dst)
+proj_frames(movie, dst)
 # # compute piv
-# compute_piv(movie, dst, piv_kwargs={})
+compute_piv(movie, dst, piv_kwargs={})
 
-filter_piv(movie, dst, filter_temporal_kwargs={"kwargs_corr": {"tolerance": 0.1}})
+filter_piv(movie, dst, filter_temporal_kwargs={"kwargs_corr": {"tolerance": -100}})
+#
+compute_q(movie, dst)
 
 make_video(movie, dst, video_args)
 

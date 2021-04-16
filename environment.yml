@@ -1,4 +1,4 @@
-name: openrivercam
+name: openrivercamlib
 
 channels:
   - conda-forge
@@ -11,10 +11,19 @@ dependencies:
   - numpy
   - opencv
   - pip
-  - python>=3.8
+  - python=3.8
   - requests
   - scipy
   - scikit-image
+  - rasterio
+  - xarray
+  - pyproj
+  - geojson
+  - geos
+  - shapely
+  - matplotlib
+  - descartes
+  - netCDF4
   - pip:
     - openpiv
 
