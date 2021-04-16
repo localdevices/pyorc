@@ -229,7 +229,6 @@ def piv(
     else:
         corr = np.zeros(s2n.shape)
         corr[:] = np.nan
-
     return cols, rows, v_x * res_x, v_y * res_y, s2n, corr
 
 

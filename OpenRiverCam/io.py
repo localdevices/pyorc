@@ -280,7 +280,6 @@ def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     :param y_grid: str, name of variable that stores the y coordinates in the projection in which "ys" is supplied
     :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
     """
-    # get the transform of the grid projected coordinated
 
     if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
@@ -294,6 +293,7 @@ def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     # compute rows and cols locations of coordinates (x, y)
     rows, cols = rasterio.transform.rowcol(transform, list(xs), list(ys))
     rows, cols = np.array(rows), np.array(cols)
+
     # select x and y coordinates from axes
     idx = np.all(
         np.array([cols >= 0, cols < len(ds["x"]), rows >= 0, rows < len(ds["y"])]),
@@ -305,9 +305,7 @@ def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     y[:] = np.nan
     x[idx] = ds["x"].isel(x=cols[idx])
     y[idx] = ds["y"].isel(y=rows[idx])
-
     # interpolate values from grid to list of x-y coordinates to grid in xarray format
-
     x = xr.DataArray(list(x), dims="points")
     y = xr.DataArray(list(y), dims="points")
     ds_points = ds.interp(x=x, y=y)
