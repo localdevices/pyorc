@@ -21,8 +21,8 @@ def optimize_log_profile(z, v):
     result = curve_fit(log_profile,
                        np.array(z),
                        np.array(v),
-                       bounds=([0.3, 0.1], [0.30000001, 20]),
-                       p0=[0.3, 2])
+                       bounds=([0.05, 0.1], [0.050000001, 20]),
+                       p0=[0.05, 2])
     z0, k = result[0]
     return {"z0": z0, "k": k}
 
@@ -79,7 +79,7 @@ def imread(fn):
     return openpiv.tools.imread(fn)
 
 
-def integrate_flow(q, quantile=0.5):
+def integrate_flow(q):
     """
     Integrates time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
     estimating one or several quantiles over the time dimension.
@@ -97,8 +97,8 @@ def integrate_flow(q, quantile=0.5):
 
     # assign coordinates for distance
     q = q.assign_coords(dist=("points", dist))
-    # retrieve quantiles
-    # Q = q.quantile(quantile, dim="time").fillna(0.0).integrate(dim="dist")
+
+    # if any missings are still present, fill with 0.0, integrate of dim dist
     Q = q.fillna(0.0).integrate(dim="dist")
     Q.attrs = {
         "standard_name": "river_discharge",
