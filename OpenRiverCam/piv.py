@@ -58,15 +58,10 @@ def velocity_fill(z, v, z_0, h_a):
         pars = optimize_log_profile(depth[np.isfinite(_v)], _v[np.isfinite(_v)])
         _v[np.isnan(_v)] = log_profile(depth[np.isnan(_v)], **pars)
         return _v
-
-
-    import matplotlib.pyplot as plt
     depth = np.maximum(z_0 + h_a - z, 0)
-    colors = ["k", "b", "m", "c", "g"]
     # per slice, fill missings
     v_group = copy.deepcopy(v).groupby("quantile")
-    v_fit = v_group.apply(fit)
-    return v_fit
+    return v_group.apply(fit)
 
 def distance_pts(c1, c2):
     """
