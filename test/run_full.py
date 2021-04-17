@@ -266,7 +266,6 @@ def compute_q(
         movie["h_a"],
         v_corr=v_corr,
     )
-
     # integrate over the width of the cross-section
     Q = ORC.piv.integrate_flow(ds_points["q"], quantile=quantile)
 

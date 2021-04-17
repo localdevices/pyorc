@@ -2,8 +2,29 @@ import openpiv.tools
 import openpiv.pyprocess
 import numpy as np
 import xarray as xr
+import copy
 
 from scipy.signal import convolve2d
+from scipy.optimize import curve_fit
+
+def log_profile(z, z0, k):
+    return k*np.maximum(np.log(np.maximum(z, 1e-6)/z0), 0)
+
+def optimize_log_profile(z, v):
+    """
+    optimize velocity log profile relation of v=k*max(z/z0)
+    :param z: list of depths
+    :param v: list of surface velocities
+    :return: {z_0, k}
+    """
+
+    result = curve_fit(log_profile,
+                       np.array(z),
+                       np.array(v),
+                       bounds=([0.3, 0.1], [0.30000001, 20]),
+                       p0=[0.3, 2])
+    z0, k = result[0]
+    return {"z0": z0, "k": k}
 
 def depth_integrate(z, v, z_0, h_a, v_corr=0.85):
     """
@@ -32,6 +53,20 @@ def depth_integrate(z, v, z_0, h_a, v_corr=0.85):
     q.name = "q"
     return q
 
+def velocity_fill(z, v, z_0, h_a):
+    def fit(_v):
+        pars = optimize_log_profile(depth[np.isfinite(_v)], _v[np.isfinite(_v)])
+        _v[np.isnan(_v)] = log_profile(depth[np.isnan(_v)], **pars)
+        return _v
+
+
+    import matplotlib.pyplot as plt
+    depth = np.maximum(z_0 + h_a - z, 0)
+    colors = ["k", "b", "m", "c", "g"]
+    # per slice, fill missings
+    v_group = copy.deepcopy(v).groupby("quantile")
+    v_fit = v_group.apply(fit)
+    return v_fit
 
 def distance_pts(c1, c2):
     """
@@ -67,7 +102,9 @@ def integrate_flow(q, quantile=0.5):
 
     # assign coordinates for distance
     q = q.assign_coords(dist=("points", dist))
-    Q = q.quantile(quantile, dim="time").fillna(0.0).integrate(dim="dist")
+    # retrieve quantiles
+    # Q = q.quantile(quantile, dim="time").fillna(0.0).integrate(dim="dist")
+    Q = q.fillna(0.0).integrate(dim="dist")
     Q.attrs = {
         "standard_name": "river_discharge",
         "long_name": "River Flow",
