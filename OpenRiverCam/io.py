@@ -308,7 +308,10 @@ def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     # interpolate values from grid to list of x-y coordinates to grid in xarray format
     x = xr.DataArray(list(x), dims="points")
     y = xr.DataArray(list(y), dims="points")
-    ds_points = ds.interp(x=x, y=y)
+    if np.isnan(x).all():
+        raise ValueError("All bathymetry points are outside valid domain")
+    else:
+        ds_points = ds.interp(x=x, y=y)
     # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
     # found back from this dataset
     ds_points = ds_points.assign_coords(xcoords=("points", list(xs)))
