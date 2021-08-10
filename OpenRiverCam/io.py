@@ -65,11 +65,12 @@ def frames(
     _n = start_frame
     _t = 0.0
     fps = cap.get(cv2.cv2.CAP_PROP_FPS)
-    if (np.isinf(fps)) or (fps <=0):
+    if (np.isinf(fps)) or (fps <= 0):
+        t_index_start = 0 # assume it is zero
         # count framerate until the desired frame
-        for no_frame in range(end_frame - start_frame):
+        for n, no_frame in enumerate(range(end_frame - start_frame)):
             dummy = cap.read()
-            if no_frame == 0:
+            if n == 0:
                 t_index_start = cap.get(cv2.CAP_PROP_POS_MSEC)
         t_index_end = cap.get(cv2.CAP_PROP_POS_MSEC)
         fps = 1./((t_index_end - t_index_start) / (1000 * no_frame))
