@@ -65,6 +65,24 @@ def frames(
     _n = start_frame
     _t = 0.0
     fps = cap.get(cv2.cv2.CAP_PROP_FPS)
+    if (np.isinf(fps)) or (fps <=0):
+        # count framerate until the desired frame
+        for no_frame in range(end_frame - start_frame):
+            dummy = cap.read()
+            if no_frame == 0:
+                t_index_start = cap.get(cv2.CAP_PROP_POS_MSEC)
+        t_index_end = cap.get(cv2.CAP_PROP_POS_MSEC)
+        fps = 1./((t_index_end - t_index_start) / (1000 * no_frame))
+        print(f"Computed FPS is: {fps}")
+        cap.release()
+        # reopen file
+        cap = cv2.VideoCapture(fn)
+        # go to the right frame position
+        cap.set(cv2.CAP_PROP_POS_FRAMES, int(start_frame))
+
+    #     # assume fps is 27
+    #     fps = 27
+
     while (cap.isOpened()) and (_n <= end_frame):
         try:
             ret, img = cap.read()
@@ -81,7 +99,10 @@ def frames(
                 img = img.mean(axis=2)
             # update frame number
             _n += 1
-            # update frame time
+            # # update frame time
+            # _newt = cap.get(cv2.CAP_PROP_POS_MSEC)
+            # print(f"Time diff is {_newt}")
+            # _t = _newt
             _t += 1.0 / fps
             yield _t, img
         else:
