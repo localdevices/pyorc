@@ -67,8 +67,8 @@ def frames(
     fps = cap.get(cv2.cv2.CAP_PROP_FPS)
     if (np.isinf(fps)) or (fps <= 0):
         t_index_start = 0 # assume it is zero
-        # count framerate until the desired frame
-        for n, no_frame in enumerate(range(end_frame - start_frame + 1)):
+        # count framerate until the desired frame (add one to ensure you are at the start of the next frame)
+        for n, no_frame in enumerate(range(end_frame - start_frame + 2)):
             dummy = cap.read()
             if n == 0:
                 t_index_start = cap.get(cv2.CAP_PROP_POS_MSEC)
