@@ -99,7 +99,7 @@ def integrate_flow(q):
     q = q.assign_coords(dist=("points", dist))
 
     # if any missings are still present, fill with 0.0, integrate of dim dist
-    Q = q.fillna(0.0).integrate(dim="dist")
+    Q = q.fillna(0.0).integrate(coord="dist")
     Q.attrs = {
         "standard_name": "river_discharge",
         "long_name": "River Flow",
