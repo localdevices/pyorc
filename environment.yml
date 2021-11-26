@@ -24,6 +24,7 @@ dependencies:
   - matplotlib
   - descartes
   - netCDF4
+  - jupyter
   - pip:
     - openpiv
 
