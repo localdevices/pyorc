@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-from OpenRiverCam import cv
+from OpenRiverCam import cv, io
 
 def from_file(fn):
     with open(fn, "r") as f:
@@ -17,6 +17,7 @@ class Video(cv2.VideoCapture):
             h_a,
             resolution=0.01,
             window_size=15,
+            corners=None,
             *args,
             **kwargs
     ):
@@ -25,7 +26,8 @@ class Video(cv2.VideoCapture):
         self.h_a = h_a
         self.resolution = resolution,
         self.window_size = window_size
-
+        if corners is not None:
+            self.corners = corners
 
     def set_corners(self, x, y):
         """
@@ -40,9 +42,13 @@ class Video(cv2.VideoCapture):
 
         :return:
         """
-        self.corners = zip(x, y)
+        self.corners = {}
+        keys = ["up_left", "down_left", "down_right", "up_right"]
 
-    def read_project(self, cam_config, grayscale=True):
+        for k, _x, _y in zip(keys, x, y):
+            self.corners[k] = [_x, _y]
+
+    def read_project(self, cam_config, **kwargs):
         """
         Read and immediately project a frame
 
@@ -50,7 +56,8 @@ class Video(cv2.VideoCapture):
         """
         assert(isinstance(cam_config, CameraConfig))
         bbox = cv.get_aoi(cam_config.gcps["src"], cam_config.gcps["dst"], self.corners)
-
+        iter = io.frames(self, lens_pars=cam_config.lens_pars, **kwargs)
+        return iter
 
 
 class CameraConfig:
@@ -83,8 +90,6 @@ class CameraConfig:
         self.crs = crs.to_wkt()
         if lens_position is not None:
             self.set_lens_position(*lens_position)
-        if corners is not None:
-            self.corners = corners
         if gcps is not None:
             self.set_gcps(**gcps)
         if lens_pars is not None:

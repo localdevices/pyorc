@@ -49,6 +49,8 @@ def frames(
     """
     if isinstance(fn, str):
         cap = cv2.VideoCapture(fn)
+    else:
+        cap = fn
     # elif isinstance(fn, )
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if end_frame is None:
@@ -75,9 +77,9 @@ def frames(
         t_index_end = cap.get(cv2.CAP_PROP_POS_MSEC)
         fps = 1./((t_index_end - t_index_start) / (1000 * no_frame))
         print(f"Computed FPS is: {fps}")
-        cap.release()
+        # cap.release()
         # reopen file
-        cap = cv2.VideoCapture(fn)
+        # cap = cv2.VideoCapture(fn)
         # go to the right frame position
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(start_frame))
 
