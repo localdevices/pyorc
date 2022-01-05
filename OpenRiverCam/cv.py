@@ -220,9 +220,40 @@ def orthorectification(
     cols, rows = _get_shape(
         bbox, resolution=resolution, round=10
     )  # for now hard -coded on 10, alter dependent on how PIV is done
-    corr_img = cv2.warpPerspective(img, M, (cols, rows), flags=flags)  #
+    corr_img = get_ortho(img, M, (cols, rows), flags=flags)
     return corr_img, transform
 
+def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
+    """
+    Reproject an image to a given shape using perspective transformation matrix M
+    :param img: nd-array, image to transform
+    :param M: image perspective transformation matrix
+    :param shape: tuple with ints (cols, rows)
+    :param flags: cv2.flags to pass with cv2.warpPerspective
+    :return:
+    """
+    return cv2.warpPerspective(img, M, shape, flags=flags)
+
+def get_transform(lens_position, gcps, h_a, bbox, resolution):
+    dst_a = _get_gcps_a(
+        lens_position,
+        h_a,
+        gcps["dst"],
+        gcps["z_0"],
+        gcps["h_ref"],
+    )
+
+    dst_colrow_a = _transform_to_bbox(dst_a, bbox, resolution)
+
+    # retrieve M for destination row and col
+    M = _get_M(src=gcps["src"], dst=dst_colrow_a)
+    # estimate size of required grid
+    transform = _get_transform(bbox, resolution=resolution)
+    # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
+    cols, rows = _get_shape(
+        bbox, resolution=resolution, round=10
+    )  # for now hard -coded on 10, alter dependent on how PIV is done
+    return M, transform, (cols, rows)
 
 def get_aoi(src, dst, src_corners):
 

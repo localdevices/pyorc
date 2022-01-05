@@ -112,6 +112,23 @@ def frames(
             break
     return
 
+def get_frame(cap, n=None, grayscale=False, lens_pars=None):
+    if n is not None:
+        # first move to the right position
+        cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+    try:
+        ret, img = cap.read()
+    except:
+        raise IOError(f"Cannot read")
+    if ret:
+        if lens_pars is not None:
+            # apply lens distortion correction
+            img = _corr_lens(img, **lens_pars)
+        if grayscale:
+            # apply gray scaling, contrast- and gamma correction
+            # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
+            img = img.mean(axis=2)
+    return img
 
 def to_geotiff(fn, z, transform, crs=None, compress=None):
     """
