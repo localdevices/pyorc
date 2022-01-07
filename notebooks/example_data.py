@@ -1,6 +1,6 @@
 import numpy as np
 from shapely.geometry import Polygon
-import OpenRiverCam as ORC
+import orc as ORC
 import pyproj
 camera_type = {
     "name": "Foscam E9900P",  # user-chosen name for camera

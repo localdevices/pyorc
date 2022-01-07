@@ -10,14 +10,14 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 setup(
-    name="OpenRiverCam",
-    description="OpenRiverCam is a front and backend to control river camera observation locations",
+    name="orc",
+    description="orc is a front and backend to control river camera observation locations",
     long_description=readme + "\n\n",
     url="https://github.com/TAHMO/OpenRiverCam",
     author="Hessel Winsemius",
     author_email="winsemius@rainbowsensing.com",
     packages=find_packages(),
-    package_dir={"OpenRiverCam": "OpenRiverCam"},
+    package_dir={"orc": "orc"},
     test_suite="tests",
     use_scm_version=True,
     setup_requires=["setuptools_scm"],
@@ -44,7 +44,7 @@ setup(
         "dev": ["pytest", "pytest-cov", "black"],
         "optional": [],
     },
-    # scripts=["OpenRiverCam"],
+    # scripts=["orc"],
     entry_points="""
     """,
     include_package_data=True,
@@ -63,5 +63,5 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    keywords="hydrology hydrometry river-flow OpenRiverCam",
+    keywords="hydrology hydrometry river-flow orc",
 )

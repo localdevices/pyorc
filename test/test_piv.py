@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import rasterio
 from datetime import datetime, timedelta
-from OpenRiverCam import io, piv
+from orc import io, piv
 
-folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam"
+folder = r"/home/hcwinsemius/Media/projects/orc"
 start_time = "2020-12-17 07:45:00"
 t = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
 

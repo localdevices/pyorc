@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import rasterio
 from datetime import datetime, timedelta
 from rasterio.plot import reshape_as_raster
-import OpenRiverCam as ORC
+import orc as ORC
 import cv2
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
@@ -20,7 +20,7 @@ def proj_frames(movie, dst, prefix="proj"):
 
     n = 0  # frame number
     for _t, img in ORC.io.frames(
-            src, start_frame=0, grayscale=True, lens_pars=lensParameters
+            src, grayscale=True, start_frame=0, lens_pars=lensParameters
     ):
         # make a filename
         dst_fn = os.path.join(
@@ -179,7 +179,7 @@ def filter_piv(
         (+default values if not provided):
         kwargs_angle, dict, containing the following keyword args:
             angle_expected=0.5 * np.pi -- expected angle in radians of flow velocity measured from upwards, clock-wise.
-                In OpenRiverCam this is always 0.5*pi because we make sure water flows from left to right
+                In orc this is always 0.5*pi because we make sure water flows from left to right
             angle_bounds=0.25 * np.pi -- the maximum angular deviation from expected angle allowed. Velocities that are
                 outside this bound are masked
         kwargs_std, dict, containing following keyword args:
@@ -214,7 +214,7 @@ def filter_piv(
     # open file from bucket in memory
     fn = os.path.join(dst, "velocity.nc")
     print("applying temporal filters")
-    ds = ORC.piv.filter_temporal(fn, filter_corr=True, **filter_temporal_kwargs)
+    ds = ORC.piv.filter_temporal(fn, **filter_temporal_kwargs)  # filter_corr=True,
     print("applying spatial filters")
     ds = ORC.piv.filter_spatial(ds, **filter_spatial_kwargs)
 
@@ -306,6 +306,8 @@ def make_video(movie, dst, video_args):
         im_data = cv2.imread(fns[i + 1])
         # im_data = openpiv.tools.imread(fns[i+1])
         _u, _v = ds["v_x"][i].values, ds["v_y"][i].values
+        _u, _v = ds["v_x"].median(dim="time").values, ds["v_y"].median(dim="time").values
+
         _u[np.isnan(_u)] = ds["v_x"].median(dim="time").values[np.isnan(_u)]
         _v[np.isnan(_v)] = ds["v_y"].median(dim="time").values[np.isnan(_v)]
         im.set_data(im_data)

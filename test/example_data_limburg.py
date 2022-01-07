@@ -1,6 +1,6 @@
 import numpy as np
 from shapely.geometry import Polygon
-import OpenRiverCam as ORC
+import orc as ORC
 import pyproj
 camera_type = {
     "name": "Foscam E9900P",  # user-chosen name for camera
@@ -12,11 +12,10 @@ camera_type = {
 }
 gcps = {
     "src": [
-        [139, 270],
-        [930, 196],
-        [1323, 333],
-        # [1935, 1590],
-        [1258, 874]],
+        [138, 270],
+        [935, 194],
+        [1322, 330],
+        [1264, 867]],
     "dst": [
         [5.913401333, 50.8072278333],
         [5.9133098333, 50.807340333],
@@ -25,14 +24,15 @@ gcps = {
     ],
     "z_0": 138.4,  # reference height of zero water level compared to the crs used
     "h_ref": 0.05,  # actual water level during taking of the gcp points
+    "crs": 4326
 }
 
 # corner points provided by user in pixel coordinates, starting at upstream-left, downstream-left, downstream-right, upstream-right
 corners = {
-    "up_left": [10, 203],
-    "down_left": [632, 128],
-    "down_right": [1765, 488],
-    "up_right": [1041, 1059],
+    "up_left": [8, 246],
+    "down_left": [1110, 141],
+    "down_right": [1866, 463],
+    "up_right": [1049, 1110],
 }
 
 
@@ -50,19 +50,19 @@ crs_site = pyproj.CRS.from_epsg(site["crs"])
 crs_latlon = pyproj.CRS.from_epsg(4326)
 transform = pyproj.Transformer.from_crs(crs_latlon, crs_site, always_xy=True)
 
-# transform dst coordinates to local projection
-_lon, _lat = zip(*gcps["dst"])
-_x, _y = transform.transform(_lon, _lat)
-# replace them
-gcps["dst"] = list(zip(_x, _y))
+# # transform dst coordinates to local projection
+# _lon, _lat = zip(*gcps["dst"])
+# _x, _y = transform.transform(_lon, _lat)
+# # replace them
+# gcps["dst"] = list(zip(_x, _y))
 
 # make a polygon from corner points, print it to see what it looks like.
 src_polygon = Polygon([corners[s] for s in corners])
-print(src_polygon)
+# print(src_polygon)
 
 # this function prepares a bounding box, from 4 user selected corner points, print to see what it looks like
 bbox = ORC.cv.get_aoi(gcps["src"], gcps["dst"], corners)
-print(bbox)
+# print(bbox)
 
 lensPosition = [ 5.9136175, 50.807232333333, 143.1]
 
@@ -283,10 +283,10 @@ bathymetry = {
     "coords": coords,  # list of (x, y, z) tuples defined in crs [m], coords are not valid in the example
 }
 
-# transform lens position
-_x, _y = transform.transform(lensPosition[0], lensPosition[1])
-lensPosition[0] = _x
-lensPosition[1] = _y
+# # transform lens position
+# _x, _y = transform.transform(lensPosition[0], lensPosition[1])
+# lensPosition[0] = _x
+# lensPosition[1] = _y
 
 movie = {
     "id": 1,

@@ -1,4 +1,4 @@
-import OpenRiverCam
+import orc
 import cv2
 import os
 
@@ -18,13 +18,13 @@ lens_pars = {
 #     "f": 1.,
 # }
 
-logger = OpenRiverCam.log.start_logger(True, False)
+logger = orc.log.start_logger(True, False)
 # do frame extraction
 n = 0
 t = 0
 if not (os.path.isdir(dst)):
     os.makedirs(dst)
-for _t, img in OpenRiverCam.io.frames(
+for _t, img in orc.io.frames(
     fn, dst, start_frame=0, grayscale=False, lens_pars=lens_pars
 ):
 

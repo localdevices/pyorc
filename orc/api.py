@@ -1,25 +1,30 @@
 import cv2
 import dask
 import dask.array as da
+# from dask.cache import Cache
+
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-from OpenRiverCam import cv, io
-from pyproj import CRS, Transformer
+import shapely.wkt
+import xarray as xr
 
-def from_file(fn):
-    with open(fn, "r") as f:
-        dict = json.loads(f.read())
-    return CameraConfig(**dict)
+from orc import cv, io
+from pyproj import CRS, Transformer
+from matplotlib.animation import FuncAnimation, FFMpegWriter
+
+VIDEO_ARGS = {
+    "fps": 25,
+    "extra_args": ["-vcodec", "libx264"],
+    "dpi": 120,
+}
 
 class Video(cv2.VideoCapture):
     def __init__(
             self,
             fn,
+            camera_config,
             h_a,
-            resolution=0.01,
-            window_size=15,
-            corners=None,
             start_frame=None,
             end_frame=None,
             *args,
@@ -42,14 +47,16 @@ class Video(cv2.VideoCapture):
         self.end_frame = end_frame
         self.start_frame = start_frame
         self.fps = self.get(cv2.CAP_PROP_FPS)
+        self.frame_number = 0
         # set other properties
         self.h_a = h_a
-        self.resolution = resolution
-        self.window_size = window_size
-        if corners is not None:
-            self.corners = corners
+        # get the perspective transformation matrix (movie dependent)
+        self.M = camera_config.get_M(self.h_a)
+        self.lens_pars = camera_config.lens_pars
         self.fn = fn
-        self.transform = None
+        self.transform = camera_config.transform
+        self.shape = camera_config.shape
+        self._stills = {}  # here all stills are stored lazily
 
     @property
     def end_frame(self):
@@ -91,82 +98,75 @@ class Video(cv2.VideoCapture):
     def corners(self, corners):
         self._corners = corners
 
-    def set_corners(self, x, y):
+    # def get_stills(self, key):
+    #     if not key in self._stills:
+    #         raise ValueError(f"dataset with name {key} not available in video object")
+    #     return self._stills[key]
+
+    def get_frame(self, n, lens_pars=None, grayscale=False):
+        cap = cv2.VideoCapture(self.fn)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+        try:
+            ret, img = cap.read()
+        except:
+            raise IOError(f"Cannot read")
+        if ret:
+            if lens_pars is not None:
+                # apply lens distortion correction
+                img = io._corr_lens(img, **lens_pars)
+            if grayscale:
+                # apply gray scaling, contrast- and gamma correction
+                # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
+                img = img.mean(axis=2)
+
+        self.frame_count = n + 1
+        cap.release()
+        return img
+
+    def get_frames(self, **kwargs):
         """
-        The coordinates must be provided in the following order:
-        - upstream left-bank
-        - downstream left-bank
-        - downstream right-bank
-        - upstream right-bank
-
-        :param x: list, x-coordinates of corners
-        :param y: list, y-coordinates of corners
-
-        :return:
-        """
-        self._corners = {}
-        keys = ["up_left", "down_left", "down_right", "up_right"]
-
-        for k, _x, _y in zip(keys, x, y):
-            self._corners[k] = [_x, _y]
-
-    def set_frames(self, cam_config, **kwargs):
-        """
-        Make a dask array of frames, expected to be read
+        Make a dask array of frames, expected to be read lazily
 
         :return: frame
         """
-        get_frame = dask.delayed(io.get_frame, pure=True)  # Lazy version of get_frame
-        assert(isinstance(cam_config, CameraConfig))
-
-        frames = [get_frame(self, n=n, lens_pars=cam_config.lens_pars, **kwargs) for n in range(self.start_frame, self.end_frame)]
+        get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
+        frames = [get_frame(n=n, lens_pars=self.lens_pars, **kwargs) for n in range(self.start_frame, self.end_frame)]
         sample = frames[0].compute()
         data_array = [da.from_delayed(
             frame,
             dtype=sample.dtype,
             shape=sample.shape
         ) for frame in frames]
-
-        self._frames = da.stack(data_array, axis=0)
-
-    def set_project_frames(self, cam_config):
-        get_ortho = dask.delayed(cv.get_ortho)
-        bbox = cv.get_aoi(cam_config.gcps["src"], cam_config.gcps["dst"], self.corners)
-
-        # get the perspective transformation matrix
-        M = cam_config.get_M(bbox, self.h_a, self.resolution)
-
-        # get the desired target shape and transform
-        transform, shape = cam_config.get_transform(bbox, self.resolution)
-        # store the transform
-        self.transform = transform
-
-        imgs = [get_ortho(frame, M, shape, flags=cv2.INTER_AREA) for frame in self.frames]
-
-        # retrieve one sample to setup a lazy dask array
-        sample = imgs[0].compute()
-        data_array = [da.from_delayed(
-            img,
-            dtype=sample.dtype,
-            shape=sample.shape
-        ) for img in imgs]
-        self._proj_frames = da.stack(data_array, axis=0)
-
-
-    @property
-    def frames(self):
-        return self._frames
-
-        #
-        # iter = io.frames(self, lens_pars=cam_config.lens_pars, **kwargs)
-        # return iter
+        time = np.arange(len(data_array))*1/self.fps
+        y = np.flipud(np.arange(data_array[0].shape[0]))
+        x = np.arange(data_array[0].shape[1])
+        dims = ("time", "y", "x")
+        attrs = {
+            "M": self.M,
+            "proj_transform": self.transform,
+            "proj_shape": self.shape
+        }
+        return xr.DataArray(
+            da.stack(data_array, axis=0),
+            dims=dims,
+            coords={
+                "time": time,
+                "y": y,
+                "x": x
+            },
+            attrs=attrs
+        )
 
 
 class CameraConfig:
     def __init__(self,
                  crs,
-                 aoi_window_size=15,
+                 window_size=15,
+                 resolution=0.01,
                  lens_position=None,
+                 bbox=None,
+                 transform=None,
+                 shape=None,
                  corners=None,
                  gcps=None,
                  lens_pars=None
@@ -182,7 +182,7 @@ class CameraConfig:
         :param aoi_window_size:
         """
 
-        assert(isinstance(aoi_window_size, int)), 'aoi_window_size must be of type "int"'
+        assert(isinstance(window_size, int)), 'aoi_window_size must be of type "int"'
         if crs is not None:
             try:
                 crs = CRS.from_user_input(crs)
@@ -190,14 +190,27 @@ class CameraConfig:
                 raise ValueError(f"crs {crs} is not a valid Coordinate Reference System")
             assert(crs.is_geographic == 0), "Provided crs must be projected with units like [m]"
         self.crs = crs.to_wkt()
+        if resolution is not None:
+            self.resolution = resolution
         if lens_position is not None:
             self.set_lens_position(*lens_position)
         if gcps is not None:
             self.set_gcps(**gcps)
         if lens_pars is not None:
             self.set_lens_pars(**lens_pars)
+        if bbox is not None:
+            self.bbox = bbox
+        if transform is not None:
+            self.transform = transform
+        if shape is not None:
+            self.shape = shape
+        # override the transform and bbox with the set corners
+        if (corners is not None and hasattr(self, "gcps")):
+            self.set_bbox(corners)
+            # get the desired target shape and transform for future videos using this CameraConfig
+            self.set_transform()
 
-    def get_M(self, bbox, h_a, resolution):
+    def get_M(self, h_a):
         dst_a = cv._get_gcps_a(
             self.lens_position,
             h_a,
@@ -205,19 +218,44 @@ class CameraConfig:
             self.gcps["z_0"],
             self.gcps["h_ref"],
         )
-        dst_colrow_a = cv._transform_to_bbox(dst_a, bbox, resolution)
+        dst_colrow_a = cv._transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
 
         # retrieve M for destination row and col
         return cv._get_M(src=self.gcps["src"], dst=dst_colrow_a)
 
-    def get_transform(self, bbox, resolution):
+    def set_bbox(self, corners):
+        self.bbox = cv.get_aoi(self.gcps["src"], self.gcps["dst"], corners).__str__()
+
+    # def set_corners(self, x, y):
+    #     """
+    #     The coordinates must be provided in the following order:
+    #     - upstream left-bank
+    #     - downstream left-bank
+    #     - downstream right-bank
+    #     - upstream right-bank
+    #
+    #     :param x: list, x-coordinates of corners
+    #     :param y: list, y-coordinates of corners
+    #
+    #     :return:
+    #     """
+    #     self._corners = {}
+    #     keys = ["up_left", "down_left", "down_right", "up_right"]
+    #
+    #     for k, _x, _y in zip(keys, x, y):
+    #         self._corners[k] = [_x, _y]
+
+    def set_transform(self):
         # estimate size of required grid
-        transform = cv._get_transform(bbox, resolution=resolution)
+        bbox = shapely.wkt.loads(self.bbox)
+        transform = cv._get_transform(bbox, resolution=self.resolution)
         # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
         cols, rows = cv._get_shape(
-            bbox, resolution=resolution, round=10
+            bbox, resolution=self.resolution, round=10
         )
-        return transform, (cols, rows)
+        self.transform = transform
+        self.shape = (cols, rows)
+
 
     def set_lens_pars(self, k1=0, c=2, f=4):
         """
@@ -276,6 +314,7 @@ class CameraConfig:
             "h_ref": h_ref,
             "z_0": z_0,
         }
+
 
 
     def set_lens_position(self, x, y, z, crs=None):
@@ -366,4 +405,108 @@ class CameraConfig:
         :return:
         """
         return self.__dict__
+
+
+# API functions
+def load_camera_config(fn):
+    with open(fn, "r") as f:
+        dict = json.loads(f.read())
+    return CameraConfig(**dict)
+
+
+def set_project_frames(cam_config, corners):
+    get_ortho = dask.delayed(cv.get_ortho)
+
+    imgs = [get_ortho(frame, M, shape, flags=cv2.INTER_AREA) for frame in self.get_stills(input)]
+
+    # retrieve one sample to setup a lazy dask array
+    sample = imgs[0].compute()
+    data_array = [da.from_delayed(
+        img,
+        dtype=sample.dtype,
+        shape=sample.shape
+    ) for img in imgs]
+    self._stills[output] = da.stack(data_array, axis=0)
+
+
+def set_landmask_frames(self, input="frames", output="landmask_frames", iterations=10):
+    dilate = dask.delayed(cv2.dilate)
+    normalize = dask.delayed(cv2.normalize)
+    threshold = dask.delayed(cv2.threshold, nout=2)
+    frames = self.get_stills(input)
+    sample = frames[0].compute()
+    # compute standard deviation over mean, assuming this value is low over water, and high over land
+    std_norm = (frames.std(axis=0) / frames.mean(axis=0)).compute()
+    # retrieve a simple 3x3 equal weight kernel
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    # dilate the std_norm by some dilation iterations
+    dilate_std_norm = dilate(std_norm, kernel, iterations=iterations)
+    # rescale result to typical uint8 0-255 range
+    img = normalize(dilate_std_norm, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F).astype(
+        np.uint8)
+    # img = da.from_delayed(img, dtype=np.uint8, shape=sample.shape)
+
+    # threshold with Otsu thresholding
+    ret, thres = threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # mask is where thres is
+    mask = da.from_delayed(thres == 255, dtype=bool, shape=sample.shape)
+    # make mask 3-dimensional
+    mask = da.multiply(frames, mask).astype(bool)
+    self._stills[output] = da.ma.masked_array(frames, mask)
+
+
+def set_normalize_frames(self, input="frames", output="normalize_frames"):
+    normalize = dask.delayed(cv2.normalize)
+    frames = self.get_stills(input)
+    mean = frames.mean(axis=0).compute()
+    frame_reduce = da.subtract(frames, mean)
+    norm_imgs = [normalize(
+        da.maximum(frame, 0),
+        None,
+        alpha=0,
+        beta=255,
+        norm_type=cv2.NORM_MINMAX,
+        dtype=cv2.CV_32F
+    ) for frame in frame_reduce]
+    # convert to dask array
+    data_array = [da.from_delayed(
+        img,
+        dtype=np.uint8,
+        shape=frames[0].shape,
+    ) for img in norm_imgs]
+
+    self._stills[output] = da.stack(data_array, axis=0)
+
+
+def to_video(self, fn, key, video_args=VIDEO_ARGS, **kwargs):
+    """
+    Create a video of the result, using defined settings passed to imshow
+
+    :param attr:
+    :return:
+    """
+
+    def init():
+        im_data = dataset[0]
+        im.set_data(np.zeros(im_data.shape))
+        return ax
+
+    def animate(i):
+        im_data = dataset[i]
+        im.set_data(im_data)
+        return ax
+
+    # retrieve the dataset
+    dataset = self.get_stills(key)
+    f = plt.figure(figsize=(16, 9), frameon=False)
+    f.set_size_inches(16, 9, True)
+    f.patch.set_facecolor("k")
+    f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+    ax = plt.subplot(111)
+    im_data = dataset[0].compute()
+    im = ax.imshow(im_data, **kwargs)
+    anim = FuncAnimation(
+        f, animate, init_func=init, frames=dataset.shape[0], interval=20, blit=False
+    )
+    anim.save(fn, **video_args)
 

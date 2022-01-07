@@ -8,14 +8,14 @@ import matplotlib.pyplot as plt
 import rasterio
 from datetime import datetime, timedelta
 from rasterio.plot import reshape_as_raster
-import OpenRiverCam as ORC
+import orc as ORC
 import cv2
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 from process import *
 # import example data
 from example_data import movie
 
-folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam"
+folder = r"/home/hcwinsemius/Media/projects/orc"
 video_args = {
     "fps": 4,
     "extra_args": ["-vcodec", "libx264"],
@@ -26,7 +26,7 @@ video_args = {
 # settings.
 
 # change the movie file (all frames are parsed under a subfolder called 'frames')
-movie['file']['bucket'] = r'/home/hcwinsemius/Media/projects/OpenRiverCam/buckets/20210327_113200' # s3 bucket (or in our case a local folder) in which the movie is located
+movie['file']['bucket'] = r'/home/hcwinsemius/Media/projects/orc/buckets/20210327_113200' # s3 bucket (or in our case a local folder) in which the movie is located
 movie['file']['identifier'] = 'clip_schedule_20210327_113240.mkv'
 movie['h_a'] = 0.62  # this value is simply what you read on the staff gauge
 
