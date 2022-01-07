@@ -429,30 +429,22 @@ def set_project_frames(cam_config, corners):
     self._stills[output] = da.stack(data_array, axis=0)
 
 
-def set_landmask_frames(self, input="frames", output="landmask_frames", iterations=10):
-    dilate = dask.delayed(cv2.dilate)
-    normalize = dask.delayed(cv2.normalize)
-    threshold = dask.delayed(cv2.threshold, nout=2)
-    frames = self.get_stills(input)
-    sample = frames[0].compute()
+def landmask_frames(frames, dilate_iter=10):
     # compute standard deviation over mean, assuming this value is low over water, and high over land
-    std_norm = (frames.std(axis=0) / frames.mean(axis=0)).compute()
+    std_norm = (frames.std(axis=0) / frames.mean(axis=0)).load()
     # retrieve a simple 3x3 equal weight kernel
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     # dilate the std_norm by some dilation iterations
-    dilate_std_norm = dilate(std_norm, kernel, iterations=iterations)
+    dilate_std_norm = cv2.dilate(std_norm.values, kernel, iterations=dilate_iter)
     # rescale result to typical uint8 0-255 range
-    img = normalize(dilate_std_norm, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F).astype(
+    img = cv2.normalize(dilate_std_norm, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F).astype(
         np.uint8)
-    # img = da.from_delayed(img, dtype=np.uint8, shape=sample.shape)
-
     # threshold with Otsu thresholding
-    ret, thres = threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret, thres = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     # mask is where thres is
-    mask = da.from_delayed(thres == 255, dtype=bool, shape=sample.shape)
+    mask = thres != 255
     # make mask 3-dimensional
-    mask = da.multiply(frames, mask).astype(bool)
-    self._stills[output] = da.ma.masked_array(frames, mask)
+    return (frames * mask) # .astype(bool)
 
 
 def set_normalize_frames(self, input="frames", output="normalize_frames"):
