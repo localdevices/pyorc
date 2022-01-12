@@ -250,6 +250,10 @@ def piv(
     :return corr: 2-D numpy array, correlation values in interrogation windows
 
     """
+    if isinstance(frame_a, xr.core.dataarray.DataArray):
+        frame_a = frame_a.values
+    if isinstance(frame_b, xr.core.dataarray.DataArray):
+        frame_b = frame_b.values
     window_size = search_area_size if window_size is None else window_size
     overlap = int(round(window_size)/2) if overlap is None else overlap
     v_x, v_y, s2n = openpiv.pyprocess.extended_search_area_piv(

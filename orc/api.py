@@ -6,6 +6,7 @@ import dask.array as da
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import rasterio.transform
 import shapely.wkt
 import xarray as xr
 
@@ -55,7 +56,10 @@ class Video(cv2.VideoCapture):
         self.lens_pars = camera_config.lens_pars
         self.fn = fn
         self.transform = camera_config.transform
+        self.resolution = camera_config.resolution
         self.shape = camera_config.shape
+        self.window_size = camera_config.window_size
+        self.crs = camera_config.crs
         self._stills = {}  # here all stills are stored lazily
 
     @property
@@ -144,7 +148,10 @@ class Video(cv2.VideoCapture):
         attrs = {
             "M": self.M,
             "proj_transform": self.transform,
-            "proj_shape": self.shape
+            "proj_shape": self.shape,
+            "crs": self.crs,
+            "resolution": self.resolution,
+            "window_size": self.window_size
         }
         return xr.DataArray(
             da.stack(data_array, axis=0),
@@ -182,7 +189,7 @@ class CameraConfig:
         :param aoi_window_size:
         """
 
-        assert(isinstance(window_size, int)), 'aoi_window_size must be of type "int"'
+        assert(isinstance(window_size, int)), 'window_size must be of type "int"'
         if crs is not None:
             try:
                 crs = CRS.from_user_input(crs)
@@ -204,11 +211,25 @@ class CameraConfig:
             self.transform = transform
         if shape is not None:
             self.shape = shape
+        if window_size is not None:
+            self.window_size = window_size
         # override the transform and bbox with the set corners
         if (corners is not None and hasattr(self, "gcps")):
             self.set_bbox(corners)
             # get the desired target shape and transform for future videos using this CameraConfig
-            self.set_transform()
+            self.set_transform_from_bbox()
+
+    @property
+    def transform(self):
+        return self._transform
+
+    @transform.setter
+    def transform(self, transform):
+        if isinstance(transform, rasterio.transform.Affine):
+            self._transform = transform
+        else:
+            # try to set it via rasterio Affine, assuming it is a (minimal) 6 value list
+            self._transform = rasterio.transform.Affine(*transform[0:6])
 
     def get_M(self, h_a):
         dst_a = cv._get_gcps_a(
@@ -226,26 +247,7 @@ class CameraConfig:
     def set_bbox(self, corners):
         self.bbox = cv.get_aoi(self.gcps["src"], self.gcps["dst"], corners).__str__()
 
-    # def set_corners(self, x, y):
-    #     """
-    #     The coordinates must be provided in the following order:
-    #     - upstream left-bank
-    #     - downstream left-bank
-    #     - downstream right-bank
-    #     - upstream right-bank
-    #
-    #     :param x: list, x-coordinates of corners
-    #     :param y: list, y-coordinates of corners
-    #
-    #     :return:
-    #     """
-    #     self._corners = {}
-    #     keys = ["up_left", "down_left", "down_right", "up_right"]
-    #
-    #     for k, _x, _y in zip(keys, x, y):
-    #         self._corners[k] = [_x, _y]
-
-    def set_transform(self):
+    def set_transform_from_bbox(self):
         # estimate size of required grid
         bbox = shapely.wkt.loads(self.bbox)
         transform = cv._get_transform(bbox, resolution=self.resolution)
@@ -253,8 +255,8 @@ class CameraConfig:
         cols, rows = cv._get_shape(
             bbox, resolution=self.resolution, round=10
         )
-        self.transform = transform
-        self.shape = (cols, rows)
+        self._transform = transform
+        self.shape = (rows, cols)
 
 
     def set_lens_pars(self, k1=0, c=2, f=4):
@@ -396,15 +398,23 @@ class CameraConfig:
         Write the CameraConfig object to json structure
         :return:
         """
+
         with open(fn, "w") as f:
-            f.write(json.dumps(self, default=lambda o: o.__dict__, indent=4))
+            f.write(json.dumps(self, default=lambda o: o.to_dict(), indent=4))
 
     def to_dict(self):
         """
         Return the CameraConfig object as dictionary
         :return:
         """
-        return self.__dict__
+
+        dict = self.__dict__
+        # replace underscore keys for keys without underscore
+        for k in list(dict.keys()):
+            if k[0] == "_":
+                dict[k[1:]] = dict.pop(k)
+
+        return dict
 
 
 # API functions
@@ -413,92 +423,4 @@ def load_camera_config(fn):
         dict = json.loads(f.read())
     return CameraConfig(**dict)
 
-
-def set_project_frames(cam_config, corners):
-    get_ortho = dask.delayed(cv.get_ortho)
-
-    imgs = [get_ortho(frame, M, shape, flags=cv2.INTER_AREA) for frame in self.get_stills(input)]
-
-    # retrieve one sample to setup a lazy dask array
-    sample = imgs[0].compute()
-    data_array = [da.from_delayed(
-        img,
-        dtype=sample.dtype,
-        shape=sample.shape
-    ) for img in imgs]
-    self._stills[output] = da.stack(data_array, axis=0)
-
-
-def landmask_frames(frames, dilate_iter=10):
-    # compute standard deviation over mean, assuming this value is low over water, and high over land
-    std_norm = (frames.std(axis=0) / frames.mean(axis=0)).load()
-    # retrieve a simple 3x3 equal weight kernel
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    # dilate the std_norm by some dilation iterations
-    dilate_std_norm = cv2.dilate(std_norm.values, kernel, iterations=dilate_iter)
-    # rescale result to typical uint8 0-255 range
-    img = cv2.normalize(dilate_std_norm, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F).astype(
-        np.uint8)
-    # threshold with Otsu thresholding
-    ret, thres = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    # mask is where thres is
-    mask = thres != 255
-    # make mask 3-dimensional
-    return (frames * mask) # .astype(bool)
-
-
-def set_normalize_frames(self, input="frames", output="normalize_frames"):
-    normalize = dask.delayed(cv2.normalize)
-    frames = self.get_stills(input)
-    mean = frames.mean(axis=0).compute()
-    frame_reduce = da.subtract(frames, mean)
-    norm_imgs = [normalize(
-        da.maximum(frame, 0),
-        None,
-        alpha=0,
-        beta=255,
-        norm_type=cv2.NORM_MINMAX,
-        dtype=cv2.CV_32F
-    ) for frame in frame_reduce]
-    # convert to dask array
-    data_array = [da.from_delayed(
-        img,
-        dtype=np.uint8,
-        shape=frames[0].shape,
-    ) for img in norm_imgs]
-
-    self._stills[output] = da.stack(data_array, axis=0)
-
-
-def to_video(self, fn, key, video_args=VIDEO_ARGS, **kwargs):
-    """
-    Create a video of the result, using defined settings passed to imshow
-
-    :param attr:
-    :return:
-    """
-
-    def init():
-        im_data = dataset[0]
-        im.set_data(np.zeros(im_data.shape))
-        return ax
-
-    def animate(i):
-        im_data = dataset[i]
-        im.set_data(im_data)
-        return ax
-
-    # retrieve the dataset
-    dataset = self.get_stills(key)
-    f = plt.figure(figsize=(16, 9), frameon=False)
-    f.set_size_inches(16, 9, True)
-    f.patch.set_facecolor("k")
-    f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
-    ax = plt.subplot(111)
-    im_data = dataset[0].compute()
-    im = ax.imshow(im_data, **kwargs)
-    anim = FuncAnimation(
-        f, animate, init_func=init, frames=dataset.shape[0], interval=20, blit=False
-    )
-    anim.save(fn, **video_args)
 

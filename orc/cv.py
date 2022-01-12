@@ -232,6 +232,9 @@ def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
     :param flags: cv2.flags to pass with cv2.warpPerspective
     :return:
     """
+    if not(isinstance(img, np.ndarray)):
+        # load values here
+        img = img.values
     return cv2.warpPerspective(img, M, shape, flags=flags)
 
 def get_transform(lens_position, gcps, h_a, bbox, resolution):
