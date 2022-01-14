@@ -146,9 +146,9 @@ class Video(cv2.VideoCapture):
         x = np.arange(data_array[0].shape[1])
         dims = ("time", "y", "x")
         attrs = {
-            "M": self.M,
-            "proj_transform": self.transform,
-            "proj_shape": self.shape,
+            "M": str(self.M.tolist()),
+            "proj_transform": str(list(self.transform)[0:6]),
+            "proj_shape": str(self.shape),
             "crs": self.crs,
             "resolution": self.resolution,
             "window_size": self.window_size

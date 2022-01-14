@@ -1,7 +1,7 @@
 import cv2
 import dask
 import dask.array as da
-
+from rasterio.transform import Affine
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -17,17 +17,36 @@ VIDEO_ARGS = {
 
 PIV_NAMES = ["v_x", "v_y", "s2n", "corr"]
 
+def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
+    """
+    Return a deserialized version of said property (assumed to be stored as a string) of DataArray
+
+    :param data_array: xr.DataArray, containing attributes of interest
+    :param attr: str, name of attributes
+    :param type: object type to return, function will try to perform type(eval(attr)), default np.array
+    :param args_parse: bool, if True, function will try to return type(*eval(attr)), assuming attribute contains list
+        of arguments
+    :return: parsed attribute, of type defined by arg type
+    """
+    assert hasattr(data_array, attr), f'frames do not contain attribute with name "{attr}'
+    attr_obj = getattr(data_array, attr)
+    if args_parse:
+        return type(*eval(attr_obj))
+    return type(eval(attr_obj))
+
 def delayed_to_da(delayed_das, shape, dtype, time, y, x, attrs={}, name=None):
     """
     Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D DataArray with all axes
+
     :param delayed_das: Delayed dask data arrays (2D)
     :param shape: tuple, foreseen shape of data arrays (rows, cols)
     :param dtype: string or dtype, e.g. "uint8" of data arrays
-    :param time:
-    :param y:
-    :param x:
-    :param attrs:
-    :return:
+    :param time: time axis to use in data array
+    :param y: y axis to use in data array
+    :param x: x axis to use in data array
+    :param attrs: dict, containing attributes for data array
+    :param name: str, name of attribute, default None
+    :return: xr.DataArray
     """
     assert(len(time)==len(delayed_das)), f"Length of time axis {len(time)} is not equal to amount of data arrays {len(delayed_das)}"
     assert(len(y)==shape[0]), f"Length of y-axis {len(y)} is not equal to expected shape in y-direction {shape[0]}"
@@ -65,8 +84,8 @@ def project(frames):
         raise AttributeError(f'Attribute "M" is not available in frames')
     if not(hasattr(frames, "shape")):
         raise AttributeError(f'Attribute "shape" is not available in frames')
-    M = frames.M
-    shape = frames.proj_shape
+    M = deserialize_attr(frames, "M", np.array, args_parse=True)
+    shape = deserialize_attr(frames, "proj_shape", list)
     get_ortho = dask.delayed(cv.get_ortho)
     imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in frames]
     # prepare axes
@@ -86,6 +105,18 @@ def project(frames):
 
 
 def landmask(frames, dilate_iter=10, samples=15):
+    """
+    Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much higher
+    than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation operation is
+    used to make the land mask a little bit larger than the exact defined pixels.
+
+    :param frames: DataArray with frames
+    :param dilate_iter: number of dilation iterations to use, to dilate land mask
+    :param samples: amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+        number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
+    :return: xr.DataArray with filtered frames
+
+    """
     time_interval = round(len(frames)/samples)
     assert(time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
     # ensure attributes are kept
@@ -108,6 +139,16 @@ def landmask(frames, dilate_iter=10, samples=15):
 
 
 def normalize(frames, samples=15):
+    """
+    Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and helps
+    to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and partly
+    shaded parts.
+
+    :param frames: DataArray with frames
+    :param samples: amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+        number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
+    :return: xr.DataArray with filtered frames
+    """
     time_interval = round(len(frames)/samples)
     assert(time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
     # ensure attributes are kept
@@ -131,9 +172,6 @@ def reduce_rolling(frames, int=25):
     xr.set_options(keep_attrs=True)
     # normalize = dask.delayed(cv2.normalize)
     frames_reduce = frames - roll_mean
-    # frames_min = frames_reduce.min(axis=-1).min(axis=-1)
-    # frames_max = frames_reduce.max(axis=-1).min(axis=-1)
-    # frames_norm = ((frames_reduce - frames_min)/(frames_max-frames_min)*255).astype("uint8")
     frames_thres = np.maximum(frames_reduce, 0)
     # # normalize
     frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
@@ -144,7 +182,9 @@ def compute_piv(frames, res_x=0.01, res_y=0.01, search_area_size=30, correlation
     # forward the computation to piv
     dask_piv = dask.delayed(piv.piv, nout=6)
     v_x, v_y, s2n, corr = [], [], [], []
-    for frame_a, frame_b in zip(frames[0:-1], frames[1:]):
+    frames_a = frames[0:-1]
+    frames_b = frames[1:]
+    for frame_a, frame_b in zip(frames_a, frames_b):
         dt = frame_b.time - frame_a.time
         # determine time difference dt between frames
         cols, rows, _v_x, _v_y, _s2n, _corr = dask_piv(
@@ -156,15 +196,6 @@ def compute_piv(frames, res_x=0.01, res_y=0.01, search_area_size=30, correlation
             search_area_size=frames.window_size,
             **kwargs,
         )
-        # result = dask_piv(
-        #     frame_a,
-        #     frame_b,
-        #     res_x=frames.resolution,
-        #     res_y=frames.resolution,
-        #     dt=float(dt.values),
-        #     search_area_size=frames.window_size,
-        #     **kwargs,
-        # )
         v_x.append(_v_x), v_y.append(_v_y), s2n.append(_s2n), corr.append(_corr)
     # compute one sample for the spacing
     cols, rows, _v_x, _v_y, _s2n, _corr = piv.piv(
@@ -179,7 +210,12 @@ def compute_piv(frames, res_x=0.01, res_y=0.01, search_area_size=30, correlation
     attrs = frames.attrs
     time = (frames.time[0:-1].values + frames.time[1:].values)/2  # as we use frame to frame differences, one time step gets lost
     x, y = io.get_axes(cols, rows, frames.resolution)
-    xs, ys, lons, lats = io.get_xs_ys(cols, rows, frames.proj_transform, frames.crs)
+    xs, ys, lons, lats = io.get_xs_ys(
+        cols,
+        rows,
+        deserialize_attr(frames, "proj_transform", Affine),
+        frames.crs
+    )
     v_x, v_y, s2n, corr = [
         delayed_to_da(
             data,
@@ -193,56 +229,6 @@ def compute_piv(frames, res_x=0.01, res_y=0.01, search_area_size=30, correlation
         ) for data, name in zip((v_x, v_y, s2n, corr), PIV_NAMES)]
     ds = xr.merge([v_x, v_y, s2n, corr])
     return ds
-    #
-    # # prepare dataset
-    # dataset = io.to_dataset(
-    #     [v_x, v_y, s2n, corr],
-    #     var_names,
-    #     x,
-    #     y,
-    #     time=time,
-    #     lat=lats,
-    #     lon=lons,
-    #     xs=xs,
-    #     ys=ys,
-    #     attrs=var_attrs,
-    # )
-    #
-    # # structure into properly defined DataArrays
-    # v_x = [da.from_delayed(img, dtype="uint8", shape=tuple(np.flipud(shape))) for img in imgs]
-    # time = frames.time
-    # y = np.flipud(np.linspace(frames.resolution/2, frames.resolution*(data_array[0].shape[0]-0.5), data_array[0].shape[0]))
-    # x = np.linspace(frames.resolution/2, frames.resolution*(data_array[0].shape[1]-0.5), data_array[0].shape[1])
-    # dims = ("time", "y", "x")
-    # attrs = {
-    #     "M": M,
-    #     "proj_transform": frames.proj_transform,
-    #     "crs": frames.crs,
-    #
-    # }
-    # return xr.DataArray(
-    #     da.stack(data_array, axis=0),
-    #     dims=dims,
-    #     coords={
-    #         "time": time,
-    #         "y": y,
-    #         "x": x
-    #     },
-    #     attrs=attrs
-    # )
-
-
-
-    # finally read GeoTiff transform from the first file
-
-    raise NotImplementedError
-
-    # def piv(
-    #         frame_a, frame_b, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None,
-    #         overlap=None,
-    #         **kwargs
-    # ):
-    #
 
 def animation(fn, frames, video_args=VIDEO_ARGS, **kwargs):
     """
