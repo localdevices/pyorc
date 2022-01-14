@@ -53,6 +53,7 @@ class Video(cv2.VideoCapture):
         self.h_a = h_a
         # get the perspective transformation matrix (movie dependent)
         self.M = camera_config.get_M(self.h_a)
+        self.M_reverse = camera_config.get_M_reverse(self.h_a)
         self.lens_pars = camera_config.lens_pars
         self.fn = fn
         self.transform = camera_config.transform
@@ -122,7 +123,8 @@ class Video(cv2.VideoCapture):
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
                 img = img.mean(axis=2)
-
+            else:
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.frame_count = n + 1
         cap.release()
         return img
@@ -144,9 +146,18 @@ class Video(cv2.VideoCapture):
         time = np.arange(len(data_array))*1/self.fps
         y = np.flipud(np.arange(data_array[0].shape[0]))
         x = np.arange(data_array[0].shape[1])
-        dims = ("time", "y", "x")
+        coords = {
+            "time": time,
+            "y": y,
+            "x": x
+        }
+        if len(sample.shape) == 3:
+            coords["rgb"] = np.array([0, 1, 2])
+
+        dims = tuple(coords.keys())
         attrs = {
             "M": str(self.M.tolist()),
+            "M_reverse": str(self.M_reverse.tolist()),
             "proj_transform": str(list(self.transform)[0:6]),
             "proj_shape": str(self.shape),
             "crs": self.crs,
@@ -156,11 +167,7 @@ class Video(cv2.VideoCapture):
         return xr.DataArray(
             da.stack(data_array, axis=0),
             dims=dims,
-            coords={
-                "time": time,
-                "y": y,
-                "x": x
-            },
+            coords=coords,
             attrs=attrs
         )
 
@@ -243,6 +250,19 @@ class CameraConfig:
 
         # retrieve M for destination row and col
         return cv._get_M(src=self.gcps["src"], dst=dst_colrow_a)
+
+    def get_M_reverse(self, h_a):
+        dst_a = cv._get_gcps_a(
+            self.lens_position,
+            h_a,
+            self.gcps["dst"],
+            self.gcps["z_0"],
+            self.gcps["h_ref"],
+        )
+        dst_colrow_a = cv._transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
+
+        # retrieve M reverse for destination row and col
+        return cv._get_M(src=dst_colrow_a, dst=self.gcps["src"])
 
     def set_bbox(self, corners):
         self.bbox = cv.get_aoi(self.gcps["src"], self.gcps["dst"], corners).__str__()

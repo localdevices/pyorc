@@ -1,12 +1,10 @@
 import cv2
 import dask
-import dask.array as da
-from rasterio.transform import Affine
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
-from orc import cv, piv_process, io
+from orc import cv, helpers
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
 VIDEO_ARGS = {
@@ -14,60 +12,6 @@ VIDEO_ARGS = {
     "extra_args": ["-vcodec", "libx264"],
     "dpi": 120,
 }
-
-PIV_NAMES = ["v_x", "v_y", "s2n", "corr"]
-
-def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
-    """
-    Return a deserialized version of said property (assumed to be stored as a string) of DataArray
-
-    :param data_array: xr.DataArray, containing attributes of interest
-    :param attr: str, name of attributes
-    :param type: object type to return, function will try to perform type(eval(attr)), default np.array
-    :param args_parse: bool, if True, function will try to return type(*eval(attr)), assuming attribute contains list
-        of arguments
-    :return: parsed attribute, of type defined by arg type
-    """
-    assert hasattr(data_array, attr), f'frames do not contain attribute with name "{attr}'
-    attr_obj = getattr(data_array, attr)
-    if args_parse:
-        return type(*eval(attr_obj))
-    return type(eval(attr_obj))
-
-def delayed_to_da(delayed_das, shape, dtype, time, y, x, attrs={}, name=None):
-    """
-    Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D DataArray with all axes
-
-    :param delayed_das: Delayed dask data arrays (2D)
-    :param shape: tuple, foreseen shape of data arrays (rows, cols)
-    :param dtype: string or dtype, e.g. "uint8" of data arrays
-    :param time: time axis to use in data array
-    :param y: y axis to use in data array
-    :param x: x axis to use in data array
-    :param attrs: dict, containing attributes for data array
-    :param name: str, name of attribute, default None
-    :return: xr.DataArray
-    """
-    assert(len(time)==len(delayed_das)), f"Length of time axis {len(time)} is not equal to amount of data arrays {len(delayed_das)}"
-    assert(len(y)==shape[0]), f"Length of y-axis {len(y)} is not equal to expected shape in y-direction {shape[0]}"
-    assert(len(x)==shape[1]), f"Length of x-axis {len(x)} is not equal to expected shape in x-direction {shape[1]}"
-    data_array = [da.from_delayed(
-        d,
-        dtype=dtype,
-        shape=shape
-    ) for d in delayed_das]
-    dims = ("time", "y", "x")
-    return xr.DataArray(
-        da.stack(data_array, axis=0),
-        dims=dims,
-        coords={
-            "time": time,
-            "y": y,
-            "x": x
-        },
-        attrs=attrs,
-        name=name
-    )
 
 def project(frames):
     """
@@ -84,8 +28,8 @@ def project(frames):
         raise AttributeError(f'Attribute "M" is not available in frames')
     if not(hasattr(frames, "shape")):
         raise AttributeError(f'Attribute "shape" is not available in frames')
-    M = deserialize_attr(frames, "M", np.array, args_parse=True)
-    shape = deserialize_attr(frames, "proj_shape", list)
+    M = helpers.deserialize_attr(frames, "M", np.array, args_parse=False)
+    shape = helpers.deserialize_attr(frames, "proj_shape", list)
     get_ortho = dask.delayed(cv.get_ortho)
     imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in frames]
     # prepare axes
@@ -101,7 +45,18 @@ def project(frames):
         "resolution": frames.resolution
     }
     # create DataArray and return
-    return delayed_to_da(imgs, shape, "uint8", time, y, x, attrs=frames.attrs)
+    coords = {
+        "time": time,
+        "y": y,
+        "x": x
+    }
+    return helpers.delayed_to_da(
+        imgs,
+        shape,
+        "uint8",
+        coords=coords,
+        attrs=frames.attrs
+    )
 
 
 def landmask(frames, dilate_iter=10, samples=15):
@@ -177,58 +132,6 @@ def reduce_rolling(frames, int=25):
     frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
     frames_norm = frames_norm.where(roll_mean!=0, 0)
     return frames_norm
-
-def compute_piv(frames, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None, overlap=None, **kwargs):
-    # forward the computation to piv
-    dask_piv = dask.delayed(piv.piv, nout=6)
-    v_x, v_y, s2n, corr = [], [], [], []
-    frames_a = frames[0:-1]
-    frames_b = frames[1:]
-    for frame_a, frame_b in zip(frames_a, frames_b):
-        dt = frame_b.time - frame_a.time
-        # determine time difference dt between frames
-        cols, rows, _v_x, _v_y, _s2n, _corr = dask_piv(
-            frame_a,
-            frame_b,
-            res_x=frames.resolution,
-            res_y=frames.resolution,
-            dt=float(dt.values),
-            search_area_size=frames.window_size,
-            **kwargs,
-        )
-        v_x.append(_v_x), v_y.append(_v_y), s2n.append(_s2n), corr.append(_corr)
-    # compute one sample for the spacing
-    cols, rows, _v_x, _v_y, _s2n, _corr = piv_process.piv(
-        frame_a,
-        frame_b,
-        res_x=frames.resolution,
-        res_y=frames.resolution,
-        dt=float(dt.values),
-        search_area_size=frames.window_size,
-        **kwargs,
-    )
-    attrs = frames.attrs
-    time = (frames.time[0:-1].values + frames.time[1:].values)/2  # as we use frame to frame differences, one time step gets lost
-    x, y = io.get_axes(cols, rows, frames.resolution)
-    xs, ys, lons, lats = io.get_xs_ys(
-        cols,
-        rows,
-        deserialize_attr(frames, "proj_transform", Affine),
-        frames.crs
-    )
-    v_x, v_y, s2n, corr = [
-        delayed_to_da(
-            data,
-            (len(y), len(x)),
-            np.float32,
-            time,
-            y,
-            x,
-            attrs=attrs,
-            name=name
-        ) for data, name in zip((v_x, v_y, s2n, corr), PIV_NAMES)]
-    ds = xr.merge([v_x, v_y, s2n, corr])
-    return ds
 
 def animation(fn, frames, video_args=VIDEO_ARGS, **kwargs):
     """
