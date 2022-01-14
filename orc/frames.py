@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
-from orc import cv, piv, io
+from orc import cv, piv_process, io
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
 VIDEO_ARGS = {
@@ -198,7 +198,7 @@ def compute_piv(frames, res_x=0.01, res_y=0.01, search_area_size=30, correlation
         )
         v_x.append(_v_x), v_y.append(_v_y), s2n.append(_s2n), corr.append(_corr)
     # compute one sample for the spacing
-    cols, rows, _v_x, _v_y, _s2n, _corr = piv.piv(
+    cols, rows, _v_x, _v_y, _s2n, _corr = piv_process.piv(
         frame_a,
         frame_b,
         res_x=frames.resolution,
