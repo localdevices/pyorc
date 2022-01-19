@@ -10,7 +10,7 @@ import rasterio.transform
 import shapely.wkt
 import xarray as xr
 
-from orc import cv, io
+from orc import cv, io, helpers, const
 from pyproj import CRS, Transformer
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
@@ -145,7 +145,10 @@ class Video(cv2.VideoCapture):
         ) for frame in frames]
         time = np.arange(len(data_array))*1/self.fps
         y = np.flipud(np.arange(data_array[0].shape[0]))
+        # y = np.arange(data_array[0].shape[0])
         x = np.arange(data_array[0].shape[1])
+        # perspective column and row coordinate grids
+        xp, yp = np.meshgrid(x, y)
         coords = {
             "time": time,
             "y": y,
@@ -160,17 +163,23 @@ class Video(cv2.VideoCapture):
             "M_reverse": str(self.M_reverse.tolist()),
             "proj_transform": str(list(self.transform)[0:6]),
             "proj_shape": str(self.shape),
+            "camera_shape": str([len(y), len(x)]),
             "crs": self.crs,
             "resolution": self.resolution,
             "window_size": self.window_size
         }
-        return xr.DataArray(
+        data_array = xr.DataArray(
             da.stack(data_array, axis=0),
             dims=dims,
             coords=coords,
             attrs=attrs
         )
-
+        del coords["time"]
+        if len(sample.shape) == 3:
+            del coords["rgb"]
+        # add coordinate grids
+        data_array = helpers.add_xy_coords(data_array, [xp, yp], coords, const.PERSPECTIVE_ATTRS)
+        return data_array
 
 class CameraConfig:
     def __init__(self,

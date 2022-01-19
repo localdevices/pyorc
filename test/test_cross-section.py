@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import xarray as xr
-from orc import io, piv
+from orc import io, piv_process
 import matplotlib.pyplot as plt
 
 # define cross section
@@ -100,16 +100,16 @@ ds_points = io.interp_coords(ds, xs=xs, ys=ys, zs=zs)
 # This is secondary functionality tested: integrate to vertically integrated flow
 
 # now compute effective velocity in thge direction of flow
-ds_points["v_eff"] = piv.vector_to_scalar(ds_points["v_x"], ds_points["v_y"])
+ds_points["v_eff"] = piv_process.vector_to_scalar(ds_points["v_x"], ds_points["v_y"])
 
 # integrate over depth with vertical correction
-ds_points["q"] = piv.depth_integrate(
+ds_points["q"] = piv_process.depth_integrate(
     ds_points["zcoords"], ds_points["v_eff"], z_0, h_a, v_corr
 )
 
 # compute Q per time step
 # inputs
-Q = piv.integrate_flow(ds_points["q"], quantile=np.linspace(0.01, 0.99, 99))
+Q = piv_process.integrate_flow(ds_points["q"], quantile=np.linspace(0.01, 0.99, 99))
 
 
 print(Q)

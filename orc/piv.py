@@ -1,3 +1,4 @@
+import cv2
 import dask
 import dask.array as da
 import matplotlib.pyplot as plt
@@ -6,33 +7,7 @@ from rasterio.transform import Affine
 import xarray as xr
 
 from orc import piv_process, io, helpers
-
-PIV_ATTRS = {
-    "v_x": {
-        "standard_name": "sea_water_x_velocity",
-        "long_name": "Flow element center velocity vector, x-component",
-        "units": "m s-1",
-        "coordinates": "lon lat",
-    },
-    "v_y": {
-        "standard_name": "sea_water_x_velocity",
-        "long_name": "Flow element center velocity vector, x-component",
-        "units": "m s-1",
-        "coordinates": "lon lat",
-   },
-    "s2n": {
-        "standard_name": "ratio",
-        "long_name": "signal to noise ratio",
-        "units": "",
-        "coordinates": "lon lat",
-    },
-    "corr": {
-        "standard_name": "correlation_coefficient",
-        "long_name": "correlation coefficient between frames",
-        "units": "",
-        "coordinates": "lon lat",
-    }
-}
+from orc.const import GEOGRAPHICAL_ATTRS, PIV_ATTRS, PERSPECTIVE_ATTRS
 
 def compute_piv(frames, **kwargs):
     # forward the computation to piv
@@ -72,6 +47,12 @@ def compute_piv(frames, **kwargs):
         helpers.deserialize_attr(frames, "proj_transform", Affine, args_parse=True),
         frames.crs
     )
+    M = helpers.deserialize_attr(frames, "M_reverse", np.array)
+    # compute row and column position of vectors in original reprojected background image col/row coordinates
+    xp, yp = helpers.xy_to_perspective(x, np.flipud(y), frames.resolution, M)
+    # dirty trick to ensure y coordinates start at the top in the right orientation
+    shape_y, shape_x = helpers.deserialize_attr(frames, "camera_shape", np.array)
+    yp = shape_y - yp
     coords = {
         "time": time,
         "y": y,
@@ -86,7 +67,12 @@ def compute_piv(frames, **kwargs):
             attrs=attrs,
             name=name
         ) for data, (name, attrs) in zip((v_x, v_y, s2n, corr), PIV_ATTRS.items())]
+    # prepare the xs, ys, lons and lats grids for geographical projections
     ds = xr.merge([v_x, v_y, s2n, corr])
+    del coords["time"]
+    # add all coordinate grids
+    ds = helpers.add_xy_coords(ds, [xp, yp, xs, ys, lons, lats], coords, {**PERSPECTIVE_ATTRS, **GEOGRAPHICAL_ATTRS})
+    # finally, add global attributes
     ds.attrs = global_attrs
     return ds
 
@@ -123,6 +109,8 @@ def filter_temporal(
     if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
         ds = xr.open_dataset(ds)
+    # load dataset in memory
+    ds = ds.load()
     if filter_std:
         ds = filter_temporal_std(ds, v_x=v_x, v_y=v_y, **kwargs_std)
     if filter_angle:
@@ -319,6 +307,86 @@ def filter_spatial_median(ds, v_x="v_x", v_y="v_y", tolerance=0.7, stride=1, mis
     ds[v_y][:] = v
     return ds
 
+def plot(ds, scalar=True, quiver=True, background=None, mode="ortho", scalar_kwargs={}, quiver_kwargs={}, v_x="v_x", v_y="v_y"):
+    if len(ds[v_x].shape) > 2:
+        raise OverflowError(
+            f'Dataset\'s variables should only contain 2 dimensions, this dataset '
+            f'contains {len(ds[v_x].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
+            f'Reducing can be done e.g. with ds.mean(dim="time") or slicing with ds.isel(time=0)'
+        )
+    assert (scalar or quiver), "Either scalar or quiver should be set tot True, nothing to plot"
+    assert mode in ["local", "geographical", "perspective"], 'Mode must be "ortho", "geographic" or "objective"'
+
+    if mode == "local":
+        x = "x"
+        y = "y"
+        theta = 0.
+    elif mode == "geographical":
+        x = "lon"
+        y = "lat"
+        aff = helpers.deserialize_attr(ds, "proj_transform", Affine, args_parse=True)
+        theta = np.arctan2(aff.d, aff.a)
+    else:
+        x = "xp"
+        y = "yp"
+        theta = 0.
+    if mode in ["local", "geographical"]:
+        f = plt.figure()
+    else:
+        # in camera mode make a screen filling figure with black edges and faces
+        f = plt.figure(figsize=(16, 9), frameon=False, facecolor="k")
+        f.set_size_inches(16, 9, True)
+        f.patch.set_facecolor("k")
+        f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+    ax = f.add_subplot(111)
+    # ax.axis("equal")
+
+
+    u = ds[v_x].copy()
+    v = ds[v_y].copy()
+    s = (u**2 + v**2)**0.5
+
+    if background is not None:
+        if (len(background.shape) == 3 and background.shape[-1] == 3):
+            facecolors = background.values.reshape(background.shape[0]*background.shape[1], 3)/255
+            facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
+            quad = ax.pcolormesh(background[x], background[y], background.mean(dim="rgb"), shading="nearest", facecolors=facecolors)
+            quad.set_array(None)
+        else:
+            background.plot(x=x, y=y, add_colorbar=False)
+        # ax.set_autoscale_on(False)
+    if scalar:
+        # plot the scalar velocity value as grid, return mappable
+        # p = ax.pcolormesh(s[x], s[y], s, **scalar_kwargs)
+        p = s.plot(ax=ax, x=x, y=y, add_colorbar=False, **scalar_kwargs)
+    if quiver:
+        if scalar:
+            ax.quiver(
+                ds[x],
+                ds[y],
+                *helpers.rotate_u_v(u, v, theta),
+                **quiver_kwargs
+            ) # , color="w", alpha=0.3, scale=75, width=0.0010)
+        else:
+            # if not scalar, then return a mappable here
+            p = ax.quiver(
+                ds[x],
+                ds[y],
+                *helpers.rotate_u_v(u, v, theta),
+                s,
+                **quiver_kwargs
+            ) # , color="w", alpha=0.3, scale=75, width=0.0010)
+    # f = ax.figure
+    # cax = f.add_axes([0.9, 0.1, 0.04, 0.5])
+    # cax.set_visible(False)
+
+    # cbar = f.colorbar(p, ax=cax)
+    # finally, if a background is used, set xlim and ylim to the relevant axes
+    if background is not None:
+        ax.set_xlim([background[x].min(), background[x].max()])
+        ax.set_ylim([background[y].min(), background[y].max()])
+    return f, ax
+
 def replace_outliers(ds, v_x="v_x", v_y="v_y", stride=1, max_iter=1):
     """
     Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples
@@ -347,25 +415,3 @@ def replace_outliers(ds, v_x="v_x", v_y="v_y", stride=1, max_iter=1):
     ds[v_x][:] = u
     ds[v_y][:] = v
     return ds
-
-def plot(ds, reducer="mean", timestep=None, scalar=True, quiver=True, background=None, scalar_kwargs={}, quiver_kwargs={}, v_x="v_x", v_y="v_y"):
-    if timestep is not None:
-        u = ds[v_x][timestep]
-        v = ds[v_y][timestep]
-    else:
-        u = getattr(ds[v_x], reducer)(dim="time")
-        v = getattr(ds[v_y], reducer)(dim="time")
-    s = (u**2 + v**2)**0.5
-    f = plt.figure()
-    ax = plt.axes()
-    if background is not None:
-        background.plot.imshow(add_colorbar=False)
-    if scalar:
-        s.plot(ax=ax, **scalar_kwargs)
-    if quiver:
-        x, y = ds["x"].values, ds["y"].values
-        # make a local mesh
-        xi, yi = np.meshgrid(x, y)
-        ax.quiver(xi, yi, u, v, **quiver_kwargs) # , color="w", alpha=0.3, scale=75, width=0.0010)
-    return ax
-    # raise NotImplementedError

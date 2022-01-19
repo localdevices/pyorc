@@ -111,7 +111,7 @@ def compute_piv(movie, dst, prefix="proj", piv_kwargs={}):
         # determine time offset of frame from filename
         ms = timedelta(milliseconds=int(fn[-10:-4]))
         frame_a = frame_b
-        frame_b = ORC.piv.imread(fn)
+        frame_b = ORC.piv_process.imread(fn)
         # rewind to beginning of file
         if (frame_a is not None) and (frame_b is not None):
             # we have two frames in memory, now estimate velocity
@@ -214,7 +214,7 @@ def filter_piv(
     # open file from bucket in memory
     fn = os.path.join(dst, "velocity.nc")
     print("applying temporal filters")
-    ds = ORC.piv.filter_temporal(fn, **filter_temporal_kwargs)  # filter_corr=True,
+    ds = ORC.piv_process.filter_temporal(fn, **filter_temporal_kwargs)  # filter_corr=True,
     print("applying spatial filters")
     ds = ORC.piv.filter_spatial(ds, **filter_spatial_kwargs)
 
@@ -263,7 +263,7 @@ def compute_q(
         "gcps"]["z_0"], movie["h_a"])
 
     # integrate over depth with vertical correction
-    ds_points["q"] = ORC.piv.depth_integrate(
+    ds_points["q"] = ORC.piv_process.depth_integrate(
         ds_points["zcoords"],
         ds_points["v_eff_fill"],
         movie["camera_config"]["gcps"]["z_0"],
@@ -271,7 +271,7 @@ def compute_q(
         v_corr=v_corr,
     )
     # integrate over the width of the cross-section
-    Q = ORC.piv.integrate_flow(ds_points["q"])
+    Q = ORC.piv_process.integrate_flow(ds_points["q"])
 
     # extract a callback from Q
     Q_dict = {
