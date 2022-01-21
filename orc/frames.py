@@ -4,14 +4,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
-from orc import cv, helpers
 from matplotlib.animation import FuncAnimation, FFMpegWriter
+from orc import cv, io, helpers, const
+from rasterio.transform import Affine
 
-VIDEO_ARGS = {
-    "fps": 25,
-    "extra_args": ["-vcodec", "libx264"],
-    "dpi": 120,
-}
+
 
 def project(frames):
     """
@@ -36,6 +33,17 @@ def project(frames):
     time = frames.time
     y = np.flipud(np.linspace(frames.resolution/2, frames.resolution*(shape[0]-0.5), shape[0]))
     x = np.linspace(frames.resolution/2, frames.resolution*(shape[1]-0.5), shape[1])
+    cols, rows = np.meshgrid(
+        np.arange(len(x)),
+        np.arange(len(y))
+    )
+    xs, ys, lons, lats = io.get_xs_ys(
+        cols,
+        rows,
+        helpers.deserialize_attr(frames, "proj_transform", Affine, args_parse=True),
+        frames.crs
+    )
+
     # prepare attributes
 
     attrs = {
@@ -50,14 +58,21 @@ def project(frames):
         "y": y,
         "x": x
     }
-    return helpers.delayed_to_da(
+    if "rgb" in frames.coords:
+        coords["rgb"] = np.array([0, 1, 2])
+        shape = (*shape, 3)
+    da = helpers.delayed_to_da(
         imgs,
         shape,
         "uint8",
         coords=coords,
         attrs=frames.attrs
     )
-
+    del coords["time"]
+    if "rgb" in frames.coords:
+        del coords["rgb"]
+    da = helpers.add_xy_coords(da, [xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+    return da
 
 def landmask(frames, dilate_iter=10, samples=15):
     """
@@ -133,7 +148,7 @@ def reduce_rolling(frames, int=25):
     frames_norm = frames_norm.where(roll_mean!=0, 0)
     return frames_norm
 
-def animation(fn, frames, video_args=VIDEO_ARGS, **kwargs):
+def animation(fn, frames, video_args=const.VIDEO_ARGS, **kwargs):
     """
     Create a video of the result, using defined settings passed to imshow
 

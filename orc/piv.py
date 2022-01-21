@@ -376,11 +376,11 @@ def plot(ds, scalar=True, quiver=True, background=None, mode="ortho", scalar_kwa
                 s,
                 **quiver_kwargs
             ) # , color="w", alpha=0.3, scale=75, width=0.0010)
-    # f = ax.figure
-    # cax = f.add_axes([0.9, 0.1, 0.04, 0.5])
-    # cax.set_visible(False)
-
-    # cbar = f.colorbar(p, ax=cax)
+    cax = f.add_axes([0.85, 0.05, 0.05, 0.5])
+    cax.set_visible(False)
+    cbar = f.colorbar(p, ax=cax)
+    cbar.set_label(label="velocity [m/s]", size=15, weight='bold', color="w")
+    cbar.ax.tick_params(labelsize=12, labelcolor="w")
     # finally, if a background is used, set xlim and ylim to the relevant axes
     if background is not None:
         ax.set_xlim([background[x].min(), background[x].max()])
