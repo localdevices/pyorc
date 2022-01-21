@@ -1,4 +1,4 @@
-name: openrivercamlib
+name: pyorc
 
 channels:
   - conda-forge
@@ -7,7 +7,6 @@ channels:
 # if you only want the user dependencies, see
 # install_requires in setup.py
 dependencies:
-  - black
   - numpy
   - opencv
   - pip
