@@ -83,7 +83,7 @@ def replace_outliers(ds, stride=1, max_iter=1):
     ds["v_y"][:] = v_y
     return ds
 
-folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam/piv"
+folder = r"/home/hcwinsemius/Media/projects/orc/piv"
 src_1 = os.path.join(folder, "velocity.nc")
 src_2 = os.path.join(folder, "velocity_filter_func.nc")
 # out_fn = os.path.join(folder, "velocity_filter_func.nc")

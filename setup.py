@@ -11,20 +11,20 @@ with open("README.md") as readme_file:
 
 setup(
     name="pyorc",
+    description="pyorc is a front and backend to control river camera observation locations",
     version="0.1.0",
-    description="pyOpenRiverCam reprojects and analyzes river videos into veclocities and discharge using Particle Image \ Velocimetry. It is the main computation engine of OpenRiverCam",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
     url="https://github.com/localdevices/pyorc",
     author="Hessel Winsemius",
     author_email="winsemius@rainbowsensing.com",
     packages=find_packages(),
-    package_dir={"OpenRiverCam": "OpenRiverCam"},
+    package_dir={"pyorc": "pyorc"},
     test_suite="tests",
     python_requires=">=3.8",
     install_requires=[
+        "dask",
         "descartes",
-        "geos",
         "geojson",
         "matplotlib",
         "netCDF4",
@@ -43,8 +43,8 @@ setup(
         "dev": ["pytest", "pytest-cov"],
         "optional": [],
     },
-    #entry_points="""
-    #""",
+    # entry_points="""
+    # """,
     include_package_data=True,
     license="GPLv3",
     zip_safe=False,
@@ -60,5 +60,5 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    keywords="hydrology hydrometry river-flow OpenRiverCam",
+    keywords="hydrology hydrometry river-flow pyorc",
 )

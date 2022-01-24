@@ -3,7 +3,7 @@ import numpy as np
 import rasterio
 from pyproj import CRS
 import geojson
-from OpenRiverCam.cv import _corr_lens, _corr_color
+from pyorc.cv import _corr_lens, _corr_color
 import xarray as xr
 from rasterio import warp
 
@@ -49,6 +49,8 @@ def frames(
     """
     if isinstance(fn, str):
         cap = cv2.VideoCapture(fn)
+    else:
+        cap = fn
     # elif isinstance(fn, )
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if end_frame is None:
@@ -75,9 +77,9 @@ def frames(
         t_index_end = cap.get(cv2.CAP_PROP_POS_MSEC)
         fps = 1./((t_index_end - t_index_start) / (1000 * no_frame))
         print(f"Computed FPS is: {fps}")
-        cap.release()
+        # cap.release()
         # reopen file
-        cap = cv2.VideoCapture(fn)
+        # cap = cv2.VideoCapture(fn)
         # go to the right frame position
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(start_frame))
 
@@ -110,6 +112,23 @@ def frames(
             break
     return
 
+def get_frame(cap, n=None, grayscale=False, lens_pars=None):
+    if n is not None:
+        # first move to the right position
+        cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+    try:
+        ret, img = cap.read()
+    except:
+        raise IOError(f"Cannot read")
+    if ret:
+        if lens_pars is not None:
+            # apply lens distortion correction
+            img = _corr_lens(img, **lens_pars)
+        if grayscale:
+            # apply gray scaling, contrast- and gamma correction
+            # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
+            img = img.mean(axis=2)
+    return img
 
 def to_geotiff(fn, z, transform, crs=None, compress=None):
     """
@@ -277,15 +296,63 @@ def to_dataset(
 
 def convert_cols_rows(fn, cols, rows, dst_crs=rasterio.crs.CRS.from_epsg(4326)):
     with rasterio.open(fn) as ds:
-        xs, ys = rasterio.transform.xy(ds.transform, rows, cols)
-        xs, ys = np.array(xs), np.array(ys)
-        lons, lats = warp.transform(ds.crs, dst_crs, xs.flatten(), ys.flatten())
-        lons, lats = (
-            np.array(lons).reshape(xs.shape),
-            np.array(lats).reshape(ys.shape),
-        )
-        return xs, ys, lons, lats
+        coord_data = get_xs_ys(cols, rows, ds.transform, dst_crs)
+        # xs, ys = rasterio.transform.xy(ds.transform, rows, cols)
+        # xs, ys = np.array(xs), np.array(ys)
+        # lons, lats = warp.transform(ds.crs, dst_crs, xs.flatten(), ys.flatten())
+        # lons, lats = (
+        #     np.array(lons).reshape(xs.shape),
+        #     np.array(lats).reshape(ys.shape),
+        # )
+        return coord_data
 
+def get_xs_ys(cols, rows, transform, src_crs, dst_crs=rasterio.crs.CRS.from_epsg(4326)):
+    """
+    Computes rasters of x and y coordinates, and longitude and latitude coordinates of a certain raster
+    based on row and column counts and a defined transform, source crs of that raster and target crs.
+
+    :param cols: list of ints, defining the column counts
+    :param rows: list of ints, defining the row counts
+    :param transform: np.ndarray, 1D, with 6 rasterio compatible transform parameters
+    :param src_crs: coordinate reference system of the source grid
+    :param dst_crs: coordinate reference system of a transformed set of coordinates, defaults ot EPSG:4326 but can be altered to any other CRS if needed
+    :return: 4 np.ndarray (MxN): xs: x-coordinates, ys: y-coordinates, lons: longitude coordinates, lats: latitude coordinates
+    """
+    xs, ys = rasterio.transform.xy(transform, rows, cols)
+    xs, ys = np.array(xs), np.array(ys)
+    lons, lats = warp.transform(src_crs, dst_crs, xs.flatten(), ys.flatten())
+    lons, lats = (
+        np.array(lons).reshape(xs.shape),
+        np.array(lats).reshape(ys.shape),
+    )
+    return xs, ys, lons, lats
+
+def get_axes(cols, rows, resolution):
+    """
+    Retrieve a locally spaced axes for PIV results on the basis of resolution and row and col distances from the
+    original frames
+    :param cols: list with ints, columns, sampled from the original projected frames
+    :param rows: list with ints, rows, sampled from the original projected frames
+    :param resolution: resolution of original frames
+    :return: np.ndarray (N), containing x-axis with origin at the left
+             np.ndarray (N), containing y-axis with origin on the top
+
+    """
+    spacing_x = np.diff(cols[0])[0]
+    spacing_y = np.diff(rows[:, 0])[0]
+    x = np.linspace(
+        resolution / 2 * spacing_x,
+        (len(cols[0]) - 0.5) * resolution * spacing_x,
+        len(cols[0]),
+    )
+    y = np.flipud(
+        np.linspace(
+            resolution / 2 * spacing_y,
+            (len(rows[:, 0]) - 0.5) * resolution * spacing_y,
+            len(rows[:, 0]),
+        )
+    )
+    return x, y
 
 def interp_coords(ds, xs, ys, zs=None, x_grid="x_grid", y_grid="y_grid"):
     """

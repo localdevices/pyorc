@@ -10,17 +10,13 @@ def _corr_color(img, alpha=None, beta=None, gamma=0.5):
     Grey scaling, contrast- and gamma correction. Both alpha and beta need to be
     defined in order to apply contrast correction.
 
-    Input:
-    ------
     :param img: 3D cv2 img object
     :param alpha=None: float - gain parameter for contrast correction)
     :param beta=None: bias parameter for contrast correction
     :param gamma=0.5 brightness parameter for gamma correction (default: 0.5)
     :return img 2D gray scale
-    Output:
-    -------
-    return: img gray scaled, contrast- and gamma corrected image
     """
+
     # turn image into grey scale
     corr_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
@@ -42,7 +38,7 @@ def _corr_color(img, alpha=None, beta=None, gamma=0.5):
 def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
     """
     Lens distortion correction based on lens characteristics.
-    Function by Gerben Gerritsen / Sten Schurer, 2019
+    Function by Gerben Gerritsen / Sten Schurer, 2019.
 
     :param img:  3D cv2 img matrix
     :param k1=0.: float - barrel lens distortion parameter
@@ -73,7 +69,8 @@ def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
 
 def _get_shape(bbox, resolution=0.01, round=1):
     """
-    defines the number of rows and columns needed in a target raster, to fit a given bounding box
+    defines the number of rows and columns needed in a target raster, to fit a given bounding box.
+
     :param bbox: shapely Polygon, bounding box
     :param resolution: resolution of target raster
     :param round: number of pixels to round intended shape to
@@ -89,7 +86,8 @@ def _get_shape(bbox, resolution=0.01, round=1):
 
 def _get_transform(bbox, resolution=0.01):
     """
-    return a rotated Affine transformation that fits with the bounding box and resolution
+    return a rotated Affine transformation that fits with the bounding box and resolution.
+
     :param bbox: shapely Polygon, polygon of bounding box. The coordinate order is very important and has to be:
         (upstream-left, downstream-left, downstream-right, upstream-right, upstream-left)
     :param res=0.01: float, resolution of target grid in meters
@@ -220,9 +218,43 @@ def orthorectification(
     cols, rows = _get_shape(
         bbox, resolution=resolution, round=10
     )  # for now hard -coded on 10, alter dependent on how PIV is done
-    corr_img = cv2.warpPerspective(img, M, (cols, rows), flags=flags)  #
+    corr_img = get_ortho(img, M, (cols, rows), flags=flags)
     return corr_img, transform
 
+def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
+    """
+    Reproject an image to a given shape using perspective transformation matrix M
+    :param img: nd-array, image to transform
+    :param M: image perspective transformation matrix
+    :param shape: tuple with ints (cols, rows)
+    :param flags: cv2.flags to pass with cv2.warpPerspective
+    :return:
+    """
+    if not(isinstance(img, np.ndarray)):
+        # load values here
+        img = img.values
+    return cv2.warpPerspective(img, M, shape, flags=flags)
+
+def get_transform(lens_position, gcps, h_a, bbox, resolution):
+    dst_a = _get_gcps_a(
+        lens_position,
+        h_a,
+        gcps["dst"],
+        gcps["z_0"],
+        gcps["h_ref"],
+    )
+
+    dst_colrow_a = _transform_to_bbox(dst_a, bbox, resolution)
+
+    # retrieve M for destination row and col
+    M = _get_M(src=gcps["src"], dst=dst_colrow_a)
+    # estimate size of required grid
+    transform = _get_transform(bbox, resolution=resolution)
+    # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
+    cols, rows = _get_shape(
+        bbox, resolution=resolution, round=10
+    )  # for now hard -coded on 10, alter dependent on how PIV is done
+    return M, transform, (cols, rows)
 
 def get_aoi(src, dst, src_corners):
 

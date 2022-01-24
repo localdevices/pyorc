@@ -8,7 +8,7 @@ from shapely.affinity import rotate
 
 from descartes.patch import PolygonPatch
 
-import OpenRiverCam as ORC
+import orc as ORC
 import cv2
 import rasterio.plot
 
@@ -16,8 +16,8 @@ import rasterio.plot
 
 # it'll also include options to assess changes in orthography given changes in water levels. For this the position
 # of the camera is needed, in the same x, y, z reference system as the measurements of the GCPs.
-# folder = r"c:\OpenRiverCam"
-folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam"
+# folder = r"c:\orc"
+folder = r"/home/hcwinsemius/Media/projects/orc"
 
 src = os.path.join(folder, "with_lens_color")
 dst = os.path.join(folder, "ortho_proj_color")

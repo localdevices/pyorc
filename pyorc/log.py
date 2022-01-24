@@ -48,6 +48,6 @@ def start_logger(verbose, quiet):
     else:
         quiet = 0
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = setuplog("OpenRiverCam", "OpenRiverCam.log", log_level=log_level)
+    logger = setuplog("pyorc", "pyorc.log", log_level=log_level)
     logger.info("starting...")
     return logger

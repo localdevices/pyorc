@@ -3,7 +3,7 @@ import glob
 import xarray as xr
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
-from OpenRiverCam import piv
+from orc import piv_process
 import cv2
 
 
@@ -48,7 +48,7 @@ def movie(f, ax, fns, ds, movie_fn, video_args):
 
 import numpy as np
 
-folder = r"/home/hcwinsemius/Media/projects/OpenRiverCam/piv"
+folder = r"/home/hcwinsemius/Media/projects/orc/piv"
 src = os.path.join(folder, "velocity.nc")
 out_fn = os.path.join(folder, "velocity_filter_func.nc")
 
