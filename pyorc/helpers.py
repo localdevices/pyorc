@@ -140,7 +140,7 @@ def rotate_u_v(u, v, theta, deg=False):
 
 def xy_to_perspective(x, y, resolution, M):
     """
-    Back transform local col and row locations from ortho projected frame to original perspective of camera using M
+    Back transform local meters-from-top-left coordinates from frame to original perspective of camera using M
     matrix, belonging to transformation from orthographic to local
 
     :param x: np.ndarray, 1D axis of x-coordinates in local projection with origin top-left, to be backwards projected
@@ -150,10 +150,15 @@ def xy_to_perspective(x, y, resolution, M):
     :return: (xp, yp), np.ndarray of shape (len(y), len(x)) containing perspective columns (xp) and rows (yp) of data
     """
     # make a mesgrid of cols and rows
-    cols_i, rows_i = np.meshgrid(x / resolution - 0.5, y / resolution - 0.5)
+    if (len(x.shape) == 1 and len(y.shape) == 1):
+        cols_i, rows_i = np.meshgrid(x / resolution - 0.5, y / resolution - 0.5)
+    elif (len(x.shape) == 2 and len(y.shape) == 2):
+        cols_i, rows_i = x / resolution - 0.5, y / resolution - 0.5
+    else:
+        raise ValueError(f"shape of x and y should both have a length of either 2, or 1, this is now {len(x.shape)} for x and {len(y.shape)} for y")
     # make list of coordinates, compatible with cv2.perspectiveTransform
     coords = np.float32([np.array([cols_i.flatten(), rows_i.flatten()]).transpose([1, 0])])
     coords_trans = cv2.perspectiveTransform(coords, M)
-    xp = coords_trans[0][:, 0].reshape((len(y), len(x)))
-    yp = coords_trans[0][:, 1].reshape((len(y), len(x)))
+    xp = coords_trans[0][:, 0].reshape(cols_i.shape)
+    yp = coords_trans[0][:, 1].reshape(cols_i.shape)
     return xp, yp

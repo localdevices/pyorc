@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 
 from matplotlib.animation import FuncAnimation, FFMpegWriter
-from orc import cv, io, helpers, const
+from pyorc import cv, io, helpers, const
 from rasterio.transform import Affine
 
 

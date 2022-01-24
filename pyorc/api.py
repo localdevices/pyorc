@@ -10,7 +10,7 @@ import rasterio.transform
 import shapely.wkt
 import xarray as xr
 
-from orc import cv, io, helpers, const
+from pyorc import cv, io, helpers, const
 from pyproj import CRS, Transformer
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 

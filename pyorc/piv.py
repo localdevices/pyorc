@@ -2,12 +2,13 @@ import cv2
 import dask
 import dask.array as da
 import matplotlib.pyplot as plt
+from matplotlib.collections import QuadMesh
 import numpy as np
 from rasterio.transform import Affine
 import xarray as xr
 
-from orc import piv_process, io, helpers
-from orc.const import GEOGRAPHICAL_ATTRS, PIV_ATTRS, PERSPECTIVE_ATTRS
+from pyorc import piv_process, io, helpers
+from pyorc.const import GEOGRAPHICAL_ATTRS, PIV_ATTRS, PERSPECTIVE_ATTRS
 
 def compute_piv(frames, **kwargs):
     # forward the computation to piv
@@ -307,7 +308,107 @@ def filter_spatial_median(ds, v_x="v_x", v_y="v_y", tolerance=0.7, stride=1, mis
     ds[v_y][:] = v
     return ds
 
-def plot(ds, scalar=True, quiver=True, background=None, mode="ortho", scalar_kwargs={}, quiver_kwargs={}, v_x="v_x", v_y="v_y"):
+def get_uv_camera(ds, dt=0.1, v_x="v_x", v_y="v_y"):
+    """
+    Returns row, column locations in the camera objective, and u (x-directional) and v (y-directional) vectors, scaled
+    and transformed to the camera objective (i.e. vectors far away are smaller than closeby, and follow the river direction)
+    applied on u and v, so that they plot in a geographical space. This is needed because the raster of PIV results
+    is usually rotated geographically, so that water always flows from left to right in the grid. The results can be
+    used to plot velocities in the camera perspective, e.g. overlayed on a background image directly from the camera.
+
+    :param ds: xr.Dataset, established using compute_piv. This dataset's attributes are used to construct the rotation
+    :param dt: float, time difference [s] used to scale the u and v velocities to a very small distance to project with
+        default: 0.1, usually not needed to modify this.
+    :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
+    :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
+    :return: 5 outputs: 4 np.ndarrays containing camera perspective column location, row location, transformed u and v
+        velocity vectors (no unit) and the scalar velocities (m/s). Rotation is not needed because the transformed
+        u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
+    """
+    # retrieve the backward transformation array
+    M = helpers.deserialize_attr(ds, "M_reverse", np.array)
+    # get the shape of the original frames
+    shape_y, shape_x = helpers.deserialize_attr(ds, "camera_shape", np.array)
+    xi, yi = np.meshgrid(ds.x, ds.y)
+    # flip the y-coordinates to match the row order used by opencv
+    yi = np.flipud(yi)
+
+    x_moved, y_moved = xi + ds[v_x] * dt, yi + ds[v_y] * dt
+    xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, ds.resolution, M)
+
+    # convert row counts to start at the top of the frame instead of bottom
+    yp_moved = shape_y - yp_moved
+
+    # missing values end up at the top-left, replace these with nan
+    yp_moved[yp_moved == shape_y] = np.nan # ds["yp"].values[yp_moved == shape_y]
+    xp_moved[xp_moved == 0] = np.nan  # ds["xp"].values[xp_moved == 0]
+
+    u, v = xp_moved - ds["xp"], yp_moved - ds["yp"]
+    s = (ds[v_x]**2 + ds[v_y]**2)**0.5
+    return "xp", "yp", u, v, s
+
+
+def get_uv_geographical(ds, v_x="v_x", v_y="v_y"):
+    """
+    Returns lon, lat coordinates and u (x-directional) and v (y-directional) velocities, and a rotation that must be
+    applied on u and v, so that they plot in a geographical space. This is needed because the raster of PIV results
+    is usually rotated geographically, so that water always flows from left to right in the grid. The results can be
+    used to plot velocities in a geographical map, e.g. overlayed on a background image, projected to lat/lon.
+
+
+    :param ds: xr.Dataset, established using compute_piv. This dataset's attributes are used to construct the rotation
+    :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
+    :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
+    :return: 6 outputs: 5 np.ndarrays containing longitude, latitude coordinates, u and v velocities and scalar velocity;
+        and float with counter-clockwise rotation in radians, to be applied on u, v to plot in geographical space.
+
+    """
+    # select lon and lat variables as coordinates
+    u = ds[v_x]
+    v = ds[v_y]
+    s = (u**2 + v**2)**0.5
+    aff = helpers.deserialize_attr(ds, "proj_transform", Affine, args_parse=True)
+    theta = np.arctan2(aff.d, aff.a)
+    return "lon", "lat", u, v, s, theta
+
+
+def plot(ds, scalar=True, quiver=True, background=None, mode="local", background_kwargs={}, scalar_kwargs={}, quiver_kwargs={}, v_x="v_x", v_y="v_y", ax=None, cbar_color="w", cbar_fontsize=15):
+    """
+    Extensive functionality to plot PIV results. PIV results can be plotted on a background frame, and can be plotted as
+    scalar values (i.e. a mesh) or as quivers, or both by setting the inputs 'scalar' and 'quiver' to True or False.
+    Plotting can be done in three modes:
+    - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
+      being the 0, 0 point, and ascending coordinates towards the right and bottom. If a background frame is provided,
+      then this must be a projected background frame (i.e. resulting from `pyorc.frames.project`)
+    - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a geographical
+      axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made. If a background
+      frame is provided, then this must be a projected background frame, i.e. resulting from `pyorc.frames.project`.
+    - "camera": plots velocities as augmented reality (i.e. seen from the camera perspective). This is the most
+      intuitive view for end users. If a background frame is provided, then this must be a frame from the camera
+      perspective, i.e. as derived from a `pyorc.Video` object, with the method `pyorc.Video.get_frames`.
+
+    :param ds: xr.Dataset, established using compute_piv. This dataset's attributes are used to construct the rotation
+    :param scalar: boolean, if set to True, velocities are plotted as scalar values in a mesh (default: True)
+    :param quiver: boolean, if set to True, velocities are plotted as quiver (i.e. arrows). In case scalar is also True,
+        quivers will be plotted with a single color (defined in `quiver_kwargs`), if not, the scalar values are used
+        to color the arrows.
+    :param background: xr.DataArray, a single frame capture to be used as background, taken from pyorc.Video.get_frames in case
+        `mode=="camera"` and from `pyorc.frames.project` in case `mode=="local"` or `mode=="geographical"`.
+    :param mode: can be "local", "geographical", or "camera". To select the perspective of plotting, see description.
+    :param background_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting the
+        background frame.
+    :param scalar_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting scalar
+        values.
+    :param quiver_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
+    :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
+    :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
+    :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
+        cartopy GeoAxes needs to be provided, or will be made in case ax is not set.
+    :param cbar_color: color to use for the colorbar
+    :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly smaller).
+    :return: ax, axes object resulting from this function.
+    """
+
     if len(ds[v_x].shape) > 2:
         raise OverflowError(
             f'Dataset\'s variables should only contain 2 dimensions, this dataset '
@@ -315,77 +416,106 @@ def plot(ds, scalar=True, quiver=True, background=None, mode="ortho", scalar_kwa
             f'Reducing can be done e.g. with ds.mean(dim="time") or slicing with ds.isel(time=0)'
         )
     assert (scalar or quiver), "Either scalar or quiver should be set tot True, nothing to plot"
-    assert mode in ["local", "geographical", "perspective"], 'Mode must be "ortho", "geographic" or "objective"'
-
+    assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
     if mode == "local":
         x = "x"
         y = "y"
         theta = 0.
+        u = ds[v_x]
+        v = ds[v_y]
+        s = (u ** 2 + v ** 2) ** 0.5
     elif mode == "geographical":
-        x = "lon"
-        y = "lat"
-        aff = helpers.deserialize_attr(ds, "proj_transform", Affine, args_parse=True)
-        theta = np.arctan2(aff.d, aff.a)
+        # import some additional packages
+        import cartopy.crs as ccrs
+        # add transform for GeoAxes
+        scalar_kwargs["transform"] = ccrs.PlateCarree()
+        quiver_kwargs["transform"] = ccrs.PlateCarree()
+        background_kwargs["transform"] = ccrs.PlateCarree()
+        x, y, u, v, s, theta = get_uv_geographical(ds)
     else:
-        x = "xp"
-        y = "yp"
+        # mode is camera
+        x, y, u, v, s = get_uv_camera(ds)
         theta = 0.
-    if mode in ["local", "geographical"]:
-        f = plt.figure()
-    else:
-        # in camera mode make a screen filling figure with black edges and faces
-        f = plt.figure(figsize=(16, 9), frameon=False, facecolor="k")
-        f.set_size_inches(16, 9, True)
-        f.patch.set_facecolor("k")
-        f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
-    ax = f.add_subplot(111)
-    # ax.axis("equal")
-
-
-    u = ds[v_x].copy()
-    v = ds[v_y].copy()
-    s = (u**2 + v**2)**0.5
+    # prepare an axis for the provided mode
+    ax = plot_prepare_axes(ax=ax, mode=mode)
+    f = ax.figure  # handle to figure
 
     if background is not None:
         if (len(background.shape) == 3 and background.shape[-1] == 3):
             facecolors = background.values.reshape(background.shape[0]*background.shape[1], 3)/255
             facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
-            quad = ax.pcolormesh(background[x], background[y], background.mean(dim="rgb"), shading="nearest", facecolors=facecolors)
-            quad.set_array(None)
+            quad = ax.pcolormesh(background[x], background[y], background.mean(dim="rgb"), shading="nearest", facecolors=facecolors, **background_kwargs)
+            # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if array has dims
+            QuadMesh.set_array(quad, None)
         else:
-            background.plot(x=x, y=y, add_colorbar=False)
-        # ax.set_autoscale_on(False)
-    if scalar:
-        # plot the scalar velocity value as grid, return mappable
-        # p = ax.pcolormesh(s[x], s[y], s, **scalar_kwargs)
-        p = s.plot(ax=ax, x=x, y=y, add_colorbar=False, **scalar_kwargs)
+            ax.pcolormesh(background[x], background[y], background, **background_kwargs)
     if quiver:
         if scalar:
-            ax.quiver(
-                ds[x],
-                ds[y],
-                *helpers.rotate_u_v(u, v, theta),
-                **quiver_kwargs
-            ) # , color="w", alpha=0.3, scale=75, width=0.0010)
+            p = plot_quiver(ax, ds[x].values, ds[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], None,
+                            **quiver_kwargs)
         else:
-            # if not scalar, then return a mappable here
-            p = ax.quiver(
-                ds[x],
-                ds[y],
-                *helpers.rotate_u_v(u, v, theta),
-                s,
-                **quiver_kwargs
-            ) # , color="w", alpha=0.3, scale=75, width=0.0010)
-    cax = f.add_axes([0.85, 0.05, 0.05, 0.5])
-    cax.set_visible(False)
-    cbar = f.colorbar(p, ax=cax)
-    cbar.set_label(label="velocity [m/s]", size=15, weight='bold', color="w")
-    cbar.ax.tick_params(labelsize=12, labelcolor="w")
+            p = plot_quiver(ax, ds[x].values, ds[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
+                            **quiver_kwargs)
+    if scalar:
+        # plot the scalar velocity value as grid, return mappable
+        p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
+        if mode == "geographical":
+            ax.set_extent([ds[x].min() - 0.00005, ds[x].max() + 0.00005, ds[y].min() - 0.00005, ds[y].max() + 0.00005],
+                  crs=ccrs.PlateCarree())
+    cbar = plot_cbar(ax, p, mode=mode, size=cbar_fontsize, color=cbar_color)
     # finally, if a background is used, set xlim and ylim to the relevant axes
-    if background is not None:
+    if (background is not None and mode != "geographical"):
         ax.set_xlim([background[x].min(), background[x].max()])
         ax.set_ylim([background[y].min(), background[y].max()])
-    return f, ax
+    return ax
+
+def plot_prepare_axes(ax=None, mode="local"):
+    """
+    Prepares the axes, needed to plot results, called from `plot`
+
+    :param mode: str, mode to plot, can be "local", "geographical" or "camera", default: "local"
+    :return: ax, axes object.
+    """
+    if ax is not None:
+        if mode=="geographical":
+            # ensure that the axes is a geoaxes
+            from cartopy.mpl.geoaxes import GeoAxesSubplot
+            assert (
+                isinstance(ax, GeoAxesSubplot)), "For mode=geographical, the provided axes must be a cartopy GeoAxesSubplot"
+        return ax
+
+    # make a screen filling figure with black edges and faces
+    f = plt.figure(figsize=(16, 9), frameon=False, facecolor="k")
+    f.set_size_inches(16, 9, True)
+    f.patch.set_facecolor("k")
+    f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+    if mode == "geographical":
+        import cartopy.crs as ccrs
+        ax = f.add_subplot(111, projection=ccrs.PlateCarree())
+    else:
+        ax = plt.subplot(111)
+    return ax
+
+def plot_quiver(ax, x, y, u, v, s=None, zorder=3, **kwargs):
+    if s is None:
+        p = ax.quiver(x, y, u, v, zorder=zorder, **kwargs)
+    else:
+        # if not scalar, then return a mappable here
+        p = ax.quiver(x, y, u, v, s, zorder=zorder, **kwargs)
+    return p
+
+def plot_cbar(ax, p, mode="local", size=15, color="w"):
+    if mode == "camera":
+        # place the colorbar nicely inside
+        cax = ax.figure.add_axes([0.9, 0.05, 0.05, 0.5])
+        cax.set_visible(False)
+        cbar = ax.figure.colorbar(p, ax=cax)
+        cbar.set_label(label="velocity [m/s]", size=size, weight='bold', color=color)
+        cbar.ax.tick_params(labelsize=size-3, labelcolor=color)
+    else:
+        cbar = ax.figure.colorbar(p)
+    return cbar
+
 
 def replace_outliers(ds, v_x="v_x", v_y="v_y", stride=1, max_iter=1):
     """

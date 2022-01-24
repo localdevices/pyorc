@@ -3,7 +3,7 @@ import numpy as np
 import rasterio
 from pyproj import CRS
 import geojson
-from orc.cv import _corr_lens, _corr_color
+from pyorc.cv import _corr_lens, _corr_color
 import xarray as xr
 from rasterio import warp
 
