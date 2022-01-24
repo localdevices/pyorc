@@ -1,7 +1,6 @@
 import cv2
 import dask
 import dask.array as da
-# from dask.cache import Cache
 
 import json
 import matplotlib.pyplot as plt
@@ -12,13 +11,6 @@ import xarray as xr
 
 from pyorc import cv, io, helpers, const
 from pyproj import CRS, Transformer
-from matplotlib.animation import FuncAnimation, FFMpegWriter
-
-VIDEO_ARGS = {
-    "fps": 25,
-    "extra_args": ["-vcodec", "libx264"],
-    "dpi": 120,
-}
 
 class Video(cv2.VideoCapture):
     def __init__(
