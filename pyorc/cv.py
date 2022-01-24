@@ -10,17 +10,13 @@ def _corr_color(img, alpha=None, beta=None, gamma=0.5):
     Grey scaling, contrast- and gamma correction. Both alpha and beta need to be
     defined in order to apply contrast correction.
 
-    Input:
-    ------
     :param img: 3D cv2 img object
     :param alpha=None: float - gain parameter for contrast correction)
     :param beta=None: bias parameter for contrast correction
     :param gamma=0.5 brightness parameter for gamma correction (default: 0.5)
     :return img 2D gray scale
-    Output:
-    -------
-    return: img gray scaled, contrast- and gamma corrected image
     """
+
     # turn image into grey scale
     corr_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
@@ -42,7 +38,7 @@ def _corr_color(img, alpha=None, beta=None, gamma=0.5):
 def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
     """
     Lens distortion correction based on lens characteristics.
-    Function by Gerben Gerritsen / Sten Schurer, 2019
+    Function by Gerben Gerritsen / Sten Schurer, 2019.
 
     :param img:  3D cv2 img matrix
     :param k1=0.: float - barrel lens distortion parameter
@@ -73,7 +69,8 @@ def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
 
 def _get_shape(bbox, resolution=0.01, round=1):
     """
-    defines the number of rows and columns needed in a target raster, to fit a given bounding box
+    defines the number of rows and columns needed in a target raster, to fit a given bounding box.
+
     :param bbox: shapely Polygon, bounding box
     :param resolution: resolution of target raster
     :param round: number of pixels to round intended shape to
@@ -89,7 +86,8 @@ def _get_shape(bbox, resolution=0.01, round=1):
 
 def _get_transform(bbox, resolution=0.01):
     """
-    return a rotated Affine transformation that fits with the bounding box and resolution
+    return a rotated Affine transformation that fits with the bounding box and resolution.
+
     :param bbox: shapely Polygon, polygon of bounding box. The coordinate order is very important and has to be:
         (upstream-left, downstream-left, downstream-right, upstream-right, upstream-left)
     :param res=0.01: float, resolution of target grid in meters

@@ -1,3 +1,4 @@
+# attributes for PIV variables
 PIV_ATTRS = {
     "v_x": {
         "standard_name": "sea_water_x_velocity",
@@ -24,6 +25,8 @@ PIV_ATTRS = {
         "coordinates": "lon lat",
     }
 }
+
+# attributes for geographical coordinate variables
 GEOGRAPHICAL_ATTRS = {
     "xs": {
         "axis": "X",
@@ -45,6 +48,7 @@ GEOGRAPHICAL_ATTRS = {
     }
 }
 
+# attributes for camera perspective coordinate values
 PERSPECTIVE_ATTRS = {
     "xp": {
         "axis": "X",
@@ -58,9 +62,9 @@ PERSPECTIVE_ATTRS = {
     },
 }
 
+# typical arguments used for making an animation writer.
 VIDEO_ARGS = {
     "fps": 25,
     "extra_args": ["-vcodec", "libx264"],
     "dpi": 120,
 }
-

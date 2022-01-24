@@ -1,23 +1,19 @@
 import cv2
 import dask
-import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
-from matplotlib.animation import FuncAnimation, FFMpegWriter
 from pyorc import cv, io, helpers, const
 from rasterio.transform import Affine
 
-
-
 def project(frames):
     """
-    Project frames DataArray, derived from a Video object with a complete CameraConfig, into a projected
+    Project frames xr.DataArray, derived from a Video object with a complete CameraConfig, into a projected
     frames DataArray, with information from the CameraConfig. This requires that the CameraConfig contains full gcp
     information and a coordinate reference system (crs).
 
-    :param frames: DataArray with frames, and typical attributes derived from the CameraConfig M, proj_transform and crs
-    :return: frames: DataArray with projected frames and x and y axis in local coordinate system (origin: top-left)
+    :param frames: xr.DataArray with frames, and typical attributes derived from the CameraConfig M, proj_transform and crs
+    :return: frames: xr.DataArray with projected frames and x and y axis in local coordinate system (origin: top-left)
 
     """
     # retrieve the M and shape from the frames attributes
@@ -27,6 +23,7 @@ def project(frames):
         raise AttributeError(f'Attribute "shape" is not available in frames')
     M = helpers.deserialize_attr(frames, "M", np.array, args_parse=False)
     shape = helpers.deserialize_attr(frames, "proj_shape", list)
+    # get orthoprojected frames as delayed objects
     get_ortho = dask.delayed(cv.get_ortho)
     imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in frames]
     # prepare axes
@@ -37,30 +34,24 @@ def project(frames):
         np.arange(len(x)),
         np.arange(len(y))
     )
+    # retrieve all coordinates we may ever need for further analysis or plotting
     xs, ys, lons, lats = io.get_xs_ys(
         cols,
         rows,
         helpers.deserialize_attr(frames, "proj_transform", Affine, args_parse=True),
         frames.crs
     )
-
-    # prepare attributes
-
-    attrs = {
-        "M": M,
-        "proj_transform": frames.proj_transform,
-        "crs": frames.crs,
-        "resolution": frames.resolution
-    }
-    # create DataArray and return
+    # Setup coordinates
     coords = {
         "time": time,
         "y": y,
         "x": x
     }
+    # add a coordinate if RGB frames are used
     if "rgb" in frames.coords:
         coords["rgb"] = np.array([0, 1, 2])
         shape = (*shape, 3)
+    # prepare a dask data array
     da = helpers.delayed_to_da(
         imgs,
         shape,
@@ -68,9 +59,11 @@ def project(frames):
         coords=coords,
         attrs=frames.attrs
     )
+    # remove time coordinate for the spatial variables (and rgb in case rgb frames are used)
     del coords["time"]
     if "rgb" in frames.coords:
         del coords["rgb"]
+    # add coordinate meshes to projected frames and return
     da = helpers.add_xy_coords(da, [xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
     return da
 
@@ -80,9 +73,9 @@ def landmask(frames, dilate_iter=10, samples=15):
     than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation operation is
     used to make the land mask a little bit larger than the exact defined pixels.
 
-    :param frames: DataArray with frames
-    :param dilate_iter: number of dilation iterations to use, to dilate land mask
-    :param samples: amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+    :param frames: xr.DataArray with frames
+    :param dilate_iter: int, number of dilation iterations to use, to dilate land mask
+    :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
         number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
     :return: xr.DataArray with filtered frames
 
@@ -114,8 +107,8 @@ def normalize(frames, samples=15):
     to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and partly
     shaded parts.
 
-    :param frames: DataArray with frames
-    :param samples: amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+    :param frames: xr.DataArray with frames
+    :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
         number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
     :return: xr.DataArray with filtered frames
     """
@@ -135,9 +128,16 @@ def normalize(frames, samples=15):
     frames_norm = frames_norm.where(mean!=0, 0)
     return frames_norm
 
-def reduce_rolling(frames, int=25):
-    roll_mean = frames.rolling(time=25).mean()
-    assert(len(frames) >= int), f"Amount of frames is smaller than requested rolling interval of {int} samples"
+def reduce_rolling(frames, samples=25):
+    """
+    Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use `normalize` instead).
+
+    :param frames: xr.DataArray with frames
+    :param samples: number of samples per rolling
+    :return: xr.DataArray with filtered frames
+    """
+    roll_mean = frames.rolling(time=samples).mean()
+    assert(len(frames) >= samples), f"Amount of frames is smaller than requested rolling interval of {samples} samples"
     # ensure attributes are kept
     xr.set_options(keep_attrs=True)
     # normalize = dask.delayed(cv2.normalize)
@@ -147,35 +147,4 @@ def reduce_rolling(frames, int=25):
     frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
     frames_norm = frames_norm.where(roll_mean!=0, 0)
     return frames_norm
-
-def animation(fn, frames, video_args=const.VIDEO_ARGS, **kwargs):
-    """
-    Create a video of the result, using defined settings passed to imshow
-
-    :param attr:
-    :return:
-    """
-
-    def init():
-        im_data = frames[0]
-        im.set_data(np.zeros(im_data.shape))
-        return ax
-
-    def animate(i):
-        im_data = frames[i].load()
-        im.set_data(im_data.values)
-        return ax
-
-    # retrieve the dataset
-    f = plt.figure(figsize=(16, 9), frameon=False)
-    f.set_size_inches(16, 9, True)
-    f.patch.set_facecolor("k")
-    f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
-    ax = plt.subplot(111)
-    im_data = frames[0].load()
-    im = ax.imshow(im_data.values, **kwargs)
-    anim = FuncAnimation(
-        f, animate, init_func=init, frames=frames.shape[0], interval=20, blit=False
-    )
-    anim.save(fn, **video_args)
 

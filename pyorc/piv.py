@@ -1,6 +1,4 @@
-import cv2
 import dask
-import dask.array as da
 import matplotlib.pyplot as plt
 from matplotlib.collections import QuadMesh
 import numpy as np
@@ -11,14 +9,24 @@ from pyorc import piv_process, io, helpers
 from pyorc.const import GEOGRAPHICAL_ATTRS, PIV_ATTRS, PERSPECTIVE_ATTRS
 
 def compute_piv(frames, **kwargs):
+    """
+    Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to
+    trigger actual computation.
+
+    :param frames: xr.DataArray, containing projected frames as 3D array or dask array
+    :param kwargs: dict, keyword arguments to pass to dask_piv, used to control the manner in which openpiv.pyprocess
+        is called.
+    :return: xr.Dataset, containing the PIV results in a lazy dask.array form.
+    """
     # forward the computation to piv
     dask_piv = dask.delayed(piv_process.piv, nout=6)
     v_x, v_y, s2n, corr = [], [], [], []
     frames_a = frames[0:-1]
     frames_b = frames[1:]
     for frame_a, frame_b in zip(frames_a, frames_b):
+        # select the time difference in seconds
         dt = frame_b.time - frame_a.time
-        # determine time difference dt between frames
+        # perform lazy piv graph computation
         cols, rows, _v_x, _v_y, _s2n, _corr = dask_piv(
             frame_a,
             frame_b,
@@ -28,6 +36,7 @@ def compute_piv(frames, **kwargs):
             search_area_size=frames.window_size,
             **kwargs,
         )
+        # append to result
         v_x.append(_v_x), v_y.append(_v_y), s2n.append(_s2n), corr.append(_corr)
     # compute one sample for the spacing
     cols, rows, _v_x, _v_y, _s2n, _corr = piv_process.piv(
@@ -39,9 +48,12 @@ def compute_piv(frames, **kwargs):
         search_area_size=frames.window_size,
         **kwargs,
     )
+    # extract global attributes from origin
     global_attrs = frames.attrs
     time = (frames.time[0:-1].values + frames.time[1:].values)/2  # as we use frame to frame differences, one time step gets lost
+    # retrieve the x and y-axis belonging to the results
     x, y = io.get_axes(cols, rows, frames.resolution)
+    # convert in projected and latlon coordinates
     xs, ys, lons, lats = io.get_xs_ys(
         cols,
         rows,
@@ -59,6 +71,7 @@ def compute_piv(frames, **kwargs):
         "y": y,
         "x": x
     }
+    # here establish the full xr.Dataset
     v_x, v_y, s2n, corr = [
         helpers.delayed_to_da(
             data,
@@ -68,12 +81,11 @@ def compute_piv(frames, **kwargs):
             attrs=attrs,
             name=name
         ) for data, (name, attrs) in zip((v_x, v_y, s2n, corr), PIV_ATTRS.items())]
-    # prepare the xs, ys, lons and lats grids for geographical projections
     ds = xr.merge([v_x, v_y, s2n, corr])
     del coords["time"]
-    # add all coordinate grids
+    # prepare the xs, ys, lons and lats grids for geographical projections and add to xr.Dataset
     ds = helpers.add_xy_coords(ds, [xp, yp, xs, ys, lons, lats], coords, {**PERSPECTIVE_ATTRS, **GEOGRAPHICAL_ATTRS})
-    # finally, add global attributes
+    # finally, add global attributes and return xr.Dataset
     ds.attrs = global_attrs
     return ds
 
@@ -93,8 +105,9 @@ def filter_temporal(
     kwargs_neighbour={},
 ):
     """
-    Masks values using several filters that use temporal variations or comparison as basis
-    :param ds: xarray Dataset, or file containing, with velocity vectors as [time, y, x]
+    Masks values using several filters that use temporal variations or comparison as basis.
+
+    :param ds: xr.Dataset, or file containing, with velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param filter_std: boolean, if True (default, filtering on variance is applied)
@@ -105,7 +118,7 @@ def filter_temporal(
     :param kwargs_angle: dict, set of key-word arguments to pass on to filter_temporal_angle
     :param kwargs_velocity: dict, set of key-word arguments to pass on to filter_temporal_velocity
     :param kwargs_corr: dict, set of key-word arguments to pass on to filter_temporal_corr
-    :return: xarray Dataset, containing temporally filtered velocity vectors as [time, y, x]
+    :return: xr.Dataset, containing temporally filtered velocity vectors as [time, y, x]
     """
     if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
@@ -138,15 +151,16 @@ def filter_temporal_angle(
     estimates in time, in case the user wants this (filter_per_timestep=True), in case the angle on
     a specific time step deviates more than the defined amount from the average.
     note: this function does not work appropriately, if the expected angle (+/- anglebounds) are within
-    range of zero, as zero is the same as 2*pi. This exception may be resolved in the future if necessary
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    range of zero, as zero is the same as 2*pi. This exception may be resolved in the future if necessary.
+
+    :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
-    :param angle_expected (=0.5*np.pi, assumes that flow is from left to right): angle [radians, 0-2*pi],
-        measured clock-wise from vertical upwards direction, expected in the velocites
-    :param angle_tolerance: float [0-2*pi] maximum deviation from expected angle allowed.
-    :param filter_per_timestep (=True): if set to True, tolerances are also checked per individual time step
-    :return: xarray Dataset, containing angle filtered velocity vectors as [time, y, x]
+    :param angle_expected float, angle (0-2*pi), measured clock-wise from vertical upwards direction, expected
+        in the velocites, default: 0.5*np.pi (meaning from left to right)
+    :param angle_tolerance: float (0-2*pi) maximum deviation from expected angle allowed.
+    :param filter_per_timestep: if set to True, tolerances are also checked per individual time step
+    :return: xr.Dataset, containing angle filtered velocity vectors as [time, y, x], default: True
     """
     # TODO: make function working appropriately, if angles are close to zero (2*pi)
     angle = np.arctan2(ds[v_x], ds[v_y])
@@ -161,13 +175,14 @@ def filter_temporal_angle(
 def filter_temporal_neighbour(ds, v_x="v_x", v_y="v_y", roll=5, tolerance=0.5):
     """
     Masks values if neighbours over a certain rolling length before and after, have a
-    significantly higher velocity than value under consideration, measured by tolerance
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    significantly higher velocity than value under consideration, measured by tolerance.
+
+    :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
-    :param roll: amount of time steps in rolling window (centred)
-    :param tolerance: Relative acceptable velocity of maximum found within rolling window
-    :return: xarray Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
+    :param roll: int, amount of time steps in rolling window (centred)
+    :param tolerance: float (0-1), Relative acceptable velocity of maximum found within rolling window
+    :return: xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
     """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
     s_roll = s.fillna(0.).rolling(time=roll, center=True).max()
@@ -180,12 +195,12 @@ def filter_temporal_std(
     ds, v_x="v_x", v_y="v_y", tolerance=1.0):
     """
     Masks values if they deviate more than x standard deviations from the mean.
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+
+    :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param tolerance: float, representing amount of standard deviations
-    :param filter_per_timestep:
-    :return: xarray Dataset, containing standard deviation filtered velocity vectors as [time, y, x]
+    :return: xr.Dataset, containing standard deviation filtered velocity vectors as [time, y, x]
     """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
     s_std = s.std(dim="time")
@@ -199,13 +214,14 @@ def filter_temporal_std(
 
 def filter_temporal_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
     """
-    Masks values if the velocity scalar lies outside a user-defined valid range
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    Masks values if the velocity scalar lies outside a user-defined valid range.
+
+    :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
-    :param s_min: minimum scalar velocity [m s-1]
-    :param s_max: maximum scalar velocity [m s-1]
-    :return: xarray Dataset, containing velocity-range filtered velocity vectors as [time, y, x]
+    :param s_min: float, minimum scalar velocity [m s-1]
+    :param s_max: float, maximum scalar velocity [m s-1]
+    :return: xr.Dataset, containing velocity-range filtered velocity vectors as [time, y, x]
     """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
     ds[v_x] = ds[v_x].where(s > s_min)
@@ -214,13 +230,14 @@ def filter_temporal_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
 
 def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.1):
     """
-    Masks values with a too low correlation
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    Masks values with a too low correlation.
+
+    :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param corr: str, name of correlation variable
-    :param tolerance: tolerance for correlation value. If correlation is lower than tolerance, it is masked
-    :return: xarray Dataset, containing correlation filtered velocity vectors as [time, y, x]
+    :param tolerance: float (0-1), tolerance for correlation value. If correlation is lower than tolerance, it is masked
+    :return: xr.Dataset, containing correlation filtered velocity vectors as [time, y, x]
     """
     ds[v_x] = ds[v_x].where(ds[corr] > tolerance)
     ds[v_y] = ds[v_y].where(ds[corr] > tolerance)
@@ -236,13 +253,14 @@ def filter_spatial(
     kwargs_median={},
 ):
     """
-    Masks velocity values on a number of spatial filters
-    :param ds: xarray Dataset, or file containing, with velocity vectors as [time, y, x]
+    Masks velocity values on a number of spatial filters.
+
+    :param ds: xr.Dataset, or file containing, with velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param kwargs_nan: dict, keyword arguments to pass to filter_spatial_nan
     :param kwargs_median: dict, keyword arguments to pass to filter_spatial_median
-    :return: xarray Dataset, containing spatially filtered velocity vectors as [time, y, x]
+    :return: xr.Dataset, containing spatially filtered velocity vectors as [time, y, x]
     """
     if not isinstance(ds, xr.Dataset):
         # assume ds is as yet a ref to a filename or buffer and first open
@@ -263,14 +281,15 @@ def filter_spatial(
 def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", tolerance=0.8, stride=1, missing=-9999.):
     """
     Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated
-    velocity estimates
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    velocity estimates.
+
+    :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param tolerance: float, amount of NaNs in search window measured as a fraction of total amount of values [0-1]
     :param stride: int, stride used to determine relevant neighbours
     :param missing: float, a temporary missing value, used to be able to convolve NaNs
-    :return: xarray Dataset, containing NaN filtered velocity vectors as [time, y, x]
+    :return: xr.Dataset, containing NaN filtered velocity vectors as [time, y, x]
     """
     # u, v = ds[v_x], ds[v_y]
     u, v = ds[v_x].values, ds[v_y].values
@@ -286,14 +305,15 @@ def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", tolerance=0.8, stride=1, missin
 def filter_spatial_median(ds, v_x="v_x", v_y="v_y", tolerance=0.7, stride=1, missing=-9999.):
     """
     Masks values when their value deviates more than x standard deviations from the median of its neighbours
-        (inc. itself).
-    :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
+    (inc. itself).
+
+    :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
-    :param tolerance: amount of standard deviations tolerance
+    :param tolerance: float, amount of standard deviations tolerance
     :param stride: int, stride used to determine relevant neighbours
     :param missing: float, a temporary missing value, used to be able to convolve NaNs
-    :return: xarray Dataset, containing std filtered velocity vectors as [time, y, x]
+    :return: xr.Dataset, containing std filtered velocity vectors as [time, y, x]
     """
     u, v = ds[v_x].values, ds[v_y].values
     s = (u**2 + v**2)**0.5
@@ -355,7 +375,6 @@ def get_uv_geographical(ds, v_x="v_x", v_y="v_y"):
     is usually rotated geographically, so that water always flows from left to right in the grid. The results can be
     used to plot velocities in a geographical map, e.g. overlayed on a background image, projected to lat/lon.
 
-
     :param ds: xr.Dataset, established using compute_piv. This dataset's attributes are used to construct the rotation
     :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
     :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
@@ -372,7 +391,21 @@ def get_uv_geographical(ds, v_x="v_x", v_y="v_y"):
     return "lon", "lat", u, v, s, theta
 
 
-def plot(ds, scalar=True, quiver=True, background=None, mode="local", background_kwargs={}, scalar_kwargs={}, quiver_kwargs={}, v_x="v_x", v_y="v_y", ax=None, cbar_color="w", cbar_fontsize=15):
+def plot(
+        ds,
+        ax=None,
+        scalar=True,
+        quiver=True,
+        background=None,
+        mode="local",
+        background_kwargs={},
+        scalar_kwargs={},
+        quiver_kwargs={},
+        v_x="v_x",
+        v_y="v_y",
+        cbar_color="w",
+        cbar_fontsize=15
+):
     """
     Extensive functionality to plot PIV results. PIV results can be plotted on a background frame, and can be plotted as
     scalar values (i.e. a mesh) or as quivers, or both by setting the inputs 'scalar' and 'quiver' to True or False.
@@ -388,6 +421,8 @@ def plot(ds, scalar=True, quiver=True, background=None, mode="local", background
       perspective, i.e. as derived from a `pyorc.Video` object, with the method `pyorc.Video.get_frames`.
 
     :param ds: xr.Dataset, established using compute_piv. This dataset's attributes are used to construct the rotation
+    :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
+        cartopy GeoAxes needs to be provided, or will be made in case ax is not set.
     :param scalar: boolean, if set to True, velocities are plotted as scalar values in a mesh (default: True)
     :param quiver: boolean, if set to True, velocities are plotted as quiver (i.e. arrows). In case scalar is also True,
         quivers will be plotted with a single color (defined in `quiver_kwargs`), if not, the scalar values are used
@@ -402,8 +437,6 @@ def plot(ds, scalar=True, quiver=True, background=None, mode="local", background
     :param quiver_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
     :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
     :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
-    :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
-        cartopy GeoAxes needs to be provided, or will be made in case ax is not set.
     :param cbar_color: color to use for the colorbar
     :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly smaller).
     :return: ax, axes object resulting from this function.
@@ -471,7 +504,7 @@ def plot(ds, scalar=True, quiver=True, background=None, mode="local", background
 
 def plot_prepare_axes(ax=None, mode="local"):
     """
-    Prepares the axes, needed to plot results, called from `plot`
+    Prepares the axes, needed to plot results, called from `pyorc.piv.plot`.
 
     :param mode: str, mode to plot, can be "local", "geographical" or "camera", default: "local"
     :return: ax, axes object.
@@ -497,6 +530,19 @@ def plot_prepare_axes(ax=None, mode="local"):
     return ax
 
 def plot_quiver(ax, x, y, u, v, s=None, zorder=3, **kwargs):
+    """
+    Add quiver plot to existing axes.
+
+    :param ax: axes object
+    :param x: np.ndarray (2D), x-coordinate grid
+    :param y: np.ndarray (2D), y-coordinate grid
+    :param u: np.ndarray (2D), x-directional (u) velocity components [m/s]
+    :param v: np.ndarray (2D), y-directional (v) velocity components [m/s]
+    :param s: np.ndarray (2D), scalar velocities [m/s]
+    :param zorder: int, zorder in plot (default: 3)
+    :param kwargs: dict, keyword arguments to pass to matplotlib.pyplot.quiver
+    :return: mappable, result from matplotlib.pyplot.quiver (can be used to construct a colorbar or legend)
+    """
     if s is None:
         p = ax.quiver(x, y, u, v, zorder=zorder, **kwargs)
     else:
@@ -505,6 +551,17 @@ def plot_quiver(ax, x, y, u, v, s=None, zorder=3, **kwargs):
     return p
 
 def plot_cbar(ax, p, mode="local", size=15, color="w"):
+    """
+    Add colorbar to existing axes. In case camera mode is used, the colorbar will get a bespoke layout and will
+    be placed inside of the axes object.
+
+    :param ax: axes object
+    :param p: mappable, used to define colorbar
+    :param mode: plotting mode, see pyorc.piv.plot
+    :param size: fontsize, used for colorbar title, only used with `mode="camera"`
+    :param color: color, used for fonts of colorbar title and ticks, only used with `mode="camera"`
+    :return: handle to colorbar
+    """
     if mode == "camera":
         # place the colorbar nicely inside
         cax = ax.figure.add_axes([0.9, 0.05, 0.05, 0.5])
@@ -522,12 +579,13 @@ def replace_outliers(ds, v_x="v_x", v_y="v_y", stride=1, max_iter=1):
     Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples
     in time are available to derive a mean or median velocity from, consider using a reducer on those samples instead
     of a spatial infilling method such as suggested here.
+
     :param ds: xarray Dataset, containing velocity vectors as [time, y, x]
     :param v_x: str, name of x-directional velocity
     :param v_y: str, name of y-directional velocity
     :param stride: int, stride used to determine relevant neighbours
     :param max_iter: number of iterations for replacement
-    :return:
+    :return: xr.Dataset, containing filtered velocities
     """
     # TO-DO: make replacement decision dependent on amount of non-NaN values in neighbourhood
     u, v = ds[v_x].values, ds[v_y].values

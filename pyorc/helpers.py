@@ -4,8 +4,16 @@ import numpy as np
 import xarray as xr
 from scipy.signal import convolve2d
 
-
 def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
+    """
+    add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.
+
+    :param ds: xr.Dataset with at least y and x dimensions
+    :param xy_coord_data: list, one or several arrays with 2-dimensional coordinates
+    :param coords: tuple with strings, indicating the dimensions of the data in xy_coord_data
+    :param attrs_dict: list of dicts, containing attributes belonging to xy_coord_data, must have equal length as xy_coord_data
+    :return: xr.Dataset, with added coordinate variables.
+    """
     dims = tuple(coords.keys())
     xy_coord_data = [
         xr.DataArray(
@@ -27,17 +35,16 @@ def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
 
 def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None):
     """
-    Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D DataArray with all axes
+    Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D xr.DataArray with dask arrays
+        with all axes.
 
     :param delayed_das: Delayed dask data arrays (2D) or list of 2D delayed dask arrays
     :param shape: tuple, foreseen shape of data arrays (rows, cols)
     :param dtype: string or dtype, e.g. "uint8" of data arrays
-    :param time: time axis to use in data array
-    :param y: y axis to use in data array
-    :param x: x axis to use in data array
-    :param attrs: dict, containing attributes for data array
-    :param name: str, name of attribute, default None
-    :return: xr.DataArray
+    :param coords: tuple with strings, indicating the dimensions of the xr.DataArray being prepared, usually ("time", "y", "x").
+    :param attrs: dict, containing attributes for xr.DataArray
+    :param name: str, name of variable, default None
+    :return: xr.DataArray with dask.array
     """
     if isinstance(delayed_das, list):
         data_array = da.stack(
@@ -66,7 +73,7 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None):
 
 def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
     """
-    Return a deserialized version of said property (assumed to be stored as a string) of DataArray
+    Return a deserialized version of said property (assumed to be stored as a string) of DataArray.
 
     :param data_array: xr.DataArray, containing attributes of interest
     :param attr: str, name of attributes
@@ -83,15 +90,13 @@ def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
 
 def neighbour_stack(array, stride=1, missing=-9999.):
     """
-    Builds a stack of arrays from a 2-D input array, with its neighbours using a provided stride
+    Builds a stack of arrays from a 2-D input array, constructed by permutation in space using a provided stride.
 
     :param array: 2-D numpy array, any values (may contain NaN)
     :param stride: int, stride used to determine relevant neighbours
     :param missing: float, a temporary missing value, used to be able to convolve NaNs
     :return: 3-D numpy array, stack of 2-D arrays, with strided neighbours
-
     """
-    # array = np.copy(array)
     array[np.isnan(array)] = missing
     array_move = []
     for vert in range(-stride, stride+1):
@@ -106,21 +111,9 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     array_move[np.isclose(array_move, missing)] = np.nan
     return array_move
 
-def plot_as_colormesh(image, ax, **pcolormeshkwargs):
-    # https://gist.github.com/tatome/e029e61a50d39090eb56
-    raveled_pixel_shape = (image.shape[0]*image.shape[1], image.shape[2])
-    color_tuple = image.values.transpose((1,0,2)).reshape(raveled_pixel_shape)
-
-    if color_tuple.dtype == np.uint8:
-        color_tuple = color_tuple / 255.
-
-    # index = np.tile(np.arange(image.shape[0]), (image.shape[1],1))
-    quad = ax.pcolormesh(image.lon.values, image.lat.values, image.values.mean(axis=-1), facecolor=color_tuple, linewidth=0., **pcolormeshkwargs)  # shading="nearest"
-    quad.set_array(None)
-
 def rotate_u_v(u, v, theta, deg=False):
     """
-    Rotate u and v components of vector counter clockwise by an amount of rotation
+    Rotate u and v components of vector counter clockwise by an amount of rotation.
 
     :param u: float, np.ndarray or xr.DataArray, x-direction component of vector
     :param v: float, np.ndarray or xr.DataArray, y-direction component of vector
@@ -141,7 +134,7 @@ def rotate_u_v(u, v, theta, deg=False):
 def xy_to_perspective(x, y, resolution, M):
     """
     Back transform local meters-from-top-left coordinates from frame to original perspective of camera using M
-    matrix, belonging to transformation from orthographic to local
+    matrix, belonging to transformation from orthographic to local.
 
     :param x: np.ndarray, 1D axis of x-coordinates in local projection with origin top-left, to be backwards projected
     :param y: np.ndarray, 1D axis of y-coordinates in local projection with origin top-left, to be backwards projected
