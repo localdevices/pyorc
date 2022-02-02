@@ -1,7 +1,7 @@
 pyORC
 =====
 
-**pyORC** is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for 
+**pyORC**, short for "pyOpenRiverCam" is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for 
 computations on the fully open software stack OpenRiverCam. **pyORC** can only be successful if the underlying methods
 are made available openly for all. Currently **pyORC** implements Large-scale Particle Image Velocimetry (LSPIV) based
 flow analysis using the OpenPIV library and reprojections and image pre-processing with OpenCV. We wish to extend this 
