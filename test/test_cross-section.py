@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import xarray as xr
-from orc import io, piv_process
+from pyorc import io, piv_process
 import matplotlib.pyplot as plt
 
 # define cross section
@@ -69,7 +69,7 @@ z = np.flipud(
     ]
 )
 
-folder = r"/home/hcwinsemius/Media/projects/orc/piv"
+folder = r"/home/hcwinsemius/Media/projects/pyorc/piv"
 src = os.path.join(folder, "velocity_filter.nc")
 coords = list(zip(x, y, z))
 

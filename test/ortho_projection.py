@@ -8,7 +8,7 @@ from shapely.affinity import rotate
 
 from descartes.patch import PolygonPatch
 
-import orc as ORC
+import pyorc as ORC
 import cv2
 import rasterio.plot
 
@@ -16,8 +16,8 @@ import rasterio.plot
 
 # it'll also include options to assess changes in orthography given changes in water levels. For this the position
 # of the camera is needed, in the same x, y, z reference system as the measurements of the GCPs.
-# folder = r"c:\orc"
-folder = r"/home/hcwinsemius/Media/projects/orc"
+# folder = r"c:\pyorc"
+folder = r"/home/hcwinsemius/Media/projects/pyorc"
 
 src = os.path.join(folder, "with_lens_color")
 dst = os.path.join(folder, "ortho_proj_color")
@@ -54,7 +54,7 @@ src_corners = {
 
 # make a polygon from corner points
 src_polygon = Polygon([src_corners[s] for s in src_corners])
-bbox = ORC.cv.get_aoi(gcps["src"], gcps["dst"], src_corners)
+bbox = pyorc.cv.get_aoi(gcps["src"], gcps["dst"], src_corners)
 
 prefix = "proj"
 dt = 0.004
@@ -80,12 +80,12 @@ for n, fn in enumerate(fns):
     # TODO: add "round" below when we know how we should compute it.
     # gcps["src"], gcps["dst"], gcps["z_0"], gcps["h_ref"]
 
-    corr_img, transform = ORC.cv.orthorectification(
+    corr_img, transform = pyorc.cv.orthorectification(
         img, lensPosition, h_a, bbox=bbox, resolution=0.01, **gcps
     )
     # print(transform)
     # save to geotiff
-    ORC.io.to_geotiff(
+    pyorc.io.to_geotiff(
         os.path.join(dst, dest_fn),
         rasterio.plot.reshape_as_raster(corr_img),
         transform,

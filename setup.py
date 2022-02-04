@@ -23,6 +23,7 @@ setup(
     test_suite="tests",
     python_requires=">=3.8",
     install_requires=[
+        "cython; platform_machine != 'x86_64'",
         "dask",
         "descartes",
         "geojson",
@@ -31,8 +32,10 @@ setup(
         "numpy",
         "opencv-python-headless",
         "openpiv",
+        "packaging; platform_machine != 'x86_64'"
         "pip",
         "pyproj",
+        "pythran; platform_machine != 'x86_64'",
         "rasterio",
         "scikit-image",
         "scipy",

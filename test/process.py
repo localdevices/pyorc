@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import rasterio
 from datetime import datetime, timedelta
 from rasterio.plot import reshape_as_raster
-import orc as ORC
+import pyorc as ORC
 import cv2
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
@@ -19,7 +19,7 @@ def proj_frames(movie, dst, prefix="proj"):
     src = os.path.join(movie['file']['bucket'], movie['file']['identifier'])
 
     n = 0  # frame number
-    for _t, img in ORC.io.frames(
+    for _t, img in pyorc.io.frames(
             src, grayscale=True, start_frame=0, lens_pars=lensParameters
     ):
         # make a filename
@@ -28,7 +28,7 @@ def proj_frames(movie, dst, prefix="proj"):
         )
         print(f"Putting frame {n} in file {dst_fn}")
         n += 1  # increase frame number by one
-        corr_img, transform = ORC.cv.orthorectification(
+        corr_img, transform = pyorc.cv.orthorectification(
             img=img,
             lensPosition=lensPosition,
             h_a=movie["h_a"],
@@ -41,7 +41,7 @@ def proj_frames(movie, dst, prefix="proj"):
         else:
             raster = np.int8(np.expand_dims(corr_img, axis=0))
         # write to temporary file
-        ORC.io.to_geotiff(
+        pyorc.io.to_geotiff(
             dst_fn,
             raster,
             transform,
@@ -111,14 +111,14 @@ def compute_piv(movie, dst, prefix="proj", piv_kwargs={}):
         # determine time offset of frame from filename
         ms = timedelta(milliseconds=int(fn[-10:-4]))
         frame_a = frame_b
-        frame_b = ORC.piv_process.imread(fn)
+        frame_b = pyorc.piv_process.imread(fn)
         # rewind to beginning of file
         if (frame_a is not None) and (frame_b is not None):
             # we have two frames in memory, now estimate velocity
             print(f"Processing frame {n}")
             # determine time difference dt between frames
             dt = (ms - _ms).total_seconds()
-            cols, rows, _v_x, _v_y, _s2n, _corr = ORC.piv.piv(
+            cols, rows, _v_x, _v_y, _s2n, _corr = pyorc.piv.piv(
                 frame_a,
                 frame_b,
                 res_x=resolution,
@@ -131,7 +131,7 @@ def compute_piv(movie, dst, prefix="proj", piv_kwargs={}):
             time.append(start_time + ms)
     # finally read GeoTiff transform from the first file
     print(f"Retrieving coordinates of grid from {fn}")
-    xs, ys, lons, lats = ORC.io.convert_cols_rows(fns[0], cols, rows)
+    xs, ys, lons, lats = pyorc.io.convert_cols_rows(fns[0], cols, rows)
 
     # prepare local axes
     spacing_x = np.diff(cols[0])[0]
@@ -150,7 +150,7 @@ def compute_piv(movie, dst, prefix="proj", piv_kwargs={}):
     )
 
     # prepare dataset
-    dataset = ORC.io.to_dataset(
+    dataset = pyorc.io.to_dataset(
         [v_x, v_y, s2n, corr],
         var_names,
         x,
@@ -179,7 +179,7 @@ def filter_piv(
         (+default values if not provided):
         kwargs_angle, dict, containing the following keyword args:
             angle_expected=0.5 * np.pi -- expected angle in radians of flow velocity measured from upwards, clock-wise.
-                In orc this is always 0.5*pi because we make sure water flows from left to right
+                In pyorc this is always 0.5*pi because we make sure water flows from left to right
             angle_bounds=0.25 * np.pi -- the maximum angular deviation from expected angle allowed. Velocities that are
                 outside this bound are masked
         kwargs_std, dict, containing following keyword args:
@@ -214,9 +214,9 @@ def filter_piv(
     # open file from bucket in memory
     fn = os.path.join(dst, "velocity.nc")
     print("applying temporal filters")
-    ds = ORC.piv_process.filter_temporal(fn, **filter_temporal_kwargs)  # filter_corr=True,
+    ds = pyorc.piv_process.filter_temporal(fn, **filter_temporal_kwargs)  # filter_corr=True,
     print("applying spatial filters")
-    ds = ORC.piv.filter_spatial(ds, **filter_spatial_kwargs)
+    ds = pyorc.piv.filter_spatial(ds, **filter_spatial_kwargs)
 
     encoding = {var: {"zlib": True} for var in ds}
     # write gridded netCDF with filtered velocities netCDF
@@ -246,12 +246,12 @@ def compute_q(
     )
 
     # retrieve velocities over cross section only (ds_points has time, points as dimension)
-    ds_points = ORC.io.interp_coords(
+    ds_points = pyorc.io.interp_coords(
         fn, *zip(*movie["bathymetry"]["coords"])
     )
 
     # add the effective velocity perpendicular to cross-section
-    ds_points["v_eff"] = ORC.piv.vector_to_scalar(
+    ds_points["v_eff"] = pyorc.piv.vector_to_scalar(
         ds_points["v_x"], ds_points["v_y"]
     )
 
@@ -259,11 +259,11 @@ def compute_q(
     ds_points = ds_points.quantile(quantile, dim="time")
 
     # fill velocities with logarithmic profile fit
-    ds_points["v_eff_fill"] = ORC.piv.velocity_fill(ds_points["zcoords"], ds_points["v_eff"], movie["camera_config"][
+    ds_points["v_eff_fill"] = pyorc.piv.velocity_fill(ds_points["zcoords"], ds_points["v_eff"], movie["camera_config"][
         "gcps"]["z_0"], movie["h_a"])
 
     # integrate over depth with vertical correction
-    ds_points["q"] = ORC.piv_process.depth_integrate(
+    ds_points["q"] = pyorc.piv_process.depth_integrate(
         ds_points["zcoords"],
         ds_points["v_eff_fill"],
         movie["camera_config"]["gcps"]["z_0"],
@@ -271,7 +271,7 @@ def compute_q(
         v_corr=v_corr,
     )
     # integrate over the width of the cross-section
-    Q = ORC.piv_process.integrate_flow(ds_points["q"])
+    Q = pyorc.piv_process.integrate_flow(ds_points["q"])
 
     # extract a callback from Q
     Q_dict = {

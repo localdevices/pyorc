@@ -1,6 +1,6 @@
 import numpy as np
 from shapely.geometry import Polygon
-import orc as ORC
+import pyorc as ORC
 import pyproj
 camera_type = {
     "name": "Foscam E9900P",  # user-chosen name for camera
@@ -54,7 +54,7 @@ src_polygon = Polygon([corners[s] for s in corners])
 print(src_polygon)
 
 # this function prepares a bounding box, from 4 user selected corner points, print to see what it looks like
-bbox = ORC.cv.get_aoi(gcps["src"], gcps["dst"], corners)
+bbox = pyorc.cv.get_aoi(gcps["src"], gcps["dst"], corners)
 print(bbox)
 
 lensPosition = [ 527869.47, 9251757.48, -14.38]

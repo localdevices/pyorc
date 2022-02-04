@@ -454,7 +454,11 @@ class CameraConfig:
         ax.plot(x[0:4], y[0:4], ".", markersize=16, transform=ccrs.PlateCarree(), zorder=2, label="Control points")  #
         if hasattr(self, "lens_position"):
             ax.plot(x[-1], y[-1], ".", markersize=16, transform=ccrs.PlateCarree(), zorder=2, label="Lens position")  # transform=ccrs.PlateCarree()
-        plt.legend()
+        bbox = shapely.wkt.loads(self.bbox)
+        bbox_trans = ops.transform(transform, bbox)
+        ax.add_geometries([bbox_trans], ccrs.PlateCarree(), alpha=0.5,  label="Area of interest")
+
+        ax.legend()
         return ax
 
     def to_file(self, fn):
