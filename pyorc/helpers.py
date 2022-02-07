@@ -2,6 +2,7 @@ import cv2
 import dask.array as da
 import numpy as np
 import xarray as xr
+from rasterio.transform import Affine
 from scipy.signal import convolve2d
 
 def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
@@ -32,6 +33,28 @@ def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
         ds[k].attrs = v.attrs
 
     return ds
+
+
+def affine_from_grid(xi, yi):
+    """
+    Retrieve the affine transformation from a gridded set of coordinates.
+    This function (unlike rasterio.transform functions) can also handle rotated grids
+
+    :param xi: 2D numpy-like gridded x-coordinates
+    :param yi: 2D numpy-like gridded y-coordinates
+
+    :return: rasterio Affine
+    """
+
+    xul, yul = xi[0, 0], yi[0, 0]
+    xcol, ycol = xi[0, 1], yi[0, 1]
+    xrow, yrow = xi[1, 0], yi[1, 0]
+    dx_col = xcol - xul
+    dy_col = ycol - yul
+    dx_row = xrow - xul
+    dy_row = yrow - yul
+    return Affine(dx_col, dy_col, xul, dx_row, dy_row, yul)
+
 
 def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None):
     """
@@ -105,7 +128,7 @@ def neighbour_stack(array, stride=1, missing=-9999.):
             _y = int(np.floor((abs(vert)*2+1)/2)) + vert
             _x = int(np.floor((abs(horz)*2+1)/2)) + horz
             conv_arr[_y, _x] = 1
-            array_move.append(convolve2d(array, conv_arr, mode="same"))
+            array_move.append(convolve2d(array, conv_arr, mode="same", fillvalue=np.nan))
     array_move = np.stack(array_move)
     # replace missings by Nan
     array_move[np.isclose(array_move, missing)] = np.nan

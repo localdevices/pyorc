@@ -8,27 +8,6 @@ import xarray as xr
 from rasterio import warp
 
 
-def affine_from_grid(xi, yi):
-    """
-    Retrieve the affine transformation from a gridded set of coordinates.
-    This function (unlike rasterio.transform functions) can also handle rotated grids
-
-    :param xi: 2D numpy-like gridded x-coordinates
-    :param yi: 2D numpy-like gridded y-coordinates
-
-    :return: rasterio Affine
-    """
-
-    xul, yul = xi[0, 0], yi[0, 0]
-    xcol, ycol = xi[0, 1], yi[0, 1]
-    xrow, yrow = xi[1, 0], yi[1, 0]
-    dx_col = xcol - xul
-    dy_col = ycol - yul
-    dx_row = xrow - xul
-    dy_row = yrow - yul
-    return rasterio.transform.Affine(dx_col, dy_col, xul, dx_row, dy_row, yul)
-
-
 def frames(
     fn,
     frame_int=1,

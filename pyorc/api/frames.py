@@ -119,14 +119,61 @@ def normalize(frames, samples=15):
     # normalize = dask.delayed(cv2.normalize)
     mean = frames[::time_interval].mean(axis=0).load()
     frames_reduce = frames - mean
-    # frames_min = frames_reduce.min(axis=-1).min(axis=-1)
-    # frames_max = frames_reduce.max(axis=-1).min(axis=-1)
-    # frames_norm = ((frames_reduce - frames_min)/(frames_max-frames_min)*255).astype("uint8")
-    frames_thres = np.maximum(frames_reduce, 0)
-    # # normalize
-    frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
+    # frames_norm = cv2.normalize(frames_reduce)
+    frames_min = frames_reduce.min(axis=-1).min(axis=-1)
+    frames_max = frames_reduce.max(axis=-1).min(axis=-1)
+    frames_norm = ((frames_reduce - frames_min)/(frames_max-frames_min)*255).astype("uint8")
+     # frames_thres = np.maximum(frames_reduce, 0)
+    # # # normalize
+    # frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
     frames_norm = frames_norm.where(mean!=0, 0)
     return frames_norm
+
+def edge_detection(frames, stride_1=7, stride_2=9):
+    """
+
+    :param frames: xr.DataArray with frames
+    :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+        number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
+    :return: xr.DataArray with filtered frames
+    """
+    def convert_edge(img, stride_1, stride_2):
+        if not(isinstance(img, np.ndarray)):
+            img = img.values
+        # load values here
+        blur1 = cv2.GaussianBlur(img, (stride_1, stride_1), 0)
+        blur2 = cv2.GaussianBlur(img, (stride_2, stride_2), 0)
+        edges = blur2 - blur1
+        mask = edges == 0
+        edges = ((edges - edges.min()) / (edges.max() - edges.min()) * 255).astype("uint8")
+        edges = cv2.equalizeHist(edges)
+        edges[mask] = 0
+        return edges
+
+    shape = frames[0].shape  # single-frame shape does not change
+    da_convert_edge = dask.delayed(convert_edge)
+    imgs = [da_convert_edge(frame.values, stride_1, stride_2) for frame in frames]
+    # prepare axes
+    # Setup coordinates
+    coords = {
+        "time": frames.time,
+        "y": frames.y,
+        "x": frames.x
+    }
+    # add a coordinate if RGB frames are used
+    da = helpers.delayed_to_da(
+        imgs,
+        shape,
+        "uint8",
+        coords=coords,
+        attrs=frames.attrs,
+        name="edges"
+    )
+    da["xp"] = frames["xp"]
+    da["yp"] = frames["yp"]
+    return da
+
+
 
 def reduce_rolling(frames, samples=25):
     """

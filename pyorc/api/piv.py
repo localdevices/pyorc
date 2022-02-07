@@ -4,6 +4,7 @@ from matplotlib.collections import QuadMesh
 import numpy as np
 from rasterio.transform import Affine
 import xarray as xr
+import warnings
 
 from pyorc import piv_process, io, helpers
 from pyorc.const import GEOGRAPHICAL_ATTRS, PIV_ATTRS, PERSPECTIVE_ATTRS
@@ -98,10 +99,10 @@ def filter_temporal(
     filter_velocity=True,
     filter_corr=True,
     filter_neighbour=True,
+    kwargs_corr={},
     kwargs_std={},
     kwargs_angle={},
     kwargs_velocity={},
-    kwargs_corr={},
     kwargs_neighbour={},
 ):
     """
@@ -125,16 +126,18 @@ def filter_temporal(
         ds = xr.open_dataset(ds)
     # load dataset in memory
     ds = ds.load()
+    # start with entirely independent filters
+    if filter_corr:
+        ds = filter_temporal_corr(ds, v_x=v_x, v_y=v_y, **kwargs_corr)
+    if filter_velocity:
+        ds = filter_temporal_velocity(ds, v_x=v_x, v_y=v_y, **kwargs_velocity)
+    if filter_neighbour:
+        ds = filter_temporal_neighbour(ds, v_x=v_x, v_y=v_y, **kwargs_neighbour)
+    # finalize with temporally dependent filters
     if filter_std:
         ds = filter_temporal_std(ds, v_x=v_x, v_y=v_y, **kwargs_std)
     if filter_angle:
         ds = filter_temporal_angle(ds, v_x=v_x, v_y=v_y, **kwargs_angle)
-    if filter_velocity:
-        ds = filter_temporal_velocity(ds, v_x=v_x, v_y=v_y, **kwargs_velocity)
-    if filter_corr:
-        ds = filter_temporal_corr(ds, v_x=v_x, v_y=v_y, **kwargs_corr)
-    if filter_neighbour:
-        ds = filter_temporal_neighbour(ds, v_x=v_x, v_y=v_y, **kwargs_neighbour)
     return ds
 
 def filter_temporal_angle(
@@ -163,11 +166,17 @@ def filter_temporal_angle(
     :return: xr.Dataset, containing angle filtered velocity vectors as [time, y, x], default: True
     """
     # TODO: make function working appropriately, if angles are close to zero (2*pi)
-    angle = np.arctan2(ds[v_x], ds[v_y])
-    angle_mean = angle.mean(dim="time")
+    # first filter on the temporal mean. This is to ensure that widely varying results in angle are deemed not
+    # to be trusted.
+    v_x_mean = ds[v_x].mean(dim="time")
+    v_y_mean = ds[v_y].mean(dim="time")
+    angle_mean = np.arctan2(v_x_mean, v_y_mean)
+    # angle_mean = angle.mean(dim="time")
     ds[v_x] = ds[v_x].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
     ds[v_y] = ds[v_y].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
+    # refine locally if user wishes so
     if filter_per_timestep:
+        angle = np.arctan2(ds[v_x], ds[v_y])
         ds[v_x] = ds[v_x].where(np.abs(angle - angle_expected) < angle_tolerance)
         ds[v_y] = ds[v_y].where(np.abs(angle - angle_expected) < angle_tolerance)
     return ds
@@ -228,7 +237,7 @@ def filter_temporal_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
     ds[v_y] = ds[v_y].where(s < s_max)
     return ds
 
-def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.1):
+def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.4):
     """
     Masks values with a too low correlation.
 
@@ -318,8 +327,11 @@ def filter_spatial_median(ds, v_x="v_x", v_y="v_y", tolerance=0.7, stride=1, mis
     u, v = ds[v_x].values, ds[v_y].values
     s = (u**2 + v**2)**0.5
     s_move = helpers.neighbour_stack(s, stride=stride)
-    # replace missings by Nan
-    s_median = np.nanmedian(s_move, axis=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+
+        # replace missings by Nan
+        s_median = np.nanmedian(s_move, axis=0)
     # now filter points that are very far off from the median
     filter = np.abs(s - s_median)/s_median > tolerance
     u[filter] = np.nan
