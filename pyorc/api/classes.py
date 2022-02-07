@@ -364,15 +364,9 @@ class CameraConfig:
         if crs is not None:
             if self.crs is None:
                 raise ValueError("CameraConfig does not contain a crs, ")
-            try:
-                crs = CRS.from_user_input(crs)
-            except:
-                raise ValueError(f"crs {crs} is not a valid Coordinate Reference System")
-            transform = Transformer.from_crs(crs, CRS.from_wkt(self.crs), always_xy=True)
-            # transform dst coordinates to local projection
             _x, _y = zip(*dst)
-            x, y = transform.transform(_x, _y)
-            # replace them
+            x, y = helpers.xy_transform(_x, _y, crs, CRS.from_wkt(self.crs))
+            # replace transformed coordinates
             dst = list(zip(x, y))
         self.gcps = {
             "src": src,
@@ -396,14 +390,7 @@ class CameraConfig:
         if crs is not None:
             if self.crs is None:
                 raise ValueError("CameraConfig does not contain a crs, ")
-            try:
-                crs = CRS.from_user_input(crs)
-            except:
-                raise ValueError(f"crs {crs} is not a valid Coordinate Reference System")
-            transform = Transformer.from_crs(crs, self.crs, always_xy=True)
-            # transform dst coordinates to local projection
-            x, y = transform.transform(x, y)
-            # replace them
+            x, y = helpers.xy_transform(x, y, crs, self.crs)
 
         self.lens_position = [x, y, z]
 

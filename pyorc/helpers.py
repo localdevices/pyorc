@@ -2,6 +2,8 @@ import cv2
 import dask.array as da
 import numpy as np
 import xarray as xr
+
+from pyproj import CRS, Transformer
 from rasterio.transform import Affine
 from scipy.signal import convolve2d
 
@@ -178,3 +180,16 @@ def xy_to_perspective(x, y, resolution, M):
     xp = coords_trans[0][:, 0].reshape(cols_i.shape)
     yp = coords_trans[0][:, 1].reshape(cols_i.shape)
     return xp, yp
+
+def xy_transform(x, y, crs_from, crs_to):
+        try:
+            crs = CRS.from_user_input(crs_from)
+        except:
+            raise ValueError(f"Input crs {crs_from} is not a valid Coordinate Reference System")
+        try:
+            crs = CRS.from_user_input(crs_from)
+        except:
+            raise ValueError(f"Output crs {crs_to} is not a valid Coordinate Reference System")
+        transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
+        # transform dst coordinates to local projection
+        return transform.transform(x, y)
