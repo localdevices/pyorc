@@ -212,7 +212,9 @@ def filter_temporal_std(
     :return: xr.Dataset, containing standard deviation filtered velocity vectors as [time, y, x]
     """
     s = (ds[v_x] ** 2 + ds[v_y] ** 2) ** 0.5
-    s_std = s.std(dim="time")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        s_std = s.std(dim="time")
     s_mean = s.mean(dim="time")
     s_var = s_std / s_mean
     ds[v_x] = ds[v_x].where((s - s_mean) / s_std < tolerance)
