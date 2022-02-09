@@ -5,7 +5,7 @@ import xarray as xr
 from pyorc import helpers
 from pyproj import CRS
 
-def get_q(ds, x, y, z=None, crs=None, xs="xs", ys="ys"):
+def get_uv_points(ds, x, y, z=None, crs=None, xs="xs", ys="ys"):
     """
     Interpolate all variables to supplied x and y coordinates. This function assumes that the grid
     can be rotated and that xs and ys are supplied following the projected coordinates supplied in
@@ -64,3 +64,4 @@ def get_q(ds, x, y, z=None, crs=None, xs="xs", ys="ys"):
         ds_points = ds_points.assign_coords(zcoords=("points", list(z)))
 
     return ds_points
+
