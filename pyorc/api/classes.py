@@ -64,6 +64,8 @@ class Video(cv2.VideoCapture):
         self.M = camera_config.get_M(self.h_a)
         self.M_reverse = camera_config.get_M_reverse(self.h_a)
         self.lens_pars = camera_config.lens_pars
+        self.z_0 = camera_config.gcps["z_0"]
+        self.h_ref = camera_config.gcps["h_ref"]
         self.fn = fn
         self.transform = camera_config.transform
         self.resolution = camera_config.resolution
@@ -182,7 +184,10 @@ class Video(cv2.VideoCapture):
             "camera_shape": str([len(y), len(x)]),
             "crs": self.crs,
             "resolution": self.resolution,
-            "window_size": self.window_size
+            "window_size": self.window_size,
+            "z_0": self.z_0,
+            "h_ref": self.h_ref,
+            "h_a": self.h_a
         }
         data_array = xr.DataArray(
             da.stack(data_array, axis=0),

@@ -67,12 +67,26 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys"):
         ds_points = ds_points.assign_coords(zcoords=("points", list(z)))
     if v_eff:
         # add the effective velocity, perpendicular to cross section direction
-        ds_points["v_eff"] = vector_to_scalar(
-            ds_points["v_x"], ds_points["v_y"]
-        )
+        ds_points = vector_to_scalar(ds_points)
     return ds_points
 
-def vector_to_scalar(v_x, v_y, angle_method=0):
+def get_q(ds_points, groupby="quantile", v_corr=0.85, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
+    # aggregate to a limited set of quantiles
+    ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
+    z = ds_points["zcoords"]
+    z_0 = ds_points.z_0
+    h_ref =  ds_points.h_ref
+    h_a = ds_points.h_a
+    # add filled surface velocities with a logarithmic profile curve fit
+    ds_points["v_eff"] = helpers.velocity_fill(z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, groupby=groupby)
+    # compute q for both non-filled and filled velocities
+    # ds_points["q_nofill"] = helpers.depth_integrate(z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, v_corr=v_corr, name="q_nofill")
+    # ds_points["q"] = helpers.depth_integrate(z, ds_points["v_eff"], z_0, h_ref, h_a, v_corr=v_corr, name="q")
+    return ds_points
+
+
+
+def vector_to_scalar(ds_points, angle_method=0, v_x="v_x", v_y="v_y"):
     """
     Turns velocity vectors into effective velocities over cross-section, by computing the perpendicular velocity component
     :param v_x: DataArray(t, points), time series in cross section points with x-directional velocities
@@ -82,8 +96,8 @@ def vector_to_scalar(v_x, v_y, angle_method=0):
     :return: v_eff: DataArray(t, points), time series in cross section points with velocities perpendicular to cross section
 
     """
-    xs = v_x["x"].values
-    ys = v_x["y"].values
+    xs = ds_points["x"].values
+    ys = ds_points["y"].values
     # find points that are located on the area of interest
     idx = np.isfinite(xs)
     xs = xs[idx]
@@ -95,7 +109,7 @@ def vector_to_scalar(v_x, v_y, angle_method=0):
     else:
         # start with empty angle
         angle = np.zeros(ys.shape)
-        angle_da = np.zeros(v_x["x"].shape)
+        angle_da = np.zeros(ds_points["x"].shape)
         angle_da[:] = np.nan
 
         for n, (x, y) in enumerate(zip(xs, ys)):
@@ -142,9 +156,9 @@ def vector_to_scalar(v_x, v_y, angle_method=0):
     flow_dir = angle_da - 0.5 * np.pi
 
     # compute per velocity vector in the dataset, what its angle is
-    v_angle = np.arctan2(v_x, v_y)
+    v_angle = np.arctan2(ds_points[v_x], ds_points[v_y])
     # compute the scalar value of velocity
-    v_scalar = (v_x ** 2 + v_y ** 2) ** 0.5
+    v_scalar = (ds_points[v_x] ** 2 + ds_points[v_y] ** 2) ** 0.5
 
     # compute difference in angle between velocity and perpendicular of cross section
     angle_diff = v_angle - flow_dir
@@ -156,6 +170,7 @@ def vector_to_scalar(v_x, v_y, angle_method=0):
         "units": "m s-1",
     }
     # set name
-    v_eff.name = "v_eff"
-    return v_eff
+    v_eff.name = "v_eff_nofill"  # there still may be gaps in this series
+    ds_points["v_eff_nofill"] = v_eff
+    return ds_points
 
