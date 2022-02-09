@@ -239,7 +239,7 @@ def filter_temporal_velocity(ds, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
     ds[v_y] = ds[v_y].where(s < s_max)
     return ds
 
-def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.4):
+def filter_temporal_corr(ds, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.1):
     """
     Masks values with a too low correlation.
 
@@ -289,7 +289,7 @@ def filter_spatial(
     return ds
 
 
-def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", tolerance=0.8, stride=1, missing=-9999.):
+def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", tolerance=0.3, stride=1, missing=-9999.):
     """
     Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated
     velocity estimates.
@@ -304,7 +304,7 @@ def filter_spatial_nan(ds, v_x="v_x", v_y="v_y", tolerance=0.8, stride=1, missin
     """
     # u, v = ds[v_x], ds[v_y]
     u, v = ds[v_x].values, ds[v_y].values
-    u_move = helpers.neighbour_stack(u, stride=stride, missing=missing)
+    u_move = helpers.neighbour_stack(u.copy(), stride=stride, missing=missing)
     # replace missings by Nan
     nan_frac = np.float64(np.isnan(u_move)).sum(axis=0)/float(len(u_move))
     u[nan_frac > tolerance] = np.nan

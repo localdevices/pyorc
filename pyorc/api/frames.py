@@ -112,22 +112,24 @@ def normalize(frames, samples=15):
         number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
     :return: xr.DataArray with filtered frames
     """
-    time_interval = round(len(frames)/samples)
-    assert(time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
+    time_interval = round(len(frames) / samples)
+    assert (time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
     # ensure attributes are kept
     xr.set_options(keep_attrs=True)
     # normalize = dask.delayed(cv2.normalize)
     mean = frames[::time_interval].mean(axis=0).load()
     frames_reduce = frames - mean
-    # frames_norm = cv2.normalize(frames_reduce)
-    frames_min = frames_reduce.min(axis=-1).min(axis=-1)
-    frames_max = frames_reduce.max(axis=-1).min(axis=-1)
-    frames_norm = ((frames_reduce - frames_min)/(frames_max-frames_min)*255).astype("uint8")
-     # frames_thres = np.maximum(frames_reduce, 0)
-    # # # normalize
-    # frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
+    #     frames_norm = cv2.normalize(frames_reduce)
+    # frames_min = frames_reduce.min(axis=-1).min(axis=-1)
+    # frames_max = frames_reduce.max(axis=-1).min(axis=-1)
+    # frames_norm = ((frames_reduce - frames_min) / (frames_max - frames_min) * 255).astype("uint8")
+
+    frames_thres = np.maximum(frames_reduce, 0)
+    # normalize
+    frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
     frames_norm = frames_norm.where(mean!=0, 0)
     return frames_norm
+
 
 def edge_detection(frames, stride_1=7, stride_2=9):
     """
