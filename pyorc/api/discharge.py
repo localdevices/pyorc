@@ -4,6 +4,7 @@ import xarray as xr
 
 from pyorc import helpers
 from pyproj import CRS
+from scipy.interpolate import interp1d
 
 def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys"):
     """
@@ -38,7 +39,7 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys"):
     coli, rowi = np.meshgrid(np.arange(len(ds["x"])), np.arange(len(ds["y"])))
     ds["cols"], ds["rows"] = (["y", "x"], coli), (["y", "x"], rowi)
     # compute rows and cols locations of coordinates (x, y)
-    rows, cols = rasterio.transform.rowcol(transform, list(x), list(y))
+    rows, cols = rasterio.transform.rowcol(transform, list(x), list(y), op=float)  # ensure we get rows and columns in fractions instead of whole numbers
     rows, cols = np.array(rows), np.array(cols)
 
     # select x and y coordinates from axes
@@ -46,19 +47,20 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys"):
         np.array([cols >= 0, cols < len(ds["x"]), rows >= 0, rows < len(ds["y"])]),
         axis=0,
     )
-    x = np.empty(len(cols))
-    x[:] = np.nan
-    y = np.empty(len(rows))
-    y[:] = np.nan
-    x[idx] = ds["x"].isel(x=cols[idx])
-    y[idx] = ds["y"].isel(y=rows[idx])
-    # interpolate values from grid to list of x-y coordinates to grid in xarray format
-    x = xr.DataArray(list(x), dims="points")
-    y = xr.DataArray(list(y), dims="points")
-    if np.isnan(x).all():
-        raise ValueError("All bathymetry points are outside valid domain")
-    else:
-        ds_points = ds.interp(x=x, y=y)
+    # compute transect coordinates in the local grid coordinate system (can be outside the grid)
+    f_x = interp1d(np.arange(0, len(ds["x"])), ds["x"], fill_value="extrapolate")
+    f_y = interp1d(np.arange(0, len(ds["y"])), ds["y"], fill_value="extrapolate")
+    _x = f_x(cols)
+    _y = f_y(rows)
+
+    # covert local coordinates to DataArray
+    _x = xr.DataArray(list(_x), dims="points")
+    _y = xr.DataArray(list(_y), dims="points")
+
+    # interpolate velocities over points
+    ds_points = ds.interp(x=_x, y=_y)
+    if np.isnan(ds_points["v_x"].mean(dim="time")).all():
+        raise ValueError("No valid velocimetry points found over bathymetry. Check if the bethymetry is within the camera objective")
     # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
     # found back from this dataset
     ds_points = ds_points.assign_coords(xcoords=("points", list(x)))
@@ -174,3 +176,10 @@ def vector_to_scalar(ds_points, angle_method=0, v_x="v_x", v_y="v_y"):
     ds_points["v_eff_nofill"] = v_eff
     return ds_points
 
+def plot(ds_points):
+    """
+
+
+    :param ds_points:
+    :return:
+    """
