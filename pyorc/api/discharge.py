@@ -6,7 +6,7 @@ from pyorc import helpers
 from pyproj import CRS
 from scipy.interpolate import interp1d
 
-def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys"):
+def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", distance=None):
     """
     Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the grid
     can be rotated and that xs and ys are supplied following the projected coordinates supplied in
@@ -35,6 +35,12 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys"):
     if crs is not None:
         # transform coordinates of cross section
         x, y = helpers.xy_transform(x, y, crs_from=crs, crs_to=CRS.from_wkt(ds.crs))
+    if distance is None:
+        # interpret suitable sampling distance from grid resolution
+        distance = np.abs(np.diff(ds.x)[0])
+        # interpolate to a suitable set of points
+    x, y, z = helpers.xy_equidistant(x, y, distance=distance, z=z)
+
     # make a cols and rows temporary variable
     coli, rowi = np.meshgrid(np.arange(len(ds["x"])), np.arange(len(ds["y"])))
     ds["cols"], ds["rows"] = (["y", "x"], coli), (["y", "x"], rowi)

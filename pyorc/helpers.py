@@ -256,17 +256,18 @@ def velocity_fill(z, v, z_0, h_ref, h_a, groupby="quantile"):
     v_group = copy.deepcopy(v).groupby(groupby)
     return v_group.apply(fit)
 
-def xy_equidistant(x, y, distance):
+def xy_equidistant(x, y, distance, z=None):
     """
-    Transforms a set of ordered in space x, y coordinates into x, y coordinates with equal 1-dimensional distance
-    between them using piece-wise linear interpolation. Extrapolation is used for the last point to ensure the
-    range of points covers at least the full range of x, y coordinates.
+    Transforms a set of ordered in space x, y (and z if provided) coordinates into x, y (and z) coordinates with equal
+    1-dimensional distance between them using piece-wise linear interpolation. Extrapolation is used for the last point
+    to ensure the range of points covers at least the full range of x, y coordinates.
 
     :param x: np.ndarray, set of (assumed ordered) x-coordinates
     :param y: np.ndarray, set of (assumed ordered) x-coordinates
     :param distance: float, distance between equidistant samples measured in cumulated 1-dimensional distance from xy
         origin (first point)
-    :return: (x_sample, y_sample): np.ndarrays with 1D points
+    :param z: np.ndarray, set of (assumed ordered) z-coordinates (default: None)
+    :return: (x_sample, y_sample, z_sample (only if z is not None)): np.ndarrays with 1D points
     """
     # estimate cumulative distance between points, starting with zero
     x_diff = np.concatenate((np.array([0]), np.diff(x)))
@@ -283,7 +284,12 @@ def xy_equidistant(x, y, distance):
     # interpolate x and y coordinates
     x_sample = f_x(s_sample)
     y_sample = f_y(s_sample)
-    return x_sample, y_sample
+    if z is None:
+        return x_sample, y_sample
+    else:
+        f_z = interp1d(s, z, fill_value="extrapolate")
+        z_sample = f_z(s_sample)
+        return x_sample, y_sample, z_sample
 
 
 def xy_to_perspective(x, y, resolution, M):
