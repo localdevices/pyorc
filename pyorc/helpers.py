@@ -1,3 +1,4 @@
+import copy
 import cv2
 import dask.array as da
 import numpy as np
@@ -5,7 +6,9 @@ import xarray as xr
 
 from pyproj import CRS, Transformer
 from rasterio.transform import Affine
+from scipy.optimize import curve_fit
 from scipy.signal import convolve2d
+from scipy.interpolate import interp1d
 
 def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
     """
@@ -96,6 +99,45 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None):
         name=name
     )
 
+def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
+    """
+    :param z: DataArray(points), bathymetry depths (ref. CRS)
+    :param v: DataArray(time, points), effective velocity at surface [m s-1]
+    :param z_0: float, zero water level (ref. CRS)
+    :param h_ref: float, water level measured during survey (ref. z_0)
+    :param h_a: float, actual water level (ref. z_0)
+    :param v_corr: float (range: 0-1, typically close to 1), correction factor from surface to depth-average (default: 0.85)
+    :return: q: DataArray(time, points), depth integrated velocity [m2 s-1]
+    """
+    # compute depth, never smaller than zero. Depth is in words:
+    #   + height of the level of staff gauge (z_0) measured during survey in gps CRS (e.g. WGS84)
+    #   - z levels the bottom cross section observations measured in gps CRS (e.g. WGS84)
+    #   + difference in water level measured with staff gauge during movie and during survey
+    #   of course depth cannot be negative, so it is always maximized to zero when below zero
+    depth = np.maximum(z_0 - z + h_a - h_ref, 0)
+    # compute the depth average velocity
+    q = v * v_corr * depth
+    q.attrs = {
+        "standard_name": "velocity_depth",
+        "long_name": "velocity averaged over depth",
+        "units": "m2 s-1",
+    }
+    # set name
+    q.name = name
+    return q
+
+def distance_pts(c1, c2):
+    """
+    Compute distance between c1 and c2
+    :param c1: tuple(x, y), coordinate 1
+    :param c2: tuple(x, y), coordinate 2
+    :return: float, distance between c1 and c2
+    """
+    x1, y1 = c1
+    x2, y2 = c2
+    return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+
+
 def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
     """
     Return a deserialized version of said property (assumed to be stored as a string) of DataArray.
@@ -112,6 +154,9 @@ def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
     if args_parse:
         return type(*eval(attr_obj))
     return type(eval(attr_obj))
+
+def log_profile(z, z0, k):
+    return k*np.maximum(np.log(np.maximum(z, 1e-6)/z0), 0)
 
 def neighbour_stack(array, stride=1, missing=-9999.):
     """
@@ -136,6 +181,35 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     array_move[np.isclose(array_move, missing)] = np.nan
     return array_move
 
+def optimize_log_profile(z, v):
+    """
+    optimize velocity log profile relation of v=k*max(z/z0)
+    :param z: list of depths
+    :param v: list of surface velocities
+    :return: {z_0, k}
+    """
+    if v.min() < 0:
+        result = curve_fit(
+            log_profile,
+            np.array(z),
+            np.array(-v),
+            bounds=([0.05, 0.1], [0.050000001, 20]),
+            p0=[0.05, 2]
+        )
+    else:
+        result = curve_fit(
+            log_profile,
+            np.array(z),
+            np.array(v),
+            bounds=([0.05, 0.1], [0.050000001, 20]),
+            p0=[0.05, 2]
+        )
+
+    z0, k = result[0]
+    return {"z0": z0, "k": k}
+
+
+
 def rotate_u_v(u, v, theta, deg=False):
     """
     Rotate u and v components of vector counter clockwise by an amount of rotation.
@@ -155,6 +229,62 @@ def rotate_u_v(u, v, theta, deg=False):
     u2 = R[0, 0] * u + R[0, 1] * v
     v2 = R[1, 0] * u + R[1, 1] * v
     return u2, v2
+
+def velocity_fill(z, v, z_0, h_ref, h_a, groupby="quantile"):
+    """
+    Fill missing surface velocities using a velocity depth profile with
+
+    :param z: DataArray(points), bathymetry depths (ref. CRS)
+    :param v: DataArray(time, points), effective velocity at surface [m s-1]
+    :param z_0: float, zero water level (ref. CRS)
+    :param h_ref: float, water level measured during survey (ref. z_0)
+    :param h_a: float, actual water level (ref. z_0)
+    :param groupby: str, dimension over which data should be grouped, default: "quantile", dimension must exist in v,
+        typically "quantile" or "time"
+    :return: v_fill: DataArray(quantile or time, points), filled velocities  [m s-1]
+    """
+    def fit(_v):
+        pars = optimize_log_profile(depth[np.isfinite(_v)], _v[np.isfinite(_v)])
+        if _v.min() < 0:
+            _v[np.isnan(_v)] = -log_profile(depth[np.isnan(_v)], **pars)
+        else:
+            _v[np.isnan(_v)] = log_profile(depth[np.isnan(_v)], **pars)
+
+        return _v
+    depth = np.maximum(z_0 - z + h_a - h_ref, 0)
+    # per slice, fill missings
+    v_group = copy.deepcopy(v).groupby(groupby)
+    return v_group.apply(fit)
+
+def xy_equidistant(x, y, distance):
+    """
+    Transforms a set of ordered in space x, y coordinates into x, y coordinates with equal 1-dimensional distance
+    between them using piece-wise linear interpolation. Extrapolation is used for the last point to ensure the
+    range of points covers at least the full range of x, y coordinates.
+
+    :param x: np.ndarray, set of (assumed ordered) x-coordinates
+    :param y: np.ndarray, set of (assumed ordered) x-coordinates
+    :param distance: float, distance between equidistant samples measured in cumulated 1-dimensional distance from xy
+        origin (first point)
+    :return: (x_sample, y_sample): np.ndarrays with 1D points
+    """
+    # estimate cumulative distance between points, starting with zero
+    x_diff = np.concatenate((np.array([0]), np.diff(x)))
+    y_diff = np.concatenate((np.array([0]), np.diff(y)))
+    s = np.cumsum((x_diff ** 2 + y_diff ** 2) ** 0.5)
+
+    # create interpolation functions for x and y coordinates
+    f_x = interp1d(s, x, fill_value="extrapolate")
+    f_y = interp1d(s, y, fill_value="extrapolate")
+
+    # make equidistant samples
+    s_sample = np.arange(s.min(), np.ceil((1 + s.max() / distance) * distance), distance)
+
+    # interpolate x and y coordinates
+    x_sample = f_x(s_sample)
+    y_sample = f_y(s_sample)
+    return x_sample, y_sample
+
 
 def xy_to_perspective(x, y, resolution, M):
     """
