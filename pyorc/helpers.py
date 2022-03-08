@@ -155,8 +155,12 @@ def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
         return type(*eval(attr_obj))
     return type(eval(attr_obj))
 
-def log_profile(z, z0, k):
-    return k*np.maximum(np.log(np.maximum(z, 1e-6)/z0), 0)
+def log_profile(X, z0, k_max, s0=0., s1=0.):
+    z, s = X
+    k = k_max * np.minimum(np.maximum((s-s0)/(s1-s0), 0), 1)
+    v = k*np.maximum(np.log(np.maximum(z, 1e-6)/z0), 0)
+    return v
+
 
 def neighbour_stack(array, stride=1, missing=-9999.):
     """
@@ -181,32 +185,29 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     array_move[np.isclose(array_move, missing)] = np.nan
     return array_move
 
-def optimize_log_profile(z, v):
+def optimize_log_profile(z, v, dist_bank=None):
     """
     optimize velocity log profile relation of v=k*max(z/z0)
     :param z: list of depths
     :param v: list of surface velocities
     :return: {z_0, k}
     """
-    if v.min() < 0:
-        result = curve_fit(
-            log_profile,
-            np.array(z),
-            np.array(-v),
-            bounds=([0.05, 0.1], [0.050000001, 20]),
-            p0=[0.05, 2]
-        )
-    else:
-        result = curve_fit(
-            log_profile,
-            np.array(z),
-            np.array(v),
-            bounds=([0.05, 0.1], [0.050000001, 20]),
-            p0=[0.05, 2]
-        )
+    if dist_bank is None:
+        dist_bank = np.inf(len(v))
+    v = np.array(v)
+    z = np.array(z)
+    # if v.min() < 0:
+    result = curve_fit(
+        log_profile,
+        (z, dist_bank),
+        np.array(v),
+        # bounds=([0.00001, 0.05, -20], [10, 2., 20]),
+        bounds=([0.05, -20, 0., 0.], [0.051, 20, 5, 100]),
+        # method="dogbox"
+    )
 
-    z0, k = result[0]
-    return {"z0": z0, "k": k}
+    z0, k_max, s0, s1 = result[0]
+    return {"z0": z0, "k_max": k_max, "s0": s0, "s1": s1}
 
 
 
@@ -230,7 +231,7 @@ def rotate_u_v(u, v, theta, deg=False):
     v2 = R[1, 0] * u + R[1, 1] * v
     return u2, v2
 
-def velocity_fill(z, v, z_0, h_ref, h_a, groupby="quantile"):
+def velocity_fill(x, y, z, v, z_0, h_ref, h_a, groupby="quantile"):
     """
     Fill missing surface velocities using a velocity depth profile with
 
@@ -244,17 +245,17 @@ def velocity_fill(z, v, z_0, h_ref, h_a, groupby="quantile"):
     :return: v_fill: DataArray(quantile or time, points), filled velocities  [m s-1]
     """
     def fit(_v):
-        pars = optimize_log_profile(depth[np.isfinite(_v)], _v[np.isfinite(_v)])
-        if _v.min() < 0:
-            _v[np.isnan(_v)] = -log_profile(depth[np.isnan(_v)], **pars)
-        else:
-            _v[np.isnan(_v)] = log_profile(depth[np.isnan(_v)], **pars)
-
+        pars = optimize_log_profile(depth[np.isfinite(_v)], _v[np.isfinite(_v)], dist_bank[np.isfinite(_v)])
+        _v[np.isnan(_v)] = log_profile((depth[np.isnan(_v)], dist_bank[np.isnan(_v)]), **pars)
         return _v
-    depth = np.maximum(z_0 - z + h_a - h_ref, 0)
-    # per slice, fill missings
+
+    z_pressure = np.maximum(z_0 - h_ref + h_a, z)
+    depth = z_pressure - z
+    z_dry = z_0 - h_ref + h_a < z
+    dist_bank = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
+    # per time slice or quantile, fill missings
     v_group = copy.deepcopy(v).groupby(groupby)
-    return v_group.apply(fit)
+    return v_group.map(fit)
 
 def xy_equidistant(x, y, distance, z=None):
     """
@@ -289,7 +290,7 @@ def xy_equidistant(x, y, distance, z=None):
     else:
         f_z = interp1d(s, z, fill_value="extrapolate")
         z_sample = f_z(s_sample)
-        return x_sample, y_sample, z_sample
+        return x_sample, y_sample, z_sample, s_sample
 
 
 def xy_to_perspective(x, y, resolution, M):

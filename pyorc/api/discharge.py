@@ -6,6 +6,22 @@ from pyorc import helpers
 from pyproj import CRS
 from scipy.interpolate import interp1d
 
+def get_river_flow(ds):
+    if "q" not in ds:
+        raise ValueError('Dataset must contain variable "q", which is the depth-integrated velocity [m2 s-1], perpendicular to cross-section. Create this wjith pyorc.discharge.get_q')
+    # integrate over the distance coordinates (s-coord)
+    Q = ds["q"].fillna(0.0).integrate(coord="scoords")
+    Q.attrs = {
+        "standard_name": "river_discharge",
+        "long_name": "River Flow",
+        "units": "m3 s-1",
+    }
+    # set name
+    Q.name = "Q"
+    ds["river_flow"] = Q
+    return ds
+
+
 def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", distance=None):
     """
     Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the grid
@@ -27,10 +43,10 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
         default: "ys"
     :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
     """
-
     if not isinstance(ds, xr.Dataset):
-        # assume ds is as yet a ref to a filename or buffer and first open
-        ds = xr.open_dataset(ds)
+        raise IOError("Dataset must be of type xarray.Dataset, ensure to create it from pyorc.piv_process.compute_piv or open it from file with xarray.open_dataset")
+    if ("v_x" not in ds) or ("v_y" not in ds):
+        raise ValueError('Dataset must contain variables "v_x" and "v_y" which are the surface velocity longitudinal and transect components [m s-1], make sure dataset originates from pyorc.piv_process.compute_piv')
     transform = helpers.affine_from_grid(ds[xs].values, ds[ys].values)
     if crs is not None:
         # transform coordinates of cross section
@@ -39,7 +55,7 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
         # interpret suitable sampling distance from grid resolution
         distance = np.abs(np.diff(ds.x)[0])
         # interpolate to a suitable set of points
-    x, y, z = helpers.xy_equidistant(x, y, distance=distance, z=z)
+    x, y, z, s = helpers.xy_equidistant(x, y, distance=distance, z=z)
 
     # make a cols and rows temporary variable
     coli, rowi = np.meshgrid(np.arange(len(ds["x"])), np.arange(len(ds["y"])))
@@ -71,6 +87,7 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
     # found back from this dataset
     ds_points = ds_points.assign_coords(xcoords=("points", list(x)))
     ds_points = ds_points.assign_coords(ycoords=("points", list(y)))
+    ds_points = ds_points.assign_coords(scoords=("points", list(s)))
     if z is not None:
         ds_points = ds_points.assign_coords(zcoords=("points", list(z)))
     if v_eff:
@@ -78,18 +95,20 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
         ds_points = vector_to_scalar(ds_points)
     return ds_points
 
-def get_q(ds_points, groupby="quantile", v_corr=0.85, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
+def get_q(ds_points, v_corr=0.9, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
     # aggregate to a limited set of quantiles
     ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
-    z = ds_points["zcoords"]
+    x = ds_points["xcoords"].values
+    y = ds_points["ycoords"].values
+    z = ds_points["zcoords"].values
     z_0 = ds_points.z_0
     h_ref =  ds_points.h_ref
     h_a = ds_points.h_a
     # add filled surface velocities with a logarithmic profile curve fit
-    ds_points["v_eff"] = helpers.velocity_fill(z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, groupby=groupby)
+    ds_points["v_eff"] = helpers.velocity_fill(x, y, z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, groupby="quantile")
     # compute q for both non-filled and filled velocities
-    # ds_points["q_nofill"] = helpers.depth_integrate(z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, v_corr=v_corr, name="q_nofill")
-    # ds_points["q"] = helpers.depth_integrate(z, ds_points["v_eff"], z_0, h_ref, h_a, v_corr=v_corr, name="q")
+    ds_points["q_nofill"] = helpers.depth_integrate(z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, v_corr=v_corr, name="q_nofill")
+    ds_points["q"] = helpers.depth_integrate(z, ds_points["v_eff"], z_0, h_ref, h_a, v_corr=v_corr, name="q")
     return ds_points
 
 
