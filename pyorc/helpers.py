@@ -306,18 +306,12 @@ def xy_to_perspective(x, y, resolution, M):
     :param M: transformation matrix generated with cv2.getPerspectiveTransform
     :return: (xp, yp), np.ndarray of shape (len(y), len(x)) containing perspective columns (xp) and rows (yp) of data
     """
-    # make a mesgrid of cols and rows
-    if (len(x.shape) == 1 and len(y.shape) == 1):
-        cols_i, rows_i = np.meshgrid(x / resolution - 0.5, y / resolution - 0.5)
-    elif (len(x.shape) == 2 and len(y.shape) == 2):
-        cols_i, rows_i = x / resolution - 0.5, y / resolution - 0.5
-    else:
-        raise ValueError(f"shape of x and y should both have a length of either 2, or 1, this is now {len(x.shape)} for x and {len(y.shape)} for y")
+    cols, rows = x / resolution - 0.5, y / resolution - 0.5
     # make list of coordinates, compatible with cv2.perspectiveTransform
-    coords = np.float32([np.array([cols_i.flatten(), rows_i.flatten()]).transpose([1, 0])])
+    coords = np.float32([np.array([cols.flatten(), rows.flatten()]).transpose([1, 0])])
     coords_trans = cv2.perspectiveTransform(coords, M)
-    xp = coords_trans[0][:, 0].reshape(cols_i.shape)
-    yp = coords_trans[0][:, 1].reshape(cols_i.shape)
+    xp = coords_trans[0][:, 0].reshape(cols.shape)
+    yp = coords_trans[0][:, 1].reshape(cols.shape)
     return xp, yp
 
 def xy_transform(x, y, crs_from, crs_to):

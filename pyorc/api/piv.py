@@ -63,7 +63,7 @@ def compute_piv(frames, **kwargs):
     )
     M = helpers.deserialize_attr(frames, "M_reverse", np.array)
     # compute row and column position of vectors in original reprojected background image col/row coordinates
-    xp, yp = helpers.xy_to_perspective(x, np.flipud(y), frames.resolution, M)
+    xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), frames.resolution, M)
     # dirty trick to ensure y coordinates start at the top in the right orientation
     shape_y, shape_x = helpers.deserialize_attr(frames, "camera_shape", np.array)
     yp = shape_y - yp
