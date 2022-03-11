@@ -203,6 +203,7 @@ def optimize_log_profile(z, v, dist_bank=None):
         np.array(v),
         # bounds=([0.00001, 0.05, -20], [10, 2., 20]),
         bounds=([0.05, -20, 0., 0.], [0.051, 20, 5, 100]),
+        # p0=[0.05, 0, 0., 0.]
         # method="dogbox"
     )
 
@@ -246,6 +247,7 @@ def velocity_fill(x, y, z, v, z_0, h_ref, h_a, groupby="quantile"):
     """
     def fit(_v):
         pars = optimize_log_profile(depth[np.isfinite(_v)], _v[np.isfinite(_v)], dist_bank[np.isfinite(_v)])
+        print(pars)
         _v[np.isnan(_v)] = log_profile((depth[np.isnan(_v)], dist_bank[np.isnan(_v)]), **pars)
         return _v
 

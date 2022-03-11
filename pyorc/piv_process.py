@@ -3,41 +3,6 @@ import openpiv.pyprocess
 import numpy as np
 import xarray as xr
 
-def imread(fn):
-    return openpiv.tools.imread(fn)
-
-
-def integrate_flow(q):
-    """
-    Integrates time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
-    estimating one or several quantiles over the time dimension.
-    :param q: DataArray(time, points) depth integrated velocities [m2 s-1] over cross section
-    :param quantile: float or list of floats (range: 0-1)  (default: 0.5)
-    :return: Q: DataArray(quantile) River Flow [m3 s-1] for one or several quantiles. The time dimension no longer
-        exists because of the quantile mapping, the point dimension no longer exists because of the integration over width
-    """
-    dist = [0.0]
-    for n, (x1, y1, x2, y2) in enumerate(
-        zip(q.xcoords[:-1], q.ycoords[:-1], q.xcoords[1:], q.ycoords[1:])
-    ):
-        _dist = distance_pts((x1, y1), (x2, y2))
-        dist.append(dist[n] + _dist)
-
-    # assign coordinates for distance
-    q = q.assign_coords(dist=("points", dist))
-
-    # if any missings are still present, fill with 0.0, integrate of dim dist
-    Q = q.fillna(0.0).integrate(coord="dist")
-    Q.attrs = {
-        "standard_name": "river_discharge",
-        "long_name": "River Flow",
-        "units": "m3 s-1",
-    }
-    # set name
-    Q.name = "Q"
-    return Q
-
-
 
 def piv(
     frame_a, frame_b, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None, overlap=None,
