@@ -7,6 +7,15 @@ from pyproj import CRS
 from scipy.interpolate import interp1d
 
 def get_river_flow(ds):
+    """
+    Integrates time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
+    estimating one or several quantiles over the time dimension.
+
+    :param ds: xarray dataset, containing interpolated point data on cross section and variable "q", which depth integrated velocity [m2 s-1]
+    :return: ds: xarray dataset, including variable "Q" which is cross-sectional integrated river flow [m3 s-1] for one or several quantiles.
+        The time dimension no longer exists because of the quantile mapping, the point dimension no longer exists because of the integration over width
+    """
+
     if "q" not in ds:
         raise ValueError('Dataset must contain variable "q", which is the depth-integrated velocity [m2 s-1], perpendicular to cross-section. Create this wjith pyorc.discharge.get_q')
     # integrate over the distance coordinates (s-coord)
@@ -22,7 +31,7 @@ def get_river_flow(ds):
     return ds
 
 
-def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", distance=None):
+def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", distance=None, wdw=1):
     """
     Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the grid
     can be rotated and that xs and ys are supplied following the projected coordinates supplied in
@@ -80,7 +89,14 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
     _y = xr.DataArray(list(_y), dims="points")
 
     # interpolate velocities over points
-    ds_points = ds.interp(x=_x, y=_y)
+    if wdw==0:
+        ds_points = ds.interp(x=_x, y=_y)
+    else:
+        # collect points within a stride, collate and analyze for outliers
+        ds_wdw = xr.concat([ds.shift(x=x_stride, y=y_stride) for x_stride in range(-wdw, wdw + 1) for y_stride in range(-wdw, wdw + 1)],  dim="stride")
+        # use the median to prevent a large influence of serious outliers
+        ds_effective = ds_wdw.median(dim="stride", keep_attrs=True)
+        ds_points = ds_effective.interp(x=_x, y=_y)
     if np.isnan(ds_points["v_x"].mean(dim="time")).all():
         raise ValueError("No valid velocimetry points found over bathymetry. Check if the bethymetry is within the camera objective")
     # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
