@@ -177,50 +177,6 @@ def _transform_to_bbox(coords, bbox, res):
     return list(zip(cols, rows))
 
 
-def orthorectification(
-    img, lensPosition, h_a, src, dst, z_0, h_ref, bbox, resolution=0.01, flags=cv2.INTER_AREA
-):
-    """
-    This function takes the original gcps and water level, and uses the actual water level, defined resolution
-    and AOI to determine a resulting projected (in crs if that was used for coordinates) image.
-    The image is rotated to be oriented along the river channel.
-    GCPs need to be taken at water level and water level during GCPs needs to be known to interpret the locations of
-    GCPS during the current img.
-
-    :param img: NP-array (3D), input img
-    :param lensPosition: list of floats, [x, y, z] of lens position within crs
-    :param h_a: actual water level during img
-    :param src: list of lists [x, y] ground control point source coordinates
-    :param dst: list of lists [x, y] ground control point destination coordinates
-    :param z_0: float, reference level of zero water level
-    :param h_ref: float, water level taken during gcp field work
-    :param bbox: shapely Polygon, bounding box of aoi
-    :param resolution: float, resolution of target projected image
-    :param round:
-    :return: 3D numpy array [cols, rows, bands] of img, Affine transform (rasterio)
-    """
-    # compute the geographical location of the gcps with the actual water level (h_a)
-    dst_a = _get_gcps_a(
-        lensPosition,
-        h_a,
-        dst,
-        z_0,
-        h_ref,
-    )
-
-    dst_colrow_a = _transform_to_bbox(dst_a, bbox, resolution)
-
-    # retrieve M for destination row and col
-    M = _get_M(src=src, dst=dst_colrow_a)
-    # estimate size of required grid
-    transform = _get_transform(bbox, resolution=resolution)
-    # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
-    cols, rows = _get_shape(
-        bbox, resolution=resolution, round=10
-    )  # for now hard -coded on 10, alter dependent on how PIV is done
-    corr_img = get_ortho(img, M, (cols, rows), flags=flags)
-    return corr_img, transform
-
 def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
     """
     Reproject an image to a given shape using perspective transformation matrix M
