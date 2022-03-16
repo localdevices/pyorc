@@ -6,7 +6,7 @@ from rasterio.transform import Affine
 import xarray as xr
 import warnings
 
-from pyorc import piv_process, io, helpers
+from pyorc import piv_process, helpers
 from pyorc.const import GEOGRAPHICAL_ATTRS, PIV_ATTRS, PERSPECTIVE_ATTRS
 
 def compute_piv(frames, **kwargs):
@@ -19,6 +19,8 @@ def compute_piv(frames, **kwargs):
         is called.
     :return: xr.Dataset, containing the PIV results in a lazy dask.array form.
     """
+    # get the camera configuration from frames metadata
+    camera_config = helpers.get_camera_config_from_ds(frames)
     # forward the computation to piv
     dask_piv = dask.delayed(piv_process.piv, nout=6)
     v_x, v_y, s2n, corr = [], [], [], []
@@ -31,10 +33,10 @@ def compute_piv(frames, **kwargs):
         cols, rows, _v_x, _v_y, _s2n, _corr = dask_piv(
             frame_a,
             frame_b,
-            res_x=frames.resolution,
-            res_y=frames.resolution,
+            res_x=camera_config.resolution,
+            res_y=camera_config.resolution,
             dt=float(dt.values),
-            search_area_size=frames.window_size,
+            search_area_size=camera_config.window_size,
             **kwargs,
         )
         # append to result
@@ -43,27 +45,28 @@ def compute_piv(frames, **kwargs):
     cols, rows, _v_x, _v_y, _s2n, _corr = piv_process.piv(
         frame_a,
         frame_b,
-        res_x=frames.resolution,
-        res_y=frames.resolution,
+        res_x=camera_config.resolution,
+        res_y=camera_config.resolution,
         dt=float(dt.values),
-        search_area_size=frames.window_size,
+        search_area_size=camera_config.window_size,
         **kwargs,
     )
     # extract global attributes from origin
     global_attrs = frames.attrs
     time = (frames.time[0:-1].values + frames.time[1:].values)/2  # as we use frame to frame differences, one time step gets lost
     # retrieve the x and y-axis belonging to the results
-    x, y = io.get_axes(cols, rows, frames.resolution)
+    x, y = helpers.get_axes(cols, rows, camera_config.resolution)
     # convert in projected and latlon coordinates
-    xs, ys, lons, lats = io.get_xs_ys(
+    xs, ys, lons, lats = helpers.get_xs_ys(
         cols,
         rows,
-        helpers.deserialize_attr(frames, "proj_transform", Affine, args_parse=True),
-        frames.crs
+        camera_config.transform,
+        # helpers.deserialize_attr(frames, "proj_transform", Affine, args_parse=True),
+        camera_config.crs
     )
-    M = helpers.deserialize_attr(frames, "M_reverse", np.array)
+    M = camera_config.get_M_reverse(frames.h_a)
     # compute row and column position of vectors in original reprojected background image col/row coordinates
-    xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), frames.resolution, M)
+    xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), camera_config.resolution, M)
     # dirty trick to ensure y coordinates start at the top in the right orientation
     shape_y, shape_x = helpers.deserialize_attr(frames, "camera_shape", np.array)
     yp = shape_y - yp
@@ -359,8 +362,9 @@ def get_uv_camera(ds, dt=0.1, v_x="v_x", v_y="v_y"):
         velocity vectors (no unit) and the scalar velocities (m/s). Rotation is not needed because the transformed
         u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
     """
+    camera_config = helpers.get_camera_config_from_ds(ds)
     # retrieve the backward transformation array
-    M = helpers.deserialize_attr(ds, "M_reverse", np.array)
+    M = camera_config.get_M_reverse(ds.h_a)
     # get the shape of the original frames
     shape_y, shape_x = helpers.deserialize_attr(ds, "camera_shape", np.array)
     xi, yi = np.meshgrid(ds.x, ds.y)
@@ -368,7 +372,7 @@ def get_uv_camera(ds, dt=0.1, v_x="v_x", v_y="v_y"):
     yi = np.flipud(yi)
 
     x_moved, y_moved = xi + ds[v_x] * dt, yi + ds[v_y] * dt
-    xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, ds.resolution, M)
+    xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, camera_config.resolution, M)
 
     # convert row counts to start at the top of the frame instead of bottom
     yp_moved = shape_y - yp_moved
@@ -397,10 +401,12 @@ def get_uv_geographical(ds, v_x="v_x", v_y="v_y"):
 
     """
     # select lon and lat variables as coordinates
+    camera_config = helpers.get_camera_config_from_ds(ds)
     u = ds[v_x]
     v = ds[v_y]
     s = (u**2 + v**2)**0.5
-    aff = helpers.deserialize_attr(ds, "proj_transform", Affine, args_parse=True)
+    aff = camera_config.transform
+    # aff = helpers.deserialize_attr(ds, "proj_transform", Affine, args_parse=True)
     theta = np.arctan2(aff.d, aff.a)
     return "lon", "lat", u, v, s, theta
 

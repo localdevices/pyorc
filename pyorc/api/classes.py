@@ -5,9 +5,11 @@ import dask.array as da
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 import rasterio.transform
 import shapely.wkt
 import xarray as xr
+import warnings
 
 from pyorc import cv, io, helpers, const
 from pyproj import CRS, Transformer
@@ -16,8 +18,8 @@ class Video(cv2.VideoCapture):
     def __init__(
             self,
             fn,
-            camera_config,
-            h_a,
+            camera_config=None,
+            h_a=None,
             start_frame=None,
             end_frame=None,
             *args,
@@ -59,20 +61,44 @@ class Video(cv2.VideoCapture):
         self.fps = self.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
         # set other properties
-        self.h_a = h_a
-        # get the perspective transformation matrix (movie dependent)
-        self.M = camera_config.get_M(self.h_a)
-        self.M_reverse = camera_config.get_M_reverse(self.h_a)
-        self.lens_pars = camera_config.lens_pars
-        self.z_0 = camera_config.gcps["z_0"]
-        self.h_ref = camera_config.gcps["h_ref"]
+        if h_a is not None:
+            self.h_a = h_a
+        # make camera config part of the vidoe object
+        if camera_config is not None:
+            self.camera_config = camera_config
         self.fn = fn
-        self.transform = camera_config.transform
-        self.resolution = camera_config.resolution
-        self.shape = camera_config.shape
-        self.window_size = camera_config.window_size
-        self.crs = camera_config.crs
         self._stills = {}  # here all stills are stored lazily
+
+    @property
+    def camera_config(self):
+        """
+
+        :return: CameraConfig object
+        """
+        return self._camera_config
+
+    @camera_config.setter
+    def camera_config(self, camera_config_input):
+        """
+        Set camera config as a serializable object from either a json string or a dict
+        :param camera_config_input: dict, CameraConfig object or json string containing camera configuration
+        :return:
+        """
+        try:
+            if isinstance(camera_config_input, str):
+                if os.path.isfile(camera_config_input):
+                    # assume string is a file
+                    self._camera_config = load_camera_config(camera_config_input)
+                else: # Try to read CameraConfig from string
+                    self._camera_config = get_camera_config(camera_config_input)
+            elif isinstance(camera_config_input, CameraConfig):
+                # set CameraConfig as is
+                self._camera_config = camera_config_input
+            elif isinstance(camera_config_input, dict):
+                # Create CameraConfig from dict
+                self._camera_config = CameraConfig(**camera_config_input)
+        except:
+            raise IOError("Could not recognise input as a CameraConfig file, string, dictionary or CameraConfig object.")
 
     @property
     def end_frame(self):
@@ -84,6 +110,19 @@ class Video(cv2.VideoCapture):
             self._end_frame = self.frame_count
         else:
             self._end_frame = min(self.frame_count, end_frame)
+
+    @property
+    def h_a(self):
+        return self._h_a
+
+    @h_a.setter
+    def h_a(self, h_a):
+        assert(isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
+        if h_a > 10:
+            warnings.warn(f"Your water level is {h_a} meters, which is very high for a locally referenced reading. Make sure this value is correct and expressed in unit meters.")
+        if h_a < 0:
+            warnings.warn("Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.")
+        self._h_a = h_a
 
     @property
     def start_frame(self):
@@ -114,7 +153,7 @@ class Video(cv2.VideoCapture):
     def corners(self, corners):
         self._corners = corners
 
-    def get_frame(self, n, lens_pars=None, grayscale=False):
+    def get_frame(self, n, grayscale=True):
         """
         Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
 
@@ -131,14 +170,16 @@ class Video(cv2.VideoCapture):
         except:
             raise IOError(f"Cannot read")
         if ret:
-            if lens_pars is not None:
-                # apply lens distortion correction
-                img = io._corr_lens(img, **lens_pars)
+            if hasattr(self.camera_config, "lens_pars"):
+                if self.camera_config.lens_pars is not None:
+                    # apply lens distortion correction
+                    img = cv._corr_lens(img, **self.camera_config.lens_pars)
             if grayscale:
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
                 img = img.mean(axis=2)
             else:
+                # turn bgr to rgb for plotting purposes
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.frame_count = n + 1
         cap.release()
@@ -153,8 +194,10 @@ class Video(cv2.VideoCapture):
         :param kwargs: dict, keyword arguments to pass to `get_frame`. Currently only `grayscale` is supported.
         :return: xr.DataArray, containing all requested frames
         """
+        assert(hasattr(self, "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
+        assert(hasattr(self, "_h_a")), 'Water level with this video has not been set, please set it with the .h_a method'
         get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
-        frames = [get_frame(n=n, lens_pars=self.lens_pars, **kwargs) for n in range(self.start_frame, self.end_frame)]
+        frames = [get_frame(n=n, **kwargs) for n in range(self.start_frame, self.end_frame)]
         sample = frames[0].compute()
         data_array = [da.from_delayed(
             frame,
@@ -177,16 +220,8 @@ class Video(cv2.VideoCapture):
 
         dims = tuple(coords.keys())
         attrs = {
-            "M": str(self.M.tolist()),
-            "M_reverse": str(self.M_reverse.tolist()),
-            "proj_transform": str(list(self.transform)[0:6]),
-            "proj_shape": str(self.shape),
             "camera_shape": str([len(y), len(x)]),
-            "crs": self.crs,
-            "resolution": self.resolution,
-            "window_size": self.window_size,
-            "z_0": self.z_0,
-            "h_ref": self.h_ref,
+            "camera_config_json": self.camera_config.to_json(),
             "h_a": self.h_a
         }
         data_array = xr.DataArray(
@@ -453,19 +488,11 @@ class CameraConfig:
         ax.legend()
         return ax
 
-    def to_file(self, fn):
-        """
-        Write the CameraConfig object to json structure
-        :return:
-        """
-
-        with open(fn, "w") as f:
-            f.write(json.dumps(self, default=lambda o: o.to_dict(), indent=4))
-
     def to_dict(self):
         """
         Return the CameraConfig object as dictionary
-        :return:
+
+        :return: dict, containing CameraConfig components
         """
 
         dict = self.__dict__
@@ -476,6 +503,35 @@ class CameraConfig:
 
         return dict
 
+    def to_file(self, fn):
+        """
+        Write the CameraConfig object to json structure
+
+        :return: None
+        """
+
+        with open(fn, "w") as f:
+            f.write(self.to_json())
+
+    def to_json(self):
+        """
+        Convert CameraConfig object to string
+
+        :return: json string with CameraConfig components
+        """
+        return json.dumps(self, default=lambda o: o.to_dict(), indent=4)
+
+
+
+def get_camera_config(s):
+    """
+    Read camera config from string
+    :param s: json string containing camera config
+    :return: CameraConfig object
+    """
+    dict = json.loads(s)
+    return CameraConfig(**dict)
+
 
 def load_camera_config(fn):
     """
@@ -485,7 +541,6 @@ def load_camera_config(fn):
     :return: CameraConfig object
     """
     with open(fn, "r") as f:
-        dict = json.loads(f.read())
-    return CameraConfig(**dict)
-
+        camera_config = get_camera_config(f.read())
+    return camera_config
 

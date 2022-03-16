@@ -3,7 +3,7 @@ import dask
 import numpy as np
 import xarray as xr
 
-from pyorc import cv, io, helpers, const
+from pyorc import cv, helpers, const
 from rasterio.transform import Affine
 
 def project(frames):
@@ -16,30 +16,37 @@ def project(frames):
     :return: frames: xr.DataArray with projected frames and x and y axis in local coordinate system (origin: top-left)
 
     """
-    # retrieve the M and shape from the frames attributes
-    if not(hasattr(frames, "M")):
-        raise AttributeError(f'Attribute "M" is not available in frames')
-    if not(hasattr(frames, "shape")):
-        raise AttributeError(f'Attribute "shape" is not available in frames')
-    M = helpers.deserialize_attr(frames, "M", np.array, args_parse=False)
-    shape = helpers.deserialize_attr(frames, "proj_shape", list)
+    # read json into CameraConfig object
+    camera_config = helpers.get_camera_config_from_ds(frames)
+    # retrieve the M and shape from camera config with said h_a
+    M = camera_config.get_M(frames.h_a)
+    shape = camera_config.shape
+    # shape = helpers.deserialize_attr(frames, "proj_shape", list)
     # get orthoprojected frames as delayed objects
     get_ortho = dask.delayed(cv.get_ortho)
     imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in frames]
     # prepare axes
     time = frames.time
-    y = np.flipud(np.linspace(frames.resolution/2, frames.resolution*(shape[0]-0.5), shape[0]))
-    x = np.linspace(frames.resolution/2, frames.resolution*(shape[1]-0.5), shape[1])
+    y = np.flipud(np.linspace(
+        camera_config.resolution/2,
+        camera_config.resolution*(shape[0]-0.5),
+        shape[0])
+    )
+    x = np.linspace(
+        camera_config.resolution/2,
+        camera_config.resolution*(shape[1]-0.5), shape[1]
+    )
     cols, rows = np.meshgrid(
         np.arange(len(x)),
         np.arange(len(y))
     )
     # retrieve all coordinates we may ever need for further analysis or plotting
-    xs, ys, lons, lats = io.get_xs_ys(
+    xs, ys, lons, lats = helpers.get_xs_ys(
         cols,
         rows,
-        helpers.deserialize_attr(frames, "proj_transform", Affine, args_parse=True),
-        frames.crs
+        camera_config.transform,
+        # helpers.deserialize_attr(frames, "proj_transform", Affine, args_parse=True),
+        camera_config.crs
     )
     # Setup coordinates
     coords = {

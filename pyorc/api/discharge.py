@@ -52,6 +52,7 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
         default: "ys"
     :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
     """
+    camera_config = helpers.get_camera_config_from_ds(ds)
     if not isinstance(ds, xr.Dataset):
         raise IOError("Dataset must be of type xarray.Dataset, ensure to create it from pyorc.piv_process.compute_piv or open it from file with xarray.open_dataset")
     if ("v_x" not in ds) or ("v_y" not in ds):
@@ -59,7 +60,7 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
     transform = helpers.affine_from_grid(ds[xs].values, ds[ys].values)
     if crs is not None:
         # transform coordinates of cross section
-        x, y = helpers.xy_transform(x, y, crs_from=crs, crs_to=CRS.from_wkt(ds.crs))
+        x, y = helpers.xy_transform(x, y, crs_from=crs, crs_to=CRS.from_wkt(camera_config.crs))
     if distance is None:
         # interpret suitable sampling distance from grid resolution
         distance = np.abs(np.diff(ds.x)[0])
@@ -113,12 +114,13 @@ def get_uv_points(ds, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", dist
 
 def get_q(ds_points, v_corr=0.9, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
     # aggregate to a limited set of quantiles
+    camera_config = helpers.get_camera_config_from_ds(ds_points)
     ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
     x = ds_points["xcoords"].values
     y = ds_points["ycoords"].values
     z = ds_points["zcoords"].values
-    z_0 = ds_points.z_0
-    h_ref =  ds_points.h_ref
+    z_0 = camera_config.gcps["z_0"]
+    h_ref =  camera_config.gcps["h_ref"]
     h_a = ds_points.h_a
     # add filled surface velocities with a logarithmic profile curve fit
     ds_points["v_eff"] = helpers.velocity_fill(x, y, z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, groupby="quantile")
@@ -126,7 +128,6 @@ def get_q(ds_points, v_corr=0.9, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
     ds_points["q_nofill"] = helpers.depth_integrate(z, ds_points["v_eff_nofill"], z_0, h_ref, h_a, v_corr=v_corr, name="q_nofill")
     ds_points["q"] = helpers.depth_integrate(z, ds_points["v_eff"], z_0, h_ref, h_a, v_corr=v_corr, name="q")
     return ds_points
-
 
 
 def vector_to_scalar(ds_points, angle_method=0, v_x="v_x", v_y="v_y"):
@@ -224,3 +225,4 @@ def plot(ds_points):
     :param ds_points:
     :return:
     """
+    raise NotImplementedError
