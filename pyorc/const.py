@@ -68,3 +68,15 @@ VIDEO_ARGS = {
     "extra_args": ["-vcodec", "libx264"],
     "dpi": 120,
 }
+
+ENCODING_PARAMS = {
+    "zlib": True,
+    "dtype": "int16",
+    "scale_factor": 0.01,
+    "_FillValue": -9999
+}
+
+ENCODE_VARS = ["v_x", "v_y", "corr", "s2n"]
+ENCODING = {k: ENCODING_PARAMS for k in ENCODE_VARS}
+
+
