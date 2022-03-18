@@ -8,10 +8,11 @@ import numpy as np
 import os
 import rasterio.transform
 import shapely.wkt
-import xarray as xr
 import warnings
 
-from pyorc import cv, io, helpers, const
+from .. import cv, helpers, const
+from .frames import Frames
+
 from pyproj import CRS, Transformer
 
 class Video(cv2.VideoCapture):
@@ -221,10 +222,11 @@ class Video(cv2.VideoCapture):
         dims = tuple(coords.keys())
         attrs = {
             "camera_shape": str([len(y), len(x)]),
-            "camera_config_json": self.camera_config.to_json(),
+            "camera_config": self.camera_config,
+            # "camera_config_json": self.camera_config.to_json(),
             "h_a": self.h_a
         }
-        data_array = xr.DataArray(
+        frames = Frames(
             da.stack(data_array, axis=0),
             dims=dims,
             coords=coords,
@@ -234,22 +236,24 @@ class Video(cv2.VideoCapture):
         if len(sample.shape) == 3:
             del coords["rgb"]
         # add coordinate grids
-        data_array = helpers.add_xy_coords(data_array, [xp, yp], coords, const.PERSPECTIVE_ATTRS)
-        return data_array
+        frames = helpers.add_xy_coords(frames, [xp, yp], coords, const.PERSPECTIVE_ATTRS)
+        # frames = helpers.add_xy_coords(frames, [xp, yp], coords, const.PERSPECTIVE_ATTRS)
+        return frames
 
 class CameraConfig:
-    def __init__(self,
-                 crs,
-                 window_size=15,
-                 resolution=0.01,
-                 lens_position=None,
-                 bbox=None,
-                 transform=None,
-                 shape=None,
-                 corners=None,
-                 gcps=None,
-                 lens_pars=None
-                 ):
+    def __init__(
+        self,
+        crs,
+        window_size=15,
+        resolution=0.01,
+        lens_position=None,
+        bbox=None,
+        transform=None,
+        shape=None,
+        corners=None,
+        gcps=None,
+        lens_pars=None
+    ):
         """
         Initiate a CameraConfig object with several (default) settings. This object allows for treatment of movies
         with defined settings

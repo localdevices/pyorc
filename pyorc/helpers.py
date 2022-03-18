@@ -16,7 +16,7 @@ def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
     """
     add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.
 
-    :param ds: xr.Dataset with at least y and x dimensions
+    :param ds: xr.Dataset or DataArray or similar with at least y and x dimensions
     :param xy_coord_data: list, one or several arrays with 2-dimensional coordinates
     :param coords: tuple with strings, indicating the dimensions of the data in xy_coord_data
     :param attrs_dict: list of dicts, containing attributes belonging to xy_coord_data, must have equal length as xy_coord_data
@@ -38,7 +38,6 @@ def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
     # add the attributes (not possible with assign_coords
     for k, v in zip(attrs_dict, xy_coord_data):
         ds[k].attrs = v.attrs
-
     return ds
 
 
@@ -63,7 +62,7 @@ def affine_from_grid(xi, yi):
     return Affine(dx_col, dy_col, xul, dx_row, dy_row, yul)
 
 
-def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None):
+def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object_type=xr.DataArray):
     """
     Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D xr.DataArray with dask arrays
         with all axes.
@@ -93,7 +92,7 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None):
         )
     for n, (coord, values) in enumerate(coords.items()):
         assert(len(values)==data_array.shape[n]), f"Length of {coord} axis {len(values)} is not equal to amount of data arrays {data_array.shape[n]}"
-    return xr.DataArray(
+    return object_type(
         data_array,
         dims=tuple(coords.keys()),
         coords=coords,
