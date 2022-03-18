@@ -353,7 +353,7 @@ def xy_equidistant(x, y, distance, z=None):
         return x_sample, y_sample, z_sample, s_sample
 
 
-def xy_to_perspective(x, y, resolution, M):
+def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     """
     Back transform local meters-from-top-left coordinates from frame to original perspective of camera using M
     matrix, belonging to transformation from orthographic to local.
@@ -365,6 +365,8 @@ def xy_to_perspective(x, y, resolution, M):
     :return: (xp, yp), np.ndarray of shape (len(y), len(x)) containing perspective columns (xp) and rows (yp) of data
     """
     cols, rows = x / resolution - 0.5, y / resolution - 0.5
+    if reverse_y is not None:
+        rows = reverse_y - rows
     # make list of coordinates, compatible with cv2.perspectiveTransform
     coords = np.float32([np.array([cols.flatten(), rows.flatten()]).transpose([1, 0])])
     coords_trans = cv2.perspectiveTransform(coords, M)

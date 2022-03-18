@@ -94,6 +94,20 @@ class Transect(xr.Dataset):
         v_eff.name = "v_eff_nofill"  # there still may be gaps in this series
         self["v_eff_nofill"] = v_eff
 
+    def get_xyz_perspective(self, reverse_y=None):
+        z = (self.zcoords - self.camera_config.gcps["z_0"] + self.camera_config.gcps["h_ref"]).values
+        Ms = [self.camera_config.get_M_reverse(depth) for depth in z]
+        # compute row and column position of vectors in original reprojected background image col/row coordinates
+        cols, rows = zip(*[helpers.xy_to_perspective(x, y, self.camera_config.resolution, M, reverse_y=self.camera_config.shape[0]) for x, y, M in zip(self.x.values, self.y.values, Ms)])
+
+
+        # xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
+        # dirty trick to ensure y coordinates start at the top in the right orientation
+        shape_y, shape_x = self.camera_shape
+        rows = shape_y - np.array(rows)
+        cols = np.array(cols)
+        return cols, rows
+
 
     def get_river_flow(self):
         """
