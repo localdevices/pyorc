@@ -673,15 +673,3 @@ class Velocimetry(xr.Dataset):
         # serialize camera_config to a json
         self.attrs["camera_config"] = self.camera_config.to_json()
         return super().to_netcdf(*args, **kwargs)
-
-
-def open_velocimetry(fn, *args, **kwargs):
-    """
-    Opens dataset as Piv object
-
-    :param fn: str, filename
-    :return: xr.Piv Dataset
-    """
-    kwargs["chunks"] = {"time": 1}
-    ds = xr.open_dataset(fn, *args, **kwargs)
-    return Velocimetry(ds, attrs=ds.attrs)
