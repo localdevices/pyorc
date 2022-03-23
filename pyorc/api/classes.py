@@ -154,7 +154,7 @@ class Video(cv2.VideoCapture):
     def corners(self, corners):
         self._corners = corners
 
-    def get_frame(self, n, grayscale=True):
+    def get_frame(self, n, grayscale=True, lens_corr=False):
         """
         Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
 
@@ -171,10 +171,10 @@ class Video(cv2.VideoCapture):
         except:
             raise IOError(f"Cannot read")
         if ret:
-            if hasattr(self.camera_config, "lens_pars"):
+            if (lens_corr and hasattr(self.camera_config, "lens_pars")):
                 if self.camera_config.lens_pars is not None:
                     # apply lens distortion correction
-                    img = cv._corr_lens(img, **self.camera_config.lens_pars)
+                    img = cv.undistort_img(img, **self.camera_config.lens_pars)
             if grayscale:
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)

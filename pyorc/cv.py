@@ -35,36 +35,36 @@ def _corr_color(img, alpha=None, beta=None, gamma=0.5):
     return corr_img
 
 
-def _corr_lens(img, k1=0.0, c=2.0, f=1.0):
+def _get_dist_coefs(k1):
     """
-    Lens distortion correction based on lens characteristics.
-    Function by Gerben Gerritsen / Sten Schurer, 2019.
+    Establish distance coefficient matrix for use in cv2.undistort
 
-    :param img:  3D cv2 img matrix
-    :param k1=0.: float - barrel lens distortion parameter
-    :param c=2.: float - optical center
-    :param f=1.: float - focal length
-    :return undistorted img
+    :param k1: barrel lens distortion parameter
+    :return: distance coefficient matrix (4 parameter)
     """
-
-    # define imagery characteristics
-    height, width, __ = img.shape
-
     # define distortion coefficient vector
     dist = np.zeros((4, 1), np.float64)
     dist[0, 0] = k1
+    return dist
 
+def _get_cam_mtx(height, width, c=2.0, f=1.0):
+    """
+    Get camera matrix from lens parameters
+
+    :param height: height of image from camera
+    :param width: width of image from camera
+    :param c=2.: float - optical center
+    :param f=1.: float - focal length
+    :return: camera matrix, to be used by cv2.undistort
+    """
     # define camera matrix
     mtx = np.eye(3, dtype=np.float32)
-
     mtx[0, 2] = width / c  # define center x
     mtx[1, 2] = height / c  # define center y
     mtx[0, 0] = f  # define focal length x
     mtx[1, 1] = f  # define focal length y
+    return mtx
 
-    # correct image for lens distortion
-    corr_img = cv2.undistort(img, mtx, dist)
-    return corr_img
 
 
 def _get_shape(bbox, resolution=0.01, round=1):
@@ -260,12 +260,49 @@ def get_aoi(src, dst, src_corners):
     bbox = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
     return bbox
 
+def undistort_img(img, k1=0.0, c=2.0, f=1.0):
+    """
+    Lens distortion correction based on lens characteristics.
+    Function by Gerben Gerritsen / Sten Schurer, 2019.
 
-def surf_velocity():
-    # FIXME
-    raise NotImplementedError("")
+    :param img:  3D cv2 img matrix
+    :param k1=0.: float - barrel lens distortion parameter
+    :param c=2.: float - optical center
+    :param f=1.: float - focal length
+    :return undistorted img
+    """
 
+    # define imagery characteristics
+    height, width, __ = img.shape
+    dist = _get_dist_coefs(k1)
 
-def river_flow():
-    # FIXME
-    raise NotImplementedError("")
+    # get camera matrix
+    mtx = _get_cam_mtx(height, width, c=c, f=f)
+
+    # correct image for lens distortion
+    corr_img = cv2.undistort(img, mtx, dist)
+    return corr_img
+
+def undistort_points(points, height, width, k1=0.0, c=2.0, f=1.0):
+    """
+    Undistorts x, y point locations with provided lens parameters, so that points
+    can be undistorted together with images from that lens.
+
+    :param points: list, containing lists of points [x, y], provided as float
+    :param height: int, height of camera images [nr. of pixels]
+    :param width: int, width of camera images [nr. of pixels]
+    :param k1=0.: float - barrel lens distortion parameter
+    :param c=2.: float - optical center
+    :param f=1.: float - focal length
+    :return: list, containg lists of undistorted point coordinates [x, y] as floats
+    """
+    mtx = _get_cam_mtx(height, width, c=c, f=f)
+    dist = _get_dist_coefs(k1)
+    points_undistort = cv2.undistortPoints(
+        np.expand_dims(np.float32(points), axis=1),
+        mtx,
+        dist,
+        P=mtx
+    )
+    return points_undistort[:, 0].tolist()
+
