@@ -67,7 +67,7 @@ def _get_cam_mtx(height, width, c=2.0, f=1.0):
 
 
 
-def _get_shape(bbox, resolution=0.01, round=1):
+def get_shape(bbox, resolution=0.01, round=1):
     """
     defines the number of rows and columns needed in a target raster, to fit a given bounding box.
 
@@ -230,15 +230,17 @@ def get_aoi(src, dst, src_corners):
     # prepare a simple temporary np.array of the src_corners
     try:
         _src_corners = np.array(
-            [
-                src_corners["up_left"],
-                src_corners["down_left"],
-                src_corners["down_right"],
-                src_corners["up_right"],
-            ]
+            src_corners
+            # [
+            #     src_corners["up_left"],
+            #     src_corners["down_left"],
+            #     src_corners["down_right"],
+            #     src_corners["up_right"],
+            # ]
         )
     except:
         raise ValueError("src_corner coordinates not having expected format")
+    assert(_src_corners.shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is {src_corners.shape}"
     # reproject corner points to the actual space in coordinates
     _dst_corners = cv2.perspectiveTransform(np.float32([_src_corners]), M_gcp)[0]
     polygon = Polygon(_dst_corners)

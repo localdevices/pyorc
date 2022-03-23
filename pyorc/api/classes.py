@@ -1,3 +1,5 @@
+import copy
+
 import cv2
 import dask
 import dask.array as da
@@ -171,7 +173,7 @@ class Video(cv2.VideoCapture):
         except:
             raise IOError(f"Cannot read")
         if ret:
-            if (lens_corr and hasattr(self.camera_config, "lens_pars")):
+            if lens_corr:
                 if self.camera_config.lens_pars is not None:
                     # apply lens distortion correction
                     img = cv.undistort_img(img, **self.camera_config.lens_pars)
@@ -197,7 +199,13 @@ class Video(cv2.VideoCapture):
         """
         assert(hasattr(self, "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
         assert(hasattr(self, "_h_a")), 'Water level with this video has not been set, please set it with the .h_a method'
+        # camera_config may be altered for the frames object, so copy below
+        camera_config = copy.deepcopy(self.camera_config)
         get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
+        if not("lens_corr" in kwargs):
+            # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs
+            if hasattr(self.camera_config, "lens_pars"):
+                kwargs["lens_corr"] = True
         frames = [get_frame(n=n, **kwargs) for n in range(self.start_frame, self.end_frame)]
         sample = frames[0].compute()
         data_array = [da.from_delayed(
@@ -205,6 +213,13 @@ class Video(cv2.VideoCapture):
             dtype=sample.dtype,
             shape=sample.shape
         ) for frame in frames]
+        if "lens_corr" in kwargs:
+            if kwargs["lens_corr"]:
+                # also correct the control point src
+                camera_config.gcps["src"] = cv.undistort_points(camera_config.gcps["src"], *sample.shape, **self.camera_config.lens_pars)
+                camera_config.corners = cv.undistort_points(camera_config.corners, *sample.shape, **self.camera_config.lens_pars)
+                print(self.camera_config.gcps["src"])
+                print(camera_config.gcps["src"])
         time = np.arange(len(data_array))*1/self.fps
         y = np.flipud(np.arange(data_array[0].shape[0]))
         # y = np.arange(data_array[0].shape[0])
@@ -222,8 +237,7 @@ class Video(cv2.VideoCapture):
         dims = tuple(coords.keys())
         attrs = {
             "camera_shape": str([len(y), len(x)]),
-            "camera_config": self.camera_config,
-            # "camera_config_json": self.camera_config.to_json(),
+            "camera_config": camera_config,
             "h_a": self.h_a
         }
         frames = Frames(
@@ -237,7 +251,6 @@ class Video(cv2.VideoCapture):
             del coords["rgb"]
         # add coordinate grids
         frames = helpers.add_xy_coords(frames, [xp, yp], coords, const.PERSPECTIVE_ATTRS)
-        # frames = helpers.add_xy_coords(frames, [xp, yp], coords, const.PERSPECTIVE_ATTRS)
         return frames
 
 class CameraConfig:
@@ -290,22 +303,29 @@ class CameraConfig:
         if window_size is not None:
             self.window_size = window_size
         # override the transform and bbox with the set corners
-        if (corners is not None and hasattr(self, "gcps")):
-            self.set_bbox(corners)
-            # get the desired target shape and transform for future videos using this CameraConfig
-            self.set_transform_from_bbox()
+        if corners is not None:
+            self.set_corners(corners)
+
+    @property
+    def bbox(self):
+        assert(hasattr(self, "corners")), "CameraConfig object has no corners, set these with CameraConfig.set_corners"
+        return cv.get_aoi(self.gcps["src"], self.gcps["dst"], self.corners).__str__()
+
+    @property
+    def shape(self):
+        cols, rows = cv.get_shape(
+            shapely.wkt.loads(self.bbox),
+            resolution=self.resolution,
+            round=10
+        )
+        return (rows, cols)
 
     @property
     def transform(self):
-        return self._transform
+        bbox = shapely.wkt.loads(self.bbox)
+        return cv._get_transform(bbox, resolution=self.resolution)
 
-    @transform.setter
-    def transform(self, transform):
-        if isinstance(transform, rasterio.transform.Affine):
-            self._transform = transform
-        else:
-            # try to set it via rasterio Affine, assuming it is a (minimal) 6 value list
-            self._transform = rasterio.transform.Affine(*transform[0:6])
+
 
     def get_M(self, h_a):
         """
@@ -349,19 +369,9 @@ class CameraConfig:
         # retrieve M reverse for destination row and col
         return cv._get_M(src=dst_colrow_a, dst=self.gcps["src"])
 
-    def set_bbox(self, corners):
-        self.bbox = cv.get_aoi(self.gcps["src"], self.gcps["dst"], corners).__str__()
-
-    def set_transform_from_bbox(self):
-        # estimate size of required grid
-        bbox = shapely.wkt.loads(self.bbox)
-        transform = cv._get_transform(bbox, resolution=self.resolution)
-        # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
-        cols, rows = cv._get_shape(
-            bbox, resolution=self.resolution, round=10
-        )
-        self._transform = transform
-        self.shape = (rows, cols)
+    def set_corners(self, corners):
+        assert(np.array(corners).shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is {corners.shape}"
+        self.corners = corners
 
     def set_lens_pars(self, k1=0, c=2, f=4):
         """
@@ -403,7 +413,7 @@ class CameraConfig:
         assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
         assert(isinstance(h_ref, (float, int))), "h_ref must contain a float number"
         assert(isinstance(z_0, (float, int))), "z_0 must contain a float number"
-        assert(all(isinstance(x, int) for p in src for x in p)), "src contains non-int parts"
+        assert(all(isinstance(x, (float, int)) for p in src for x in p)), "src contains non-int parts"
         assert(all(isinstance(x, (float, int)) for p in dst for x in p)), "dst contains non-float parts"
         if crs is not None:
             if self.crs is None:

@@ -12,11 +12,12 @@ camera_type = {
 }
 gcps = {
     "src": [
-        [138, 270],
-        [935, 194],
-        [1322, 330],
-        [1264, 867]],
-    "dst": [
+        [253, 307],
+        [931, 202],
+        [1308, 337],
+        [1251, 859]
+    ],
+        "dst": [
         [5.913401333, 50.8072278333],
         [5.9133098333, 50.807340333],
         [5.9134281667, 50.8073605],
@@ -28,12 +29,18 @@ gcps = {
 }
 
 # corner points provided by user in pixel coordinates, starting at upstream-left, downstream-left, downstream-right, upstream-right
-corners = {
-    "up_left": [8, 246],
-    "down_left": [1110, 141],
-    "down_right": [1866, 463],
-    "up_right": [1049, 1110],
-}
+# corners = {
+#     "up_left": [8, 246],
+#     "down_left": [1110, 141],
+#     "down_right": [1866, 463],
+#     "up_right": [1049, 1110],
+# }
+corners = [
+    [190, 205],
+    [953, 143],
+    [1735, 480],
+    [1290, 914],
+]
 
 
 site = {
@@ -57,7 +64,7 @@ transform = pyproj.Transformer.from_crs(crs_latlon, crs_site, always_xy=True)
 # gcps["dst"] = list(zip(_x, _y))
 
 # make a polygon from corner points, print it to see what it looks like.
-src_polygon = Polygon([corners[s] for s in corners])
+src_polygon = Polygon([c for c in corners])
 # print(src_polygon)
 
 # this function prepares a bounding box, from 4 user selected corner points, print to see what it looks like
