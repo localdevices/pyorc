@@ -1,11 +1,13 @@
 import numpy as np
 import xarray as xr
 from pyorc import helpers
+from .orcbase import ORCBase
 
-class Transect(xr.Dataset):
-    __slots__ = ()
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+@xr.register_dataset_accessor("transect")
+class Transect(ORCBase):
+    def __init__(self, xarray_obj):
+        super(Transect, self).__init__(xarray_obj)
 
     def vector_to_scalar(self, angle_method=0, v_x="v_x", v_y="v_y"):
         """
@@ -17,8 +19,8 @@ class Transect(xr.Dataset):
         :return: v_eff: DataArray(t, points), time series in cross section points with velocities perpendicular to cross section
 
         """
-        xs = self["x"].values
-        ys = self["y"].values
+        xs = self._obj["x"].values
+        ys = self._obj["y"].values
         # find points that are located on the area of interest
         idx = np.isfinite(xs)
         xs = xs[idx]
@@ -30,7 +32,7 @@ class Transect(xr.Dataset):
         else:
             # start with empty angle
             angle = np.zeros(ys.shape)
-            angle_da = np.zeros(self["x"].shape)
+            angle_da = np.zeros(self._obj["x"].shape)
             angle_da[:] = np.nan
 
             for n, (x, y) in enumerate(zip(xs, ys)):
@@ -77,9 +79,9 @@ class Transect(xr.Dataset):
         flow_dir = angle_da - 0.5 * np.pi
 
         # compute per velocity vector in the dataset, what its angle is
-        v_angle = np.arctan2(self[v_x], self[v_y])
+        v_angle = np.arctan2(self._obj[v_x], self._obj[v_y])
         # compute the scalar value of velocity
-        v_scalar = (self[v_x] ** 2 + self[v_y] ** 2) ** 0.5
+        v_scalar = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
 
         # compute difference in angle between velocity and perpendicular of cross section
         angle_diff = v_angle - flow_dir
@@ -92,13 +94,13 @@ class Transect(xr.Dataset):
         }
         # set name
         v_eff.name = "v_eff_nofill"  # there still may be gaps in this series
-        self["v_eff_nofill"] = v_eff
+        self._obj["v_eff_nofill"] = v_eff
 
     def get_xyz_perspective(self, reverse_y=None):
-        z = (self.zcoords - self.camera_config.gcps["z_0"] + self.camera_config.gcps["h_ref"]).values
+        z = (self._obj.zcoords - self.camera_config.gcps["z_0"] + self.camera_config.gcps["h_ref"]).values
         Ms = [self.camera_config.get_M_reverse(depth) for depth in z]
         # compute row and column position of vectors in original reprojected background image col/row coordinates
-        cols, rows = zip(*[helpers.xy_to_perspective(x, y, self.camera_config.resolution, M, reverse_y=self.camera_config.shape[0]) for x, y, M in zip(self.x.values, self.y.values, Ms)])
+        cols, rows = zip(*[helpers.xy_to_perspective(x, y, self.camera_config.resolution, M, reverse_y=self.camera_config.shape[0]) for x, y, M in zip(self._obj.x.values, self._obj.y.values, Ms)])
 
 
         # xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
@@ -118,10 +120,10 @@ class Transect(xr.Dataset):
             The time dimension no longer exists because of the quantile mapping, the point dimension no longer exists because of the integration over width
         """
 
-        if "q" not in self:
-            raise ValueError('Dataset must contain variable "q", which is the depth-integrated velocity [m2 s-1], perpendicular to cross-section. Create this with Transect.get_q')
+        if "q" not in self._obj:
+            raise ValueError('Dataset must contain variable "q", which is the depth-integrated velocity [m2 s-1], perpendicular to cross-section. Create this with ds.transect.get_q')
         # integrate over the distance coordinates (s-coord)
-        Q = self["q"].fillna(0.0).integrate(coord="scoords")
+        Q = self._obj["q"].fillna(0.0).integrate(coord="scoords")
         Q.attrs = {
             "standard_name": "river_discharge",
             "long_name": "River Flow",
@@ -129,12 +131,12 @@ class Transect(xr.Dataset):
         }
         # set name
         Q.name = "Q"
-        self["river_flow"] = Q
+        self._obj["river_flow"] = Q
 
 
     def get_q(self, v_corr=0.9, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
         # aggregate to a limited set of quantiles
-        ds = self.quantile(quantiles, dim="time", keep_attrs=True)
+        ds = self._obj.quantile(quantiles, dim="time", keep_attrs=True)
         x = ds["xcoords"].values
         y = ds["ycoords"].values
         z = ds["zcoords"].values

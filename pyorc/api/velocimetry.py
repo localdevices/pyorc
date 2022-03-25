@@ -1,3 +1,4 @@
+import copy
 import matplotlib.pyplot as plt
 from matplotlib.collections import QuadMesh
 import numpy as np
@@ -8,6 +9,7 @@ import warnings
 from pyproj import CRS
 from scipy.interpolate import interp1d
 from .transect import Transect
+from .orcbase import ORCBase
 from .. import helpers, const
 
 
@@ -83,23 +85,10 @@ def plot_cbar(ax, p, mode="local", size=15, color="w"):
     return cbar
 
 
-
-class Velocimetry(xr.Dataset):
-    __slots__ = ()
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ):
-        super().__init__(*args, **kwargs)
-        if hasattr(self, "camera_config"):
-            if isinstance(self.camera_config, str):
-                # convert into a camera_config object
-                from pyorc import get_camera_config
-                self.attrs["camera_config"] = get_camera_config(self.camera_config)
-        if hasattr(self, "camera_shape"):
-            if isinstance(self.camera_shape, str):
-                self.attrs["camera_shape"] = helpers.deserialize_attr(self, "camera_shape", np.array)
+@xr.register_dataset_accessor("velocimetry")
+class Velocimetry(ORCBase):
+    def __init__(self, xarray_obj):
+        super(Velocimetry, self).__init__(xarray_obj)
 
     def filter_temporal(
             self,
@@ -135,22 +124,22 @@ class Velocimetry(xr.Dataset):
         :return: xr.Dataset, containing temporally filtered velocity vectors as [time, y, x]
         """
         # load dataset in memory and update self
-        ds = self.load()
+        ds = copy.deepcopy(self._obj.load())
         # start with entirely independent filters
         if filter_corr:
-            ds.filter_temporal_corr(v_x=v_x, v_y=v_y, **kwargs_corr)
+            ds.velocimetry.filter_temporal_corr(v_x=v_x, v_y=v_y, **kwargs_corr)
         if filter_velocity:
-            ds.filter_temporal_velocity(v_x=v_x, v_y=v_y, **kwargs_velocity)
+            ds.velocimetry.filter_temporal_velocity(v_x=v_x, v_y=v_y, **kwargs_velocity)
         if filter_neighbour:
-            ds.filter_temporal_neighbour(v_x=v_x, v_y=v_y, **kwargs_neighbour)
+            ds.velocimetry.filter_temporal_neighbour(v_x=v_x, v_y=v_y, **kwargs_neighbour)
         # finalize with temporally dependent filters
         if filter_std:
-            ds.filter_temporal_std(v_x=v_x, v_y=v_y, **kwargs_std)
+            ds.velocimetry.filter_temporal_std(v_x=v_x, v_y=v_y, **kwargs_std)
         if filter_angle:
-            ds.filter_temporal_angle(v_x=v_x, v_y=v_y, **kwargs_angle)
-        ds.attrs = self.attrs
+            ds.velocimetry.filter_temporal_angle(v_x=v_x, v_y=v_y, **kwargs_angle)
+        ds.attrs = self._obj.attrs
         if inplace:
-            self.update(ds)
+            self._obj.update(ds)
         else:
             return ds
 
@@ -182,17 +171,17 @@ class Velocimetry(xr.Dataset):
         # TODO: make function working appropriately, if angles are close to zero (2*pi)
         # first filter on the temporal mean. This is to ensure that widely varying results in angle are deemed not
         # to be trusted.
-        v_x_mean = self[v_x].mean(dim="time")
-        v_y_mean = self[v_y].mean(dim="time")
+        v_x_mean = self._obj[v_x].mean(dim="time")
+        v_y_mean = self._obj[v_y].mean(dim="time")
         angle_mean = np.arctan2(v_x_mean, v_y_mean)
         # angle_mean = angle.mean(dim="time")
-        self[v_x] = self[v_x].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
-        self[v_y] = self[v_y].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
+        self._obj[v_x] = self._obj[v_x].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
+        self._obj[v_y] = self._obj[v_y].where(np.abs(angle_mean - angle_expected) < angle_tolerance)
         # refine locally if user wishes so
         if filter_per_timestep:
-            angle = np.arctan2(self[v_x], self[v_y])
-            self[v_x] = self[v_x].where(np.abs(angle - angle_expected) < angle_tolerance)
-            self[v_y] = self[v_y].where(np.abs(angle - angle_expected) < angle_tolerance)
+            angle = np.arctan2(self._obj[v_x], self._obj[v_y])
+            self._obj[v_x] = self._obj[v_x].where(np.abs(angle - angle_expected) < angle_tolerance)
+            self._obj[v_y] = self._obj[v_y].where(np.abs(angle - angle_expected) < angle_tolerance)
 
     def filter_temporal_neighbour(self, v_x="v_x", v_y="v_y", roll=5, tolerance=0.5):
         """
@@ -206,10 +195,10 @@ class Velocimetry(xr.Dataset):
         :param tolerance: float (0-1), Relative acceptable velocity of maximum found within rolling window
         :return: xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
         """
-        s = (self[v_x] ** 2 + self[v_y] ** 2) ** 0.5
+        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         s_roll = s.fillna(0.).rolling(time=roll, center=True).max()
-        self[v_x] = self[v_x].where(s > tolerance * s_roll)
-        self[v_y] = self[v_y].where(s > tolerance * s_roll)
+        self._obj[v_x] = self._obj[v_x].where(s > tolerance * s_roll)
+        self._obj[v_y] = self._obj[v_y].where(s > tolerance * s_roll)
         # return ds
 
     def filter_temporal_std(
@@ -223,14 +212,14 @@ class Velocimetry(xr.Dataset):
         :param tolerance: float, representing amount of standard deviations
         :return: xr.Dataset, containing standard deviation filtered velocity vectors as [time, y, x]
         """
-        s = (self[v_x] ** 2 + self[v_y] ** 2) ** 0.5
+        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             s_std = s.std(dim="time")
         s_mean = s.mean(dim="time")
         s_var = s_std / s_mean
-        self[v_x] = self[v_x].where((s - s_mean) / s_std < tolerance)
-        self[v_y] = self[v_y].where((s - s_mean) / s_std < tolerance)
+        self._obj[v_x] = self._obj[v_x].where((s - s_mean) / s_std < tolerance)
+        self._obj[v_y] = self._obj[v_y].where((s - s_mean) / s_std < tolerance)
         # return ds
 
     def filter_temporal_velocity(self, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
@@ -244,9 +233,9 @@ class Velocimetry(xr.Dataset):
         :param s_max: float, maximum scalar velocity [m s-1]
         :return: xr.Dataset, containing velocity-range filtered velocity vectors as [time, y, x]
         """
-        s = (self[v_x] ** 2 + self[v_y] ** 2) ** 0.5
-        self[v_x] = self[v_x].where(s > s_min)
-        self[v_y] = self[v_y].where(s < s_max)
+        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
+        self._obj[v_x] = self._obj[v_x].where(s > s_min)
+        self._obj[v_y] = self._obj[v_y].where(s < s_max)
         # return ds
 
     def filter_temporal_corr(self, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.1):
@@ -260,8 +249,8 @@ class Velocimetry(xr.Dataset):
         :param tolerance: float (0-1), tolerance for correlation value. If correlation is lower than tolerance, it is masked
         :return: xr.Dataset, containing correlation filtered velocity vectors as [time, y, x]
         """
-        self[v_x] = self[v_x].where(self[corr] > tolerance)
-        self[v_y] = self[v_y].where(self[corr] > tolerance)
+        self._obj[v_x] = self._obj[v_x].where(self._obj[corr] > tolerance)
+        self._obj[v_y] = self._obj[v_y].where(self._obj[corr] > tolerance)
         # return ds
 
     def filter_spatial(
@@ -285,16 +274,16 @@ class Velocimetry(xr.Dataset):
         :return: xr.Dataset, containing spatially filtered velocity vectors as [time, y, x]
         """
         # work on v_x and v_y only
-        ds_temp = self[[v_x, v_y]].copy(deep=True).load()
+        ds_temp = self._obj[[v_x, v_y]].copy(deep=True).load()
         if filter_nan:
-            ds_temp.filter_spatial_nan(v_x=v_x, v_y=v_y, **kwargs_nan)
+            ds_temp.velocimetry.filter_spatial_nan(v_x=v_x, v_y=v_y, **kwargs_nan)
         if filter_median:
-            ds_temp.filter_spatial_median(v_x=v_x, v_y=v_y, **kwargs_median)
+            ds_temp.velocimetry.filter_spatial_median(v_x=v_x, v_y=v_y, **kwargs_median)
         # merge the temporary set with the original
-        ds = xr.merge([self.drop_vars([v_x, v_y]), ds_temp])
-        ds.attrs = self.attrs
+        ds = xr.merge([self._obj.drop_vars([v_x, v_y]), ds_temp])
+        ds.attrs = self._obj.attrs
         if inplace:
-            self.update(ds)
+            self._obj.update(ds)
         else:
             return ds
 
@@ -322,8 +311,8 @@ class Velocimetry(xr.Dataset):
             ds_slice[v_x][:] = u
             ds_slice[v_y][:] = v
             return ds_slice
-        ds_g = self.groupby("time")
-        self.update(
+        ds_g = self._obj.groupby("time")
+        self._obj.update(
             ds_g.apply(_filter_nan, v_x=v_x, v_y=v_y, **kwargs)
         )
 
@@ -356,8 +345,8 @@ class Velocimetry(xr.Dataset):
             ds_slice[v_x][:] = u
             ds_slice[v_y][:] = v
             return ds_slice
-        ds_g = self.groupby("time")
-        self.update(
+        ds_g = self._obj.groupby("time")
+        self._obj.update(
             ds_g.apply(_filter_median, v_x=v_x, v_y=v_y, **kwargs)
         )
 
@@ -378,14 +367,14 @@ class Velocimetry(xr.Dataset):
             u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
         """
         # retrieve the backward transformation array
-        M = self.camera_config.get_M_reverse(self.h_a)
+        M = self.camera_config.get_M_reverse(self._obj.h_a)
         # get the shape of the original frames
         shape_y, shape_x = self.camera_shape
-        xi, yi = np.meshgrid(self.x, self.y)
+        xi, yi = np.meshgrid(self._obj.x, self._obj.y)
         # flip the y-coordinates to match the row order used by opencv
         yi = np.flipud(yi)
 
-        x_moved, y_moved = xi + self[v_x] * dt, yi + self[v_y] * dt
+        x_moved, y_moved = xi + self._obj[v_x] * dt, yi + self._obj[v_y] * dt
         xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, self.camera_config.resolution, M)
 
         # convert row counts to start at the top of the frame instead of bottom
@@ -395,8 +384,8 @@ class Velocimetry(xr.Dataset):
         yp_moved[yp_moved == shape_y] = np.nan  # ds["yp"].values[yp_moved == shape_y]
         xp_moved[xp_moved == 0] = np.nan  # ds["xp"].values[xp_moved == 0]
 
-        u, v = xp_moved - self["xp"], yp_moved - self["yp"]
-        s = (self[v_x] ** 2 + self[v_y] ** 2) ** 0.5
+        u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
+        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         s.name = "radial_sea_water_velocity_away_from_instrument"
         return "xp", "yp", u, v, s
 
@@ -415,8 +404,8 @@ class Velocimetry(xr.Dataset):
 
         """
         # select lon and lat variables as coordinates
-        u = self[v_x]
-        v = self[v_y]
+        u = self._obj[v_x]
+        v = self._obj[v_y]
         s = (u ** 2 + v ** 2) ** 0.5
         aff = self.camera_config.transform
         theta = np.arctan2(aff.d, aff.a)
@@ -444,19 +433,19 @@ class Velocimetry(xr.Dataset):
             default: "ys"
         :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
         """
-        transform = helpers.affine_from_grid(self[xs].values, self[ys].values)
+        transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
         if crs is not None:
             # transform coordinates of cross section
             x, y = helpers.xy_transform(x, y, crs_from=crs, crs_to=CRS.from_wkt(self.camera_config.crs))
         if distance is None:
             # interpret suitable sampling distance from grid resolution
-            distance = np.abs(np.diff(self.x)[0])
+            distance = np.abs(np.diff(self._obj.x)[0])
             # interpolate to a suitable set of points
         x, y, z, s = helpers.xy_equidistant(x, y, distance=distance, z=z)
 
         # make a cols and rows temporary variable
-        coli, rowi = np.meshgrid(np.arange(len(self["x"])), np.arange(len(self["y"])))
-        self["cols"], self["rows"] = (["y", "x"], coli), (["y", "x"], rowi)
+        coli, rowi = np.meshgrid(np.arange(len(self._obj["x"])), np.arange(len(self._obj["y"])))
+        self._obj["cols"], self._obj["rows"] = (["y", "x"], coli), (["y", "x"], rowi)
         # compute rows and cols locations of coordinates (x, y)
         rows, cols = rasterio.transform.rowcol(
             transform,
@@ -468,12 +457,12 @@ class Velocimetry(xr.Dataset):
 
         # select x and y coordinates from axes
         idx = np.all(
-            np.array([cols >= 0, cols < len(self["x"]), rows >= 0, rows < len(self["y"])]),
+            np.array([cols >= 0, cols < len(self._obj["x"]), rows >= 0, rows < len(self._obj["y"])]),
             axis=0,
         )
         # compute transect coordinates in the local grid coordinate system (can be outside the grid)
-        f_x = interp1d(np.arange(0, len(self["x"])), self["x"], fill_value="extrapolate")
-        f_y = interp1d(np.arange(0, len(self["y"])), self["y"], fill_value="extrapolate")
+        f_x = interp1d(np.arange(0, len(self._obj["x"])), self._obj["x"], fill_value="extrapolate")
+        f_y = interp1d(np.arange(0, len(self._obj["y"])), self._obj["y"], fill_value="extrapolate")
         _x = f_x(cols)
         _y = f_y(rows)
 
@@ -483,10 +472,10 @@ class Velocimetry(xr.Dataset):
 
         # interpolate velocities over points
         if wdw == 0:
-            ds_points = self.interp(x=_x, y=_y)
+            ds_points = self._obj.interp(x=_x, y=_y)
         else:
             # collect points within a stride, collate and analyze for outliers
-            ds_wdw = xr.concat([self.shift(x=x_stride, y=y_stride) for x_stride in range(-wdw, wdw + 1) for y_stride in
+            ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(-wdw, wdw + 1) for y_stride in
                                 range(-wdw, wdw + 1)], dim="stride")
             # use the median to prevent a large influence of serious outliers
             ds_effective = ds_wdw.median(dim="stride", keep_attrs=True)
@@ -502,11 +491,11 @@ class Velocimetry(xr.Dataset):
         if z is not None:
             ds_points = ds_points.assign_coords(zcoords=("points", list(z)))
         # convert to a Transect object
-        transect = Transect(ds_points, attrs=ds_points.attrs)
+        ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
         if v_eff:
             # add the effective velocity, perpendicular to cross section direction
-            transect.vector_to_scalar()
-        return transect
+            ds_points.transect.vector_to_scalar()
+        return ds_points
 
     def plot(
             self,
@@ -558,10 +547,10 @@ class Velocimetry(xr.Dataset):
         :return: ax, axes object resulting from this function.
         """
 
-        if len(self[v_x].shape) > 2:
+        if len(self._obj[v_x].shape) > 2:
             raise OverflowError(
                 f'Dataset\'s variables should only contain 2 dimensions, this dataset '
-                f'contains {len(self[v_x].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
+                f'contains {len(self._obj[v_x].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
                 f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
             )
         assert (scalar or quiver), "Either scalar or quiver should be set tot True, nothing to plot"
@@ -570,8 +559,8 @@ class Velocimetry(xr.Dataset):
             x = "x"
             y = "y"
             theta = 0.
-            u = self[v_x]
-            v = self[v_y]
+            u = self._obj[v_x]
+            v = self._obj[v_y]
             s = (u ** 2 + v ** 2) ** 0.5
         elif mode == "geographical":
             # import some additional packages
@@ -601,18 +590,18 @@ class Velocimetry(xr.Dataset):
                 ax.pcolormesh(background[x], background[y], background, **background_kwargs)
         if quiver:
             if scalar:
-                p = plot_quiver(ax, self[x].values, self[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)],
+                p = plot_quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)],
                                 None,
                                 **quiver_kwargs)
             else:
-                p = plot_quiver(ax, self[x].values, self[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
+                p = plot_quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
                                 **quiver_kwargs)
         if scalar:
             # plot the scalar velocity value as grid, return mappable
             p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
             if mode == "geographical":
                 ax.set_extent(
-                    [self[x].min() - 0.00005, self[x].max() + 0.00005, self[y].min() - 0.00005, self[y].max() + 0.00005],
+                    [self._obj[x].min() - 0.00005, self._obj[x].max() + 0.00005, self._obj[y].min() - 0.00005, self._obj[y].max() + 0.00005],
                     crs=ccrs.PlateCarree())
         cbar = plot_cbar(ax, p, mode=mode, size=cbar_fontsize, color=cbar_color)
         # finally, if a background is used, set xlim and ylim to the relevant axes
@@ -635,7 +624,7 @@ class Velocimetry(xr.Dataset):
         :return: xr.Dataset, containing filtered velocities
         """
         # TO-DO: make replacement decision dependent on amount of non-NaN values in neighbourhood
-        u, v = self[v_x].values, self[v_y].values
+        u, v = self._obj[v_x].values, self._obj[v_y].values
         for n in range(max_iter):
             u_move = helpers.neighbour_stack(u, stride=stride)
             v_move = helpers.neighbour_stack(v, stride=stride)
@@ -654,22 +643,14 @@ class Velocimetry(xr.Dataset):
             v[:, 0:stride] = np.nan;
             v[:, -stride:] = np.nan
         if inplace:
-            self[v_x][:] = u
-            self[v_y][:] = v
+            self._obj[v_x][:] = u
+            self._obj[v_y][:] = v
         else:
-            ds = self.copy(deep=True)
+            ds = self._obj.copy(deep=True)
             ds[v_x][:] = u
             ds[v_y][:] = v
             return ds
 
-    def to_netcdf(
-        self,
-        *args,
-        **kwargs
-    ):
-        # ensure that default encoding is applied
-        if not("encoding" in kwargs):
-            kwargs["encoding"] = const.ENCODING
-        # serialize camera_config to a json
-        self.attrs["camera_config"] = self.camera_config.to_json()
-        return super().to_netcdf(*args, **kwargs)
+    def set_encoding(self):
+        for k in const.ENCODE_VARS:
+            self._obj[k].encoding = const.ENCODING_PARAMS

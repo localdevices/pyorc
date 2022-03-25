@@ -2,61 +2,15 @@ import cv2
 import dask
 import numpy as np
 import xarray as xr
-
+from .orcbase import ORCBase
 from .. import cv, helpers, const, piv_process
-from .piv import Velocimetry
+from .velocimetry import Velocimetry
+from pyorc.const import ENCODING
 
-class Frames(xr.DataArray):
-    __slots__ = ()
-    def __init__(
-        self,
-        *args,
-        **kwargs
-    ):
-        super().__init__(*args, **kwargs)
-        # check for camera_config
-        self.name = "frames"
-        if hasattr(self, "camera_config"):
-            if isinstance(self.camera_config, str):
-                # convert into a camera_config object
-                from pyorc import get_camera_config
-                self.attrs["camera_config"] = get_camera_config(self.camera_config)
-        if hasattr(self, "camera_shape"):
-            if isinstance(self.camera_shape, str):
-                self.attrs["camera_shape"] = helpers.deserialize_attr(self, "camera_shape", np.array)
-
-    def add_xy_coords(
-        self,
-        xy_coord_data,
-        coords,
-        attrs_dict
-    ):
-        """
-        add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.
-
-        :param ds: xr.Dataset with at least y and x dimensions
-        :param xy_coord_data: list, one or several arrays with 2-dimensional coordinates
-        :param coords: tuple with strings, indicating the dimensions of the data in xy_coord_data
-        :param attrs_dict: list of dicts, containing attributes belonging to xy_coord_data, must have equal length as xy_coord_data
-        :return: xr.Dataset, with added coordinate variables.
-        """
-        dims = tuple(coords.keys())
-        xy_coord_data = [
-            xr.DataArray(
-                data,
-                dims=dims,
-                coords=coords,
-                attrs=attrs,
-                name=name
-            ) for data, (name, attrs) in zip(xy_coord_data, attrs_dict.items())]
-        # assign the coordinates
-        frames_coord = self.assign_coords({
-            k: (dims, v) for k, v in zip(attrs_dict, xy_coord_data)
-        })
-        # add the attributes (not possible with assign_coords
-        for k, v in zip(attrs_dict, xy_coord_data):
-            frames_coord[k].attrs = v.attrs
-        return frames_coord
+@xr.register_dataarray_accessor("frames")
+class Frames(ORCBase):
+    def __init__(self, xarray_obj):
+        super(Frames, self).__init__(xarray_obj)
 
     def get_piv(self, **kwargs):
         """
@@ -70,8 +24,8 @@ class Frames(xr.DataArray):
         # forward the computation to piv
         dask_piv = dask.delayed(piv_process.piv, nout=6)
         v_x, v_y, s2n, corr = [], [], [], []
-        frames_a = self[0:-1]
-        frames_b = self[1:]
+        frames_a = self._obj[0:-1]
+        frames_b = self._obj[1:]
         for frame_a, frame_b in zip(frames_a, frames_b):
             # select the time difference in seconds
             dt = frame_b.time - frame_a.time
@@ -98,8 +52,8 @@ class Frames(xr.DataArray):
             **kwargs,
         )
         # extract global attributes from origin
-        global_attrs = self.attrs
-        time = (self.time[0:-1].values + self.time[1:].values) / 2  # frame to frame differences
+        global_attrs = self._obj.attrs
+        time = (self._obj.time[0:-1].values + self._obj.time[1:].values) / 2  # frame to frame differences
         # retrieve the x and y-axis belonging to the results
         x, y = helpers.get_axes(cols, rows, self.camera_config.resolution)
         # convert in projected and latlon coordinates
@@ -109,7 +63,7 @@ class Frames(xr.DataArray):
             self.camera_config.transform,
             self.camera_config.crs
         )
-        M = self.camera_config.get_M_reverse(self.h_a)
+        M = self.camera_config.get_M_reverse(self._obj.h_a)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
         # dirty trick to ensure y coordinates start at the top in the right orientation
@@ -133,14 +87,16 @@ class Frames(xr.DataArray):
         ds = xr.merge([v_x, v_y, s2n, corr])
         del coords["time"]
         # prepare the xs, ys, lons and lats grids for geographical projections and add to xr.Dataset
-        ds = helpers.add_xy_coords(
-            ds,
+        ds = ds.velocimetry.add_xy_coords(
             [xp, yp, xs, ys, lons, lats],
             coords,
             {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
         )
+
         # add piv object functionality and attrs to dataset and return
-        return Velocimetry(ds, attrs=global_attrs)
+        ds = xr.Dataset(ds, attrs=global_attrs)
+        ds.velocimetry.set_encoding()
+        return ds
 
     def project(self):
         """
@@ -154,13 +110,13 @@ class Frames(xr.DataArray):
         # # read json into CameraConfig object
         # camera_config = helpers.get_camera_config_from_ds(frames)
         # retrieve the M and shape from camera config with said h_a
-        M = self.camera_config.get_M(self.h_a)
+        M = self.camera_config.get_M(self._obj.h_a)
         shape = self.camera_config.shape
         # get orthoprojected frames as delayed objects
         get_ortho = dask.delayed(cv.get_ortho)
-        imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in self]
+        imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in self._obj]
         # prepare axes
-        time = self.time
+        time = self._obj.time
         y = np.flipud(np.linspace(
             self.camera_config.resolution/2,
             self.camera_config.resolution*(shape[0]-0.5),
@@ -188,7 +144,7 @@ class Frames(xr.DataArray):
             "x": x
         }
         # add a coordinate if RGB frames are used
-        if "rgb" in self.coords:
+        if "rgb" in self._obj.coords:
             coords["rgb"] = np.array([0, 1, 2])
             shape = (*shape, 3)
         # prepare a dask data array
@@ -197,17 +153,18 @@ class Frames(xr.DataArray):
             shape,
             "uint8",
             coords=coords,
-            attrs=self.attrs,
-            object_type=Frames
+            attrs=self._obj.attrs,
+            object_type=xr.DataArray
         )
 
         # frames_proj = Frames(da)
         # remove time coordinate for the spatial variables (and rgb in case rgb frames are used)
         del coords["time"]
-        if "rgb" in self.coords:
+        if "rgb" in self._obj.coords:
             del coords["rgb"]
         # add coordinate meshes to projected frames and return
-        return frames_proj.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        frames_proj = frames_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        return frames_proj
 
     def landmask(self, dilate_iter=10, samples=15):
         """
@@ -222,12 +179,12 @@ class Frames(xr.DataArray):
         :return: xr.DataArray with filtered frames
 
         """
-        time_interval = round(len(self)/samples)
+        time_interval = round(len(self._obj)/samples)
         assert(time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
         # ensure attributes are kept
         xr.set_options(keep_attrs=True)
         # compute standard deviation over mean, assuming this value is low over water, and high over land
-        std_norm = (self[::time_interval].std(axis=0) / self[::time_interval].mean(axis=0)).load()
+        std_norm = (self._obj[::time_interval].std(axis=0) / self._obj[::time_interval].mean(axis=0)).load()
         # retrieve a simple 3x3 equal weight kernel
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
         # dilate the std_norm by some dilation iterations
@@ -240,7 +197,7 @@ class Frames(xr.DataArray):
         # mask is where thres is
         mask = thres != 255
         # make mask 3-dimensional
-        return (self * mask) # .astype(bool)
+        return (self._obj * mask) # .astype(bool)
 
 
     def normalize(self, samples=15):
@@ -254,13 +211,13 @@ class Frames(xr.DataArray):
             number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
         :return: xr.DataArray with filtered frames
         """
-        time_interval = round(len(self) / samples)
+        time_interval = round(len(self._obj) / samples)
         assert (time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
         # ensure attributes are kept
         xr.set_options(keep_attrs=True)
         # normalize = dask.delayed(cv2.normalize)
-        mean = self[::time_interval].mean(axis=0).load()
-        frames_reduce = self - mean
+        mean = self._obj[::time_interval].mean(axis=0).load()
+        frames_reduce = self._obj - mean
         #     frames_norm = cv2.normalize(frames_reduce)
         # frames_min = frames_reduce.min(axis=-1).min(axis=-1)
         # frames_max = frames_reduce.max(axis=-1).min(axis=-1)
@@ -294,15 +251,15 @@ class Frames(xr.DataArray):
             edges[mask] = 0
             return edges
 
-        shape = self[0].shape  # single-frame shape does not change
+        shape = self._obj[0].shape  # single-frame shape does not change
         da_convert_edge = dask.delayed(convert_edge)
-        imgs = [da_convert_edge(frame.values, stride_1, stride_2) for frame in self]
+        imgs = [da_convert_edge(frame.values, stride_1, stride_2) for frame in self._obj]
         # prepare axes
         # Setup coordinates
         coords = {
-            "time": self.time,
-            "y": self.y,
-            "x": self.x
+            "time": self._obj.time,
+            "y": self._obj.y,
+            "x": self._obj.x
         }
         # add a coordinate if RGB frames are used
         frames_edge = helpers.delayed_to_da(
@@ -310,12 +267,12 @@ class Frames(xr.DataArray):
             shape,
             "uint8",
             coords=coords,
-            attrs=self.attrs,
+            attrs=self._obj.attrs,
             name="edges",
             object_type=Frames
         )
-        frames_edge["xp"] = self["xp"]
-        frames_edge["yp"] = self["yp"]
+        frames_edge["xp"] = self._obj["xp"]
+        frames_edge["yp"] = self._obj["yp"]
         return frames_edge
 
     def reduce_rolling(self, samples=25):
@@ -326,31 +283,14 @@ class Frames(xr.DataArray):
         :param samples: number of samples per rolling
         :return: xr.DataArray with filtered frames
         """
-        roll_mean = self.rolling(time=samples).mean()
-        assert (len(self) >= samples), f"Amount of frames is smaller than requested rolling interval of {samples} samples"
+        roll_mean = self._obj.rolling(time=samples).mean()
+        assert (len(self._obj) >= samples), f"Amount of frames is smaller than requested rolling interval of {samples} samples"
         # ensure attributes are kept
         xr.set_options(keep_attrs=True)
         # normalize = dask.delayed(cv2.normalize)
-        frames_reduce = self - roll_mean
+        frames_reduce = self._obj - roll_mean
         frames_thres = np.maximum(frames_reduce, 0)
         # # normalize
         frames_norm = (frames_thres * 255 / frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
         frames_norm = frames_norm.where(roll_mean != 0, 0)
         return frames_norm
-
-    #
-
-    def to_netcdf(self, *args, **kwargs): # -> Union[bytes, "Delayed", None]:
-#       # before writing, serialize the camera_config
-        self.attrs["camera_config"] = self.camera_config.to_json()
-        super().to_netcdf(*args, **kwargs)
-
-
-def open_frames(fn, *args, **kwargs):
-    if not("chunks" in kwargs):
-        # add at least the time chunk
-        kwargs["chunks"] = {"time": 1}
-    ds = xr.open_dataset(fn, *args, **kwargs)
-    assert("frames" in ds), f"Opened dataset does not contain frames"
-    return Frames(ds["frames"])
-
