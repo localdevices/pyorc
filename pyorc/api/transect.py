@@ -1,6 +1,8 @@
 import numpy as np
 import xarray as xr
 from pyorc import helpers
+import pyorc.plot as plot_orc
+
 from .orcbase import ORCBase
 
 
@@ -95,6 +97,13 @@ class Transect(ORCBase):
         # set name
         v_eff.name = "v_eff_nofill"  # there still may be gaps in this series
         self._obj["v_eff_nofill"] = v_eff
+        # store the angle for plotting purposes
+        self._obj["v_dir"] = (("points"), np.ones(len(self._obj.points)) * flow_dir)
+        self._obj["v_dir"].attrs = {
+            "standard_name": "river_flow_angle",
+            "long_name": "Angle of river flow in radians from North",
+            "units": "rad"
+        }
 
     def get_xyz_perspective(self, reverse_y=None):
         z = (self._obj.zcoords - self.camera_config.gcps["z_0"] + self.camera_config.gcps["h_ref"]).values
@@ -151,9 +160,54 @@ class Transect(ORCBase):
         return ds
 
 
-    def plot(self):
+    def plot(
+        self,
+        ax=None,
+        quiver=True,
+        background=None,
+        mode="local",
+        background_kwargs={},
+        quiver_kwargs={},
+        v_eff="v_eff",
+        v_dir="v_dir",
+        cbar_color="w",
+        cbar_fontsize=15
+    ):
         """
 
         :return:
         """
-        raise NotImplementedError
+        u = self._obj[v_eff] * np.sin(self._obj[v_dir])
+        v = self._obj[v_eff] * np.cos(self._obj[v_dir])
+        s = self._obj[v_eff]
+        if mode == "local":
+            x = "x"
+            y = "y"
+            theta = 0.
+        elif mode == "geographical":
+            import cartopy.crs as ccrs
+            # add transform for GeoAxes
+            quiver_kwargs["transform"] = ccrs.PlateCarree()
+            x = "lon"
+            y = "lat"
+            aff = self.camera_config.transform
+            theta = np.arctan2(aff.d, aff.a)
+
+        ax = plot_orc.prepare_axes(ax=ax, mode=mode)
+        f = ax.figure  # handle to figure
+
+        if quiver:
+            p = plot_orc.quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
+                            **quiver_kwargs)
+        # if scalar:
+        #     # plot the scalar velocity value as grid, return mappable
+        #     p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
+        if mode == "geographical":
+            ax.set_extent(
+                [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
+                crs=ccrs.PlateCarree())
+        else:
+            ax.axis('equal')
+        cbar = plot_orc.cbar(ax, p, mode=mode, size=cbar_fontsize, color=cbar_color)
+        return ax
+        # raise NotImplementedError
