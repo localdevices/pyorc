@@ -12,6 +12,7 @@ from scipy.optimize import curve_fit
 from scipy.signal import convolve2d
 from scipy.interpolate import interp1d
 
+# TODO: check if redundant
 def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
     """
     add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.
@@ -49,7 +50,7 @@ def affine_from_grid(xi, yi):
     :param xi: 2D numpy-like gridded x-coordinates
     :param yi: 2D numpy-like gridded y-coordinates
 
-    :return: rasterio Affine
+    :return: rasterio.Affine object
     """
 
     xul, yul = xi[0, 0], yi[0, 0]
@@ -73,7 +74,7 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object
     :param coords: tuple with strings, indicating the dimensions of the xr.DataArray being prepared, usually ("time", "y", "x").
     :param attrs: dict, containing attributes for xr.DataArray
     :param name: str, name of variable, default None
-    :return: xr.DataArray with dask.array
+    :return: object of object_type (default: xr.DataArray)
     """
     if isinstance(delayed_das, list):
         data_array = da.stack(
@@ -102,6 +103,8 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object
 
 def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
     """
+    integrate velocities [m s-1] to depth-integrated velocity [m2 s-1] using depth information
+
     :param z: DataArray(points), bathymetry depths (ref. CRS)
     :param v: DataArray(time, points), effective velocity at surface [m s-1]
     :param z_0: float, zero water level (ref. CRS)
@@ -130,6 +133,7 @@ def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
 def distance_pts(c1, c2):
     """
     Compute distance between c1 and c2
+
     :param c1: tuple(x, y), coordinate 1
     :param c2: tuple(x, y), coordinate 2
     :return: float, distance between c1 and c2
@@ -159,14 +163,14 @@ def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
 
 def get_axes(cols, rows, resolution):
     """
-    Retrieve a locally spaced axes for PIV results on the basis of resolution and row and col distances from the
-    original frames
+    Retrieve a locally spaced axes for surface velocimetry results on the basis of resolution and row and 
+    col distances from the original frames
 
     :param cols: list with ints, columns, sampled from the original projected frames
     :param rows: list with ints, rows, sampled from the original projected frames
     :param resolution: resolution of original frames
     :return: np.ndarray (N), containing x-axis with origin at the left
-             np.ndarray (N), containing y-axis with origin on the top
+        np.ndarray (N), containing y-axis with origin on the top
 
     """
     spacing_x = np.diff(cols[0])[0]
@@ -185,6 +189,7 @@ def get_axes(cols, rows, resolution):
     )
     return x, y
 
+# TODO: check if used
 def get_camera_config_from_ds(ds):
     assert(hasattr(ds, "camera_config_json")), f'dataset does not contain attribute "camera_config_json" needed to interpret the camera configuration of the video'
     from pyorc import get_camera_config
@@ -214,6 +219,16 @@ def get_xs_ys(cols, rows, transform, src_crs, dst_crs=CRS.from_epsg(4326)):
 
 
 def log_profile(X, z0, k_max, s0=0., s1=0.):
+    """
+    Returns values of a log-profile function
+
+    :param X: tuple with (depth [m], distance to bank [m]) arrays of equal length
+    :param z0: float, depth with zero velocity [m]
+    :param k_max: float, maximum scale factor of log-profile function [-]
+    :param s0: float, distance from bank where k equals zero (and thus velocity is zero) [m]
+    :param s1: float, distance from bank whrre k=k_max (k cannot be larger than k_max) [m]
+    :return: values from log-profile, equal amount and shape as arrays inside X [m s-1]
+    """
     z, s = X
     k = k_max * np.minimum(np.maximum((s-s0)/(s1-s0), 0), 1)
     v = k*np.maximum(np.log(np.maximum(z, 1e-6)/z0), 0)
@@ -227,7 +242,7 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     :param array: 2-D numpy array, any values (may contain NaN)
     :param stride: int, stride used to determine relevant neighbours
     :param missing: float, a temporary missing value, used to be able to convolve NaNs
-    :return: 3-D numpy array, stack of 2-D arrays, with strided neighbours
+    :return: np.array, 3D containing stack of 2-D arrays, with strided neighbours
     """
     array[np.isnan(array)] = missing
     array_move = []
@@ -246,15 +261,15 @@ def neighbour_stack(array, stride=1, missing=-9999.):
 def optimize_log_profile(z, v, dist_bank=None):
     """
     optimize velocity log profile relation of v=k*max(z/z0)
+
     :param z: list of depths
     :param v: list of surface velocities
-    :return: {z_0, k}
+    :return: dict, fitted parameters of log_profile {z_0, k_max, s0 and s1}
     """
     if dist_bank is None:
         dist_bank = np.inf(len(v))
     v = np.array(v)
     z = np.array(z)
-    # if v.min() < 0:
     result = curve_fit(
         log_profile,
         (z, dist_bank),
@@ -294,6 +309,8 @@ def velocity_fill(x, y, z, v, z_0, h_ref, h_a, groupby="quantile"):
     """
     Fill missing surface velocities using a velocity depth profile with
 
+    :param x: DataArray(points), x-coordinates of bathymetry depths (ref. CRS)
+    :param y: DataArray(points), y-coordinates of bathymetry depths (ref. CRS)
     :param z: DataArray(points), bathymetry depths (ref. CRS)
     :param v: DataArray(time, points), effective velocity at surface [m s-1]
     :param z_0: float, zero water level (ref. CRS)
@@ -375,14 +392,25 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     return xp, yp
 
 def xy_transform(x, y, crs_from, crs_to):
-        try:
-            crs = CRS.from_user_input(crs_from)
-        except:
-            raise ValueError(f"Input crs {crs_from} is not a valid Coordinate Reference System")
-        try:
-            crs = CRS.from_user_input(crs_from)
-        except:
-            raise ValueError(f"Output crs {crs_to} is not a valid Coordinate Reference System")
-        transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
-        # transform dst coordinates to local projection
-        return transform.transform(x, y)
+    """
+    transforms set of x and y coordinates from one CRS to another
+
+    :param x: np.ndarray, 1D axis of x-coordinates in local projection with origin top-left, to be backwards projected
+    :param y: np.ndarray, 1D axis of y-coordinates in local projection with origin top-left, to be backwards projected
+    :param crs_from: source crs, compatible with rasterio.crs.CRS.from_user_input (e.g. a epsg number or proj string)
+    :param crs_to: destination crs, compatible with rasterio.crs.CRS.from_user_input (e.g. a epsg number or proj string)
+    :param y: np.ndarray, 1D axis of y-coordinates in local projection with origin top-left, to be backwards projected
+
+    """
+
+    try:
+        crs = CRS.from_user_input(crs_from)
+    except:
+        raise ValueError(f"Input crs {crs_from} is not a valid Coordinate Reference System")
+    try:
+        crs = CRS.from_user_input(crs_from)
+    except:
+        raise ValueError(f"Output crs {crs_to} is not a valid Coordinate Reference System")
+    transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
+    # transform dst coordinates to local projection
+    return transform.transform(x, y)
