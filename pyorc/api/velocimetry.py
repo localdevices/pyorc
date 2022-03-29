@@ -532,7 +532,7 @@ class Velocimetry(ORCBase):
                 ax.set_extent(
                     [self._obj[x].min() - 0.00005, self._obj[x].max() + 0.00005, self._obj[y].min() - 0.00005, self._obj[y].max() + 0.00005],
                     crs=ccrs.PlateCarree())
-        cbar = plot_orc.cbar(ax, p, mode=mode, size=cbar_fontsize, color=cbar_color)
+        cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
         # finally, if a background is used, set xlim and ylim to the relevant axes
         if (background is not None and mode != "geographical"):
             ax.set_xlim([background[x].min(), background[x].max()])

@@ -1,4 +1,7 @@
 import matplotlib.pyplot as plt
+from matplotlib import patheffects
+import numpy as np
+import matplotlib.ticker as mticker
 
 def prepare_axes(ax=None, mode="local"):
     """
@@ -48,7 +51,7 @@ def quiver(ax, x, y, u, v, s=None, zorder=3, **kwargs):
         p = ax.quiver(x, y, u, v, s, zorder=zorder, **kwargs)
     return p
 
-def cbar(ax, p, mode="local", size=15, color="w"):
+def cbar(ax, p, size=12, **kwargs):
     """
     Add colorbar to existing axes. In case camera mode is used, the colorbar will get a bespoke layout and will
     be placed inside of the axes object.
@@ -60,13 +63,26 @@ def cbar(ax, p, mode="local", size=15, color="w"):
     :param color: color, used for fonts of colorbar title and ticks, only used with `mode="camera"`
     :return: handle to colorbar
     """
-    if mode == "camera":
-        # place the colorbar nicely inside
-        cax = ax.figure.add_axes([0.9, 0.05, 0.05, 0.5])
-        cax.set_visible(False)
-        cbar = ax.figure.colorbar(p, ax=cax)
-        cbar.set_label(label="velocity [m/s]", size=size, weight='bold', color=color)
-        cbar.ax.tick_params(labelsize=size-3, labelcolor=color)
-    else:
-        cbar = ax.figure.colorbar(p)
-    return cbar
+    label_format = '{:,.2f}'
+    path_effects = [
+        patheffects.Stroke(linewidth=3, foreground="w"),
+        patheffects.Normal(),
+    ]
+    cax = ax.inset_axes([0.05, 0.05,
+                         0.02, 0.25])
+    cb = ax.figure.colorbar(p, cax=cax, **kwargs)
+    ticks_loc = cb.get_ticks().tolist()
+    cb.set_ticks(mticker.FixedLocator(ticks_loc))
+    cb.set_ticklabels([label_format.format(x) for x in ticks_loc], path_effects=path_effects, fontsize=size)
+    cb.set_label(label="velocity [m/s]", size=size, path_effects=path_effects)
+
+    # if mode == "camera":
+    #     # place the colorbar nicely inside
+    #     cax = ax.figure.add_axes([0.9, 0.05, 0.05, 0.5])
+    #     cax.set_visible(False)
+    #     cbar = ax.figure.colorbar(p, ax=cax)
+    #     cbar.set_label(label="velocity [m/s]", size=size, weight='bold', color=color)
+    #     cbar.ax.tick_params(labelsize=size-3, labelcolor=color)
+    # else:
+    #     cbar = ax.figure.colorbar(p)
+    return cb

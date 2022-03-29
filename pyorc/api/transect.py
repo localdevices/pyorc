@@ -192,7 +192,6 @@ class Transect(ORCBase):
             y = "lat"
             aff = self.camera_config.transform
             theta = np.arctan2(aff.d, aff.a)
-
         ax = plot_orc.prepare_axes(ax=ax, mode=mode)
         f = ax.figure  # handle to figure
 
@@ -208,6 +207,6 @@ class Transect(ORCBase):
                 crs=ccrs.PlateCarree())
         else:
             ax.axis('equal')
-        cbar = plot_orc.cbar(ax, p, mode=mode, size=cbar_fontsize, color=cbar_color)
+        cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
         return ax
         # raise NotImplementedError
