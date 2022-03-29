@@ -58,9 +58,8 @@ def cbar(ax, p, size=12, **kwargs):
 
     :param ax: axes object
     :param p: mappable, used to define colorbar
-    :param mode: plotting mode, see pyorc.piv.plot
     :param size: fontsize, used for colorbar title, only used with `mode="camera"`
-    :param color: color, used for fonts of colorbar title and ticks, only used with `mode="camera"`
+    :param kwargs: dict, additional settings passed to plt.colorbar
     :return: handle to colorbar
     """
     label_format = '{:,.2f}'
