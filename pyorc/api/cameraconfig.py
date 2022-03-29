@@ -13,7 +13,7 @@ class CameraConfig:
 
     def __init__(
         self,
-        crs,
+        crs=None,
         window_size=15,
         resolution=0.01,
         lens_position=None,
@@ -42,7 +42,7 @@ class CameraConfig:
             except:
                 raise ValueError(f"crs {crs} is not a valid Coordinate Reference System")
             assert(crs.is_geographic == 0), "Provided crs must be projected with units like [m]"
-        self.crs = crs.to_wkt()
+            self.crs = crs.to_wkt()
         if resolution is not None:
             self.resolution = resolution
         if lens_position is not None:
@@ -173,8 +173,8 @@ class CameraConfig:
         assert(all(isinstance(x, (float, int)) for p in src for x in p)), "src contains non-int parts"
         assert(all(isinstance(x, (float, int)) for p in dst for x in p)), "dst contains non-float parts"
         if crs is not None:
-            if self.crs is None:
-                raise ValueError("CameraConfig does not contain a crs, ")
+            if not(hasattr(self, "crs")):
+                raise ValueError('CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided destination coordinates are in a locally defined coordinate reference system, e.g. established with a spirit level.')
             _x, _y = zip(*dst)
             x, y = helpers.xy_transform(_x, _y, crs, CRS.from_wkt(self.crs))
             # replace transformed coordinates

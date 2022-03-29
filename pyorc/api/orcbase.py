@@ -61,7 +61,7 @@ class ORCBase(object):
                 coords=coords,
                 attrs=attrs,
                 name=name
-            ) for data, (name, attrs) in zip(xy_coord_data, attrs_dict.items())]
+            ) for data, (name, attrs) in zip(xy_coord_data, attrs_dict.items()) if data is not None]
         # assign the coordinates
         frames_coord = self._obj.assign_coords({
             k: (dims, v) for k, v in zip(attrs_dict, xy_coord_data)

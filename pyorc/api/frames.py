@@ -58,12 +58,16 @@ class Frames(ORCBase):
         # retrieve the x and y-axis belonging to the results
         x, y = helpers.get_axes(cols, rows, self.camera_config.resolution)
         # convert in projected and latlon coordinates
-        xs, ys, lons, lats = helpers.get_xs_ys(
+        xs, ys = helpers.get_xs_ys(
             cols,
             rows,
             self.camera_config.transform,
-            self.camera_config.crs
         )
+        if hasattr(self.camera_config, "crs"):
+            lons, lats = helpers.get_lons_lats(xs, ys, self.camera_config.crs)
+        else:
+            lons = None
+            lats = None
         M = self.camera_config.get_M_reverse(self._obj.h_a)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
@@ -198,12 +202,16 @@ class Frames(ORCBase):
             np.arange(len(y))
         )
         # retrieve all coordinates we may ever need for further analysis or plotting
-        xs, ys, lons, lats = helpers.get_xs_ys(
+        xs, ys = helpers.get_xs_ys(
             cols,
             rows,
             self.camera_config.transform,
-            self.camera_config.crs
         )
+        if hasattr(self.camera_config, "crs"):
+            lons, lats = helpers.get_lons_lats(xs, ys, self.camera_config.crs)
+        else:
+            lons = None
+            lats = None
         # Setup coordinates
         coords = {
             "time": time,

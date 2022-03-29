@@ -196,7 +196,7 @@ def get_camera_config_from_ds(ds):
     return get_camera_config(ds.camera_config_json)
 
 
-def get_xs_ys(cols, rows, transform, src_crs, dst_crs=CRS.from_epsg(4326)):
+def get_xs_ys(cols, rows, transform):
     """
     Computes rasters of x and y coordinates, and longitude and latitude coordinates of a certain raster
     based on row and column counts and a defined transform, source crs of that raster and target crs.
@@ -210,12 +210,16 @@ def get_xs_ys(cols, rows, transform, src_crs, dst_crs=CRS.from_epsg(4326)):
     """
     xs, ys = xy(transform, rows, cols)
     xs, ys = np.array(xs), np.array(ys)
+    return xs, ys
+
+
+def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
     lons, lats = warp.transform(src_crs, dst_crs, xs.flatten(), ys.flatten())
     lons, lats = (
         np.array(lons).reshape(xs.shape),
         np.array(lats).reshape(ys.shape),
     )
-    return xs, ys, lons, lats
+    return lons, lats
 
 
 def log_profile(X, z0, k_max, s0=0., s1=0.):
