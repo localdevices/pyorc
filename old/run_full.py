@@ -1,19 +1,8 @@
-import openpiv.tools
-import openpiv.pyprocess
-import xarray as xr
-import glob
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-import rasterio
-from datetime import datetime, timedelta
-from rasterio.plot import reshape_as_raster
-import pyorc as ORC
-import cv2
-from matplotlib.animation import FuncAnimation, FFMpegWriter
 from process import *
 # import example data
-from example_data import movie
+from examples.example_data import movie
 
 folder = r"/home/hcwinsemius/Media/projects/pyorc"
 video_args = {

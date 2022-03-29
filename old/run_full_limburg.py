@@ -1,6 +1,6 @@
 from process import *
 # import example data
-from example_data_limburg import movie
+from examples.example_data_limburg import movie
 
 folder = r"/home/hcwinsemius/Media/projects/pyorc/buckets/limburg"
 video_args = {

@@ -4,7 +4,7 @@ import pyorc
 import pyproj
 camera_type = {
     "name": "Foscam E9900P",  # user-chosen name for camera
-    "lensParameters": {  # the lens parameters need to be known or calibrated
+    "lens_parameters": {  # the lens parameters need to be known or calibrated
         "k1": -3.0e-6,
         "c": 2,
         "f": 4.0,
@@ -29,12 +29,6 @@ gcps = {
 }
 
 # corner points provided by user in pixel coordinates, starting at upstream-left, downstream-left, downstream-right, upstream-right
-# corners = {
-#     "up_left": [8, 246],
-#     "down_left": [1110, 141],
-#     "down_right": [1866, 463],
-#     "up_right": [1049, 1110],
-# }
 corners = [
     [190, 205],
     [953, 143],
@@ -42,52 +36,7 @@ corners = [
     [1290, 914],
 ]
 
-
-site = {
-    "name": "Hommerich - Geul",  # str, name of user
-    "uuid": "blah",  # some uuid for relational database purposes
-    "position": (
-        5.91376662254334,
-        50.8071890242766,
-    ),  # approximate geographical location of site in crs (x, y) coordinates in metres.
-    "crs": 32631,  # int, coordinate ref system as EPSG code
-}
-
-crs_site = pyproj.CRS.from_epsg(site["crs"])
-crs_latlon = pyproj.CRS.from_epsg(4326)
-transform = pyproj.Transformer.from_crs(crs_latlon, crs_site, always_xy=True)
-
-# # transform dst coordinates to local projection
-# _lon, _lat = zip(*gcps["dst"])
-# _x, _y = transform.transform(_lon, _lat)
-# # replace them
-# gcps["dst"] = list(zip(_x, _y))
-
-# make a polygon from corner points, print it to see what it looks like.
-src_polygon = Polygon([c for c in corners])
-# print(src_polygon)
-
-# this function prepares a bounding box, from 4 user selected corner points, print to see what it looks like
-bbox = pyorc.cv.get_aoi(gcps["src"], gcps["dst"], corners)
-# print(bbox)
-
-lensPosition = [ 5.9136175, 50.807232333333, 143.1]
-
-camera_config = {
-    "id": 1,
-    "camera_type": camera_type,  # dict, camera object, relational, because a camera configuration belongs to a certain camera.
-    "site": site,  # dict, site object, relational because we need to know to whcih site a camera_config belongs. you can have multiple camera configs per site.
-    "time_start": "2020-12-16T00:00:00",  # start time of valid range
-    "time_end": "2020-12-31T00:00:00",  # end time of valid range, can for instance be used to find the right camera config with a given movie
-    "gcps": gcps,  # dict, gcps dictionary, see above
-    "corners": corners,  # dict containining corner pixel coordinates, see above
-    "resolution": 0.01,  # resolution to be used in reprojection to AOI
-    "lensPosition": lensPosition,  # we could also make this a geojson but it is just one point (x, y, z)
-    "aoi_bbox": bbox,
-    "aoi_window_size": 15,
-
-}
-
+lens_position = [ 5.9136175, 50.807232333333, 143.1]
 
 lons = list(np.flipud(np.array([
     5.913656,
