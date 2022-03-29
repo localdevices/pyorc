@@ -164,16 +164,20 @@ class Transect(ORCBase):
         self,
         ax=None,
         quiver=True,
-        background=None,
         mode="local",
-        background_kwargs={},
-        quiver_kwargs={},
         v_eff="v_eff",
         v_dir="v_dir",
-        cbar_color="w",
-        cbar_fontsize=15
+        cbar_fontsize=15,
+        kwargs = {},
     ):
         """
+        plot velocimetry results across a transect as quiver plot. Plotting can be done in three modes:
+
+        - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
+          being the 0, 0 point, and ascending coordinates towards the right and bottom.
+        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a geographical
+          axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
+        - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
 
         :return:
         """
@@ -187,7 +191,7 @@ class Transect(ORCBase):
         elif mode == "geographical":
             import cartopy.crs as ccrs
             # add transform for GeoAxes
-            quiver_kwargs["transform"] = ccrs.PlateCarree()
+            kwargs["transform"] = ccrs.PlateCarree()
             x = "lon"
             y = "lat"
             aff = self.camera_config.transform
@@ -197,10 +201,7 @@ class Transect(ORCBase):
 
         if quiver:
             p = plot_orc.quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
-                            **quiver_kwargs)
-        # if scalar:
-        #     # plot the scalar velocity value as grid, return mappable
-        #     p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
+                            **kwargs)
         if mode == "geographical":
             ax.set_extent(
                 [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],

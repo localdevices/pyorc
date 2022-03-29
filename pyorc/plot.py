@@ -65,7 +65,7 @@ def cbar(ax, p, size=12, **kwargs):
     """
     label_format = '{:,.2f}'
     path_effects = [
-        patheffects.Stroke(linewidth=3, foreground="w"),
+        patheffects.Stroke(linewidth=2, foreground="w"),
         patheffects.Normal(),
     ]
     cax = ax.inset_axes([0.05, 0.05,
@@ -75,14 +75,4 @@ def cbar(ax, p, size=12, **kwargs):
     cb.set_ticks(mticker.FixedLocator(ticks_loc))
     cb.set_ticklabels([label_format.format(x) for x in ticks_loc], path_effects=path_effects, fontsize=size)
     cb.set_label(label="velocity [m/s]", size=size, path_effects=path_effects)
-
-    # if mode == "camera":
-    #     # place the colorbar nicely inside
-    #     cax = ax.figure.add_axes([0.9, 0.05, 0.05, 0.5])
-    #     cax.set_visible(False)
-    #     cbar = ax.figure.colorbar(p, ax=cax)
-    #     cbar.set_label(label="velocity [m/s]", size=size, weight='bold', color=color)
-    #     cbar.ax.tick_params(labelsize=size-3, labelcolor=color)
-    # else:
-    #     cbar = ax.figure.colorbar(p)
     return cb

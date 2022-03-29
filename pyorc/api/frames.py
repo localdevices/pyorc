@@ -2,10 +2,11 @@ import cv2
 import dask
 import numpy as np
 import xarray as xr
+
+from matplotlib.collections import QuadMesh
 from .orcbase import ORCBase
 from .. import cv, helpers, const, piv_process
-from .velocimetry import Velocimetry
-from pyorc.const import ENCODING
+import pyorc.plot as plot_orc
 
 @xr.register_dataarray_accessor("frames")
 class Frames(ORCBase):
@@ -97,6 +98,72 @@ class Frames(ORCBase):
         ds = xr.Dataset(ds, attrs=global_attrs)
         ds.velocimetry.set_encoding()
         return ds
+
+
+    def plot(self, ax=None, mode="local", **kwargs):
+        """
+        plot a frame. this can be useful for plotting as background for a velocimetry result. Plotting can be done in
+        three modes:
+        - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
+          being the 0, 0 point, and ascending coordinates towards the right and bottom.
+        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a geographical
+          axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
+        - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
+
+        :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
+            cartopy GeoAxes needs to be provided, or will be made in case ax is not set.
+        :param mode: can be "local", "geographical", or "camera". For "geographical" a frames set from frames.project
+            should be used that contains "lon" and "lat" coordinates. For "camera", a non-projected frames set should
+            be used.
+        :param kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting the
+            background frame.
+        """
+
+
+        # if len(self._obj[v_x].shape) > 2:
+        #     raise OverflowError(
+        #         f'Dataset\'s variables should only contain 2 dimensions, this dataset '
+        #         f'contains {len(self._obj[v_x].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
+        #         f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
+        #     )
+        # assert (scalar or quiver), "Either scalar or quiver should be set tot True, nothing to plot"
+        # assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
+
+        # prepare axes
+        if "time" in self._obj.coords:
+            if self._obj.time.size > 1:
+                raise AttributeError(f'Object contains dimension "time" with length {len(self._obj.time)}. Reduce dataset by selecting one time step or taking a median, mean or other statistic.')
+        ax = plot_orc.prepare_axes(ax=ax, mode=mode)
+        f = ax.figure  # handle to figure
+        if mode == "local":
+            x = "x"
+            y = "y"
+        elif mode == "geographical":
+            # import some additional packages
+            import cartopy.crs as ccrs
+            # add transform for GeoAxes
+            kwargs["transform"] = ccrs.PlateCarree()
+            x = "lon"
+            y = "lat"
+        else:
+            # mode is camera
+            x = "xp"
+            y = "yp"
+        assert all(v in self._obj.coords for v in [x, y]), f'required coordinates "{x}" and/or "{y}" are not available'
+        if (len(self._obj.shape) == 3 and self._obj.shape[-1] == 3):
+            # looking at an rgb image
+            facecolors = self._obj.values.reshape(self._obj.shape[0] * self._obj.shape[1], 3) / 255
+            facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
+            quad = ax.pcolormesh(self._obj[x], self._obj[y], self._obj.mean(dim="rgb"), shading="nearest",
+                                 facecolors=facecolors, **kwargs)
+            # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if array has dims
+            QuadMesh.set_array(quad, None)
+        else:
+            ax.pcolormesh(self._obj[x], self._obj[y], self._obj, **kwargs)
+        # fix axis limits to min and max of extent of frames
+        ax.set_xlim([self._obj[x].min(), self._obj[x].max()])
+        ax.set_ylim([self._obj[y].min(), self._obj[y].max()])
+        return ax
 
     def project(self):
         """

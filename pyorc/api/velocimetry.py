@@ -431,47 +431,34 @@ class Velocimetry(ORCBase):
             ax=None,
             scalar=True,
             quiver=True,
-            background=None,
             mode="local",
-            background_kwargs={},
             scalar_kwargs={},
             quiver_kwargs={},
             v_x="v_x",
             v_y="v_y",
-            cbar_color="w",
             cbar_fontsize=15
     ):
         """
-        Extensive functionality to plot PIV results. PIV results can be plotted on a background frame, and can be plotted as
-        scalar values (i.e. a mesh) or as quivers, or both by setting the inputs 'scalar' and 'quiver' to True or False.
-        Plotting can be done in three modes:
+        plot velocimetry results. These can be plotted as scalar values (i.e. a mesh) or as quivers, or both by setting
+        the inputs 'scalar' and 'quiver' to True or False. Plotting can be done in three modes:
         - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
-          being the 0, 0 point, and ascending coordinates towards the right and bottom. If a background frame is provided,
-          then this must be a projected background frame (i.e. resulting from `pyorc.frames.project`)
+          being the 0, 0 point, and ascending coordinates towards the right and bottom.
         - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a geographical
-          axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made. If a background
-          frame is provided, then this must be a projected background frame, i.e. resulting from `pyorc.frames.project`.
-        - "camera": plots velocities as augmented reality (i.e. seen from the camera perspective). This is the most
-          intuitive view for end users. If a background frame is provided, then this must be a frame from the camera
-          perspective, i.e. as derived from a `pyorc.Video` object, with the method `pyorc.Video.get_frames`.
+          axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
+        - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
 
         :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
-            cartopy GeoAxes needs to be provided, or will be made in case ax is not set.
+            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background frame
+            is provided (made through frames.plot) then the background must be plotted in the same mode as selected here.
         :param scalar: boolean, if set to True, velocities are plotted as scalar values in a mesh (default: True)
         :param quiver: boolean, if set to True, velocities are plotted as quiver (i.e. arrows). In case scalar is also True,
             quivers will be plotted with a single color (defined in `quiver_kwargs`), if not, the scalar values are used
             to color the arrows.
-        :param background: xr.DataArray, a single frame capture to be used as background, taken from pyorc.Video.get_frames in case
-            `mode=="camera"` and from `pyorc.frames.project` in case `mode=="local"` or `mode=="geographical"`.
-        :param mode: can be "local", "geographical", or "camera". To select the perspective of plotting, see description.
-        :param background_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting the
-            background frame.
         :param scalar_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting scalar
             values.
         :param quiver_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
         :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
         :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
-        :param cbar_color: color to use for the colorbar
         :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly smaller).
         :return: ax, axes object resulting from this function.
         """
@@ -497,7 +484,6 @@ class Velocimetry(ORCBase):
             # add transform for GeoAxes
             scalar_kwargs["transform"] = ccrs.PlateCarree()
             quiver_kwargs["transform"] = ccrs.PlateCarree()
-            background_kwargs["transform"] = ccrs.PlateCarree()
             x, y, u, v, s, theta = self.get_uv_geographical()
         else:
             # mode is camera
@@ -506,37 +492,36 @@ class Velocimetry(ORCBase):
         # prepare an axis for the provided mode
         ax = plot_orc.prepare_axes(ax=ax, mode=mode)
         f = ax.figure  # handle to figure
-
-        if background is not None:
-            if (len(background.shape) == 3 and background.shape[-1] == 3):
-                facecolors = background.values.reshape(background.shape[0] * background.shape[1], 3) / 255
-                facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
-                quad = ax.pcolormesh(background[x], background[y], background.mean(dim="rgb"), shading="nearest",
-                                     facecolors=facecolors, **background_kwargs)
-                # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if array has dims
-                QuadMesh.set_array(quad, None)
-            else:
-                ax.pcolormesh(background[x], background[y], background, **background_kwargs)
         if quiver:
             if scalar:
-                p = plot_orc.quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-                                None,
-                                **quiver_kwargs)
+                p = plot_orc.quiver(
+                    ax,
+                    self._obj[x].values,
+                    self._obj[y].values,
+                    *[v.values for v in helpers.rotate_u_v(u, v, theta)],
+                    None,
+                    **quiver_kwargs
+                )
             else:
-                p = plot_orc.quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
-                                **quiver_kwargs)
+                p = plot_orc.quiver(
+                    ax,
+                    self._obj[x].values,
+                    self._obj[y].values,
+                    *[v.values for v in helpers.rotate_u_v(u, v, theta)],
+                    s,
+                    **quiver_kwargs
+                )
         if scalar:
             # plot the scalar velocity value as grid, return mappable
             p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
-            if mode == "geographical":
-                ax.set_extent(
-                    [self._obj[x].min() - 0.00005, self._obj[x].max() + 0.00005, self._obj[y].min() - 0.00005, self._obj[y].max() + 0.00005],
-                    crs=ccrs.PlateCarree())
+        if mode == "geographical":
+            ax.set_extent(
+                [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
+                crs=ccrs.PlateCarree())
+        else:
+            ax.axis('equal')
+
         cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
-        # finally, if a background is used, set xlim and ylim to the relevant axes
-        if (background is not None and mode != "geographical"):
-            ax.set_xlim([background[x].min(), background[x].max()])
-            ax.set_ylim([background[y].min(), background[y].max()])
         return ax
 
     def replace_outliers(self, v_x="v_x", v_y="v_y", stride=1, max_iter=1, inplace=False):
