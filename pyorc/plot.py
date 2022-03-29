@@ -3,15 +3,17 @@ from matplotlib import patheffects
 import numpy as np
 import matplotlib.ticker as mticker
 
+
 def prepare_axes(ax=None, mode="local"):
     """
     Prepares the axes, needed to plot results, called from `pyorc.PIV.plot`.
 
+    :param ax: axes object, if not set, a new axes is prepared (default: None)
     :param mode: str, mode to plot, can be "local", "geographical" or "camera", default: "local"
     :return: ax, axes object.
     """
     if ax is not None:
-        if mode=="geographical":
+        if mode == "geographical":
             # ensure that the axes is a geoaxes
             from cartopy.mpl.geoaxes import GeoAxesSubplot
             assert (
@@ -29,6 +31,7 @@ def prepare_axes(ax=None, mode="local"):
     else:
         ax = plt.subplot(111)
     return ax
+
 
 def quiver(ax, x, y, u, v, s=None, zorder=3, **kwargs):
     """
@@ -50,6 +53,7 @@ def quiver(ax, x, y, u, v, s=None, zorder=3, **kwargs):
         # if not scalar, then return a mappable here
         p = ax.quiver(x, y, u, v, s, zorder=zorder, **kwargs)
     return p
+
 
 def cbar(ax, p, size=12, **kwargs):
     """

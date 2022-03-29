@@ -25,9 +25,9 @@ def _corr_color(img, alpha=None, beta=None, gamma=0.5):
         corr_img = cv2.convertScaleAbs(corr_img, alpha=alpha, beta=beta)
 
     # apply gamma correction
-    invGamma = 1.0 / gamma
+    inv_gamma = 1.0 / gamma
     table = np.array(
-        [((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]
+        [((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]
     ).astype("uint8")
 
     corr_img = cv2.LUT(corr_img, table)
@@ -46,6 +46,7 @@ def _get_dist_coefs(k1):
     dist = np.zeros((4, 1), np.float64)
     dist[0, 0] = k1
     return dist
+
 
 def _get_cam_mtx(height, width, c=2.0, f=1.0):
     """
@@ -66,7 +67,6 @@ def _get_cam_mtx(height, width, c=2.0, f=1.0):
     return mtx
 
 
-
 def get_shape(bbox, resolution=0.01, round=1):
     """
     defines the number of rows and columns needed in a target raster, to fit a given bounding box.
@@ -84,13 +84,13 @@ def get_shape(bbox, resolution=0.01, round=1):
     return cols, rows
 
 
-def _get_transform(bbox, resolution=0.01):
+def get_transform(bbox, resolution=0.01):
     """
     return a rotated Affine transformation that fits with the bounding box and resolution.
 
     :param bbox: shapely Polygon, polygon of bounding box. The coordinate order is very important and has to be:
         (upstream-left, downstream-left, downstream-right, upstream-right, upstream-left)
-    :param res: float, resolution of target grid in meters (default: 0.01)
+    :param resolution: float, resolution of target grid in meters (default: 0.01)
     :return: rasterio compatible Affine transformation matrix
     """
 
@@ -115,7 +115,7 @@ def _get_transform(bbox, resolution=0.01):
     )
 
 
-def _get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
+def get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
     """
     Get the actual x, y locations of ground control points at the actual water level
 
@@ -146,7 +146,7 @@ def _get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
     return dest_out
 
 
-def _get_M(src, dst):
+def get_M(src, dst):
     """
     Retrieve transformation matrix for between (4) src and (4) dst points
 
@@ -164,7 +164,7 @@ def _get_M(src, dst):
     return M
 
 
-def _transform_to_bbox(coords, bbox, res):
+def transform_to_bbox(coords, bbox, res):
     """
     transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
     
@@ -176,7 +176,7 @@ def _transform_to_bbox(coords, bbox, res):
     """
     # first assemble x and y coordinates
     xs, ys = zip(*coords)
-    transform = _get_transform(bbox, res)
+    transform = get_transform(bbox, res)
     rows, cols = rasterio.transform.rowcol(transform, xs, ys)
     return list(zip(cols, rows))
 
@@ -196,26 +196,6 @@ def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
         img = img.values
     return cv2.warpPerspective(img, M, shape, flags=flags)
 
-def get_transform(lens_position, gcps, h_a, bbox, resolution):
-    dst_a = _get_gcps_a(
-        lens_position,
-        h_a,
-        gcps["dst"],
-        gcps["z_0"],
-        gcps["h_ref"],
-    )
-
-    dst_colrow_a = _transform_to_bbox(dst_a, bbox, resolution)
-
-    # retrieve M for destination row and col
-    M = _get_M(src=gcps["src"], dst=dst_colrow_a)
-    # estimate size of required grid
-    transform = _get_transform(bbox, resolution=resolution)
-    # TODO: alter method to determine window_size based on how PIV is done. If only squares are possible, then this can be one single nr.
-    cols, rows = _get_shape(
-        bbox, resolution=resolution, round=10
-    )  # for now hard -coded on 10, alter dependent on how PIV is done
-    return M, transform, (cols, rows)
 
 def get_aoi(src, dst, src_corners):
 
@@ -231,17 +211,11 @@ def get_aoi(src, dst, src_corners):
 
     # retrieve the M transformation matrix for the conditions during GCP. These are used to define the AOI so that
     # dst AOI remains the same for any movie
-    M_gcp = _get_M(src=src, dst=dst)
+    M_gcp = get_M(src=src, dst=dst)
     # prepare a simple temporary np.array of the src_corners
     try:
         _src_corners = np.array(
             src_corners
-            # [
-            #     src_corners["up_left"],
-            #     src_corners["down_left"],
-            #     src_corners["down_right"],
-            #     src_corners["up_right"],
-            # ]
         )
     except:
         raise ValueError("src_corner coordinates not having expected format")
@@ -267,15 +241,16 @@ def get_aoi(src, dst, src_corners):
     bbox = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
     return bbox
 
+
 def undistort_img(img, k1=0.0, c=2.0, f=1.0):
     """
     Lens distortion correction of image based on lens characteristics.
     Function by Gerben Gerritsen / Sten Schurer, 2019.
 
     :param img: np.ndarray, 3D array with image
-    :param k1=0.: float - barrel lens distortion parameter
-    :param c=2.: float - optical center
-    :param f=1.: float - focal length
+    :param k1: float, barrel lens distortion parameter (default: 0.)
+    :param c: float, optical center (default: 2.)
+    :param f: float, focal length (default: 1.)
     :return undistorted img
     """
 
@@ -289,6 +264,7 @@ def undistort_img(img, k1=0.0, c=2.0, f=1.0):
     # correct image for lens distortion
     corr_img = cv2.undistort(img, mtx, dist)
     return corr_img
+
 
 def undistort_points(points, height, width, k1=0.0, c=2.0, f=1.0):
     """

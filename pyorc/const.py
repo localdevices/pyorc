@@ -10,8 +10,8 @@ PIV_ATTRS = {
         "standard_name": "sea_water_x_velocity",
         "long_name": "Flow element center velocity vector, x-component",
         "units": "m s-1",
-        "coordinates": "lon lat",
-   },
+        "coordinates": "lon lat"
+    },
     "s2n": {
         "standard_name": "ratio",
         "long_name": "signal to noise ratio",
@@ -78,5 +78,3 @@ ENCODING_PARAMS = {
 
 ENCODE_VARS = ["v_x", "v_y", "corr", "s2n"]
 ENCODING = {k: ENCODING_PARAMS for k in ENCODE_VARS}
-
-

@@ -80,7 +80,7 @@ class CameraConfig:
     @property
     def transform(self):
         bbox = shapely.wkt.loads(self.bbox)
-        return cv._get_transform(bbox, resolution=self.resolution)
+        return cv.get_transform(bbox, resolution=self.resolution)
 
 
 
@@ -93,7 +93,7 @@ class CameraConfig:
         :return: np.ndarray, containing 2x3 transformation matrix.
         """
         # map where the destination points are with the actual water level h_a.
-        dst_a = cv._get_gcps_a(
+        dst_a = cv.get_gcps_a(
             self.lens_position,
             h_a,
             self.gcps["dst"],
@@ -101,10 +101,10 @@ class CameraConfig:
             self.gcps["h_ref"],
         )
         # lookup where the destination points are in row/column space
-        dst_colrow_a = cv._transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
+        dst_colrow_a = cv.transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
 
         # retrieve and return M for destination row and col
-        return cv._get_M(src=self.gcps["src"], dst=dst_colrow_a)
+        return cv.get_M(src=self.gcps["src"], dst=dst_colrow_a)
 
     def get_M_reverse(self, h_a):
         """
@@ -114,17 +114,17 @@ class CameraConfig:
         :param h_a: actual water level [m]
         :return: np.ndarray, containing 2x3 transformation matrix.
         """
-        dst_a = cv._get_gcps_a(
+        dst_a = cv.get_gcps_a(
             self.lens_position,
             h_a,
             self.gcps["dst"],
             self.gcps["z_0"],
             self.gcps["h_ref"],
         )
-        dst_colrow_a = cv._transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
+        dst_colrow_a = cv.transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
 
         # retrieve M reverse for destination row and col
-        return cv._get_M(src=dst_colrow_a, dst=self.gcps["src"])
+        return cv.get_M(src=dst_colrow_a, dst=self.gcps["src"])
 
     def set_corners(self, corners):
         assert(np.array(corners).shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is {corners.shape}"

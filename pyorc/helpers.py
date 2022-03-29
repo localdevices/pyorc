@@ -4,42 +4,13 @@ import dask.array as da
 import numpy as np
 import xarray as xr
 
-from pyproj import CRS, Transformer
+from pyproj import Transformer
 from rasterio.transform import Affine, xy
 from rasterio.crs import CRS
 from rasterio import warp
 from scipy.optimize import curve_fit
 from scipy.signal import convolve2d
 from scipy.interpolate import interp1d
-
-# TODO: check if redundant
-def add_xy_coords(ds, xy_coord_data, coords, attrs_dict):
-    """
-    add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.
-
-    :param ds: xr.Dataset or DataArray or similar with at least y and x dimensions
-    :param xy_coord_data: list, one or several arrays with 2-dimensional coordinates
-    :param coords: tuple with strings, indicating the dimensions of the data in xy_coord_data
-    :param attrs_dict: list of dicts, containing attributes belonging to xy_coord_data, must have equal length as xy_coord_data
-    :return: xr.Dataset, with added coordinate variables.
-    """
-    dims = tuple(coords.keys())
-    xy_coord_data = [
-        xr.DataArray(
-            data,
-            dims=dims,
-            coords=coords,
-            attrs=attrs,
-            name=name
-        ) for data, (name, attrs) in zip(xy_coord_data, attrs_dict.items())]
-    # assign the coordinates
-    ds = ds.assign_coords({
-        k: (dims, v) for k, v in zip(attrs_dict, xy_coord_data)
-    })
-    # add the attributes (not possible with assign_coords
-    for k, v in zip(attrs_dict, xy_coord_data):
-        ds[k].attrs = v.attrs
-    return ds
 
 
 def affine_from_grid(xi, yi):
@@ -71,9 +42,11 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object
     :param delayed_das: Delayed dask data arrays (2D) or list of 2D delayed dask arrays
     :param shape: tuple, foreseen shape of data arrays (rows, cols)
     :param dtype: string or dtype, e.g. "uint8" of data arrays
-    :param coords: tuple with strings, indicating the dimensions of the xr.DataArray being prepared, usually ("time", "y", "x").
+    :param coords: tuple with strings, indicating the dimensions of the xr.DataArray being prepared, usually
+        ("time", "y", "x").
     :param attrs: dict, containing attributes for xr.DataArray
     :param name: str, name of variable, default None
+    :param object_type: type of object to create from lazy array (default: xr.DataArray)
     :return: object of object_type (default: xr.DataArray)
     """
     if isinstance(delayed_das, list):
@@ -92,7 +65,7 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object
             shape=shape
         )
     for n, (coord, values) in enumerate(coords.items()):
-        assert(len(values)==data_array.shape[n]), f"Length of {coord} axis {len(values)} is not equal to amount of data arrays {data_array.shape[n]}"
+        assert(len(values) == data_array.shape[n]), f"Length of {coord} axis {len(values)} is not equal to amount of data arrays {data_array.shape[n]}"
     return object_type(
         data_array,
         dims=tuple(coords.keys()),
@@ -100,6 +73,7 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object
         attrs=attrs,
         name=name
     )
+
 
 def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
     """
@@ -110,7 +84,9 @@ def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
     :param z_0: float, zero water level (ref. CRS)
     :param h_ref: float, water level measured during survey (ref. z_0)
     :param h_a: float, actual water level (ref. z_0)
-    :param v_corr: float (range: 0-1, typically close to 1), correction factor from surface to depth-average (default: 0.85)
+    :param v_corr: float (range: 0-1, typically close to 1), correction factor from surface to depth-average
+        (default: 0.85)
+    :param name: str, name of DataArray (default: "q")
     :return: q: DataArray(time, points), depth integrated velocity [m2 s-1]
     """
     # compute depth, never smaller than zero. Depth is in words:
@@ -130,6 +106,7 @@ def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
     q.name = name
     return q
 
+
 def distance_pts(c1, c2):
     """
     Compute distance between c1 and c2
@@ -143,13 +120,13 @@ def distance_pts(c1, c2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
-def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
+def deserialize_attr(data_array, attr, dtype=np.array, args_parse=False):
     """
     Return a deserialized version of said property (assumed to be stored as a string) of DataArray.
 
     :param data_array: xr.DataArray, containing attributes of interest
     :param attr: str, name of attributes
-    :param type: object type to return, function will try to perform type(eval(attr)), default np.array
+    :param dtype: object type to return, function will try to perform type(eval(attr)), default np.array
     :param args_parse: bool, if True, function will try to return type(*eval(attr)), assuming attribute contains list
         of arguments
     :return: parsed attribute, of type defined by arg type
@@ -157,8 +134,8 @@ def deserialize_attr(data_array, attr, type=np.array, args_parse=False):
     assert hasattr(data_array, attr), f'frames do not contain attribute with name "{attr}'
     attr_obj = getattr(data_array, attr)
     if args_parse:
-        return type(*eval(attr_obj))
-    return type(eval(attr_obj))
+        return dtype(*eval(attr_obj))
+    return dtype(eval(attr_obj))
 
 
 def get_axes(cols, rows, resolution):
@@ -189,24 +166,15 @@ def get_axes(cols, rows, resolution):
     )
     return x, y
 
-# TODO: check if used
-def get_camera_config_from_ds(ds):
-    assert(hasattr(ds, "camera_config_json")), f'dataset does not contain attribute "camera_config_json" needed to interpret the camera configuration of the video'
-    from pyorc import get_camera_config
-    return get_camera_config(ds.camera_config_json)
-
 
 def get_xs_ys(cols, rows, transform):
     """
-    Computes rasters of x and y coordinates, and longitude and latitude coordinates of a certain raster
-    based on row and column counts and a defined transform, source crs of that raster and target crs.
+    Computes rasters of x and y coordinates, based on row and column counts and a defined transform.
 
     :param cols: list of ints, defining the column counts
     :param rows: list of ints, defining the row counts
     :param transform: np.ndarray, 1D, with 6 rasterio compatible transform parameters
-    :param src_crs: coordinate reference system of the source grid
-    :param dst_crs: coordinate reference system of a transformed set of coordinates, defaults ot EPSG:4326 but can be altered to any other CRS if needed
-    :return: 4 np.ndarray (MxN): xs: x-coordinates, ys: y-coordinates, lons: longitude coordinates, lats: latitude coordinates
+    :return: 2 np.ndarray (MxN): xs: x-coordinates, ys: y-coordinates, lons: longitude coordinates, lats: latitude coordinates
     """
     xs, ys = xy(transform, rows, cols)
     xs, ys = np.array(xs), np.array(ys)
@@ -214,6 +182,17 @@ def get_xs_ys(cols, rows, transform):
 
 
 def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
+    """
+    Computes raster of longitude and latitude coordinates (default) of a certain raster set of coordinates in a local
+    coordinate reference system. User can supply an alternative coordinate reference system if projection other than
+    WGS84 Lat Lon is needed.    
+
+    :param xs: x-coordinates in a given CRS
+    :param ys: y-coordinates in a given CRS
+    :param src_crs: source coordinate reference system of xs and ys 
+    :param dst_crs: target coordinate reference system (default: CRS.from_epsg(4326) for wGS84 lat-lon)
+    :return: 2 np.ndarray (MxN): lons: longitude coordinates, lats: latitude coordinates
+    """
     lons, lats = warp.transform(src_crs, dst_crs, xs.flatten(), ys.flatten())
     lons, lats = (
         np.array(lons).reshape(xs.shape),
@@ -262,12 +241,14 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     array_move[np.isclose(array_move, missing)] = np.nan
     return array_move
 
+
 def optimize_log_profile(z, v, dist_bank=None):
     """
-    optimize velocity log profile relation of v=k*max(z/z0)
+    optimize velocity log profile relation of v=k*max(z/z0) with k a function of distance to bank and k_max
 
     :param z: list of depths
     :param v: list of surface velocities
+    :param dist_bank: list of distances to bank
     :return: dict, fitted parameters of log_profile {z_0, k_max, s0 and s1}
     """
     if dist_bank is None:
@@ -283,10 +264,9 @@ def optimize_log_profile(z, v, dist_bank=None):
         # p0=[0.05, 0, 0., 0.]
         # method="dogbox"
     )
-
+    # unravel parameters
     z0, k_max, s0, s1 = result[0]
     return {"z0": z0, "k_max": k_max, "s0": s0, "s1": s1}
-
 
 
 def rotate_u_v(u, v, theta, deg=False):
@@ -303,11 +283,12 @@ def rotate_u_v(u, v, theta, deg=False):
         # convert to radians first
         theta = np.radians(theta)
     c, s = np.cos(theta), np.sin(theta)
-    R = np.array(((c, -s), (s, c)))
+    r = np.array(((c, -s), (s, c)))
     # compute rotations with dot-product
-    u2 = R[0, 0] * u + R[0, 1] * v
-    v2 = R[1, 0] * u + R[1, 1] * v
+    u2 = r[0, 0] * u + r[0, 1] * v
+    v2 = r[1, 0] * u + r[1, 1] * v
     return u2, v2
+
 
 def velocity_fill(x, y, z, v, z_0, h_ref, h_a, groupby="quantile"):
     """
@@ -337,6 +318,7 @@ def velocity_fill(x, y, z, v, z_0, h_ref, h_a, groupby="quantile"):
     # per time slice or quantile, fill missings
     v_group = copy.deepcopy(v).groupby(groupby)
     return v_group.map(fit)
+
 
 def xy_equidistant(x, y, distance, z=None):
     """
@@ -395,6 +377,7 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     yp = coords_trans[0][:, 1].reshape(cols.shape)
     return xp, yp
 
+
 def xy_transform(x, y, crs_from, crs_to):
     """
     transforms set of x and y coordinates from one CRS to another
@@ -406,15 +389,6 @@ def xy_transform(x, y, crs_from, crs_to):
     :param y: np.ndarray, 1D axis of y-coordinates in local projection with origin top-left, to be backwards projected
 
     """
-
-    try:
-        crs = CRS.from_user_input(crs_from)
-    except:
-        raise ValueError(f"Input crs {crs_from} is not a valid Coordinate Reference System")
-    try:
-        crs = CRS.from_user_input(crs_from)
-    except:
-        raise ValueError(f"Output crs {crs_to} is not a valid Coordinate Reference System")
     transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
     # transform dst coordinates to local projection
     return transform.transform(x, y)

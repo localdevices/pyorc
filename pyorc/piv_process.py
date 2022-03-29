@@ -20,6 +20,13 @@ def piv(
     :param frame_b: 2-D numpy array, containing second frame
     :param res_x: float, resolution of x-dir pixels in a user-defined unit per pixel (e.g. m pixel-1)
     :param res_y: float, resolution of y-dir pixels in a user-defined unit per pixel (e.g. m pixel-1)
+    :param search_area_size: int, length of subsetted matrix to search for correlations (default: 30)
+    :param correlation: bool, if True, the best found correlation coefficient is also returned for each interrogation
+        window (default: True).
+    :param window_size: int, size of interrogation window in amount of pixels. If not set, it is set equal to
+        search_area_size (default: None).
+    :param overlap: int, length of overlap between interrogation windows. If not set, this defaults to 50% of the
+        window_size parameter (default: None).
     :param kwargs: dict, several keyword arguments related to openpiv. See openpiv manual for further information
     :return cols: 1-D numpy array, col number of centre of interrogation windows
     :return rows: 1-D numpy array, row number of centre of interrogation windows
@@ -111,7 +118,6 @@ def piv_corr(
         correlation_method=correlation_method,
         normalized_correlation=normalized_correlation,
     )
-
     corr = corr.max(axis=-1).max(axis=-1).reshape((n_rows, n_cols))
     return corr
 

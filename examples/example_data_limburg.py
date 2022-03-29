@@ -222,40 +222,40 @@ z = list(np.flipud(np.array([
     141.2,
     141.2,
 ])))
-x = []
-y = []
-for lon, lat in zip(lons, lats):
-    _x, _y = transform.transform(lon, lat)
-    x.append(_x)
-    y.append(_y)
-
-coords = list(zip(x, y, z))
-
-# make coords entirely jsonifiable by getting rid of tuple construct
-coords = [list(c) for c in coords]
-
-bathymetry = {
-    "crs": 32631,  # int, epsg code in [m], only projected coordinate systems are supported
-    "coords": coords,  # list of (x, y, z) tuples defined in crs [m], coords are not valid in the example
-}
-
-# # transform lens position
-# _x, _y = transform.transform(lensPosition[0], lensPosition[1])
-# lensPosition[0] = _x
-# lensPosition[1] = _y
-
-movie = {
-    "id": 1,
-    "type": "normal",  # str, defines what the movie is used for, either "configuration" or "normal"
-    "camera_config": camera_config,  # dict, camera_config object, relational, because a movie belongs to a given camera_config (which in turn belongs to a site).
-    "file": {  # file contains the actual filename, and the bucket in which it sits.
-        "bucket": "example",
-        "identifier": "example_video.mp4",
-    },
-    "timestamp": "2021-01-01T00:05:30Z",
-    "resolution": "1920x1080",
-    "fps": 25.862,  # float
-    "bathymetry": bathymetry,
-    "h_a": 0.1,  # float, water level with reference to gauge plate zero level
-}
-
+# x = []
+# y = []
+# for lon, lat in zip(lons, lats):
+#     _x, _y = transform.transform(lon, lat)
+#     x.append(_x)
+#     y.append(_y)
+#
+# coords = list(zip(x, y, z))
+#
+# # make coords entirely jsonifiable by getting rid of tuple construct
+# coords = [list(c) for c in coords]
+#
+# bathymetry = {
+#     "crs": 32631,  # int, epsg code in [m], only projected coordinate systems are supported
+#     "coords": coords,  # list of (x, y, z) tuples defined in crs [m], coords are not valid in the example
+# }
+#
+# # # transform lens position
+# # _x, _y = transform.transform(lensPosition[0], lensPosition[1])
+# # lensPosition[0] = _x
+# # lensPosition[1] = _y
+#
+# movie = {
+#     "id": 1,
+#     "type": "normal",  # str, defines what the movie is used for, either "configuration" or "normal"
+#     "camera_config": camera_config,  # dict, camera_config object, relational, because a movie belongs to a given camera_config (which in turn belongs to a site).
+#     "file": {  # file contains the actual filename, and the bucket in which it sits.
+#         "bucket": "example",
+#         "identifier": "example_video.mp4",
+#     },
+#     "timestamp": "2021-01-01T00:05:30Z",
+#     "resolution": "1920x1080",
+#     "fps": 25.862,  # float
+#     "bathymetry": bathymetry,
+#     "h_a": 0.1,  # float, water level with reference to gauge plate zero level
+# }
+#
