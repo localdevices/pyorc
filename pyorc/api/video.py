@@ -34,8 +34,8 @@ class Video(cv2.VideoCapture):
         :param camera_config: CameraConfig object, containing all information about the camera, lens parameters, lens
             position, ground control points with GPS coordinates, and all referencing information (see CameraConfig),
             needed to reproject frames on a horizontal geographically referenced plane.
-        :param h_a: float, actual height [m], measured in local vertical reference (e.g. a staff gauge in view of the
-            camera)
+        :param h_a: float, actual height [m], measured in local vertical reference during the video (e.g. a staff gauge
+            in view of the camera)
         :param start_frame: int, first frame to use in analysis
         :param end_frame: int, last frame to use in analysis
         :param args: list or tuple, arguments to pass to cv2.VideoCapture on initialization.
@@ -79,16 +79,16 @@ class Video(cv2.VideoCapture):
     @camera_config.setter
     def camera_config(self, camera_config_input):
         """
-        Set camera config as a serializable object from either a json string or a dict
-        :param camera_config_input: dict, CameraConfig object or json string containing camera configuration
-        :return:
+        Set camera config as a serializable object from either a filename, json string or a dict
+        :param camera_config_input: str, dict, CameraConfig object, filename string, or json string containing camera
+            configuration.
         """
         try:
             if isinstance(camera_config_input, str):
                 if os.path.isfile(camera_config_input):
                     # assume string is a file
                     self._camera_config = load_camera_config(camera_config_input)
-                else: # Try to read CameraConfig from string
+                else:  # Try to read CameraConfig from string
                     self._camera_config = get_camera_config(camera_config_input)
             elif isinstance(camera_config_input, CameraConfig):
                 # set CameraConfig as is
@@ -101,6 +101,10 @@ class Video(cv2.VideoCapture):
 
     @property
     def end_frame(self):
+        """
+
+        :return: int, last frame considered in analysis
+        """
         return self._end_frame
 
     @end_frame.setter
@@ -112,6 +116,10 @@ class Video(cv2.VideoCapture):
 
     @property
     def h_a(self):
+        """
+
+        :return: Actual water level [m] during video
+        """
         return self._h_a
 
     @h_a.setter
@@ -125,6 +133,10 @@ class Video(cv2.VideoCapture):
 
     @property
     def start_frame(self):
+        """
+
+        :return: int, first frame considered in analysis
+        """
         return self._start_frame
 
     @start_frame.setter
@@ -136,6 +148,10 @@ class Video(cv2.VideoCapture):
 
     @property
     def fps(self):
+        """
+
+        :return: float, frames per second
+        """
         return self._fps
 
     @fps.setter
@@ -146,6 +162,10 @@ class Video(cv2.VideoCapture):
 
     @property
     def corners(self):
+        """
+
+        :return: list of 4 lists (int) with [column, row] locations of area of interest in video objective
+        """
         return self._corners
 
     @corners.setter
@@ -157,11 +177,10 @@ class Video(cv2.VideoCapture):
         Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
 
         :param n: int, frame number to retrieve
-        :param lens_pars: dict, containing lens parameters k1, c and f
-        :param grayscale: bool, if set to `True`, frame will be grayscaled
+        :param grayscale: bool, optional, if set to `True`, frame will be grayscaled (default: True)
+        :param lens_corr: bool, optional, if set to True, lens parameters will be used to undistort image
         :return: np.ndarray containing frame
         """
-
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n)
         try:
@@ -212,11 +231,21 @@ class Video(cv2.VideoCapture):
         if "lens_corr" in kwargs:
             if kwargs["lens_corr"]:
                 # also correct the control point src
-                camera_config.gcps["src"] = cv.undistort_points(camera_config.gcps["src"], sample.shape[0], sample.shape[1], **self.camera_config.lens_pars)
-                camera_config.corners = cv.undistort_points(camera_config.corners, sample.shape[0], sample.shape[1], **self.camera_config.lens_pars)
+                camera_config.gcps["src"] = cv.undistort_points(
+                    camera_config.gcps["src"],
+                    sample.shape[0],
+                    sample.shape[1],
+                    **self.camera_config.lens_pars
+                )
+                camera_config.corners = cv.undistort_points(
+                    camera_config.corners,
+                    sample.shape[0],
+                    sample.shape[1],
+                    **self.camera_config.lens_pars
+                )
         time = np.arange(len(data_array))*1/self.fps
+        # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)
         y = np.flipud(np.arange(data_array[0].shape[0]))
-        # y = np.arange(data_array[0].shape[0])
         x = np.arange(data_array[0].shape[1])
         # perspective column and row coordinate grids
         xp, yp = np.meshgrid(x, y)
@@ -227,7 +256,7 @@ class Video(cv2.VideoCapture):
         }
         if len(sample.shape) == 3:
             coords["rgb"] = np.array([0, 1, 2])
-
+        # make DataArray dimensions and attributes
         dims = tuple(coords.keys())
         attrs = {
             "camera_shape": str([len(y), len(x)]),
@@ -243,7 +272,7 @@ class Video(cv2.VideoCapture):
         del coords["time"]
         if len(sample.shape) == 3:
             del coords["rgb"]
-        # add coordinate grids
+        # add coordinate grids (i.e. without time)
         frames = frames.frames.add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
         frames.name = "frames"
         return frames
