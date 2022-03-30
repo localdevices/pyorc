@@ -8,6 +8,7 @@ from .orcbase import ORCBase
 from .. import cv, helpers, const, piv_process
 import pyorc.plot as plot_orc
 
+
 @xr.register_dataarray_accessor("frames")
 class Frames(ORCBase):
     def __init__(self, xarray_obj):
@@ -18,8 +19,8 @@ class Frames(ORCBase):
         Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to
         trigger actual computation.
 
-        :param kwargs: dict, keyword arguments to pass to dask_piv, used to control the manner in which openpiv.pyprocess
-            is called.
+        :param kwargs: dict, keyword arguments to pass to dask_piv, used to control the manner in which
+            openpiv.pyprocess is called.
         :return: Velocimetry object (xr.Dataset), containing the PIV results in a lazy dask.array form.
         """
         # forward the computation to piv
@@ -71,7 +72,7 @@ class Frames(ORCBase):
         M = self.camera_config.get_M_reverse(self._obj.h_a)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
-        # dirty trick to ensure y coordinates start at the top in the right orientation
+        # ensure y coordinates start at the top in the right orientation (different from order of a CRS)
         shape_y, shape_x = self.camera_shape
         yp = shape_y - yp
         coords = {
@@ -79,7 +80,7 @@ class Frames(ORCBase):
             "y": y,
             "x": x
         }
-        # here establish the full xr.Dataset
+        # establish the full xr.Dataset
         v_x, v_y, s2n, corr = [
             helpers.delayed_to_da(
                 data,
@@ -97,12 +98,10 @@ class Frames(ORCBase):
             coords,
             {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
         )
-
         # add piv object functionality and attrs to dataset and return
         ds = xr.Dataset(ds, attrs=global_attrs)
         ds.velocimetry.set_encoding()
         return ds
-
 
     def plot(self, ax=None, mode="local", **kwargs):
         """
@@ -122,17 +121,6 @@ class Frames(ORCBase):
         :param kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting the
             background frame.
         """
-
-
-        # if len(self._obj[v_x].shape) > 2:
-        #     raise OverflowError(
-        #         f'Dataset\'s variables should only contain 2 dimensions, this dataset '
-        #         f'contains {len(self._obj[v_x].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
-        #         f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
-        #     )
-        # assert (scalar or quiver), "Either scalar or quiver should be set tot True, nothing to plot"
-        # assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
-
         # prepare axes
         if "time" in self._obj.coords:
             if self._obj.time.size > 1:
@@ -174,8 +162,7 @@ class Frames(ORCBase):
         Project frames into a projected frames object, with information from the camera_config attr.
         This requires that the CameraConfig contains full gcp information and a coordinate reference system (crs).
 
-        :param frames: xr.DataArray with frames, and typical attributes derived from the CameraConfig M, proj_transform and crs
-        :return: frames: xr.DataArray with projected frames and x and y axis in local coordinate system (origin: top-left)
+        :return: frames: xr.DataArray with projected frames and x and y in local coordinate system (origin: top-left)
 
         """
         # # read json into CameraConfig object
@@ -243,15 +230,14 @@ class Frames(ORCBase):
 
     def landmask(self, dilate_iter=10, samples=15):
         """
-        Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much higher
-        than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation operation is
-        used to make the land mask a little bit larger than the exact defined pixels.
+        Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much
+        higher than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation
+        operation is used to make the land mask slightly larger than the exact defined pixels.
 
-        :param frames: xr.DataArray with frames
         :param dilate_iter: int, number of dilation iterations to use, to dilate land mask
         :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
             number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
-        :return: xr.DataArray with filtered frames
+        :return: xr.DataArray, filtered frames
 
         """
         time_interval = round(len(self._obj)/samples)
@@ -272,19 +258,18 @@ class Frames(ORCBase):
         # mask is where thres is
         mask = thres != 255
         # make mask 3-dimensional
-        return (self._obj * mask) # .astype(bool)
+        return (self._obj * mask)
 
 
     def normalize(self, samples=15):
         """
-        Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and helps
-        to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and partly
-        shaded parts.
+        Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and
+        helps to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and
+        partly shaded parts.
 
-        :param frames: xr.DataArray with frames
         :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
             number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
-        :return: xr.DataArray with filtered frames
+        :return: xr.DataArray, filtered frames
         """
         time_interval = round(len(self._obj) / samples)
         assert (time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
@@ -307,11 +292,12 @@ class Frames(ORCBase):
 
     def edge_detection(self, stride_1=7, stride_2=9):
         """
+        Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved
+        images and computes their difference to detect edges.
 
-        :param frames: xr.DataArray with frames
-        :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
-            number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
-        :return: xr.DataArray with filtered frames
+        :param stride_1: int, stride to use for first gaussian blur filter
+        :param stride_2: int, stride to use for second gaussian blur filter
+        :return: xr.DataArray, filtered frames (i.e. difference between first and second gaussian convolution)
         """
         def convert_edge(img, stride_1, stride_2):
             if not(isinstance(img, np.ndarray)):
@@ -352,14 +338,13 @@ class Frames(ORCBase):
 
     def reduce_rolling(self, samples=25):
         """
-        Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use `normalize` instead).
+        Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use `normalize`).
 
-        :param frames: xr.DataArray with frames
         :param samples: number of samples per rolling
-        :return: xr.DataArray with filtered frames
+        :return: xr.DataArray, filtered frames
         """
         roll_mean = self._obj.rolling(time=samples).mean()
-        assert (len(self._obj) >= samples), f"Amount of frames is smaller than requested rolling interval of {samples} samples"
+        assert (len(self._obj) >= samples), f"Amount of frames is smaller than requested rolling of {samples} samples"
         # ensure attributes are kept
         xr.set_options(keep_attrs=True)
         # normalize = dask.delayed(cv2.normalize)
