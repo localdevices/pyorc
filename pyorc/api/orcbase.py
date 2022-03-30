@@ -50,7 +50,8 @@ class ORCBase(object):
 
         :param xy_coord_data: list, one or several arrays with 2-dimensional coordinates
         :param coords: tuple with strings, indicating the dimensions of the data in xy_coord_data
-        :param attrs_dict: list of dicts, containing attributes belonging to xy_coord_data, must have equal length as xy_coord_data
+        :param attrs_dict: list of dicts, containing attributes belonging to xy_coord_data, must have equal length as
+            xy_coord_data.
         :return: xr.Dataset, with added coordinate variables.
         """
         dims = tuple(coords.keys())

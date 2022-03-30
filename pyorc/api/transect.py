@@ -13,12 +13,13 @@ class Transect(ORCBase):
 
     def vector_to_scalar(self, angle_method=0, v_x="v_x", v_y="v_y"):
         """
-        Turns velocity vectors into effective velocities over cross-section, by computing the perpendicular velocity component
-        :param v_x: DataArray(t, points), time series in cross section points with x-directional velocities
-        :param v_y: DataArray(t, points), time series in cross section points with y-directional velocities
+        Set "v_eff" and "v_dir" variables as effective velocities over cross-section, and its angle
+
+        :param v_x: str, variable containing (t, points) time series in cross section with x-directional velocities.
+        :param v_y: str, variable containing (t, points) time series in cross section with y-directional velocities.
         :param angle_method: if set to 0, then angle of cross section is determined with left to right bank coordinates,
-            otherwise, it is determined per section
-        :return: v_eff: DataArray(t, points), time series in cross section points with velocities perpendicular to cross section
+            otherwise, it is determined per section.
+        :return: DataArray(t, points), time series in points with velocities perpendicular to cross section.
 
         """
         xs = self._obj["x"].values
@@ -105,15 +106,18 @@ class Transect(ORCBase):
             "units": "rad"
         }
 
-    def get_xyz_perspective(self, reverse_y=None):
+    def get_xyz_perspective(self):
+        """
+        Get camera-perspective column, row coordinates from cross-section points.
+
+        :return:
+        """
         z = (self._obj.zcoords - self.camera_config.gcps["z_0"] + self.camera_config.gcps["h_ref"]).values
         Ms = [self.camera_config.get_M_reverse(depth) for depth in z]
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         cols, rows = zip(*[helpers.xy_to_perspective(x, y, self.camera_config.resolution, M, reverse_y=self.camera_config.shape[0]) for x, y, M in zip(self._obj.x.values, self._obj.y.values, Ms)])
 
-
-        # xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
-        # dirty trick to ensure y coordinates start at the top in the right orientation
+        # ensure y coordinates start at the top in the right orientation
         shape_y, shape_x = self.camera_shape
         rows = shape_y - np.array(rows)
         cols = np.array(cols)
@@ -122,8 +126,9 @@ class Transect(ORCBase):
 
     def get_river_flow(self):
         """
-        Integrates time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
-        estimating one or several quantiles over the time dimension.
+        Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
+        estimating one or several quantiles over the time dimension. Depth average velocities must first have been
+        estimated using get_q.
     
         :return: ds: xarray dataset, including variable "Q" which is cross-sectional integrated river flow [m3 s-1] for one or several quantiles.
             The time dimension no longer exists because of the quantile mapping, the point dimension no longer exists because of the integration over width
@@ -144,6 +149,14 @@ class Transect(ORCBase):
 
 
     def get_q(self, v_corr=0.9, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
+        """
+        Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
+        depth-average velocity.
+
+        :param v_corr: float, optional, correction factor (default: 0.9)
+        :param quantiles: list of floats, optional, quantiles (0-1) over time to estimate depth-integrated velocity for
+        :return: xr.Dataset, Transect for selected quantiles in time, including "q".
+        """
         # aggregate to a limited set of quantiles
         ds = self._obj.quantile(quantiles, dim="time", keep_attrs=True)
         x = ds["xcoords"].values
@@ -163,7 +176,6 @@ class Transect(ORCBase):
     def plot(
         self,
         ax=None,
-        quiver=True,
         mode="local",
         v_eff="v_eff",
         v_dir="v_dir",
@@ -175,11 +187,19 @@ class Transect(ORCBase):
 
         - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
           being the 0, 0 point, and ascending coordinates towards the right and bottom.
-        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a geographical
-          axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
+        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a
+            geographical axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
         - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
-
-        :return:
+        :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
+            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background
+            frame is provided (made through frames.plot) then the background must be plotted in the same mode as
+            selected here.
+        :param kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
+        :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
+        :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
+        :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
+            smaller).
+        :return: ax, axes object resulting from this function.
         """
         u = self._obj[v_eff] * np.sin(self._obj[v_dir])
         v = self._obj[v_eff] * np.cos(self._obj[v_dir])
@@ -199,9 +219,8 @@ class Transect(ORCBase):
         ax = plot_orc.prepare_axes(ax=ax, mode=mode)
         f = ax.figure  # handle to figure
 
-        if quiver:
-            p = plot_orc.quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
-                            **kwargs)
+        p = plot_orc.quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
+                        **kwargs)
         if mode == "geographical":
             ax.set_extent(
                 [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
@@ -210,4 +229,3 @@ class Transect(ORCBase):
             ax.axis('equal')
         cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
         return ax
-        # raise NotImplementedError
