@@ -12,7 +12,7 @@ with open("README.md") as readme_file:
 setup(
     name="pyorc",
     description="pyorc is a front and backend to control river camera observation locations",
-    version="0.1.0",
+    version="0.1.0.dev",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
     url="https://github.com/localdevices/pyorc",
@@ -23,6 +23,7 @@ setup(
     test_suite="tests",
     python_requires=">=3.8",
     install_requires=[
+        "cython; platform_machine != 'x86_64'",
         "dask",
         "descartes",
         "geojson",
@@ -31,8 +32,10 @@ setup(
         "numpy",
         "opencv-python-headless",
         "openpiv",
+        "packaging; platform_machine != 'x86_64'",
         "pip",
         "pyproj",
+        "pythran; platform_machine != 'x86_64'",
         "rasterio",
         "scikit-image",
         "scipy",

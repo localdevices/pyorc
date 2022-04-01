@@ -1,10 +1,10 @@
 import numpy as np
 from shapely.geometry import Polygon
-import orc as ORC
+import pyorc
 import pyproj
 camera_type = {
     "name": "Foscam E9900P",  # user-chosen name for camera
-    "lensParameters": {  # the lens parameters need to be known or calibrated
+    "lens_parameters": {  # the lens parameters need to be known or calibrated
         "k1": -3.0e-6,
         "c": 2,
         "f": 4.0,
@@ -12,11 +12,12 @@ camera_type = {
 }
 gcps = {
     "src": [
-        [138, 270],
-        [935, 194],
-        [1322, 330],
-        [1264, 867]],
-    "dst": [
+        [253, 307],
+        [931, 202],
+        [1308, 337],
+        [1251, 859]
+    ],
+        "dst": [
         [5.913401333, 50.8072278333],
         [5.9133098333, 50.807340333],
         [5.9134281667, 50.8073605],
@@ -28,59 +29,14 @@ gcps = {
 }
 
 # corner points provided by user in pixel coordinates, starting at upstream-left, downstream-left, downstream-right, upstream-right
-corners = {
-    "up_left": [8, 246],
-    "down_left": [1110, 141],
-    "down_right": [1866, 463],
-    "up_right": [1049, 1110],
-}
+corners = [
+    [190, 205],
+    [953, 143],
+    [1735, 480],
+    [1290, 914],
+]
 
-
-site = {
-    "name": "Hommerich - Geul",  # str, name of user
-    "uuid": "blah",  # some uuid for relational database purposes
-    "position": (
-        5.91376662254334,
-        50.8071890242766,
-    ),  # approximate geographical location of site in crs (x, y) coordinates in metres.
-    "crs": 32631,  # int, coordinate ref system as EPSG code
-}
-
-crs_site = pyproj.CRS.from_epsg(site["crs"])
-crs_latlon = pyproj.CRS.from_epsg(4326)
-transform = pyproj.Transformer.from_crs(crs_latlon, crs_site, always_xy=True)
-
-# # transform dst coordinates to local projection
-# _lon, _lat = zip(*gcps["dst"])
-# _x, _y = transform.transform(_lon, _lat)
-# # replace them
-# gcps["dst"] = list(zip(_x, _y))
-
-# make a polygon from corner points, print it to see what it looks like.
-src_polygon = Polygon([corners[s] for s in corners])
-# print(src_polygon)
-
-# this function prepares a bounding box, from 4 user selected corner points, print to see what it looks like
-bbox = ORC.cv.get_aoi(gcps["src"], gcps["dst"], corners)
-# print(bbox)
-
-lensPosition = [ 5.9136175, 50.807232333333, 143.1]
-
-camera_config = {
-    "id": 1,
-    "camera_type": camera_type,  # dict, camera object, relational, because a camera configuration belongs to a certain camera.
-    "site": site,  # dict, site object, relational because we need to know to whcih site a camera_config belongs. you can have multiple camera configs per site.
-    "time_start": "2020-12-16T00:00:00",  # start time of valid range
-    "time_end": "2020-12-31T00:00:00",  # end time of valid range, can for instance be used to find the right camera config with a given movie
-    "gcps": gcps,  # dict, gcps dictionary, see above
-    "corners": corners,  # dict containining corner pixel coordinates, see above
-    "resolution": 0.01,  # resolution to be used in reprojection to AOI
-    "lensPosition": lensPosition,  # we could also make this a geojson but it is just one point (x, y, z)
-    "aoi_bbox": bbox,
-    "aoi_window_size": 15,
-
-}
-
+lens_position = [ 5.9136175, 50.807232333333, 143.1]
 
 lons = list(np.flipud(np.array([
     5.913656,
@@ -266,40 +222,40 @@ z = list(np.flipud(np.array([
     141.2,
     141.2,
 ])))
-x = []
-y = []
-for lon, lat in zip(lons, lats):
-    _x, _y = transform.transform(lon, lat)
-    x.append(_x)
-    y.append(_y)
-
-coords = list(zip(x, y, z))
-
-# make coords entirely jsonifiable by getting rid of tuple construct
-coords = [list(c) for c in coords]
-
-bathymetry = {
-    "crs": 32631,  # int, epsg code in [m], only projected coordinate systems are supported
-    "coords": coords,  # list of (x, y, z) tuples defined in crs [m], coords are not valid in the example
-}
-
-# # transform lens position
-# _x, _y = transform.transform(lensPosition[0], lensPosition[1])
-# lensPosition[0] = _x
-# lensPosition[1] = _y
-
-movie = {
-    "id": 1,
-    "type": "normal",  # str, defines what the movie is used for, either "configuration" or "normal"
-    "camera_config": camera_config,  # dict, camera_config object, relational, because a movie belongs to a given camera_config (which in turn belongs to a site).
-    "file": {  # file contains the actual filename, and the bucket in which it sits.
-        "bucket": "example",
-        "identifier": "example_video.mp4",
-    },
-    "timestamp": "2021-01-01T00:05:30Z",
-    "resolution": "1920x1080",
-    "fps": 25.862,  # float
-    "bathymetry": bathymetry,
-    "h_a": 0.1,  # float, water level with reference to gauge plate zero level
-}
-
+# x = []
+# y = []
+# for lon, lat in zip(lons, lats):
+#     _x, _y = transform.transform(lon, lat)
+#     x.append(_x)
+#     y.append(_y)
+#
+# coords = list(zip(x, y, z))
+#
+# # make coords entirely jsonifiable by getting rid of tuple construct
+# coords = [list(c) for c in coords]
+#
+# bathymetry = {
+#     "crs": 32631,  # int, epsg code in [m], only projected coordinate systems are supported
+#     "coords": coords,  # list of (x, y, z) tuples defined in crs [m], coords are not valid in the example
+# }
+#
+# # # transform lens position
+# # _x, _y = transform.transform(lensPosition[0], lensPosition[1])
+# # lensPosition[0] = _x
+# # lensPosition[1] = _y
+#
+# movie = {
+#     "id": 1,
+#     "type": "normal",  # str, defines what the movie is used for, either "configuration" or "normal"
+#     "camera_config": camera_config,  # dict, camera_config object, relational, because a movie belongs to a given camera_config (which in turn belongs to a site).
+#     "file": {  # file contains the actual filename, and the bucket in which it sits.
+#         "bucket": "example",
+#         "identifier": "example_video.mp4",
+#     },
+#     "timestamp": "2021-01-01T00:05:30Z",
+#     "resolution": "1920x1080",
+#     "fps": 25.862,  # float
+#     "bathymetry": bathymetry,
+#     "h_a": 0.1,  # float, water level with reference to gauge plate zero level
+# }
+#
