@@ -443,23 +443,28 @@ class Velocimetry(ORCBase):
         the inputs 'scalar' and 'quiver' to True or False. Plotting can be done in three modes:
         - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
           being the 0, 0 point, and ascending coordinates towards the right and bottom.
-        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a geographical
-          axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
+        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a
+          geographical axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
         - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
 
         :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
-            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background frame
-            is provided (made through frames.plot) then the background must be plotted in the same mode as selected here.
+            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background
+            frame is provided (made through frames.plot) then the background must be plotted in the same mode as
+            selected here.
         :param scalar: boolean, if set to True, velocities are plotted as scalar values in a mesh (default: True)
-        :param quiver: boolean, if set to True, velocities are plotted as quiver (i.e. arrows). In case scalar is also True,
-            quivers will be plotted with a single color (defined in `quiver_kwargs`), if not, the scalar values are used
-            to color the arrows.
-        :param scalar_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting scalar
-            values.
-        :param quiver_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
+        :param quiver: boolean, if set to True, velocities are plotted as quiver (i.e. arrows). In case scalar is also
+            True, quivers will be plotted with a single color (defined in `quiver_kwargs`), if not, the scalar values
+            are used to color the arrows.
+        :param mode: can be "local", "geographical", or "camera". For "geographical" a velocimetry result that contains
+            "lon" and "lat" coordinates must be provided (i.e. produced with known CRS for control points).
+        :param scalar_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting
+            scalar values.
+        :param quiver_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver
+            arrows.
         :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
         :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
-        :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly smaller).
+        :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
+            smaller).
         :return: ax, axes object resulting from this function.
         """
 
@@ -527,8 +532,8 @@ class Velocimetry(ORCBase):
     def replace_outliers(self, v_x="v_x", v_y="v_y", stride=1, max_iter=1, inplace=False):
         """
         Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples
-        in time are available to derive a mean or median velocity from, consider using a reducer on those samples instead
-        of a spatial infilling method such as suggested here.
+        in time are available to derive a mean or median velocity from, consider using a reducer on those samples
+        instead of a spatial infilling method such as suggested here.
 
         :param self: xarray Dataset, containing velocity vectors as [time, y, x]
         :param v_x: str, name of x-directional velocity
