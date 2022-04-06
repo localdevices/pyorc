@@ -69,7 +69,7 @@ class Frames(ORCBase):
         else:
             lons = None
             lats = None
-        M = self.camera_config.get_M_reverse(self._obj.h_a)
+        M = self.camera_config.get_M(self.h_a, reverse=True)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
         # ensure y coordinates start at the top in the right orientation (different from order of a CRS)
@@ -165,10 +165,8 @@ class Frames(ORCBase):
         :return: frames: xr.DataArray with projected frames and x and y in local coordinate system (origin: top-left)
 
         """
-        # # read json into CameraConfig object
-        # camera_config = helpers.get_camera_config_from_ds(frames)
         # retrieve the M and shape from camera config with said h_a
-        M = self.camera_config.get_M(self._obj.h_a)
+        M = self.camera_config.get_M(self.h_a)
         shape = self.camera_config.shape
         # get orthoprojected frames as delayed objects
         get_ortho = dask.delayed(cv.get_ortho)

@@ -3,6 +3,7 @@ import copy
 import cv2
 import dask
 import dask.array as da
+import json
 
 import numpy as np
 import os
@@ -14,6 +15,17 @@ from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
 
 
 class Video(cv2.VideoCapture):
+    def __repr__(self):
+        template = """
+Filename: {:s}
+FPS: {:f}
+start frame: {:d}
+end frame: {:d}
+Camera configuration: {:s}
+        """.format
+
+        return template(self.fn, self.fps, self.start_frame, self.end_frame, self.camera_config.__repr__())
+
     def __init__(
             self,
             fn,
@@ -60,8 +72,8 @@ class Video(cv2.VideoCapture):
         self.fps = self.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
         # set other properties
-        if h_a is not None:
-            self.h_a = h_a
+        # if h_a is not None:
+        self.h_a = h_a
         # make camera config part of the vidoe object
         if camera_config is not None:
             self.camera_config = camera_config
@@ -124,11 +136,12 @@ class Video(cv2.VideoCapture):
 
     @h_a.setter
     def h_a(self, h_a):
-        assert(isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
-        if h_a > 10:
-            warnings.warn(f"Your water level is {h_a} meters, which is very high for a locally referenced reading. Make sure this value is correct and expressed in unit meters.")
-        if h_a < 0:
-            warnings.warn("Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.")
+        if h_a is not None:
+            assert(isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
+            if h_a > 10:
+                warnings.warn(f"Your water level is {h_a} meters, which is very high for a locally referenced reading. Make sure this value is correct and expressed in unit meters.")
+            if h_a < 0:
+                warnings.warn("Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.")
         self._h_a = h_a
 
     @property
@@ -213,7 +226,7 @@ class Video(cv2.VideoCapture):
         :return: xr.DataArray, containing all requested frames
         """
         assert(hasattr(self, "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
-        assert(hasattr(self, "_h_a")), 'Water level with this video has not been set, please set it with the .h_a method'
+        # assert(hasattr(self, "_h_a")), 'Water level with this video has not been set, please set it with the .h_a method'
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
         get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
@@ -261,7 +274,7 @@ class Video(cv2.VideoCapture):
         attrs = {
             "camera_shape": str([len(y), len(x)]),
             "camera_config": camera_config.to_json(),
-            "h_a": self.h_a
+            "h_a": json.dumps(self.h_a)
         }
         frames = xr.DataArray(
             da.stack(data_array, axis=0),
