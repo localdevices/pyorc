@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import xarray as xr
 from pyorc import helpers
@@ -5,6 +6,16 @@ from pyorc import helpers
 class ORCBase(object):
     def __init__(self, xarray_obj):
         self._obj = xarray_obj
+
+    @property
+    def h_a(self):
+        """
+        Deserialize h_a from the underlying object
+
+        :return: deserialized representation of actual water level
+        """
+        return json.loads(self._obj.h_a)
+
 
     @property
     def camera_config(self):

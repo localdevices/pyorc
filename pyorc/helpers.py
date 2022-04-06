@@ -75,7 +75,7 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object
     )
 
 
-def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
+def depth_integrate(depth, v, v_corr=0.85, name="q"):
     """
     integrate velocities [m s-1] to depth-integrated velocity [m2 s-1] using depth information
 
@@ -94,7 +94,7 @@ def depth_integrate(z, v, z_0, h_ref, h_a, v_corr=0.85, name="q"):
     #   - z levels the bottom cross section observations measured in gps CRS (e.g. WGS84)
     #   + difference in water level measured with staff gauge during movie and during survey
     #   of course depth cannot be negative, so it is always maximized to zero when below zero
-    depth = np.maximum(z_0 - z + h_a - h_ref, 0)
+    # depth = np.maximum(z_0 - z + h_a - h_ref, 0)
     # compute the depth average velocity
     q = v * v_corr * depth
     q.attrs = {
@@ -290,7 +290,7 @@ def rotate_u_v(u, v, theta, deg=False):
     return u2, v2
 
 
-def velocity_fill(x, y, z, v, z_0, h_ref, h_a, groupby="quantile"):
+def velocity_fill(x, y, depth, v, groupby="quantile"):
     """
     Fill missing surface velocities using a velocity depth profile with
 
@@ -311,9 +311,10 @@ def velocity_fill(x, y, z, v, z_0, h_ref, h_a, groupby="quantile"):
         _v[np.isnan(_v)] = log_profile((depth[np.isnan(_v)], dist_bank[np.isnan(_v)]), **pars)
         return _v
 
-    z_pressure = np.maximum(z_0 - h_ref + h_a, z)
-    depth = z_pressure - z
-    z_dry = z_0 - h_ref + h_a < z
+    # z_pressure = np.maximum(z_0 - h_ref + h_a, z)
+    # depth = z_pressure - z
+    z_dry = depth <= 0
+    # z_dry = z_0 - h_ref + h_a < z
     dist_bank = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
     # per time slice or quantile, fill missings
     v_group = copy.deepcopy(v).groupby(groupby)
