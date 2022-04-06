@@ -14,6 +14,9 @@ class CameraConfig:
     def __str__(self):
         return self.to_json()
 
+    def __repr__(self):
+        return self.to_json()
+
     def __init__(
             self,
             crs=None,
@@ -89,47 +92,59 @@ class CameraConfig:
         bbox = shapely.wkt.loads(self.bbox)
         return cv.get_transform(bbox, resolution=self.resolution)
 
-    def get_M(self, h_a):
+    def get_depth(self, z, h_a=None):
+        """
+        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
+        in local reference (e.g. staff gauge).
+
+        :param z: measured bathymetry p
+        :param h_a: float, optional, actual water level measured [m], if not set, assumption is that a single video
+            is processed and thus changes in water level are not relevant.
+        :return:
+        """
+        if h_a is None:
+            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is provided"
+            h_a = 0.
+            h_ref = 0.
+        else:
+            h_ref = self.gcps["h_ref"]
+        z_pressure = np.maximum(self.gcps["z_0"] - h_ref + h_a, z)
+        return z_pressure - z
+
+
+    def get_M(self, h_a=None, reverse=False):
         """
         Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
         ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.
 
         :param h_a: actual water level [m]
+        :param reverse: bool, optional, if set, the reverse matrix is prepared, which can be used to transform projected
+            coordinates back to the original camera perspective.
         :return: np.ndarray, containing 2x3 transformation matrix.
         """
         # map where the destination points are with the actual water level h_a.
+        if h_a is None:
+            # fill in the same value for h_ref and h_a
+            h_ref = 0.
+            h_a = 0.
+        else:
+            h_ref = self.gcps["h_ref"]
         dst_a = cv.get_gcps_a(
             self.lens_position,
             h_a,
             self.gcps["dst"],
             self.gcps["z_0"],
-            self.gcps["h_ref"],
+            h_ref,
         )
+
         # lookup where the destination points are in row/column space
         dst_colrow_a = cv.transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
-
-        # retrieve and return M for destination row and col
-        return cv.get_M(src=self.gcps["src"], dst=dst_colrow_a)
-
-    def get_M_reverse(self, h_a):
-        """
-        Establish the reverse transformation matrix for certain actual water level. This is used to be able to
-        transform coordinates from the real space to the camera perspective (reverse of `get_M`).
-
-        :param h_a: actual water level [m]
-        :return: np.ndarray, containing 2x3 transformation matrix.
-        """
-        dst_a = cv.get_gcps_a(
-            self.lens_position,
-            h_a,
-            self.gcps["dst"],
-            self.gcps["z_0"],
-            self.gcps["h_ref"],
-        )
-        dst_colrow_a = cv.transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
-
-        # retrieve M reverse for destination row and col
-        return cv.get_M(src=dst_colrow_a, dst=self.gcps["src"])
+        if reverse:
+            # retrieve and return M reverse for destination row and col
+            return cv.get_M(src=dst_colrow_a, dst=self.gcps["src"])
+        else:
+            # retrieve and return M for destination row and col
+            return cv.get_M(src=self.gcps["src"], dst=dst_colrow_a)
 
     def set_corners(self, corners):
         assert (np.array(corners).shape == (4,
@@ -154,19 +169,19 @@ class CameraConfig:
             "f": f
         }
 
-    def set_gcps(self, src, dst, h_ref, z_0, crs=None):
+    def set_gcps(self, src, dst, z_0, h_ref=None, crs=None):
         """
         Set ground control points for the given CameraConfig
 
         :param src: list of lists, containing 4 x, y pairs of columns and rows in the frames of the original video
         :param dst: list of lists, containing 4 x, y pairs of real world coordinates in the given coordinate reference
             system.
-        :param h_ref: water level, belonging to the 4 control points in `dst`. This is the water level as measured by
-            a local reference (e.g. gauge plate) during the surveying of the control points. Control points must be
-            taken on the water surface.
         :param z_0: same as `h_ref` but then as measured by a global reference system such as a geoid or ellipsoid used
             by a GPS device. All other surveyed points (lens position and cross section) must have the same vertical
             reference.
+        :param h_ref: float, optional. Water level, belonging to the 4 control points in `dst`. This is the water level
+            as measured by a local reference (e.g. gauge plate) during the surveying of the control points. Control
+            points must be taken on the water surface. If a single movie is processed, h_ref can be left out.
         :param crs: coordinate reference system, used to measure the control points (e.g. 4326 for WGS84 lat-lon).
             the destination control points will automatically be reprojected to the local crs of the CameraConfig.
         """
@@ -174,7 +189,8 @@ class CameraConfig:
         assert (isinstance(dst, list)), f"dst must be a list of 4 numbers"
         assert (len(src) == 4), f"4 source points are expected in src, but {len(src)} were found"
         assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
-        assert (isinstance(h_ref, (float, int))), "h_ref must contain a float number"
+        if h_ref is not None:
+            assert (isinstance(h_ref, (float, int))), "h_ref must contain a float number"
         assert (isinstance(z_0, (float, int))), "z_0 must contain a float number"
         assert (all(isinstance(x, (float, int)) for p in src for x in p)), "src contains non-int parts"
         assert (all(isinstance(x, (float, int)) for p in dst for x in p)), "dst contains non-float parts"
@@ -211,7 +227,7 @@ class CameraConfig:
 
         self.lens_position = [x, y, z]
 
-    def plot(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0002, zoom_level=18, tiles_kwargs={}):
+    def plot(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}):
         """
         Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
         to be in the right location. Requires cartopy to be installed.
@@ -219,7 +235,7 @@ class CameraConfig:
         :param figsize: tuple, optional, width and height of figure
         :param ax: axes, optional, if not provided, axes is setup
         :param tiles: str, optional, name of tiler service to use (called as attribute from cartopy.io.img_tiles)
-        :param buffer: float, optional buffer in lat-lon around points, used to set extent (default: 0.0002)
+        :param buffer: float, optional buffer in lat-lon around points, used to set extent (default: 0.0005)
         :param zoom_level: int, optional, zoom level of image tiler service (default: 18)
         :param tiles_kwargs: dict, optional, keyword arguments to pass to ax,add_image when tiles are added
         :return: ax
@@ -231,7 +247,8 @@ class CameraConfig:
             raise ValueError("No GCPs found yet, please populate the gcps attribute with set_gcps first.")
         # prepare points for plotting
         points = [Point(x, y) for x, y in self.gcps["dst"]]
-        bbox = shapely.wkt.loads(self.bbox)
+        if hasattr(self, "corners"):
+            bbox = shapely.wkt.loads(self.bbox)
         if hasattr(self, "lens_position"):
             points.append(Point(self.lens_position[0], self.lens_position[1]))
         # transform points in case a crs is provided
@@ -239,7 +256,8 @@ class CameraConfig:
             # make a transformer to lat lon
             transform = Transformer.from_crs(CRS.from_user_input(self.crs), CRS.from_epsg(4326), always_xy=True).transform
             points = [ops.transform(transform, p) for p in points]
-            bbox = ops.transform(transform, bbox)
+            if hasattr(self, "corners"):
+                bbox = ops.transform(transform, bbox)
         xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
         extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
         x = [p.x for p in points]
@@ -256,7 +274,7 @@ class CameraConfig:
                     raise ModuleNotFoundError(
                         'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try again.')
                 if tiles is not None:
-                    tiler = getattr(cimgt, tiles)()
+                    tiler = getattr(cimgt, tiles)(**tiles_kwargs)
                     crs = tiler.crs
                 else:
                     crs = ccrs.PlateCarree()
@@ -264,16 +282,17 @@ class CameraConfig:
                 ax = plt.subplot(projection=crs)
                 ax.set_extent(extent, crs=ccrs.PlateCarree())
                 if tiles is not None:
-                    ax.add_image(tiler, zoom_level, zorder=1, **tiles_kwargs)
+                    ax.add_image(tiler, zoom_level, zorder=1)
         if hasattr(ax, "add_geometries"):
             plot_kwargs = dict(transform= ccrs.PlateCarree())
         else:
             plot_kwargs = {}
-        ax.plot(x[0:4], y[0:4], ".", label="Control points", markersize=16, zorder=2, **plot_kwargs)
+        ax.plot(x[0:4], y[0:4], ".", label="Control points", markersize=12, markeredgecolor="w", zorder=2, **plot_kwargs)
         if hasattr(self, "lens_position"):
-            ax.plot(x[-1], y[-1], ".", label="Lens position", markersize=16, zorder=2, **plot_kwargs)
-        patch = PolygonPatch(bbox, alpha=0.5, zorder=2, edgecolor="w", label="Area of interest", **plot_kwargs)
-        ax.add_patch(patch)
+            ax.plot(x[-1], y[-1], ".", label="Lens position", markersize=12, zorder=2, markeredgecolor="w", **plot_kwargs)
+        if hasattr(self, "corners"):
+            patch = PolygonPatch(bbox, alpha=0.5, zorder=2, edgecolor="w", label="Area of interest", **plot_kwargs)
+            ax.add_patch(patch)
         ax.legend()
         return ax
 

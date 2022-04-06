@@ -116,9 +116,14 @@ class Transect(ORCBase):
             xs = self._obj.x.values
         if ys is None:
             ys = self._obj.y.values
-        zs = (self._obj.zcoords - self.camera_config.gcps["z_0"] + self.camera_config.gcps["h_ref"]).values
+        # compute bathymetry as measured in local height reference (such as staff gauge)
+        if self.camera_config.gcps["h_ref"] is None:
+            h_ref = 0.
+        else:
+            h_ref = self.camera_config.gcps["h_ref"]
+        zs = (self._obj.zcoords - self.camera_config.gcps["z_0"] + h_ref).values
         if M is None:
-            Ms = [self.camera_config.get_M_reverse(depth) for depth in zs]
+            Ms = [self.camera_config.get_M(depth, reverse=True) for depth in zs]
         else:
             # use user defined M instead
             Ms = [M for _ in zs]
@@ -180,14 +185,12 @@ class Transect(ORCBase):
         x = ds["xcoords"].values
         y = ds["ycoords"].values
         z = ds["zcoords"].values
-        z_0 = self.camera_config.gcps["z_0"]
-        h_ref = self.camera_config.gcps["h_ref"]
-        h_a = ds.h_a
         # add filled surface velocities with a logarithmic profile curve fit
-        ds["v_eff"] = helpers.velocity_fill(x, y, z, ds["v_eff_nofill"], z_0, h_ref, h_a, groupby="quantile")
+        depth = self.camera_config.get_depth(z, ds.h_a)
+        ds["v_eff"] = helpers.velocity_fill(x, y, depth, ds["v_eff_nofill"], groupby="quantile")
         # compute q for both non-filled and filled velocities
-        ds["q_nofill"] = helpers.depth_integrate(z, ds["v_eff_nofill"], z_0, h_ref, h_a, v_corr=v_corr, name="q_nofill")
-        ds["q"] = helpers.depth_integrate(z, ds["v_eff"], z_0, h_ref, h_a, v_corr=v_corr, name="q")
+        ds["q_nofill"] = helpers.depth_integrate(depth, ds["v_eff_nofill"], v_corr=v_corr, name="q_nofill")
+        ds["q"] = helpers.depth_integrate(depth, ds["v_eff"], v_corr=v_corr, name="q")
         return ds
 
     def get_uv_camera(self, dt=0.1, v_eff="v_eff", v_dir="v_dir"):
@@ -208,7 +211,7 @@ class Transect(ORCBase):
             u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
         """
         # retrieve the backward transformation array
-        M = self.camera_config.get_M_reverse(self._obj.h_a)
+        M = self.camera_config.get_M(self.h_a, reverse=True)
 
         x, y = self._obj.x, self._obj.y
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
