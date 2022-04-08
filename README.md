@@ -8,8 +8,8 @@ flow analysis using the OpenPIV library and reprojections and image pre-processi
 to Large-scale Particle Tracking Velocimetry (LSPTV) and Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV once open
 libraries with API to perform this are available. 
 
-![example_image](examples/example.jpg)
-Image: Example of pyORC velocimetry over Geul river - Limburg, The Netherlands.
+![example_image](docs/ngwerere.jpg)
+Image: Example of pyORC velocimetry over Ngwerere river at the Zambezi Road crossing - Lusaka, Zambia.
 
 Current capabilities are:
 * Reading of frames and reprojection to surface
