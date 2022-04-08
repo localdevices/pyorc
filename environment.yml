@@ -8,23 +8,23 @@ channels:
 # install_requires in setup.py
 dependencies:
   - cartopy
+  - descartes
+  - geojson
+  - geos
+  - jupyter
+  - matplotlib
+  - netCDF4
   - numpy
   - opencv
   - pip
-  - python=3.8
-  - requests
-  - scipy
-  - scikit-image
-  - rasterio
-  - xarray
   - pyproj
-  - geojson
-  - geos
+  - python
+  - rasterio
+  - requests
+  - scikit-image
+  - scipy
   - shapely
-  - matplotlib
-  - descartes
-  - netCDF4
-  - jupyter
+  - xarray
   - pip:
     - openpiv
 
