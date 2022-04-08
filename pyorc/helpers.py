@@ -311,7 +311,7 @@ def velocity_fill(x, y, depth, v, groupby="quantile"):
         _v[np.isnan(_v).values] = log_profile((depth[np.isnan(_v).values], dist_bank[np.isnan(_v).values]), **pars)
         # enforce that velocities are zero with zero depth
         _v[depth<=0] = 0.
-        return _v
+        return np.maximum(_v, 0)
 
     z_dry = depth <= 0
     dist_bank = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
