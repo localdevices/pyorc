@@ -264,6 +264,14 @@ class Transect(ORCBase):
             smaller).
         :return: ax, axes object resulting from this function.
         """
+        if len(self._obj[v_eff].shape) > 1:
+            raise OverflowError(
+                f'Dataset\'s variables should only contain 1 dimension (points), this dataset '
+                f'contains {len(self._obj[v_eff].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
+                f'Slicing can be done e.g. with ds.isel(quantile=2), which would return the 50% quantile (index 2) '
+                f'in case the default quantile range [0.05, 0.25, 0.50, 0.75, 0.95] was used.'
+            )
+
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
         u = self._obj[v_eff] * np.sin(self._obj[v_dir])
         v = self._obj[v_eff] * np.cos(self._obj[v_dir])
@@ -317,8 +325,8 @@ class Transect(ORCBase):
             x_bottom, y_bottom = self._obj.transect.get_xyz_perspective()
             ax.plot(x_bottom, y_bottom, "#0088FF", linewidth=3)
             ax.plot(x_bottom, y_bottom, "#00CCFF", linewidth=1)
-            ax.plot(self._obj[x].values, self._obj[y].values, "#00FF88", linewidth=3, zorder=1)
-            ax.plot(self._obj[x].values, self._obj[y].values, "#00FFCC", linewidth=1, zorder=2)
+        ax.plot(self._obj[x].values, self._obj[y].values, "#00FF88", linewidth=3, zorder=1)
+        ax.plot(self._obj[x].values, self._obj[y].values, "#00FFCC", linewidth=1, zorder=2)
         if cbar:
             cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
         return ax

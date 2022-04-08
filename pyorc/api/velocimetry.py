@@ -394,6 +394,9 @@ class Velocimetry(ORCBase):
             default: "xs"
         :param ys: str, name of variable that stores the y coordinates in the projection in which "y" is supplied
             default: "ys"
+        :param distance: float, optional, sampling distance over the cross-section in [m]. the bathymetry points will
+            be interpolated to match this distance. If not set, the distance will be estimated from the velocimetry
+            grid resolution.
         :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
         """
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
