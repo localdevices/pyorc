@@ -1,8 +1,10 @@
 import numpy as np
 import xarray as xr
+
+from matplotlib.colors import Normalize
+
 from pyorc import helpers
 import pyorc.plot as plot_orc
-
 from .orcbase import ORCBase
 
 
@@ -116,12 +118,18 @@ class Transect(ORCBase):
             xs = self._obj.x.values
         if ys is None:
             ys = self._obj.y.values
-        zs = (self._obj.zcoords - self.camera_config.gcps["z_0"] + self.camera_config.gcps["h_ref"]).values
+        # compute bathymetry as measured in local height reference (such as staff gauge)
+        if self.camera_config.gcps["h_ref"] is None:
+            h_ref = 0.
+        else:
+            h_ref = self.camera_config.gcps["h_ref"]
+        hs = self.camera_config.z_to_h(self._obj.zcoords).values
+        # zs = (self._obj.zcoords - self.camera_config.gcps["z_0"] + h_ref).values
         if M is None:
-            Ms = [self.camera_config.get_M_reverse(depth) for depth in zs]
+            Ms = [self.camera_config.get_M(h, reverse=True) for h in hs]
         else:
             # use user defined M instead
-            Ms = [M for _ in zs]
+            Ms = [M for _ in hs]
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         cols, rows = zip(*[
             helpers.xy_to_perspective(
@@ -180,14 +188,12 @@ class Transect(ORCBase):
         x = ds["xcoords"].values
         y = ds["ycoords"].values
         z = ds["zcoords"].values
-        z_0 = self.camera_config.gcps["z_0"]
-        h_ref = self.camera_config.gcps["h_ref"]
-        h_a = ds.h_a
         # add filled surface velocities with a logarithmic profile curve fit
-        ds["v_eff"] = helpers.velocity_fill(x, y, z, ds["v_eff_nofill"], z_0, h_ref, h_a, groupby="quantile")
+        depth = self.camera_config.get_depth(z, self.h_a)
+        ds["v_eff"] = helpers.velocity_fill(x, y, depth, ds["v_eff_nofill"], groupby="quantile")
         # compute q for both non-filled and filled velocities
-        ds["q_nofill"] = helpers.depth_integrate(z, ds["v_eff_nofill"], z_0, h_ref, h_a, v_corr=v_corr, name="q_nofill")
-        ds["q"] = helpers.depth_integrate(z, ds["v_eff"], z_0, h_ref, h_a, v_corr=v_corr, name="q")
+        ds["q_nofill"] = helpers.depth_integrate(depth, ds["v_eff_nofill"], v_corr=v_corr, name="q_nofill")
+        ds["q"] = helpers.depth_integrate(depth, ds["v_eff"], v_corr=v_corr, name="q")
         return ds
 
     def get_uv_camera(self, dt=0.1, v_eff="v_eff", v_dir="v_dir"):
@@ -208,7 +214,7 @@ class Transect(ORCBase):
             u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
         """
         # retrieve the backward transformation array
-        M = self.camera_config.get_M_reverse(self._obj.h_a)
+        M = self.camera_config.get_M(self.h_a, reverse=True)
 
         x, y = self._obj.x, self._obj.y
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
@@ -232,8 +238,9 @@ class Transect(ORCBase):
         mode="local",
         v_eff="v_eff",
         v_dir="v_dir",
+        cbar=True,
         cbar_fontsize=15,
-        kwargs = {},
+        kwargs={},
     ):
         """
         plot velocimetry results across a transect as quiver plot. Plotting can be done in three modes:
@@ -252,10 +259,19 @@ class Transect(ORCBase):
         :param kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
         :param v_eff: str, name of variable, containing effective velocity (default: "v_eff")
         :param v_dir: str, name of variable, containing angle direction of velocity (default: "v_dir")
+        :param cbar: bool, optional, define if colorbar should be included (default: True)
         :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
             smaller).
         :return: ax, axes object resulting from this function.
         """
+        if len(self._obj[v_eff].shape) > 1:
+            raise OverflowError(
+                f'Dataset\'s variables should only contain 1 dimension (points), this dataset '
+                f'contains {len(self._obj[v_eff].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
+                f'Slicing can be done e.g. with ds.isel(quantile=2), which would return the 50% quantile (index 2) '
+                f'in case the default quantile range [0.05, 0.25, 0.50, 0.75, 0.95] was used.'
+            )
+
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
         u = self._obj[v_eff] * np.sin(self._obj[v_dir])
         v = self._obj[v_eff] * np.cos(self._obj[v_dir])
@@ -279,22 +295,38 @@ class Transect(ORCBase):
 
         ax = plot_orc.prepare_axes(ax=ax, mode=mode)
         f = ax.figure  # handle to figure
+        vmin = None
+        vmax = None
+        if "vmin" in kwargs:
+            vmin = kwargs["vmin"]
+            del kwargs["vmin"]
+        if "vmax" in kwargs:
+            vmax = kwargs["vmax"]
+            del kwargs["vmax"]
+        norm = Normalize(vmin=vmin, vmax=vmax, clip=False)
 
-        p = plot_orc.quiver(ax, self._obj[x].values, self._obj[y].values, *[v.values for v in helpers.rotate_u_v(u, v, theta)], s,
-                        **kwargs)
+        p = plot_orc.quiver(
+            ax,
+            self._obj[x].values,
+            self._obj[y].values,
+            *[v.values for v in helpers.rotate_u_v(u, v, theta)],
+            s,
+            norm=norm,
+            **kwargs
+        )
         if mode == "geographical":
             ax.set_extent(
                 [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
                 crs=ccrs.PlateCarree())
-        else:
-            ax.axis('equal')
+        # else:
+        #     ax.axis('equal')
         if mode == "camera":
             # we can also make a bottom profile plot
             x_bottom, y_bottom = self._obj.transect.get_xyz_perspective()
             ax.plot(x_bottom, y_bottom, "#0088FF", linewidth=3)
             ax.plot(x_bottom, y_bottom, "#00CCFF", linewidth=1)
-            ax.plot(self._obj[x].values, self._obj[y].values, "#00FF88", linewidth=3, zorder=1)
-            ax.plot(self._obj[x].values, self._obj[y].values, "#00FFCC", linewidth=1, zorder=2)
-
-        cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
+        ax.plot(self._obj[x].values, self._obj[y].values, "#00FF88", linewidth=3, zorder=1)
+        ax.plot(self._obj[x].values, self._obj[y].values, "#00FFCC", linewidth=1, zorder=2)
+        if cbar:
+            cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
         return ax

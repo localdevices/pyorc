@@ -1,6 +1,5 @@
 import copy
-import matplotlib.pyplot as plt
-from matplotlib.collections import QuadMesh
+from matplotlib.colors import Normalize
 import numpy as np
 import rasterio
 import xarray as xr
@@ -131,7 +130,7 @@ class Velocimetry(ORCBase):
         # return ds
 
     def filter_temporal_std(
-            self, v_x="v_x", v_y="v_y", tolerance=1.0):
+            self, v_x="v_x", v_y="v_y", tolerance_sample=1.0, tolerance_var=5., mode="or"):
         """
         Masks values if they deviate more than x standard deviations from the mean.
 
@@ -141,14 +140,41 @@ class Velocimetry(ORCBase):
         :param tolerance: float, representing amount of standard deviations
         :return: xr.Dataset, containing standard deviation filtered velocity vectors as [time, y, x]
         """
-        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
+
+        # s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            s_std = s.std(dim="time")
-        s_mean = s.mean(dim="time")
-        s_var = s_std / s_mean
-        self._obj[v_x] = self._obj[v_x].where((s - s_mean) / s_std < tolerance)
-        self._obj[v_y] = self._obj[v_y].where((s - s_mean) / s_std < tolerance)
+            # s_std = s.std(dim="time")
+            x_std = self._obj[v_x].std(dim="time")
+            y_std = self._obj[v_y].std(dim="time")
+        x_mean = self._obj[v_x].mean(dim="time")
+        y_mean = self._obj[v_y].mean(dim="time")
+        x_var = np.abs(x_std / x_mean)
+        y_var = np.abs(y_std / y_mean)
+
+        # s_mean = s.mean(dim="time")
+        # s_var = s_std / s_mean
+        x_condition = np.abs((self._obj[v_x] - x_mean) / x_std) < tolerance_sample
+        y_condition = np.abs((self._obj[v_y] - y_mean) / y_std) < tolerance_sample
+        if mode == "or":
+            condition = np.any([x_condition, y_condition], axis=0)
+        else:
+            condition = np.all([x_condition, y_condition], axis=0)
+        self._obj[v_x] = self._obj[v_x].where(condition)
+        self._obj[v_y] = self._obj[v_y].where(condition)
+        # also remove places with a high variance in either (or both) directions
+        x_condition = x_var < tolerance_var
+        y_condition = y_var < tolerance_var
+        if mode == "or":
+            condition = np.any([x_condition, y_condition], axis=0)
+        else:
+            condition = np.all([x_condition, y_condition], axis=0)
+        self._obj[v_x] = self._obj[v_x].where(condition)
+        self._obj[v_y] = self._obj[v_y].where(condition)
+
+        #
+        # self._obj[v_x] = self._obj[v_x].where((s - s_mean) / s_std < tolerance)
+        # self._obj[v_y] = self._obj[v_y].where((s - s_mean) / s_std < tolerance)
         # return ds
 
     def filter_temporal_velocity(self, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
@@ -164,7 +190,15 @@ class Velocimetry(ORCBase):
         """
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         self._obj[v_x] = self._obj[v_x].where(s > s_min)
+        self._obj[v_x] = self._obj[v_x].where(s < s_max)
+        self._obj[v_y] = self._obj[v_y].where(s > s_min)
         self._obj[v_y] = self._obj[v_y].where(s < s_max)
+        s_mean = s.mean(dim="time")
+        self._obj[v_x] = self._obj[v_x].where(s_mean > s_min)
+        self._obj[v_x] = self._obj[v_x].where(s_mean < s_max)
+        self._obj[v_y] = self._obj[v_y].where(s_mean > s_min)
+        self._obj[v_y] = self._obj[v_y].where(s_mean < s_max)
+
         # return ds
 
     def filter_temporal_corr(self, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.1):
@@ -296,7 +330,7 @@ class Velocimetry(ORCBase):
             u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
         """
         # retrieve the backward transformation array
-        M = self.camera_config.get_M_reverse(self._obj.h_a)
+        M = self.camera_config.get_M(self.h_a, reverse=True)
         # get the shape of the original frames
         shape_y, shape_x = self.camera_shape
         xi, yi = np.meshgrid(self._obj.x, self._obj.y)
@@ -334,7 +368,7 @@ class Velocimetry(ORCBase):
         """
         # select lon and lat variables as coordinates
         u = self._obj[v_x]
-        v = self._obj[v_y]
+        v = -self._obj[v_y]
         s = (u ** 2 + v ** 2) ** 0.5
         aff = self.camera_config.transform
         theta = np.arctan2(aff.d, aff.a)
@@ -360,6 +394,9 @@ class Velocimetry(ORCBase):
             default: "xs"
         :param ys: str, name of variable that stores the y coordinates in the projection in which "y" is supplied
             default: "ys"
+        :param distance: float, optional, sampling distance over the cross-section in [m]. the bathymetry points will
+            be interpolated to match this distance. If not set, the distance will be estimated from the velocimetry
+            grid resolution.
         :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
         """
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
@@ -436,6 +473,7 @@ class Velocimetry(ORCBase):
             quiver_kwargs={},
             v_x="v_x",
             v_y="v_y",
+            cbar=True,
             cbar_fontsize=15
     ):
         """
@@ -463,6 +501,7 @@ class Velocimetry(ORCBase):
             arrows.
         :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
         :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
+        :param cbar: bool, optional, define if colorbar should be included (default: True)
         :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
             smaller).
         :return: ax, axes object resulting from this function.
@@ -481,7 +520,7 @@ class Velocimetry(ORCBase):
             y = "y"
             theta = 0.
             u = self._obj[v_x]
-            v = self._obj[v_y]
+            v = -self._obj[v_y]
             s = (u ** 2 + v ** 2) ** 0.5
         elif mode == "geographical":
             # import some additional packages
@@ -498,6 +537,15 @@ class Velocimetry(ORCBase):
         ax = plot_orc.prepare_axes(ax=ax, mode=mode)
         f = ax.figure  # handle to figure
         if quiver:
+            vmin = None
+            vmax = None
+            if "vmin" in quiver_kwargs:
+                vmin = quiver_kwargs["vmin"]
+                del quiver_kwargs["vmin"]
+            if "vmax" in quiver_kwargs:
+                vmax = quiver_kwargs["vmax"]
+                del quiver_kwargs["vmax"]
+
             if scalar:
                 p = plot_orc.quiver(
                     ax,
@@ -508,12 +556,14 @@ class Velocimetry(ORCBase):
                     **quiver_kwargs
                 )
             else:
+                norm = Normalize(vmin=vmin, vmax=vmax, clip=False)
                 p = plot_orc.quiver(
                     ax,
                     self._obj[x].values,
                     self._obj[y].values,
                     *[v.values for v in helpers.rotate_u_v(u, v, theta)],
                     s,
+                    norm=norm,
                     **quiver_kwargs
                 )
         if scalar:
@@ -521,12 +571,12 @@ class Velocimetry(ORCBase):
             p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
         if mode == "geographical":
             ax.set_extent(
-                [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
+                [self._obj[x].min() - 0.0001, self._obj[x].max() + 0.0001, self._obj[y].min() - 0.0001, self._obj[y].max() + 0.0001],
                 crs=ccrs.PlateCarree())
-        else:
-            ax.axis('equal')
-
-        cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
+        # else:
+        #     ax.axis('equal')
+        if cbar:
+            cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
         return ax
 
     def replace_outliers(self, v_x="v_x", v_y="v_y", stride=1, max_iter=1, inplace=False):
