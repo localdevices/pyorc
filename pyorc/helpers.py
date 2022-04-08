@@ -260,8 +260,9 @@ def optimize_log_profile(z, v, dist_bank=None):
         (z, dist_bank),
         np.array(v),
         # bounds=([0.00001, 0.05, -20], [10, 2., 20]),
-        bounds=([0.05, -20, 0., 0.], [0.051, 20, 5, 100]),
-        # p0=[0.05, 0, 0., 0.]
+        # bounds=([0.05, -20, 0., 0.], [0.051, 20, 5, 100]),
+        bounds=([0.005, -20, 0., 0.], [0.1, 20, 5, 100]),
+        # p0=[0.05, 0, 0., 0.],
         # method="dogbox"
     )
     # unravel parameters
@@ -308,6 +309,8 @@ def velocity_fill(x, y, depth, v, groupby="quantile"):
     def fit(_v):
         pars = optimize_log_profile(depth[np.isfinite(_v).values], _v[np.isfinite(_v).values], dist_bank[np.isfinite(_v).values])
         _v[np.isnan(_v).values] = log_profile((depth[np.isnan(_v).values], dist_bank[np.isnan(_v).values]), **pars)
+        # enforce that velocities are zero with zero depth
+        _v[depth<=0] = 0.
         return _v
 
     z_dry = depth <= 0
