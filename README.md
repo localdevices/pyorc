@@ -1,5 +1,5 @@
 pyOpenRiverCam
-=====
+==============
 
 **pyorc**, short for "pyOpenRiverCam" is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for 
 computations on the fully open software stack OpenRiverCam. **pyorc** can only be successful if the underlying methods
