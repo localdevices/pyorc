@@ -53,7 +53,8 @@ Camera configuration: {:s}
         :param args: list or tuple, arguments to pass to cv2.VideoCapture on initialization.
         :param kwargs: dict, keyword arguments to pass to cv2.VideoCapture on initialization.
         """
-
+        assert(isinstance(start_frame, int)), 'start_frame must be of type "int"'
+        assert(isinstance(end_frame, int)), 'end_frame must be of type "int"'
         super().__init__(*args, **kwargs)
         # explicitly open file for reading
         self.open(fn)

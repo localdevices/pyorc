@@ -306,15 +306,11 @@ def velocity_fill(x, y, depth, v, groupby="quantile"):
     :return: v_fill: DataArray(quantile or time, points), filled velocities  [m s-1]
     """
     def fit(_v):
-        pars = optimize_log_profile(depth[np.isfinite(_v)], _v[np.isfinite(_v)], dist_bank[np.isfinite(_v)])
-        print(pars)
-        _v[np.isnan(_v)] = log_profile((depth[np.isnan(_v)], dist_bank[np.isnan(_v)]), **pars)
+        pars = optimize_log_profile(depth[np.isfinite(_v).values], _v[np.isfinite(_v).values], dist_bank[np.isfinite(_v).values])
+        _v[np.isnan(_v).values] = log_profile((depth[np.isnan(_v).values], dist_bank[np.isnan(_v).values]), **pars)
         return _v
 
-    # z_pressure = np.maximum(z_0 - h_ref + h_a, z)
-    # depth = z_pressure - z
     z_dry = depth <= 0
-    # z_dry = z_0 - h_ref + h_a < z
     dist_bank = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
     # per time slice or quantile, fill missings
     v_group = copy.deepcopy(v).groupby(groupby)
@@ -392,4 +388,7 @@ def xy_transform(x, y, crs_from, crs_to):
     """
     transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
     # transform dst coordinates to local projection
+    x_trans, y_trans = transform.transform(x, y)
+    if np.all(np.isinf(x_trans)):
+        raise ValueError("Transformation did not give valid results, please check if the provided crs of input coordinates is correct.")
     return transform.transform(x, y)

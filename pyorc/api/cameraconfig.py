@@ -97,7 +97,7 @@ class CameraConfig:
         Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
         in local reference (e.g. staff gauge).
 
-        :param z: measured bathymetry p
+        :param z: measured bathymetry points
         :param h_a: float, optional, actual water level measured [m], if not set, assumption is that a single video
             is processed and thus changes in water level are not relevant.
         :return:
@@ -111,6 +111,20 @@ class CameraConfig:
         z_pressure = np.maximum(self.gcps["z_0"] - h_ref + h_a, z)
         return z_pressure - z
 
+    def z_to_h(self, z):
+        """
+        Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)
+
+        :param z: measured bathymetry point
+        :return:
+        """
+        if self.gcps["h_ref"] is None:
+            h_ref = 0.
+        else:
+            h_ref = self.gcps["h_ref"]
+        h = z + h_ref - self.gcps["z_0"]
+        return h
+
 
     def get_M(self, h_a=None, reverse=False):
         """
@@ -123,7 +137,7 @@ class CameraConfig:
         :return: np.ndarray, containing 2x3 transformation matrix.
         """
         # map where the destination points are with the actual water level h_a.
-        if h_a is None:
+        if h_a is None or self.gcps["h_ref"] is None:
             # fill in the same value for h_ref and h_a
             h_ref = 0.
             h_a = 0.

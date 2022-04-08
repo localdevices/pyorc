@@ -1,6 +1,4 @@
 import copy
-import matplotlib.pyplot as plt
-from matplotlib.collections import QuadMesh
 from matplotlib.colors import Normalize
 import numpy as np
 import rasterio
@@ -472,6 +470,7 @@ class Velocimetry(ORCBase):
             quiver_kwargs={},
             v_x="v_x",
             v_y="v_y",
+            cbar=True,
             cbar_fontsize=15
     ):
         """
@@ -499,6 +498,7 @@ class Velocimetry(ORCBase):
             arrows.
         :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
         :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
+        :param cbar: bool, optional, define if colorbar should be included (default: True)
         :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
             smaller).
         :return: ax, axes object resulting from this function.
@@ -572,8 +572,8 @@ class Velocimetry(ORCBase):
                 crs=ccrs.PlateCarree())
         # else:
         #     ax.axis('equal')
-
-        cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
+        if cbar:
+            cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
         return ax
 
     def replace_outliers(self, v_x="v_x", v_y="v_y", stride=1, max_iter=1, inplace=False):
