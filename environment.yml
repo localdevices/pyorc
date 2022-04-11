@@ -27,4 +27,5 @@ dependencies:
   - xarray
   - pip:
     - openpiv
+    - git+https://github.com/localdevices/pyorc.git
 

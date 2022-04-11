@@ -1,9 +1,9 @@
 import json
-from descartes.patch import PolygonPatch
 import matplotlib.pyplot as plt
 import numpy as np
 import shapely.wkt
 
+from matplotlib import patches
 from pyproj import CRS, Transformer
 from pyproj.exceptions import CRSError
 
@@ -298,6 +298,7 @@ class CameraConfig:
                 if tiles is not None:
                     ax.add_image(tiler, zoom_level, zorder=1)
         if hasattr(ax, "add_geometries"):
+            import cartopy.crs as ccrs
             plot_kwargs = dict(transform= ccrs.PlateCarree())
         else:
             plot_kwargs = {}
@@ -305,7 +306,9 @@ class CameraConfig:
         if hasattr(self, "lens_position"):
             ax.plot(x[-1], y[-1], ".", label="Lens position", markersize=12, zorder=2, markeredgecolor="w", **plot_kwargs)
         if hasattr(self, "corners"):
-            patch = PolygonPatch(bbox, alpha=0.5, zorder=2, edgecolor="w", label="Area of interest", **plot_kwargs)
+            bbox_x, bbox_y = bbox.exterior.xy
+            bbox_coords = list(zip(bbox_x, bbox_y))
+            patch = patches.Polygon(bbox_coords, alpha=0.5, zorder=2, edgecolor="w", label="Area of interest", **plot_kwargs)
             ax.add_patch(patch)
         ax.legend()
         return ax
