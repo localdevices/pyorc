@@ -294,15 +294,19 @@ class Velocimetry(ORCBase):
         """
         def _filter_median(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.7, stride=1, missing=-9999.):
             u, v = ds_slice[v_x].values, ds_slice[v_y].values
-            s = (u ** 2 + v ** 2) ** 0.5
-            s_move = helpers.neighbour_stack(s, stride=stride)
+            # s = (u ** 2 + v ** 2) ** 0.5
+            u_move = helpers.neighbour_stack(copy.deepcopy(u), stride=stride, missing=missing)
+            v_move = helpers.neighbour_stack(copy.deepcopy(v), stride=stride, missing=missing)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
 
                 # replace missings by Nan
-                s_median = np.nanmedian(s_move, axis=0)
-            # now filter points that are very far off from the median
-            filter = np.abs(s - s_median) / s_median > tolerance
+                u_median = np.nanmedian(u_move, axis=0)
+                v_median = np.nanmedian(v_move, axis=0)
+                # now filter points that are very far off from the median
+                u_filter = np.abs(u - u_median) / u_median > tolerance
+                v_filter = np.abs(v - v_median) / v_median > tolerance
+            filter = np.any([u_filter, v_filter], axis=0)
             u[filter] = np.nan
             v[filter] = np.nan
             ds_slice[v_x][:] = u
