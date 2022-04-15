@@ -141,10 +141,12 @@ class CameraConfig:
             # fill in the same value for h_ref and h_a
             h_ref = 0.
             h_a = 0.
+            lens_position = [0., 0., 0.]
         else:
             h_ref = self.gcps["h_ref"]
+            lens_position = self.lens_position
         dst_a = cv.get_gcps_a(
-            self.lens_position,
+            lens_position,
             h_a,
             self.gcps["dst"],
             self.gcps["z_0"],
