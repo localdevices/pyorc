@@ -13,9 +13,6 @@ from .plot import _Velocimetry_PlotMethods
 from .. import helpers, const
 from xarray.core import utils
 
-import pyorc.plot as plot_orc
-
-
 @xr.register_dataset_accessor("velocimetry")
 class Velocimetry(ORCBase):
     def __init__(self, xarray_obj):
@@ -409,123 +406,8 @@ class Velocimetry(ORCBase):
             ds_points.transect.vector_to_scalar()
         return ds_points
 
-    plot2 = utils.UncachedAccessor(_Velocimetry_PlotMethods)
-
-    def plot(
-            self,
-            ax=None,
-            scalar=True,
-            quiver=True,
-            mode="local",
-            scalar_kwargs={},
-            quiver_kwargs={},
-            v_x="v_x",
-            v_y="v_y",
-            cbar=True,
-            cbar_fontsize=15
-    ):
-        """
-        plot velocimetry results. These can be plotted as scalar values (i.e. a mesh) or as quivers, or both by setting
-        the inputs 'scalar' and 'quiver' to True or False. Plotting can be done in three modes:
-        - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
-          being the 0, 0 point, and ascending coordinates towards the right and bottom.
-        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a
-          geographical axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
-        - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
-
-        :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
-            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background
-            frame is provided (made through frames.plot) then the background must be plotted in the same mode as
-            selected here.
-        :param scalar: boolean, if set to True, velocities are plotted as scalar values in a mesh (default: True)
-        :param quiver: boolean, if set to True, velocities are plotted as quiver (i.e. arrows). In case scalar is also
-            True, quivers will be plotted with a single color (defined in `quiver_kwargs`), if not, the scalar values
-            are used to color the arrows.
-        :param mode: can be "local", "geographical", or "camera". For "geographical" a velocimetry result that contains
-            "lon" and "lat" coordinates must be provided (i.e. produced with known CRS for control points).
-        :param scalar_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting
-            scalar values.
-        :param quiver_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver
-            arrows.
-        :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
-        :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
-        :param cbar: bool, optional, define if colorbar should be included (default: True)
-        :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
-            smaller).
-        :return: ax, axes object resulting from this function.
-        """
-
-        if len(self._obj[v_x].shape) > 2:
-            raise OverflowError(
-                f'Dataset\'s variables should only contain 2 dimensions, this dataset '
-                f'contains {len(self._obj[v_x].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
-                f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
-            )
-        assert (scalar or quiver), "Either scalar or quiver should be set tot True, nothing to plot"
-        assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
-        if mode == "local":
-            x = "x"
-            y = "y"
-            theta = 0.
-            u = self._obj[v_x]
-            v = -self._obj[v_y]
-            s = (u ** 2 + v ** 2) ** 0.5
-        elif mode == "geographical":
-            # import some additional packages
-            import cartopy.crs as ccrs
-            # add transform for GeoAxes
-            scalar_kwargs["transform"] = ccrs.PlateCarree()
-            quiver_kwargs["transform"] = ccrs.PlateCarree()
-            x, y, u, v, s, theta = self.get_uv_geographical()
-        else:
-            # mode is camera
-            x, y, u, v, s = self.get_uv_camera()
-            theta = 0.
-        # prepare an axis for the provided mode
-        ax = plot_orc.prepare_axes(ax=ax, mode=mode)
-        f = ax.figure  # handle to figure
-        if quiver:
-            vmin = None
-            vmax = None
-            if "vmin" in quiver_kwargs:
-                vmin = quiver_kwargs["vmin"]
-                del quiver_kwargs["vmin"]
-            if "vmax" in quiver_kwargs:
-                vmax = quiver_kwargs["vmax"]
-                del quiver_kwargs["vmax"]
-
-            if scalar:
-                p = plot_orc.quiver(
-                    ax,
-                    self._obj[x].values,
-                    self._obj[y].values,
-                    *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-                    None,
-                    **quiver_kwargs
-                )
-            else:
-                norm = Normalize(vmin=vmin, vmax=vmax, clip=False)
-                p = plot_orc.quiver(
-                    ax,
-                    self._obj[x].values,
-                    self._obj[y].values,
-                    *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-                    s,
-                    norm=norm,
-                    **quiver_kwargs
-                )
-        if scalar:
-            # plot the scalar velocity value as grid, return mappable
-            p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
-        if mode == "geographical":
-            ax.set_extent(
-                [self._obj[x].min() - 0.0001, self._obj[x].max() + 0.0001, self._obj[y].min() - 0.0001, self._obj[y].max() + 0.0001],
-                crs=ccrs.PlateCarree())
-        # else:
-        #     ax.axis('equal')
-        if cbar:
-            cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
-        return ax
+    # add .plot as group of methods, UncachedAccessor ensures that Velocimetry is passed as object
+    plot = utils.UncachedAccessor(_Velocimetry_PlotMethods)
 
     def replace_outliers(self, v_x="v_x", v_y="v_y", stride=1, max_iter=1, inplace=False):
         """

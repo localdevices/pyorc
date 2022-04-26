@@ -66,6 +66,18 @@ def _base_plot(plot_func):
             y = ref._obj["yp"].values
             u, v, s = ref.get_uv_camera()
         return plot_func(x, y, u, v, s, ax, *args, **kwargs)
+
+    # if mode == "geographical":
+    #     ax.set_extent(
+    #         [self._obj[x].min() - 0.0001, self._obj[x].max() + 0.0001, self._obj[y].min() - 0.0001,
+    #          self._obj[y].max() + 0.0001],
+    #         crs=ccrs.PlateCarree())
+    # # else:
+    # #     ax.axis('equal')
+    # if cbar:
+    #     cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
+    # return ax
+
     return get_plot_method
 
 class _Velocimetry_PlotMethods:

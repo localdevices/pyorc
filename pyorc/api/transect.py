@@ -4,7 +4,6 @@ import xarray as xr
 from matplotlib.colors import Normalize
 
 from pyorc import helpers
-import pyorc.plot as plot_orc
 from .orcbase import ORCBase
 
 
@@ -232,101 +231,101 @@ class Transect(ORCBase):
         u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
         return "xp", "yp", u, v, s
 
-    def plot(
-        self,
-        ax=None,
-        mode="local",
-        v_eff="v_eff",
-        v_dir="v_dir",
-        cbar=True,
-        cbar_fontsize=15,
-        kwargs={},
-    ):
-        """
-        plot velocimetry results across a transect as quiver plot. Plotting can be done in three modes:
-        - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
-          being the 0, 0 point, and ascending coordinates towards the right and bottom.
-        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a
-            geographical axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
-        - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
-
-        :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
-            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background
-            frame is provided (made through frames.plot) then the background must be plotted in the same mode as
-            selected here.
-        :param mode: can be "local", "geographical", or "camera". For "geographical" a transect result that contains
-            "lon" and "lat" coordinates must be provided (i.e. produced with known CRS for control points).
-        :param kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
-        :param v_eff: str, name of variable, containing effective velocity (default: "v_eff")
-        :param v_dir: str, name of variable, containing angle direction of velocity (default: "v_dir")
-        :param cbar: bool, optional, define if colorbar should be included (default: True)
-        :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
-            smaller).
-        :return: ax, axes object resulting from this function.
-        """
-        if len(self._obj[v_eff].shape) > 1:
-            raise OverflowError(
-                f'Dataset\'s variables should only contain 1 dimension (points), this dataset '
-                f'contains {len(self._obj[v_eff].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
-                f'Slicing can be done e.g. with ds.isel(quantile=2), which would return the 50% quantile (index 2) '
-                f'in case the default quantile range [0.05, 0.25, 0.50, 0.75, 0.95] was used.'
-            )
-
-        assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
-        u = self._obj[v_eff] * np.sin(self._obj[v_dir])
-        v = self._obj[v_eff] * np.cos(self._obj[v_dir])
-        s = self._obj[v_eff]
-        if mode == "local":
-            x = "x"
-            y = "y"
-            theta = 0.
-        elif mode == "geographical":
-            import cartopy.crs as ccrs
-            # add transform for GeoAxes
-            kwargs["transform"] = ccrs.PlateCarree()
-            x = "lon"
-            y = "lat"
-            aff = self.camera_config.transform
-            theta = np.arctan2(aff.d, aff.a)
-        elif mode == "camera":
-            # mode is camera
-            x, y, u, v, s = self.get_uv_camera()
-            theta = 0.
-
-        ax = plot_orc.prepare_axes(ax=ax, mode=mode)
-        f = ax.figure  # handle to figure
-        vmin = None
-        vmax = None
-        if "vmin" in kwargs:
-            vmin = kwargs["vmin"]
-            del kwargs["vmin"]
-        if "vmax" in kwargs:
-            vmax = kwargs["vmax"]
-            del kwargs["vmax"]
-        norm = Normalize(vmin=vmin, vmax=vmax, clip=False)
-
-        p = plot_orc.quiver(
-            ax,
-            self._obj[x].values,
-            self._obj[y].values,
-            *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-            s,
-            norm=norm,
-            **kwargs
-        )
-        if mode == "geographical":
-            ax.set_extent(
-                [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
-                crs=ccrs.PlateCarree())
-        # else:
-        #     ax.axis('equal')
-        if mode == "camera":
-            # we can also make a bottom profile plot
-            x_bottom, y_bottom = self._obj.transect.get_xyz_perspective()
-            ax.plot(x_bottom, y_bottom, "#0088FF", linewidth=3)
-            ax.plot(x_bottom, y_bottom, "#00CCFF", linewidth=1)
-        ax.plot(self._obj[x].values, self._obj[y].values, "#00FF88", linewidth=3, zorder=1)
-        ax.plot(self._obj[x].values, self._obj[y].values, "#00FFCC", linewidth=1, zorder=2)
-        if cbar:
-            cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
-        return ax
+    # def plot(
+    #     self,
+    #     ax=None,
+    #     mode="local",
+    #     v_eff="v_eff",
+    #     v_dir="v_dir",
+    #     cbar=True,
+    #     cbar_fontsize=15,
+    #     kwargs={},
+    # ):
+    #     """
+    #     plot velocimetry results across a transect as quiver plot. Plotting can be done in three modes:
+    #     - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
+    #       being the 0, 0 point, and ascending coordinates towards the right and bottom.
+    #     - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a
+    #         geographical axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
+    #     - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
+    #
+    #     :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
+    #         cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background
+    #         frame is provided (made through frames.plot) then the background must be plotted in the same mode as
+    #         selected here.
+    #     :param mode: can be "local", "geographical", or "camera". For "geographical" a transect result that contains
+    #         "lon" and "lat" coordinates must be provided (i.e. produced with known CRS for control points).
+    #     :param kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
+    #     :param v_eff: str, name of variable, containing effective velocity (default: "v_eff")
+    #     :param v_dir: str, name of variable, containing angle direction of velocity (default: "v_dir")
+    #     :param cbar: bool, optional, define if colorbar should be included (default: True)
+    #     :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
+    #         smaller).
+    #     :return: ax, axes object resulting from this function.
+    #     """
+    #     if len(self._obj[v_eff].shape) > 1:
+    #         raise OverflowError(
+    #             f'Dataset\'s variables should only contain 1 dimension (points), this dataset '
+    #             f'contains {len(self._obj[v_eff].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
+    #             f'Slicing can be done e.g. with ds.isel(quantile=2), which would return the 50% quantile (index 2) '
+    #             f'in case the default quantile range [0.05, 0.25, 0.50, 0.75, 0.95] was used.'
+    #         )
+    #
+    #     assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
+    #     u = self._obj[v_eff] * np.sin(self._obj[v_dir])
+    #     v = self._obj[v_eff] * np.cos(self._obj[v_dir])
+    #     s = self._obj[v_eff]
+    #     if mode == "local":
+    #         x = "x"
+    #         y = "y"
+    #         theta = 0.
+    #     elif mode == "geographical":
+    #         import cartopy.crs as ccrs
+    #         # add transform for GeoAxes
+    #         kwargs["transform"] = ccrs.PlateCarree()
+    #         x = "lon"
+    #         y = "lat"
+    #         aff = self.camera_config.transform
+    #         theta = np.arctan2(aff.d, aff.a)
+    #     elif mode == "camera":
+    #         # mode is camera
+    #         x, y, u, v, s = self.get_uv_camera()
+    #         theta = 0.
+    #
+    #     ax = plot_orc.prepare_axes(ax=ax, mode=mode)
+    #     f = ax.figure  # handle to figure
+    #     vmin = None
+    #     vmax = None
+    #     if "vmin" in kwargs:
+    #         vmin = kwargs["vmin"]
+    #         del kwargs["vmin"]
+    #     if "vmax" in kwargs:
+    #         vmax = kwargs["vmax"]
+    #         del kwargs["vmax"]
+    #     norm = Normalize(vmin=vmin, vmax=vmax, clip=False)
+    #
+    #     p = plot_orc.quiver(
+    #         ax,
+    #         self._obj[x].values,
+    #         self._obj[y].values,
+    #         *[v.values for v in helpers.rotate_u_v(u, v, theta)],
+    #         s,
+    #         norm=norm,
+    #         **kwargs
+    #     )
+    #     if mode == "geographical":
+    #         ax.set_extent(
+    #             [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
+    #             crs=ccrs.PlateCarree())
+    #     # else:
+    #     #     ax.axis('equal')
+    #     if mode == "camera":
+    #         # we can also make a bottom profile plot
+    #         x_bottom, y_bottom = self._obj.transect.get_xyz_perspective()
+    #         ax.plot(x_bottom, y_bottom, "#0088FF", linewidth=3)
+    #         ax.plot(x_bottom, y_bottom, "#00CCFF", linewidth=1)
+    #     ax.plot(self._obj[x].values, self._obj[y].values, "#00FF88", linewidth=3, zorder=1)
+    #     ax.plot(self._obj[x].values, self._obj[y].values, "#00FFCC", linewidth=1, zorder=2)
+    #     if cbar:
+    #         cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
+    #     return ax
