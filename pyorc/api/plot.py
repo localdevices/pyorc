@@ -1,9 +1,12 @@
 import functools
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import patheffects
+import matplotlib.ticker as mticker
 
-import pyorc.plot as plot_orc
 from pyorc import helpers
+
+
 
 def _base_plot(plot_func):
     commondoc = """
@@ -16,6 +19,7 @@ def _base_plot(plot_func):
     :param **kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
     :return: mappable from wrapped Matplotlib function
     """
+    # This function is largely based on xarray.Dataset function _dsplot
     # Build on the original docstring
     plot_func.__doc__ = f"{plot_func.__doc__}{commondoc}"
 
@@ -33,7 +37,7 @@ def _base_plot(plot_func):
         :param kwargs:
         :return:
         """
-        ax = plot_orc.prepare_axes(ax=ax, mode=mode)
+        ax = _prepare_axes(ax=ax, mode=mode)
         # update ax
         if len(ref._obj["v_x"].shape) > 2:
             raise OverflowError(
@@ -99,15 +103,17 @@ class _Velocimetry_PlotMethods:
 
         """
         # select lon and lat variables as coordinates
+        velocimetry = self._obj.velocimetry
         u = self._obj["v_x"]
         v = -self._obj["v_y"]
-        aff = self.camera_config.transform
+        s = (u**2 + v**2)**0.5
+        aff = velocimetry.camera_config.transform
         theta = np.arctan2(aff.d, aff.a)
         # rotate velocity vectors along angle theta to match the requested projection. this only changes values
         # in case of camera projections
         u, v = helpers.rotate_u_v(u, v, theta)
 
-        return u, v
+        return u, v, s
 
     def get_uv_camera(self, dt=0.1, v_x="v_x", v_y="v_y"):
         """
@@ -126,15 +132,16 @@ class _Velocimetry_PlotMethods:
             u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
         """
         # retrieve the backward transformation array
-        M = self.camera_config.get_M(self.h_a, reverse=True)
+        velocimetry = self._obj.velocimetry
+        M = velocimetry.camera_config.get_M(velocimetry.h_a, reverse=True)
         # get the shape of the original frames
-        shape_y, shape_x = self.camera_shape
+        shape_y, shape_x = velocimetry.camera_shape
         xi, yi = np.meshgrid(self._obj.x, self._obj.y)
         # flip the y-coordinates to match the row order used by opencv
         yi = np.flipud(yi)
 
         x_moved, y_moved = xi + self._obj[v_x] * dt, yi + self._obj[v_y] * dt
-        xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, self.camera_config.resolution, M)
+        xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, velocimetry.camera_config.resolution, M)
 
         # convert row counts to start at the top of the frame instead of bottom
         yp_moved = shape_y - yp_moved
@@ -146,10 +153,10 @@ class _Velocimetry_PlotMethods:
         u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         s.name = "radial_sea_water_velocity_away_from_instrument"
-        return "xp", "yp", u, v, s
+        return u, v, s
 
 @_base_plot
-def _quiver(x, y, u, v, s=None, theta=0., ax=None, *args, **kwargs):
+def _quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
     """
     Creates quiver plot from velocimetry results on new or existing axes
 
@@ -157,31 +164,76 @@ def _quiver(x, y, u, v, s=None, theta=0., ax=None, *args, **kwargs):
     """
     if "color" in kwargs:
         # replace scalar colors by one single color
-        primitive = ax.quiver(x, y, *[v for v in helpers.rotate_u_v(u, v, theta)], *args, **kwargs)
+        primitive = ax.quiver(x, y, u, v, *args, **kwargs)
     else:
-        primitive = ax.quiver(x, y, *[v for v in helpers.rotate_u_v(u, v, theta)], s, *args, **kwargs)
+        primitive = ax.quiver(x, y, u, v, s, *args, **kwargs)
     #
     return primitive
 
 @_base_plot
-def _pcolormesh(x, y, u, v, s=None, theta=0., ax=None, *args, **kwargs):
+def _pcolormesh(x, y, u, v, s=None, ax=None, *args, **kwargs):
     """
     Creates pcolormesh plot from velocimetry results on new or existing axes
 
      Wraps :py:func:`matplotlib:matplotlib.pyplot.pcolormesh`.
     """
-    primitive = ax.pcolormesh(x, y, *[v for v in helpers.rotate_u_v(u, v, theta)], s, **kwargs)
-# )
-    # primitive = plot_orc.quiver(
-    #     ax,
-    #     x,
-    #     y,
-    #     *[v for v in helpers.rotate_u_v(u, v, theta)],
-    #     s,
-    #     **kwargs
-    # )
-    # ax.quiver(x, y, u, v, s, *args, **kwargs)
+    primitive = ax.pcolormesh(x, y, u, v, s, **kwargs)
     return primitive
+
+
+def cbar(ax, p, size=12, **kwargs):
+    """
+    Add colorbar to existing axes. In case camera mode is used, the colorbar will get a bespoke layout and will
+    be placed inside of the axes object.
+
+    :param ax: axes object
+    :param p: mappable, used to define colorbar
+    :param size: fontsize, used for colorbar title, only used with `mode="camera"`
+    :param kwargs: dict, additional settings passed to plt.colorbar
+    :return: handle to colorbar
+    """
+    label_format = '{:,.2f}'
+    path_effects = [
+        patheffects.Stroke(linewidth=2, foreground="w"),
+        patheffects.Normal(),
+    ]
+    cax = ax.inset_axes([0.05, 0.05,
+                         0.02, 0.25])
+    cb = ax.figure.colorbar(p, cax=cax, **kwargs)
+    ticks_loc = cb.get_ticks().tolist()
+    cb.set_ticks(mticker.FixedLocator(ticks_loc))
+    cb.set_ticklabels([label_format.format(x) for x in ticks_loc], path_effects=path_effects, fontsize=size)
+    cb.set_label(label="velocity [m/s]", size=size, path_effects=path_effects)
+    return cb
+
+
+def _prepare_axes(ax=None, mode="local"):
+    """
+    Prepares the axes, needed to plot results, called from `pyorc.PIV.plot`.
+
+    :param ax: axes object, if not set, a new axes is prepared (default: None)
+    :param mode: str, mode to plot, can be "local", "geographical" or "camera", default: "local"
+    :return: ax, axes object.
+    """
+    if ax is not None:
+        if mode == "geographical":
+            # ensure that the axes is a geoaxes
+            from cartopy.mpl.geoaxes import GeoAxesSubplot
+            assert (
+                isinstance(ax, GeoAxesSubplot)), "For mode=geographical, the provided axes must be a cartopy GeoAxesSubplot"
+        return ax
+
+    # make a screen filling figure with black edges and faces
+    f = plt.figure(figsize=(16, 9), frameon=False, facecolor="k")
+    f.set_size_inches(16, 9, True)
+    f.patch.set_facecolor("k")
+    f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+    if mode == "geographical":
+        import cartopy.crs as ccrs
+        ax = f.add_subplot(111, projection=ccrs.PlateCarree())
+    else:
+        ax = plt.subplot(111)
+    return ax
 
 
 # if scalar:
