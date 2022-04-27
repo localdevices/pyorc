@@ -2,22 +2,21 @@ import functools
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patheffects
+from matplotlib.collections import QuadMesh
 import matplotlib.ticker as mticker
 
 from pyorc import helpers
 
 
-
 def _base_plot(plot_func):
     commondoc = """
-    :param ds: Dataset containing velocimetry results
+    :param ds: Dataset containing velocimetry or transect results
     :param mode: str, perspective mode to use for plotting. Can be "local", "geographical", or "camera". For 
         "geographical" a velocimetry result that contains "lon" and "lat" coordinates must be provided 
         (i.e. produced with known CRS for control points).
     :param ax: matplotlib axes object, optional
         If ``None``, use the current axes. Not applicable when using facets.
     :param **kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
-    :return: mappable from wrapped Matplotlib function
     """
     # This function is largely based on xarray.Dataset function _dsplot
     # Build on the original docstring
@@ -25,10 +24,10 @@ def _base_plot(plot_func):
 
     # apply wrapper to allow for partial update of the function, with updated docstring
     @functools.wraps(plot_func)
-    def get_plot_method(ref, mode="local", ax=None, *args, **kwargs):
+    def get_plot_method(ref, mode="local", ax=None, add_colorbar=False, add_cross_section=True, *args, **kwargs):
         """
         Retrieve plot method with all required inputs
-        :param ref: velocimetry object
+        :param ref: velocimetry or transect object
         :param mode: str, perspective mode to use for plotting. Can be "local", "geographical", or "camera". For
             "geographical" a velocimetry result that contains "lon" and "lat" coordinates must be provided
             (i.e. produced with known CRS for control points).
@@ -39,19 +38,32 @@ def _base_plot(plot_func):
         """
         ax = _prepare_axes(ax=ax, mode=mode)
         # update ax
+
         if len(ref._obj["v_x"].shape) > 2:
             raise OverflowError(
                 f'Dataset\'s variables should only contain 2 dimensions, this dataset '
                 f'contains {len(ref._obj["v_x"].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
                 f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
             )
+        if "time" in ref._obj:
+            if isinstance(ref._obj["time"].values.tolist(), list):
+                raise OverflowError(
+                    f'Dimension "time" exists in dataset and has multiple values. Reduce this by applying a reducer or '
+                    f'selecting a time step.'
+                )
+        if "quantile" in ref._obj:
+            if isinstance(ref._obj["quantile"].values.tolist(), list):
+                raise OverflowError(
+                    f'Dimension "quantile" exists in dataset and contains multiple values. Reduce this by selecting one'
+                    f'quantile, e.g. using ds.isel(quantile=2) or ds.sel(quantile=0.5)'
+                )
+        # check if dataset is a transect or not
+        is_transect = True if "points" in ref._obj.dims else False
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
         if mode == "local":
             x = ref._obj["x"].values
             y = ref._obj["y"].values
-            u = ref._obj["v_x"].values
-            v = -ref._obj["v_y"].values
-            s = (u ** 2 + v ** 2) ** 0.5
+            u, v, s = ref.get_uv_local()
         elif mode == "geographical":
             # import some additional packages
             import cartopy.crs as ccrs
@@ -65,7 +77,25 @@ def _base_plot(plot_func):
             x = ref._obj["xp"].values
             y = ref._obj["yp"].values
             u, v, s = ref.get_uv_camera()
-        return plot_func(x, y, u, v, s, ax, *args, **kwargs)
+        if plot_func.__name__ == "_quiver":
+            primitive = plot_func(x, y, u, v, s, ax, *args, **kwargs)
+        else:
+            primitive = plot_func(x, y, s, ax, *args, **kwargs)
+        if add_colorbar:
+            cb = cbar(ax, primitive)
+        if mode == "local":
+            ax.set_aspect("equal")
+        if is_transect:
+            if add_cross_section:
+                ax.plot(x, y, "#00FF88", linewidth=3, zorder=1)
+                ax.plot(x, y, "#00FFCC", linewidth=1, zorder=2)
+                if mode == "camera":
+                    x_bottom, y_bottom = ref._obj.transect.get_xyz_perspective()
+                    ax.plot(x_bottom, y_bottom, "#0088FF", linewidth=3)
+                    ax.plot(x_bottom, y_bottom, "#00CCFF", linewidth=1)
+
+        return primitive
+
 
     # if mode == "geographical":
     #     ax.set_extent(
@@ -80,6 +110,121 @@ def _base_plot(plot_func):
 
     return get_plot_method
 
+def _frames_plot(ref, ax=None, mode="local", **kwargs):
+    """
+    Creates QuadMesh plot from a RGB or grayscaled frame on a new or existing (if ``ax`` is not ``None``) axes
+
+     Wraps :py:func:`matplotlib:matplotlib.collections.QuadMesh`.
+
+    :param ds: Dataset containing frames results
+    :param mode: str, perspective mode to use for plotting. Can be "local", "geographical", or "camera".
+        For "geographical" a frames set from frames.project should be used that contains "lon" and "lat" coordinates.
+        For "camera", a non-projected frames set should be used.
+    :param ax: matplotlib axes object, optional
+        If ``None``, use the current axes. Not applicable when using facets.
+    :param **kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
+    :return: mappable of matplotlib.collections.QuadMesh type
+    """
+    # prepare axes
+    if "time" in ref._obj.coords:
+        if ref._obj.time.size > 1:
+            raise AttributeError(f'Object contains dimension "time" with length {len(self._obj.time)}. Reduce dataset by selecting one time step or taking a median, mean or other statistic.')
+    ax = _prepare_axes(ax=ax, mode=mode)
+    f = ax.figure  # handle to figure
+    if mode == "local":
+        x = "x"
+        y = "y"
+    elif mode == "geographical":
+        # import some additional packages
+        import cartopy.crs as ccrs
+        # add transform for GeoAxes
+        kwargs["transform"] = ccrs.PlateCarree()
+        x = "lon"
+        y = "lat"
+    else:
+        # mode is camera
+        x = "xp"
+        y = "yp"
+    assert all(v in ref._obj.coords for v in [x, y]), f'required coordinates "{x}" and/or "{y}" are not available'
+    if (len(ref._obj.shape) == 3 and ref._obj.shape[-1] == 3):
+        # looking at an rgb image
+        facecolors = ref._obj.values.reshape(ref._obj.shape[0] * ref._obj.shape[1], 3) / 255
+        facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
+        primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj.mean(dim="rgb"), shading="nearest",
+                             facecolors=facecolors, **kwargs)
+        # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if array has dims
+        QuadMesh.set_array(primitive, None)
+    else:
+        primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj, **kwargs)
+    # fix axis limits to min and max of extent of frames
+    ax.set_xlim([ref._obj[x].min(), ref._obj[x].max()])
+    ax.set_ylim([ref._obj[y].min(), ref._obj[y].max()])
+    return primitive
+
+
+class _Transect_PlotMethods:
+    """
+    Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
+    For example, Dataset.velocimetry.plot.pcolormesh
+    """
+
+    def __init__(self, transect):
+        # make the original dataset also available on the plotting object
+        self.transect = transect
+        self._obj = transect._obj
+        # Add to class _PlotMethods
+        setattr(_Transect_PlotMethods, "quiver", _quiver)
+        setattr(_Transect_PlotMethods, "scatter", _scatter)
+
+    def __call__(self, method="quiver", *args, **kwargs):
+        """
+
+        :param method: str, "quiver" or "scatter", choose plotting option
+        :param args: arguments, passed to plot method
+        :param kwargs: keyword arguments, passed to plot method
+        :return:
+        """
+        return getattr(self, method)(*args, **kwargs)
+
+
+    def get_uv_camera(self, dt=0.1, v_eff="v_eff", v_dir="v_dir"):
+        # retrieve the backward transformation array
+        transect = self._obj.transect
+        M = transect.camera_config.get_M(transect.h_a, reverse=True)
+
+        x, y = self._obj.x, self._obj.y
+        _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
+        _v = self._obj[v_eff] * np.cos(self._obj[v_dir])
+        s = self._obj[v_eff].values
+        x_moved, y_moved = x + _u * dt, y + _v * dt
+        xp, yp = transect.get_xyz_perspective(M=M, xs=x.values, ys=y.values)
+        xp_moved, yp_moved = transect.get_xyz_perspective(M=M, xs=x_moved.values, ys=y_moved.values)
+        # remove vectors that have nan on moved pixels
+        xp_moved[np.isnan(x_moved)] = np.nan
+        yp_moved[np.isnan(y_moved)] = np.nan
+
+        self._obj["xp"][:] = xp[:]
+        self._obj["yp"][:] = yp[:]
+        u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
+        return u, v, s
+
+    def get_uv_geographical(self, v_eff="v_eff", v_dir="v_dir"):
+        u = self._obj[v_eff] * np.sin(self._obj[v_dir])
+        v = self._obj[v_eff] * np.cos(self._obj[v_dir])
+        s = self._obj[v_eff]
+        aff = self.transect.camera_config.transform
+        theta = np.arctan2(aff.d, aff.a)
+        # rotate velocity vectors along angle theta to match the requested projection. this only changes values
+        # in case of camera projections
+        u, v = helpers.rotate_u_v(u, v, theta)
+        return u, v, s
+
+    def get_uv_local(self, v_eff="v_eff", v_dir="v_dir"):
+        u = self._obj[v_eff] * np.sin(self._obj[v_dir])
+        v = self._obj[v_eff] * np.cos(self._obj[v_dir])
+        s = self._obj[v_eff]
+        return u, v, s
+
 class _Velocimetry_PlotMethods:
     """
     Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
@@ -92,13 +237,18 @@ class _Velocimetry_PlotMethods:
         self._obj = velocimetry._obj
         # Add to class _PlotMethods
         setattr(_Velocimetry_PlotMethods, "quiver", _quiver)
+        setattr(_Velocimetry_PlotMethods, "pcolormesh", _pcolormesh)
+        setattr(_Velocimetry_PlotMethods, "scatter", _scatter)
 
-    def __call__(self, *args, **kwargs):
-        raise ValueError(
-            "Dataset.plot cannot be called directly. Use "
-            "an explicit plot method, e.g. ds.plot.scatter(...)"
-        )
+    def __call__(self, method="quiver", *args, **kwargs):
+        """
 
+        :param method: str, "quiver", "scatter", or "pcolormesh", choose plotting option
+        :param args: arguments, passed to plot method
+        :param kwargs: keyword arguments, passed to plot method
+        :return:
+        """
+        return getattr(self, method)(*args, **kwargs)
 
     def get_uv_geographical(self):
         """
@@ -124,8 +274,15 @@ class _Velocimetry_PlotMethods:
         # rotate velocity vectors along angle theta to match the requested projection. this only changes values
         # in case of camera projections
         u, v = helpers.rotate_u_v(u, v, theta)
-
         return u, v, s
+
+
+    def get_uv_local(self, v_x="v_x", v_y="v_y"):
+        u = self._obj[v_x].values
+        v = self._obj[v_y].values
+        s = (u**2 + v**2)**0.5
+        return u, v, s
+
 
     def get_uv_camera(self, dt=0.1, v_x="v_x", v_y="v_y"):
         """
@@ -163,8 +320,8 @@ class _Velocimetry_PlotMethods:
         xp_moved[xp_moved == 0] = np.nan  # ds["xp"].values[xp_moved == 0]
 
         u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
-        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
-        s.name = "radial_sea_water_velocity_away_from_instrument"
+        s = ((self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5).values
+        # s.name = "radial_sea_water_velocity_away_from_instrument"
         return u, v, s
 
 @_base_plot
@@ -172,7 +329,7 @@ def _quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
     """
     Creates quiver plot from velocimetry results on new or existing axes
 
-     Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
+    Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
     """
     if "color" in kwargs:
         # replace scalar colors by one single color
@@ -183,13 +340,24 @@ def _quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
     return primitive
 
 @_base_plot
-def _pcolormesh(x, y, u, v, s=None, ax=None, *args, **kwargs):
+def _scatter(x, y, c=None, ax=None, *args, **kwargs):
+    """
+    Creates scatter plot of velocimetry or transect results on new or existing axes
+
+    Wraps :py:func:`matplotlib:matplotlib.pyplot.scatter`.
+    """
+    primitive = ax.scatter(x, y, c=c, *args, **kwargs)
+    return primitive
+
+
+@_base_plot
+def _pcolormesh(x, y, s=None, ax=None, *args, **kwargs):
     """
     Creates pcolormesh plot from velocimetry results on new or existing axes
 
      Wraps :py:func:`matplotlib:matplotlib.pyplot.pcolormesh`.
     """
-    primitive = ax.pcolormesh(x, y, u, v, s, **kwargs)
+    primitive = ax.pcolormesh(x, y, s, *args, **kwargs)
     return primitive
 
 
@@ -218,7 +386,6 @@ def cbar(ax, p, size=12, **kwargs):
     cb.set_label(label="velocity [m/s]", size=size, path_effects=path_effects)
     return cb
 
-
 def _prepare_axes(ax=None, mode="local"):
     """
     Prepares the axes, needed to plot results, called from `pyorc.PIV.plot`.
@@ -246,14 +413,3 @@ def _prepare_axes(ax=None, mode="local"):
     else:
         ax = plt.subplot(111)
     return ax
-
-
-# if scalar:
-#     p = plot_orc.quiver(
-#         ax,
-#         self._obj[x].values,
-#         self._obj[y].values,
-#         *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-#         None,
-#         **quiver_kwargs
-#     )
