@@ -195,8 +195,10 @@ Camera configuration: {:s}
         :param lens_corr: bool, optional, if set to True, lens parameters will be used to undistort image
         :return: np.ndarray containing frame
         """
+        assert(n >= 0), "frame number cannot be negative"
+        assert(n < self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
         cap = cv2.VideoCapture(self.fn)
-        cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
         try:
             ret, img = cap.read()
         except:
@@ -235,7 +237,7 @@ Camera configuration: {:s}
             # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs
             if hasattr(self.camera_config, "lens_pars"):
                 kwargs["lens_corr"] = True
-        frames = [get_frame(n=n, **kwargs) for n in range(self.start_frame, self.end_frame)]
+        frames = [get_frame(n=n, **kwargs) for n in range(self.end_frame - self.start_frame)]
         sample = frames[0].compute()
         data_array = [da.from_delayed(
             frame,
