@@ -173,17 +173,16 @@ class Transect(ORCBase):
         self._obj["river_flow"] = Q
 
 
-    def get_q(self, v_corr=0.9, quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]):
+    def get_q(self, v_corr=0.9):
         """
         Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
         depth-average velocity.
 
         :param v_corr: float, optional, correction factor (default: 0.9)
-        :param quantiles: list of floats, optional, quantiles (0-1) over time to estimate depth-integrated velocity for
         :return: xr.Dataset, Transect for selected quantiles in time, including "q".
         """
         # aggregate to a limited set of quantiles
-        ds = self._obj.quantile(quantiles, dim="time", keep_attrs=True)
+        ds = self._obj
         x = ds["xcoords"].values
         y = ds["ycoords"].values
         z = ds["zcoords"].values
