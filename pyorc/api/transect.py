@@ -1,12 +1,11 @@
 import numpy as np
 import xarray as xr
 
-from matplotlib.colors import Normalize
+from xarray.core import utils
 
 from pyorc import helpers
-import pyorc.plot as plot_orc
+from .plot import _Transect_PlotMethods
 from .orcbase import ORCBase
-
 
 @xr.register_dataset_accessor("transect")
 class Transect(ORCBase):
@@ -196,137 +195,4 @@ class Transect(ORCBase):
         ds["q"] = helpers.depth_integrate(depth, ds["v_eff"], v_corr=v_corr, name="q")
         return ds
 
-    def get_uv_camera(self, dt=0.1, v_eff="v_eff", v_dir="v_dir"):
-        """
-        Returns row, column locations in the camera objective, and u (x-directional) and v (y-directional) vectors,
-        scaled and transformed to the camera objective (i.e. vectors far away are smaller than closeby, and follow the
-        river direction) applied on u and v, so that they plot in a geographical space. This is needed because the
-        raster of PIV results is usually rotated geographically, so that water always flows from left to right in the
-        grid. The results can be used to plot velocities in the camera perspective, e.g. overlayed on a background image
-        directly from the camera.
-
-        :param dt: float, optional time difference [s] used to scale the u and v velocities to a very small distance to
-            project (default: 0.1). Usually not needed to modify this.
-        :param v_eff: str, name of variable, containing effective velocity (default: "v_eff")
-        :param v_dir: str, name of variable, containing angle direction of velocity (default: "v_dir")
-        :return: 5 outputs: 4 np.ndarrays containing camera perspective column location, row location, transformed u and v
-            velocity vectors (no unit) and the scalar velocities (m/s). Rotation is not needed because the transformed
-            u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
-        """
-        # retrieve the backward transformation array
-        M = self.camera_config.get_M(self.h_a, reverse=True)
-
-        x, y = self._obj.x, self._obj.y
-        _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
-        _v = self._obj[v_eff] * np.cos(self._obj[v_dir])
-        s = self._obj[v_eff]
-        x_moved, y_moved = x + _u * dt, y + _v * dt * 0.1
-        xp, yp = self._obj.transect.get_xyz_perspective(M=M, xs=x.values, ys=y.values)
-        xp_moved, yp_moved = self.get_xyz_perspective(M=M, xs=x_moved.values, ys=y_moved.values)
-        # remove vectors that have nan on moved pixels
-        xp_moved[np.isnan(x_moved)] = np.nan
-        yp_moved[np.isnan(y_moved)] = np.nan
-
-        self._obj["xp"][:] = xp[:]
-        self._obj["yp"][:] = yp[:]
-        u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
-        return "xp", "yp", u, v, s
-
-    def plot(
-        self,
-        ax=None,
-        mode="local",
-        v_eff="v_eff",
-        v_dir="v_dir",
-        cbar=True,
-        cbar_fontsize=15,
-        kwargs={},
-    ):
-        """
-        plot velocimetry results across a transect as quiver plot. Plotting can be done in three modes:
-        - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
-          being the 0, 0 point, and ascending coordinates towards the right and bottom.
-        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a
-            geographical axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
-        - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
-
-        :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
-            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background
-            frame is provided (made through frames.plot) then the background must be plotted in the same mode as
-            selected here.
-        :param mode: can be "local", "geographical", or "camera". For "geographical" a transect result that contains
-            "lon" and "lat" coordinates must be provided (i.e. produced with known CRS for control points).
-        :param kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver arrows.
-        :param v_eff: str, name of variable, containing effective velocity (default: "v_eff")
-        :param v_dir: str, name of variable, containing angle direction of velocity (default: "v_dir")
-        :param cbar: bool, optional, define if colorbar should be included (default: True)
-        :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
-            smaller).
-        :return: ax, axes object resulting from this function.
-        """
-        if len(self._obj[v_eff].shape) > 1:
-            raise OverflowError(
-                f'Dataset\'s variables should only contain 1 dimension (points), this dataset '
-                f'contains {len(self._obj[v_eff].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
-                f'Slicing can be done e.g. with ds.isel(quantile=2), which would return the 50% quantile (index 2) '
-                f'in case the default quantile range [0.05, 0.25, 0.50, 0.75, 0.95] was used.'
-            )
-
-        assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
-        u = self._obj[v_eff] * np.sin(self._obj[v_dir])
-        v = self._obj[v_eff] * np.cos(self._obj[v_dir])
-        s = self._obj[v_eff]
-        if mode == "local":
-            x = "x"
-            y = "y"
-            theta = 0.
-        elif mode == "geographical":
-            import cartopy.crs as ccrs
-            # add transform for GeoAxes
-            kwargs["transform"] = ccrs.PlateCarree()
-            x = "lon"
-            y = "lat"
-            aff = self.camera_config.transform
-            theta = np.arctan2(aff.d, aff.a)
-        elif mode == "camera":
-            # mode is camera
-            x, y, u, v, s = self.get_uv_camera()
-            theta = 0.
-
-        ax = plot_orc.prepare_axes(ax=ax, mode=mode)
-        f = ax.figure  # handle to figure
-        vmin = None
-        vmax = None
-        if "vmin" in kwargs:
-            vmin = kwargs["vmin"]
-            del kwargs["vmin"]
-        if "vmax" in kwargs:
-            vmax = kwargs["vmax"]
-            del kwargs["vmax"]
-        norm = Normalize(vmin=vmin, vmax=vmax, clip=False)
-
-        p = plot_orc.quiver(
-            ax,
-            self._obj[x].values,
-            self._obj[y].values,
-            *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-            s,
-            norm=norm,
-            **kwargs
-        )
-        if mode == "geographical":
-            ax.set_extent(
-                [self._obj[x].min() - 0.0002, self._obj[x].max() + 0.0002, self._obj[y].min() - 0.0002, self._obj[y].max() + 0.0002],
-                crs=ccrs.PlateCarree())
-        # else:
-        #     ax.axis('equal')
-        if mode == "camera":
-            # we can also make a bottom profile plot
-            x_bottom, y_bottom = self._obj.transect.get_xyz_perspective()
-            ax.plot(x_bottom, y_bottom, "#0088FF", linewidth=3)
-            ax.plot(x_bottom, y_bottom, "#00CCFF", linewidth=1)
-        ax.plot(self._obj[x].values, self._obj[y].values, "#00FF88", linewidth=3, zorder=1)
-        ax.plot(self._obj[x].values, self._obj[y].values, "#00FFCC", linewidth=1, zorder=2)
-        if cbar:
-            cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
-        return ax
+    plot = utils.UncachedAccessor(_Transect_PlotMethods)
