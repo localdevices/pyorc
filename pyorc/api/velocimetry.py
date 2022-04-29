@@ -401,7 +401,7 @@ class Velocimetry(ORCBase):
             ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(-wdw, wdw + 1) for y_stride in
                                 range(-wdw, wdw + 1)], dim="stride")
             # use the median to prevent a large influence of serious outliers
-            ds_effective = ds_wdw.median(dim="stride", keep_attrs=True)
+            ds_effective = ds_wdw.mean(dim="stride", keep_attrs=True)
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
             raise ValueError(
@@ -416,7 +416,7 @@ class Velocimetry(ORCBase):
         # convert to a Transect object
         ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
         if rolling is not None:
-            ds_points = ds_points.rolling(time=rolling).mean()
+            ds_points = ds_points.rolling(time=rolling, min_periods=1).mean()
         ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
         if v_eff:
             # add the effective velocity, perpendicular to cross section direction

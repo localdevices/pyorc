@@ -173,7 +173,7 @@ class Transect(ORCBase):
         self._obj["river_flow"] = Q
 
 
-    def get_q(self, v_corr=0.9):
+    def get_q(self, v_corr=0.9, fill_method="zeros"):
         """
         Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
         depth-average velocity.
@@ -182,13 +182,17 @@ class Transect(ORCBase):
         :return: xr.Dataset, Transect for selected quantiles in time, including "q".
         """
         # aggregate to a limited set of quantiles
+        assert(fill_method in ["zeros", "log_profile"]), f'fill_method must be "zeros" or "log_profile", "{fill_method}" given'
         ds = self._obj
         x = ds["xcoords"].values
         y = ds["ycoords"].values
         z = ds["zcoords"].values
         # add filled surface velocities with a logarithmic profile curve fit
         depth = self.camera_config.get_depth(z, self.h_a)
-        ds["v_eff"] = helpers.velocity_fill(x, y, depth, ds["v_eff_nofill"], groupby="quantile")
+        if fill_method == "zeros":
+            ds["v_eff"] = ds["v_eff_nofill"].fillna(0.)
+        elif fill_method == "log_profile":
+            ds["v_eff"] = helpers.velocity_fill(x, y, depth, ds["v_eff_nofill"], groupby="quantile")
         # compute q for both non-filled and filled velocities
         ds["q_nofill"] = helpers.depth_integrate(depth, ds["v_eff_nofill"], v_corr=v_corr, name="q_nofill")
         ds["q"] = helpers.depth_integrate(depth, ds["v_eff"], v_corr=v_corr, name="q")
