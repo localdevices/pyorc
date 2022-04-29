@@ -265,6 +265,7 @@ def optimize_log_profile(
         workers=2,
         popsize=100,
         updating="deferred",
+        seed=0,
         **kwargs
 ):
 
@@ -291,6 +292,7 @@ def optimize_log_profile(
         workers=workers,
         popsize=popsize,
         updating=updating,
+        seed=seed,
         **kwargs
     )
     # unravel parameters

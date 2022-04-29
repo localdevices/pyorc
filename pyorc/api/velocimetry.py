@@ -316,13 +316,24 @@ class Velocimetry(ORCBase):
         )
 
 
-    def get_transect(self, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", distance=None, wdw=1):
+    def get_transect(
+            self, x, y, z=None,
+            crs=None,
+            v_eff=True,
+            xs="xs",
+            ys="ys",
+            distance=None,
+            wdw=1,
+            rolling=None,
+            quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]
+    ):
         """
-        Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the grid
-        can be rotated and that xs and ys are supplied following the projected coordinates supplied in
+        Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the
+        grid can be rotated and that xs and ys are supplied following the projected coordinates supplied in
         "xs" and "ys" coordinate variables in ds. x-coordinates and y-coordinates that fall outside the
         domain of ds, are still stored in the result for further interpolation or extrapolation.
         Original coordinate values supplied are stored in coordinates "x", "y" and (if supplied) "z".
+        Time series are transformed to set quantiles.
 
         :param self: xarray dataset
         :param x: tuple or list-like, x-coordinates on which interpolation should be done
@@ -338,7 +349,12 @@ class Velocimetry(ORCBase):
         :param distance: float, optional, sampling distance over the cross-section in [m]. the bathymetry points will
             be interpolated to match this distance. If not set, the distance will be estimated from the velocimetry
             grid resolution.
-        :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
+        :param wdw: int, window size to use for sampling the velocity. zero means, only cell itself, 1 means 3x3 window.
+        :param rolling: int, optional, if set, a rolling mean over time is applied, before deriving quantile estimates.
+        :param quantiles: list of floats (0-1), optional, list of quantiles to return
+            (default: [0.05, 0.25, 0.5, 0.75, 0.95]).
+        :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates over
+            quantiles.
         """
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
         if crs is not None:
@@ -399,6 +415,9 @@ class Velocimetry(ORCBase):
             ds_points = ds_points.assign_coords(zcoords=("points", list(z)))
         # convert to a Transect object
         ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
+        if rolling is not None:
+            ds_points = ds_points.rolling(time=rolling).mean()
+        ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
         if v_eff:
             # add the effective velocity, perpendicular to cross section direction
             ds_points.transect.vector_to_scalar()
