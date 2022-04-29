@@ -182,7 +182,7 @@ class Transect(ORCBase):
         :return: xr.Dataset, Transect for selected quantiles in time, including "q".
         """
         # aggregate to a limited set of quantiles
-        assert(fill_method in ["zeros", "log_profile"]), f'fill_method must be "zeros" or "log_profile", "{fill_method}" given'
+        assert(fill_method in ["zeros", "log_profile", "interpolate"]), f'fill_method must be "zeros", "log_profile", or "interpolate", instead "{fill_method}" given'
         ds = self._obj
         x = ds["xcoords"].values
         y = ds["ycoords"].values
@@ -193,6 +193,14 @@ class Transect(ORCBase):
             ds["v_eff"] = ds["v_eff_nofill"].fillna(0.)
         elif fill_method == "log_profile":
             ds["v_eff"] = helpers.velocity_fill(x, y, depth, ds["v_eff_nofill"], groupby="quantile")
+        elif fill_method == "interpolate":
+            depth = ds.zcoords*0 + self.camera_config.get_depth(ds.zcoords, self.h_a)
+            # interpolate gaps in between known values
+            ds["v_eff"] = ds["v_eff_nofill"].interpolate_na(dim="points")
+            # anywhere where depth == 0, remove values
+            ds["v_eff"] = ds["v_eff"].where(depth > 0)
+            # fill NAs with zeros
+            ds["v_eff"] = ds["v_eff"].fillna(0.)
         # compute q for both non-filled and filled velocities
         ds["q_nofill"] = helpers.depth_integrate(depth, ds["v_eff_nofill"], v_corr=v_corr, name="q_nofill")
         ds["q"] = helpers.depth_integrate(depth, ds["v_eff"], v_corr=v_corr, name="q")
