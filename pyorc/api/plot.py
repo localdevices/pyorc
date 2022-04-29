@@ -324,7 +324,7 @@ class _Velocimetry_PlotMethods:
         :return: np.ndarray containing x-directional (u), y-directional (v) and scalar velocity
         """
         u = self._obj[v_x].values
-        v = self._obj[v_y].values
+        v = -self._obj[v_y].values
         s = (u**2 + v**2)**0.5
         return u, v, s
 
