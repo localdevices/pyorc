@@ -1,5 +1,4 @@
 import copy
-from matplotlib.colors import Normalize
 import numpy as np
 import rasterio
 import xarray as xr
@@ -7,7 +6,6 @@ import warnings
 
 from pyproj import CRS
 from scipy.interpolate import interp1d
-from .transect import Transect
 from .orcbase import ORCBase
 from .plot import _Velocimetry_PlotMethods
 from .. import helpers, const
