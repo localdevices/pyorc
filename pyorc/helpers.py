@@ -8,7 +8,7 @@ from pyproj import Transformer
 from rasterio.transform import Affine, xy
 from rasterio.crs import CRS
 from rasterio import warp
-from scipy.optimize import curve_fit
+from scipy.optimize import differential_evolution
 from scipy.signal import convolve2d
 from scipy.interpolate import interp1d
 
@@ -218,6 +218,21 @@ def log_profile(X, z0, k_max, s0=0., s1=0.):
     return v
 
 
+def mse(pars, func, X, Y):
+    """
+    mean of sum of squares between evaluation of function with provided parameters and X input, and Y as dependent variable.
+
+    :param pars: list or tuple, parameter passed as *args to func
+    :param func: function, receiving X and *pars as input and returning predicted Y as result
+    :param X: tuple with lists or array-likes, indepent variable(s).
+    :param Y: list or array-like, dependent variable, predicted by func
+    :return: list or array-like, predicted Y from X and pars by func
+    """
+    Y_pred = func(X, *pars)
+    mse = np.sum((Y_pred - Y) ** 2)
+    return mse
+
+
 def neighbour_stack(array, stride=1, missing=-9999.):
     """
     Builds a stack of arrays from a 2-D input array, constructed by permutation in space using a provided stride.
@@ -242,31 +257,44 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     return array_move
 
 
-def optimize_log_profile(z, v, dist_bank=None):
+def optimize_log_profile(
+        z,
+        v,
+        dist_bank=None,
+        bounds=([0.001, 0.1], [-20, 20], [0., 5], [0., 100]),
+        workers=2,
+        popsize=100,
+        updating="deferred",
+        **kwargs
+):
+
     """
     optimize velocity log profile relation of v=k*max(z/z0) with k a function of distance to bank and k_max
+    A differential evolution optimizer is used.
 
     :param z: list of depths
     :param v: list of surface velocities
     :param dist_bank: list of distances to bank
+    :param kwargs: keyword arguments for scipy.optimize.differential_evolution
     :return: dict, fitted parameters of log_profile {z_0, k_max, s0 and s1}
     """
     if dist_bank is None:
         dist_bank = np.inf(len(v))
     v = np.array(v)
     z = np.array(z)
-    result = curve_fit(
-        log_profile,
-        (z, dist_bank),
-        np.array(v),
-        # bounds=([0.00001, 0.05, -20], [10, 2., 20]),
-        # bounds=([0.05, -20, 0., 0.], [0.051, 20, 5, 100]),
-        bounds=([0.005, -20, 0., 0.], [0.1, 20, 5, 100]),
-        # p0=[0.05, 0, 0., 0.],
-        # method="dogbox"
+    X = (z, dist_bank)
+    Y = v
+    result = differential_evolution(
+        wrap_mse,
+        args=(log_profile, X, Y),
+        bounds=bounds,
+        workers=workers,
+        popsize=popsize,
+        updating=updating,
+        **kwargs
     )
     # unravel parameters
-    z0, k_max, s0, s1 = result[0]
+    z0, k_max, s0, s1 = result.x
     return {"z0": z0, "k_max": k_max, "s0": s0, "s1": s1}
 
 
@@ -318,6 +346,10 @@ def velocity_fill(x, y, depth, v, groupby="quantile"):
     # per time slice or quantile, fill missings
     v_group = copy.deepcopy(v).groupby(groupby)
     return v_group.map(fit)
+
+
+def wrap_mse(pars_iter, *args):
+    return mse(pars_iter, *args)
 
 
 def xy_equidistant(x, y, distance, z=None):
