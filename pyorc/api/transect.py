@@ -152,7 +152,7 @@ class Transect(ORCBase):
         return cols, rows
 
 
-    def get_river_flow(self):
+    def get_river_flow(self, q_name="q", Q_name="river_flow"):
         """
         Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
         estimating one or several quantiles over the time dimension. Depth average velocities must first have been
@@ -160,9 +160,9 @@ class Transect(ORCBase):
 
         """
         if "q" not in self._obj:
-            raise ValueError('Dataset must contain variable "q", which is the depth-integrated velocity [m2 s-1], perpendicular to cross-section. Create this with ds.transect.get_q')
+            raise ValueError(f'Dataset must contain variable "{q_name}", which is the depth-integrated velocity [m2 s-1], perpendicular to cross-section. Create this with ds.transect.get_q')
         # integrate over the distance coordinates (s-coord)
-        Q = self._obj["q"].fillna(0.0).integrate(coord="scoords")
+        Q = self._obj[q_name].fillna(0.0).integrate(coord="scoords")
         Q.attrs = {
             "standard_name": "river_discharge",
             "long_name": "River Flow",
@@ -170,7 +170,7 @@ class Transect(ORCBase):
         }
         # set name
         Q.name = "Q"
-        self._obj["river_flow"] = Q
+        self._obj[Q_name] = Q
 
 
     def get_q(self, v_corr=0.9, fill_method="zeros"):
