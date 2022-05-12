@@ -189,17 +189,18 @@ Camera configuration: {:s}
     def corners(self, corners):
         self._corners = corners
 
-    def get_frame(self, n, grayscale=True, lens_corr=False):
+    def get_frame(self, n, method="grayscale", lens_corr=False):
         """
         Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
 
         :param n: int, frame number to retrieve
-        :param grayscale: bool, optional, if set to `True`, frame will be grayscaled (default: True)
+        :param method: str, can be "rgb", "grayscale", or "hsv", default: "grayscale"
         :param lens_corr: bool, optional, if set to True, lens parameters will be used to undistort image
         :return: np.ndarray containing frame
         """
         assert(n >= 0), "frame number cannot be negative"
         assert(n <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
+        assert(method in ["grayscale", "rgb", "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
         try:
@@ -211,13 +212,15 @@ Camera configuration: {:s}
                 if self.camera_config.lens_pars is not None:
                     # apply lens distortion correction
                     img = cv.undistort_img(img, **self.camera_config.lens_pars)
-            if grayscale:
+            if method == "grayscale":
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
                 img = img.mean(axis=2)
-            else:
+            elif method == "rgb":
                 # turn bgr to rgb for plotting purposes
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            elif method == "hsv":
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         self.frame_count = n + 1
         cap.release()
         return img
