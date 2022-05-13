@@ -221,18 +221,11 @@ class Frames(ORCBase):
         assert (time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
         # ensure attributes are kept
         xr.set_options(keep_attrs=True)
-        # normalize = dask.delayed(cv2.normalize)
-        mean = self._obj[::time_interval].mean(axis=0).load()
-        frames_reduce = self._obj - mean
-        #     frames_norm = cv2.normalize(frames_reduce)
-        # frames_min = frames_reduce.min(axis=-1).min(axis=-1)
-        # frames_max = frames_reduce.max(axis=-1).min(axis=-1)
-        # frames_norm = ((frames_reduce - frames_min) / (frames_max - frames_min) * 255).astype("uint8")
-
-        frames_thres = np.maximum(frames_reduce, 0)
-        # normalize
-        frames_norm = (frames_thres*255/frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
-        frames_norm = frames_norm.where(mean!=0, 0)
+        mean = self._obj[::time_interval].mean(axis=0).load().astype("float32")
+        frames_reduce = self._obj.astype("float32") - mean
+        frames_min = frames_reduce.min(axis=-1).min(axis=-1)
+        frames_max = frames_reduce.max(axis=-1).max(axis=-1)
+        frames_norm = ((frames_reduce - frames_min) / (frames_max - frames_min) * 255).astype("uint8")
         return frames_norm
 
 
@@ -254,7 +247,7 @@ class Frames(ORCBase):
             edges = blur2 - blur1
             mask = edges == 0
             edges = ((edges - edges.min()) / (edges.max() - edges.min()) * 255).astype("uint8")
-            edges = cv2.equalizeHist(edges)
+            # edges = cv2.equalizeHist(edges)
             edges[mask] = 0
             return edges
 
@@ -276,10 +269,11 @@ class Frames(ORCBase):
             coords=coords,
             attrs=self._obj.attrs,
             name="edges",
-            object_type=Frames
+            object_type=xr.DataArray
         )
-        frames_edge["xp"] = self._obj["xp"]
-        frames_edge["yp"] = self._obj["yp"]
+        if "xp" in self._obj:
+            frames_edge["xp"] = self._obj["xp"]
+            frames_edge["yp"] = self._obj["yp"]
         return frames_edge
 
     def reduce_rolling(self, samples=25):
