@@ -365,7 +365,8 @@ def xy_equidistant(x, y, distance, z=None):
     :param distance: float, distance between equidistant samples measured in cumulated 1-dimensional distance from xy
         origin (first point)
     :param z: np.ndarray, set of (assumed ordered) z-coordinates (default: None)
-    :return: (x_sample, y_sample, z_sample (only if z is not None)): np.ndarrays with 1D points
+    :return: (x_sample, y_sample, s_sample, z_sample (only if z is not None)): np.ndarrays with 1D points for
+        x, y, s (distance from first point), z
     """
     # estimate cumulative distance between points, starting with zero
     x_diff = np.concatenate((np.array([0]), np.diff(x)))
@@ -383,12 +384,26 @@ def xy_equidistant(x, y, distance, z=None):
     x_sample = f_x(s_sample)
     y_sample = f_y(s_sample)
     if z is None:
-        return x_sample, y_sample
+        return x_sample, y_sample, s_sample
     else:
         f_z = interp1d(s, z, fill_value="extrapolate")
         z_sample = f_z(s_sample)
         return x_sample, y_sample, z_sample, s_sample
 
+
+def xy_angle(x, y):
+    """
+    Determine angle between x, y points.
+    :param x: set of x-coordinate
+    :param y: set of y-coordinates
+    :return: angles over section. Angle is determined as the angle between the point left and right of the point
+        under consideration. The most left and right coordinates are based on the first and last 2 points respectively.
+    """
+    angles = np.zeros(len(x))
+    angles[1:-1] = np.arctan2(x[2:] - x[0:-2], y[2:] - y[0:-2])
+    angles[0] = np.arctan2(x[1] - x[0], y[1] - y[0])
+    angles[-1] = np.arctan2(x[-1] - x[-2], y[-1] - y[-2])
+    return angles
 
 def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     """

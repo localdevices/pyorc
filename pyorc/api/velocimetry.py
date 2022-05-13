@@ -400,7 +400,7 @@ class Velocimetry(ORCBase):
             # collect points within a stride, collate and analyze for outliers
             ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(-wdw, wdw + 1) for y_stride in
                                 range(-wdw, wdw + 1)], dim="stride")
-            # use the median to prevent a large influence of serious outliers
+            # use the median (not mean) to prevent a large influence of serious outliers
             ds_effective = ds_wdw.mean(dim="stride", keep_attrs=True)
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
@@ -413,6 +413,15 @@ class Velocimetry(ORCBase):
         ds_points = ds_points.assign_coords(scoords=("points", list(s)))
         if z is not None:
             ds_points = ds_points.assign_coords(zcoords=("points", list(z)))
+        # add mean angles to dataset
+        alpha = helpers.xy_angle(ds_points["x"], ds_points["y"])
+        flow_dir = alpha - 0.5 * np.pi
+        ds_points["v_dir"] = (("points"), flow_dir)
+        ds_points["v_dir"].attrs = {
+            "standard_name": "river_flow_angle",
+            "long_name": "Angle of river flow in radians from North",
+            "units": "rad"
+        }
         # convert to a Transect object
         ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
         if rolling is not None:

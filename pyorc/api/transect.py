@@ -12,14 +12,12 @@ class Transect(ORCBase):
     def __init__(self, xarray_obj):
         super(Transect, self).__init__(xarray_obj)
 
-    def vector_to_scalar(self, angle_method=0, v_x="v_x", v_y="v_y"):
+    def vector_to_scalar(self, v_x="v_x", v_y="v_y"):
         """
         Set "v_eff" and "v_dir" variables as effective velocities over cross-section, and its angle
 
         :param v_x: str, variable containing (t, points) time series in cross section with x-directional velocities.
         :param v_y: str, variable containing (t, points) time series in cross section with y-directional velocities.
-        :param angle_method: if set to 0, then angle of cross section is determined with left to right bank coordinates,
-            otherwise, it is determined per section.
         :return: DataArray(t, points), time series in points with velocities perpendicular to cross section.
 
         """
@@ -29,67 +27,15 @@ class Transect(ORCBase):
         idx = np.isfinite(xs)
         xs = xs[idx]
         ys = ys[idx]
-        if angle_method == 0:
-            x_left, y_left = xs[0], ys[0]
-            x_right, y_right = xs[-1], ys[-1]
-            angle_da = np.arctan2(x_right - x_left, y_right - y_left)
-        else:
-            # start with empty angle
-            angle = np.zeros(ys.shape)
-            angle_da = np.zeros(self._obj["x"].shape)
-            angle_da[:] = np.nan
-
-            for n, (x, y) in enumerate(zip(xs, ys)):
-                # determine the angle of the current point with its neighbours
-                # check if we are at left bank
-                # first estimate left bank angle
-                undefined = True  # angle is still undefined
-                m = 0
-                while undefined:
-                    # go one step to the left
-                    m -= 1
-                    if n + m < 0:
-                        # we are at the left bank, so angle with left neighbour is non-existing.
-                        x_left, y_left = xs[n], ys[n]
-                        # angle_left = np.nan
-                        undefined = False
-                    else:
-                        x_left, y_left = xs[n + m], ys[n + m]
-                        if not ((x_left == x) and (y_left == y)):
-                            # profile points are in another pixel, so estimate angle
-                            undefined = False
-                            angle_left = np.arctan2(x - x_left, y - y_left)
-
-                # estimate right bank angle
-                undefined = True  # angle is still undefined
-                m = 0
-                while undefined:
-                    # go one step to the left
-                    m += 1
-                    if n + m >= len(xs) - 1:
-                        angle_right = np.nan
-                        undefined = False
-                    else:
-                        x_right, y_right = xs[n + m], ys[n + m]
-                        if not ((x_right == x) and (y_right == y)):
-                            # profile points are in another pixel, so estimate angle
-                            undefined = False
-                            angle_right = np.arctan2(x_right - x, y_right - y)
-                angle[n] = np.nanmean([angle_left, angle_right])
-            # add angles to array meant for data array
-            angle_da[idx] = angle
-
-        # compute angle of flow direction (i.e. the perpendicular of the cross section) and add as DataArray to ds_points
-        flow_dir = angle_da - 0.5 * np.pi
-
         # compute per velocity vector in the dataset, what its angle is
         v_angle = np.arctan2(self._obj[v_x], self._obj[v_y])
         # compute the scalar value of velocity
         v_scalar = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
 
         # compute difference in angle between velocity and perpendicular of cross section
+        flow_dir = self._obj["v_dir"]
         angle_diff = v_angle - flow_dir
-        # compute effective velocity in the flow direction (i.e. perpendicular to cross section
+        # compute effective velocity in the flow direction (i.e. perpendicular to cross section)
         v_eff = np.cos(angle_diff) * v_scalar
         v_eff.attrs = {
             "standard_name": "velocity",
@@ -99,13 +45,7 @@ class Transect(ORCBase):
         # set name
         v_eff.name = "v_eff_nofill"  # there still may be gaps in this series
         self._obj["v_eff_nofill"] = v_eff
-        # store the angle for plotting purposes
-        self._obj["v_dir"] = (("points"), np.ones(len(self._obj.points)) * flow_dir)
-        self._obj["v_dir"].attrs = {
-            "standard_name": "river_flow_angle",
-            "long_name": "Angle of river flow in radians from North",
-            "units": "rad"
-        }
+
 
     def get_xyz_perspective(self, M=None, xs=None, ys=None, mask_outside=True):
         """
