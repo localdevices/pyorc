@@ -1,10 +1,11 @@
 import cv2
 import dask
+import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from xarray.core import utils
 
-
+from matplotlib.animation import FuncAnimation, FFMpegWriter
+from tqdm import tqdm
 from .orcbase import ORCBase
 from .plot import _frames_plot
 from .. import cv, helpers, const, piv_process
@@ -174,6 +175,7 @@ class Frames(ORCBase):
         frames_proj = frames_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         return frames_proj
 
+
     def landmask(self, dilate_iter=10, samples=15):
         """
         Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much
@@ -242,13 +244,9 @@ class Frames(ORCBase):
             if not(isinstance(img, np.ndarray)):
                 img = img.values
             # load values here
-            blur1 = cv2.GaussianBlur(img, (stride_1, stride_1), 0)
-            blur2 = cv2.GaussianBlur(img, (stride_2, stride_2), 0)
+            blur1 = cv2.GaussianBlur(img.astype("float32"), (stride_1, stride_1), 0)
+            blur2 = cv2.GaussianBlur(img.astype("float32"), (stride_2, stride_2), 0)
             edges = blur2 - blur1
-            mask = edges == 0
-            edges = ((edges - edges.min()) / (edges.max() - edges.min()) * 255).astype("uint8")
-            # edges = cv2.equalizeHist(edges)
-            edges[mask] = 0
             return edges
 
         shape = self._obj[0].shape  # single-frame shape does not change
@@ -276,6 +274,7 @@ class Frames(ORCBase):
             frames_edge["yp"] = self._obj["yp"]
         return frames_edge
 
+
     def reduce_rolling(self, samples=25):
         """
         Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use `normalize`).
@@ -294,5 +293,30 @@ class Frames(ORCBase):
         frames_norm = (frames_thres * 255 / frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
         frames_norm = frames_norm.where(roll_mean != 0, 0)
         return frames_norm
+
+
+    def to_ani(self, fn, video_kwargs=const.VIDEO_ARGS, anim_kwargs=const.ANIM_ARGS, **kwargs):
+        def init():
+            # set imshow data to values in the first frame
+            im.set_data(self._obj[0])
+            return ax  # line,
+
+        def animate(i):
+            # set imshow data to values in the current frame
+            im.set_data(self._obj[i])
+            return ax
+
+        # setup a standard 16/9 borderless window with black background
+        f = plt.figure(figsize=(16, 9), frameon=False)
+        f.set_size_inches(16, 9, True)
+        f.patch.set_facecolor("k")
+        f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+        ax = plt.subplot(111)
+
+        im = ax.imshow(self._obj[0], **kwargs)
+        anim = FuncAnimation(
+            f, animate, init_func=init, frames=tqdm(range(len(self._obj))), **anim_kwargs
+        )
+        anim.save(fn, **video_kwargs)
 
     plot = _frames_plot

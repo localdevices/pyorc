@@ -40,6 +40,7 @@ setup(
         "scikit-image",
         "scipy",
         "shapely",
+        "tqdm",
         "xarray",
     ],
     extras_require={
