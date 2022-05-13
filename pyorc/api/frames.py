@@ -231,7 +231,7 @@ class Frames(ORCBase):
         return frames_norm
 
 
-    def edge_detection(self, stride_1=7, stride_2=9):
+    def edge_detect(self, stride_1=7, stride_2=9):
         """
         Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved
         images and computes their difference to detect edges.
