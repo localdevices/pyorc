@@ -28,6 +28,7 @@ def _base_plot(plot_func):
     def get_plot_method(ref, mode="local", ax=None, add_colorbar=False, add_cross_section=True, kwargs_line={}, *args, **kwargs):
         """
         Retrieve plot method with all required inputs
+
         :param ref: velocimetry or transect object
         :param mode: str, perspective mode to use for plotting. Can be "local", "geographical", or "camera". For
             "geographical" a velocimetry result that contains "lon" and "lat" coordinates must be provided
@@ -64,6 +65,10 @@ def _base_plot(plot_func):
                     f'Dimension "quantile" exists in dataset and contains multiple values. Reduce this by selecting one'
                     f'quantile, e.g. using ds.isel(quantile=2) or ds.sel(quantile=0.5)'
                 )
+        if plot_func.__name__ == "_streamplot":
+            if mode != "local":
+                raise NotImplementedError(f"Streamplot only works in local mode, not in {mode} mode.")
+
         # check if dataset is a transect or not
         is_transect = True if "points" in ref._obj.dims else False
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
@@ -71,6 +76,13 @@ def _base_plot(plot_func):
             x = ref._obj["x"].values
             y = ref._obj["y"].values
             u, v, s = ref.get_uv_local()
+            if plot_func.__name__ == "_streamplot":
+                # flipping of variables is needed
+                y = np.flipud(y)
+                u = np.flipud(u)
+                v = np.flipud(v)
+                s = np.flipud(s)
+
         elif mode == "geographical":
             # import some additional packages
             import cartopy.crs as ccrs
@@ -86,7 +98,7 @@ def _base_plot(plot_func):
             x = ref._obj["xp"].values
             y = ref._obj["yp"].values
             u, v, s = ref.get_uv_camera()
-        if plot_func.__name__ == "_quiver":
+        if plot_func.__name__ in ["_quiver", "_streamplot"]:
             primitive = plot_func(x, y, u, v, s, ax, *args, **kwargs)
         else:
             primitive = plot_func(x, y, s, ax, *args, **kwargs)
@@ -238,6 +250,7 @@ class _Transect_PlotMethods:
         u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
         return u, v, s
 
+
     def get_uv_geographical(self):
         """
         Get x-directional (u), y-directional (v) and scalar velocity in geographical projection from transect dataset.
@@ -257,6 +270,7 @@ class _Transect_PlotMethods:
         u, v = helpers.rotate_u_v(u, v, theta)
         return u, v, s
 
+
     def get_uv_local(self):
         """
         Get x-directional (u), y-directional (v) and scalar velocity in local projection from transect dataset.
@@ -270,6 +284,7 @@ class _Transect_PlotMethods:
         v = self._obj[v_eff] * np.cos(self._obj[v_dir])
         s = self._obj[v_eff]
         return u, v, s
+
 
 class _Velocimetry_PlotMethods:
     """
@@ -285,6 +300,7 @@ class _Velocimetry_PlotMethods:
         setattr(_Velocimetry_PlotMethods, "quiver", _quiver)
         setattr(_Velocimetry_PlotMethods, "pcolormesh", _pcolormesh)
         setattr(_Velocimetry_PlotMethods, "scatter", _scatter)
+        setattr(_Velocimetry_PlotMethods, "streamplot", _streamplot)
 
     def __call__(self, method="quiver", *args, **kwargs):
         """
@@ -295,6 +311,7 @@ class _Velocimetry_PlotMethods:
         :return:
         """
         return getattr(self, method)(*args, **kwargs)
+
 
     def get_uv_geographical(self):
         """
@@ -363,6 +380,7 @@ class _Velocimetry_PlotMethods:
         s = ((self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5).values
         return u, v, s
 
+
 @_base_plot
 def _quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
     """
@@ -378,6 +396,7 @@ def _quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
     #
     return primitive
 
+
 @_base_plot
 def _scatter(x, y, c=None, ax=None, *args, **kwargs):
     """
@@ -387,6 +406,25 @@ def _scatter(x, y, c=None, ax=None, *args, **kwargs):
     """
     primitive = ax.scatter(x, y, c=c, *args, **kwargs)
     return primitive
+
+
+@_base_plot
+def _streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwargs):
+    """
+    Creates streamplot of velocimetry results on new or existing axes
+
+    Wraps :py:func:`matplotlib:matplotlib.pyplot.streamplot`. Additional input arguments:
+
+    :param linewidth_scale: float, optional, used to scale the linewidth according to the scalar velocity
+
+    """
+    if linewidth_scale is not None:
+        kwargs["linewidth"] = s * linewidth_scale
+    if "color" in kwargs:
+        primitive = ax.streamplot(x, y, u, v, *args, **kwargs)
+    else:
+        primitive = ax.streamplot(x, y, u, v, color=s, *args, **kwargs)
+    return primitive.lines
 
 
 @_base_plot
