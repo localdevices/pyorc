@@ -52,7 +52,14 @@ If you simply want to add **pyorc** to an existing python installation or virtua
 instructions.
 
 First activate the environment you want **pyorc** to be installed in (if you don't care about virtual environments, then 
-simply skip this step)
+simply skip this step). Dependencies `rasterio`, `geopandas` and `cartopy` are known to be difficult to install with
+`pip`. Therefore, we highly recommend to use a conda environment that already includes these dependencies before
+installation. You can simply install these libraries as follows:
+
+```
+conda activate <name-of-your-environment>
+conda install -c conda-forge cartopy geopandas rasterio
+```
 
 Then install **pyorc** as follows:
 ```
