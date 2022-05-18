@@ -30,7 +30,7 @@ setup(
         "matplotlib",
         "netCDF4",
         "numpy",
-        "opencv-python-headless",
+        "opencv-python",
         "openpiv",
         "packaging; platform_machine != 'x86_64'",
         "pip",
