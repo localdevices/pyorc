@@ -1,3 +1,5 @@
+import copy
+
 import cv2
 import dask
 import matplotlib.pyplot as plt
@@ -25,6 +27,10 @@ class Frames(ORCBase):
             openpiv.pyprocess is called.
         :return: Velocimetry object (xr.Dataset), containing the PIV results in a lazy dask.array form.
         """
+        camera_config = copy.deepcopy(self.camera_config)
+        if "window_size" in kwargs:
+            camera_config.window_size = kwargs["window_size"]
+            del kwargs["window_size"]
         # forward the computation to piv
         dask_piv = dask.delayed(piv_process.piv, nout=6)
         v_x, v_y, s2n, corr = [], [], [], []
@@ -37,10 +43,10 @@ class Frames(ORCBase):
             cols, rows, _v_x, _v_y, _s2n, _corr = dask_piv(
                 frame_a,
                 frame_b,
-                res_x=self.camera_config.resolution,
-                res_y=self.camera_config.resolution,
+                res_x=camera_config.resolution,
+                res_y=camera_config.resolution,
                 dt=float(dt.values),
-                search_area_size=self.camera_config.window_size,
+                search_area_size=camera_config.window_size,
                 **kwargs,
             )
             # append to result
@@ -49,10 +55,10 @@ class Frames(ORCBase):
         cols, rows, _v_x, _v_y, _s2n, _corr = piv_process.piv(
             frame_a,
             frame_b,
-            res_x=self.camera_config.resolution,
-            res_y=self.camera_config.resolution,
+            res_x=camera_config.resolution,
+            res_y=camera_config.resolution,
             dt=float(dt.values),
-            search_area_size=self.camera_config.window_size,
+            search_area_size=camera_config.window_size,
             **kwargs,
         )
         # extract global attributes from origin
@@ -64,14 +70,14 @@ class Frames(ORCBase):
         xs, ys = helpers.get_xs_ys(
             cols,
             rows,
-            self.camera_config.transform,
+            camera_config.transform,
         )
-        if hasattr(self.camera_config, "crs"):
-            lons, lats = helpers.get_lons_lats(xs, ys, self.camera_config.crs)
+        if hasattr(camera_config, "crs"):
+            lons, lats = helpers.get_lons_lats(xs, ys, camera_config.crs)
         else:
             lons = None
             lats = None
-        M = self.camera_config.get_M(self.h_a, reverse=True)
+        M = camera_config.get_M(self.h_a, reverse=True)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
         # ensure y coordinates start at the top in the right orientation (different from order of a CRS)
@@ -102,11 +108,14 @@ class Frames(ORCBase):
         )
         # add piv object functionality and attrs to dataset and return
         ds = xr.Dataset(ds, attrs=global_attrs)
+        # in case window_size was changed, overrule the camera_config attribute
+        ds.attrs.update(camera_config=camera_config.to_json())
+        # set encoding
         ds.velocimetry.set_encoding()
         return ds
 
 
-    def project(self):
+    def project(self, resolution=None):
         """
         Project frames into a projected frames object, with information from the camera_config attr.
         This requires that the CameraConfig contains full gcp information and a coordinate reference system (crs).
@@ -115,21 +124,25 @@ class Frames(ORCBase):
 
         """
         # retrieve the M and shape from camera config with said h_a
-        M = self.camera_config.get_M(self.h_a)
-        shape = self.camera_config.shape
+        camera_config = copy.deepcopy(self.camera_config)
+        if resolution is not None:
+            camera_config.resolution = resolution
+        M = camera_config.get_M(self.h_a)
+        shape = camera_config.shape
+        print(shape)
         # get orthoprojected frames as delayed objects
         get_ortho = dask.delayed(cv.get_ortho)
         imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in self._obj]
         # prepare axes
         time = self._obj.time
         y = np.flipud(np.linspace(
-            self.camera_config.resolution/2,
-            self.camera_config.resolution*(shape[0]-0.5),
+            camera_config.resolution/2,
+            camera_config.resolution*(shape[0]-0.5),
             shape[0])
         )
         x = np.linspace(
-            self.camera_config.resolution/2,
-            self.camera_config.resolution*(shape[1]-0.5), shape[1]
+            camera_config.resolution/2,
+            camera_config.resolution*(shape[1]-0.5), shape[1]
         )
         cols, rows = np.meshgrid(
             np.arange(len(x)),
@@ -139,10 +152,10 @@ class Frames(ORCBase):
         xs, ys = helpers.get_xs_ys(
             cols,
             rows,
-            self.camera_config.transform,
+            camera_config.transform,
         )
-        if hasattr(self.camera_config, "crs"):
-            lons, lats = helpers.get_lons_lats(xs, ys, self.camera_config.crs)
+        if hasattr(camera_config, "crs"):
+            lons, lats = helpers.get_lons_lats(xs, ys, camera_config.crs)
         else:
             lons = None
             lats = None
@@ -165,14 +178,14 @@ class Frames(ORCBase):
             attrs=self._obj.attrs,
             object_type=xr.DataArray
         )
-
-        # frames_proj = Frames(da)
         # remove time coordinate for the spatial variables (and rgb in case rgb frames are used)
         del coords["time"]
         if "rgb" in self._obj.coords:
             del coords["rgb"]
         # add coordinate meshes to projected frames and return
         frames_proj = frames_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        # in case resolution was changed, overrule the camera_config attribute
+        frames_proj.attrs.update(camera_config = camera_config.to_json())
         return frames_proj
 
 
