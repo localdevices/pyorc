@@ -93,6 +93,7 @@ cd pyorc
 Setup a virtual developers environment and install the package as follows:
 ```
 conda env create -f environment-dev.yml
+conda activate pyorc-dev
 pip install -e .
 ```
 
