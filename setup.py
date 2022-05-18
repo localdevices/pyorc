@@ -10,8 +10,8 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 setup(
-    name="pyorc",
-    description="pyorc is a front and backend to control river camera observation locations",
+    name="pyopenrivercam",
+    description="pyopenrivercam (pyorc) is a front and backend to control river camera observation locations",
     version="0.2.0",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
