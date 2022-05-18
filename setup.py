@@ -12,7 +12,7 @@ with open("README.md") as readme_file:
 setup(
     name="pyorc",
     description="pyorc is a front and backend to control river camera observation locations",
-    version="0.1.0.dev",
+    version="0.2.0",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
     url="https://github.com/localdevices/pyorc",
