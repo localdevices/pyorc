@@ -54,7 +54,7 @@ setup(
     zip_safe=False,
     classifiers=[
         # https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Hydrology",
@@ -64,5 +64,5 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    keywords="hydrology hydrometry river-flow pyorc",
+    keywords="hydrology, hydrometry, river-flow, pyorc",
 )
