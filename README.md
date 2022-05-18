@@ -10,7 +10,7 @@ flow analysis using the OpenPIV library and reprojections and image pre-processi
 to Large-scale Particle Tracking Velocimetry (LSPTV) and Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV using open
 libraries or extensions to this code. 
 
-![example_image](docs/ngwerere.jpg)
+![example_image](https://raw.githubusercontent.com/localdevices/pyorc/main/docs/ngwerere.jpg)
 Image: Example of pyorc velocimetry over Ngwerere river at the Zambezi Road crossing - Lusaka, Zambia.
 
 Current capabilities are:
