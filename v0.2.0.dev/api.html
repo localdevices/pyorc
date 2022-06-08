@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API reference &mdash; pyOpenRiverCam 0.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pyorc.Video.camera_config" href="_generated/pyorc.Video.camera_config.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyOpenRiverCam
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#video-class">Video class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Video.camera_config.html">pyorc.Video.camera_config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Video.fps.html">pyorc.Video.fps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Video.corners.html">pyorc.Video.corners</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Video.get_frames.html">pyorc.Video.get_frames</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#frames-subclass">Frames subclass</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Frames.project.html">pyorc.Frames.project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Frames.get_piv.html">pyorc.Frames.get_piv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Frames.to_ani.html">pyorc.Frames.to_ani</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Frames.plot.html">pyorc.Frames.plot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#velocimetry-subclass">Velocimetry subclass</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.html">pyorc.Velocimetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal.html">pyorc.Velocimetry.filter_temporal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_angle.html">pyorc.Velocimetry.filter_temporal_angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_neighbour.html">pyorc.Velocimetry.filter_temporal_neighbour</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_std.html">pyorc.Velocimetry.filter_temporal_std</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_velocity.html">pyorc.Velocimetry.filter_temporal_velocity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_corr.html">pyorc.Velocimetry.filter_temporal_corr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial.html">pyorc.Velocimetry.filter_spatial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_nan.html">pyorc.Velocimetry.filter_spatial_nan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_median.html">pyorc.Velocimetry.filter_spatial_median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/pyorc.Velocimetry.set_encoding.html">pyorc.Velocimetry.set_encoding</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transect-subclass">Transect subclass</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyOpenRiverCam</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>API reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="api-reference">
+<span id="api"></span><h1>API reference<a class="headerlink" href="#api-reference" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">pyorc</span></code>’s consists of several subclasses of the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> data models.
+In a nutshell, <code class="docutils literal notranslate"><span class="pre">xarray</span></code>’s data models are meant to store and analyze scientific datasets with multiple
+dimensions. A <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> contains one variable with possibly several dimensions and coordinates
+within those dimensions. A <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> may contain multiple <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> objects, with shared
+coordinates. In <code class="docutils literal notranslate"><span class="pre">pyorc</span></code> typically the coordinates are <code class="docutils literal notranslate"><span class="pre">time</span></code> for time epochs measured in seconds since
+the beginning of a video, <code class="docutils literal notranslate"><span class="pre">x</span></code> for horizontal grid spacing (in meters), <code class="docutils literal notranslate"><span class="pre">y</span></code> for vertical grid spacing
+(in meters). Operations you can apply on both data models are very comparable with operations you may
+already use in <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, such as resampling, reindexing, aggregations, and so on.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We highly recommend to use the excellent <code class="docutils literal notranslate"><span class="pre">xarray</span></code> manual side-by-side with <code class="docutils literal notranslate"><span class="pre">pyorc</span></code> to understand
+how to effectively work with the <code class="docutils literal notranslate"><span class="pre">xarray</span></code> ecosystem.
+The documentation can be found on <a class="reference external" href="https://docs.xarray.dev/">https://docs.xarray.dev/</a>.</p>
+</div>
+<p>In the remaining sections, we describe the API classes, and the functions they are based on.</p>
+<section id="video-class">
+<h2>Video class<a class="headerlink" href="#video-class" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.camera_config.html#pyorc.Video.camera_config" title="pyorc.Video.camera_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.camera_config</span></code></a></p></td>
+<td><p>CameraConfig object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Video.fps.html#pyorc.Video.fps" title="pyorc.Video.fps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.fps</span></code></a></p></td>
+<td><p>float, frames per second</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.end_frame.html#pyorc.Video.end_frame" title="pyorc.Video.end_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.end_frame</span></code></a></p></td>
+<td><p>int, last frame considered in analysis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Video.start_frame.html#pyorc.Video.start_frame" title="pyorc.Video.start_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.start_frame</span></code></a></p></td>
+<td><p>int, first frame considered in analysis</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.corners.html#pyorc.Video.corners" title="pyorc.Video.corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.corners</span></code></a></p></td>
+<td><p>list of 4 lists (int) with [column, row] locations of area of interest in video objective</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Video.get_frame.html#pyorc.Video.get_frame" title="pyorc.Video.get_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.get_frame</span></code></a>(n[, method, lens_corr])</p></td>
+<td><p>Retrieve one frame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.get_frames.html#pyorc.Video.get_frames" title="pyorc.Video.get_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.get_frames</span></code></a>(**kwargs)</p></td>
+<td><p>Get a xr.DataArray, containing a dask array of frames, from <cite>start_frame</cite> until <cite>end_frame</cite>, expected to be read lazily.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="frames-subclass">
+<h2>Frames subclass<a class="headerlink" href="#frames-subclass" title="Permalink to this heading"></a></h2>
+<p>These methods can be called from an <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> that is generated using <code class="docutils literal notranslate"><span class="pre">pyorc.Video.get_frames</span></code>.</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.normalize.html#pyorc.Frames.normalize" title="pyorc.Frames.normalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.normalize</span></code></a>([samples])</p></td>
+<td><p>Remove the mean of sampled frames.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect" title="pyorc.Frames.edge_detect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.edge_detect</span></code></a>([stride_1, stride_2])</p></td>
+<td><p>Convert frames in edges, using a band convolution filter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.project.html#pyorc.Frames.project" title="pyorc.Frames.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.project</span></code></a>([resolution])</p></td>
+<td><p>Project frames into a projected frames object, with information from the camera_config attr.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.get_piv.html#pyorc.Frames.get_piv" title="pyorc.Frames.get_piv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.get_piv</span></code></a>(**kwargs)</p></td>
+<td><p>Perform PIV computation on projected frames.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani" title="pyorc.Frames.to_ani"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.to_ani</span></code></a>(fn[, figure_kwargs, ...])</p></td>
+<td><p>Store an animation of the frames in the object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.plot.html#pyorc.Frames.plot" title="pyorc.Frames.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.plot</span></code></a>([ax, mode])</p></td>
+<td><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if <code class="docutils literal notranslate"><span class="pre">ax</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>) axes</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="velocimetry-subclass">
+<h2>Velocimetry subclass<a class="headerlink" href="#velocimetry-subclass" title="Permalink to this heading"></a></h2>
+<p>These methods can be called from an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> that is generated using <code class="docutils literal notranslate"><span class="pre">pyorc.Frames.get_piv</span></code>.</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.html#pyorc.Velocimetry" title="pyorc.Velocimetry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry</span></code></a>(xarray_obj)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal.html#pyorc.Velocimetry.filter_temporal" title="pyorc.Velocimetry.filter_temporal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_temporal</span></code></a>([v_x, v_y, ...])</p></td>
+<td><p>Masks values using several filters that use temporal variations or comparison as basis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_angle.html#pyorc.Velocimetry.filter_temporal_angle" title="pyorc.Velocimetry.filter_temporal_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_temporal_angle</span></code></a>([v_x, ...])</p></td>
+<td><p>filters on the expected angle.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_neighbour.html#pyorc.Velocimetry.filter_temporal_neighbour" title="pyorc.Velocimetry.filter_temporal_neighbour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_temporal_neighbour</span></code></a>([v_x, ...])</p></td>
+<td><p>Masks values if neighbours over a certain rolling length before and after, have a significantly higher velocity than value under consideration, measured by tolerance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_std.html#pyorc.Velocimetry.filter_temporal_std" title="pyorc.Velocimetry.filter_temporal_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_temporal_std</span></code></a>([v_x, v_y, ...])</p></td>
+<td><p>Masks values if they deviate more than x standard deviations from the mean.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_velocity.html#pyorc.Velocimetry.filter_temporal_velocity" title="pyorc.Velocimetry.filter_temporal_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_temporal_velocity</span></code></a>([v_x, ...])</p></td>
+<td><p>Masks values if the velocity scalar lies outside a user-defined valid range.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_temporal_corr.html#pyorc.Velocimetry.filter_temporal_corr" title="pyorc.Velocimetry.filter_temporal_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_temporal_corr</span></code></a>([v_x, v_y, ...])</p></td>
+<td><p>Masks values with a too low correlation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial.html#pyorc.Velocimetry.filter_spatial" title="pyorc.Velocimetry.filter_spatial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial</span></code></a>([v_x, v_y, ...])</p></td>
+<td><p>Masks velocity values on a number of spatial filters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan" title="pyorc.Velocimetry.filter_spatial_nan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial_nan</span></code></a>([v_x, v_y])</p></td>
+<td><p>Masks values if their surrounding neighbours (inc.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median" title="pyorc.Velocimetry.filter_spatial_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial_median</span></code></a>([v_x, v_y])</p></td>
+<td><p>Masks values when their value deviates more than x standard deviations from the median of its neighbours (inc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.replace_outliers</span></code></a>([v_x, v_y, ...])</p></td>
+<td><p>Replace missing values using neighbourhood operators.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.get_transect</span></code></a>(x, y[, z, crs, ...])</p></td>
+<td><p>Interpolate all variables to supplied x and y coordinates of a cross section.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.set_encoding</span></code></a>([enc_pars])</p></td>
+<td><p>Set encoding parameters for all typical variables in a velocimetry dataset.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="transect-subclass">
+<h2>Transect subclass<a class="headerlink" href="#transect-subclass" title="Permalink to this heading"></a></h2>
+<p>These methods can be called from an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> that is generated using <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.get_transect</span></code>.</p>
+<span class="target" id="module-pyorc.Transect"></span><dl class="py function">
+<dt class="sig sig-object py" id="pyorc.Transect.__init__">
+<span class="sig-prename descclassname"><span class="pre">pyorc.Transect.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Transect.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyorc.Transect.get_q">
+<span class="sig-prename descclassname"><span class="pre">pyorc.Transect.</span></span><span class="sig-name descname"><span class="pre">get_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_corr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zeros'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Transect.get_q" title="Permalink to this definition"></a></dt>
+<dd><p>Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
+depth-average velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>v_corr</strong> – float, optional, correction factor (default: 0.9)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>xr.Dataset, Transect for selected quantiles in time, including “q”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyorc.Transect.get_river_flow">
+<span class="sig-prename descclassname"><span class="pre">pyorc.Transect.</span></span><span class="sig-name descname"><span class="pre">get_river_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'q'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'river_flow'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Transect.get_river_flow" title="Permalink to this definition"></a></dt>
+<dd><p>Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
+estimating one or several quantiles over the time dimension. Depth average velocities must first have been
+estimated using get_q. A variable “Q” will be added to Dataset, with only “quantiles” as dimension.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyorc.Transect.get_xyz_perspective">
+<span class="sig-prename descclassname"><span class="pre">pyorc.Transect.</span></span><span class="sig-name descname"><span class="pre">get_xyz_perspective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_outside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Transect.get_xyz_perspective" title="Permalink to this definition"></a></dt>
+<dd><p>Get camera-perspective column, row coordinates from cross-section points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyorc.Transect.plot">
+<span class="sig-prename descclassname"><span class="pre">pyorc.Transect.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><a class="headerlink" href="#pyorc.Transect.plot" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_Transect_PlotMethods</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyorc.Transect.vector_to_scalar">
+<span class="sig-prename descclassname"><span class="pre">pyorc.Transect.</span></span><span class="sig-name descname"><span class="pre">vector_to_scalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_y'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Transect.vector_to_scalar" title="Permalink to this definition"></a></dt>
+<dd><p>Set “v_eff” and “v_dir” variables as effective velocities over cross-section, and its angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v_x</strong> – str, variable containing (t, points) time series in cross section with x-directional velocities.</p></li>
+<li><p><strong>v_y</strong> – str, variable containing (t, points) time series in cross section with y-directional velocities.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataArray(t, points), time series in points with velocities perpendicular to cross section.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="_generated/pyorc.Video.camera_config.html" class="btn btn-neutral float-right" title="pyorc.Video.camera_config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rainbow Sensing.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

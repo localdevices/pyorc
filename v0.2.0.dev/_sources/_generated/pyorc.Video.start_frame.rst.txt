@@ -1,0 +1,6 @@
+﻿pyorc.Video.start\_frame
+========================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: Video.start_frame

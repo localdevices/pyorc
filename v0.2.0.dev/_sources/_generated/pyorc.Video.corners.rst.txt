@@ -1,0 +1,6 @@
+﻿pyorc.Video.corners
+===================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: Video.corners

@@ -1,0 +1,6 @@
+﻿pyorc.Velocimetry.replace\_outliers
+===================================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Velocimetry.replace_outliers

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyorc.api.frames &mdash; pyOpenRiverCam 0.2.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pyOpenRiverCam
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyOpenRiverCam</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pyorc.api.frames</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyorc.api.frames</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span><span class="p">,</span> <span class="n">FFMpegWriter</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">.orcbase</span> <span class="kn">import</span> <span class="n">ORCBase</span>
+<span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">_frames_plot</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">const</span><span class="p">,</span> <span class="n">piv_process</span>
+
+
+<span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataarray_accessor</span><span class="p">(</span><span class="s2">&quot;frames&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Frames</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Frames</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Frames.get_piv"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.get_piv.html#pyorc.Frames.get_piv">[docs]</a>    <span class="k">def</span> <span class="nf">get_piv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to</span>
+<span class="sd">        trigger actual computation.</span>
+
+<span class="sd">        :param kwargs: dict, keyword arguments to pass to dask_piv, used to control the manner in which</span>
+<span class="sd">            openpiv.pyprocess is called.</span>
+<span class="sd">        :return: Velocimetry object (xr.Dataset), containing the PIV results in a lazy dask.array form.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">camera_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;window_size&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;window_size&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;window_size&quot;</span><span class="p">]</span>
+        <span class="c1"># forward the computation to piv</span>
+        <span class="n">dask_piv</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="n">piv_process</span><span class="o">.</span><span class="n">piv</span><span class="p">,</span> <span class="n">nout</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">s2n</span><span class="p">,</span> <span class="n">corr</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">frames_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">frames_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">for</span> <span class="n">frame_a</span><span class="p">,</span> <span class="n">frame_b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">frames_a</span><span class="p">,</span> <span class="n">frames_b</span><span class="p">):</span>
+            <span class="c1"># select the time difference in seconds</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">frame_b</span><span class="o">.</span><span class="n">time</span> <span class="o">-</span> <span class="n">frame_a</span><span class="o">.</span><span class="n">time</span>
+            <span class="c1"># perform lazy piv graph computation</span>
+            <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">_v_x</span><span class="p">,</span> <span class="n">_v_y</span><span class="p">,</span> <span class="n">_s2n</span><span class="p">,</span> <span class="n">_corr</span> <span class="o">=</span> <span class="n">dask_piv</span><span class="p">(</span>
+                <span class="n">frame_a</span><span class="p">,</span>
+                <span class="n">frame_b</span><span class="p">,</span>
+                <span class="n">res_x</span><span class="o">=</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                <span class="n">res_y</span><span class="o">=</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                <span class="n">dt</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+                <span class="n">search_area_size</span><span class="o">=</span><span class="n">camera_config</span><span class="o">.</span><span class="n">window_size</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># append to result</span>
+            <span class="n">v_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_v_x</span><span class="p">),</span> <span class="n">v_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_v_y</span><span class="p">),</span> <span class="n">s2n</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_s2n</span><span class="p">),</span> <span class="n">corr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_corr</span><span class="p">)</span>
+        <span class="c1"># compute one sample for the spacing</span>
+        <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">_v_x</span><span class="p">,</span> <span class="n">_v_y</span><span class="p">,</span> <span class="n">_s2n</span><span class="p">,</span> <span class="n">_corr</span> <span class="o">=</span> <span class="n">piv_process</span><span class="o">.</span><span class="n">piv</span><span class="p">(</span>
+            <span class="n">frame_a</span><span class="p">,</span>
+            <span class="n">frame_b</span><span class="p">,</span>
+            <span class="n">res_x</span><span class="o">=</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">res_y</span><span class="o">=</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">dt</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+            <span class="n">search_area_size</span><span class="o">=</span><span class="n">camera_config</span><span class="o">.</span><span class="n">window_size</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># extract global attributes from origin</span>
+        <span class="n">global_attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># frame to frame differences</span>
+        <span class="c1"># retrieve the x and y-axis belonging to the results</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_axes</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="c1"># convert in projected and latlon coordinates</span>
+        <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_xs_ys</span><span class="p">(</span>
+            <span class="n">cols</span><span class="p">,</span>
+            <span class="n">rows</span><span class="p">,</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">camera_config</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">):</span>
+            <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_lons_lats</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lons</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">lats</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># compute row and column position of vectors in original reprojected background image col/row coordinates</span>
+        <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xy_to_perspective</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+        <span class="c1"># ensure y coordinates start at the top in the right orientation (different from order of a CRS)</span>
+        <span class="n">shape_y</span><span class="p">,</span> <span class="n">shape_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span>
+        <span class="n">yp</span> <span class="o">=</span> <span class="n">shape_y</span> <span class="o">-</span> <span class="n">yp</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span>
+        <span class="p">}</span>
+        <span class="c1"># establish the full xr.Dataset</span>
+        <span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">s2n</span><span class="p">,</span> <span class="n">corr</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">helpers</span><span class="o">.</span><span class="n">delayed_to_da</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span>
+                <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+                <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">s2n</span><span class="p">,</span> <span class="n">corr</span><span class="p">),</span> <span class="n">const</span><span class="o">.</span><span class="n">PIV_ATTRS</span><span class="o">.</span><span class="n">items</span><span class="p">())]</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">,</span> <span class="n">s2n</span><span class="p">,</span> <span class="n">corr</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
+        <span class="c1"># prepare the xs, ys, lons and lats grids for geographical projections and add to xr.Dataset</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">add_xy_coords</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">],</span>
+            <span class="n">coords</span><span class="p">,</span>
+            <span class="p">{</span><span class="o">**</span><span class="n">const</span><span class="o">.</span><span class="n">PERSPECTIVE_ATTRS</span><span class="p">,</span> <span class="o">**</span><span class="n">const</span><span class="o">.</span><span class="n">GEOGRAPHICAL_ATTRS</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="c1"># add piv object functionality and attrs to dataset and return</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">global_attrs</span><span class="p">)</span>
+        <span class="c1"># in case window_size was changed, overrule the camera_config attribute</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="n">camera_config</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+        <span class="c1"># set encoding</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">set_encoding</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ds</span></div>
+
+
+<div class="viewcode-block" id="Frames.project"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.project.html#pyorc.Frames.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project frames into a projected frames object, with information from the camera_config attr.</span>
+<span class="sd">        This requires that the CameraConfig contains full gcp information and a coordinate reference system (crs).</span>
+
+<span class="sd">        :return: frames: xr.DataArray with projected frames and x and y in local coordinate system (origin: top-left)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># retrieve the M and shape from camera config with said h_a</span>
+        <span class="n">camera_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">shape</span>
+        <span class="c1"># get orthoprojected frames as delayed objects</span>
+        <span class="n">get_ortho</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">get_ortho</span><span class="p">)</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_ortho</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">shape</span><span class="p">)),</span> <span class="n">flags</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_AREA</span><span class="p">)</span> <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">]</span>
+        <span class="c1"># prepare axes</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="o">*</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),</span>
+            <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="o">*</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="c1"># retrieve all coordinates we may ever need for further analysis or plotting</span>
+        <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_xs_ys</span><span class="p">(</span>
+            <span class="n">cols</span><span class="p">,</span>
+            <span class="n">rows</span><span class="p">,</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">camera_config</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">):</span>
+            <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_lons_lats</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lons</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">lats</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Setup coordinates</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span>
+        <span class="p">}</span>
+        <span class="c1"># add a coordinate if RGB frames are used</span>
+        <span class="k">if</span> <span class="s2">&quot;rgb&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;rgb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="c1"># prepare a dask data array</span>
+        <span class="n">frames_proj</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">delayed_to_da</span><span class="p">(</span>
+            <span class="n">imgs</span><span class="p">,</span>
+            <span class="n">shape</span><span class="p">,</span>
+            <span class="s2">&quot;uint8&quot;</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+            <span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span>
+        <span class="p">)</span>
+        <span class="c1"># remove time coordinate for the spatial variables (and rgb in case rgb frames are used)</span>
+        <span class="k">del</span> <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;rgb&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;rgb&quot;</span><span class="p">]</span>
+        <span class="c1"># add coordinate meshes to projected frames and return</span>
+        <span class="n">frames_proj</span> <span class="o">=</span> <span class="n">frames_proj</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">add_xy_coords</span><span class="p">([</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">],</span> <span class="n">coords</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">GEOGRAPHICAL_ATTRS</span><span class="p">)</span>
+        <span class="c1"># in case resolution was changed, overrule the camera_config attribute</span>
+        <span class="n">frames_proj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">camera_config</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">frames_proj</span></div>
+
+
+    <span class="k">def</span> <span class="nf">landmask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dilate_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much</span>
+<span class="sd">        higher than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation</span>
+<span class="sd">        operation is used to make the land mask slightly larger than the exact defined pixels.</span>
+
+<span class="sd">        :param dilate_iter: int, number of dilation iterations to use, to dilate land mask</span>
+<span class="sd">        :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower</span>
+<span class="sd">            number to speed up calculation, default: 15 (which is normally sufficient and fast enough).</span>
+<span class="sd">        :return: xr.DataArray, filtered frames</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time_interval</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="o">/</span><span class="n">samples</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">time_interval</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Amount of frames is too small to provide </span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s2"> samples&quot;</span>
+        <span class="c1"># ensure attributes are kept</span>
+        <span class="n">xr</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># compute standard deviation over mean, assuming this value is low over water, and high over land</span>
+        <span class="n">std_norm</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[::</span><span class="n">time_interval</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[::</span><span class="n">time_interval</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="c1"># retrieve a simple 3x3 equal weight kernel</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">getStructuringElement</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">MORPH_RECT</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="c1"># dilate the std_norm by some dilation iterations</span>
+        <span class="n">dilate_std_norm</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">std_norm</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">dilate_iter</span><span class="p">)</span>
+        <span class="c1"># rescale result to typical uint8 0-255 range</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">dilate_std_norm</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">NORM_MINMAX</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">CV_32F</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="c1"># threshold with Otsu thresholding</span>
+        <span class="n">ret</span><span class="p">,</span> <span class="n">thres</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_BINARY</span> <span class="o">+</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_OTSU</span><span class="p">)</span>
+        <span class="c1"># mask is where thres is</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">thres</span> <span class="o">!=</span> <span class="mi">255</span>
+        <span class="c1"># make mask 3-dimensional</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Frames.normalize"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.normalize.html#pyorc.Frames.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and</span>
+<span class="sd">        helps to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and</span>
+<span class="sd">        partly shaded parts.</span>
+
+<span class="sd">        :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower</span>
+<span class="sd">            number to speed up calculation, default: 15 (which is normally sufficient and fast enough).</span>
+<span class="sd">        :return: xr.DataArray, filtered frames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time_interval</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span> <span class="o">/</span> <span class="n">samples</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">time_interval</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Amount of frames is too small to provide </span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s2"> samples&quot;</span>
+        <span class="c1"># ensure attributes are kept</span>
+        <span class="n">xr</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[::</span><span class="n">time_interval</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">frames_reduce</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean</span>
+        <span class="n">frames_min</span> <span class="o">=</span> <span class="n">frames_reduce</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">frames_max</span> <span class="o">=</span> <span class="n">frames_reduce</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">frames_norm</span> <span class="o">=</span> <span class="p">((</span><span class="n">frames_reduce</span> <span class="o">-</span> <span class="n">frames_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">frames_max</span> <span class="o">-</span> <span class="n">frames_min</span><span class="p">)</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">frames_norm</span></div>
+
+
+<div class="viewcode-block" id="Frames.edge_detect"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect">[docs]</a>    <span class="k">def</span> <span class="nf">edge_detect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stride_1</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">stride_2</span><span class="o">=</span><span class="mi">9</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved</span>
+<span class="sd">        images and computes their difference to detect edges.</span>
+
+<span class="sd">        :param stride_1: int, stride to use for first gaussian blur filter</span>
+<span class="sd">        :param stride_2: int, stride to use for second gaussian blur filter</span>
+<span class="sd">        :return: xr.DataArray, filtered frames (i.e. difference between first and second gaussian convolution)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">convert_edge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">stride_1</span><span class="p">,</span> <span class="n">stride_2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">values</span>
+            <span class="c1"># load values here</span>
+            <span class="n">blur1</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">GaussianBlur</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">stride_1</span><span class="p">,</span> <span class="n">stride_1</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">blur2</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">GaussianBlur</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">stride_2</span><span class="p">,</span> <span class="n">stride_2</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">blur2</span> <span class="o">-</span> <span class="n">blur1</span>
+            <span class="k">return</span> <span class="n">edges</span>
+
+        <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># single-frame shape does not change</span>
+        <span class="n">da_convert_edge</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="n">convert_edge</span><span class="p">)</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">da_convert_edge</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">stride_1</span><span class="p">,</span> <span class="n">stride_2</span><span class="p">)</span> <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">]</span>
+        <span class="c1"># prepare axes</span>
+        <span class="c1"># Setup coordinates</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">x</span>
+        <span class="p">}</span>
+        <span class="c1"># add a coordinate if RGB frames are used</span>
+        <span class="n">frames_edge</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">delayed_to_da</span><span class="p">(</span>
+            <span class="n">imgs</span><span class="p">,</span>
+            <span class="n">shape</span><span class="p">,</span>
+            <span class="s2">&quot;float32&quot;</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+            <span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;edges&quot;</span><span class="p">,</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;xp&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">:</span>
+            <span class="n">frames_edge</span><span class="p">[</span><span class="s2">&quot;xp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;xp&quot;</span><span class="p">]</span>
+            <span class="n">frames_edge</span><span class="p">[</span><span class="s2">&quot;yp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;yp&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">frames_edge</span></div>
+
+
+    <span class="k">def</span> <span class="nf">reduce_rolling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use `normalize`).</span>
+
+<span class="sd">        :param samples: number of samples per rolling</span>
+<span class="sd">        :return: xr.DataArray, filtered frames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">roll_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">samples</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Amount of frames is smaller than requested rolling of </span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s2"> samples&quot;</span>
+        <span class="c1"># ensure attributes are kept</span>
+        <span class="n">xr</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># normalize = dask.delayed(cv2.normalize)</span>
+        <span class="n">frames_reduce</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">-</span> <span class="n">roll_mean</span>
+        <span class="n">frames_thres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">frames_reduce</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># # normalize</span>
+        <span class="n">frames_norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">frames_thres</span> <span class="o">*</span> <span class="mi">255</span> <span class="o">/</span> <span class="n">frames_thres</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
+        <span class="n">frames_norm</span> <span class="o">=</span> <span class="n">frames_norm</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">roll_mean</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">frames_norm</span>
+
+
+<div class="viewcode-block" id="Frames.to_ani"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani">[docs]</a>    <span class="k">def</span> <span class="nf">to_ani</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">figure_kwargs</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">FIGURE_ARGS</span><span class="p">,</span> <span class="n">video_kwargs</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">VIDEO_ARGS</span><span class="p">,</span> <span class="n">anim_kwargs</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">ANIM_ARGS</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store an animation of the frames in the object</span>
+
+<span class="sd">        :param fn: str, filename to which animation is stored</span>
+<span class="sd">        :param figure_kwargs: dict, keyword args passed to ``matplotlib.pyplot.figure``</span>
+<span class="sd">        :param video_kwargs:  dict, optional, keyword arguments passed to ``save`` method of animation,</span>
+<span class="sd">            containing parameters such as the frame rate, dpi and codec settings to use.</span>
+<span class="sd">        :param anim_kwargs: dict, optional, keyword arguments passed to ``matplotlib.animation.FuncAnimation``</span>
+<span class="sd">            to control the animation.</span>
+<span class="sd">        :param kwargs: dict, optional, keyword arguments to pass to ``matplotlib.pyplot.imshow``</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
+            <span class="c1"># set imshow data to values in the first frame</span>
+            <span class="n">im</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">ax</span>  <span class="c1"># line,</span>
+
+        <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="c1"># set imshow data to values in the current frame</span>
+            <span class="n">im</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">ax</span>
+
+        <span class="c1"># setup a standard 16/9 borderless window with black background</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="o">**</span><span class="n">figure_kwargs</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+        <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">anim</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">animate</span><span class="p">,</span> <span class="n">init_func</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">))),</span> <span class="o">**</span><span class="n">anim_kwargs</span>
+        <span class="p">)</span>
+        <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">**</span><span class="n">video_kwargs</span><span class="p">)</span></div>
+
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">_frames_plot</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rainbow Sensing.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

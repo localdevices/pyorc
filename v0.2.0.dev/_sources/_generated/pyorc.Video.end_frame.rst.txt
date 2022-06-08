@@ -1,0 +1,6 @@
+﻿pyorc.Video.end\_frame
+======================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: Video.end_frame

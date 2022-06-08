@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; pyOpenRiverCam 0.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API reference" href="api.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyOpenRiverCam
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#user-install">User install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developer-install">Developer install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-of-exiftool-for-metadata-extraction">Installation of exiftool for metadata extraction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyOpenRiverCam</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
+<section id="user-install">
+<h2>User install<a class="headerlink" href="#user-install" title="Permalink to this heading"></a></h2>
+<p>ODMax can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>.</p>
+<p>To install ODMax open a console, activate a python virtual environment if you wish and do:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install odmax
+</pre></div>
+</div>
+<p>This will install the library, API and command-line utility of ODMax.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For windows users, it may be difficult to get geographic libraries installed with the normal pip install procedure.
+For windows users we therefore recommend that you follow the Developer install instructions and setup a <code class="docutils literal notranslate"><span class="pre">conda</span></code>
+environment using the <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> delivered with the code. This environment includes geopandas and cartopy.
+After that follow the instructions above from within the established environment. We will deliver a conda package
+soon so that you can simply install with <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">odmax</span></code>.</p>
+</div>
+</section>
+<section id="developer-install">
+<h2>Developer install<a class="headerlink" href="#developer-install" title="Permalink to this heading"></a></h2>
+<p>If you want to download ODMax directly from git to easily have access to the latest developments or
+make changes to the code you can use the following steps.</p>
+<p>First, clone ODMax’s <code class="docutils literal notranslate"><span class="pre">git</span></code> repo from
+<a class="reference external" href="https://github.com/localdevices/ODMax.git">github</a>, then navigate into the
+the code folder as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone https://github.com/localdevices/ODMax.git
+<span class="gp">$ </span><span class="nb">cd</span> ODMax
+</pre></div>
+</div>
+<p>Then, make and activate a new python environment if you wish, or use your base environment.
+After that, build and install odmax for development using <code class="docutils literal notranslate"><span class="pre">pip</span></code> as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install -e .
+</pre></div>
+</div>
+</section>
+<section id="installation-of-exiftool-for-metadata-extraction">
+<h2>Installation of exiftool for metadata extraction<a class="headerlink" href="#installation-of-exiftool-for-metadata-extraction" title="Permalink to this heading"></a></h2>
+<p>Especially for photogrammetry or 360 streetview applications, it is essential to have time stamps and geographical
+coordinates embedded in the extracted stills. ODMax automatically extracts such information from 360-video files if
+these are recorded by the device used. In order to do this, ODMax requires <code class="docutils literal notranslate"><span class="pre">exiftool</span></code> to be installed and available on
+the path. To install <code class="docutils literal notranslate"><span class="pre">exiftool</span></code> in Windows, please follow the download and installation instructions for Windows on
+<a class="reference external" href="https://exiftool.org/install.html">https://exiftool.org/install.html</a>. For Linux, you can also follow the download and installation instructions, or simply
+acquire a stable version from the package manager of your installed distribution. E.g. for Ubuntu users, you can easily
+install <code class="docutils literal notranslate"><span class="pre">exiftool</span></code> as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>sudo apt update
+<span class="gp">$ </span>sudo apt install libimage-exiftool-perl
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For windows installation, please make sure to rename <code class="docutils literal notranslate"><span class="pre">exiftool(k).exe</span></code> to <code class="docutils literal notranslate"><span class="pre">exiftool.exe</span></code> and make sure
+<code class="docutils literal notranslate"><span class="pre">exiftool.exe</span></code> is located in a folder that is part of your <code class="docutils literal notranslate"><span class="pre">PATH</span></code> environment variable. If you do not know how
+to get a folder added to your <code class="docutils literal notranslate"><span class="pre">PATH</span></code> then simply ensure that you copy the exiftool(k).exe to <code class="docutils literal notranslate"><span class="pre">C:\WINDOWS</span></code>
+and rename it after that to <code class="docutils literal notranslate"><span class="pre">exiftool.exe</span></code>.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rainbow Sensing.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+﻿pyorc.Frames.normalize
+======================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Frames.normalize

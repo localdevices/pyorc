@@ -1,0 +1,6 @@
+﻿pyorc.Frames.edge\_detect
+=========================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Frames.edge_detect

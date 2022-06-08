@@ -1,0 +1,25 @@
+﻿pyorc.Velocimetry.plot
+======================
+
+.. currentmodule:: pyorc
+
+.. autoclass:: Velocimetry.plot
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Velocimetry.plot.__init__
+      ~Velocimetry.plot.get_uv_camera
+      ~Velocimetry.plot.get_uv_geographical
+      ~Velocimetry.plot.get_uv_local
+   
+   
+
+   
+   
+   

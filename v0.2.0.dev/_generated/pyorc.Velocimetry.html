@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyorc.Velocimetry &mdash; pyOpenRiverCam 0.2.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyorc.Velocimetry.filter_temporal" href="pyorc.Velocimetry.filter_temporal.html" />
+    <link rel="prev" title="pyorc.Frames.plot" href="pyorc.Frames.plot.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pyOpenRiverCam
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#video-class">Video class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#frames-subclass">Frames subclass</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#velocimetry-subclass">Velocimetry subclass</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyorc.Velocimetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html">pyorc.Velocimetry.filter_temporal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html">pyorc.Velocimetry.filter_temporal_angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html">pyorc.Velocimetry.filter_temporal_neighbour</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html">pyorc.Velocimetry.filter_temporal_std</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html">pyorc.Velocimetry.filter_temporal_velocity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html">pyorc.Velocimetry.filter_temporal_corr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html">pyorc.Velocimetry.filter_spatial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html">pyorc.Velocimetry.filter_spatial_nan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html">pyorc.Velocimetry.filter_spatial_median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html">pyorc.Velocimetry.set_encoding</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#transect-subclass">Transect subclass</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyOpenRiverCam</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API reference</a> &raquo;</li>
+      <li>pyorc.Velocimetry</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_generated/pyorc.Velocimetry.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="pyorc-velocimetry">
+<h1>pyorc.Velocimetry<a class="headerlink" href="#pyorc-velocimetry" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyorc.Velocimetry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Velocimetry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/velocimetry.html#Velocimetry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Velocimetry" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pyorc.Velocimetry.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/velocimetry.html#Velocimetry.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Velocimetry.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyorc.Velocimetry.__init__" title="pyorc.Velocimetry.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(xarray_obj)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_xy_coords</span></code>(xy_coord_data, coords, attrs_dict)</p></td>
+<td><p>add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html#pyorc.Velocimetry.filter_spatial" title="pyorc.Velocimetry.filter_spatial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial</span></code></a>([v_x, v_y, filter_nan, ...])</p></td>
+<td><p>Masks velocity values on a number of spatial filters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median" title="pyorc.Velocimetry.filter_spatial_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_median</span></code></a>([v_x, v_y])</p></td>
+<td><p>Masks values when their value deviates more than x standard deviations from the median of its neighbours (inc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan" title="pyorc.Velocimetry.filter_spatial_nan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_nan</span></code></a>([v_x, v_y])</p></td>
+<td><p>Masks values if their surrounding neighbours (inc.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html#pyorc.Velocimetry.filter_temporal" title="pyorc.Velocimetry.filter_temporal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal</span></code></a>([v_x, v_y, filter_std, ...])</p></td>
+<td><p>Masks values using several filters that use temporal variations or comparison as basis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html#pyorc.Velocimetry.filter_temporal_angle" title="pyorc.Velocimetry.filter_temporal_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_angle</span></code></a>([v_x, v_y, ...])</p></td>
+<td><p>filters on the expected angle.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html#pyorc.Velocimetry.filter_temporal_corr" title="pyorc.Velocimetry.filter_temporal_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_corr</span></code></a>([v_x, v_y, corr, tolerance])</p></td>
+<td><p>Masks values with a too low correlation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html#pyorc.Velocimetry.filter_temporal_neighbour" title="pyorc.Velocimetry.filter_temporal_neighbour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_neighbour</span></code></a>([v_x, v_y, roll, ...])</p></td>
+<td><p>Masks values if neighbours over a certain rolling length before and after, have a significantly higher velocity than value under consideration, measured by tolerance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html#pyorc.Velocimetry.filter_temporal_std" title="pyorc.Velocimetry.filter_temporal_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_std</span></code></a>([v_x, v_y, ...])</p></td>
+<td><p>Masks values if they deviate more than x standard deviations from the mean.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html#pyorc.Velocimetry.filter_temporal_velocity" title="pyorc.Velocimetry.filter_temporal_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_velocity</span></code></a>([v_x, v_y, s_min, ...])</p></td>
+<td><p>Masks values if the velocity scalar lies outside a user-defined valid range.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transect</span></code></a>(x, y[, z, crs, v_eff, xs, ys, ...])</p></td>
+<td><p>Interpolate all variables to supplied x and y coordinates of a cross section.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_outliers</span></code></a>([v_x, v_y, stride, ...])</p></td>
+<td><p>Replace missing values using neighbourhood operators.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_camera_config</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_encoding</span></code></a>([enc_pars])</p></td>
+<td><p>Set encoding parameters for all typical variables in a velocimetry dataset.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_config</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_shape</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_a</span></code></p></td>
+<td><p>Deserialize h_a from the underlying object</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyorc.Frames.plot.html" class="btn btn-neutral float-left" title="pyorc.Frames.plot" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyorc.Velocimetry.filter_temporal.html" class="btn btn-neutral float-right" title="pyorc.Velocimetry.filter_temporal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rainbow Sensing.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

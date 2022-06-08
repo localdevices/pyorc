@@ -1,0 +1,6 @@
+﻿pyorc.Frames.get\_piv
+=====================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Frames.get_piv

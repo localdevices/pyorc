@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; pyOpenRiverCam 0.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Welcome to pyOpenRiverCam’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyOpenRiverCam
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pyopenrivercam-in-a-nutshell">pyOpenRiverCam in a nutshell</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyOpenRiverCam</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/intro.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
+<section id="pyopenrivercam-in-a-nutshell">
+<h2>pyOpenRiverCam in a nutshell<a class="headerlink" href="#pyopenrivercam-in-a-nutshell" title="Permalink to this heading"></a></h2>
+<p>pyOpenRiverCam is a Application Programming Interface (API) to preprocess, reproject, and analyze videos of rivers, in order
+to estimate river flows. Below we provide an overview of all functionalities in a nutshell:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 69%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="line-block">
+<div class="line">Create geographical</div>
+<div class="line">awareness of your</div>
+<div class="line">videos using your</div>
+<div class="line">own field</div>
+<div class="line">observations</div>
+</div>
+</td>
+<td><img alt="_images/wark_cam_config.jpg" src="_images/wark_cam_config.jpg" />
+</td>
+</tr>
+<tr class="row-odd"><td><div class="line-block">
+<div class="line">Extract frames</div>
+<div class="line">your original video</div>
+<div class="line">into a array-like</div>
+<div class="line">manageable format</div>
+<div class="line">using the xarray</div>
+<div class="line">library.</div>
+</div>
+</td>
+<td><img alt="_images/video_orig.gif" src="_images/video_orig.gif" />
+</td>
+</tr>
+<tr class="row-even"><td><div class="line-block">
+<div class="line">Enhance frames to</div>
+<div class="line">improve visibility</div>
+<div class="line">of tracers</div>
+</div>
+</td>
+<td><img alt="_images/video_norm.gif" src="_images/video_norm.gif" />
+</td>
+</tr>
+<tr class="row-odd"><td><div class="line-block">
+<div class="line">Reproject frames</div>
+<div class="line">to meters-distance</div>
+<div class="line">planar views</div>
+</div>
+</td>
+<td><img alt="_images/video_norm_proj.gif" src="_images/video_norm_proj.gif" />
+</td>
+</tr>
+<tr class="row-even"><td><div class="line-block">
+<div class="line">Enhance gradients</div>
+<div class="line">for improved feature</div>
+<div class="line">detection</div>
+</div>
+</td>
+<td><img alt="_images/video_edge.gif" src="_images/video_edge.gif" />
+</td>
+</tr>
+<tr class="row-odd"><td><div class="line-block">
+<div class="line">Estimate flow</div>
+<div class="line">velocity at the</div>
+<div class="line">water surface</div>
+</div>
+</td>
+<td><img alt="_images/wark_streamplot.jpg" src="_images/wark_streamplot.jpg" />
+</td>
+</tr>
+<tr class="row-even"><td><div class="line-block">
+<div class="line">Estimate river</div>
+<div class="line">discharge over a</div>
+<div class="line">supplied cross-</div>
+<div class="line">section</div>
+</div>
+</td>
+<td><img alt="_images/wark_discharge.jpg" src="_images/wark_discharge.jpg" />
+</td>
+</tr>
+<tr class="row-odd"><td><div class="line-block">
+<div class="line">Export preprocessed</div>
+<div class="line">frames to animation</div>
+</div>
+</td>
+<td><div class="line-block">
+<div class="line">Above examples were generated with this export</div>
+<div class="line">functionality</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="line-block">
+<div class="line">Plot combined</div>
+<div class="line">views using</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">matplotlib</span></code></div>
+<div class="line">convenience methods</div>
+<div class="line">in local, camera</div>
+<div class="line">or geographical</div>
+<div class="line">perspectives</div>
+</div>
+</td>
+<td><img alt="_images/wark_cam_persp.jpg" src="_images/wark_cam_persp.jpg" />
+</td>
+</tr>
+<tr class="row-odd"><td><div class="line-block">
+<div class="line">Perform scientific</div>
+<div class="line">analysis and store</div>
+<div class="line">results to files</div>
+<div class="line">with <code class="docutils literal notranslate"><span class="pre">xarray</span></code> data</div>
+<div class="line">models</div>
+</div>
+</td>
+<td><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># perform piv analysis on treated frames</span>
+<span class="n">piv</span> <span class="o">=</span> <span class="n">preprocessed</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">get_piv</span><span class="p">()</span>
+<span class="c1"># filter piv results with pyorc filters</span>
+<span class="n">piv_filt</span> <span class="o">=</span> <span class="n">piv</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">filter_temporal</span><span class="p">()</span>
+<span class="c1"># get mean over time using xarray funcs</span>
+<span class="n">piv_mean</span> <span class="o">=</span> <span class="n">piv_filt</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+    <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="c1"># store results to netcdf using xarray</span>
+<span class="n">piv</span><span class="o">.</span><span class="n">_mean</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="s2">&quot;my_first_piv.nc&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Documentation is currently being established. Please come back later for more information.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to pyOpenRiverCam’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rainbow Sensing.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

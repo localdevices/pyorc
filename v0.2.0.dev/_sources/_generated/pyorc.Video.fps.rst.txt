@@ -1,0 +1,6 @@
+﻿pyorc.Video.fps
+===============
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: Video.fps
