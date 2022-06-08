@@ -83,3 +83,8 @@ ENCODING_PARAMS = {
 
 ENCODE_VARS = ["v_x", "v_y", "corr", "s2n"]
 ENCODING = {k: ENCODING_PARAMS for k in ENCODE_VARS}
+
+FIGURE_ARGS = {
+    "figsize": (16, 9),
+    "frameon": False,
+}

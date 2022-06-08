@@ -129,7 +129,6 @@ class Frames(ORCBase):
             camera_config.resolution = resolution
         M = camera_config.get_M(self.h_a)
         shape = camera_config.shape
-        print(shape)
         # get orthoprojected frames as delayed objects
         get_ortho = dask.delayed(cv.get_ortho)
         imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in self._obj]
@@ -276,7 +275,7 @@ class Frames(ORCBase):
         frames_edge = helpers.delayed_to_da(
             imgs,
             shape,
-            "uint8",
+            "float32",
             coords=coords,
             attrs=self._obj.attrs,
             name="edges",
@@ -308,7 +307,7 @@ class Frames(ORCBase):
         return frames_norm
 
 
-    def to_ani(self, fn, video_kwargs=const.VIDEO_ARGS, anim_kwargs=const.ANIM_ARGS, **kwargs):
+    def to_ani(self, fn, figure_kwargs=const.FIGURE_ARGS, video_kwargs=const.VIDEO_ARGS, anim_kwargs=const.ANIM_ARGS, **kwargs):
         def init():
             # set imshow data to values in the first frame
             im.set_data(self._obj[0])
@@ -320,7 +319,7 @@ class Frames(ORCBase):
             return ax
 
         # setup a standard 16/9 borderless window with black background
-        f = plt.figure(figsize=(16, 9), frameon=False)
+        f = plt.figure(**figure_kwargs)
         f.set_size_inches(16, 9, True)
         f.patch.set_facecolor("k")
         f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
