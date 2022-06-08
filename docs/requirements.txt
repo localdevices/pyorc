@@ -1,0 +1,7 @@
+sphinxcontrib-programoutput
+ipykernel
+nbsphinx
+sphinx-gallery
+pandoc
+opencv-python-headless
+matplotlib
