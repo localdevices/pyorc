@@ -88,8 +88,8 @@ class Velocimetry(ORCBase):
         :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
         :param v_x: str, name of x-directional velocity
         :param v_y: str, name of y-directional velocity
-        :param angle_expected float, angle (0-2*pi), measured clock-wise from vertical upwards direction, expected
-            in the velocites, default: 0.5*np.pi (meaning from left to right)
+        :param angle_expected: float, angle (0-2*pi), measured clock-wise from vertical upwards direction, expected
+            in the velocities, default: 0.5*np.pi (meaning from left to right)
         :param angle_tolerance: float (0-2*pi) maximum deviation from expected angle allowed.
         :param filter_per_timestep: if set to True, tolerances are also checked per individual time step
         :return: xr.Dataset, containing angle filtered velocity vectors as [time, y, x], default: True
@@ -476,6 +476,14 @@ class Velocimetry(ORCBase):
             ds[v_y][:] = v
             return ds
 
-    def set_encoding(self):
+    def set_encoding(self, enc_pars=const.ENCODING_PARAMS):
+        """
+        Set encoding parameters for all typical variables in a velocimetry dataset. This reduces the required storage
+        for this dataset significantly, when stored to disk in e.g. a netcdf file using ``xarray.Dataset.to_netcdf``.
+
+        :param enc_pars: dict, optional, per variable, a dict containing encoding parameters. When called without
+            input, a standard set of encoding parameters is used that compresses well.
+        :return:
+        """
         for k in const.ENCODE_VARS:
-            self._obj[k].encoding = const.ENCODING_PARAMS
+            self._obj[k].encoding = enc_pars

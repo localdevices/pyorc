@@ -142,8 +142,8 @@ def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
         For "camera", a non-projected frames set should be used.
     :param ax: matplotlib axes object, optional
         If ``None``, use the current axes. Not applicable when using facets.
-    :param *args: optional, additional arguments, passed to wrapped Matplotlib function.
-    :param **kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
+    :param args: optional, additional arguments, passed to wrapped Matplotlib function.
+    :param kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
     :return: mappable of matplotlib.collections.QuadMesh type
     """
     # prepare axes
@@ -297,7 +297,7 @@ class _Velocimetry_PlotMethods:
         self.velocimetry = velocimetry
         self._obj = velocimetry._obj
         # Add to class _PlotMethods
-        setattr(_Velocimetry_PlotMethods, "quiver", _quiver)
+        setattr(_Velocimetry_PlotMethods, "quiver", quiver)
         setattr(_Velocimetry_PlotMethods, "pcolormesh", _pcolormesh)
         setattr(_Velocimetry_PlotMethods, "scatter", _scatter)
         setattr(_Velocimetry_PlotMethods, "streamplot", _streamplot)
@@ -379,6 +379,7 @@ class _Velocimetry_PlotMethods:
         u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
         s = ((self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5).values
         return u, v, s
+
 
 
 @_base_plot

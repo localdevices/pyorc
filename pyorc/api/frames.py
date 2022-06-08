@@ -308,6 +308,18 @@ class Frames(ORCBase):
 
 
     def to_ani(self, fn, figure_kwargs=const.FIGURE_ARGS, video_kwargs=const.VIDEO_ARGS, anim_kwargs=const.ANIM_ARGS, **kwargs):
+        """
+        Store an animation of the frames in the object
+
+        :param fn: str, filename to which animation is stored
+        :param figure_kwargs: dict, keyword args passed to ``matplotlib.pyplot.figure``
+        :param video_kwargs:  dict, optional, keyword arguments passed to ``save`` method of animation,
+            containing parameters such as the frame rate, dpi and codec settings to use.
+        :param anim_kwargs: dict, optional, keyword arguments passed to ``matplotlib.animation.FuncAnimation``
+            to control the animation.
+        :param kwargs: dict, optional, keyword arguments to pass to ``matplotlib.pyplot.imshow``
+        :return:
+        """
         def init():
             # set imshow data to values in the first frame
             im.set_data(self._obj[0])
