@@ -9,7 +9,18 @@ from .orcbase import ORCBase
 
 @xr.register_dataset_accessor("transect")
 class Transect(ORCBase):
+    """
+    Transect functionalities that can be applied on ``xarray.Dataset``
+
+    """
+
     def __init__(self, xarray_obj):
+        """
+        Initialize a transect ``xarray.Dataset``
+
+        :param xarray_obj: xarray dataset containing transect data fields (from ``pyorc.Velocimetry.get_transect``)
+        """
+
         super(Transect, self).__init__(xarray_obj)
 
     def vector_to_scalar(self, v_x="v_x", v_y="v_y"):

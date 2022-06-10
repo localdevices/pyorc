@@ -16,8 +16,8 @@ import os
 import glob
 import sys
 import pyorc
-#from pyorc import Video
-#from pyorc.api.velocimetry import Velocimetry
+# from pyorc import Video
+# from pyorc import Velocimetry
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
@@ -38,7 +38,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'pyOpenRiverCam'
+project = 'pyorc'
 copyright = '2022, Rainbow Sensing'
 author = 'Hessel Winsemius'
 
@@ -65,7 +65,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['_templates', sphinx_autosummary_accessors.templates_path]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -79,8 +79,8 @@ master_doc = "index"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'alabaster'
-html_theme = "sphinx_rtd_theme"
+html_theme = 'pydata_sphinx_theme'
+
 autoclass_content = "both"
 autosummary_generate = True
 # Add any paths that contain custom static files (such as style sheets) here,

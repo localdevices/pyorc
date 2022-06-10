@@ -16,8 +16,8 @@ def _base_plot(plot_func):
         (i.e. produced with known CRS for control points).
     :param ax: matplotlib axes object, optional
         If ``None``, use the current axes. Not applicable when using facets.
-    :param *args: optional, additional arguments, passed to wrapped Matplotlib function.
-    :param **kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
+    :param args: optional, additional arguments, passed to wrapped Matplotlib function.
+    :param kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
     """
     # This function is largely based on xarray.Dataset function _dsplot
     # Build on the original docstring
@@ -65,7 +65,7 @@ def _base_plot(plot_func):
                     f'Dimension "quantile" exists in dataset and contains multiple values. Reduce this by selecting one'
                     f'quantile, e.g. using ds.isel(quantile=2) or ds.sel(quantile=0.5)'
                 )
-        if plot_func.__name__ == "_streamplot":
+        if plot_func.__name__ == "streamplot":
             if mode != "local":
                 raise NotImplementedError(f"Streamplot only works in local mode, not in {mode} mode.")
 
@@ -76,7 +76,7 @@ def _base_plot(plot_func):
             x = ref._obj["x"].values
             y = ref._obj["y"].values
             u, v, s = ref.get_uv_local()
-            if plot_func.__name__ == "_streamplot":
+            if plot_func.__name__ == "streamplot":
                 # flipping of variables is needed
                 y = np.flipud(y)
                 u = np.flipud(u)
@@ -98,7 +98,7 @@ def _base_plot(plot_func):
             x = ref._obj["xp"].values
             y = ref._obj["yp"].values
             u, v, s = ref.get_uv_camera()
-        if plot_func.__name__ in ["_quiver", "_streamplot"]:
+        if plot_func.__name__ in ["quiver", "streamplot"]:
             primitive = plot_func(x, y, u, v, s, ax, *args, **kwargs)
         else:
             primitive = plot_func(x, y, s, ax, *args, **kwargs)
@@ -206,8 +206,6 @@ class _Transect_PlotMethods:
         self.transect = transect
         self._obj = transect._obj
         # Add to class _PlotMethods
-        setattr(_Transect_PlotMethods, "quiver", _quiver)
-        setattr(_Transect_PlotMethods, "scatter", _scatter)
 
     def __call__(self, method="quiver", *args, **kwargs):
         """
@@ -291,16 +289,11 @@ class _Velocimetry_PlotMethods:
     Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
     For example, Dataset.velocimetry.plot.pcolormesh
     """
-
     def __init__(self, velocimetry):
         # make the original dataset also available on the plotting object
         self.velocimetry = velocimetry
         self._obj = velocimetry._obj
         # Add to class _PlotMethods
-        setattr(_Velocimetry_PlotMethods, "quiver", quiver)
-        setattr(_Velocimetry_PlotMethods, "pcolormesh", _pcolormesh)
-        setattr(_Velocimetry_PlotMethods, "scatter", _scatter)
-        setattr(_Velocimetry_PlotMethods, "streamplot", _streamplot)
 
     def __call__(self, method="quiver", *args, **kwargs):
         """
@@ -381,9 +374,8 @@ class _Velocimetry_PlotMethods:
         return u, v, s
 
 
-
 @_base_plot
-def _quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
+def quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
     """
     Creates quiver plot from velocimetry results on new or existing axes
 
@@ -399,7 +391,7 @@ def _quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
 
 
 @_base_plot
-def _scatter(x, y, c=None, ax=None, *args, **kwargs):
+def scatter(x, y, c=None, ax=None, *args, **kwargs):
     """
     Creates scatter plot of velocimetry or transect results on new or existing axes
 
@@ -410,7 +402,7 @@ def _scatter(x, y, c=None, ax=None, *args, **kwargs):
 
 
 @_base_plot
-def _streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwargs):
+def streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwargs):
     """
     Creates streamplot of velocimetry results on new or existing axes
 
@@ -429,7 +421,7 @@ def _streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwar
 
 
 @_base_plot
-def _pcolormesh(x, y, s=None, ax=None, *args, **kwargs):
+def pcolormesh(x, y, s=None, ax=None, *args, **kwargs):
     """
     Creates pcolormesh plot from velocimetry results on new or existing axes
 
@@ -492,3 +484,11 @@ def _prepare_axes(ax=None, mode="local"):
     else:
         ax = plt.subplot(111)
     return ax
+
+# add all required plot methods below
+setattr(_Velocimetry_PlotMethods, "quiver", quiver)
+setattr(_Velocimetry_PlotMethods, "pcolormesh", pcolormesh)
+setattr(_Velocimetry_PlotMethods, "scatter", scatter)
+setattr(_Velocimetry_PlotMethods, "streamplot", streamplot)
+setattr(_Transect_PlotMethods, "quiver", quiver)
+setattr(_Transect_PlotMethods, "scatter", scatter)

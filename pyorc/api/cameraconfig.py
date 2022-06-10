@@ -41,11 +41,11 @@ class CameraConfig:
             "src": list of 4 lists, with column, row locations in objective of control points.
             "dst": list of 4 lists, with x, y locations (local or global coordinate reference system) of control points.
             "h_ref": float, measured water level [m] in local reference system (e.g. from staff gauge or pressure gauge)
-                during gcp survey.
+            during gcp survey.
             "z_0": float, water level [m] in global reference system (e.g. from used GPS system CRS). This must be in
-                the same vertical reference as the measured bathymetry and other survey points.
+            the same vertical reference as the measured bathymetry and other survey points.
             "crs": int, str or CRS object, CRS in which "dst" points are measured. If None, a local coordinate system is
-                assumed (e.g. from spirit level).
+            assumed (e.g. from spirit level).
         :param lens_pars: dict, containing:
             "k1": float, barrel lens distortion parameter (default: 0.)
             "c": float, optical center (default: 2.)
@@ -75,11 +75,22 @@ class CameraConfig:
 
     @property
     def bbox(self):
+        """
+        Return the best fitting bounding box orthoprojected coordinates from camera perspective coordinates provided
+        in property ``pyorc.CameraConfig.corners``
+
+        :return: shapely.geometry.Polygon object containing bbox
+        """
         assert (hasattr(self, "corners")), "CameraConfig object has no corners, set these with CameraConfig.set_corners"
         return cv.get_aoi(self.gcps["src"], self.gcps["dst"], self.corners).__str__()
 
     @property
     def shape(self):
+        """
+        Return amount of rows and columns of orthoprojected frames retrieved with ``pyorc.Video.project``
+
+        :return: int, int, containin rows, columns
+        """
         cols, rows = cv.get_shape(
             shapely.wkt.loads(self.bbox),
             resolution=self.resolution,
@@ -89,6 +100,11 @@ class CameraConfig:
 
     @property
     def transform(self):
+        """
+        Return a rotated Affine transformation belonging to orthoprojected frames retrieved with ``pyorc.Video.project``
+
+        :return: rasterio.transform.Affine object
+        """
         bbox = shapely.wkt.loads(self.bbox)
         return cv.get_transform(bbox, resolution=self.resolution)
 

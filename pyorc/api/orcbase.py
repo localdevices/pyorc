@@ -10,18 +10,23 @@ class ORCBase(object):
     @property
     def h_a(self):
         """
-        Deserialize h_a from the underlying object
+        Actual water level belonging to the processed video
 
-        :return: deserialized representation of actual water level
+        :return: float, deserialized representation of actual water level
         """
         return json.loads(self._obj.h_a)
 
 
     @property
     def camera_config(self):
+        """
+        Camera configuration belonging to the processed video
+
+        :return: pyorc.CameraConfig object
+        """
         if not(hasattr(self, "_camera_config")):
             #  first set the camera config and shape
-            self.set_camera_config()
+            self._set_camera_config()
         return self._camera_config
 
     @camera_config.setter
@@ -35,6 +40,11 @@ class ORCBase(object):
 
     @property
     def camera_shape(self):
+        """
+        Shape of the original camera objective of the processed video (e.g. 1080, 1920)
+
+        :return: int, int, number of rows and columns
+        """
         return self._camera_shape
 
     @camera_shape.setter
@@ -44,13 +54,13 @@ class ORCBase(object):
         else:
             self._camera_shape = self._obj.camera_shape
 
-    def set_camera_config(self):
+    def _set_camera_config(self):
         # set the camera config
         self.camera_config = self._obj.camera_config
         self.camera_shape = self._obj.camera_shape
 
 
-    def add_xy_coords(
+    def _add_xy_coords(
         self,
         xy_coord_data,
         coords,

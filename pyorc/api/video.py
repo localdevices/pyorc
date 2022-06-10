@@ -295,7 +295,7 @@ Camera configuration: {:s}
         if len(sample.shape) == 3:
             del coords["rgb"]
         # add coordinate grids (i.e. without time)
-        frames = frames.frames.add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
+        frames = frames.frames._add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
         frames.name = "frames"
         return frames
 

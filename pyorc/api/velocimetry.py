@@ -13,7 +13,16 @@ from xarray.core import utils
 
 @xr.register_dataset_accessor("velocimetry")
 class Velocimetry(ORCBase):
+    """
+    Velocimetry functionalities that can be applied on ``xarray.Dataset``
+
+    """
     def __init__(self, xarray_obj):
+        """
+        Initialize a velocimetry ``xarray.Dataset``
+
+        :param xarray_obj: xarray dataset containing velocimetry data fields (from ``pyorc.Frames.get_piv``)
+        """
         super(Velocimetry, self).__init__(xarray_obj)
 
     def filter_temporal(

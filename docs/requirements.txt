@@ -1,7 +1,10 @@
+sphinx
+sphinx_autosummary_accessors
 sphinxcontrib-programoutput
+sphinx_rtd_theme
+pydata_sphinx_theme
 ipykernel
 nbsphinx
 sphinx-gallery
 pandoc
-opencv-python-headless
 matplotlib

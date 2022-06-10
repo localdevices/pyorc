@@ -15,7 +15,16 @@ from .. import cv, helpers, const, piv_process
 
 @xr.register_dataarray_accessor("frames")
 class Frames(ORCBase):
+    """
+    Frames functionalities that can be applied on ``xarray.DataArray``
+
+    """
     def __init__(self, xarray_obj):
+        """
+        Initialize a frames ``xarray.DataArray``
+
+        :param xarray_obj: xarray dataarray containing frames data fields (from ``pyorc.Video.get_frames``)
+        """
         super(Frames, self).__init__(xarray_obj)
 
     def get_piv(self, **kwargs):
@@ -101,7 +110,7 @@ class Frames(ORCBase):
         ds = xr.merge([v_x, v_y, s2n, corr])
         del coords["time"]
         # prepare the xs, ys, lons and lats grids for geographical projections and add to xr.Dataset
-        ds = ds.velocimetry.add_xy_coords(
+        ds = ds.velocimetry._add_xy_coords(
             [xp, yp, xs, ys, lons, lats],
             coords,
             {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
@@ -182,7 +191,7 @@ class Frames(ORCBase):
         if "rgb" in self._obj.coords:
             del coords["rgb"]
         # add coordinate meshes to projected frames and return
-        frames_proj = frames_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        frames_proj = frames_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         # in case resolution was changed, overrule the camera_config attribute
         frames_proj.attrs.update(camera_config = camera_config.to_json())
         return frames_proj
