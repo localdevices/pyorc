@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.set\_gcps
+============================
+
+.. currentmodule:: pyorc
+
+.. automethod:: CameraConfig.set_gcps

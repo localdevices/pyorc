@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.bbox
+=======================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: CameraConfig.bbox

@@ -1,0 +1,6 @@
+﻿pyorc.Transect.get\_q
+=====================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Transect.get_q

@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.set\_lens\_position
+======================================
+
+.. currentmodule:: pyorc
+
+.. automethod:: CameraConfig.set_lens_position

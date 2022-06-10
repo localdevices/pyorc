@@ -19,12 +19,13 @@ libraries or extensions to this code.
 Image: Example of pyorc velocimetry over Ngwerere river at the Zambezi Road crossing - Lusaka, Zambia.
 
 Current capabilities are:
+
 * Reading of frames and reprojection to surface
 * Velocimetry estimation at user-defined resolution
 * Discharge estimation over provided cross-section
 * Plotting of velocimetry results and cross-section flows in camera, geographical and orthoprojected perspectives.
 
-We use the well-known **xarray** data models and computation pipelines (with dask) throughout the entire library to 
+We use the well-known xarray_ data models and computation pipelines (with dask) throughout the entire library to
 guarantee an easy interoperability with other tools and methods, and allow for lazy computing. 
 
 We are seeking funding for the following frequently requested functionalities:
@@ -35,24 +36,26 @@ We are seeking funding for the following frequently requested functionalities:
 * Implementation of additional processing algorithms (STIV and LSPTV)
 
 .. note::
-   ODMax has been created by `Rainbow Sensing <https://rainbowsensing.com>`_ to support local people, with local devices and software to monitor their
-   environment. If you like ODMax, require additional functionalities or want to contact us for other work or ideas,
-   please email us on info@rainbowsensing.com
+   **pyorc** has been created by `Rainbow Sensing <https://rainbowsensing.com>`_ to support local people, with local
+   devices and software to monitor their environment. If you like **pyorc**, require additional functionalities or want
+   to contact us for other work or ideas, please email us on info@rainbowsensing.com
 
 .. note::
-   Acknowledgement: the development of pyOpenRiverCam has been funded partly by the World Meteorological Organisation and partly by in-kind contributions
-   of Rainbow Sensing.
+   Acknowledgement: the development of **pyorc** has been funded partly by the World Meteorological Organisation and
+   partly by in-kind contributions of Rainbow Sensing.
 
 * :doc:`intro`
 * :doc:`installation`
 * :doc:`api`
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    :caption: Contents:
 
    intro
    installation
    api
+
+.. _xarray: https://docs.xarray.dev/
 

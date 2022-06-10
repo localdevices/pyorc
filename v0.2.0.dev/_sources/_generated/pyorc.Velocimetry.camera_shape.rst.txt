@@ -1,0 +1,6 @@
+﻿pyorc.Velocimetry.camera\_shape
+===============================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: Velocimetry.camera_shape

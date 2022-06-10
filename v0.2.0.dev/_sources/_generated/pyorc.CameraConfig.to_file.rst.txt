@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.to\_file
+===========================
+
+.. currentmodule:: pyorc
+
+.. automethod:: CameraConfig.to_file

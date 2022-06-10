@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.to\_dict
+===========================
+
+.. currentmodule:: pyorc
+
+.. automethod:: CameraConfig.to_dict

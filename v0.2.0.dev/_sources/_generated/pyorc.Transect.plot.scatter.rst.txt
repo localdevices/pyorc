@@ -1,0 +1,6 @@
+﻿pyorc.Transect.plot.scatter
+===========================
+
+.. currentmodule:: pyorc
+
+.. autoaccessormethod:: Transect.plot.scatter

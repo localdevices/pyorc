@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.shape
+========================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: CameraConfig.shape

@@ -1,0 +1,6 @@
+﻿pyorc.Frames.h\_a
+=================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: Frames.h_a

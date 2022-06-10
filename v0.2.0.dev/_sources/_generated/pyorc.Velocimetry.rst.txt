@@ -14,7 +14,6 @@
    .. autosummary::
    
       ~Velocimetry.__init__
-      ~Velocimetry.add_xy_coords
       ~Velocimetry.filter_spatial
       ~Velocimetry.filter_spatial_median
       ~Velocimetry.filter_spatial_nan
@@ -26,7 +25,6 @@
       ~Velocimetry.filter_temporal_velocity
       ~Velocimetry.get_transect
       ~Velocimetry.replace_outliers
-      ~Velocimetry.set_camera_config
       ~Velocimetry.set_encoding
    
    

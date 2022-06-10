@@ -1,0 +1,6 @@
+﻿pyorc.Velocimetry.plot.scatter
+==============================
+
+.. currentmodule:: pyorc
+
+.. autoaccessormethod:: Velocimetry.plot.scatter

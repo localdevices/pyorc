@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.set\_corners
+===============================
+
+.. currentmodule:: pyorc
+
+.. automethod:: CameraConfig.set_corners

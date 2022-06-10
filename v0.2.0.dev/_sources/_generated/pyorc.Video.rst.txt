@@ -1,0 +1,46 @@
+﻿pyorc.Video
+===========
+
+.. currentmodule:: pyorc
+
+.. autoclass:: Video
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Video.__init__
+      ~Video.get
+      ~Video.getBackendName
+      ~Video.getExceptionMode
+      ~Video.get_frame
+      ~Video.get_frames
+      ~Video.grab
+      ~Video.isOpened
+      ~Video.open
+      ~Video.read
+      ~Video.release
+      ~Video.retrieve
+      ~Video.set
+      ~Video.setExceptionMode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Video.camera_config
+      ~Video.corners
+      ~Video.end_frame
+      ~Video.fps
+      ~Video.h_a
+      ~Video.start_frame
+   
+   

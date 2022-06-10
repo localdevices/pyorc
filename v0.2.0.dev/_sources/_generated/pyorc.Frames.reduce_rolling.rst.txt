@@ -1,0 +1,6 @@
+﻿pyorc.Frames.reduce\_rolling
+============================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Frames.reduce_rolling

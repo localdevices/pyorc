@@ -1,0 +1,6 @@
+﻿pyorc.Transect.vector\_to\_scalar
+=================================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Transect.vector_to_scalar

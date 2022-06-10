@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.get\_M
+=========================
+
+.. currentmodule:: pyorc
+
+.. automethod:: CameraConfig.get_M

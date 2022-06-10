@@ -1,0 +1,6 @@
+﻿pyorc.Velocimetry.plot.streamplot
+=================================
+
+.. currentmodule:: pyorc
+
+.. autoaccessormethod:: Velocimetry.plot.streamplot

@@ -1,0 +1,6 @@
+﻿pyorc.Transect.get\_xyz\_perspective
+====================================
+
+.. currentmodule:: pyorc
+
+.. automethod:: Transect.get_xyz_perspective

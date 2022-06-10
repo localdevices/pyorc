@@ -1,0 +1,6 @@
+﻿pyorc.CameraConfig.to\_json
+===========================
+
+.. currentmodule:: pyorc
+
+.. automethod:: CameraConfig.to_json

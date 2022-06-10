@@ -1,0 +1,6 @@
+﻿pyorc.Transect.h\_a
+===================
+
+.. currentmodule:: pyorc
+
+.. autoproperty:: Transect.h_a

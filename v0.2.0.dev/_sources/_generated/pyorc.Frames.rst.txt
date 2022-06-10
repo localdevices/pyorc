@@ -1,0 +1,38 @@
+﻿pyorc.Frames
+============
+
+.. currentmodule:: pyorc
+
+.. autoclass:: Frames
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Frames.__init__
+      ~Frames.edge_detect
+      ~Frames.get_piv
+      ~Frames.landmask
+      ~Frames.normalize
+      ~Frames.plot
+      ~Frames.project
+      ~Frames.reduce_rolling
+      ~Frames.to_ani
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Frames.camera_config
+      ~Frames.camera_shape
+      ~Frames.h_a
+   
+   
