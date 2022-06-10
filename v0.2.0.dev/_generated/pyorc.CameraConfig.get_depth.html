@@ -563,13 +563,16 @@ in local reference (e.g. staff gauge).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> – measured bathymetry points</p></li>
-<li><p><strong>h_a</strong> – float, optional, actual water level measured [m], if not set, assumption is that a single video
-is processed and thus changes in water level are not relevant.</p></li>
+<li><p><strong>z</strong> (<em>list of floats</em>) – measured bathymetry point depths</p></li>
+<li><p><strong>h_a</strong> (<em>float</em><em>, </em><em>optional</em>) – actual water level measured [m], if not set, assumption is that a single video
+is processed and thus changes in water level are not relevant. (default: None)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p><strong>depths</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of floats</p>
 </dd>
 </dl>
 </dd></dl>

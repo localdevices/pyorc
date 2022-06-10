@@ -169,27 +169,34 @@
 
 <div class="viewcode-block" id="Transect"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.html#pyorc.Transect">[docs]</a><span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;transect&quot;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Transect</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Transect functionalities that can be applied on ``xarray.Dataset``</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Transect functionalities that can be applied on ``xarray.Dataset``&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Transect.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.html#pyorc.Transect.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize a transect ``xarray.Dataset``</span>
+<span class="sd">        Initialize a transect ``xarray.Dataset`` containing cross sectional velocities in [time, points] dimensions</span>
 
-<span class="sd">        :param xarray_obj: xarray dataset containing transect data fields (from ``pyorc.Velocimetry.get_transect``)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xarray_obj: xr.Dataset</span>
+<span class="sd">            transect data fields (from ``pyorc.Velocimetry.get_transect``)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">Transect</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Transect.vector_to_scalar"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">vector_to_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle</span>
+        <span class="sd">&quot;&quot;&quot;Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle</span>
 
-<span class="sd">        :param v_x: str, variable containing (t, points) time series in cross section with x-directional velocities.</span>
-<span class="sd">        :param v_y: str, variable containing (t, points) time series in cross section with y-directional velocities.</span>
-<span class="sd">        :return: DataArray(t, points), time series in points with velocities perpendicular to cross section.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of variable containing x-directional velocities. (default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y :</span>
+<span class="sd">            name of variable containing y-directional velocities. (default: &quot;v_y&quot;)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        da : xr.DataArray</span>
+<span class="sd">            velocities perpendicular to cross section [time, points]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -219,10 +226,27 @@
 
 
 <div class="viewcode-block" id="Transect.get_xyz_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyz_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_outside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get camera-perspective column, row coordinates from cross-section points.</span>
+        <span class="sd">&quot;&quot;&quot;Get camera-perspective column, row coordinates from cross-section locations.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        M : np.ndarray, optional</span>
+<span class="sd">             perspective transform matrix (Default value = None)</span>
+<span class="sd">        xs : np.array, optional</span>
+<span class="sd">            x-coordinates to transform, derived from self.x if not provided (Default value = None)</span>
+<span class="sd">        ys :</span>
+<span class="sd">            y-coordinates to transform, derived from self.y if not provided (Default value = None)</span>
+<span class="sd">        mask_outside :</span>
+<span class="sd">            values not fitting in the original camera frame are set to NaN (Default value = True)</span>
 
-<span class="sd">        :return:</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cols : list of ints</span>
+<span class="sd">            columns of locations in original camera perspective</span>
+<span class="sd">        rows : list of ints</span>
+<span class="sd">            rows of locations in original camera perspective</span>
+
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">xs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span>
@@ -264,10 +288,17 @@
 
 
 <div class="viewcode-block" id="Transect.get_river_flow"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_river_flow.html#pyorc.Transect.get_river_flow">[docs]</a>    <span class="k">def</span> <span class="nf">get_river_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">Q_name</span><span class="o">=</span><span class="s2">&quot;river_flow&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]</span>
+        <span class="sd">&quot;&quot;&quot;Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]</span>
 <span class="sd">        estimating one or several quantiles over the time dimension. Depth average velocities must first have been</span>
 <span class="sd">        estimated using get_q. A variable &quot;Q&quot; will be added to Dataset, with only &quot;quantiles&quot; as dimension.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        q_name : str, optional</span>
+<span class="sd">             name of variable where depth integrated velocities [m2 s-1] are stored (Default value = &quot;q&quot;)</span>
+<span class="sd">        Q_name : str, optional</span>
+<span class="sd">             name of variable where resulting width integrated river flow estimates must be stored</span>
+<span class="sd">             (Default value = &quot;river_flow&quot;)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;q&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">:</span>
@@ -285,12 +316,24 @@
 
 
 <div class="viewcode-block" id="Transect.get_q"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_q.html#pyorc.Transect.get_q">[docs]</a>    <span class="k">def</span> <span class="nf">get_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_corr</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">fill_method</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and</span>
+        <span class="sd">&quot;&quot;&quot;Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and</span>
 <span class="sd">        depth-average velocity.</span>
 
-<span class="sd">        :param v_corr: float, optional, correction factor (default: 0.9)</span>
-<span class="sd">        :return: xr.Dataset, Transect for selected quantiles in time, including &quot;q&quot;.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_corr : float, optional</span>
+<span class="sd">            correction factor (default: 0.9)</span>
+<span class="sd">        fill_method : method to fill missing values. &quot;zeros&quot; fills NaNS with zeros, &quot;interpolate&quot; interpolates values</span>
+<span class="sd">            from nearest neighbour, &quot;log_profile&quot; fits a 4-parameter logarithmic profile with depth and with changing</span>
+<span class="sd">             velocities towards banks on known velocities, and fills missing with the fitted relationship.</span>
+<span class="sd">             (Default value = &quot;zeros&quot;)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds : xr.Dataset</span>
+<span class="sd">            Transect for selected quantiles in time, with &quot;q_nofill&quot; containing the integrated values, and &quot;q&quot; the</span>
+<span class="sd">            integrated values, filled with chosen fill method.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># aggregate to a limited set of quantiles</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">fill_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;zeros&quot;</span><span class="p">,</span> <span class="s2">&quot;log_profile&quot;</span><span class="p">,</span> <span class="s2">&quot;interpolate&quot;</span><span class="p">]),</span> <span class="sa">f</span><span class="s1">&#39;fill_method must be &quot;zeros&quot;, &quot;log_profile&quot;, or &quot;interpolate&quot;, instead &quot;</span><span class="si">{</span><span class="n">fill_method</span><span class="si">}</span><span class="s1">&quot; given&#39;</span>

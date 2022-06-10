@@ -557,22 +557,25 @@
 <h1>pyorc.Velocimetry.replace_outliers<a class="headerlink" href="#pyorc-velocimetry-replace-outliers" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Velocimetry.replace_outliers">
-<span class="sig-prename descclassname"><span class="pre">Velocimetry.</span></span><span class="sig-name descname"><span class="pre">replace_outliers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/velocimetry.html#Velocimetry.replace_outliers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Velocimetry.replace_outliers" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Velocimetry.</span></span><span class="sig-name descname"><span class="pre">replace_outliers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wdw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/velocimetry.html#Velocimetry.replace_outliers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Velocimetry.replace_outliers" title="Permalink to this definition">#</a></dt>
 <dd><p>Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples
 in time are available to derive a mean or median velocity from, consider using a reducer on those samples
 instead of a spatial infilling method such as suggested here.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – xarray Dataset, containing velocity vectors as [time, y, x]</p></li>
-<li><p><strong>v_x</strong> – str, name of x-directional velocity</p></li>
-<li><p><strong>v_y</strong> – str, name of y-directional velocity</p></li>
-<li><p><strong>stride</strong> – int, stride used to determine relevant neighbours</p></li>
-<li><p><strong>max_iter</strong> – number of iterations for replacement</p></li>
+<li><p><strong>v_x</strong> (<em>str</em><em>, </em><em>optional</em>) – name of x-directional velocity (default: “v_x”)</p></li>
+<li><p><strong>v_y</strong> (<em>str</em><em>, </em><em>optional</em>) – name of y-directional velocity (default: “v_y”)</p></li>
+<li><p><strong>wdw</strong> (<em>int</em><em>, </em><em>optional</em>) – window size used to determine relevant neighbours (default: 1), 1 means a 3x3 window (1 neighbour)</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – number of iterations for replacement (default: 1)</p></li>
+<li><p><strong>inplace</strong> (<em>boolean</em><em>, </em><em>optional</em>) – replace values instead of returning new xr.Dataset (default: False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, containing filtered velocities</p>
+<dd class="field-even"><p><strong>ds_replaced</strong> – velocities with replacements [time, x, y]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

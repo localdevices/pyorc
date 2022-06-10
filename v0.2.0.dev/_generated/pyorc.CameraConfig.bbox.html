@@ -558,11 +558,13 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="pyorc.CameraConfig.bbox">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CameraConfig.</span></span><span class="sig-name descname"><span class="pre">bbox</span></span><a class="headerlink" href="#pyorc.CameraConfig.bbox" title="Permalink to this definition">#</a></dt>
-<dd><p>Return the best fitting bounding box orthoprojected coordinates from camera perspective coordinates provided
-in property <code class="docutils literal notranslate"><span class="pre">pyorc.CameraConfig.corners</span></code></p>
+<dd><p>Returns geographical bbox fitting around corners points of area of interest in camera perspective</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>shapely.geometry.Polygon object containing bbox</p>
+<dd class="field-odd"><p><strong>bbox</strong> – bbox of area of interest</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>shapely.geometry.Polygon</p>
 </dd>
 </dl>
 </dd></dl>

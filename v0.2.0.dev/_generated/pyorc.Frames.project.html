@@ -559,10 +559,22 @@
 <dt class="sig sig-object py" id="pyorc.Frames.project">
 <span class="sig-prename descclassname"><span class="pre">Frames.</span></span><span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/frames.html#Frames.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Frames.project" title="Permalink to this definition">#</a></dt>
 <dd><p>Project frames into a projected frames object, with information from the camera_config attr.
-This requires that the CameraConfig contains full gcp information and a coordinate reference system (crs).</p>
+This requires that the CameraConfig contains full gcp information. If a CRS is provided, also “lat” and “lon”
+variables will be added to the output, containing geographical latitude and longitude coordinates.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>frames: xr.DataArray with projected frames and x and y in local coordinate system (origin: top-left)</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>resolution</strong> (<em>float</em><em>, </em><em>optional</em>) – <dl class="simple">
+<dt>resolution to project to. If not provided, this will be taken from the camera config in the metadata</dt><dd><p>(Default value = None)</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>frames</strong> – projected frames and x and y in local coordinate system (origin: top-left), lat and lon if a crs was
+provided.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>

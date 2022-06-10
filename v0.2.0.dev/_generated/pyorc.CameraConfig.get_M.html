@@ -563,13 +563,16 @@ ground control points, measured at <cite>h_ref</cite> will end up with new water
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>h_a</strong> – actual water level [m]</p></li>
-<li><p><strong>reverse</strong> – bool, optional, if set, the reverse matrix is prepared, which can be used to transform projected
-coordinates back to the original camera perspective.</p></li>
+<li><p><strong>h_a</strong> (<em>float</em><em>, </em><em>optional</em>) – actual water level [m] (Default: None)</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em><em>, </em><em>optional</em>) – if True, the reverse matrix is prepared, which can be used to transform projected
+coordinates back to the original camera perspective. (Default: False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>np.ndarray, containing 2x3 transformation matrix.</p>
+<dd class="field-even"><p><strong>M</strong> – 2x3 transformation matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>

@@ -562,11 +562,12 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – </p></li>
-<li><p><strong>y</strong> – </p></li>
-<li><p><strong>z</strong> – </p></li>
-<li><p><strong>crs</strong> – coordinate reference system, used to measure the lens position (e.g. 4326 for WGS84 lat-lon).
-the position’s x and y coordinates will automatically be reprojected to the local crs of the CameraConfig.</p></li>
+<li><p><strong>x</strong> (<em>float</em>) – x-coordinate</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – y-coordinate</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – z-coordinate</p></li>
+<li><p><strong>crs</strong> (<em>int</em><em>, </em><em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to
+measure the lens position (e.g. 4326 for WGS84 lat-lon). The position’s x and y coordinates will
+automatically be reprojected to the local crs of the CameraConfig.</p></li>
 </ul>
 </dd>
 </dl>

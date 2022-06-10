@@ -562,7 +562,7 @@
 <p>Initialize a velocimetry <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>xarray_obj</strong> – xarray dataset containing velocimetry data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Frames.get_piv</span></code>)</p>
+<dd class="field-odd"><p><strong>xarray_obj</strong> (<em>xr.Dataset</em>) – velocimetry data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Frames.get_piv</span></code>)</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -571,7 +571,7 @@
 <dd><p>Initialize a velocimetry <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>xarray_obj</strong> – xarray dataset containing velocimetry data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Frames.get_piv</span></code>)</p>
+<dd class="field-odd"><p><strong>xarray_obj</strong> (<em>xr.Dataset</em>) – velocimetry data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Frames.get_piv</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -589,10 +589,10 @@
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html#pyorc.Velocimetry.filter_spatial" title="pyorc.Velocimetry.filter_spatial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial</span></code></a>([v_x, v_y, filter_nan, ...])</p></td>
 <td><p>Masks velocity values on a number of spatial filters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median" title="pyorc.Velocimetry.filter_spatial_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_median</span></code></a>([v_x, v_y])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median" title="pyorc.Velocimetry.filter_spatial_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_median</span></code></a>([v_x, v_y, tolerance, ...])</p></td>
 <td><p>Masks values when their value deviates more than x standard deviations from the median of its neighbours (inc.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan" title="pyorc.Velocimetry.filter_spatial_nan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_nan</span></code></a>([v_x, v_y])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan" title="pyorc.Velocimetry.filter_spatial_nan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_nan</span></code></a>([v_x, v_y, tolerance, ...])</p></td>
 <td><p>Masks values if their surrounding neighbours (inc.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html#pyorc.Velocimetry.filter_temporal" title="pyorc.Velocimetry.filter_temporal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal</span></code></a>([v_x, v_y, filter_std, ...])</p></td>
@@ -616,7 +616,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transect</span></code></a>(x, y[, z, crs, v_eff, xs, ys, ...])</p></td>
 <td><p>Interpolate all variables to supplied x and y coordinates of a cross section.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_outliers</span></code></a>([v_x, v_y, stride, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_outliers</span></code></a>([v_x, v_y, wdw, max_iter, ...])</p></td>
 <td><p>Replace missing values using neighbourhood operators.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_encoding</span></code></a>([enc_pars])</p></td>

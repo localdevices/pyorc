@@ -562,17 +562,14 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fn</strong> – str, filename to which animation is stored</p></li>
-<li><p><strong>figure_kwargs</strong> – dict, keyword args passed to <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.figure</span></code></p></li>
-<li><p><strong>video_kwargs</strong> – dict, optional, keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">save</span></code> method of animation,
-containing parameters such as the frame rate, dpi and codec settings to use.</p></li>
-<li><p><strong>anim_kwargs</strong> – dict, optional, keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">matplotlib.animation.FuncAnimation</span></code>
-to control the animation.</p></li>
-<li><p><strong>kwargs</strong> – dict, optional, keyword arguments to pass to <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow</span></code></p></li>
+<li><p><strong>fn</strong> (<em>str</em>) – path to file to which animation is stored</p></li>
+<li><p><strong>figure_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – keyword args passed to <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.figure</span></code> (Default value = const.FIGURE_ARGS)</p></li>
+<li><p><strong>video_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">save</span></code> method of animation, containing parameters such as the frame rate,
+dpi and codec settings to use. (Default value = const.VIDEO_ARGS)</p></li>
+<li><p><strong>anim_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">matplotlib.animation.FuncAnimation</span></code>
+to control the animation. (Default value = const.ANIM_ARGS)</p></li>
+<li><p><strong>**kwargs</strong> (keyword arguments to pass to <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow</span></code>) – </p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
 </dd>
 </dl>
 </dd></dl>

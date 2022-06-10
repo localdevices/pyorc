@@ -171,6 +171,10 @@
 
 
 <div class="viewcode-block" id="CameraConfig"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.html#pyorc.CameraConfig">[docs]</a><span class="k">class</span> <span class="nc">CameraConfig</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Camera configuration containing information about the perspective of the camera with respect to real world</span>
+<span class="sd">    coordinates</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 
@@ -188,28 +192,34 @@
             <span class="n">lens_pars</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        CameraConfig object with several settings. This object allows for treatment of movies</span>
-<span class="sd">        with defined settings.</span>
 
-<span class="sd">        :param crs: int, dict, or str, optional. Coordinate Reference System. Accepts EPSG codes (int or str);</span>
-<span class="sd">            proj (str or dict) or wkt (str). Only used if the data has no native CRS.</span>
-<span class="sd">        :param window_size: int, pixel size of interrogation window (default: 15)</span>
-<span class="sd">        :param resolution: float, resolution in m. of projected pixels</span>
-<span class="sd">        :param lens_position: list of 3 floats, containing x, y, z coordinate of lens position in CRS</span>
-<span class="sd">        :param corners: list of 4 lists with [x, y] coordinates defining corners of area of interest in camera cols/rows</span>
-<span class="sd">        :param gcps: dict, containing:</span>
-<span class="sd">            &quot;src&quot;: list of 4 lists, with column, row locations in objective of control points.</span>
-<span class="sd">            &quot;dst&quot;: list of 4 lists, with x, y locations (local or global coordinate reference system) of control points.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        crs : int, dict or str, optional</span>
+<span class="sd">            Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). Only used if</span>
+<span class="sd">            the data has no native CRS.</span>
+<span class="sd">        window_size : int</span>
+<span class="sd">            pixel size of interrogation window (default: 15)</span>
+<span class="sd">        resolution : float</span>
+<span class="sd">            resolution in m. of projected pixels</span>
+<span class="sd">        lens_position : list of floats (3),</span>
+<span class="sd">            x, y, z coordinate of lens position in CRS</span>
+<span class="sd">        corners : list of lists of floats (2)</span>
+<span class="sd">            [x, y] coordinates defining corners of area of interest in camera cols/rows</span>
+<span class="sd">        gcps : dict</span>
+<span class="sd">            Can contain &quot;src&quot;: list of 4 lists, with column, row locations in objective of control points,</span>
+<span class="sd">            &quot;dst&quot;: list of 4 lists, with x, y locations (local or global coordinate reference system) of control points,</span>
 <span class="sd">            &quot;h_ref&quot;: float, measured water level [m] in local reference system (e.g. from staff gauge or pressure gauge)</span>
-<span class="sd">            during gcp survey.</span>
+<span class="sd">            during gcp survey,</span>
 <span class="sd">            &quot;z_0&quot;: float, water level [m] in global reference system (e.g. from used GPS system CRS). This must be in</span>
-<span class="sd">            the same vertical reference as the measured bathymetry and other survey points.</span>
+<span class="sd">            the same vertical reference as the measured bathymetry and other survey points,</span>
 <span class="sd">            &quot;crs&quot;: int, str or CRS object, CRS in which &quot;dst&quot; points are measured. If None, a local coordinate system is</span>
 <span class="sd">            assumed (e.g. from spirit level).</span>
-<span class="sd">        :param lens_pars: dict, containing:</span>
-<span class="sd">            &quot;k1&quot;: float, barrel lens distortion parameter (default: 0.)</span>
-<span class="sd">            &quot;c&quot;: float, optical center (default: 2.)</span>
+<span class="sd">        lens_pars : dict, optional</span>
+<span class="sd">            Lens parameters, containing: &quot;k1&quot;: float, barrel lens distortion parameter (default: 0.),</span>
+<span class="sd">            &quot;c&quot;: float, optical center (default: 2.),</span>
 <span class="sd">            &quot;f&quot;: float, focal length (default: 1.)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">window_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">)),</span> <span class="s1">&#39;window_size must be of type &quot;int&quot;&#39;</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -236,10 +246,13 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the best fitting bounding box orthoprojected coordinates from camera perspective coordinates provided</span>
-<span class="sd">        in property ``pyorc.CameraConfig.corners``</span>
+<span class="sd">        Returns geographical bbox fitting around corners points of area of interest in camera perspective</span>
 
-<span class="sd">        :return: shapely.geometry.Polygon object containing bbox</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bbox : shapely.geometry.Polygon</span>
+<span class="sd">            bbox of area of interest</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;corners&quot;</span><span class="p">)),</span> <span class="s2">&quot;CameraConfig object has no corners, set these with CameraConfig.set_corners&quot;</span>
         <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_aoi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
@@ -247,9 +260,14 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return amount of rows and columns of orthoprojected frames retrieved with ``pyorc.Video.project``</span>
+<span class="sd">        Returns rows and columns in projected frames from ``Frames.project``</span>
 
-<span class="sd">        :return: int, int, containin rows, columns</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rows : int</span>
+<span class="sd">            Amount of rows in projected frame</span>
+<span class="sd">        cols : int</span>
+<span class="sd">            Amount of columns in projected frame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(</span>
             <span class="n">shapely</span><span class="o">.</span><span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">),</span>
@@ -261,22 +279,32 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a rotated Affine transformation belonging to orthoprojected frames retrieved with ``pyorc.Video.project``</span>
+<span class="sd">        Returns Affine transform of projected frames from ``Frames.project``</span>
 
-<span class="sd">        :return: rasterio.transform.Affine object</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        transform : rasterio.transform.Affine object</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_transform</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CameraConfig.get_depth"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_depth.html#pyorc.CameraConfig.get_depth">[docs]</a>    <span class="k">def</span> <span class="nf">get_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured</span>
 <span class="sd">        in local reference (e.g. staff gauge).</span>
 
-<span class="sd">        :param z: measured bathymetry points</span>
-<span class="sd">        :param h_a: float, optional, actual water level measured [m], if not set, assumption is that a single video</span>
-<span class="sd">            is processed and thus changes in water level are not relevant.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        z : list of floats</span>
+<span class="sd">            measured bathymetry point depths</span>
+<span class="sd">        h_a : float, optional</span>
+<span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
+<span class="sd">            is processed and thus changes in water level are not relevant. (default: None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        depths : list of floats</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;No actual water level is provided, but a reference water level is provided&quot;</span>
@@ -288,11 +316,16 @@
         <span class="k">return</span> <span class="n">z_pressure</span> <span class="o">-</span> <span class="n">z</span></div>
 
 <div class="viewcode-block" id="CameraConfig.z_to_h"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.z_to_h.html#pyorc.CameraConfig.z_to_h">[docs]</a>    <span class="k">def</span> <span class="nf">z_to_h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)</span>
+        <span class="sd">&quot;&quot;&quot;Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)</span>
 
-<span class="sd">        :param z: measured bathymetry point</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        z : float</span>
+<span class="sd">            measured bathymetry point</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        h : float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">h_ref</span> <span class="o">=</span> <span class="mf">0.</span>
@@ -303,14 +336,22 @@
 
 
 <div class="viewcode-block" id="CameraConfig.get_M"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M">[docs]</a>    <span class="k">def</span> <span class="nf">get_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the</span>
+        <span class="sd">&quot;&quot;&quot;Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the</span>
 <span class="sd">        ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.</span>
 
-<span class="sd">        :param h_a: actual water level [m]</span>
-<span class="sd">        :param reverse: bool, optional, if set, the reverse matrix is prepared, which can be used to transform projected</span>
-<span class="sd">            coordinates back to the original camera perspective.</span>
-<span class="sd">        :return: np.ndarray, containing 2x3 transformation matrix.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h_a : float, optional</span>
+<span class="sd">            actual water level [m] (Default: None)</span>
+<span class="sd">        reverse : bool, optional</span>
+<span class="sd">            if True, the reverse matrix is prepared, which can be used to transform projected</span>
+<span class="sd">            coordinates back to the original camera perspective. (Default: False)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        M : np.ndarray</span>
+<span class="sd">            2x3 transformation matrix</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># map where the destination points are with the actual water level h_a.</span>
         <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -339,18 +380,33 @@
             <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst_colrow_a</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_corners"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_corners.html#pyorc.CameraConfig.set_corners">[docs]</a>    <span class="k">def</span> <span class="nf">set_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign corner coordinates to camera configuration</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        corners : list of lists (4)</span>
+<span class="sd">            [columns, row] coordinates in camera perspective</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span>
                                             <span class="mi">2</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is </span><span class="si">{</span><span class="n">corners</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">corners</span> <span class="o">=</span> <span class="n">corners</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_lens_pars"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the lens parameters of the given CameraConfig</span>
+        <span class="sd">&quot;&quot;&quot;Set the lens parameters of the given CameraConfig</span>
 
-<span class="sd">        :param k1: float, lens curvature [-], zero (default) means no curvature</span>
-<span class="sd">        :param c: float, optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        k1 : float</span>
+<span class="sd">            lens curvature [-], zero (default) means no curvature</span>
+<span class="sd">        c : float</span>
+<span class="sd">            optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the</span>
 <span class="sd">            centre.</span>
-<span class="sd">        :param f: float, focal length [mm], typical values could be 2.8, or 4 (default).</span>
+<span class="sd">        f : float, optional</span>
+<span class="sd">            focal length [mm], typical values could be 2.8, or 4 (default).</span>
+
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
@@ -362,20 +418,28 @@
         <span class="p">}</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_gcps"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">set_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="p">,</span> <span class="n">h_ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set ground control points for the given CameraConfig</span>
+        <span class="sd">&quot;&quot;&quot;Set ground control points for the given CameraConfig</span>
 
-<span class="sd">        :param src: list of lists, containing 4 x, y pairs of columns and rows in the frames of the original video</span>
-<span class="sd">        :param dst: list of lists, containing 4 x, y pairs of real world coordinates in the given coordinate reference</span>
-<span class="sd">            system.</span>
-<span class="sd">        :param z_0: same as `h_ref` but then as measured by a global reference system such as a geoid or ellipsoid used</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        src : list of lists (4)</span>
+<span class="sd">            [x, y] pairs of columns and rows in the frames of the original video</span>
+<span class="sd">        dst : list of lists (4)</span>
+<span class="sd">            [x, y] pairs of real world coordinates in the given coordinate reference system.</span>
+<span class="sd">        z_0 : float</span>
+<span class="sd">            Water level measured in global reference system such as a geoid or ellipsoid used</span>
 <span class="sd">            by a GPS device. All other surveyed points (lens position and cross section) must have the same vertical</span>
 <span class="sd">            reference.</span>
-<span class="sd">        :param h_ref: float, optional. Water level, belonging to the 4 control points in `dst`. This is the water level</span>
+<span class="sd">        h_ref :  float, optional</span>
+<span class="sd">            Water level, belonging to the 4 control points in `dst`. This is the water level</span>
 <span class="sd">            as measured by a local reference (e.g. gauge plate) during the surveying of the control points. Control</span>
 <span class="sd">            points must be taken on the water surface. If a single movie is processed, h_ref can be left out.</span>
-<span class="sd">        :param crs: coordinate reference system, used to measure the control points (e.g. 4326 for WGS84 lat-lon).</span>
-<span class="sd">            the destination control points will automatically be reprojected to the local crs of the CameraConfig.</span>
+<span class="sd">            (Default: None)</span>
+<span class="sd">        crs : int, dict or str, optional</span>
+<span class="sd">            Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to</span>
+<span class="sd">            measure the control points (e.g. 4326 for WGS84 lat-lon). Destination control points will automatically be</span>
+<span class="sd">            reprojected to the local crs of the CameraConfig. (Default: None)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;src must be a list of 4 numbers&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;dst must be a list of 4 numbers&quot;</span>
@@ -402,14 +466,20 @@
         <span class="p">}</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_lens_position"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_position.html#pyorc.CameraConfig.set_lens_position">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the geographical position of the lens of current CameraConfig.</span>
+        <span class="sd">&quot;&quot;&quot;Set the geographical position of the lens of current CameraConfig.</span>
 
-<span class="sd">        :param x:</span>
-<span class="sd">        :param y:</span>
-<span class="sd">        :param z:</span>
-<span class="sd">        :param crs: coordinate reference system, used to measure the lens position (e.g. 4326 for WGS84 lat-lon).</span>
-<span class="sd">            the position&#39;s x and y coordinates will automatically be reprojected to the local crs of the CameraConfig.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : float</span>
+<span class="sd">            x-coordinate</span>
+<span class="sd">        y : float</span>
+<span class="sd">            y-coordinate</span>
+<span class="sd">        z : float</span>
+<span class="sd">            z-coordinate</span>
+<span class="sd">        crs : int, dict or str, optional</span>
+<span class="sd">            Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to</span>
+<span class="sd">            measure the lens position (e.g. 4326 for WGS84 lat-lon). The position&#39;s x and y coordinates will</span>
+<span class="sd">            automatically be reprojected to the local crs of the CameraConfig.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -420,17 +490,30 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="CameraConfig.plot"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot.html#pyorc.CameraConfig.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{}):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems</span>
+        <span class="sd">&quot;&quot;&quot;Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems</span>
 <span class="sd">        to be in the right location. Requires cartopy to be installed.</span>
 
-<span class="sd">        :param figsize: tuple, optional, width and height of figure</span>
-<span class="sd">        :param ax: axes, optional, if not provided, axes is setup</span>
-<span class="sd">        :param tiles: str, optional, name of tiler service to use (called as attribute from cartopy.io.img_tiles)</span>
-<span class="sd">        :param buffer: float, optional buffer in lat-lon around points, used to set extent (default: 0.0005)</span>
-<span class="sd">        :param zoom_level: int, optional, zoom level of image tiler service (default: 18)</span>
-<span class="sd">        :param tiles_kwargs: dict, optional, keyword arguments to pass to ax,add_image when tiles are added</span>
-<span class="sd">        :return: ax</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        figsize : tuple, optional</span>
+<span class="sd">            width and height of figure (Default value = (13)</span>
+<span class="sd">        ax : plt.axes, optional</span>
+<span class="sd">            if not provided, axes is setup (Default: None)</span>
+<span class="sd">        tiles : str, optional</span>
+<span class="sd">            name of tiler service to use (called as attribute from cartopy.io.img_tiles) (Default: None)</span>
+<span class="sd">        buffer : float, optional</span>
+<span class="sd">            buffer in lat-lon around points, used to set extent (default: 0.0005)</span>
+<span class="sd">        zoom_level : int, optional</span>
+<span class="sd">            zoom level of image tiler service (default: 18)</span>
+<span class="sd">        **tiles_kwargs</span>
+<span class="sd">            additional keyword arguments to pass to ax.add_image when tiles are added</span>
+<span class="sd">        8) :</span>
+<span class="sd">            </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ax : plt.axes</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># define plot kwargs</span>
         <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
@@ -492,10 +575,13 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="CameraConfig.to_dict"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the CameraConfig object as dictionary</span>
+        <span class="sd">&quot;&quot;&quot;Return the CameraConfig object as dictionary</span>
 
-<span class="sd">        :return: dict, containing CameraConfig components</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        camera_config_dict : dict</span>
+<span class="sd">            serialized CameraConfig</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
@@ -507,40 +593,58 @@
         <span class="k">return</span> <span class="n">d</span></div>
 
 <div class="viewcode-block" id="CameraConfig.to_file"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_file.html#pyorc.CameraConfig.to_file">[docs]</a>    <span class="k">def</span> <span class="nf">to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Write the CameraConfig object to json structure</span>
+        <span class="sd">&quot;&quot;&quot;Write the CameraConfig object to json structure</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fn : str</span>
+<span class="sd">            Path to file to write camera config to</span>
 
-<span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="CameraConfig.to_json"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_json.html#pyorc.CameraConfig.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert CameraConfig object to string</span>
-
-<span class="sd">        :return: json string with CameraConfig components</span>
+        <span class="sd">&quot;&quot;&quot;Convert CameraConfig object to string</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        json_str : str</span>
+<span class="sd">            json string with CameraConfig components</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">get_camera_config</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Read camera config from string</span>
-<span class="sd">    :param s: json string containing camera config</span>
-<span class="sd">    :return: CameraConfig object</span>
+    <span class="sd">&quot;&quot;&quot;Read camera config from string</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s : str</span>
+<span class="sd">        json string containing camera config</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cam_config : CameraConfig</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">CameraConfig</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">load_camera_config</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load a CameraConfig from a geojson file.</span>
+    <span class="sd">&quot;&quot;&quot;Load a CameraConfig from a geojson file.</span>
 
-<span class="sd">    :param fn: str, filename with camera config.</span>
-<span class="sd">    :return: CameraConfig object</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fn : str</span>
+<span class="sd">        path to file with camera config in json format.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cam_config : CameraConfig</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">camera_config</span> <span class="o">=</span> <span class="n">get_camera_config</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>

@@ -562,12 +562,15 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>v_x</strong> – str, variable containing (t, points) time series in cross section with x-directional velocities.</p></li>
-<li><p><strong>v_y</strong> – str, variable containing (t, points) time series in cross section with y-directional velocities.</p></li>
+<li><p><strong>v_x</strong> (<em>str</em><em>, </em><em>optional</em>) – name of variable containing x-directional velocities. (default: “v_x”)</p></li>
+<li><p><strong>v_y</strong> – name of variable containing y-directional velocities. (default: “v_y”)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>DataArray(t, points), time series in points with velocities perpendicular to cross section.</p>
+<dd class="field-even"><p><strong>da</strong> – velocities perpendicular to cross section [time, points]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>

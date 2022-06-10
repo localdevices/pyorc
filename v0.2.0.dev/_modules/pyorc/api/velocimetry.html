@@ -173,15 +173,14 @@
 
 <div class="viewcode-block" id="Velocimetry"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.html#pyorc.Velocimetry">[docs]</a><span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;velocimetry&quot;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Velocimetry</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Velocimetry functionalities that can be applied on ``xarray.Dataset``</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Velocimetry functionalities that can be applied on ``xarray.Dataset``&quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Velocimetry.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.html#pyorc.Velocimetry.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize a velocimetry ``xarray.Dataset``</span>
+        <span class="sd">&quot;&quot;&quot;Initialize a velocimetry ``xarray.Dataset``</span>
 
-<span class="sd">        :param xarray_obj: xarray dataset containing velocimetry data fields (from ``pyorc.Frames.get_piv``)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xarray_obj: xr.Dataset</span>
+<span class="sd">            velocimetry data fields (from ``pyorc.Frames.get_piv``)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Velocimetry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
 
@@ -201,22 +200,44 @@
             <span class="n">kwargs_neighbour</span><span class="o">=</span><span class="p">{},</span>
             <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks values using several filters that use temporal variations or comparison as basis.</span>
+        <span class="sd">&quot;&quot;&quot;Masks values using several filters that use temporal variations or comparison as basis.</span>
 
-<span class="sd">        :param ds: xr.Dataset, or file containing, with velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param filter_std: boolean, if True (default, filtering on variance is applied)</span>
-<span class="sd">        :param filter_std: boolean, if True (default, filtering on variance is applied)</span>
-<span class="sd">        :param filter_angle: boolean, if True (default, filtering on angles is applied)</span>
-<span class="sd">        :param filter_velocity: boolean, if True (default, filtering on velocity is applied)</span>
-<span class="sd">        :param filter_corr: boolean, if True (default, filtering on correlation is applied)</span>
-<span class="sd">        :param kwargs_std: dict, set of key-word arguments to pass on to filter_temporal_std</span>
-<span class="sd">        :param kwargs_angle: dict, set of key-word arguments to pass on to filter_temporal_angle</span>
-<span class="sd">        :param kwargs_velocity: dict, set of key-word arguments to pass on to filter_temporal_velocity</span>
-<span class="sd">        :param kwargs_corr: dict, set of key-word arguments to pass on to filter_temporal_corr</span>
-<span class="sd">        :return: xr.Dataset, containing temporally filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (default: &quot;v_y&quot;)</span>
+<span class="sd">        filter_std : boolean, optional</span>
+<span class="sd">            if True (default), filtering on variance is applied</span>
+<span class="sd">        filter_std : boolean, optional</span>
+<span class="sd">            if True (default), filtering on variance is applied</span>
+<span class="sd">        filter_angle : boolean, optional</span>
+<span class="sd">            if True (default), filtering on angles is applied</span>
+<span class="sd">        filter_velocity : boolean</span>
+<span class="sd">            if True (default, filtering on velocity is applied)</span>
+<span class="sd">        filter_corr : boolean</span>
+<span class="sd">            if True (default), filtering on correlation is applied</span>
+<span class="sd">        filter_neighbour : dict, optional</span>
+<span class="sd">            if True (default), neighbourhood filtering is applied</span>
+<span class="sd">        kwargs_std : dict, optional</span>
+<span class="sd">            set of key-word arguments to pass on to filter_temporal_std</span>
+<span class="sd">        kwargs_angle : dict, optional</span>
+<span class="sd">            set of key-word arguments to pass on to filter_temporal_angle</span>
+<span class="sd">        kwargs_velocity : dict, optional</span>
+<span class="sd">            set of key-word arguments to pass on to filter_temporal_velocity</span>
+<span class="sd">        kwargs_corr : dict, optional</span>
+<span class="sd">            set of key-word arguments to pass on to filter_temporal_corr</span>
+<span class="sd">        kwargs_neighbour : dict, optional</span>
+<span class="sd">            set of key-word arguments to pass on to filter_temporal_neighbour</span>
+<span class="sd">        inplace : boolean</span>
+<span class="sd">            If set, values are replaced instead of returning a new Dataset</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter : xr.Dataset</span>
+<span class="sd">            temporally filtered velocity vectors as [time, y, x]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># load dataset in memory and update self</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">load</span><span class="p">())</span>
@@ -246,22 +267,32 @@
             <span class="n">angle_tolerance</span><span class="o">=</span><span class="mf">0.25</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
             <span class="n">filter_per_timestep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        filters on the expected angle. The function filters points entirely where the mean angle over time</span>
+        <span class="sd">&quot;&quot;&quot;filters on the expected angle. The function filters points entirely where the mean angle over time</span>
 <span class="sd">        deviates more than input parameter angle_bounds (in radians). The function also filters individual</span>
 <span class="sd">        estimates in time, in case the user wants this (filter_per_timestep=True), in case the angle on</span>
 <span class="sd">        a specific time step deviates more than the defined amount from the average.</span>
 <span class="sd">        note: this function does not work appropriately, if the expected angle (+/- anglebounds) are within</span>
 <span class="sd">        range of zero, as zero is the same as 2*pi. This exception may be resolved in the future if necessary.</span>
 
-<span class="sd">        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param angle_expected: float, angle (0-2*pi), measured clock-wise from vertical upwards direction, expected</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str</span>
+<span class="sd">            name of x-directional velocity (Default value = &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str</span>
+<span class="sd">            name of y-directional velocity (Default value = &quot;v_y&quot;)</span>
+<span class="sd">        angle_expected : float</span>
+<span class="sd">            angle (0-2*pi), measured clock-wise from vertical upwards direction, expected</span>
 <span class="sd">            in the velocities, default: 0.5*np.pi (meaning from left to right)</span>
-<span class="sd">        :param angle_tolerance: float (0-2*pi) maximum deviation from expected angle allowed.</span>
-<span class="sd">        :param filter_per_timestep: if set to True, tolerances are also checked per individual time step</span>
-<span class="sd">        :return: xr.Dataset, containing angle filtered velocity vectors as [time, y, x], default: True</span>
+<span class="sd">        angle_tolerance : float (0-2*pi)</span>
+<span class="sd">            maximum deviation from expected angle allowed. (Default value = 0.25 * np.pi)</span>
+<span class="sd">        filter_per_timestep : boolean</span>
+<span class="sd">            if set to True (default), tolerances are also checked per individual time step</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter : xr.Dataset</span>
+<span class="sd">            angle filtered velocity vectors as [time, y, x]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: make function working appropriately, if angles are close to zero (2*pi)</span>
         <span class="c1"># first filter on the temporal mean. This is to ensure that widely varying results in angle are deemed not</span>
@@ -279,16 +310,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">angle</span> <span class="o">-</span> <span class="n">angle_expected</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">angle_tolerance</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Velocimetry.filter_temporal_neighbour"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_temporal_neighbour.html#pyorc.Velocimetry.filter_temporal_neighbour">[docs]</a>    <span class="k">def</span> <span class="nf">filter_temporal_neighbour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks values if neighbours over a certain rolling length before and after, have a</span>
+        <span class="sd">&quot;&quot;&quot;Masks values if neighbours over a certain rolling length before and after, have a</span>
 <span class="sd">        significantly higher velocity than value under consideration, measured by tolerance.</span>
 
-<span class="sd">        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param roll: int, amount of time steps in rolling window (centred)</span>
-<span class="sd">        :param tolerance: float (0-1), Relative acceptable velocity of maximum found within rolling window</span>
-<span class="sd">        :return: xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (Default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (Default: &quot;v_y&quot;)</span>
+<span class="sd">        roll : int, optional</span>
+<span class="sd">            amount of time steps in rolling window (centred) (default: 5)</span>
+<span class="sd">        tolerance : float (0-1)</span>
+<span class="sd">            relative acceptable velocity of maximum found within rolling window (default: .5)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        type</span>
+<span class="sd">            xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
         <span class="n">s_roll</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">roll</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
@@ -298,14 +338,28 @@
 
 <div class="viewcode-block" id="Velocimetry.filter_temporal_std"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_temporal_std.html#pyorc.Velocimetry.filter_temporal_std">[docs]</a>    <span class="k">def</span> <span class="nf">filter_temporal_std</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">tolerance_sample</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">tolerance_var</span><span class="o">=</span><span class="mf">5.</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;or&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks values if they deviate more than x standard deviations from the mean.</span>
+        <span class="sd">&quot;&quot;&quot;Masks values if they deviate more than x standard deviations from the mean.</span>
 
-<span class="sd">        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param tolerance: float, representing amount of standard deviations</span>
-<span class="sd">        :return: xr.Dataset, containing standard deviation filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (Default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (Default: &quot;v_y&quot;)</span>
+<span class="sd">        tolerance :  float</span>
+<span class="sd">            amount of standard deviations tolerance</span>
+<span class="sd">        tolerance_sample :</span>
+<span class="sd">             (Default value = 1.0)</span>
+<span class="sd">        tolerance_var :</span>
+<span class="sd">             (Default value = 5.)</span>
+<span class="sd">        mode : str</span>
+<span class="sd">             can be &quot;and&quot; or &quot;or&quot; (default). If &quot;or&quot; (&quot;and&quot;), then only one (both) of two vector components need(s) to</span>
+<span class="sd">             be within tolerance.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter : xr.Dataset</span>
+<span class="sd">            standard deviation filtered velocity vectors as [time, y, x]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5</span>
@@ -339,21 +393,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span></div>
 
-        <span class="c1">#</span>
-        <span class="c1"># self._obj[v_x] = self._obj[v_x].where((s - s_mean) / s_std &lt; tolerance)</span>
-        <span class="c1"># self._obj[v_y] = self._obj[v_y].where((s - s_mean) / s_std &lt; tolerance)</span>
         <span class="c1"># return ds</span>
 
 <div class="viewcode-block" id="Velocimetry.filter_temporal_velocity"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_temporal_velocity.html#pyorc.Velocimetry.filter_temporal_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">filter_temporal_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">s_min</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">s_max</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks values if the velocity scalar lies outside a user-defined valid range.</span>
+        <span class="sd">&quot;&quot;&quot;Masks values if the velocity scalar lies outside a user-defined valid range.</span>
 
-<span class="sd">        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param s_min: float, minimum scalar velocity [m s-1]</span>
-<span class="sd">        :param s_max: float, maximum scalar velocity [m s-1]</span>
-<span class="sd">        :return: xr.Dataset, containing velocity-range filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (Default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (Default: &quot;v_y&quot;)</span>
+<span class="sd">        s_min : float, optional</span>
+<span class="sd">            minimum scalar velocity [m s-1] (default: 0.1)</span>
+<span class="sd">        s_max : float, optional</span>
+<span class="sd">            maximum scalar velocity [m s-1] (default: 5.)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter : xr.Dataset</span>
+<span class="sd">            velocity-range filtered velocity vectors as [time, y, x]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">s</span> <span class="o">&gt;</span> <span class="n">s_min</span><span class="p">)</span>
@@ -369,15 +428,23 @@
         <span class="c1"># return ds</span>
 
 <div class="viewcode-block" id="Velocimetry.filter_temporal_corr"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_temporal_corr.html#pyorc.Velocimetry.filter_temporal_corr">[docs]</a>    <span class="k">def</span> <span class="nf">filter_temporal_corr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks values with a too low correlation.</span>
+        <span class="sd">&quot;&quot;&quot;Masks values with a too low correlation.</span>
 
-<span class="sd">        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param corr: str, name of correlation variable</span>
-<span class="sd">        :param tolerance: float (0-1), tolerance for correlation value. If correlation is lower than tolerance, it is masked</span>
-<span class="sd">        :return: xr.Dataset, containing correlation filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (Default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (Default: &quot;v_y&quot;)</span>
+<span class="sd">        corr : str</span>
+<span class="sd">            name of correlation variable (default: &quot;corr&quot;)</span>
+<span class="sd">        tolerance : float (0-1)</span>
+<span class="sd">            tolerance for correlation value (default: 0.1). If correlation is lower than tolerance, it is masked</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter : xr.Dataset</span>
+<span class="sd">            correlation filtered velocity vectors as [time, y, x]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">corr</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">corr</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">)</span></div>
@@ -393,15 +460,30 @@
             <span class="n">kwargs_median</span><span class="o">=</span><span class="p">{},</span>
             <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks velocity values on a number of spatial filters.</span>
+        <span class="sd">&quot;&quot;&quot;Masks velocity values on a number of spatial filters.</span>
 
-<span class="sd">        :param self: xr.Dataset, or file containing, with velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param kwargs_nan: dict, keyword arguments to pass to filter_spatial_nan</span>
-<span class="sd">        :param kwargs_median: dict, keyword arguments to pass to filter_spatial_median</span>
-<span class="sd">        :return: xr.Dataset, containing spatially filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (default: &quot;v_y&quot;)</span>
+<span class="sd">        filter_nan : boolean, optional</span>
+<span class="sd">            if True (default), filtering on nans is applied</span>
+<span class="sd">        filter_median : boolean, optional</span>
+<span class="sd">            if True (default), filtering on median deviations is applied</span>
+<span class="sd">        kwargs_nan : dict, optional</span>
+<span class="sd">            dict, keyword arguments to pass to filter_spatial_nan</span>
+<span class="sd">        kwargs_median : dict, optional</span>
+<span class="sd">            keyword arguments to pass to filter_spatial_median</span>
+<span class="sd">        inplace : boolean, optional</span>
+<span class="sd">            If True (default: False), values are replaced instead of returning a new Dataset</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter : xr.Dataset</span>
+<span class="sd">            spatially filtered velocity vectors as [time, y, x]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># work on v_x and v_y only</span>
         <span class="n">ds_temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[[</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
@@ -417,23 +499,37 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ds</span></div>
 
-<div class="viewcode-block" id="Velocimetry.filter_spatial_nan"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan">[docs]</a>    <span class="k">def</span> <span class="nf">filter_spatial_nan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated</span>
+<div class="viewcode-block" id="Velocimetry.filter_spatial_nan"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan">[docs]</a>    <span class="k">def</span> <span class="nf">filter_spatial_nan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">missing</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated</span>
 <span class="sd">        velocity estimates.</span>
 
-<span class="sd">        :param self: xr.Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param tolerance: float, amount of NaNs in search window measured as a fraction of total amount of values [0-1]</span>
-<span class="sd">        :param stride: int, stride used to determine relevant neighbours</span>
-<span class="sd">        :param missing: float, a temporary missing value, used to be able to convolve NaNs</span>
-<span class="sd">        :return: xr.Dataset, containing NaN filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (default: &quot;v_y&quot;)</span>
+<span class="sd">        tolerance : float, optional</span>
+<span class="sd">            amount of NaNs in search window measured as a fraction of total amount of values [0-1] (default: 0.3)</span>
+<span class="sd">        wdw : int, optional</span>
+<span class="sd">            window length used to determine relevant neighbours. 1 means that 1 neighbour on all sides is considered</span>
+<span class="sd">            (default: 1)</span>
+<span class="sd">        missing : float, optional</span>
+<span class="sd">            a temporary missing value, used to be able to convolve NaNs, normally not needed to change (default -9999.)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter: xr.Dataset</span>
+<span class="sd">            NaN filtered velocity vectors as [time, y, x]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">_filter_nan</span><span class="p">(</span><span class="n">ds_slice</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">missing</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_filter_nan</span><span class="p">(</span><span class="n">ds_slice</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">missing</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            internal function, see main function</span>
+<span class="sd">            &quot;&quot;&quot;</span>
             <span class="c1"># u, v = ds[v_x], ds[v_y]</span>
             <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">ds_slice</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ds_slice</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-            <span class="n">u_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
+            <span class="n">u_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">stride</span><span class="o">=</span><span class="n">wdw</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
             <span class="c1"># replace missings by Nan</span>
             <span class="n">nan_frac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">u_move</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u_move</span><span class="p">))</span>
             <span class="n">u</span><span class="p">[</span><span class="n">nan_frac</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -443,27 +539,47 @@
             <span class="k">return</span> <span class="n">ds_slice</span>
         <span class="n">ds_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="n">ds_g</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_filter_nan</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="n">v_y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ds_g</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="n">_filter_nan</span><span class="p">,</span>
+                <span class="n">v_x</span><span class="o">=</span><span class="n">v_x</span><span class="p">,</span>
+                <span class="n">v_y</span><span class="o">=</span><span class="n">v_y</span><span class="p">,</span>
+                <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
+                <span class="n">stride</span><span class="o">=</span><span class="n">wdw</span><span class="p">,</span>
+                <span class="n">missing</span><span class="o">=</span><span class="n">missing</span>
+            <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Velocimetry.filter_spatial_median"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median">[docs]</a>    <span class="k">def</span> <span class="nf">filter_spatial_median</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Masks values when their value deviates more than x standard deviations from the median of its neighbours</span>
+<div class="viewcode-block" id="Velocimetry.filter_spatial_median"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median">[docs]</a>    <span class="k">def</span> <span class="nf">filter_spatial_median</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">missing</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Masks values when their value deviates more than x standard deviations from the median of its neighbours</span>
 <span class="sd">        (inc. itself).</span>
 
-<span class="sd">        :param self: xr.Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param tolerance: float, amount of standard deviations tolerance</span>
-<span class="sd">        :param stride: int, stride used to determine relevant neighbours</span>
-<span class="sd">        :param missing: float, a temporary missing value, used to be able to convolve NaNs</span>
-<span class="sd">        :return: xr.Dataset, containing std filtered velocity vectors as [time, y, x]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (default: &quot;v_y&quot;)</span>
+<span class="sd">        tolerance : float, optional</span>
+<span class="sd">            amount of standard deviations tolerance (default: 0.7)</span>
+<span class="sd">        wdw : int, optional</span>
+<span class="sd">            window used to determine relevant neighbours</span>
+<span class="sd">        missing : float, optional</span>
+<span class="sd">            a temporary missing value, used to be able to convolve NaNs</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_filter : xr.Dataset</span>
+<span class="sd">            std filtered velocity vectors as [time, y, x]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">_filter_median</span><span class="p">(</span><span class="n">ds_slice</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">missing</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_filter_median</span><span class="p">(</span><span class="n">ds_slice</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">missing</span><span class="o">=-</span><span class="mf">9999.</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            internal function, see main method</span>
+<span class="sd">            &quot;&quot;&quot;</span>
             <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">ds_slice</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ds_slice</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
             <span class="c1"># s = (u ** 2 + v ** 2) ** 0.5</span>
-            <span class="n">u_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
-            <span class="n">v_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
+            <span class="n">u_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="n">wdw</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
+            <span class="n">v_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="n">wdw</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
 
@@ -481,7 +597,7 @@
             <span class="k">return</span> <span class="n">ds_slice</span>
         <span class="n">ds_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="n">ds_g</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_filter_median</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="n">v_y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ds_g</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_filter_median</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="n">v_x</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="n">v_y</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="n">wdw</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
         <span class="p">)</span></div>
 
 
@@ -496,34 +612,44 @@
             <span class="n">rolling</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the</span>
+        <span class="sd">&quot;&quot;&quot;Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the</span>
 <span class="sd">        grid can be rotated and that xs and ys are supplied following the projected coordinates supplied in</span>
 <span class="sd">        &quot;xs&quot; and &quot;ys&quot; coordinate variables in ds. x-coordinates and y-coordinates that fall outside the</span>
 <span class="sd">        domain of ds, are still stored in the result for further interpolation or extrapolation.</span>
 <span class="sd">        Original coordinate values supplied are stored in coordinates &quot;x&quot;, &quot;y&quot; and (if supplied) &quot;z&quot;.</span>
 <span class="sd">        Time series are transformed to set quantiles.</span>
 
-<span class="sd">        :param self: xarray dataset</span>
-<span class="sd">        :param x: tuple or list-like, x-coordinates on which interpolation should be done</span>
-<span class="sd">        :param y: tuple or list-like, y-coordinates on which interpolation should be done</span>
-<span class="sd">        :param z: tuple or list-like, z-coordinates on which interpolation should be done, defaults: None</span>
-<span class="sd">        :param crs: coordinate reference system (e.g. EPSG code) in which x, y and z are measured, defaults to None,</span>
-<span class="sd">            assuming crs is the same as crs of ds</span>
-<span class="sd">        :param v_eff: bool, if True, effective velocity (perpendicular to cross-section) is also computed, default: True</span>
-<span class="sd">        :param xs: str, name of variable that stores the x coordinates in the projection in which &quot;x&quot; is supplied,</span>
-<span class="sd">            default: &quot;xs&quot;</span>
-<span class="sd">        :param ys: str, name of variable that stores the y coordinates in the projection in which &quot;y&quot; is supplied</span>
-<span class="sd">            default: &quot;ys&quot;</span>
-<span class="sd">        :param distance: float, optional, sampling distance over the cross-section in [m]. the bathymetry points will</span>
-<span class="sd">            be interpolated to match this distance. If not set, the distance will be estimated from the velocimetry</span>
-<span class="sd">            grid resolution.</span>
-<span class="sd">        :param wdw: int, window size to use for sampling the velocity. zero means, only cell itself, 1 means 3x3 window.</span>
-<span class="sd">        :param rolling: int, optional, if set, a rolling mean over time is applied, before deriving quantile estimates.</span>
-<span class="sd">        :param quantiles: list of floats (0-1), optional, list of quantiles to return</span>
-<span class="sd">            (default: [0.05, 0.25, 0.5, 0.75, 0.95]).</span>
-<span class="sd">        :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates over</span>
-<span class="sd">            quantiles.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : tuple or list-like</span>
+<span class="sd">            x-coordinates on which interpolation should be done</span>
+<span class="sd">        y : tuple or list-like</span>
+<span class="sd">            y-coordinates on which interpolation should be done</span>
+<span class="sd">        z : tuple or list-like</span>
+<span class="sd">            z-coordinates on which interpolation should be done, defaults: None</span>
+<span class="sd">        crs : int, dict or str, optional</span>
+<span class="sd">            coordinate reference system (e.g. EPSG code) in which x, y and z are measured (default: None),</span>
+<span class="sd">            None assumes crs is the same as crs of xr.Dataset.</span>
+<span class="sd">        v_eff : boolean, optional</span>
+<span class="sd">            if True (default), effective velocity (perpendicular to cross-section) is also computed</span>
+<span class="sd">        xs : str, optional</span>
+<span class="sd">            name of variable that stores the x coordinates in the projection in which &quot;x&quot; is supplied (default: &quot;xs&quot;)</span>
+<span class="sd">        ys : str, optional</span>
+<span class="sd">            name of variable that stores the y coordinates in the projection in which &quot;y&quot; is supplied (default: &quot;ys&quot;)</span>
+<span class="sd">        distance : float, optional</span>
+<span class="sd">            sampling distance over the cross-section in [m]. the bathymetry points will be interpolated to match this</span>
+<span class="sd">            distance. If not set, the distance will be estimated from the velocimetry grid resolution. (default: None)</span>
+<span class="sd">        wdw : int, window size to use for sampling the velocity. zero means, only cell itself, 1 means 3x3 window.</span>
+<span class="sd">            (default: 1)</span>
+<span class="sd">        rolling : int, optional</span>
+<span class="sd">            if set other than None (default), a rolling mean over time is applied, before deriving quantile estimates.</span>
+<span class="sd">        quantiles : list of floats (0-1), optional</span>
+<span class="sd">            list of quantiles to return (default: [0.05, 0.25, 0.5, 0.75, 0.95]).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_points: xr.Dataset</span>
+<span class="sd">            interpolated data at the supplied x and y coordinates over quantiles</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transform</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">affine_from_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">xs</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">ys</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -604,38 +730,49 @@
     <span class="c1"># add .plot as group of methods, UncachedAccessor ensures that Velocimetry is passed as object</span>
     <span class="n">plot</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">UncachedAccessor</span><span class="p">(</span><span class="n">_Velocimetry_PlotMethods</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Velocimetry.replace_outliers"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers">[docs]</a>    <span class="k">def</span> <span class="nf">replace_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples</span>
+<div class="viewcode-block" id="Velocimetry.replace_outliers"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers">[docs]</a>    <span class="k">def</span> <span class="nf">replace_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples</span>
 <span class="sd">        in time are available to derive a mean or median velocity from, consider using a reducer on those samples</span>
 <span class="sd">        instead of a spatial infilling method such as suggested here.</span>
 
-<span class="sd">        :param self: xarray Dataset, containing velocity vectors as [time, y, x]</span>
-<span class="sd">        :param v_x: str, name of x-directional velocity</span>
-<span class="sd">        :param v_y: str, name of y-directional velocity</span>
-<span class="sd">        :param stride: int, stride used to determine relevant neighbours</span>
-<span class="sd">        :param max_iter: number of iterations for replacement</span>
-<span class="sd">        :return: xr.Dataset, containing filtered velocities</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of x-directional velocity (default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y : str, optional</span>
+<span class="sd">            name of y-directional velocity (default: &quot;v_y&quot;)</span>
+<span class="sd">        wdw : int, optional</span>
+<span class="sd">            window size used to determine relevant neighbours (default: 1), 1 means a 3x3 window (1 neighbour)</span>
+<span class="sd">        max_iter : int, optional</span>
+<span class="sd">            number of iterations for replacement (default: 1)</span>
+<span class="sd">        inplace : boolean, optional</span>
+<span class="sd">            replace values instead of returning new xr.Dataset (default: False)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_replaced : xr.Dataset</span>
+<span class="sd">            velocities with replacements [time, x, y]</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TO-DO: make replacement decision dependent on amount of non-NaN values in neighbourhood</span>
         <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iter</span><span class="p">):</span>
-            <span class="n">u_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">)</span>
-            <span class="n">v_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">)</span>
+            <span class="n">u_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">wdw</span><span class="p">)</span>
+            <span class="n">v_move</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">neighbour_stack</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">wdw</span><span class="p">)</span>
             <span class="c1"># compute mean</span>
             <span class="n">u_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">u_move</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">v_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">v_move</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">u</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">u</span><span class="p">)]</span> <span class="o">=</span> <span class="n">u_mean</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">u</span><span class="p">)]</span>
             <span class="n">v</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v_mean</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
             <span class="c1"># all values with stride distance from edge have to be made NaN</span>
-            <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">stride</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
-            <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="n">stride</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
-            <span class="n">u</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">stride</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
-            <span class="n">u</span><span class="p">[:,</span> <span class="o">-</span><span class="n">stride</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">stride</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
-            <span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="n">stride</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
-            <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">stride</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
-            <span class="n">v</span><span class="p">[:,</span> <span class="o">-</span><span class="n">stride</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">wdw</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
+            <span class="n">u</span><span class="p">[</span><span class="o">-</span><span class="n">wdw</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
+            <span class="n">u</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">wdw</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
+            <span class="n">u</span><span class="p">[:,</span> <span class="o">-</span><span class="n">wdw</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">wdw</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
+            <span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="n">wdw</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
+            <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">wdw</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">;</span>
+            <span class="n">v</span><span class="p">[:,</span> <span class="o">-</span><span class="n">wdw</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">u</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">v</span>
@@ -646,13 +783,18 @@
             <span class="k">return</span> <span class="n">ds</span></div>
 
 <div class="viewcode-block" id="Velocimetry.set_encoding"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">set_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc_pars</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">ENCODING_PARAMS</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set encoding parameters for all typical variables in a velocimetry dataset. This reduces the required storage</span>
+        <span class="sd">&quot;&quot;&quot;Set encoding parameters for all typical variables in a velocimetry dataset. This reduces the required storage</span>
 <span class="sd">        for this dataset significantly, when stored to disk in e.g. a netcdf file using ``xarray.Dataset.to_netcdf``.</span>
 
-<span class="sd">        :param enc_pars: dict, optional, per variable, a dict containing encoding parameters. When called without</span>
-<span class="sd">            input, a standard set of encoding parameters is used that compresses well.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        enc_pars : dict of dicts, optional</span>
+<span class="sd">            per variable, a dict containing encoding parameters. When called without input, a standard set of encoding</span>
+<span class="sd">            parameters is used that compresses well. (Default value = const.ENCODING_PARAMS)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">const</span><span class="o">.</span><span class="n">ENCODE_VARS</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">enc_pars</span></div></div>

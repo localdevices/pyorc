@@ -562,17 +562,18 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>src</strong> – list of lists, containing 4 x, y pairs of columns and rows in the frames of the original video</p></li>
-<li><p><strong>dst</strong> – list of lists, containing 4 x, y pairs of real world coordinates in the given coordinate reference
-system.</p></li>
-<li><p><strong>z_0</strong> – same as <cite>h_ref</cite> but then as measured by a global reference system such as a geoid or ellipsoid used
+<li><p><strong>src</strong> (<em>list of lists</em><em> (</em><em>4</em><em>)</em>) – [x, y] pairs of columns and rows in the frames of the original video</p></li>
+<li><p><strong>dst</strong> (<em>list of lists</em><em> (</em><em>4</em><em>)</em>) – [x, y] pairs of real world coordinates in the given coordinate reference system.</p></li>
+<li><p><strong>z_0</strong> (<em>float</em>) – Water level measured in global reference system such as a geoid or ellipsoid used
 by a GPS device. All other surveyed points (lens position and cross section) must have the same vertical
 reference.</p></li>
-<li><p><strong>h_ref</strong> – float, optional. Water level, belonging to the 4 control points in <cite>dst</cite>. This is the water level
+<li><p><strong>h_ref</strong> (<em>float</em><em>, </em><em>optional</em>) – Water level, belonging to the 4 control points in <cite>dst</cite>. This is the water level
 as measured by a local reference (e.g. gauge plate) during the surveying of the control points. Control
-points must be taken on the water surface. If a single movie is processed, h_ref can be left out.</p></li>
-<li><p><strong>crs</strong> – coordinate reference system, used to measure the control points (e.g. 4326 for WGS84 lat-lon).
-the destination control points will automatically be reprojected to the local crs of the CameraConfig.</p></li>
+points must be taken on the water surface. If a single movie is processed, h_ref can be left out.
+(Default: None)</p></li>
+<li><p><strong>crs</strong> (<em>int</em><em>, </em><em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to
+measure the control points (e.g. 4326 for WGS84 lat-lon). Destination control points will automatically be
+reprojected to the local crs of the CameraConfig. (Default: None)</p></li>
 </ul>
 </dd>
 </dl>

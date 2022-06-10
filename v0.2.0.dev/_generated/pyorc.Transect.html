@@ -559,19 +559,19 @@
 <dt class="sig sig-object py" id="pyorc.Transect">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Transect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/transect.html#Transect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Transect" title="Permalink to this definition">#</a></dt>
 <dd><p>Transect functionalities that can be applied on <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
-<p>Initialize a transect <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+<p>Initialize a transect <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> containing cross sectional velocities in [time, points] dimensions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>xarray_obj</strong> – xarray dataset containing transect data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.get_transect</span></code>)</p>
+<dd class="field-odd"><p><strong>xarray_obj</strong> (<em>xr.Dataset</em>) – transect data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.get_transect</span></code>)</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Transect.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/transect.html#Transect.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Transect.__init__" title="Permalink to this definition">#</a></dt>
-<dd><p>Initialize a transect <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p>
+<dd><p>Initialize a transect <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> containing cross sectional velocities in [time, points] dimensions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>xarray_obj</strong> – xarray dataset containing transect data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.get_transect</span></code>)</p>
+<dd class="field-odd"><p><strong>xarray_obj</strong> (<em>xr.Dataset</em>) – transect data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.get_transect</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -584,7 +584,7 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyorc.Transect.__init__" title="pyorc.Transect.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(xarray_obj)</p></td>
-<td><p>Initialize a transect <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p></td>
+<td><p>Initialize a transect <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> containing cross sectional velocities in [time, points] dimensions</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Transect.get_q.html#pyorc.Transect.get_q" title="pyorc.Transect.get_q"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_q</span></code></a>([v_corr, fill_method])</p></td>
 <td><p>Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and depth-average velocity.</p></td>
@@ -593,7 +593,7 @@
 <td><p>Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1] estimating one or several quantiles over the time dimension.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective" title="pyorc.Transect.get_xyz_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_xyz_perspective</span></code></a>([M, xs, ys, mask_outside])</p></td>
-<td><p>Get camera-perspective column, row coordinates from cross-section points.</p></td>
+<td><p>Get camera-perspective column, row coordinates from cross-section locations.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar" title="pyorc.Transect.vector_to_scalar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_to_scalar</span></code></a>([v_x, v_y])</p></td>
 <td><p>Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle</p></td>

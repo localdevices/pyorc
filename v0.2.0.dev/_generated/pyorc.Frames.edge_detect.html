@@ -557,18 +557,21 @@
 <h1>pyorc.Frames.edge_detect<a class="headerlink" href="#pyorc-frames-edge-detect" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Frames.edge_detect">
-<span class="sig-prename descclassname"><span class="pre">Frames.</span></span><span class="sig-name descname"><span class="pre">edge_detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stride_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/frames.html#Frames.edge_detect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Frames.edge_detect" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Frames.</span></span><span class="sig-name descname"><span class="pre">edge_detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wdw_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wdw_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/frames.html#Frames.edge_detect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Frames.edge_detect" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved
 images and computes their difference to detect edges.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stride_1</strong> – int, stride to use for first gaussian blur filter</p></li>
-<li><p><strong>stride_2</strong> – int, stride to use for second gaussian blur filter</p></li>
+<li><p><strong>wdw_1</strong> (<em>int</em><em>, </em><em>optional</em>) – window size to use for first gaussian blur filter (Default value = 2)</p></li>
+<li><p><strong>wdw_2</strong> (<em>int</em><em>, </em><em>optional</em>) – stride to use for second gaussian blur filter (Default value = 4)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.DataArray, filtered frames (i.e. difference between first and second gaussian convolution)</p>
+<dd class="field-even"><p><strong>da</strong> – filtered frames (i.e. difference between first and second gaussian convolution)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>

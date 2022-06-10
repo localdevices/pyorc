@@ -567,17 +567,19 @@ range of zero, as zero is the same as 2*pi. This exception may be resolved in th
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> – xr.Dataset, containing velocity vectors as [time, y, x]</p></li>
-<li><p><strong>v_x</strong> – str, name of x-directional velocity</p></li>
-<li><p><strong>v_y</strong> – str, name of y-directional velocity</p></li>
-<li><p><strong>angle_expected</strong> – float, angle (0-2*pi), measured clock-wise from vertical upwards direction, expected
+<li><p><strong>v_x</strong> (<em>str</em>) – name of x-directional velocity (Default value = “v_x”)</p></li>
+<li><p><strong>v_y</strong> (<em>str</em>) – name of y-directional velocity (Default value = “v_y”)</p></li>
+<li><p><strong>angle_expected</strong> (<em>float</em>) – angle (0-2*pi), measured clock-wise from vertical upwards direction, expected
 in the velocities, default: 0.5*np.pi (meaning from left to right)</p></li>
-<li><p><strong>angle_tolerance</strong> – float (0-2*pi) maximum deviation from expected angle allowed.</p></li>
-<li><p><strong>filter_per_timestep</strong> – if set to True, tolerances are also checked per individual time step</p></li>
+<li><p><strong>angle_tolerance</strong> (<em>float</em><em> (</em><em>0-2*pi</em><em>)</em>) – maximum deviation from expected angle allowed. (Default value = 0.25 * np.pi)</p></li>
+<li><p><strong>filter_per_timestep</strong> (<em>boolean</em>) – if set to True (default), tolerances are also checked per individual time step</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, containing angle filtered velocity vectors as [time, y, x], default: True</p>
+<dd class="field-even"><p><strong>ds_filter</strong> – angle filtered velocity vectors as [time, y, x]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

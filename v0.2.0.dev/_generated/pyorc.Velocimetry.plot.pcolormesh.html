@@ -559,21 +559,26 @@
 <dt class="sig sig-object py" id="pyorc.Velocimetry.plot.pcolormesh">
 <span class="sig-prename descclassname"><span class="pre">Velocimetry.plot.</span></span><span class="sig-name descname"><span class="pre">pcolormesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Velocimetry.plot.pcolormesh" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates pcolormesh plot from velocimetry results on new or existing axes</p>
-<blockquote>
-<div><p>Wraps <code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib:matplotlib.pyplot.pcolormesh()</span></code>.</p>
-</div></blockquote>
+<p>Wraps <code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib:matplotlib.pyplot.pcolormesh()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> – Dataset containing velocimetry or transect results</p></li>
-<li><p><strong>mode</strong> – str, perspective mode to use for plotting. Can be “local”, “geographical”, or “camera”. For
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – perspective mode to use for plotting. Can be “local” (default), “geographical”, or “camera”. For
 “geographical” a velocimetry result that contains “lon” and “lat” coordinates must be provided
 (i.e. produced with known CRS for control points).</p></li>
-<li><p><strong>ax</strong> – matplotlib axes object, optional
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, use the current axes. Not applicable when using facets.</p></li>
-<li><p><strong>args</strong> – optional, additional arguments, passed to wrapped Matplotlib function.</p></li>
-<li><p><strong>kwargs</strong> – optional, additional keyword arguments to wrapped Matplotlib function.</p></li>
+<li><p><strong>x</strong> (<em>str</em><em>, </em><em>optional</em>) – Coordinate for <em>x</em> axis. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, use <code class="docutils literal notranslate"><span class="pre">darray.dims[1]</span></code>.</p></li>
+<li><p><strong>y</strong> (<em>str</em><em>, </em><em>optional</em>) – Coordinate for <em>y</em> axis. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, use <code class="docutils literal notranslate"><span class="pre">darray.dims[0]</span></code>.</p></li>
+<li><p><strong>ax</strong> (<em>plt.axes</em><em>, </em><em>optional</em>) – If None (default), use the current axes. Not applicable when using facets.</p></li>
+<li><p><strong>*args</strong> (<em>additional arguments</em><em>, </em><em>passed to wrapped Matplotlib function.</em>) – </p></li>
+<li><p><strong>**kwargs</strong> (<em>additional keyword arguments to wrapped Matplotlib function.</em>) – </p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>artist</strong> – The same type of primitive artist that the wrapped Matplotlib
+function returns.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib mappable</p>
 </dd>
 </dl>
 </dd></dl>

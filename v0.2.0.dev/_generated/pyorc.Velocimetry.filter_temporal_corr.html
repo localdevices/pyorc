@@ -562,15 +562,17 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> – xr.Dataset, containing velocity vectors as [time, y, x]</p></li>
-<li><p><strong>v_x</strong> – str, name of x-directional velocity</p></li>
-<li><p><strong>v_y</strong> – str, name of y-directional velocity</p></li>
-<li><p><strong>corr</strong> – str, name of correlation variable</p></li>
-<li><p><strong>tolerance</strong> – float (0-1), tolerance for correlation value. If correlation is lower than tolerance, it is masked</p></li>
+<li><p><strong>v_x</strong> (<em>str</em><em>, </em><em>optional</em>) – name of x-directional velocity (Default: “v_x”)</p></li>
+<li><p><strong>v_y</strong> (<em>str</em><em>, </em><em>optional</em>) – name of y-directional velocity (Default: “v_y”)</p></li>
+<li><p><strong>corr</strong> (<em>str</em>) – name of correlation variable (default: “corr”)</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em><em> (</em><em>0-1</em><em>)</em>) – tolerance for correlation value (default: 0.1). If correlation is lower than tolerance, it is masked</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, containing correlation filtered velocity vectors as [time, y, x]</p>
+<dd class="field-even"><p><strong>ds_filter</strong> – correlation filtered velocity vectors as [time, y, x]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

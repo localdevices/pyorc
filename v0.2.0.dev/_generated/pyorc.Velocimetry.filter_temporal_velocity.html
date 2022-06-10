@@ -562,15 +562,17 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> – xr.Dataset, containing velocity vectors as [time, y, x]</p></li>
-<li><p><strong>v_x</strong> – str, name of x-directional velocity</p></li>
-<li><p><strong>v_y</strong> – str, name of y-directional velocity</p></li>
-<li><p><strong>s_min</strong> – float, minimum scalar velocity [m s-1]</p></li>
-<li><p><strong>s_max</strong> – float, maximum scalar velocity [m s-1]</p></li>
+<li><p><strong>v_x</strong> (<em>str</em><em>, </em><em>optional</em>) – name of x-directional velocity (Default: “v_x”)</p></li>
+<li><p><strong>v_y</strong> (<em>str</em><em>, </em><em>optional</em>) – name of y-directional velocity (Default: “v_y”)</p></li>
+<li><p><strong>s_min</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum scalar velocity [m s-1] (default: 0.1)</p></li>
+<li><p><strong>s_max</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum scalar velocity [m s-1] (default: 5.)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, containing velocity-range filtered velocity vectors as [time, y, x]</p>
+<dd class="field-even"><p><strong>ds_filter</strong> – velocity-range filtered velocity vectors as [time, y, x]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

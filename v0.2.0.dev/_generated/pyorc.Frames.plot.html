@@ -558,23 +558,24 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Frames.plot">
 <span class="sig-prename descclassname"><span class="pre">Frames.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Frames.plot" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if <code class="docutils literal notranslate"><span class="pre">ax</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>) axes</p>
+<dd><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes</p>
 <p>Wraps <code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib:matplotlib.collections.QuadMesh()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> – Dataset containing frames results</p></li>
-<li><p><strong>mode</strong> – str, perspective mode to use for plotting. Can be “local”, “geographical”, or “camera”.
-For “geographical” a frames set from frames.project should be used that contains “lon” and “lat” coordinates.
+<li><p><strong>ax</strong> (<em>plt.axes</em><em>, </em><em>optional</em>) – If None (default), use the current axes. Not applicable when using facets.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – perspective mode to use for plotting. Can be “local” (default), “geographical”, or “camera”.
+For “geographical” a frames set from Frames.project should be used that contains “lon” and “lat” coordinates.
 For “camera”, a non-projected frames set should be used.</p></li>
-<li><p><strong>ax</strong> – matplotlib axes object, optional
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, use the current axes. Not applicable when using facets.</p></li>
-<li><p><strong>args</strong> – optional, additional arguments, passed to wrapped Matplotlib function.</p></li>
-<li><p><strong>kwargs</strong> – optional, additional keyword arguments to wrapped Matplotlib function.</p></li>
+<li><p><strong>*args</strong> (<em>additional arguments</em><em>, </em><em>passed to wrapped Matplotlib function.</em>) – </p></li>
+<li><p><strong>**kwargs</strong> (<em>additional keyword arguments to wrapped Matplotlib function.</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>mappable of matplotlib.collections.QuadMesh type</p>
+<dd class="field-even"><p><strong>p</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.collections.QuadMesh</p>
 </dd>
 </dl>
 </dd></dl>

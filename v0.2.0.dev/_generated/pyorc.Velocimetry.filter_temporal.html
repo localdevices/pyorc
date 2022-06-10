@@ -562,22 +562,27 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> – xr.Dataset, or file containing, with velocity vectors as [time, y, x]</p></li>
-<li><p><strong>v_x</strong> – str, name of x-directional velocity</p></li>
-<li><p><strong>v_y</strong> – str, name of y-directional velocity</p></li>
-<li><p><strong>filter_std</strong> – boolean, if True (default, filtering on variance is applied)</p></li>
-<li><p><strong>filter_std</strong> – boolean, if True (default, filtering on variance is applied)</p></li>
-<li><p><strong>filter_angle</strong> – boolean, if True (default, filtering on angles is applied)</p></li>
-<li><p><strong>filter_velocity</strong> – boolean, if True (default, filtering on velocity is applied)</p></li>
-<li><p><strong>filter_corr</strong> – boolean, if True (default, filtering on correlation is applied)</p></li>
-<li><p><strong>kwargs_std</strong> – dict, set of key-word arguments to pass on to filter_temporal_std</p></li>
-<li><p><strong>kwargs_angle</strong> – dict, set of key-word arguments to pass on to filter_temporal_angle</p></li>
-<li><p><strong>kwargs_velocity</strong> – dict, set of key-word arguments to pass on to filter_temporal_velocity</p></li>
-<li><p><strong>kwargs_corr</strong> – dict, set of key-word arguments to pass on to filter_temporal_corr</p></li>
+<li><p><strong>v_x</strong> (<em>str</em><em>, </em><em>optional</em>) – name of x-directional velocity (default: “v_x”)</p></li>
+<li><p><strong>v_y</strong> (<em>str</em><em>, </em><em>optional</em>) – name of y-directional velocity (default: “v_y”)</p></li>
+<li><p><strong>filter_std</strong> (<em>boolean</em><em>, </em><em>optional</em>) – if True (default), filtering on variance is applied</p></li>
+<li><p><strong>filter_std</strong> – if True (default), filtering on variance is applied</p></li>
+<li><p><strong>filter_angle</strong> (<em>boolean</em><em>, </em><em>optional</em>) – if True (default), filtering on angles is applied</p></li>
+<li><p><strong>filter_velocity</strong> (<em>boolean</em>) – if True (default, filtering on velocity is applied)</p></li>
+<li><p><strong>filter_corr</strong> (<em>boolean</em>) – if True (default), filtering on correlation is applied</p></li>
+<li><p><strong>filter_neighbour</strong> (<em>dict</em><em>, </em><em>optional</em>) – if True (default), neighbourhood filtering is applied</p></li>
+<li><p><strong>kwargs_std</strong> (<em>dict</em><em>, </em><em>optional</em>) – set of key-word arguments to pass on to filter_temporal_std</p></li>
+<li><p><strong>kwargs_angle</strong> (<em>dict</em><em>, </em><em>optional</em>) – set of key-word arguments to pass on to filter_temporal_angle</p></li>
+<li><p><strong>kwargs_velocity</strong> (<em>dict</em><em>, </em><em>optional</em>) – set of key-word arguments to pass on to filter_temporal_velocity</p></li>
+<li><p><strong>kwargs_corr</strong> (<em>dict</em><em>, </em><em>optional</em>) – set of key-word arguments to pass on to filter_temporal_corr</p></li>
+<li><p><strong>kwargs_neighbour</strong> (<em>dict</em><em>, </em><em>optional</em>) – set of key-word arguments to pass on to filter_temporal_neighbour</p></li>
+<li><p><strong>inplace</strong> (<em>boolean</em>) – If set, values are replaced instead of returning a new Dataset</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, containing temporally filtered velocity vectors as [time, y, x]</p>
+<dd class="field-even"><p><strong>ds_filter</strong> – temporally filtered velocity vectors as [time, y, x]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

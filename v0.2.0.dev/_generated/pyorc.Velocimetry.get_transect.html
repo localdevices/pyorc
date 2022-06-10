@@ -567,29 +567,26 @@ Time series are transformed to set quantiles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – xarray dataset</p></li>
-<li><p><strong>x</strong> – tuple or list-like, x-coordinates on which interpolation should be done</p></li>
-<li><p><strong>y</strong> – tuple or list-like, y-coordinates on which interpolation should be done</p></li>
-<li><p><strong>z</strong> – tuple or list-like, z-coordinates on which interpolation should be done, defaults: None</p></li>
-<li><p><strong>crs</strong> – coordinate reference system (e.g. EPSG code) in which x, y and z are measured, defaults to None,
-assuming crs is the same as crs of ds</p></li>
-<li><p><strong>v_eff</strong> – bool, if True, effective velocity (perpendicular to cross-section) is also computed, default: True</p></li>
-<li><p><strong>xs</strong> – str, name of variable that stores the x coordinates in the projection in which “x” is supplied,
-default: “xs”</p></li>
-<li><p><strong>ys</strong> – str, name of variable that stores the y coordinates in the projection in which “y” is supplied
-default: “ys”</p></li>
-<li><p><strong>distance</strong> – float, optional, sampling distance over the cross-section in [m]. the bathymetry points will
-be interpolated to match this distance. If not set, the distance will be estimated from the velocimetry
-grid resolution.</p></li>
-<li><p><strong>wdw</strong> – int, window size to use for sampling the velocity. zero means, only cell itself, 1 means 3x3 window.</p></li>
-<li><p><strong>rolling</strong> – int, optional, if set, a rolling mean over time is applied, before deriving quantile estimates.</p></li>
-<li><p><strong>quantiles</strong> – list of floats (0-1), optional, list of quantiles to return
-(default: [0.05, 0.25, 0.5, 0.75, 0.95]).</p></li>
+<li><p><strong>x</strong> (<em>tuple</em><em> or </em><em>list-like</em>) – x-coordinates on which interpolation should be done</p></li>
+<li><p><strong>y</strong> (<em>tuple</em><em> or </em><em>list-like</em>) – y-coordinates on which interpolation should be done</p></li>
+<li><p><strong>z</strong> (<em>tuple</em><em> or </em><em>list-like</em>) – z-coordinates on which interpolation should be done, defaults: None</p></li>
+<li><p><strong>crs</strong> (<em>int</em><em>, </em><em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – coordinate reference system (e.g. EPSG code) in which x, y and z are measured (default: None),
+None assumes crs is the same as crs of xr.Dataset.</p></li>
+<li><p><strong>v_eff</strong> (<em>boolean</em><em>, </em><em>optional</em>) – if True (default), effective velocity (perpendicular to cross-section) is also computed</p></li>
+<li><p><strong>xs</strong> (<em>str</em><em>, </em><em>optional</em>) – name of variable that stores the x coordinates in the projection in which “x” is supplied (default: “xs”)</p></li>
+<li><p><strong>ys</strong> (<em>str</em><em>, </em><em>optional</em>) – name of variable that stores the y coordinates in the projection in which “y” is supplied (default: “ys”)</p></li>
+<li><p><strong>distance</strong> (<em>float</em><em>, </em><em>optional</em>) – sampling distance over the cross-section in [m]. the bathymetry points will be interpolated to match this
+distance. If not set, the distance will be estimated from the velocimetry grid resolution. (default: None)</p></li>
+<li><p><strong>wdw</strong> (<em>int</em><em>, </em><em>window size to use for sampling the velocity. zero means</em><em>, </em><em>only cell itself</em><em>, </em><em>1 means 3x3 window.</em>) – (default: 1)</p></li>
+<li><p><strong>rolling</strong> (<em>int</em><em>, </em><em>optional</em>) – if set other than None (default), a rolling mean over time is applied, before deriving quantile estimates.</p></li>
+<li><p><strong>quantiles</strong> (<em>list of floats</em><em> (</em><em>0-1</em><em>)</em><em>, </em><em>optional</em>) – list of quantiles to return (default: [0.05, 0.25, 0.5, 0.75, 0.95]).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates over
-quantiles.</p>
+<dd class="field-even"><p><strong>ds_points</strong> – interpolated data at the supplied x and y coordinates over quantiles</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

@@ -730,16 +730,16 @@ how to effectively work with the <a class="reference external" href="https://doc
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.html#pyorc.CameraConfig" title="pyorc.CameraConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig</span></code></a>([crs, window_size, resolution, ...])</p></td>
-<td><p>CameraConfig object with several settings.</p></td>
+<td><p>Camera configuration containing information about the perspective of the camera with respect to real world coordinates</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.bbox.html#pyorc.CameraConfig.bbox" title="pyorc.CameraConfig.bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.bbox</span></code></a></p></td>
-<td><p>Return the best fitting bounding box orthoprojected coordinates from camera perspective coordinates provided in property <code class="docutils literal notranslate"><span class="pre">pyorc.CameraConfig.corners</span></code></p></td>
+<td><p>Returns geographical bbox fitting around corners points of area of interest in camera perspective</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.shape.html#pyorc.CameraConfig.shape" title="pyorc.CameraConfig.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.shape</span></code></a></p></td>
-<td><p>Return amount of rows and columns of orthoprojected frames retrieved with <code class="docutils literal notranslate"><span class="pre">pyorc.Video.project</span></code></p></td>
+<td><p>Returns rows and columns in projected frames from <code class="docutils literal notranslate"><span class="pre">Frames.project</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.transform.html#pyorc.CameraConfig.transform" title="pyorc.CameraConfig.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.transform</span></code></a></p></td>
-<td><p>Return a rotated Affine transformation belonging to orthoprojected frames retrieved with <code class="docutils literal notranslate"><span class="pre">pyorc.Video.project</span></code></p></td>
+<td><p>Returns Affine transform of projected frames from <code class="docutils literal notranslate"><span class="pre">Frames.project</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -753,7 +753,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_corners.html#pyorc.CameraConfig.set_corners" title="pyorc.CameraConfig.set_corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_corners</span></code></a>(corners)</p></td>
-<td><p></p></td>
+<td><p>Assign corner coordinates to camera configuration</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps" title="pyorc.CameraConfig.set_gcps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_gcps</span></code></a>(src, dst, z_0[, ...])</p></td>
 <td><p>Set ground control points for the given CameraConfig</p></td>
@@ -883,7 +883,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.html#pyorc.Frames" title="pyorc.Frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames</span></code></a>(xarray_obj)</p></td>
-<td><p>Frames functionalities that can be applied on <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p></td>
+<td><p>Frames functionalities that can be applied on xr.DataArray</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.camera_config.html#pyorc.Frames.camera_config" title="pyorc.Frames.camera_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.camera_config</span></code></a></p></td>
 <td><p>Camera configuration belonging to the processed video</p></td>
@@ -905,7 +905,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect" title="pyorc.Frames.edge_detect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.edge_detect</span></code></a>([stride_1, stride_2])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect" title="pyorc.Frames.edge_detect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.edge_detect</span></code></a>([wdw_1, wdw_2])</p></td>
 <td><p>Convert frames in edges, using a band convolution filter.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.landmask.html#pyorc.Frames.landmask" title="pyorc.Frames.landmask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.landmask</span></code></a>([dilate_iter, samples])</p></td>
@@ -915,7 +915,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 <td><p>Remove the mean of sampled frames.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling" title="pyorc.Frames.reduce_rolling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.reduce_rolling</span></code></a>([samples])</p></td>
-<td><p>Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use <cite>normalize</cite>).</p></td>
+<td><p>Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use Frames.normalize).</p></td>
 </tr>
 </tbody>
 </table>
@@ -957,7 +957,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.plot.html#pyorc.Frames.plot" title="pyorc.Frames.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.plot</span></code></a>([ax, mode])</p></td>
-<td><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if <code class="docutils literal notranslate"><span class="pre">ax</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>) axes</p></td>
+<td><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani" title="pyorc.Frames.to_ani"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.to_ani</span></code></a>(fn[, figure_kwargs, ...])</p></td>
 <td><p>Store an animation of the frames in the object</p></td>
@@ -1032,10 +1032,10 @@ how to effectively work with the <a class="reference external" href="https://doc
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial.html#pyorc.Velocimetry.filter_spatial" title="pyorc.Velocimetry.filter_spatial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial</span></code></a>([v_x, v_y, ...])</p></td>
 <td><p>Masks velocity values on a number of spatial filters.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan" title="pyorc.Velocimetry.filter_spatial_nan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial_nan</span></code></a>([v_x, v_y])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan" title="pyorc.Velocimetry.filter_spatial_nan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial_nan</span></code></a>([v_x, v_y, ...])</p></td>
 <td><p>Masks values if their surrounding neighbours (inc.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median" title="pyorc.Velocimetry.filter_spatial_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial_median</span></code></a>([v_x, v_y])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median" title="pyorc.Velocimetry.filter_spatial_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.filter_spatial_median</span></code></a>([v_x, ...])</p></td>
 <td><p>Masks values when their value deviates more than x standard deviations from the median of its neighbours (inc.</p></td>
 </tr>
 </tbody>
@@ -1137,7 +1137,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 <td><p>Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective" title="pyorc.Transect.get_xyz_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_xyz_perspective</span></code></a>([M, xs, ys, ...])</p></td>
-<td><p>Get camera-perspective column, row coordinates from cross-section points.</p></td>
+<td><p>Get camera-perspective column, row coordinates from cross-section locations.</p></td>
 </tr>
 </tbody>
 </table>

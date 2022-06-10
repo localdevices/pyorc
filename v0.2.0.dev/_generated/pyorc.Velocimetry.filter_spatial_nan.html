@@ -557,22 +557,25 @@
 <h1>pyorc.Velocimetry.filter_spatial_nan<a class="headerlink" href="#pyorc-velocimetry-filter-spatial-nan" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Velocimetry.filter_spatial_nan">
-<span class="sig-prename descclassname"><span class="pre">Velocimetry.</span></span><span class="sig-name descname"><span class="pre">filter_spatial_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_y'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/velocimetry.html#Velocimetry.filter_spatial_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Velocimetry.filter_spatial_nan" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Velocimetry.</span></span><span class="sig-name descname"><span class="pre">filter_spatial_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wdw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">9999.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/velocimetry.html#Velocimetry.filter_spatial_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Velocimetry.filter_spatial_nan" title="Permalink to this definition">#</a></dt>
 <dd><p>Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated
 velocity estimates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – xr.Dataset, containing velocity vectors as [time, y, x]</p></li>
-<li><p><strong>v_x</strong> – str, name of x-directional velocity</p></li>
-<li><p><strong>v_y</strong> – str, name of y-directional velocity</p></li>
-<li><p><strong>tolerance</strong> – float, amount of NaNs in search window measured as a fraction of total amount of values [0-1]</p></li>
-<li><p><strong>stride</strong> – int, stride used to determine relevant neighbours</p></li>
-<li><p><strong>missing</strong> – float, a temporary missing value, used to be able to convolve NaNs</p></li>
+<li><p><strong>v_x</strong> (<em>str</em><em>, </em><em>optional</em>) – name of x-directional velocity (default: “v_x”)</p></li>
+<li><p><strong>v_y</strong> (<em>str</em><em>, </em><em>optional</em>) – name of y-directional velocity (default: “v_y”)</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em><em>, </em><em>optional</em>) – amount of NaNs in search window measured as a fraction of total amount of values [0-1] (default: 0.3)</p></li>
+<li><p><strong>wdw</strong> (<em>int</em><em>, </em><em>optional</em>) – window length used to determine relevant neighbours. 1 means that 1 neighbour on all sides is considered
+(default: 1)</p></li>
+<li><p><strong>missing</strong> (<em>float</em><em>, </em><em>optional</em>) – a temporary missing value, used to be able to convolve NaNs, normally not needed to change (default -9999.)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, containing NaN filtered velocity vectors as [time, y, x]</p>
+<dd class="field-even"><p><strong>ds_filter</strong> – NaN filtered velocity vectors as [time, y, x]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

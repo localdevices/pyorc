@@ -562,10 +562,22 @@
 depth-average velocity.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>v_corr</strong> – float, optional, correction factor (default: 0.9)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v_corr</strong> (<em>float</em><em>, </em><em>optional</em>) – correction factor (default: 0.9)</p></li>
+<li><p><strong>fill_method</strong> (<em>method to fill missing values. &quot;zeros&quot; fills NaNS with zeros</em><em>, </em><em>&quot;interpolate&quot; interpolates values</em>) – <dl class="simple">
+<dt>from nearest neighbour, “log_profile” fits a 4-parameter logarithmic profile with depth and with changing</dt><dd><p>velocities towards banks on known velocities, and fills missing with the fitted relationship.
+(Default value = “zeros”)</p>
+</dd>
+</dl>
+</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, Transect for selected quantiles in time, including “q”.</p>
+<dd class="field-even"><p><strong>ds</strong> – Transect for selected quantiles in time, with “q_nofill” containing the integrated values, and “q” the
+integrated values, filled with chosen fill method.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

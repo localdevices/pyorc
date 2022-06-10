@@ -562,11 +562,8 @@
 for this dataset significantly, when stored to disk in e.g. a netcdf file using <code class="docutils literal notranslate"><span class="pre">xarray.Dataset.to_netcdf</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>enc_pars</strong> – dict, optional, per variable, a dict containing encoding parameters. When called without
-input, a standard set of encoding parameters is used that compresses well.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-odd"><p><strong>enc_pars</strong> (<em>dict of dicts</em><em>, </em><em>optional</em>) – per variable, a dict containing encoding parameters. When called without input, a standard set of encoding
+parameters is used that compresses well. (Default value = const.ENCODING_PARAMS)</p>
 </dd>
 </dl>
 </dd></dl>

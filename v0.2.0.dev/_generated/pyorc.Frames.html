@@ -558,20 +558,20 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="pyorc.Frames">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/frames.html#Frames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Frames" title="Permalink to this definition">#</a></dt>
-<dd><p>Frames functionalities that can be applied on <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
-<p>Initialize a frames <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+<dd><p>Frames functionalities that can be applied on xr.DataArray</p>
+<p>Initialize a frames xr.DataArray</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>xarray_obj</strong> – xarray dataarray containing frames data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Video.get_frames</span></code>)</p>
+<dd class="field-odd"><p><strong>xarray_obj</strong> (<em>xr.DataArray</em>) – frames data fields (from pyorc.Video.get_frames)</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Frames.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/frames.html#Frames.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Frames.__init__" title="Permalink to this definition">#</a></dt>
-<dd><p>Initialize a frames <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p>
+<dd><p>Initialize a frames xr.DataArray</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>xarray_obj</strong> – xarray dataarray containing frames data fields (from <code class="docutils literal notranslate"><span class="pre">pyorc.Video.get_frames</span></code>)</p>
+<dd class="field-odd"><p><strong>xarray_obj</strong> (<em>xr.DataArray</em>) – frames data fields (from pyorc.Video.get_frames)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -584,9 +584,9 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyorc.Frames.__init__" title="pyorc.Frames.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(xarray_obj)</p></td>
-<td><p>Initialize a frames <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></p></td>
+<td><p>Initialize a frames xr.DataArray</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect" title="pyorc.Frames.edge_detect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_detect</span></code></a>([stride_1, stride_2])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect" title="pyorc.Frames.edge_detect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_detect</span></code></a>([wdw_1, wdw_2])</p></td>
 <td><p>Convert frames in edges, using a band convolution filter.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Frames.get_piv.html#pyorc.Frames.get_piv" title="pyorc.Frames.get_piv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_piv</span></code></a>(**kwargs)</p></td>
@@ -599,13 +599,13 @@
 <td><p>Remove the mean of sampled frames.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.plot.html#pyorc.Frames.plot" title="pyorc.Frames.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([ax, mode])</p></td>
-<td><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if <code class="docutils literal notranslate"><span class="pre">ax</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>) axes</p></td>
+<td><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Frames.project.html#pyorc.Frames.project" title="pyorc.Frames.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project</span></code></a>([resolution])</p></td>
 <td><p>Project frames into a projected frames object, with information from the camera_config attr.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling" title="pyorc.Frames.reduce_rolling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce_rolling</span></code></a>([samples])</p></td>
-<td><p>Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use <cite>normalize</cite>).</p></td>
+<td><p>Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use Frames.normalize).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Frames.to_ani.html#pyorc.Frames.to_ani" title="pyorc.Frames.to_ani"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_ani</span></code></a>(fn[, figure_kwargs, video_kwargs, ...])</p></td>
 <td><p>Store an animation of the frames in the object</p></td>

@@ -562,15 +562,20 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – xr.Dataset, or file containing, with velocity vectors as [time, y, x]</p></li>
-<li><p><strong>v_x</strong> – str, name of x-directional velocity</p></li>
-<li><p><strong>v_y</strong> – str, name of y-directional velocity</p></li>
-<li><p><strong>kwargs_nan</strong> – dict, keyword arguments to pass to filter_spatial_nan</p></li>
-<li><p><strong>kwargs_median</strong> – dict, keyword arguments to pass to filter_spatial_median</p></li>
+<li><p><strong>v_x</strong> (<em>str</em><em>, </em><em>optional</em>) – name of x-directional velocity (default: “v_x”)</p></li>
+<li><p><strong>v_y</strong> (<em>str</em><em>, </em><em>optional</em>) – name of y-directional velocity (default: “v_y”)</p></li>
+<li><p><strong>filter_nan</strong> (<em>boolean</em><em>, </em><em>optional</em>) – if True (default), filtering on nans is applied</p></li>
+<li><p><strong>filter_median</strong> (<em>boolean</em><em>, </em><em>optional</em>) – if True (default), filtering on median deviations is applied</p></li>
+<li><p><strong>kwargs_nan</strong> (<em>dict</em><em>, </em><em>optional</em>) – dict, keyword arguments to pass to filter_spatial_nan</p></li>
+<li><p><strong>kwargs_median</strong> (<em>dict</em><em>, </em><em>optional</em>) – keyword arguments to pass to filter_spatial_median</p></li>
+<li><p><strong>inplace</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If True (default: False), values are replaced instead of returning a new Dataset</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.Dataset, containing spatially filtered velocity vectors as [time, y, x]</p>
+<dd class="field-even"><p><strong>ds_filter</strong> – spatially filtered velocity vectors as [time, y, x]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

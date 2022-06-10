@@ -564,13 +564,16 @@ operation is used to make the land mask slightly larger than the exact defined p
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dilate_iter</strong> – int, number of dilation iterations to use, to dilate land mask</p></li>
-<li><p><strong>samples</strong> – int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
-number to speed up calculation, default: 15 (which is normally sufficient and fast enough).</p></li>
+<li><p><strong>dilate_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – number of dilation iterations to use, to dilate land mask (Default value = 10)</p></li>
+<li><p><strong>samples</strong> (<em>int</em><em>, </em><em>optional</em>) – amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+number to speed up calculation (Default value = 15)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>xr.DataArray, filtered frames</p>
+<dd class="field-even"><p><strong>da</strong> – filtered frames</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>

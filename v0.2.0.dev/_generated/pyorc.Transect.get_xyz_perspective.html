@@ -558,10 +558,22 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Transect.get_xyz_perspective">
 <span class="sig-prename descclassname"><span class="pre">Transect.</span></span><span class="sig-name descname"><span class="pre">get_xyz_perspective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_outside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/transect.html#Transect.get_xyz_perspective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Transect.get_xyz_perspective" title="Permalink to this definition">#</a></dt>
-<dd><p>Get camera-perspective column, row coordinates from cross-section points.</p>
+<dd><p>Get camera-perspective column, row coordinates from cross-section locations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>M</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – perspective transform matrix (Default value = None)</p></li>
+<li><p><strong>xs</strong> (<em>np.array</em><em>, </em><em>optional</em>) – x-coordinates to transform, derived from self.x if not provided (Default value = None)</p></li>
+<li><p><strong>ys</strong> – y-coordinates to transform, derived from self.y if not provided (Default value = None)</p></li>
+<li><p><strong>mask_outside</strong> – values not fitting in the original camera frame are set to NaN (Default value = True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>cols</strong> (<em>list of ints</em>) – columns of locations in original camera perspective</p></li>
+<li><p><strong>rows</strong> (<em>list of ints</em>) – rows of locations in original camera perspective</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>

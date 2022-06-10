@@ -563,16 +563,20 @@ to be in the right location. Requires cartopy to be installed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>figsize</strong> – tuple, optional, width and height of figure</p></li>
-<li><p><strong>ax</strong> – axes, optional, if not provided, axes is setup</p></li>
-<li><p><strong>tiles</strong> – str, optional, name of tiler service to use (called as attribute from cartopy.io.img_tiles)</p></li>
-<li><p><strong>buffer</strong> – float, optional buffer in lat-lon around points, used to set extent (default: 0.0005)</p></li>
-<li><p><strong>zoom_level</strong> – int, optional, zoom level of image tiler service (default: 18)</p></li>
-<li><p><strong>tiles_kwargs</strong> – dict, optional, keyword arguments to pass to ax,add_image when tiles are added</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – width and height of figure (Default value = (13)</p></li>
+<li><p><strong>ax</strong> (<em>plt.axes</em><em>, </em><em>optional</em>) – if not provided, axes is setup (Default: None)</p></li>
+<li><p><strong>tiles</strong> (<em>str</em><em>, </em><em>optional</em>) – name of tiler service to use (called as attribute from cartopy.io.img_tiles) (Default: None)</p></li>
+<li><p><strong>buffer</strong> (<em>float</em><em>, </em><em>optional</em>) – buffer in lat-lon around points, used to set extent (default: 0.0005)</p></li>
+<li><p><strong>zoom_level</strong> (<em>int</em><em>, </em><em>optional</em>) – zoom level of image tiler service (default: 18)</p></li>
+<li><p><strong>**tiles_kwargs</strong> – additional keyword arguments to pass to ax.add_image when tiles are added</p></li>
+<li><p><strong>8</strong><strong>)</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>ax</p>
+<dd class="field-even"><p><strong>ax</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>plt.axes</p>
 </dd>
 </dl>
 </dd></dl>

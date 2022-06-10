@@ -1,0 +1,279 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "e1f0a906",
+   "metadata": {},
+   "source": [
+    "## Setup a camera configuration for processing a single video\n",
+    "To process a video, a camera configuration is needed. The camera configuration makes the processing aware how to project the movie's frames to an orthorectified plane with real-world distances, and a user defined area of interest and processing resolution. It also tells the processing what the water level during the survey video is, so that the depth can be estimated, once bathymetry cross-sections are added. The process for a fixed video setup that takes videos with changing water level conditions is slightly more advanced. Therefore we here start with the assumption that you walk to a stream with a smart phone and a GPS (RTK) device or a spirit level instrument, record control points and record a short video for just one single observation.\n",
+    "\n",
+    "In this notebook, we will extract one frame from the survey video to grab the control points. For this example, field observations were collected at the Ngwerere River, in Lusaka. We will first setup an empty camera configuration, and then gradually fill this with the required information. Along the way we plot what we have in a geospatial plot. The information we add is:\n",
+    "* Ground-control points (row and columns locations in the frame as well as real world coordinates)\n",
+    "* Row and column coordinates that define the area of interest.\n",
+    "* The water level during the video and survey (set at zero, because this survey was only done for one single video, this is only relevant if multiple videos with different water levels are processed)\n",
+    "* The position of the camera lens. This is relevant in case multiple videos with different water levels are processed. We here add this, but it is not actually used. \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "aa3f5e43",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import xarray as xr\n",
+    "import pyorc\n",
+    "import cartopy\n",
+    "import cartopy.crs as ccrs\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3d01af1e",
+   "metadata": {},
+   "source": [
+    "## Open movie and plot the first frame\n",
+    "We use the pyorc Video class to open a video file and extract frame number #0 (remember, python starts counting at zero instead of one). Several markers have been placed, some as square shaped checkerboard patterns, others spraypainted with black paint on a rock. All markers are more or less at the water level. Because we use an interactive notebook plot, you can hover over the image with your mouse and see the coordinates in the bottom-right. velocimetry is normally done on one channel, but we first explicitly use \"rgb\" channels below to extract one frame for finding the points."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2cf14857",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "video_file = \"ngwerere/ngwerere_20191103.mp4\"\n",
+    "video = pyorc.Video(video_file, start_frame=0, end_frame=1)  # we only need one frame\n",
+    "frame = video.get_frame(0, method=\"rgb\")\n",
+    "\n",
+    "# plot frame on a notebook-style window\n",
+    "f = plt.figure(figsize=(10, 6))\n",
+    "plt.imshow(frame)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c902793a",
+   "metadata": {},
+   "source": [
+    "You can identify different marker x (column) and y (row) positions in the camera's objective. Below, we have put several of these into a \"src\" part of the required gcp dictionary. Then we plot the frame and coordinates together."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a8cce2a6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%matplotlib inline\n",
+    "gcps = dict(\n",
+    "    src=[\n",
+    "        [1421, 1001],\n",
+    "        [1251, 460],\n",
+    "        [421, 432],\n",
+    "        [470, 607]\n",
+    "    ]\n",
+    ")\n",
+    "\n",
+    "f = plt.figure(figsize=(16, 9))\n",
+    "plt.imshow(frame)\n",
+    "plt.plot(*zip(*gcps[\"src\"]), \"rx\", markersize=20, label=\"Control points\")\n",
+    "plt.legend()\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a7df7a7d",
+   "metadata": {},
+   "source": [
+    "Now we add the rest of the information: \n",
+    "* the real world coordinates of the GCPs. These were measured using an RTK GPS unit in the Universe Transverse Mercator (UTM) 35S coordinate reference system (EPSG code 32735). We add these to the GCPs using another key called \"dst\".\n",
+    "* the water level during the survey as measured in the EPSG 32735 projection (\"z_0\"), which is measured by the RTK GPS unit. This is used to later compute depths from a bathymetry section, measured in the same EPSG 32735 ellipsoid vertical reference.\n",
+    "* the coordinate reference system (crs). The camera configuration then understands that everything we do is in UTM 35S. Really nice, because it makes our results geographically aware and geographical plots can be made. We add the crs to the camera configuration while setting it up.\n",
+    "\n",
+    "Note that in case you have a fixed camera that regularly takes movies at different water levels, you also would need to set the following:\n",
+    "* the locally measured water level \"h_ref\" during your survey. Typically this comes from a staff gauge, that a local person reads out or a pressure gauge. For each video, a new water level must then be provided, which is used to relocate the ground control points to the right location for the new water level, and to estimate the depth over cross-sections, applied later in the process. Since we here process a single video, we don't have to worry about this. \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "aae46aed",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# first add our UTM 35S coordinates. This MUST be in precisely the same order as the src coordinates.\n",
+    "gcps[\"dst\"] = [\n",
+    "    [642735.8076, 8304292.1190],  # lowest right coordinate\n",
+    "    [642737.5823, 8304295.593],  # highest right coordinate\n",
+    "    [642732.7864, 8304298.4250],  # highest left coordinate\n",
+    "    [642732.6705, 8304296.8580]  # highest right coordinate\n",
+    "]\n",
+    "\n",
+    "# # if we would use this video as survey in video, the lines below are also needed, \n",
+    "# # and proper values need to be filled in. They are now commented out.\n",
+    "# gcps[\"h_ref\"] = <your locally measured water level during survey in>\n",
+    "gcps[\"z_0\"] = 1182.2\n",
+    "\n",
+    "# now we use everything to make a camera configuration\n",
+    "cam_config = pyorc.CameraConfig(gcps=gcps, crs=32735)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a6189c6c",
+   "metadata": {},
+   "source": [
+    "We add a lens position. This is needed in case we will make multiple videos from the same position, at different water levels. The lens position is then used to interpret how the control points change with respect to the lens position. If you only process a single video, then the position will not have any effect and can also be left out. For completeness we do add it here. We could have done this in a single step as well using:\n",
+    "```\n",
+    "cam_config = pyorc.CameraConfig(gcps=gcps, crs=32735, lens_position=[642732.6705, 8304289.010, 1188.5])\n",
+    "```\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fe07e9f6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "lens_position = [642732.6705, 8304289.010, 1188.5]\n",
+    "cam_config.set_lens_position(*lens_position)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d29e5a89",
+   "metadata": {},
+   "source": [
+    "Below we make a quick plot. Cartopy is used to make the plot geographically aware. We use GoogleTiles, using the satellite style, to get some awareness of the surroundings."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "24d9c9db",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ax = cam_config.plot(tiles=\"GoogleTiles\", tiles_kwargs={\"style\": \"satellite\"})\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "49e64791",
+   "metadata": {},
+   "source": [
+    "Finally we add information to define our area of interest, and how the camera objective must be reprojected and the resolution of the velocimetry. \n",
+    "* For the area of interest, a 4 coordinates must be selected in the camera perspective. A geographically rectangular box will be shaped around those to make a suitable area of interest. We can simply use pixel (column row) xy coordinates for this, so we can select them using the original frame. Below, 4 points are selected and shown in the camera objective.\n",
+    "* a target resolution (in meters) must be selected. The resolution is used to reproject the camera objective to a planar projection with real-world coordinates.\n",
+    "* a window size (in number of pixels) is needed. Velocimetry will be performed in windows of this size. Since the stream is quite small, we use 1 centimeter (0.01 m) and a 25 pixel (so 25 centimeter) window size, used to find patterns on the water to trace.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e54e9205",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "corners = [\n",
+    "    [292, 817],\n",
+    "    [50, 166],\n",
+    "    [1200, 236],\n",
+    "    [1600, 834]\n",
+    "]\n",
+    "cam_config.set_corners(corners)\n",
+    "cam_config.resolution = 0.01\n",
+    "cam_config.window_size = 25"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a14442d2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "f = plt.figure(figsize=(10, 6))\n",
+    "plt.imshow(frame)\n",
+    "plt.plot(*zip(*gcps[\"src\"]), \"rx\", markersize=20, label=\"Control points\")\n",
+    "plt.plot(*zip(*corners), \"co\", label=\"Corners of AOI\")\n",
+    "plt.legend()\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "41ebed1b",
+   "metadata": {},
+   "source": [
+    "Now that all information is entered, we show the final camera configuration as a plot. The rectangular box can be clearly seen now."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f4c18842",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%matplotlib inline\n",
+    "ax = cam_config.plot(tiles=\"GoogleTiles\", tiles_kwargs={\"style\": \"satellite\"})"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c89221a1",
+   "metadata": {},
+   "source": [
+    "Our camera configuration is ready. Below we still show a string representation and then we store the configuration to a file for use in our next notebook using the `.to_file` method."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5d2b843c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(cam_config)\n",
+    "cam_config.to_file(\"ngwerere.json\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "511c24bf",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
