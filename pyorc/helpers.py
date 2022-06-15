@@ -14,14 +14,19 @@ from scipy.interpolate import interp1d
 
 
 def affine_from_grid(xi, yi):
-    """
-    Retrieve the affine transformation from a gridded set of coordinates.
+    """Retrieve the affine transformation from a gridded set of coordinates.
     This function (unlike rasterio.transform functions) can also handle rotated grids
 
-    :param xi: 2D numpy-like gridded x-coordinates
-    :param yi: 2D numpy-like gridded y-coordinates
+    Parameters
+    ----------
+    xi: np.ndarray (2D)
+        gridded x-coordinates
+    yi: np.ndarray (2D)
+        gridded y-coordinates
 
-    :return: rasterio.Affine object
+    Returns
+    -------
+    obj : rasterio.transform.Affine
     """
 
     xul, yul = xi[0, 0], yi[0, 0]
@@ -35,19 +40,29 @@ def affine_from_grid(xi, yi):
 
 
 def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object_type=xr.DataArray):
-    """
-    Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D xr.DataArray with dask arrays
-        with all axes.
+    """Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D xr.DataArray with dask arrays
+    with all axes.
 
-    :param delayed_das: Delayed dask data arrays (2D) or list of 2D delayed dask arrays
-    :param shape: tuple, foreseen shape of data arrays (rows, cols)
-    :param dtype: string or dtype, e.g. "uint8" of data arrays
-    :param coords: tuple with strings, indicating the dimensions of the xr.DataArray being prepared, usually
-        ("time", "y", "x").
-    :param attrs: dict, containing attributes for xr.DataArray
-    :param name: str, name of variable, default None
-    :param object_type: type of object to create from lazy array (default: xr.DataArray)
-    :return: object of object_type (default: xr.DataArray)
+    Parameters
+    ----------
+    delayed_das: xr.DataArray or list
+    shape: tuple
+        foreseen shape of data arrays (rows, cols)
+    dtype: str or dtype
+        e.g. "uint8" of data arrays
+    coords: tuple of str
+        dimensions of the xr.DataArray being prepared, usually ("time", "y", "x").
+    attrs: dict, optional
+        attributes for xr.DataArray (default: {})
+    name: str, optional
+        name of variable, default: None
+    object_type: type
+        type of object to create from lazy array (default: xr.DataArray)
+
+    Returns
+    -------
+    object of object_type
+        default: xr.DataArray
     """
     if isinstance(delayed_das, list):
         data_array = da.stack(
@@ -76,25 +91,24 @@ def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object
 
 
 def depth_integrate(depth, v, v_corr=0.85, name="q"):
-    """
-    integrate velocities [m s-1] to depth-integrated velocity [m2 s-1] using depth information
+    """Integrate velocities [m s-1] to depth-integrated velocity [m2 s-1] using depth information
 
-    :param z: DataArray(points), bathymetry depths (ref. CRS)
-    :param v: DataArray(time, points), effective velocity at surface [m s-1]
-    :param z_0: float, zero water level (ref. CRS)
-    :param h_ref: float, water level measured during survey (ref. z_0)
-    :param h_a: float, actual water level (ref. z_0)
-    :param v_corr: float (range: 0-1, typically close to 1), correction factor from surface to depth-average
-        (default: 0.85)
-    :param name: str, name of DataArray (default: "q")
-    :return: q: DataArray(time, points), depth integrated velocity [m2 s-1]
+    Parameters
+    ----------
+    depth : DataArray (points)
+        bathymetry depths (ref. CRS)
+    v : DataArray (time, points)
+        effective velocity at surface [m s-1]
+    v_corr : float (range: 0-1), optional
+        typically close to 1, correction factor from surface to depth-average (default: 0.85)
+    name: str, optional
+        name of DataArray (default: "q")
+
+    Returns
+    -------
+    q: DataArray (time, points)
+        depth integrated velocity [m2 s-1]
     """
-    # compute depth, never smaller than zero. Depth is in words:
-    #   + height of the level of staff gauge (z_0) measured during survey in gps CRS (e.g. WGS84)
-    #   - z levels the bottom cross section observations measured in gps CRS (e.g. WGS84)
-    #   + difference in water level measured with staff gauge during movie and during survey
-    #   of course depth cannot be negative, so it is always maximized to zero when below zero
-    # depth = np.maximum(z_0 - z + h_a - h_ref, 0)
     # compute the depth average velocity
     q = v * v_corr * depth
     q.attrs = {
@@ -108,12 +122,20 @@ def depth_integrate(depth, v, v_corr=0.85, name="q"):
 
 
 def distance_pts(c1, c2):
-    """
-    Compute distance between c1 and c2
+    """Compute distance between c1 and c2
 
-    :param c1: tuple(x, y), coordinate 1
-    :param c2: tuple(x, y), coordinate 2
-    :return: float, distance between c1 and c2
+    Parameters
+    ----------
+
+    c1 : tuple
+        (x, y), coordinate 1
+    c2: tuple
+        (x, y), coordinate 2
+
+    Returns
+    -------
+    dist : float
+        distance between c1 and c2
     """
     x1, y1 = c1
     x2, y2 = c2
@@ -121,15 +143,24 @@ def distance_pts(c1, c2):
 
 
 def deserialize_attr(data_array, attr, dtype=np.array, args_parse=False):
-    """
-    Return a deserialized version of said property (assumed to be stored as a string) of DataArray.
+    """Return a deserialized version of said property (assumed to be stored as a string) of DataArray.
 
-    :param data_array: xr.DataArray, containing attributes of interest
-    :param attr: str, name of attributes
-    :param dtype: object type to return, function will try to perform type(eval(attr)), default np.array
-    :param args_parse: bool, if True, function will try to return type(*eval(attr)), assuming attribute contains list
-        of arguments
-    :return: parsed attribute, of type defined by arg type
+    Parameters
+    ----------
+    obj: xr.DataArray
+        attributes of interest
+    attr: str
+        name of attributes
+    dtype: object type, optional
+        function will try to perform type(eval(attr)), default np.array
+    args_parse: boolean, optional
+        if True, function will try to return type(*eval(attr)), assuming attribute contains list
+        of arguments (default: False)
+
+    Returns
+    -------
+    parsed_arg: type defined by user
+        parsed attribute, of type defined by arg type
     """
     assert hasattr(data_array, attr), f'frames do not contain attribute with name "{attr}'
     attr_obj = getattr(data_array, attr)
@@ -139,15 +170,24 @@ def deserialize_attr(data_array, attr, dtype=np.array, args_parse=False):
 
 
 def get_axes(cols, rows, resolution):
-    """
-    Retrieve a locally spaced axes for surface velocimetry results on the basis of resolution and row and 
+    """Retrieve a locally spaced axes for surface velocimetry results on the basis of resolution and row and
     col distances from the original frames
 
-    :param cols: list with ints, columns, sampled from the original projected frames
-    :param rows: list with ints, rows, sampled from the original projected frames
-    :param resolution: resolution of original frames
-    :return: np.ndarray (N), containing x-axis with origin at the left
-        np.ndarray (N), containing y-axis with origin on the top
+    Parameters
+    ----------
+    cols: list
+        ints, columns, sampled from the original projected frames
+    rows: list
+        ints, rows, sampled from the original projected frames
+    resolution: float
+        resolution of original frames
+
+    Returns
+    -------
+    obj : np.ndarray
+        x-axis with origin at the left
+    obj2 : np.ndarray
+        y-axis with origin on the top
 
     """
     spacing_x = np.diff(cols[0])[0]
