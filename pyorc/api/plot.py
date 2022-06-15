@@ -10,14 +10,28 @@ from pyorc import helpers
 
 def _base_plot(plot_func):
     commondoc = """
-    :param ds: Dataset containing velocimetry or transect results
-    :param mode: str, perspective mode to use for plotting. Can be "local", "geographical", or "camera". For 
-        "geographical" a velocimetry result that contains "lon" and "lat" coordinates must be provided 
+
+    Parameters
+    ----------
+    mode : str, optional
+        perspective mode to use for plotting. Can be "local" (default), "geographical", or "camera". For
+        "geographical" a velocimetry result that contains "lon" and "lat" coordinates must be provided
         (i.e. produced with known CRS for control points).
-    :param ax: matplotlib axes object, optional
-        If ``None``, use the current axes. Not applicable when using facets.
-    :param args: optional, additional arguments, passed to wrapped Matplotlib function.
-    :param kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
+    x : str, optional
+        Coordinate for *x* axis. If ``None``, use ``darray.dims[1]``.
+    y : str, optional
+        Coordinate for *y* axis. If ``None``, use ``darray.dims[0]``.
+    ax : plt.axes, optional
+        If None (default), use the current axes. Not applicable when using facets.
+    *args : additional arguments, passed to wrapped Matplotlib function.
+    **kwargs : additional keyword arguments to wrapped Matplotlib function.
+    
+    Returns
+    -------
+    artist : matplotlib mappable
+        The same type of primitive artist that the wrapped Matplotlib
+        function returns.
+    
     """
     # This function is largely based on xarray.Dataset function _dsplot
     # Build on the original docstring
@@ -26,23 +40,33 @@ def _base_plot(plot_func):
     # apply wrapper to allow for partial update of the function, with updated docstring
     @functools.wraps(plot_func)
     def get_plot_method(ref, mode="local", ax=None, add_colorbar=False, add_cross_section=True, kwargs_line={}, *args, **kwargs):
-        """
-        Retrieve plot method with all required inputs
+        """Retrieve plot method with all required inputs
 
-        :param ref: velocimetry or transect object
-        :param mode: str, perspective mode to use for plotting. Can be "local", "geographical", or "camera". For
+        Parameters
+        ----------
+        ref : xr.Dataset
+            velocimetry or transect object
+        mode : str, optional
+            perspective mode to use for plotting. Can be "local", "geographical", or "camera". For
             "geographical" a velocimetry result that contains "lon" and "lat" coordinates must be provided
             (i.e. produced with known CRS for control points).
-        :param ax: matplotlib axes object, optional
-            If ``None``, use the current axes. Not applicable when using facets.
-        :param add_colorbar: bool, optional, if set, a colorbar is added to axes (default: False)
-        :param add_cross_section: bool, optional, if set, and a transect is plotted, the transect coordinates are
-            plotted (default: True)
-        :param kwargs_line: dict, additional keyword arguments passed to matplotlib.pyplot.plot for plotting
-            cross-section.
-        :param *args: optional, additional arguments, passed to wrapped Matplotlib function.
-        :param **kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
-        :return: mappable of wrapped matplotlib function
+        ax : plt.axes object, optional
+            If None (default), use the current axes. Not applicable when using facets.
+        add_colorbar : boolean, optional
+            if True, a colorbar is added to axes (default: False)
+        add_cross_section : boolean, optional
+            if True, and a transect is plotted, the transect coordinates are plotted (default: True)
+        kwargs_line : dict, optional
+            additional keyword arguments passed to matplotlib.pyplot.plot for plotting cross-section.
+            (Default value = {})
+        *args : additional arguments, passed to wrapped Matplotlib function.
+        **kwargs : additional keyword arguments to wrapped Matplotlib function.
+            
+        Returns
+        -------
+        p : matplotlib mappable
+            mappable of wrapped matplotlib function
+
         """
         ax = _prepare_axes(ax=ax, mode=mode)
         # update ax
@@ -131,20 +155,25 @@ def _base_plot(plot_func):
 
 
 def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
-    """
-    Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ``ax`` is not ``None``) axes
-
+    """Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes
+    
     Wraps :py:func:`matplotlib:matplotlib.collections.QuadMesh`.
 
-    :param ds: Dataset containing frames results
-    :param mode: str, perspective mode to use for plotting. Can be "local", "geographical", or "camera".
-        For "geographical" a frames set from frames.project should be used that contains "lon" and "lat" coordinates.
+    Parameters
+    ----------
+    ax : plt.axes, optional
+        If None (default), use the current axes. Not applicable when using facets.
+    mode : str, optional
+        perspective mode to use for plotting. Can be "local" (default), "geographical", or "camera".
+        For "geographical" a frames set from Frames.project should be used that contains "lon" and "lat" coordinates.
         For "camera", a non-projected frames set should be used.
-    :param ax: matplotlib axes object, optional
-        If ``None``, use the current axes. Not applicable when using facets.
-    :param args: optional, additional arguments, passed to wrapped Matplotlib function.
-    :param kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
-    :return: mappable of matplotlib.collections.QuadMesh type
+    *args : additional arguments, passed to wrapped Matplotlib function.
+    **kwargs : additional keyword arguments to wrapped Matplotlib function.
+
+    Returns
+    -------
+    p : matplotlib.collections.QuadMesh
+
     """
     # prepare axes
     if "time" in ref._obj.coords:
@@ -196,8 +225,7 @@ def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
 
 
 class _Transect_PlotMethods:
-    """
-    Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
+    """Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
     For example, Dataset.velocimetry.plot.pcolormesh
     """
 
@@ -210,21 +238,39 @@ class _Transect_PlotMethods:
     def __call__(self, method="quiver", *args, **kwargs):
         """
 
-        :param method: str, "quiver" or "scatter", choose plotting option
-        :param *args: optional, additional arguments, passed to wrapped Matplotlib function.
-        :param **kwargs:  optional, additional keyword arguments to wrapped Matplotlib function.
-        :return:
+        Parameters
+        ----------
+        method : str, optional
+            plot method to use (default: "quiver")
+        *args : additional arguments, passed to wrapped Matplotlib function.
+        **kwargs : additional keyword arguments to wrapped Matplotlib function.
+
+        Returns
+        -------
+        p : matplotlib mappable
+            mappable of wrapped matplotlib function
+
         """
         return getattr(self, method)(*args, **kwargs)
 
 
     def get_uv_camera(self, dt=0.1):
-        """
-        Get x-directional (u), y-directional (v) and scalar velocity in camera projection from transect dataset.
+        """Get x-directional (u), y-directional (v) and scalar velocity in camera projection from transect dataset.
 
-        :param ds: xarray.Dataset containing transect results
-        :param dt: float, optional, time step [s] used to transpose velocities over a short distance for projection (default: 0.1)
-        :return: np.ndarray containing x-directional (u), y-directional (v) and scalar velocity
+        Parameters
+        ----------
+        dt : float, optional
+            time step [s] used to transpose velocities over a short distance for projection (default: 0.1)
+
+        Returns
+        -------
+        u : np.ndarray
+            x-directional velocity
+        v : np.ndarray
+            y-directional velocity
+        s : np.ndarray
+            scalar velocity
+
         """
         v_eff = "v_eff"
         v_dir = "v_dir"
@@ -250,11 +296,16 @@ class _Transect_PlotMethods:
 
 
     def get_uv_geographical(self):
-        """
-        Get x-directional (u), y-directional (v) and scalar velocity in geographical projection from transect dataset.
+        """Get x-directional (u), y-directional (v) and scalar velocity in geographical projection from transect dataset.
 
-        :param ds: xarray.Dataset containing transect results
-        :return: np.ndarray containing x-directional (u), y-directional (v) and scalar velocity
+        Returns
+        -------
+        u : np.ndarray
+            x-directional velocity
+        v : np.ndarray
+            y-directional velocity
+        s : np.ndarray
+            scalar velocity
         """
         v_eff = "v_eff"
         v_dir = "v_dir"
@@ -270,11 +321,16 @@ class _Transect_PlotMethods:
 
 
     def get_uv_local(self):
-        """
-        Get x-directional (u), y-directional (v) and scalar velocity in local projection from transect dataset.
+        """Get x-directional (u), y-directional (v) and scalar velocity in local projection from transect dataset.
 
-        :param ds: xarray.Dataset containing transect results
-        :return: np.ndarray containing x-directional (u), y-directional (v) and scalar velocity
+        Returns
+        -------
+        u : np.ndarray
+            x-directional velocity
+        v : np.ndarray
+            y-directional velocity
+        s : np.ndarray
+            scalar velocity
         """
         v_eff = "v_eff"
         v_dir = "v_dir"
@@ -285,8 +341,7 @@ class _Transect_PlotMethods:
 
 
 class _Velocimetry_PlotMethods:
-    """
-    Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
+    """Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
     For example, Dataset.velocimetry.plot.pcolormesh
     """
     def __init__(self, velocimetry):
@@ -297,21 +352,33 @@ class _Velocimetry_PlotMethods:
 
     def __call__(self, method="quiver", *args, **kwargs):
         """
+        Parameters
+        ----------
+        method : str, optional
+            plot method to use "quiver", "scatter", "streamplot" or "pcolormesh" (default: "quiver")
+        *args : additional arguments, passed to wrapped Matplotlib function.
+        **kwargs : additional keyword arguments to wrapped Matplotlib function.
 
-        :param method: str, "quiver", "scatter", or "pcolormesh", choose plotting option
-        :param args: arguments, passed to plot method
-        :param kwargs: keyword arguments, passed to plot method
-        :return:
+        Returns
+        -------
+        p : matplotlib mappable
+            mappable of wrapped matplotlib function
+
         """
         return getattr(self, method)(*args, **kwargs)
 
 
     def get_uv_geographical(self):
-        """
-        Get x-directional (u), y-directional (v) and scalar velocity in camera projection from velocimetry dataset.
+        """Get x-directional (u), y-directional (v) and scalar velocity in camera projection from velocimetry dataset.
 
-        :param ds: xarray.Dataset containing transect results
-        :return: np.ndarray containing x-directional (u), y-directional (v) and scalar velocity
+        Returns
+        -------
+        u : np.ndarray
+            x-directional velocity
+        v : np.ndarray
+            y-directional velocity
+        s : np.ndarray
+            scalar velocity
         """
         # select lon and lat variables as coordinates
         velocimetry = self._obj.velocimetry
@@ -326,26 +393,41 @@ class _Velocimetry_PlotMethods:
         return u, v, s
 
 
-    def get_uv_local(self, v_x="v_x", v_y="v_y"):
-        """
-        Get x-directional (u), y-directional (v) and scalar velocity in local projection from velocimetry dataset.
+    def get_uv_local(self):
+        """Get x-directional (u), y-directional (v) and scalar velocity in local projection from velocimetry dataset.
 
-        :param ds: xarray.Dataset containing transect results
-        :return: np.ndarray containing x-directional (u), y-directional (v) and scalar velocity
+        Returns
+        -------
+        u : np.ndarray
+            x-directional velocity
+        v : np.ndarray
+            y-directional velocity
+        s : np.ndarray
+            scalar velocity
         """
-        u = self._obj[v_x].values
-        v = -self._obj[v_y].values
+        u = self._obj["v_x"].values
+        v = -self._obj["v_y"].values
         s = (u**2 + v**2)**0.5
         return u, v, s
 
 
-    def get_uv_camera(self, dt=0.1, v_x="v_x", v_y="v_y"):
-        """
-        Get x-directional (u), y-directional (v) and scalar velocity in camera projection from velocimetry dataset.
+    def get_uv_camera(self, dt=0.1):
+        """Get x-directional (u), y-directional (v) and scalar velocity in camera projection from velocimetry dataset.
 
-        :param ds: xarray.Dataset containing transect results
-        :param dt: float, optional, time step [s] used to transpose velocities over a short distance for projection (default: 0.1)
-        :return: np.ndarray containing x-directional (u), y-directional (v) and scalar velocity
+        Parameters
+        ----------
+        dt : float, optional
+            time step [s] used to transpose velocities over a short distance for projection (default: 0.1)
+
+        Returns
+        -------
+        u : np.ndarray
+            x-directional velocity
+        v : np.ndarray
+            y-directional velocity
+        s : np.ndarray
+            scalar velocity
+
         """
         # retrieve the backward transformation array
         velocimetry = self._obj.velocimetry
@@ -357,7 +439,7 @@ class _Velocimetry_PlotMethods:
         yi = np.flipud(yi)
 
         # follow the velocity vector over a short distance (dt*velocity)
-        x_moved, y_moved = xi + self._obj[v_x] * dt, yi + self._obj[v_y] * dt
+        x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
         # project the found displacement points to camera projection
         xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, velocimetry.camera_config.resolution, M)
 
@@ -370,15 +452,14 @@ class _Velocimetry_PlotMethods:
 
         # estimate the projected velocity vector
         u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
-        s = ((self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5).values
+        s = ((self._obj["v_x"] ** 2 + self._obj["v_y"] ** 2) ** 0.5).values
         return u, v, s
 
 
 @_base_plot
 def quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
-    """
-    Creates quiver plot from velocimetry results on new or existing axes
-
+    """Creates quiver plot from velocimetry results on new or existing axes
+    
     Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
     """
     if "color" in kwargs:
@@ -392,9 +473,8 @@ def quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
 
 @_base_plot
 def scatter(x, y, c=None, ax=None, *args, **kwargs):
-    """
-    Creates scatter plot of velocimetry or transect results on new or existing axes
-
+    """Creates scatter plot of velocimetry or transect results on new or existing axes
+    
     Wraps :py:func:`matplotlib:matplotlib.pyplot.scatter`.
     """
     primitive = ax.scatter(x, y, c=c, *args, **kwargs)
@@ -403,13 +483,9 @@ def scatter(x, y, c=None, ax=None, *args, **kwargs):
 
 @_base_plot
 def streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwargs):
-    """
-    Creates streamplot of velocimetry results on new or existing axes
-
+    """Creates streamplot of velocimetry results on new or existing axes
+    
     Wraps :py:func:`matplotlib:matplotlib.pyplot.streamplot`. Additional input arguments:
-
-    :param linewidth_scale: float, optional, used to scale the linewidth according to the scalar velocity
-
     """
     if linewidth_scale is not None:
         kwargs["linewidth"] = s * linewidth_scale
@@ -422,25 +498,34 @@ def streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwarg
 
 @_base_plot
 def pcolormesh(x, y, s=None, ax=None, *args, **kwargs):
-    """
-    Creates pcolormesh plot from velocimetry results on new or existing axes
-
-     Wraps :py:func:`matplotlib:matplotlib.pyplot.pcolormesh`.
+    """Creates pcolormesh plot from velocimetry results on new or existing axes
+    
+    Wraps :py:func:`matplotlib:matplotlib.pyplot.pcolormesh`.
     """
     primitive = ax.pcolormesh(x, y, s, *args, **kwargs)
     return primitive
 
 
 def cbar(ax, p, size=12, **kwargs):
-    """
-    Add colorbar to existing axes. In case camera mode is used, the colorbar will get a bespoke layout and will
+    """Add colorbar to existing axes. In case camera mode is used, the colorbar will get a bespoke layout and will
     be placed inside of the axes object.
 
-    :param ax: axes object
-    :param p: mappable, used to define colorbar
-    :param size: fontsize, used for colorbar title, only used with `mode="camera"`
-    :param kwargs: dict, additional settings passed to plt.colorbar
-    :return: handle to colorbar
+    Parameters
+    ----------
+    ax : plt.axes
+    p : matplotlib mappable
+        used to define colorbar
+    size : float, optional
+        fontsize, used for colorbar title
+    kwargs :
+        dict, additional settings passed to plt.colorbar
+    **kwargs :
+        
+
+    Returns
+    -------
+    cbar : matplotlib colorbar
+        handle to colorbar
     """
     label_format = '{:,.2f}'
     path_effects = [
@@ -458,12 +543,18 @@ def cbar(ax, p, size=12, **kwargs):
 
 
 def _prepare_axes(ax=None, mode="local"):
-    """
-    Prepares the axes, needed to plot results, called from `pyorc.PIV.plot`.
+    """Prepares the axes, needed to plot results, called from `pyorc.PIV.plot`.
 
-    :param ax: axes object, if not set, a new axes is prepared (default: None)
-    :param mode: str, mode to plot, can be "local", "geographical" or "camera", default: "local"
-    :return: ax, axes object.
+    Parameters
+    ----------
+    ax : plt.axes, optional
+        if not provided (default), a new axes is prepared (default: None)
+    mode : str, optional
+        mode to plot, can be "local" (default), "geographical" or "camera".
+
+    Returns
+    -------
+    ax : plt.axes
     """
     if ax is not None:
         if mode == "geographical":

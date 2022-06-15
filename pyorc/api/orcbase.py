@@ -9,20 +9,23 @@ class ORCBase(object):
 
     @property
     def h_a(self):
-        """
-        Actual water level belonging to the processed video
+        """Actual water level belonging to the processed video
 
-        :return: float, deserialized representation of actual water level
+        Returns
+        -------
+        h : float
+            deserialized representation of actual water level
         """
         return json.loads(self._obj.h_a)
 
 
     @property
     def camera_config(self):
-        """
-        Camera configuration belonging to the processed video
+        """Camera configuration belonging to the processed video
 
-        :return: pyorc.CameraConfig object
+        Returns
+        -------
+            obj : pyorc.CameraConfig object
         """
         if not(hasattr(self, "_camera_config")):
             #  first set the camera config and shape
@@ -40,10 +43,14 @@ class ORCBase(object):
 
     @property
     def camera_shape(self):
-        """
-        Shape of the original camera objective of the processed video (e.g. 1080, 1920)
+        """Shape of the original camera objective of the processed video (e.g. 1080, 1920)
 
-        :return: int, int, number of rows and columns
+        Returns
+        -------
+        r : int
+            number of rows
+        c : int
+            number of columns
         """
         return self._camera_shape
 
@@ -66,14 +73,21 @@ class ORCBase(object):
         coords,
         attrs_dict
     ):
-        """
-        add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.
+        """Add coordinate variables with x and y dimensions (2d) to existing xr.Dataset.
 
-        :param xy_coord_data: list, one or several arrays with 2-dimensional coordinates
-        :param coords: tuple with strings, indicating the dimensions of the data in xy_coord_data
-        :param attrs_dict: list of dicts, containing attributes belonging to xy_coord_data, must have equal length as
-            xy_coord_data.
-        :return: xr.Dataset, with added coordinate variables.
+        Parameters
+        ----------
+        xy_coord_data: list
+            one or several arrays with 2-dimensional coordinates
+        coords: tuple of str
+            the dimensions belonging to the data in xy_coord_data
+        attrs_dict: list of dict
+            attributes belonging to xy_coord_data, must have equal length as xy_coord_data.
+
+        Returns
+        -------
+        ds : xr.Dataset
+            same as input, but with added coordinate variables.
         """
         dims = tuple(coords.keys())
         xy_coord_data = [
