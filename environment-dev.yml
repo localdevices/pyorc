@@ -24,6 +24,7 @@ dependencies:
   - scikit-image
   - scipy
   - shapely
+  - tqdm
   - xarray
   - pip:
     - openpiv
