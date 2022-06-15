@@ -103,9 +103,9 @@ html_theme_options = {
     # "use_edit_page_button": True,
     # "icon_links": [
     #     {
-    #         "name": "Deltares",
-    #         "url": "https://deltares.nl/en/",
-    #         "icon": "_static/deltares-white.svg",
+    #         "name": "Rainbow Sensing",
+    #         "url": "https://...",
+    #         "icon": "_static/....svg",
     #         "type": "local",
     #     },
     # ],
