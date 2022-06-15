@@ -22,6 +22,8 @@ already use in pandas_, such as resampling, reindexing, aggregations, and so on.
 
 In the remaining sections, we describe the API classes, and the functions they are based on.
 
+.. _cameraconfig:
+
 CameraConfig class
 ==================
 
@@ -76,7 +78,8 @@ Plotting methods
 
     CameraConfig.plot
 
-    
+.. _video:
+
 Video class
 ===========
 
@@ -101,6 +104,8 @@ Getting frames from video objects
 
     Video.get_frame
     Video.get_frames
+
+.. _frames:
 
 Frames subclass
 ===============
@@ -152,6 +157,8 @@ Visualizing frames
 
     Frames.plot
     Frames.to_ani
+
+.. _velocimetry:
 
 Velocimetry subclass
 ====================
@@ -223,6 +230,7 @@ Plotting methods
     Velocimetry.plot.streamplot
     Velocimetry.plot.quiver
 
+.. _transect:
 
 Transect subclass
 =================

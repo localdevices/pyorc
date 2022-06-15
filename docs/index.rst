@@ -3,6 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. _index_page:
+
 ==========================================
 Welcome to pyOpenRiverCam's documentation!
 ==========================================
@@ -44,18 +46,17 @@ We are seeking funding for the following frequently requested functionalities:
    Acknowledgement: the development of **pyorc** has been funded partly by the World Meteorological Organisation and
    partly by in-kind contributions of Rainbow Sensing.
 
-* :doc:`intro`
-* :doc:`installation`
-* :doc:`api`
+
+.. _xarray: https://docs.xarray.dev/
+
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :hidden:
-   :caption: Contents:
+   :caption: Table of Contents
 
    intro
    installation
-   api
-
-.. _xarray: https://docs.xarray.dev/
+   quickstart
+   api.rst
 

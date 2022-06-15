@@ -1,8 +1,14 @@
+.. _intro:
+
+============
 Introduction
 ============
 
+.. _nutshell:
+
 pyOpenRiverCam in a nutshell
-----------------------------
+============================
+
 pyOpenRiverCam is a Application Programming Interface (API) to preprocess, reproject, and analyze videos of rivers, in order
 to estimate river flows. Below we provide an overview of all functionalities in a nutshell:
 
@@ -69,3 +75,4 @@ to estimate river flows. Below we provide an overview of all functionalities in 
 +-----------------------+----------------------------------------------------+
 
 .. note:: Documentation is currently being established. Please come back later for more information.
+

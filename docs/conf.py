@@ -13,27 +13,39 @@
 import shutil
 import sphinx_autosummary_accessors
 import os
-import glob
 import sys
 import pyorc
-# from pyorc import Video
-# from pyorc import Velocimetry
+from distutils.dir_util import copy_tree
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 
-##copy notebooks to inside this
-#src_dir = "../notebooks"
-#dst_dir = "."
-#if not(os.path.isdir(dst_dir)):
-    #os.makedirs(dst_dir)
- 
-#copy relevant notebooks
-#shutil.copy(os.path.join(src_dir, "reprojection.ipynb"), dst_dir)
+def remove_dir_content(path: str) -> None:
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+
+
+# -- Copy notebooks to include in docs -------
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples/ngwerere")
+copy_tree("../examples/ngwerere", "_examples/ngwerere")
+
+# copy specific notebooks to include in build
+shutil.copy("../examples/01_Camera_Configuration_single_video.ipynb", "_examples")
+
+## Notebook 02 requires considerable rendering time. Therefore it is not executed unless a final build is done
+#shutil.copy("../examples/02_Process_velocimetry.ipynb", "_examples")
+shutil.copy("../examples/03_Plotting_and_filtering_velocimetry_results.ipynb", "_examples")
+shutil.copy("../examples/04_Extracting_crosssection_velocities_and_discharge.ipynb", "_examples")
+            
 #shutil.copy(os.path.join(src_dir, "geotags.ipynb"), dst_dir)
 
-##also copy the README of the notebook folder
-#shutil.copy(os.path.join(src_dir, "README.rst"), dst_dir)
 
 
 # -- Project information -----------------------------------------------------
@@ -64,6 +76,8 @@ extensions = [
     "sphinx_autosummary_accessors"
 ]
 
+autosummary_generate = True
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates', sphinx_autosummary_accessors.templates_path]
 
@@ -80,9 +94,34 @@ master_doc = "index"
 # a list of builtin themes.
 #
 html_theme = 'pydata_sphinx_theme'
-
+autodoc_member_order = "bysource"
 autoclass_content = "both"
-autosummary_generate = True
+
+html_theme_options = {
+    "show_nav_level": 2,
+    "navbar_align": "content",
+    # "use_edit_page_button": True,
+    # "icon_links": [
+    #     {
+    #         "name": "Deltares",
+    #         "url": "https://deltares.nl/en/",
+    #         "icon": "_static/deltares-white.svg",
+    #         "type": "local",
+    #     },
+    # ],
+}
+
+html_context = {
+    "github_url": "https://github.com",  # or your GitHub Enterprise interprise
+    "github_user": "localdevices",
+    "github_repo": "pyorc",
+    "github_version": "docs",
+    "doc_path": "docs",
+}
+
+
+remove_from_toctrees = ["_generated/*"]
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

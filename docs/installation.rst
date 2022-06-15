@@ -1,8 +1,13 @@
+.. _installation:
+
+============
 Installation
 ============
 
+.. _user_install:
+
 User install
-------------
+============
 
 To install **pyorc**, you will need a package manager in the Anaconda/Miniconda ecosystem such as **conda** or **mamba**.
 
@@ -11,8 +16,10 @@ Miniforge_ and Miniconda_ will install Python and the conda package manager.
 
 In general, **mamba** is a lot faster than **conda** and requires less memory.
 
+.. _install_pip:
+
 Installation from pypi with pip
--------------------------------
+===============================
 
 First activate the environment you want **pyorc** to be installed in (if you don't care about virtual environments, then
 simply skip this step). Dependencies **rasterio**, **geopandas** and **cartopy** are known to be difficult to install with
@@ -30,8 +37,10 @@ Then get the pyorc library from pypi using
 
     $ pip install pyopenrivercam
 
+.. _install_code:
+
 Installation from latest code base
-----------------------------------
+==================================
 To install the latest (unreleased) version from github, replace the last command shown in the previous section by:
 
 .. code-block:: console
@@ -40,6 +49,7 @@ To install the latest (unreleased) version from github, replace the last command
 
 .. note::
     You may have to uninstall **pyorc** first to successfully install from github.
+
 
 
 .. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
