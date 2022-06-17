@@ -15,6 +15,20 @@ to estimate river flows. Below we provide an overview of all functionalities in 
 +-----------------------+----------------------------------------------------+
 | Feature               | Example                                            |
 +=======================+====================================================+
+| Create geographical   | .. code::                                           |
+| awareness of your     |                                                    |
+| videos using your     |     import pyorc                                   |
+|                       |     # create a camera configuration with ground control points and CRS
+| own field             |     cam_config = pyorc.CameraConfig(gcps=gcps, crs=32735, lens_position=[642732.6705, 8304289.010, 1188.5])                                               |
+| observations          |                                                    |
++-----------------------+----------------------------------------------------+
+| .. image:: _images/wark_cam_config.jpg                                     |
++-----------------------+----------------------------------------------------+
+
+
++-----------------------+----------------------------------------------------+
+| Feature               | Example                                            |
++=======================+====================================================+
 | | Create geographical | .. image:: _images/wark_cam_config.jpg             |
 | | awareness of your   |                                                    |
 | | videos using your   |                                                    |
