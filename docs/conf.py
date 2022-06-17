@@ -39,14 +39,10 @@ copy_tree("../examples/ngwerere", "_examples/ngwerere")
 # copy specific notebooks to include in build
 shutil.copy("../examples/01_Camera_Configuration_single_video.ipynb", "_examples")
 
-## Notebook 02 requires considerable rendering time. Therefore it is not executed unless a final build is done
-#shutil.copy("../examples/02_Process_velocimetry.ipynb", "_examples")
+# Notebook 02 requires considerable rendering time. Therefore it is not executed unless a final build is done
+shutil.copy("../examples/02_Process_velocimetry.ipynb", "_examples")
 shutil.copy("../examples/03_Plotting_and_filtering_velocimetry_results.ipynb", "_examples")
 shutil.copy("../examples/04_Extracting_crosssection_velocities_and_discharge.ipynb", "_examples")
-            
-#shutil.copy(os.path.join(src_dir, "geotags.ipynb"), dst_dir)
-
-
 
 # -- Project information -----------------------------------------------------
 
@@ -57,7 +53,7 @@ author = 'Hessel Winsemius'
 # The full version, including alpha/beta/rc tags
 # TODO: uncomment this as soon as we have a version number on the package within pypi
 # release = pkg_resources.get_distribution("ODMax").version
-release = '0.2.0'
+release = '0.2.1'
 
 # -- General configuration ---------------------------------------------------
 
