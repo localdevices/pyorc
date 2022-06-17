@@ -208,13 +208,23 @@ def get_axes(cols, rows, resolution):
 
 
 def get_xs_ys(cols, rows, transform):
-    """
-    Computes rasters of x and y coordinates, based on row and column counts and a defined transform.
+    """Computes rasters of x and y coordinates, based on row and column counts and a defined transform.
 
-    :param cols: list of ints, defining the column counts
-    :param rows: list of ints, defining the row counts
-    :param transform: np.ndarray, 1D, with 6 rasterio compatible transform parameters
-    :return: 2 np.ndarray (MxN): xs: x-coordinates, ys: y-coordinates, lons: longitude coordinates, lats: latitude coordinates
+    Parameters
+    ----------
+    cols: list of ints
+        column counts
+    rows: list of ints
+        row counts
+    transform: np.ndarray (1D)
+        rasterio compatible transform parameters
+
+    Returns
+    -------
+    xs : np.ndarray (MxN)
+        x-coordinates
+    ys : np.ndarray (MxN)
+        y-coordinates
     """
     xs, ys = xy(transform, rows, cols)
     xs, ys = np.array(xs), np.array(ys)
@@ -222,16 +232,29 @@ def get_xs_ys(cols, rows, transform):
 
 
 def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
-    """
-    Computes raster of longitude and latitude coordinates (default) of a certain raster set of coordinates in a local
+    """Computes raster of longitude and latitude coordinates (default) of a certain raster set of coordinates in a local
     coordinate reference system. User can supply an alternative coordinate reference system if projection other than
     WGS84 Lat Lon is needed.    
 
-    :param xs: x-coordinates in a given CRS
-    :param ys: y-coordinates in a given CRS
-    :param src_crs: source coordinate reference system of xs and ys 
-    :param dst_crs: target coordinate reference system (default: CRS.from_epsg(4326) for wGS84 lat-lon)
-    :return: 2 np.ndarray (MxN): lons: longitude coordinates, lats: latitude coordinates
+    Parameters
+    ----------
+    xs : np.ndarray (MxN)
+        x-coordinates
+    ys : np.ndarray (MxN)
+        y-coordinates
+    src_crs : int, dict or str
+        Coordinate Reference System (of source coordinates). Accepts EPSG codes (int or str) proj (str or dict) or wkt
+        (str).
+    dst_crs : int, dict or str, optional
+        Coordinate Reference System (of target coordinates). Accepts EPSG codes (int or str) proj (str or dict) or wkt
+        (str). default: CRS.from_epsg(4326) for wGS84 lat-lon
+
+    Returns
+    -------
+    lons : np.ndarray (MxN)
+        longitude coordinates
+    lats: np.ndarray (MxN)
+        latitude coordinates
     """
     lons, lats = warp.transform(src_crs, dst_crs, xs.flatten(), ys.flatten())
     lons, lats = (
@@ -242,15 +265,26 @@ def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
 
 
 def log_profile(X, z0, k_max, s0=0., s1=0.):
-    """
-    Returns values of a log-profile function
+    """Returns values of a log-profile function
 
-    :param X: tuple with (depth [m], distance to bank [m]) arrays of equal length
-    :param z0: float, depth with zero velocity [m]
-    :param k_max: float, maximum scale factor of log-profile function [-]
-    :param s0: float, distance from bank where k equals zero (and thus velocity is zero) [m]
-    :param s1: float, distance from bank whrre k=k_max (k cannot be larger than k_max) [m]
-    :return: values from log-profile, equal amount and shape as arrays inside X [m s-1]
+    Parameters
+    ----------
+    X: tuple with np.ndarrays
+        (depth [m], distance to bank [m]) arrays of equal length
+    z0: float
+        depth with zero velocity [m]
+    k_max: float
+        maximum scale factor of log-profile function [-]
+    s0: float, optional
+        distance from bank (defaukt: 0.) where k equals zero (and thus velocity is zero) [m]
+    s1: float, optional
+        distance from bank (default: 0. meaning no difference over distance) where k=k_max (k cannot be larger than
+        k_max) [m]
+
+    Returns
+    -------
+    velocity : np.ndarray
+        V values from log-profile, equal shape as arrays inside X [m s-1]
     """
     z, s = X
     k = k_max * np.minimum(np.maximum((s-s0)/(s1-s0), 0), 1)
@@ -259,14 +293,24 @@ def log_profile(X, z0, k_max, s0=0., s1=0.):
 
 
 def mse(pars, func, X, Y):
-    """
-    mean of sum of squares between evaluation of function with provided parameters and X input, and Y as dependent variable.
+    """mean of sum of squares between evaluation of function with provided parameters and X input, and Y as dependent variable.
 
-    :param pars: list or tuple, parameter passed as *args to func
-    :param func: function, receiving X and *pars as input and returning predicted Y as result
-    :param X: tuple with lists or array-likes, indepent variable(s).
-    :param Y: list or array-like, dependent variable, predicted by func
-    :return: list or array-like, predicted Y from X and pars by func
+    Parameters
+    ----------
+    pars : list or tuple
+        parameter passed as *args to func
+    func: function def
+        receiving X and *pars as input and returning predicted Y as result
+    X: tuple with lists or array-likes
+        indepent variable(s).
+    Y: list or array-like
+        dependent variable, predicted by func
+
+    Returns
+    -------
+
+    Y_pred : list or array-like
+        predicted Y from X and pars by func
     """
     Y_pred = func(X, *pars)
     mse = np.sum((Y_pred - Y) ** 2)
@@ -274,13 +318,21 @@ def mse(pars, func, X, Y):
 
 
 def neighbour_stack(array, stride=1, missing=-9999.):
-    """
-    Builds a stack of arrays from a 2-D input array, constructed by permutation in space using a provided stride.
+    """Builds a stack of arrays from a 2-D input array, constructed by permutation in space using a provided stride.
 
-    :param array: 2-D numpy array, any values (may contain NaN)
-    :param stride: int, stride used to determine relevant neighbours
-    :param missing: float, a temporary missing value, used to be able to convolve NaNs
-    :return: np.array, 3D containing stack of 2-D arrays, with strided neighbours
+    Parameters
+    ----------
+    array : np.ndarray (2D)
+        any values (may contain NaN)
+    stride : int, optional
+        stride used to determine relevant neighbours (default: 1)
+    missing : float, optional
+        a temporary missing value, used to be able to convolve NaNs
+
+    Returns
+    -------
+    obj : np.array (3D)
+        stack of 2-D arrays, with strided neighbours (length 1st dim : (stride*2+1)**2 )
     """
     array[np.isnan(array)] = missing
     array_move = []
@@ -309,15 +361,23 @@ def optimize_log_profile(
         **kwargs
 ):
 
-    """
-    optimize velocity log profile relation of v=k*max(z/z0) with k a function of distance to bank and k_max
+    """optimize velocity log profile relation of v=k*max(z/z0) with k a function of distance to bank and k_max
     A differential evolution optimizer is used.
 
-    :param z: list of depths
-    :param v: list of surface velocities
-    :param dist_bank: list of distances to bank
-    :param kwargs: keyword arguments for scipy.optimize.differential_evolution
-    :return: dict, fitted parameters of log_profile {z_0, k_max, s0 and s1}
+    Parameters
+    ----------
+    z : list
+        depths [m]
+    v : list
+        surface velocities [m s-1]
+    dist_bank : list
+        distances to bank [m]
+    **kwargs : keyword arguments for scipy.optimize.differential_evolution
+
+    Returns
+    -------
+    pars : dict
+        fitted parameters of log_profile {z_0, k_max, s0 and s1}
     """
     if dist_bank is None:
         dist_bank = np.inf(len(v))
@@ -341,14 +401,25 @@ def optimize_log_profile(
 
 
 def rotate_u_v(u, v, theta, deg=False):
-    """
-    Rotate u and v components of vector counter clockwise by an amount of rotation.
+    """Rotate u and v components of vector counter clockwise by an amount of rotation.
 
-    :param u: float, np.ndarray or xr.DataArray, x-direction component of vector
-    :param v: float, np.ndarray or xr.DataArray, y-direction component of vector
-    :param theta: amount of counter clockwise rotation in radians or degrees (dependent on deg)
-    :param deg: if True, theta is defined in degrees, otherwise radians (default: False)
-    :return: u and v rotated
+    Parameters
+    ----------
+    u : float, np.ndarray or xr.DataArray
+        x-direction component of vector
+    v : float, np.ndarray or xr.DataArray
+        y-direction component of vector
+    theta : float
+        amount of counter clockwise rotation in radians or degrees (dependent on deg)
+    deg : boolean, optional
+        if True, theta is defined in degrees, otherwise radians (default: False)
+
+    Returns
+    -------
+    u_rot : float, np.ndarray or xr.DataArray
+        rotated x-direction component of vector
+    v_rot : float, np.ndarray or xr.DataArray
+        rotated y-direction component of vector
     """
     if deg:
         # convert to radians first
@@ -362,19 +433,27 @@ def rotate_u_v(u, v, theta, deg=False):
 
 
 def velocity_fill(x, y, depth, v, groupby="quantile"):
-    """
-    Fill missing surface velocities using a velocity depth profile with
+    """Fill missing surface velocities using a velocity depth profile with
 
-    :param x: DataArray(points), x-coordinates of bathymetry depths (ref. CRS)
-    :param y: DataArray(points), y-coordinates of bathymetry depths (ref. CRS)
-    :param z: DataArray(points), bathymetry depths (ref. CRS)
-    :param v: DataArray(time, points), effective velocity at surface [m s-1]
-    :param z_0: float, zero water level (ref. CRS)
-    :param h_ref: float, water level measured during survey (ref. z_0)
-    :param h_a: float, actual water level (ref. z_0)
-    :param groupby: str, dimension over which data should be grouped, default: "quantile", dimension must exist in v,
-        typically "quantile" or "time"
-    :return: v_fill: DataArray(quantile or time, points), filled velocities  [m s-1]
+    Parameters
+    ----------
+    x : xr.DataArray (points)
+        x-coordinates of bathymetry depths (ref. CRS)
+    y : xr.DataArray (points)
+        y-coordinates of bathymetry depths (ref. CRS)
+    depth : xr.DataArray (points)
+        depths [m]
+    v : xr.DataArray (time, points)
+        effective velocity at surface [m s-1]
+    groupby: str, optional
+        dimension over which data should be grouped, default: "quantile", dimension must exist in v, typically
+        "quantile" or "time"
+
+    Returns
+    -------
+
+    v_fill: xr.DataArray (quantile or time, points)
+        filled surface velocities  [m s-1]
     """
     def fit(_v):
         pars = optimize_log_profile(depth[np.isfinite(_v).values], _v[np.isfinite(_v).values], dist_bank[np.isfinite(_v).values])
@@ -395,18 +474,32 @@ def wrap_mse(pars_iter, *args):
 
 
 def xy_equidistant(x, y, distance, z=None):
-    """
-    Transforms a set of ordered in space x, y (and z if provided) coordinates into x, y (and z) coordinates with equal
+    """Transforms a set of ordered in space x, y (and z if provided) coordinates into x, y (and z) coordinates with equal
     1-dimensional distance between them using piece-wise linear interpolation. Extrapolation is used for the last point
     to ensure the range of points covers at least the full range of x, y coordinates.
 
-    :param x: np.ndarray, set of (assumed ordered) x-coordinates
-    :param y: np.ndarray, set of (assumed ordered) x-coordinates
-    :param distance: float, distance between equidistant samples measured in cumulated 1-dimensional distance from xy
+    Parameters
+    ----------
+    x : np.ndarray (1D)
+        set of (assumed ordered) x-coordinates
+    y : np.ndarray (1D)
+        set of (assumed ordered) x-coordinates
+    distance : float
+        user demanded distance between equidistant samples measured in cumulated 1-dimensional distance from xy
         origin (first point)
-    :param z: np.ndarray, set of (assumed ordered) z-coordinates (default: None)
-    :return: (x_sample, y_sample, s_sample, z_sample (only if z is not None)): np.ndarrays with 1D points for
-        x, y, s (distance from first point), z
+    z : np.ndarray (1D), optional
+        set of (assumed ordered) z-coordinates (default: None, meaning only x, y interpolated points are returned)
+
+    Returns
+    -------
+    x_sample : np.ndarray (1D)
+        interpolated x-coordinates for x, y, s (distance from first point), z
+    y_sample : np.ndarray (1D)
+        interpolated y-coordinates
+    s_sample : np.ndarray (1D)
+        interpolated s-coordinates, s being piece-wise linear distance from first point
+    z_sample : np.ndarray (1D), optional
+        interpolated z-coordinates (only returned if z is not None):
     """
     # estimate cumulative distance between points, starting with zero
     x_diff = np.concatenate((np.array([0]), np.diff(x)))
@@ -432,12 +525,20 @@ def xy_equidistant(x, y, distance, z=None):
 
 
 def xy_angle(x, y):
-    """
-    Determine angle between x, y points.
-    :param x: set of x-coordinate
-    :param y: set of y-coordinates
-    :return: angles over section. Angle is determined as the angle between the point left and right of the point
-        under consideration. The most left and right coordinates are based on the first and last 2 points respectively.
+    """Determine angle between x, y points.
+
+    Parameters
+    ----------
+    x : np.ndarray (1D)
+        set of (assumed ordered) x-coordinates
+    y : np.ndarray (1D)
+        set of (assumed ordered) x-coordinates
+
+    Returns
+    -------
+    angle : np.ndarray (1D)
+        angle between the point left and right of the point under consideration. The most left and right coordinates
+        are based on the first and last 2 points respectively
     """
     angles = np.zeros(len(x))
     angles[1:-1] = np.arctan2(x[2:] - x[0:-2], y[2:] - y[0:-2])
@@ -450,11 +551,23 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     Back transform local meters-from-top-left coordinates from frame to original perspective of camera using M
     matrix, belonging to transformation from orthographic to local.
 
-    :param x: np.ndarray, 1D axis of x-coordinates in local projection with origin top-left, to be backwards projected
-    :param y: np.ndarray, 1D axis of y-coordinates in local projection with origin top-left, to be backwards projected
-    :param resolution: resolution of original projected frames coordinates of x and y
-    :param M: transformation matrix generated with cv2.getPerspectiveTransform
-    :return: (xp, yp), np.ndarray of shape (len(y), len(x)) containing perspective columns (xp) and rows (yp) of data
+    Parameters
+    ----------
+    x : np.ndarray (1D)
+        axis of x-coordinates in local projection with origin top-left, to be backwards projected
+    y : np.ndarray (1D)
+        axis of y-coordinates in local projection with origin top-left, to be backwards projected
+    resolution : float
+        resolution of original projected frames coordinates of x and y
+    M : np.ndarray
+        2x3 transformation matrix (generated with cv2.getPerspectiveTransform)
+
+    Returns
+    -------
+    xp : np.ndarray (2D)
+        perspective columns with shape len(y), len(x)
+    yp : np.ndarray (2D)
+        perspective rows with shape len(y), len(x)
     """
     cols, rows = x / resolution - 0.5, y / resolution - 0.5
     if reverse_y is not None:
@@ -468,15 +581,25 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
 
 
 def xy_transform(x, y, crs_from, crs_to):
-    """
-    transforms set of x and y coordinates from one CRS to another
+    """transforms set of x and y coordinates from one CRS to another
 
-    :param x: np.ndarray, 1D axis of x-coordinates in local projection with origin top-left, to be backwards projected
-    :param y: np.ndarray, 1D axis of y-coordinates in local projection with origin top-left, to be backwards projected
-    :param crs_from: source crs, compatible with rasterio.crs.CRS.from_user_input (e.g. a epsg number or proj string)
-    :param crs_to: destination crs, compatible with rasterio.crs.CRS.from_user_input (e.g. a epsg number or proj string)
-    :param y: np.ndarray, 1D axis of y-coordinates in local projection with origin top-left, to be backwards projected
+    Parameters
+    ----------
+    x : np.ndarray
+        x-coordinates in crs_from
+    y : np.ndarray
+        y-coordinates in crs_from
+    crs_from : int, dict or str, optional
+        Coordinate Reference System (source). Accepts EPSG codes (int or str) proj (str or dict) or wkt (str).
+    crs_to : int, dict or str, optional
+        Coordinate Reference System (destination). Accepts EPSG codes (int or str) proj (str or dict) or wkt (str).
 
+    Returns
+    -------
+    x_trans : np.ndarray
+        x-coordinates transformed
+    y_trans : np.ndarray
+        y-coordinates transformed
     """
     transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
     # transform dst coordinates to local projection
