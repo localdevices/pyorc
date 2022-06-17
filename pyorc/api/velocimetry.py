@@ -384,7 +384,7 @@ class Velocimetry(ORCBase):
                 v_x=v_x,
                 v_y=v_y,
                 tolerance=tolerance,
-                stride=wdw,
+                wdw=wdw,
                 missing=missing
             )
         )

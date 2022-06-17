@@ -334,7 +334,7 @@ class Frames(ORCBase):
             name="edges",
             object_type=xr.DataArray
         )
-        if "xp" in self._obj:
+        if "xp" in self._obj.coords:
             frames_edge["xp"] = self._obj["xp"]
             frames_edge["yp"] = self._obj["yp"]
         return frames_edge
