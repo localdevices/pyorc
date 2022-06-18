@@ -1,0 +1,748 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyorc.Video &#8212; pyorc 0.2.1 documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyorc.Video.camera_config" href="pyorc.Video.camera_config.html" />
+    <link rel="prev" title="pyorc.CameraConfig.plot" href="pyorc.CameraConfig.plot.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">pyorc 0.2.1 documentation</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../installation.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../quickstart.html">
+  Quick start
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../api.html">
+  API reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.html">
+   pyorc.CameraConfig
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.bbox.html">
+   pyorc.CameraConfig.bbox
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.shape.html">
+   pyorc.CameraConfig.shape
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.transform.html">
+   pyorc.CameraConfig.transform
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.set_corners.html">
+   pyorc.CameraConfig.set_corners
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.set_gcps.html">
+   pyorc.CameraConfig.set_gcps
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">
+   pyorc.CameraConfig.set_lens_pars
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">
+   pyorc.CameraConfig.set_lens_position
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.to_dict.html">
+   pyorc.CameraConfig.to_dict
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.to_file.html">
+   pyorc.CameraConfig.to_file
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.to_json.html">
+   pyorc.CameraConfig.to_json
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.get_M.html">
+   pyorc.CameraConfig.get_M
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.get_depth.html">
+   pyorc.CameraConfig.get_depth
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.z_to_h.html">
+   pyorc.CameraConfig.z_to_h
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.CameraConfig.plot.html">
+   pyorc.CameraConfig.plot
+  </a>
+ </li>
+</ul>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   pyorc.Video
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Video.camera_config.html">
+   pyorc.Video.camera_config
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Video.fps.html">
+   pyorc.Video.fps
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Video.end_frame.html">
+   pyorc.Video.end_frame
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Video.start_frame.html">
+   pyorc.Video.start_frame
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Video.corners.html">
+   pyorc.Video.corners
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Video.get_frame.html">
+   pyorc.Video.get_frame
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Video.get_frames.html">
+   pyorc.Video.get_frames
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.html">
+   pyorc.Frames
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.camera_config.html">
+   pyorc.Frames.camera_config
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.camera_shape.html">
+   pyorc.Frames.camera_shape
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.h_a.html">
+   pyorc.Frames.h_a
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.edge_detect.html">
+   pyorc.Frames.edge_detect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.landmask.html">
+   pyorc.Frames.landmask
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.normalize.html">
+   pyorc.Frames.normalize
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.reduce_rolling.html">
+   pyorc.Frames.reduce_rolling
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.project.html">
+   pyorc.Frames.project
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.get_piv.html">
+   pyorc.Frames.get_piv
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.plot.html">
+   pyorc.Frames.plot
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Frames.to_ani.html">
+   pyorc.Frames.to_ani
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.html">
+   pyorc.Velocimetry
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.camera_config.html">
+   pyorc.Velocimetry.camera_config
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.camera_shape.html">
+   pyorc.Velocimetry.camera_shape
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.h_a.html">
+   pyorc.Velocimetry.h_a
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html">
+   pyorc.Velocimetry.filter_temporal
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html">
+   pyorc.Velocimetry.filter_temporal_angle
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html">
+   pyorc.Velocimetry.filter_temporal_neighbour
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html">
+   pyorc.Velocimetry.filter_temporal_std
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html">
+   pyorc.Velocimetry.filter_temporal_velocity
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html">
+   pyorc.Velocimetry.filter_temporal_corr
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html">
+   pyorc.Velocimetry.filter_spatial
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html">
+   pyorc.Velocimetry.filter_spatial_nan
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html">
+   pyorc.Velocimetry.filter_spatial_median
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">
+   pyorc.Velocimetry.replace_outliers
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.get_transect.html">
+   pyorc.Velocimetry.get_transect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.set_encoding.html">
+   pyorc.Velocimetry.set_encoding
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.plot.html">
+   pyorc.Velocimetry.plot
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.plot.pcolormesh.html">
+   pyorc.Velocimetry.plot.pcolormesh
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.plot.scatter.html">
+   pyorc.Velocimetry.plot.scatter
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.plot.streamplot.html">
+   pyorc.Velocimetry.plot.streamplot
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Velocimetry.plot.quiver.html">
+   pyorc.Velocimetry.plot.quiver
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.html">
+   pyorc.Transect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.camera_config.html">
+   pyorc.Transect.camera_config
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.camera_shape.html">
+   pyorc.Transect.camera_shape
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.h_a.html">
+   pyorc.Transect.h_a
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">
+   pyorc.Transect.vector_to_scalar
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.get_xyz_perspective.html">
+   pyorc.Transect.get_xyz_perspective
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.get_river_flow.html">
+   pyorc.Transect.get_river_flow
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.get_q.html">
+   pyorc.Transect.get_q
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.plot.html">
+   pyorc.Transect.plot
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.plot.quiver.html">
+   pyorc.Transect.plot.quiver
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="pyorc.Transect.plot.scatter.html">
+   pyorc.Transect.plot.scatter
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+
+<nav id="bd-toc-nav">
+    
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="pyorc-video">
+<h1>pyorc.Video<a class="headerlink" href="#pyorc-video" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyorc.Video">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video" title="Permalink to this definition">#</a></dt>
+<dd><p>Video class, strongly inherited from cv2.VideoCapture. This class extends cv2.VideoCapture by adding a
+camera configuration to it, and a start and end frame to read from the video. Several methods are added to
+read frames into memory or into a xr.DataArray with attributes. These can then be processed with other pyorc
+API functionalities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> – str, locally stored video file</p></li>
+<li><p><strong>camera_config</strong> – CameraConfig object, containing all information about the camera, lens parameters, lens
+position, ground control points with GPS coordinates, and all referencing information (see CameraConfig),
+needed to reproject frames on a horizontal geographically referenced plane.</p></li>
+<li><p><strong>h_a</strong> – float, actual height [m], measured in local vertical reference during the video (e.g. a staff gauge
+in view of the camera)</p></li>
+<li><p><strong>start_frame</strong> – int, first frame to use in analysis</p></li>
+<li><p><strong>end_frame</strong> – int, last frame to use in analysis</p></li>
+<li><p><strong>args</strong> – list or tuple, arguments to pass to cv2.VideoCapture on initialization.</p></li>
+<li><p><strong>kwargs</strong> – dict, keyword arguments to pass to cv2.VideoCapture on initialization.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyorc.Video.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video.__init__" title="Permalink to this definition">#</a></dt>
+<dd><p>Video class, strongly inherited from cv2.VideoCapture. This class extends cv2.VideoCapture by adding a
+camera configuration to it, and a start and end frame to read from the video. Several methods are added to
+read frames into memory or into a xr.DataArray with attributes. These can then be processed with other pyorc
+API functionalities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> – str, locally stored video file</p></li>
+<li><p><strong>camera_config</strong> – CameraConfig object, containing all information about the camera, lens parameters, lens
+position, ground control points with GPS coordinates, and all referencing information (see CameraConfig),
+needed to reproject frames on a horizontal geographically referenced plane.</p></li>
+<li><p><strong>h_a</strong> – float, actual height [m], measured in local vertical reference during the video (e.g. a staff gauge
+in view of the camera)</p></li>
+<li><p><strong>start_frame</strong> – int, first frame to use in analysis</p></li>
+<li><p><strong>end_frame</strong> – int, last frame to use in analysis</p></li>
+<li><p><strong>args</strong> – list or tuple, arguments to pass to cv2.VideoCapture on initialization.</p></li>
+<li><p><strong>kwargs</strong> – dict, keyword arguments to pass to cv2.VideoCapture on initialization.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyorc.Video.__init__" title="pyorc.Video.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(fn[, camera_config, h_a, ...])</p></td>
+<td><p>Video class, strongly inherited from cv2.VideoCapture.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(propId)</p></td>
+<td><p>.   &#64;brief Returns the specified VideoCapture property</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getBackendName</span></code>()</p></td>
+<td><p>.   &#64;brief Returns used backend API name</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getExceptionMode</span></code>()</p></td>
+<td><p><p>.</p>
+</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Video.get_frame.html#pyorc.Video.get_frame" title="pyorc.Video.get_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame</span></code></a>(n[, method, lens_corr])</p></td>
+<td><p>Retrieve one frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.get_frames.html#pyorc.Video.get_frames" title="pyorc.Video.get_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frames</span></code></a>(**kwargs)</p></td>
+<td><p>Get a xr.DataArray, containing a dask array of frames, from <cite>start_frame</cite> until <cite>end_frame</cite>, expected to be read lazily.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grab</span></code>()</p></td>
+<td><p>.   &#64;brief Grabs the next frame from video file or capturing device.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isOpened</span></code>()</p></td>
+<td><p>.   &#64;brief Returns true if video capturing has been initialized already.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">open</span></code>(filename[, apiPreference])</p></td>
+<td><p>.   &#64;brief  Opens a video file or a capturing device or an IP video stream for video capturing.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code>([, image])</p></td>
+<td><p>.   &#64;brief Grabs, decodes and returns the next video frame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">release</span></code>()</p></td>
+<td><p>.   &#64;brief Closes video file or capturing device.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">retrieve</span></code>([, image[, flag]])</p></td>
+<td><p>.   &#64;brief Decodes and returns the grabbed video frame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code>(propId, value)</p></td>
+<td><p>.   &#64;brief Sets a property in the VideoCapture.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setExceptionMode</span></code>(enable)</p></td>
+<td><p><p>.</p>
+</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Video.camera_config.html#pyorc.Video.camera_config" title="pyorc.Video.camera_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_config</span></code></a></p></td>
+<td><p>CameraConfig object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.corners.html#pyorc.Video.corners" title="pyorc.Video.corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corners</span></code></a></p></td>
+<td><p>list of 4 lists (int) with [column, row] locations of area of interest in video objective</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Video.end_frame.html#pyorc.Video.end_frame" title="pyorc.Video.end_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_frame</span></code></a></p></td>
+<td><p>int, last frame considered in analysis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.fps.html#pyorc.Video.fps" title="pyorc.Video.fps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fps</span></code></a></p></td>
+<td><p>float, frames per second</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_a</span></code></p></td>
+<td><p>Actual water level [m] during video</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.start_frame.html#pyorc.Video.start_frame" title="pyorc.Video.start_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_frame</span></code></a></p></td>
+<td><p>int, first frame considered in analysis</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="pyorc.CameraConfig.plot.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">pyorc.CameraConfig.plot</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="pyorc.Video.camera_config.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">pyorc.Video.camera_config</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, Rainbow Sensing.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.1.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>
