@@ -9,16 +9,34 @@ from .orcbase import ORCBase
 
 @xr.register_dataset_accessor("transect")
 class Transect(ORCBase):
+    """Transect functionalities that can be applied on ``xarray.Dataset``"""
+
     def __init__(self, xarray_obj):
+        """
+        Initialize a transect ``xarray.Dataset`` containing cross sectional velocities in [time, points] dimensions
+
+        Parameters
+        ----------
+        xarray_obj: xr.Dataset
+            transect data fields (from ``pyorc.Velocimetry.get_transect``)
+        """
+
         super(Transect, self).__init__(xarray_obj)
 
     def vector_to_scalar(self, v_x="v_x", v_y="v_y"):
-        """
-        Set "v_eff" and "v_dir" variables as effective velocities over cross-section, and its angle
+        """Set "v_eff" and "v_dir" variables as effective velocities over cross-section, and its angle
 
-        :param v_x: str, variable containing (t, points) time series in cross section with x-directional velocities.
-        :param v_y: str, variable containing (t, points) time series in cross section with y-directional velocities.
-        :return: DataArray(t, points), time series in points with velocities perpendicular to cross section.
+        Parameters
+        ----------
+        v_x : str, optional
+            name of variable containing x-directional velocities. (default: "v_x")
+        v_y :
+            name of variable containing y-directional velocities. (default: "v_y")
+
+        Returns
+        -------
+        da : xr.DataArray
+            velocities perpendicular to cross section [time, points]
 
         """
         xs = self._obj["x"].values
@@ -48,10 +66,27 @@ class Transect(ORCBase):
 
 
     def get_xyz_perspective(self, M=None, xs=None, ys=None, mask_outside=True):
-        """
-        Get camera-perspective column, row coordinates from cross-section points.
+        """Get camera-perspective column, row coordinates from cross-section locations.
+        
+        Parameters
+        ----------
+        M : np.ndarray, optional
+             perspective transform matrix (Default value = None)
+        xs : np.array, optional
+            x-coordinates to transform, derived from self.x if not provided (Default value = None)
+        ys :
+            y-coordinates to transform, derived from self.y if not provided (Default value = None)
+        mask_outside :
+            values not fitting in the original camera frame are set to NaN (Default value = True)
 
-        :return:
+        Returns
+        -------
+        cols : list of ints
+            columns of locations in original camera perspective
+        rows : list of ints
+            rows of locations in original camera perspective
+
+
         """
         if xs is None:
             xs = self._obj.x.values
@@ -93,10 +128,17 @@ class Transect(ORCBase):
 
 
     def get_river_flow(self, q_name="q", Q_name="river_flow"):
-        """
-        Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
+        """Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]
         estimating one or several quantiles over the time dimension. Depth average velocities must first have been
         estimated using get_q. A variable "Q" will be added to Dataset, with only "quantiles" as dimension.
+
+        Parameters
+        ----------
+        q_name : str, optional
+             name of variable where depth integrated velocities [m2 s-1] are stored (Default value = "q")
+        Q_name : str, optional
+             name of variable where resulting width integrated river flow estimates must be stored
+             (Default value = "river_flow")
 
         """
         if "q" not in self._obj:
@@ -114,12 +156,24 @@ class Transect(ORCBase):
 
 
     def get_q(self, v_corr=0.9, fill_method="zeros"):
-        """
-        Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
+        """Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
         depth-average velocity.
 
-        :param v_corr: float, optional, correction factor (default: 0.9)
-        :return: xr.Dataset, Transect for selected quantiles in time, including "q".
+        Parameters
+        ----------
+        v_corr : float, optional
+            correction factor (default: 0.9)
+        fill_method : method to fill missing values. "zeros" fills NaNS with zeros, "interpolate" interpolates values
+            from nearest neighbour, "log_profile" fits a 4-parameter logarithmic profile with depth and with changing
+             velocities towards banks on known velocities, and fills missing with the fitted relationship.
+             (Default value = "zeros")
+
+        Returns
+        -------
+        ds : xr.Dataset
+            Transect for selected quantiles in time, with "q_nofill" containing the integrated values, and "q" the
+            integrated values, filled with chosen fill method.
+
         """
         # aggregate to a limited set of quantiles
         assert(fill_method in ["zeros", "log_profile", "interpolate"]), f'fill_method must be "zeros", "log_profile", or "interpolate", instead "{fill_method}" given'

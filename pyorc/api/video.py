@@ -54,6 +54,17 @@ Camera configuration: {:s}
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
+        if camera_config is not None:
+            # check if h_a is supplied, if so, then also z_0 and h_ref must be available
+            if h_a is not None:
+                assert(isinstance(camera_config.gcps["z_0"], float)),\
+                    "h_a was supplied, but camera config's gcps do not contain z_0, this is needed for dynamic " \
+                    "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
+                    "configuration. "
+                assert (isinstance(camera_config.gcps["h_ref"], float)),\
+                    "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
+                    "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
+                    "configuration. "
         super().__init__(*args, **kwargs)
         # explicitly open file for reading
         self.open(fn)
@@ -295,7 +306,7 @@ Camera configuration: {:s}
         if len(sample.shape) == 3:
             del coords["rgb"]
         # add coordinate grids (i.e. without time)
-        frames = frames.frames.add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
+        frames = frames.frames._add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
         frames.name = "frames"
         return frames
 

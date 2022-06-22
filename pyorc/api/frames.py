@@ -15,17 +15,34 @@ from .. import cv, helpers, const, piv_process
 
 @xr.register_dataarray_accessor("frames")
 class Frames(ORCBase):
+    """Frames functionalities that can be applied on xr.DataArray"""
     def __init__(self, xarray_obj):
+        """
+        Initialize a frames xr.DataArray
+
+        Parameters
+        ----------
+        xarray_obj: xr.DataArray
+            frames data fields (from pyorc.Video.get_frames)
+        """
         super(Frames, self).__init__(xarray_obj)
 
     def get_piv(self, **kwargs):
-        """
-        Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to
-        trigger actual computation.
+        """Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to
+        trigger actual computation. The dataset returned contains velocity information for each interrogation window
+        including "v_x" for x-direction velocity components, "v_y" for y-direction velocity component, "corr" for
+        the maximum correlation [-] found in the interrogation window and s2n [-] for the signal to noise ratio
 
-        :param kwargs: dict, keyword arguments to pass to dask_piv, used to control the manner in which
-            openpiv.pyprocess is called.
-        :return: Velocimetry object (xr.Dataset), containing the PIV results in a lazy dask.array form.
+        Parameters
+        ----------
+        **kwargs : keyword arguments to pass to dask_piv, used to control the manner in which openpiv.pyprocess
+            is called.
+
+        Returns
+        -------
+        ds : xr.Dataset
+            PIV results in a lazy dask.array form in DataArrays "v_x", "v_y", "corr" and "s2n".
+
         """
         camera_config = copy.deepcopy(self.camera_config)
         if "window_size" in kwargs:
@@ -101,7 +118,7 @@ class Frames(ORCBase):
         ds = xr.merge([v_x, v_y, s2n, corr])
         del coords["time"]
         # prepare the xs, ys, lons and lats grids for geographical projections and add to xr.Dataset
-        ds = ds.velocimetry.add_xy_coords(
+        ds = ds.velocimetry._add_xy_coords(
             [xp, yp, xs, ys, lons, lats],
             coords,
             {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
@@ -116,12 +133,21 @@ class Frames(ORCBase):
 
 
     def project(self, resolution=None):
-        """
-        Project frames into a projected frames object, with information from the camera_config attr.
-        This requires that the CameraConfig contains full gcp information and a coordinate reference system (crs).
+        """Project frames into a projected frames object, with information from the camera_config attr.
+        This requires that the CameraConfig contains full gcp information. If a CRS is provided, also "lat" and "lon"
+        variables will be added to the output, containing geographical latitude and longitude coordinates.
 
-        :return: frames: xr.DataArray with projected frames and x and y in local coordinate system (origin: top-left)
+        Parameters
+        ----------
+        resolution : float, optional
+            resolution to project to. If not provided, this will be taken from the camera config in the metadata
+             (Default value = None)
 
+        Returns
+        -------
+        frames: xr.DataArray
+             projected frames and x and y in local coordinate system (origin: top-left), lat and lon if a crs was
+             provided.
         """
         # retrieve the M and shape from camera config with said h_a
         camera_config = copy.deepcopy(self.camera_config)
@@ -182,22 +208,29 @@ class Frames(ORCBase):
         if "rgb" in self._obj.coords:
             del coords["rgb"]
         # add coordinate meshes to projected frames and return
-        frames_proj = frames_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        frames_proj = frames_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         # in case resolution was changed, overrule the camera_config attribute
         frames_proj.attrs.update(camera_config = camera_config.to_json())
         return frames_proj
 
 
     def landmask(self, dilate_iter=10, samples=15):
-        """
-        Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much
+        """Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much
         higher than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation
         operation is used to make the land mask slightly larger than the exact defined pixels.
 
-        :param dilate_iter: int, number of dilation iterations to use, to dilate land mask
-        :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
-            number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
-        :return: xr.DataArray, filtered frames
+        Parameters
+        ----------
+        dilate_iter : int, optional
+            number of dilation iterations to use, to dilate land mask (Default value = 10)
+        samples : int, optional
+            amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+            number to speed up calculation (Default value = 15)
+
+        Returns
+        -------
+        da : xr.DataArray
+            filtered frames
 
         """
         time_interval = round(len(self._obj)/samples)
@@ -222,14 +255,21 @@ class Frames(ORCBase):
 
 
     def normalize(self, samples=15):
-        """
-        Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and
+        """Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and
         helps to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and
         partly shaded parts.
 
-        :param samples: int, amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
+        Parameters
+        ----------
+        samples : int, optional
+            amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
             number to speed up calculation, default: 15 (which is normally sufficient and fast enough).
-        :return: xr.DataArray, filtered frames
+
+        Returns
+        -------
+        da : xr.DataArray
+            filtered frames
+
         """
         time_interval = round(len(self._obj) / samples)
         assert (time_interval != 0), f"Amount of frames is too small to provide {samples} samples"
@@ -243,16 +283,27 @@ class Frames(ORCBase):
         return frames_norm
 
 
-    def edge_detect(self, stride_1=7, stride_2=9):
-        """
-        Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved
+    def edge_detect(self, wdw_1=2, wdw_2=4):
+        """Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved
         images and computes their difference to detect edges.
 
-        :param stride_1: int, stride to use for first gaussian blur filter
-        :param stride_2: int, stride to use for second gaussian blur filter
-        :return: xr.DataArray, filtered frames (i.e. difference between first and second gaussian convolution)
+        Parameters
+        ----------
+        wdw_1 : int, optional
+            window size to use for first gaussian blur filter (Default value = 2)
+        wdw_2 : int, optional
+            stride to use for second gaussian blur filter (Default value = 4)
+
+        Returns
+        -------
+        da : xr.DataArray
+            filtered frames (i.e. difference between first and second gaussian convolution)
+
         """
         def convert_edge(img, stride_1, stride_2):
+            """
+            internal function, see main method
+            """
             if not(isinstance(img, np.ndarray)):
                 img = img.values
             # load values here
@@ -263,6 +314,8 @@ class Frames(ORCBase):
 
         shape = self._obj[0].shape  # single-frame shape does not change
         da_convert_edge = dask.delayed(convert_edge)
+        stride_1 = wdw_1 * 2 + 1
+        stride_2 = wdw_2 * 2 + 1
         imgs = [da_convert_edge(frame.values, stride_1, stride_2) for frame in self._obj]
         # prepare axes
         # Setup coordinates
@@ -281,18 +334,26 @@ class Frames(ORCBase):
             name="edges",
             object_type=xr.DataArray
         )
-        if "xp" in self._obj:
+        if "xp" in self._obj.coords:
             frames_edge["xp"] = self._obj["xp"]
             frames_edge["yp"] = self._obj["yp"]
         return frames_edge
 
 
     def reduce_rolling(self, samples=25):
-        """
-        Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use `normalize`).
+        """Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use
+        Frames.normalize).
 
-        :param samples: number of samples per rolling
-        :return: xr.DataArray, filtered frames
+        Parameters
+        ----------
+        samples : int, optional
+            number of samples per rolling (Default value = 25)
+
+        Returns
+        -------
+        da : xr.DataArray
+            filtered frames
+
         """
         roll_mean = self._obj.rolling(time=samples).mean()
         assert (len(self._obj) >= samples), f"Amount of frames is smaller than requested rolling of {samples} samples"
@@ -307,7 +368,31 @@ class Frames(ORCBase):
         return frames_norm
 
 
-    def to_ani(self, fn, figure_kwargs=const.FIGURE_ARGS, video_kwargs=const.VIDEO_ARGS, anim_kwargs=const.ANIM_ARGS, **kwargs):
+    def to_ani(
+            self,
+            fn,
+            figure_kwargs=const.FIGURE_ARGS,
+            video_kwargs=const.VIDEO_ARGS,
+            anim_kwargs=const.ANIM_ARGS,
+            **kwargs
+    ):
+        """Store an animation of the frames in the object
+
+        Parameters
+        ----------
+        fn : str
+            path to file to which animation is stored
+        figure_kwargs : dict, optional
+            keyword args passed to ``matplotlib.pyplot.figure`` (Default value = const.FIGURE_ARGS)
+        video_kwargs : dict, optional
+            keyword arguments passed to ``save`` method of animation, containing parameters such as the frame rate,
+            dpi and codec settings to use. (Default value = const.VIDEO_ARGS)
+        anim_kwargs : dict, optional
+            keyword arguments passed to ``matplotlib.animation.FuncAnimation``
+            to control the animation. (Default value = const.ANIM_ARGS)
+        **kwargs : keyword arguments to pass to ``matplotlib.pyplot.imshow``
+
+        """
         def init():
             # set imshow data to values in the first frame
             im.set_data(self._obj[0])
