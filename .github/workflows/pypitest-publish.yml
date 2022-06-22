@@ -11,6 +11,8 @@ name: Upload Python Package to TestPyPI
 on:
   release:
     types: [published]
+  # allows running the workflow manually
+  workflow_dispatch:
 
 permissions:
   contents: read
