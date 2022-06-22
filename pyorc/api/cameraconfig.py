@@ -196,19 +196,17 @@ class CameraConfig:
         # map where the destination points are with the actual water level h_a.
         if h_a is None or self.gcps["h_ref"] is None:
             # fill in the same value for h_ref and h_a
-            h_ref = 0.
-            h_a = 0.
-            lens_position = [0., 0., 0.]
+            dst_a = self.gcps["dst"]
         else:
             h_ref = self.gcps["h_ref"]
             lens_position = self.lens_position
-        dst_a = cv.get_gcps_a(
-            lens_position,
-            h_a,
-            self.gcps["dst"],
-            self.gcps["z_0"],
-            h_ref,
-        )
+            dst_a = cv.get_gcps_a(
+                lens_position,
+                h_a,
+                self.gcps["dst"],
+                self.gcps["z_0"],
+                h_ref,
+            )
 
         # lookup where the destination points are in row/column space
         dst_colrow_a = cv.transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
@@ -257,7 +255,7 @@ class CameraConfig:
             "f": f
         }
 
-    def set_gcps(self, src, dst, z_0, h_ref=None, crs=None):
+    def set_gcps(self, src, dst, z_0=None, h_ref=None, crs=None):
         """Set ground control points for the given CameraConfig
 
         Parameters
@@ -287,7 +285,8 @@ class CameraConfig:
         assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
         if h_ref is not None:
             assert (isinstance(h_ref, (float, int))), "h_ref must contain a float number"
-        assert (isinstance(z_0, (float, int))), "z_0 must contain a float number"
+        if z_0 is not None:
+            assert (isinstance(z_0, (float, int))), "z_0 must contain a float number"
         assert (all(isinstance(x, (float, int)) for p in src for x in p)), "src contains non-int parts"
         assert (all(isinstance(x, (float, int)) for p in dst for x in p)), "dst contains non-float parts"
         if crs is not None:
