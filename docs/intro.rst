@@ -70,7 +70,7 @@ to estimate river flows. Below we provide an overview of all functionalities in 
 | Enhance gradients for improved   | .. code::                                                                         |
 | feature detection                |                                                                                   |
 |                                  |     # gradient enhancement                                                        |
-|                                  |     da_edge = da_norm_proj.edge_detect()                                          |
+|                                  |     da_edge = da_norm_proj.frames.edge_detect()                                   |
 |                                  |     # plot the first gradient frame (animation also possible with .to_ani)        |
 |                                  |     da_edge[0].frames.plot(cmap="RdBu", vmin=-6, vmax=6)                          |
 +----------------------------------+-----------------------------------------------------------------------------------+
@@ -79,9 +79,9 @@ to estimate river flows. Below we provide an overview of all functionalities in 
 | Estimate flow velocity at the    | .. code::                                                                         |
 | water surface using Particle     |                                                                                   |
 | Image Velocimetry.               |     # surface velocimetry with PIV                                                |
-| Plot with ``matplotlib``         |     ds_piv = da_edge.get_piv()                                                    |
+| Plot with ``matplotlib``         |     ds_piv = da_edge.frames.get_piv()                                             |
 | convenience                      |     # filter spurious velocities with several filters                             |
-|                                  |     ds_piv = ds_piv.filter_temporal().filter_spatial()                            |
+|                                  |     ds_piv = ds_piv.velocimetry.filter_temporal().velocimetry.filter_spatial()    |
 |                                  |     # plot the median                                                             |
 |                                  |     ds_median = ds_piv.median(dim="time", keep_attrs=True)                        |
 |                                  |     # combine plots in one axes, including a rgb first frame of video             |
