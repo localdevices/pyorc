@@ -85,15 +85,20 @@ def get_shape(bbox, resolution=0.01, round=1):
 
 
 def get_transform(bbox, resolution=0.01):
-    """
-    return a rotated Affine transformation that fits with the bounding box and resolution.
+    """Return a rotated Affine transformation that fits with the bounding box and resolution.
 
-    :param bbox: shapely Polygon, polygon of bounding box. The coordinate order is very important and has to be:
+    Parameters
+    ----------
+    bbox : shapely.geometry.Polygon
+        polygon of bounding box. The coordinate order is very important and has to be:
         (upstream-left, downstream-left, downstream-right, upstream-right, upstream-left)
-    :param resolution: float, resolution of target grid in meters (default: 0.01)
-    :return: rasterio compatible Affine transformation matrix
-    """
+    resolution : float, optional
+        resolution of target grid in meters (default: 0.01)
 
+    Returns
+    -------
+    affine : rasterio.transform.Affine
+    """
     corners = np.array(bbox.exterior.coords)
     # estimate the angle of the bounding box
     top_left_x, top_left_y = corners[0]
@@ -116,15 +121,25 @@ def get_transform(bbox, resolution=0.01):
 
 
 def get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
-    """
-    Get the actual x, y locations of ground control points at the actual water level
+    """Get the actual x, y locations of ground control points at the actual water level
 
-    :param lensPosition: list, with [x, y, z], location of cam in local crs [m]
-    :param h_a: float, actual water level in local level measuring system [m]
-    :param coords: list, containing lists [x, y] with gcp coordinates in original water level
-    :param z_0: float, reference zero plain level, i.e. the crs amount of meters of the zero level of staff gauge
-    :param h_ref: float, reference water level during taking of gcp coords with ref to staff gauge zero level
-    :return: coords, in rows/cols for use in getPerspectivetransform
+    Parameters
+    ----------
+    lensPosition : list of floats
+        x, y, z location of cam in local crs [m]
+    h_a : float
+        actual water level in local level measuring system [m]
+    coords : list of lists
+        gcp coordinates  [x, y] in original water level
+    z_0 : float, optional
+        reference zero plain level, i.e. the crs amount of meters of the zero level of staff gauge (default: 0.0)
+    h_ref : float, optional
+        reference water level during taking of gcp coords with ref to staff gauge zero level (default: 0.0)
+
+    Returns
+    -------
+    coords : list
+        rows/cols for use in getPerspectivetransform
 
     """
     # get modified gcps based on camera location and elevation values
@@ -147,15 +162,20 @@ def get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
 
 
 def get_M(src, dst):
+    """Retrieve transformation matrix for between (4) src and (4) dst points
+
+    Parameters
+    ----------
+    src : list of lists
+        [x, y] with source coordinates, typically cols and rows in image
+    dst : list of lists
+        [x, y] with target coordinates after reprojection, can e.g. be in crs [m]
+
+    Returns
+    -------
+    M : np.ndarray
+        transformation matrix, used in cv2.warpPerspective
     """
-    Retrieve transformation matrix for between (4) src and (4) dst points
-
-    :param src: list of lists [x, y] with source coordinates, typically cols and rows in image
-    :param dst: list of lists [x, y] with target coordinates after reprojection, can e.g. be in crs [m]
-
-    :return: transformation matrix, used in cv2.warpPerspective
-    """
-
     # set points to float32
     _src = np.float32(src)
     _dst = np.float32(dst)
@@ -165,14 +185,23 @@ def get_M(src, dst):
 
 
 def transform_to_bbox(coords, bbox, res):
-    """
-    transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
-    
-    :param coords: list, containing lists [x, y] with coordinates
-    :param bbox: shapely Polygon, polygon of bounding box. The coordinate order is very important and has to be:
-        (upstream-left, downstream-left, downstream-right, upstream-right, upstream-left)
-    :param res: float, resolution of target pixels within bbox
-    :return: list, containing tuples of columns and rows
+    """transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
+
+    Parameters
+    ----------
+    coords : list of lists
+        [x, y] with coordinates
+    bbox : shapely Polygon
+        Bounding box. The coordinate order is very important and has to be upstream-left, downstream-left,
+        downstream-right, upstream-right, upstream-left
+    res : float
+        resolution of target pixels within bbox
+
+    Returns
+    -------
+    colrows : list
+        tuples of columns and rows
+
     """
     # first assemble x and y coordinates
     xs, ys = zip(*coords)
@@ -182,14 +211,24 @@ def transform_to_bbox(coords, bbox, res):
 
 
 def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
-    """
-    Reproject an image to a given shape using perspective transformation matrix M
+    """Reproject an image to a given shape using perspective transformation matrix M
 
-    :param img: nd-array, image to transform
-    :param M: image perspective transformation matrix
-    :param shape: tuple with ints (cols, rows)
-    :param flags: cv2.flags to pass with cv2.warpPerspective
-    :return: np.ndarray with reprojected data with shape=shape
+    Parameters
+    ----------
+
+    img: np.ndarray
+        image to transform
+    M: np.ndarray
+        image perspective transformation matrix
+    shape: tuple of ints
+        (cols, rows)
+    flags: cv2.flags
+        passed with cv2.warpPerspective
+
+    Returns
+    -------
+        img : np.ndarray
+            reprojected data with shape=shape
     """
     if not(isinstance(img, np.ndarray)):
         # load values here
@@ -198,17 +237,22 @@ def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
 
 
 def get_aoi(src, dst, src_corners):
+    """Get rectangular AOI from 4 user defined points within frames.
 
+    Parameters
+    ----------
+    src : list of tuples
+        (col, row) pairs of ground control points
+    dst : list of tuples
+        projected (x, y) coordinates of ground control points
+    src_corners : dict with 4 (x,y) tuples
+        names "up_left", "down_left", "up_right", "down_right", source corners
+
+    Returns
+    -------
+    aoi : shapely.geometry.Polygon
+        bounding box of aoi (rotated)
     """
-    Get rectangular AOI from 4 user defined points within frames.
-
-    :param src: list, (col, row) pairs of ground control points
-    :param dst: list, projected (x, y) coordinates of ground control points
-    :param src_corners: - dict with 4 (x,y) tuples names "up_left", "down_left", "up_right", "down_right"
-    :return: shapely Polygon, representing bounding box of aoi (rotated)
-
-    """
-
     # retrieve the M transformation matrix for the conditions during GCP. These are used to define the AOI so that
     # dst AOI remains the same for any movie
     M_gcp = get_M(src=src, dst=dst)
@@ -243,15 +287,24 @@ def get_aoi(src, dst, src_corners):
 
 
 def undistort_img(img, k1=0.0, c=2.0, f=1.0):
-    """
-    Lens distortion correction of image based on lens characteristics.
+    """Lens distortion correction of image based on lens characteristics.
     Function by Gerben Gerritsen / Sten Schurer, 2019.
 
-    :param img: np.ndarray, 3D array with image
-    :param k1: float, barrel lens distortion parameter (default: 0.)
-    :param c: float, optical center (default: 2.)
-    :param f: float, focal length (default: 1.)
-    :return undistorted img
+    Parameters
+    ----------
+    img : np.ndarray
+        3D array with image
+    k1: float, optional
+        barrel lens distortion parameter (default: 0.)
+    c: float, optional
+        optical center (default: 2.)
+    f: float, optional
+        focal length (default: 1.)
+
+    Returns
+    -------
+    img: np.ndarray
+        undistorted img
     """
 
     # define imagery characteristics
@@ -267,17 +320,28 @@ def undistort_img(img, k1=0.0, c=2.0, f=1.0):
 
 
 def undistort_points(points, height, width, k1=0.0, c=2.0, f=1.0):
-    """
-    Undistorts x, y point locations with provided lens parameters, so that points
+    """Undistorts x, y point locations with provided lens parameters, so that points
     can be undistorted together with images from that lens.
 
-    :param points: list, containing lists of points [x, y], provided as float
-    :param height: int, height of camera images [nr. of pixels]
-    :param width: int, width of camera images [nr. of pixels]
-    :param k1: float, barrel lens distortion parameter (default: 0.)
-    :param c: float, optical center (default: 2.)
-    :param f: float, focal length (default: 1.)
-    :return: list, containg lists of undistorted point coordinates [x, y] as floats
+    Parameters
+    ----------
+    points : list of lists
+        points [x, y], provided as float
+    height: int
+        height of camera images [nr. of pixels]
+    width: int
+        width of camera images [nr. of pixels]
+    k1: float, optional
+        barrel lens distortion parameter (default: 0.)
+    c: float, optional
+        optical center (default: 2.)
+    f: float, optional
+        focal length (default: 1.)
+
+    Returns
+    -------
+    points : list of lists
+        undistorted point coordinates [x, y] as floats
     """
     mtx = _get_cam_mtx(height, width, c=c, f=f)
     dist = _get_dist_coefs(k1)

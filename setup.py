@@ -10,9 +10,9 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 setup(
-    name="pyorc",
-    description="pyorc is a front and backend to control river camera observation locations",
-    version="0.1.0.dev",
+    name="pyopenrivercam",
+    description="pyopenrivercam (pyorc) is a front and backend to control river camera observation locations",
+    version="0.2.1",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
     url="https://github.com/localdevices/pyorc",
@@ -23,23 +23,24 @@ setup(
     test_suite="tests",
     python_requires=">=3.8",
     install_requires=[
-        "cython; platform_machine != 'x86_64'",
+        "cython; platform_machine == 'armv7l'",
         "dask",
         "descartes",
         "geojson",
         "matplotlib",
         "netCDF4",
         "numpy",
-        "opencv-python-headless",
+        "opencv-python",
         "openpiv",
-        "packaging; platform_machine != 'x86_64'",
+        "packaging; platform_machine == 'armv7l'",
         "pip",
         "pyproj",
-        "pythran; platform_machine != 'x86_64'",
+        "pythran; platform_machine == 'armv7l'",
         "rasterio",
         "scikit-image",
         "scipy",
         "shapely",
+        "tqdm",
         "xarray",
     ],
     extras_require={
@@ -53,7 +54,7 @@ setup(
     zip_safe=False,
     classifiers=[
         # https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Hydrology",
@@ -63,5 +64,5 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    keywords="hydrology hydrometry river-flow pyorc",
+    keywords="hydrology, hydrometry, river-flow, pyorc",
 )

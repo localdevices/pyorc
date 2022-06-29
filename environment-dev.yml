@@ -1,4 +1,4 @@
-name: pyorc
+name: pyorc-dev
 
 channels:
   - conda-forge
@@ -10,7 +10,6 @@ dependencies:
   - cartopy
   - descartes
   - geojson
-  - geopandas
   - geos
   - jupyter
   - matplotlib
@@ -29,5 +28,4 @@ dependencies:
   - xarray
   - pip:
     - openpiv
-    - git+https://github.com/localdevices/pyorc.git
 

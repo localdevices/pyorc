@@ -11,6 +11,10 @@ from .. import cv, helpers
 
 
 class CameraConfig:
+    """
+    Camera configuration containing information about the perspective of the camera with respect to real world
+    coordinates
+    """
     def __str__(self):
         return self.to_json()
 
@@ -28,28 +32,34 @@ class CameraConfig:
             lens_pars=None
     ):
         """
-        CameraConfig object with several settings. This object allows for treatment of movies
-        with defined settings.
 
-        :param crs: int, dict, or str, optional. Coordinate Reference System. Accepts EPSG codes (int or str);
-            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
-        :param window_size: int, pixel size of interrogation window (default: 15)
-        :param resolution: float, resolution in m. of projected pixels
-        :param lens_position: list of 3 floats, containing x, y, z coordinate of lens position in CRS
-        :param corners: list of 4 lists with [x, y] coordinates defining corners of area of interest in camera cols/rows
-        :param gcps: dict, containing:
-            "src": list of 4 lists, with column, row locations in objective of control points.
-            "dst": list of 4 lists, with x, y locations (local or global coordinate reference system) of control points.
+        Parameters
+        ----------
+        crs : int, dict or str, optional
+            Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). Only used if
+            the data has no native CRS.
+        window_size : int
+            pixel size of interrogation window (default: 15)
+        resolution : float
+            resolution in m. of projected pixels
+        lens_position : list of floats (3),
+            x, y, z coordinate of lens position in CRS
+        corners : list of lists of floats (2)
+            [x, y] coordinates defining corners of area of interest in camera cols/rows
+        gcps : dict
+            Can contain "src": list of 4 lists, with column, row locations in objective of control points,
+            "dst": list of 4 lists, with x, y locations (local or global coordinate reference system) of control points,
             "h_ref": float, measured water level [m] in local reference system (e.g. from staff gauge or pressure gauge)
-                during gcp survey.
+            during gcp survey,
             "z_0": float, water level [m] in global reference system (e.g. from used GPS system CRS). This must be in
-                the same vertical reference as the measured bathymetry and other survey points.
+            the same vertical reference as the measured bathymetry and other survey points,
             "crs": int, str or CRS object, CRS in which "dst" points are measured. If None, a local coordinate system is
-                assumed (e.g. from spirit level).
-        :param lens_pars: dict, containing:
-            "k1": float, barrel lens distortion parameter (default: 0.)
-            "c": float, optical center (default: 2.)
+            assumed (e.g. from spirit level).
+        lens_pars : dict, optional
+            Lens parameters, containing: "k1": float, barrel lens distortion parameter (default: 0.),
+            "c": float, optical center (default: 2.),
             "f": float, focal length (default: 1.)
+
         """
         assert (isinstance(window_size, int)), 'window_size must be of type "int"'
         if crs is not None:
@@ -75,11 +85,30 @@ class CameraConfig:
 
     @property
     def bbox(self):
+        """
+        Returns geographical bbox fitting around corners points of area of interest in camera perspective
+
+        Returns
+        -------
+        bbox : shapely.geometry.Polygon
+            bbox of area of interest
+
+        """
         assert (hasattr(self, "corners")), "CameraConfig object has no corners, set these with CameraConfig.set_corners"
         return cv.get_aoi(self.gcps["src"], self.gcps["dst"], self.corners).__str__()
 
     @property
     def shape(self):
+        """
+        Returns rows and columns in projected frames from ``Frames.project``
+
+        Returns
+        -------
+        rows : int
+            Amount of rows in projected frame
+        cols : int
+            Amount of columns in projected frame
+        """
         cols, rows = cv.get_shape(
             shapely.wkt.loads(self.bbox),
             resolution=self.resolution,
@@ -89,18 +118,33 @@ class CameraConfig:
 
     @property
     def transform(self):
+        """
+        Returns Affine transform of projected frames from ``Frames.project``
+
+        Returns
+        -------
+        transform : rasterio.transform.Affine object
+
+        """
         bbox = shapely.wkt.loads(self.bbox)
         return cv.get_transform(bbox, resolution=self.resolution)
 
     def get_depth(self, z, h_a=None):
-        """
-        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
+        """Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
         in local reference (e.g. staff gauge).
 
-        :param z: measured bathymetry points
-        :param h_a: float, optional, actual water level measured [m], if not set, assumption is that a single video
-            is processed and thus changes in water level are not relevant.
-        :return:
+        Parameters
+        ----------
+        z : list of floats
+            measured bathymetry point depths
+        h_a : float, optional
+            actual water level measured [m], if not set, assumption is that a single video
+            is processed and thus changes in water level are not relevant. (default: None)
+
+        Returns
+        -------
+        depths : list of floats
+
         """
         if h_a is None:
             assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is provided"
@@ -112,11 +156,16 @@ class CameraConfig:
         return z_pressure - z
 
     def z_to_h(self, z):
-        """
-        Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)
+        """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)
 
-        :param z: measured bathymetry point
-        :return:
+        Parameters
+        ----------
+        z : float
+            measured bathymetry point
+
+        Returns
+        -------
+        h : float
         """
         if self.gcps["h_ref"] is None:
             h_ref = 0.
@@ -127,29 +176,37 @@ class CameraConfig:
 
 
     def get_M(self, h_a=None, reverse=False):
-        """
-        Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
+        """Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
         ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.
 
-        :param h_a: actual water level [m]
-        :param reverse: bool, optional, if set, the reverse matrix is prepared, which can be used to transform projected
-            coordinates back to the original camera perspective.
-        :return: np.ndarray, containing 2x3 transformation matrix.
+        Parameters
+        ----------
+        h_a : float, optional
+            actual water level [m] (Default: None)
+        reverse : bool, optional
+            if True, the reverse matrix is prepared, which can be used to transform projected
+            coordinates back to the original camera perspective. (Default: False)
+
+        Returns
+        -------
+        M : np.ndarray
+            2x3 transformation matrix
+
         """
         # map where the destination points are with the actual water level h_a.
         if h_a is None or self.gcps["h_ref"] is None:
             # fill in the same value for h_ref and h_a
-            h_ref = 0.
-            h_a = 0.
+            dst_a = self.gcps["dst"]
         else:
             h_ref = self.gcps["h_ref"]
-        dst_a = cv.get_gcps_a(
-            self.lens_position,
-            h_a,
-            self.gcps["dst"],
-            self.gcps["z_0"],
-            h_ref,
-        )
+            lens_position = self.lens_position
+            dst_a = cv.get_gcps_a(
+                lens_position,
+                h_a,
+                self.gcps["dst"],
+                self.gcps["z_0"],
+                h_ref,
+            )
 
         # lookup where the destination points are in row/column space
         dst_colrow_a = cv.transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
@@ -161,18 +218,33 @@ class CameraConfig:
             return cv.get_M(src=self.gcps["src"], dst=dst_colrow_a)
 
     def set_corners(self, corners):
+        """
+        Assign corner coordinates to camera configuration
+
+        Parameters
+        ----------
+        corners : list of lists (4)
+            [columns, row] coordinates in camera perspective
+
+        """
         assert (np.array(corners).shape == (4,
                                             2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is {corners.shape}"
         self.corners = corners
 
     def set_lens_pars(self, k1=0, c=2, f=4):
-        """
-        Set the lens parameters of the given CameraConfig
+        """Set the lens parameters of the given CameraConfig
 
-        :param k1: float, lens curvature [-], zero (default) means no curvature
-        :param c: float, optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the
+        Parameters
+        ----------
+        k1 : float
+            lens curvature [-], zero (default) means no curvature
+        c : float
+            optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the
             centre.
-        :param f: float, focal length [mm], typical values could be 2.8, or 4 (default).
+        f : float, optional
+            focal length [mm], typical values could be 2.8, or 4 (default).
+
+
         """
         assert (isinstance(k1, (int, float))), "k1 must be a float"
         assert (isinstance(c, (int, float))), "k1 must be a float"
@@ -183,21 +255,29 @@ class CameraConfig:
             "f": f
         }
 
-    def set_gcps(self, src, dst, z_0, h_ref=None, crs=None):
-        """
-        Set ground control points for the given CameraConfig
+    def set_gcps(self, src, dst, z_0=None, h_ref=None, crs=None):
+        """Set ground control points for the given CameraConfig
 
-        :param src: list of lists, containing 4 x, y pairs of columns and rows in the frames of the original video
-        :param dst: list of lists, containing 4 x, y pairs of real world coordinates in the given coordinate reference
-            system.
-        :param z_0: same as `h_ref` but then as measured by a global reference system such as a geoid or ellipsoid used
+        Parameters
+        ----------
+        src : list of lists (4)
+            [x, y] pairs of columns and rows in the frames of the original video
+        dst : list of lists (4)
+            [x, y] pairs of real world coordinates in the given coordinate reference system.
+        z_0 : float
+            Water level measured in global reference system such as a geoid or ellipsoid used
             by a GPS device. All other surveyed points (lens position and cross section) must have the same vertical
             reference.
-        :param h_ref: float, optional. Water level, belonging to the 4 control points in `dst`. This is the water level
+        h_ref :  float, optional
+            Water level, belonging to the 4 control points in `dst`. This is the water level
             as measured by a local reference (e.g. gauge plate) during the surveying of the control points. Control
             points must be taken on the water surface. If a single movie is processed, h_ref can be left out.
-        :param crs: coordinate reference system, used to measure the control points (e.g. 4326 for WGS84 lat-lon).
-            the destination control points will automatically be reprojected to the local crs of the CameraConfig.
+            (Default: None)
+        crs : int, dict or str, optional
+            Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to
+            measure the control points (e.g. 4326 for WGS84 lat-lon). Destination control points will automatically be
+            reprojected to the local crs of the CameraConfig. (Default: None)
+
         """
         assert (isinstance(src, list)), f"src must be a list of 4 numbers"
         assert (isinstance(dst, list)), f"dst must be a list of 4 numbers"
@@ -205,7 +285,8 @@ class CameraConfig:
         assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
         if h_ref is not None:
             assert (isinstance(h_ref, (float, int))), "h_ref must contain a float number"
-        assert (isinstance(z_0, (float, int))), "z_0 must contain a float number"
+        if z_0 is not None:
+            assert (isinstance(z_0, (float, int))), "z_0 must contain a float number"
         assert (all(isinstance(x, (float, int)) for p in src for x in p)), "src contains non-int parts"
         assert (all(isinstance(x, (float, int)) for p in dst for x in p)), "dst contains non-float parts"
         if crs is not None:
@@ -224,14 +305,20 @@ class CameraConfig:
         }
 
     def set_lens_position(self, x, y, z, crs=None):
-        """
-        Set the geographical position of the lens of current CameraConfig.
+        """Set the geographical position of the lens of current CameraConfig.
 
-        :param x:
-        :param y:
-        :param z:
-        :param crs: coordinate reference system, used to measure the lens position (e.g. 4326 for WGS84 lat-lon).
-            the position's x and y coordinates will automatically be reprojected to the local crs of the CameraConfig.
+        Parameters
+        ----------
+        x : float
+            x-coordinate
+        y : float
+            y-coordinate
+        z : float
+            z-coordinate
+        crs : int, dict or str, optional
+            Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to
+            measure the lens position (e.g. 4326 for WGS84 lat-lon). The position's x and y coordinates will
+            automatically be reprojected to the local crs of the CameraConfig.
         """
 
         if crs is not None:
@@ -242,17 +329,30 @@ class CameraConfig:
         self.lens_position = [x, y, z]
 
     def plot(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}):
-        """
-        Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
+        """Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
         to be in the right location. Requires cartopy to be installed.
 
-        :param figsize: tuple, optional, width and height of figure
-        :param ax: axes, optional, if not provided, axes is setup
-        :param tiles: str, optional, name of tiler service to use (called as attribute from cartopy.io.img_tiles)
-        :param buffer: float, optional buffer in lat-lon around points, used to set extent (default: 0.0005)
-        :param zoom_level: int, optional, zoom level of image tiler service (default: 18)
-        :param tiles_kwargs: dict, optional, keyword arguments to pass to ax,add_image when tiles are added
-        :return: ax
+        Parameters
+        ----------
+        figsize : tuple, optional
+            width and height of figure (Default value = (13)
+        ax : plt.axes, optional
+            if not provided, axes is setup (Default: None)
+        tiles : str, optional
+            name of tiler service to use (called as attribute from cartopy.io.img_tiles) (Default: None)
+        buffer : float, optional
+            buffer in lat-lon around points, used to set extent (default: 0.0005)
+        zoom_level : int, optional
+            zoom level of image tiler service (default: 18)
+        **tiles_kwargs
+            additional keyword arguments to pass to ax.add_image when tiles are added
+        8) :
+            
+
+        Returns
+        -------
+        ax : plt.axes
+
         """
         # define plot kwargs
         from shapely.geometry import LineString, Point
@@ -314,10 +414,13 @@ class CameraConfig:
         return ax
 
     def to_dict(self):
-        """
-        Return the CameraConfig object as dictionary
+        """Return the CameraConfig object as dictionary
 
-        :return: dict, containing CameraConfig components
+        Returns
+        -------
+        camera_config_dict : dict
+            serialized CameraConfig
+
         """
 
         d = self.__dict__
@@ -329,40 +432,58 @@ class CameraConfig:
         return d
 
     def to_file(self, fn):
-        """
-        Write the CameraConfig object to json structure
+        """Write the CameraConfig object to json structure
+        
+        Parameters
+        ----------
+        fn : str
+            Path to file to write camera config to
 
-        :return: None
         """
 
         with open(fn, "w") as f:
             f.write(self.to_json())
 
     def to_json(self):
-        """
-        Convert CameraConfig object to string
-
-        :return: json string with CameraConfig components
+        """Convert CameraConfig object to string
+        
+        Returns
+        -------
+        json_str : str
+            json string with CameraConfig components
         """
         return json.dumps(self, default=lambda o: o.to_dict(), indent=4)
 
 
 def get_camera_config(s):
-    """
-    Read camera config from string
-    :param s: json string containing camera config
-    :return: CameraConfig object
+    """Read camera config from string
+
+    Parameters
+    ----------
+    s : str
+        json string containing camera config
+
+    Returns
+    -------
+    cam_config : CameraConfig
+
     """
     d = json.loads(s)
     return CameraConfig(**d)
 
 
 def load_camera_config(fn):
-    """
-    Load a CameraConfig from a geojson file.
+    """Load a CameraConfig from a geojson file.
 
-    :param fn: str, filename with camera config.
-    :return: CameraConfig object
+    Parameters
+    ----------
+    fn : str
+        path to file with camera config in json format.
+
+    Returns
+    -------
+    cam_config : CameraConfig
+
     """
     with open(fn, "r") as f:
         camera_config = get_camera_config(f.read())

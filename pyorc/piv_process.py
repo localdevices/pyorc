@@ -8,36 +8,49 @@ def piv(
     frame_a, frame_b, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None, overlap=None,
         **kwargs
 ):
-    """
-    PIV analysis following keyword arguments from openpiv. This function also computes the correlations per
+    """PIV analysis following keyword arguments from openpiv. This function also computes the correlations per
     interrogation window, so that poorly correlated values can be filtered out. Furthermore, the resolution is used to convert
     pixel per second velocity estimates, into meter per second velocity estimates. The centre of search area columns
     and rows are also returned so that a georeferenced grid can be written from the results.
 
     Note: Typical openpiv kwargs are for instance
     window_size=60, overlap=30, search_area_size=60, dt=1./25
-    :param frame_a: 2-D numpy array, containing first frame
-    :param frame_b: 2-D numpy array, containing second frame
-    :param res_x: float, resolution of x-dir pixels in a user-defined unit per pixel (e.g. m pixel-1)
-    :param res_y: float, resolution of y-dir pixels in a user-defined unit per pixel (e.g. m pixel-1)
-    :param search_area_size: int, length of subsetted matrix to search for correlations (default: 30)
-    :param correlation: bool, if True, the best found correlation coefficient is also returned for each interrogation
-        window (default: True).
-    :param window_size: int, size of interrogation window in amount of pixels. If not set, it is set equal to
-        search_area_size (default: None).
-    :param overlap: int, length of overlap between interrogation windows. If not set, this defaults to 50% of the
-        window_size parameter (default: None).
-    :param kwargs: dict, several keyword arguments related to openpiv. See openpiv manual for further information
-    :return cols: 1-D numpy array, col number of centre of interrogation windows
-    :return rows: 1-D numpy array, row number of centre of interrogation windows
-    :return v_x: 2-D numpy array, raw x-dir velocities [m s-1] in interrogation windows (requires filtering to get
-        valid velocities)
-    :return v_y: 2-D numpy array, raw y-dir velocities [m s-1] in interrogation windows (requires filtering to get
-        valid velocities)
-    :return s2n: 2-D numpy array, signal to noise ratio, measured as maximum correlation found divided by the mean
-        correlation (method="peak2mean") or second to maximum correlation (method="peak2peak") found within search area
-    :return corr: 2-D numpy array, correlation values in interrogation windows
 
+    Parameters
+    ----------
+    frame_a: np.ndarray (2D)
+        first frame
+    frame_b: np.ndarray (2D)
+        second frame
+    res_x: float, optional
+        resolution of x-dir pixels in a user-defined unit per pixel (e.g. m pixel-1) Default: 0.01
+    res_y: float, optional
+        resolution of y-dir pixels in a user-defined unit per pixel (e.g. m pixel-1) Default: 0.01
+    search_area_size: int, optional
+        length of subsetted matrix to search for correlations (default: 30)
+    correlation: bool, optional
+        if True (default), the best found correlation coefficient is also returned for each interrogation
+    window_size: int, optional
+        size of interrogation window in amount of pixels. If not set, it is set equal to search_area_size (default: None).
+    overlap: int, optional
+        length of overlap between interrogation windows. If not set, this defaults to 50% of the window_size parameter (default: None).
+    **kwargs: keyword arguments related to openpiv. See openpiv manual for further information
+
+    Returns
+    -------
+    cols: np.ndarray (1D)
+        col number of centre of interrogation windows
+    rows: np.ndarray (1D)
+        row number of centre of interrogation windows
+    v_x: np.ndarray(2D)
+        raw x-dir velocities [m s-1] in interrogation windows (requires filtering to get valid velocities)
+    v_y: np.ndarray (2D)
+        raw y-dir velocities [m s-1] in interrogation windows (requires filtering to get valid velocities)
+    s2n: np.ndarray (2D)
+        signal to noise ratio, measured as maximum correlation found divided by the mean correlation
+        (method="peak2mean") or second to maximum correlation (method="peak2peak") found within search area
+    corr: np.ndarray (2D)
+        correlation values in interrogation windows
     """
     if isinstance(frame_a, xr.core.dataarray.DataArray):
         frame_a = frame_a.values
@@ -75,17 +88,30 @@ def piv_corr(
     correlation_method="circular",
     normalized_correlation=True,
 ):
-    """
-    Estimate the maximum correlation in piv analyses over two frames. Function taken from openpiv library.
+    """Estimate the maximum correlation in piv analyses over two frames. Function taken from openpiv library.
     This is a temporary fix. If correlation can be exported from openpiv, then this function can be removed.
-    :param frame_a: 2-D numpy array, containing first frame
-    :param frame_b: 2-D numpy array, containing second frame
-    :param search_area_size: int, size of search area in pixels (square shape)
-    :param overlap: int, amount of overlapping pixels between search areas
-    :param window_size: int, size of window to search for correlations
-    :param correlation_method: method for correlation used, as openpiv setting
-    :param normalized_correlation: return a normalized correlation number between zero and one.
-    :return: maximum correlations found in search areas
+
+    Parameters
+    ----------
+    frame_a: np.ndarray (2D)
+        first frame
+    frame_b: np.ndarray (2D)
+        second frame
+    overlap: int, optional
+        length of overlap between interrogation windows. If not set, this defaults to 50% of the window_size parameter (default: None).
+    window_size: int, optional
+        size of interrogation window in amount of pixels. If not set, it is set equal to search_area_size (default: None).
+    search_area_size: int, optional
+        length of subsetted matrix to search for correlations (default: 30)
+    correlation_method: str, optional
+        method for correlation used, as openpiv setting (default: "circular")
+    normalized_correlation: boolean, optional
+        if True (default) return a normalized correlation number between zero and one, else not normalized
+
+    Returns
+    -------
+    corr : np.ndarray (2D)
+        maximum correlations found in search areas
     """
     # extract the correlation matrix
     window_size = search_area_size if window_size is None else window_size

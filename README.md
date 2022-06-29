@@ -7,10 +7,10 @@ pyOpenRiverCam
 computations on the fully open software stack OpenRiverCam. **pyorc** can only be successful if the underlying methods
 are made available openly for all. Currently **pyorc** implements Large-scale Particle Image Velocimetry (LSPIV) based
 flow analysis using the OpenPIV library and reprojections and image pre-processing with OpenCV. We wish to extend this 
-to Large-scale Particle Tracking Velocimetry (LSPTV) and Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV once open
-libraries with API to perform this are available. 
+to Large-scale Particle Tracking Velocimetry (LSPTV) and Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV using open
+libraries or extensions to this code. 
 
-![example_image](docs/ngwerere.jpg)
+![example_image](https://raw.githubusercontent.com/localdevices/pyorc/main/docs/ngwerere.jpg)
 Image: Example of pyorc velocimetry over Ngwerere river at the Zambezi Road crossing - Lusaka, Zambia.
 
 Current capabilities are:
@@ -52,7 +52,14 @@ If you simply want to add **pyorc** to an existing python installation or virtua
 instructions.
 
 First activate the environment you want **pyorc** to be installed in (if you don't care about virtual environments, then 
-simply skip this step)
+simply skip this step). Dependencies `rasterio`, `geopandas` and `cartopy` are known to be difficult to install with
+`pip`. Therefore, we highly recommend to use a conda environment that already includes these dependencies before
+installation. You can simply install these libraries as follows:
+
+```
+conda activate <name-of-your-environment>
+conda install -c conda-forge cartopy geopandas rasterio
+```
 
 Then install **pyorc** as follows:
 ```
@@ -60,7 +67,7 @@ pip install pyopenrivercam
 ```
 That's it! You are good to go!
 
-### Installation from code base
+### Installation from latest code base
 
 To install **pyorc** from scratch in a new virtual environment from the code base, go through these steps. Logical cases
 when you wish to install from the code base are:
@@ -75,20 +82,27 @@ git clone https://github.com/localdevices/pyorc.git
 cd pyorc
 ```
 
-If you want, setup a virtual environment as follows:
+Setup a virtual environment and install the package as follows:
 ```
 conda env create -f environment.yml
 ```
+That's it, you are good to go.
 
-Now install the **pyorc** package. If you want to develop **pyorc** please type
+### Installation from latest code base as developer
+
+Clone the repository with ssh and move into the cloned folder.
+
 ```
+git clone git@github.com:localdevices/pyorc.git
+cd pyorc
+```
+
+Setup a virtual developers environment and install the package as follows:
+```
+conda env create -f environment-dev.yml
+conda activate pyorc-dev
 pip install -e .
 ```
-If you just want to use the lates **pyorc** code base (without the option to develop on the code) type:
-```
-pip install .
-```
-That's it, you are good to go.
 
 Using pyorc
 -----------

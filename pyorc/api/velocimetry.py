@@ -1,5 +1,4 @@
 import copy
-from matplotlib.colors import Normalize
 import numpy as np
 import rasterio
 import xarray as xr
@@ -7,15 +6,22 @@ import warnings
 
 from pyproj import CRS
 from scipy.interpolate import interp1d
-from .transect import Transect
 from .orcbase import ORCBase
+from .plot import _Velocimetry_PlotMethods
 from .. import helpers, const
-import pyorc.plot as plot_orc
-
+from xarray.core import utils
 
 @xr.register_dataset_accessor("velocimetry")
 class Velocimetry(ORCBase):
+    """Velocimetry functionalities that can be applied on ``xarray.Dataset``"""
     def __init__(self, xarray_obj):
+        """Initialize a velocimetry ``xarray.Dataset``
+
+        Parameters
+        ----------
+        xarray_obj: xr.Dataset
+            velocimetry data fields (from ``pyorc.Frames.get_piv``)
+        """
         super(Velocimetry, self).__init__(xarray_obj)
 
     def filter_temporal(
@@ -34,22 +40,44 @@ class Velocimetry(ORCBase):
             kwargs_neighbour={},
             inplace=False
     ):
-        """
-        Masks values using several filters that use temporal variations or comparison as basis.
+        """Masks values using several filters that use temporal variations or comparison as basis.
 
-        :param ds: xr.Dataset, or file containing, with velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param filter_std: boolean, if True (default, filtering on variance is applied)
-        :param filter_std: boolean, if True (default, filtering on variance is applied)
-        :param filter_angle: boolean, if True (default, filtering on angles is applied)
-        :param filter_velocity: boolean, if True (default, filtering on velocity is applied)
-        :param filter_corr: boolean, if True (default, filtering on correlation is applied)
-        :param kwargs_std: dict, set of key-word arguments to pass on to filter_temporal_std
-        :param kwargs_angle: dict, set of key-word arguments to pass on to filter_temporal_angle
-        :param kwargs_velocity: dict, set of key-word arguments to pass on to filter_temporal_velocity
-        :param kwargs_corr: dict, set of key-word arguments to pass on to filter_temporal_corr
-        :return: xr.Dataset, containing temporally filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (default: "v_y")
+        filter_std : boolean, optional
+            if True (default), filtering on variance is applied
+        filter_std : boolean, optional
+            if True (default), filtering on variance is applied
+        filter_angle : boolean, optional
+            if True (default), filtering on angles is applied
+        filter_velocity : boolean
+            if True (default, filtering on velocity is applied)
+        filter_corr : boolean
+            if True (default), filtering on correlation is applied
+        filter_neighbour : dict, optional
+            if True (default), neighbourhood filtering is applied
+        kwargs_std : dict, optional
+            set of key-word arguments to pass on to filter_temporal_std
+        kwargs_angle : dict, optional
+            set of key-word arguments to pass on to filter_temporal_angle
+        kwargs_velocity : dict, optional
+            set of key-word arguments to pass on to filter_temporal_velocity
+        kwargs_corr : dict, optional
+            set of key-word arguments to pass on to filter_temporal_corr
+        kwargs_neighbour : dict, optional
+            set of key-word arguments to pass on to filter_temporal_neighbour
+        inplace : boolean
+            If set, values are replaced instead of returning a new Dataset
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            temporally filtered velocity vectors as [time, y, x]
+
         """
         # load dataset in memory and update self
         ds = copy.deepcopy(self._obj.load())
@@ -79,22 +107,32 @@ class Velocimetry(ORCBase):
             angle_tolerance=0.25 * np.pi,
             filter_per_timestep=True,
     ):
-        """
-        filters on the expected angle. The function filters points entirely where the mean angle over time
+        """filters on the expected angle. The function filters points entirely where the mean angle over time
         deviates more than input parameter angle_bounds (in radians). The function also filters individual
         estimates in time, in case the user wants this (filter_per_timestep=True), in case the angle on
         a specific time step deviates more than the defined amount from the average.
         note: this function does not work appropriately, if the expected angle (+/- anglebounds) are within
         range of zero, as zero is the same as 2*pi. This exception may be resolved in the future if necessary.
 
-        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param angle_expected float, angle (0-2*pi), measured clock-wise from vertical upwards direction, expected
-            in the velocites, default: 0.5*np.pi (meaning from left to right)
-        :param angle_tolerance: float (0-2*pi) maximum deviation from expected angle allowed.
-        :param filter_per_timestep: if set to True, tolerances are also checked per individual time step
-        :return: xr.Dataset, containing angle filtered velocity vectors as [time, y, x], default: True
+        Parameters
+        ----------
+        v_x : str
+            name of x-directional velocity (Default value = "v_x")
+        v_y : str
+            name of y-directional velocity (Default value = "v_y")
+        angle_expected : float
+            angle (0-2*pi), measured clock-wise from vertical upwards direction, expected
+            in the velocities, default: 0.5*np.pi (meaning from left to right)
+        angle_tolerance : float (0-2*pi)
+            maximum deviation from expected angle allowed. (Default value = 0.25 * np.pi)
+        filter_per_timestep : boolean
+            if set to True (default), tolerances are also checked per individual time step
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            angle filtered velocity vectors as [time, y, x]
+
         """
         # TODO: make function working appropriately, if angles are close to zero (2*pi)
         # first filter on the temporal mean. This is to ensure that widely varying results in angle are deemed not
@@ -112,16 +150,25 @@ class Velocimetry(ORCBase):
             self._obj[v_y] = self._obj[v_y].where(np.abs(angle - angle_expected) < angle_tolerance)
 
     def filter_temporal_neighbour(self, v_x="v_x", v_y="v_y", roll=5, tolerance=0.5):
-        """
-        Masks values if neighbours over a certain rolling length before and after, have a
+        """Masks values if neighbours over a certain rolling length before and after, have a
         significantly higher velocity than value under consideration, measured by tolerance.
 
-        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param roll: int, amount of time steps in rolling window (centred)
-        :param tolerance: float (0-1), Relative acceptable velocity of maximum found within rolling window
-        :return: xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (Default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (Default: "v_y")
+        roll : int, optional
+            amount of time steps in rolling window (centred) (default: 5)
+        tolerance : float (0-1)
+            relative acceptable velocity of maximum found within rolling window (default: .5)
+
+        Returns
+        -------
+        type
+            xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
+
         """
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         s_roll = s.fillna(0.).rolling(time=roll, center=True).max()
@@ -131,14 +178,28 @@ class Velocimetry(ORCBase):
 
     def filter_temporal_std(
             self, v_x="v_x", v_y="v_y", tolerance_sample=1.0, tolerance_var=5., mode="or"):
-        """
-        Masks values if they deviate more than x standard deviations from the mean.
+        """Masks values if they deviate more than x standard deviations from the mean.
 
-        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param tolerance: float, representing amount of standard deviations
-        :return: xr.Dataset, containing standard deviation filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (Default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (Default: "v_y")
+        tolerance :  float
+            amount of standard deviations tolerance
+        tolerance_sample :
+             (Default value = 1.0)
+        tolerance_var :
+             (Default value = 5.)
+        mode : str
+             can be "and" or "or" (default). If "or" ("and"), then only one (both) of two vector components need(s) to
+             be within tolerance.
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            standard deviation filtered velocity vectors as [time, y, x]
         """
 
         # s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
@@ -172,21 +233,26 @@ class Velocimetry(ORCBase):
         self._obj[v_x] = self._obj[v_x].where(condition)
         self._obj[v_y] = self._obj[v_y].where(condition)
 
-        #
-        # self._obj[v_x] = self._obj[v_x].where((s - s_mean) / s_std < tolerance)
-        # self._obj[v_y] = self._obj[v_y].where((s - s_mean) / s_std < tolerance)
         # return ds
 
     def filter_temporal_velocity(self, v_x="v_x", v_y="v_y", s_min=0.1, s_max=5.0):
-        """
-        Masks values if the velocity scalar lies outside a user-defined valid range.
+        """Masks values if the velocity scalar lies outside a user-defined valid range.
 
-        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param s_min: float, minimum scalar velocity [m s-1]
-        :param s_max: float, maximum scalar velocity [m s-1]
-        :return: xr.Dataset, containing velocity-range filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (Default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (Default: "v_y")
+        s_min : float, optional
+            minimum scalar velocity [m s-1] (default: 0.1)
+        s_max : float, optional
+            maximum scalar velocity [m s-1] (default: 5.)
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            velocity-range filtered velocity vectors as [time, y, x]
         """
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         self._obj[v_x] = self._obj[v_x].where(s > s_min)
@@ -202,15 +268,23 @@ class Velocimetry(ORCBase):
         # return ds
 
     def filter_temporal_corr(self, v_x="v_x", v_y="v_y", corr="corr", tolerance=0.1):
-        """
-        Masks values with a too low correlation.
+        """Masks values with a too low correlation.
 
-        :param ds: xr.Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param corr: str, name of correlation variable
-        :param tolerance: float (0-1), tolerance for correlation value. If correlation is lower than tolerance, it is masked
-        :return: xr.Dataset, containing correlation filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (Default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (Default: "v_y")
+        corr : str
+            name of correlation variable (default: "corr")
+        tolerance : float (0-1)
+            tolerance for correlation value (default: 0.1). If correlation is lower than tolerance, it is masked
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            correlation filtered velocity vectors as [time, y, x]
         """
         self._obj[v_x] = self._obj[v_x].where(self._obj[corr] > tolerance)
         self._obj[v_y] = self._obj[v_y].where(self._obj[corr] > tolerance)
@@ -226,15 +300,30 @@ class Velocimetry(ORCBase):
             kwargs_median={},
             inplace=False
     ):
-        """
-        Masks velocity values on a number of spatial filters.
+        """Masks velocity values on a number of spatial filters.
 
-        :param self: xr.Dataset, or file containing, with velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param kwargs_nan: dict, keyword arguments to pass to filter_spatial_nan
-        :param kwargs_median: dict, keyword arguments to pass to filter_spatial_median
-        :return: xr.Dataset, containing spatially filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (default: "v_y")
+        filter_nan : boolean, optional
+            if True (default), filtering on nans is applied
+        filter_median : boolean, optional
+            if True (default), filtering on median deviations is applied
+        kwargs_nan : dict, optional
+            dict, keyword arguments to pass to filter_spatial_nan
+        kwargs_median : dict, optional
+            keyword arguments to pass to filter_spatial_median
+        inplace : boolean, optional
+            If True (default: False), values are replaced instead of returning a new Dataset
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            spatially filtered velocity vectors as [time, y, x]
+
         """
         # work on v_x and v_y only
         ds_temp = self._obj[[v_x, v_y]].copy(deep=True).load()
@@ -250,23 +339,37 @@ class Velocimetry(ORCBase):
         else:
             return ds
 
-    def filter_spatial_nan(self, v_x="v_x", v_y="v_y", **kwargs):
-        """
-        Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated
+    def filter_spatial_nan(self, v_x="v_x", v_y="v_y", tolerance=0.3, wdw=1, missing=-9999.):
+        """Masks values if their surrounding neighbours (inc. value itself) contain too many NaN. Meant to remove isolated
         velocity estimates.
 
-        :param self: xr.Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param tolerance: float, amount of NaNs in search window measured as a fraction of total amount of values [0-1]
-        :param stride: int, stride used to determine relevant neighbours
-        :param missing: float, a temporary missing value, used to be able to convolve NaNs
-        :return: xr.Dataset, containing NaN filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (default: "v_y")
+        tolerance : float, optional
+            amount of NaNs in search window measured as a fraction of total amount of values [0-1] (default: 0.3)
+        wdw : int, optional
+            window length used to determine relevant neighbours. 1 means that 1 neighbour on all sides is considered
+            (default: 1)
+        missing : float, optional
+            a temporary missing value, used to be able to convolve NaNs, normally not needed to change (default -9999.)
+
+        Returns
+        -------
+        ds_filter: xr.Dataset
+            NaN filtered velocity vectors as [time, y, x]
+
         """
-        def _filter_nan(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.3, stride=1, missing=-9999.):
+        def _filter_nan(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.3, wdw=1, missing=-9999.):
+            """
+            internal function, see main function
+            """
             # u, v = ds[v_x], ds[v_y]
             u, v = ds_slice[v_x].values, ds_slice[v_y].values
-            u_move = helpers.neighbour_stack(u.copy(), stride=stride, missing=missing)
+            u_move = helpers.neighbour_stack(u.copy(), stride=wdw, missing=missing)
             # replace missings by Nan
             nan_frac = np.float64(np.isnan(u_move)).sum(axis=0) / float(len(u_move))
             u[nan_frac > tolerance] = np.nan
@@ -276,33 +379,57 @@ class Velocimetry(ORCBase):
             return ds_slice
         ds_g = self._obj.groupby("time")
         self._obj.update(
-            ds_g.apply(_filter_nan, v_x=v_x, v_y=v_y, **kwargs)
+            ds_g.apply(
+                _filter_nan,
+                v_x=v_x,
+                v_y=v_y,
+                tolerance=tolerance,
+                wdw=wdw,
+                missing=missing
+            )
         )
 
-    def filter_spatial_median(self, v_x="v_x", v_y="v_y", **kwargs):
-        """
-        Masks values when their value deviates more than x standard deviations from the median of its neighbours
+    def filter_spatial_median(self, v_x="v_x", v_y="v_y", tolerance=0.7, wdw=1, missing=-9999.):
+        """Masks values when their value deviates more than x standard deviations from the median of its neighbours
         (inc. itself).
 
-        :param self: xr.Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param tolerance: float, amount of standard deviations tolerance
-        :param stride: int, stride used to determine relevant neighbours
-        :param missing: float, a temporary missing value, used to be able to convolve NaNs
-        :return: xr.Dataset, containing std filtered velocity vectors as [time, y, x]
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (default: "v_y")
+        tolerance : float, optional
+            amount of standard deviations tolerance (default: 0.7)
+        wdw : int, optional
+            window used to determine relevant neighbours
+        missing : float, optional
+            a temporary missing value, used to be able to convolve NaNs
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            std filtered velocity vectors as [time, y, x]
+
         """
-        def _filter_median(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.7, stride=1, missing=-9999.):
+        def _filter_median(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.7, wdw=1, missing=-9999.):
+            """
+            internal function, see main method
+            """
             u, v = ds_slice[v_x].values, ds_slice[v_y].values
-            s = (u ** 2 + v ** 2) ** 0.5
-            s_move = helpers.neighbour_stack(s, stride=stride)
+            # s = (u ** 2 + v ** 2) ** 0.5
+            u_move = helpers.neighbour_stack(copy.deepcopy(u), stride=wdw, missing=missing)
+            v_move = helpers.neighbour_stack(copy.deepcopy(v), stride=wdw, missing=missing)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
 
                 # replace missings by Nan
-                s_median = np.nanmedian(s_move, axis=0)
-            # now filter points that are very far off from the median
-            filter = np.abs(s - s_median) / s_median > tolerance
+                u_median = np.nanmedian(u_move, axis=0)
+                v_median = np.nanmedian(v_move, axis=0)
+                # now filter points that are very far off from the median
+                u_filter = np.abs(u - u_median) / u_median > tolerance
+                v_filter = np.abs(v - v_median) / v_median > tolerance
+            filter = np.any([u_filter, v_filter], axis=0)
             u[filter] = np.nan
             v[filter] = np.nan
             ds_slice[v_x][:] = u
@@ -310,94 +437,59 @@ class Velocimetry(ORCBase):
             return ds_slice
         ds_g = self._obj.groupby("time")
         self._obj.update(
-            ds_g.apply(_filter_median, v_x=v_x, v_y=v_y, **kwargs)
+            ds_g.apply(_filter_median, v_x=v_x, v_y=v_y, tolerance=tolerance, wdw=wdw, missing=missing)
         )
 
-    def get_uv_camera(self, dt=0.1, v_x="v_x", v_y="v_y"):
-        """
-        Returns row, column locations in the camera objective, and u (x-directional) and v (y-directional) vectors, scaled
-        and transformed to the camera objective (i.e. vectors far away are smaller than closeby, and follow the river direction)
-        applied on u and v, so that they plot in a geographical space. This is needed because the raster of PIV results
-        is usually rotated geographically, so that water always flows from left to right in the grid. The results can be
-        used to plot velocities in the camera perspective, e.g. overlayed on a background image directly from the camera.
 
-        :param dt: float, time difference [s] used to scale the u and v velocities to a very small distance to project with
-            default: 0.1, usually not needed to modify this.
-        :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
-        :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
-        :return: 5 outputs: 4 np.ndarrays containing camera perspective column location, row location, transformed u and v
-            velocity vectors (no unit) and the scalar velocities (m/s). Rotation is not needed because the transformed
-            u and v components are already rotated to match the camera perspective. counter-clockwise rotation in radians.
-        """
-        # retrieve the backward transformation array
-        M = self.camera_config.get_M(self.h_a, reverse=True)
-        # get the shape of the original frames
-        shape_y, shape_x = self.camera_shape
-        xi, yi = np.meshgrid(self._obj.x, self._obj.y)
-        # flip the y-coordinates to match the row order used by opencv
-        yi = np.flipud(yi)
-
-        x_moved, y_moved = xi + self._obj[v_x] * dt, yi + self._obj[v_y] * dt
-        xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, self.camera_config.resolution, M)
-
-        # convert row counts to start at the top of the frame instead of bottom
-        yp_moved = shape_y - yp_moved
-
-        # missing values end up at the top-left, replace these with nan
-        yp_moved[yp_moved == shape_y] = np.nan  # ds["yp"].values[yp_moved == shape_y]
-        xp_moved[xp_moved == 0] = np.nan  # ds["xp"].values[xp_moved == 0]
-
-        u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
-        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
-        s.name = "radial_sea_water_velocity_away_from_instrument"
-        return "xp", "yp", u, v, s
-
-    def get_uv_geographical(self, v_x="v_x", v_y="v_y"):
-        """
-        Returns lon, lat coordinate names and u (x-directional) and v (y-directional) velocities, and a rotation that must be
-        applied on u and v, so that they plot in a geographical space. This is needed because the raster of PIV results
-        is usually rotated geographically, so that water always flows from left to right in the grid. The results can be
-        directly forwarded to a plot function for velocities in a geographical map, e.g. overlayed on a background
-        image, projected to lat/lon.
-
-        :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
-        :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
-        :return: 6 outputs: 5 np.ndarrays containing longitude, latitude coordinates, u and v velocities and scalar velocity;
-            and float with counter-clockwise rotation in radians, to be applied on u, v to plot in geographical space.
-
-        """
-        # select lon and lat variables as coordinates
-        u = self._obj[v_x]
-        v = -self._obj[v_y]
-        s = (u ** 2 + v ** 2) ** 0.5
-        aff = self.camera_config.transform
-        theta = np.arctan2(aff.d, aff.a)
-        s.name = "radial_sea_water_velocity_away_from_instrument"
-        return "lon", "lat", u, v, s, theta
-
-    def get_transect(self, x, y, z=None, crs=None, v_eff=True, xs="xs", ys="ys", distance=None, wdw=1):
-        """
-        Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the grid
-        can be rotated and that xs and ys are supplied following the projected coordinates supplied in
+    def get_transect(
+            self, x, y, z=None,
+            crs=None,
+            v_eff=True,
+            xs="xs",
+            ys="ys",
+            distance=None,
+            wdw=1,
+            rolling=None,
+            quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]
+    ):
+        """Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the
+        grid can be rotated and that xs and ys are supplied following the projected coordinates supplied in
         "xs" and "ys" coordinate variables in ds. x-coordinates and y-coordinates that fall outside the
         domain of ds, are still stored in the result for further interpolation or extrapolation.
         Original coordinate values supplied are stored in coordinates "x", "y" and (if supplied) "z".
+        Time series are transformed to set quantiles.
 
-        :param self: xarray dataset
-        :param x: tuple or list-like, x-coordinates on which interpolation should be done
-        :param y: tuple or list-like, y-coordinates on which interpolation should be done
-        :param z: tuple or list-like, z-coordinates on which interpolation should be done, defaults: None
-        :param crs: coordinate reference system (e.g. EPSG code) in which x, y and z are measured, defaults to None,
-            assuming crs is the same as crs of ds
-        :param v_eff: bool, if True, effective velocity (perpendicular to cross-section) is also computed, default: True
-        :param xs: str, name of variable that stores the x coordinates in the projection in which "x" is supplied,
-            default: "xs"
-        :param ys: str, name of variable that stores the y coordinates in the projection in which "y" is supplied
-            default: "ys"
-        :param distance: float, optional, sampling distance over the cross-section in [m]. the bathymetry points will
-            be interpolated to match this distance. If not set, the distance will be estimated from the velocimetry
-            grid resolution.
-        :return: ds_points: xarray dataset, containing interpolated data at the supplied x and y coordinates
+        Parameters
+        ----------
+        x : tuple or list-like
+            x-coordinates on which interpolation should be done
+        y : tuple or list-like
+            y-coordinates on which interpolation should be done
+        z : tuple or list-like
+            z-coordinates on which interpolation should be done, defaults: None
+        crs : int, dict or str, optional
+            coordinate reference system (e.g. EPSG code) in which x, y and z are measured (default: None),
+            None assumes crs is the same as crs of xr.Dataset.
+        v_eff : boolean, optional
+            if True (default), effective velocity (perpendicular to cross-section) is also computed
+        xs : str, optional
+            name of variable that stores the x coordinates in the projection in which "x" is supplied (default: "xs")
+        ys : str, optional
+            name of variable that stores the y coordinates in the projection in which "y" is supplied (default: "ys")
+        distance : float, optional
+            sampling distance over the cross-section in [m]. the bathymetry points will be interpolated to match this
+            distance. If not set, the distance will be estimated from the velocimetry grid resolution. (default: None)
+        wdw : int, window size to use for sampling the velocity. zero means, only cell itself, 1 means 3x3 window.
+            (default: 1)
+        rolling : int, optional
+            if set other than None (default), a rolling mean over time is applied, before deriving quantile estimates.
+        quantiles : list of floats (0-1), optional
+            list of quantiles to return (default: [0.05, 0.25, 0.5, 0.75, 0.95]).
+
+        Returns
+        -------
+        ds_points: xr.Dataset
+            interpolated data at the supplied x and y coordinates over quantiles
         """
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
         if crs is not None:
@@ -443,8 +535,8 @@ class Velocimetry(ORCBase):
             # collect points within a stride, collate and analyze for outliers
             ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(-wdw, wdw + 1) for y_stride in
                                 range(-wdw, wdw + 1)], dim="stride")
-            # use the median to prevent a large influence of serious outliers
-            ds_effective = ds_wdw.median(dim="stride", keep_attrs=True)
+            # use the median (not mean) to prevent a large influence of serious outliers
+            ds_effective = ds_wdw.mean(dim="stride", keep_attrs=True)
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
             raise ValueError(
@@ -456,161 +548,71 @@ class Velocimetry(ORCBase):
         ds_points = ds_points.assign_coords(scoords=("points", list(s)))
         if z is not None:
             ds_points = ds_points.assign_coords(zcoords=("points", list(z)))
+        # add mean angles to dataset
+        alpha = helpers.xy_angle(ds_points["x"], ds_points["y"])
+        flow_dir = alpha - 0.5 * np.pi
+        ds_points["v_dir"] = (("points"), flow_dir)
+        ds_points["v_dir"].attrs = {
+            "standard_name": "river_flow_angle",
+            "long_name": "Angle of river flow in radians from North",
+            "units": "rad"
+        }
         # convert to a Transect object
         ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
+        if rolling is not None:
+            ds_points = ds_points.rolling(time=rolling, min_periods=1).mean()
+        ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
         if v_eff:
             # add the effective velocity, perpendicular to cross section direction
             ds_points.transect.vector_to_scalar()
         return ds_points
 
-    def plot(
-            self,
-            ax=None,
-            scalar=True,
-            quiver=True,
-            mode="local",
-            scalar_kwargs={},
-            quiver_kwargs={},
-            v_x="v_x",
-            v_y="v_y",
-            cbar=True,
-            cbar_fontsize=15
-    ):
-        """
-        plot velocimetry results. These can be plotted as scalar values (i.e. a mesh) or as quivers, or both by setting
-        the inputs 'scalar' and 'quiver' to True or False. Plotting can be done in three modes:
-        - "local": a simple planar view plot, with a local coordinate system in meters, with the top-left coordinate
-          being the 0, 0 point, and ascending coordinates towards the right and bottom.
-        - "geographical": a geographical plot, requiring the package `cartopy`, the results are plotted on a
-          geographical axes, so that combinations with tile layers such as OpenStreetMap, or shapefiles can be made.
-        - "camera": i.e. seen from the camera perspective. This is the most intuitive view for end users.
+    # add .plot as group of methods, UncachedAccessor ensures that Velocimetry is passed as object
+    plot = utils.UncachedAccessor(_Velocimetry_PlotMethods)
 
-        :param ax: pre-defined axes object. If not set, a new axes will be prepared. In case `mode=="geographical"`, a
-            cartopy GeoAxes needs to be provided, or will be made in case ax is not set. If an axes with background
-            frame is provided (made through frames.plot) then the background must be plotted in the same mode as
-            selected here.
-        :param scalar: boolean, if set to True, velocities are plotted as scalar values in a mesh (default: True)
-        :param quiver: boolean, if set to True, velocities are plotted as quiver (i.e. arrows). In case scalar is also
-            True, quivers will be plotted with a single color (defined in `quiver_kwargs`), if not, the scalar values
-            are used to color the arrows.
-        :param mode: can be "local", "geographical", or "camera". For "geographical" a velocimetry result that contains
-            "lon" and "lat" coordinates must be provided (i.e. produced with known CRS for control points).
-        :param scalar_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.pcolormesh, for plotting
-            scalar values.
-        :param quiver_kwargs: dict, plotting parameters to be passed to matplotlib.pyplot.quiver, for plotting quiver
-            arrows.
-        :param v_x: str, name of variable in ds, containing x-directional (u) velocity component (default: "v_x")
-        :param v_y: str, name of variable in ds, containing y-directional (v) velocity component (default: "v_y")
-        :param cbar: bool, optional, define if colorbar should be included (default: True)
-        :param cbar_fontsize: fontsize to use for the colorbar title (fontsize of tick labels will be made slightly
-            smaller).
-        :return: ax, axes object resulting from this function.
-        """
-
-        if len(self._obj[v_x].shape) > 2:
-            raise OverflowError(
-                f'Dataset\'s variables should only contain 2 dimensions, this dataset '
-                f'contains {len(self._obj[v_x].shape)} dimensions. Reduce this by applying a reducer or selecting a time step. '
-                f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
-            )
-        assert (scalar or quiver), "Either scalar or quiver should be set tot True, nothing to plot"
-        assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
-        if mode == "local":
-            x = "x"
-            y = "y"
-            theta = 0.
-            u = self._obj[v_x]
-            v = -self._obj[v_y]
-            s = (u ** 2 + v ** 2) ** 0.5
-        elif mode == "geographical":
-            # import some additional packages
-            import cartopy.crs as ccrs
-            # add transform for GeoAxes
-            scalar_kwargs["transform"] = ccrs.PlateCarree()
-            quiver_kwargs["transform"] = ccrs.PlateCarree()
-            x, y, u, v, s, theta = self.get_uv_geographical()
-        else:
-            # mode is camera
-            x, y, u, v, s = self.get_uv_camera()
-            theta = 0.
-        # prepare an axis for the provided mode
-        ax = plot_orc.prepare_axes(ax=ax, mode=mode)
-        f = ax.figure  # handle to figure
-        if quiver:
-            vmin = None
-            vmax = None
-            if "vmin" in quiver_kwargs:
-                vmin = quiver_kwargs["vmin"]
-                del quiver_kwargs["vmin"]
-            if "vmax" in quiver_kwargs:
-                vmax = quiver_kwargs["vmax"]
-                del quiver_kwargs["vmax"]
-
-            if scalar:
-                p = plot_orc.quiver(
-                    ax,
-                    self._obj[x].values,
-                    self._obj[y].values,
-                    *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-                    None,
-                    **quiver_kwargs
-                )
-            else:
-                norm = Normalize(vmin=vmin, vmax=vmax, clip=False)
-                p = plot_orc.quiver(
-                    ax,
-                    self._obj[x].values,
-                    self._obj[y].values,
-                    *[v.values for v in helpers.rotate_u_v(u, v, theta)],
-                    s,
-                    norm=norm,
-                    **quiver_kwargs
-                )
-        if scalar:
-            # plot the scalar velocity value as grid, return mappable
-            p = ax.pcolormesh(s[x], s[y], s, zorder=2, **scalar_kwargs)
-        if mode == "geographical":
-            ax.set_extent(
-                [self._obj[x].min() - 0.0001, self._obj[x].max() + 0.0001, self._obj[y].min() - 0.0001, self._obj[y].max() + 0.0001],
-                crs=ccrs.PlateCarree())
-        # else:
-        #     ax.axis('equal')
-        if cbar:
-            cb = plot_orc.cbar(ax, p, size=cbar_fontsize)
-        return ax
-
-    def replace_outliers(self, v_x="v_x", v_y="v_y", stride=1, max_iter=1, inplace=False):
-        """
-        Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples
+    def replace_outliers(self, v_x="v_x", v_y="v_y", wdw=1, max_iter=1, inplace=False):
+        """Replace missing values using neighbourhood operators. Use this with caution as it creates data. If many samples
         in time are available to derive a mean or median velocity from, consider using a reducer on those samples
         instead of a spatial infilling method such as suggested here.
 
-        :param self: xarray Dataset, containing velocity vectors as [time, y, x]
-        :param v_x: str, name of x-directional velocity
-        :param v_y: str, name of y-directional velocity
-        :param stride: int, stride used to determine relevant neighbours
-        :param max_iter: number of iterations for replacement
-        :return: xr.Dataset, containing filtered velocities
+        Parameters
+        ----------
+        v_x : str, optional
+            name of x-directional velocity (default: "v_x")
+        v_y : str, optional
+            name of y-directional velocity (default: "v_y")
+        wdw : int, optional
+            window size used to determine relevant neighbours (default: 1), 1 means a 3x3 window (1 neighbour)
+        max_iter : int, optional
+            number of iterations for replacement (default: 1)
+        inplace : boolean, optional
+            replace values instead of returning new xr.Dataset (default: False)
+
+        Returns
+        -------
+        ds_replaced : xr.Dataset
+            velocities with replacements [time, x, y]
+
         """
         # TO-DO: make replacement decision dependent on amount of non-NaN values in neighbourhood
         u, v = self._obj[v_x].values, self._obj[v_y].values
         for n in range(max_iter):
-            u_move = helpers.neighbour_stack(u, stride=stride)
-            v_move = helpers.neighbour_stack(v, stride=stride)
+            u_move = helpers.neighbour_stack(u, stride=wdw)
+            v_move = helpers.neighbour_stack(v, stride=wdw)
             # compute mean
             u_mean = np.nanmean(u_move, axis=0)
             v_mean = np.nanmean(v_move, axis=0)
             u[np.isnan(u)] = u_mean[np.isnan(u)]
             v[np.isnan(v)] = v_mean[np.isnan(v)]
             # all values with stride distance from edge have to be made NaN
-            u[0:stride, :] = np.nan;
-            u[-stride:, :] = np.nan;
-            u[:, 0:stride] = np.nan;
-            u[:, -stride:] = np.nan
-            v[0:stride, :] = np.nan;
-            v[-stride:, :] = np.nan;
-            v[:, 0:stride] = np.nan;
-            v[:, -stride:] = np.nan
+            u[0:wdw, :] = np.nan;
+            u[-wdw:, :] = np.nan;
+            u[:, 0:wdw] = np.nan;
+            u[:, -wdw:] = np.nan
+            v[0:wdw, :] = np.nan;
+            v[-wdw:, :] = np.nan;
+            v[:, 0:wdw] = np.nan;
+            v[:, -wdw:] = np.nan
         if inplace:
             self._obj[v_x][:] = u
             self._obj[v_y][:] = v
@@ -620,6 +622,19 @@ class Velocimetry(ORCBase):
             ds[v_y][:] = v
             return ds
 
-    def set_encoding(self):
+    def set_encoding(self, enc_pars=const.ENCODING_PARAMS):
+        """Set encoding parameters for all typical variables in a velocimetry dataset. This reduces the required storage
+        for this dataset significantly, when stored to disk in e.g. a netcdf file using ``xarray.Dataset.to_netcdf``.
+
+        Parameters
+        ----------
+        enc_pars : dict of dicts, optional
+            per variable, a dict containing encoding parameters. When called without input, a standard set of encoding
+            parameters is used that compresses well. (Default value = const.ENCODING_PARAMS)
+
+        Returns
+        -------
+
+        """
         for k in const.ENCODE_VARS:
-            self._obj[k].encoding = const.ENCODING_PARAMS
+            self._obj[k].encoding = enc_pars

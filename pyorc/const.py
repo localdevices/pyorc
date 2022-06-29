@@ -64,9 +64,14 @@ PERSPECTIVE_ATTRS = {
 
 # typical arguments used for making an animation writer.
 VIDEO_ARGS = {
-    "fps": 25,
+    "fps": 10,
     "extra_args": ["-vcodec", "libx264"],
     "dpi": 120,
+}
+
+ANIM_ARGS = {
+    "interval": 20,
+    "blit": False
 }
 
 ENCODING_PARAMS = {
@@ -78,3 +83,8 @@ ENCODING_PARAMS = {
 
 ENCODE_VARS = ["v_x", "v_y", "corr", "s2n"]
 ENCODING = {k: ENCODING_PARAMS for k in ENCODE_VARS}
+
+FIGURE_ARGS = {
+    "figsize": (16, 9),
+    "frameon": False,
+}

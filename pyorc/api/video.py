@@ -1,5 +1,4 @@
 import copy
-
 import cv2
 import dask
 import dask.array as da
@@ -24,7 +23,7 @@ end frame: {:d}
 Camera configuration: {:s}
         """.format
 
-        return template(self.fn, self.fps, self.start_frame, self.end_frame, self.camera_config.__repr__())
+        return template(self.fn, self.fps, self.start_frame, self.end_frame, self.camera_config.__repr__() if hasattr(self, "camera_config") else "none")
 
     def __init__(
             self,
@@ -53,8 +52,19 @@ Camera configuration: {:s}
         :param args: list or tuple, arguments to pass to cv2.VideoCapture on initialization.
         :param kwargs: dict, keyword arguments to pass to cv2.VideoCapture on initialization.
         """
-        assert(isinstance(start_frame, int)), 'start_frame must be of type "int"'
-        assert(isinstance(end_frame, int)), 'end_frame must be of type "int"'
+        assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
+        assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
+        if camera_config is not None:
+            # check if h_a is supplied, if so, then also z_0 and h_ref must be available
+            if h_a is not None:
+                assert(isinstance(camera_config.gcps["z_0"], float)),\
+                    "h_a was supplied, but camera config's gcps do not contain z_0, this is needed for dynamic " \
+                    "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
+                    "configuration. "
+                assert (isinstance(camera_config.gcps["h_ref"], float)),\
+                    "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
+                    "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
+                    "configuration. "
         super().__init__(*args, **kwargs)
         # explicitly open file for reading
         self.open(fn)
@@ -63,11 +73,15 @@ Camera configuration: {:s}
         if start_frame is not None:
             if (start_frame > self.frame_count and self.frame_count > 0):
                 raise ValueError("Start frame is larger than total amount of frames")
+        else:
+            start_frame = 0
         if end_frame is not None:
             if end_frame < start_frame:
                 raise ValueError(
                     f"Start frame {start_frame} is larger than end frame {end_frame}"
                 )
+        else:
+            end_frame = self.frame_count
         self.end_frame = end_frame
         self.start_frame = start_frame
         self.fps = self.get(cv2.CAP_PROP_FPS)
@@ -186,17 +200,20 @@ Camera configuration: {:s}
     def corners(self, corners):
         self._corners = corners
 
-    def get_frame(self, n, grayscale=True, lens_corr=False):
+    def get_frame(self, n, method="grayscale", lens_corr=False):
         """
         Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
 
         :param n: int, frame number to retrieve
-        :param grayscale: bool, optional, if set to `True`, frame will be grayscaled (default: True)
+        :param method: str, can be "rgb", "grayscale", or "hsv", default: "grayscale"
         :param lens_corr: bool, optional, if set to True, lens parameters will be used to undistort image
         :return: np.ndarray containing frame
         """
+        assert(n >= 0), "frame number cannot be negative"
+        assert(n <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
+        assert(method in ["grayscale", "rgb", "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
         cap = cv2.VideoCapture(self.fn)
-        cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
         try:
             ret, img = cap.read()
         except:
@@ -206,13 +223,15 @@ Camera configuration: {:s}
                 if self.camera_config.lens_pars is not None:
                     # apply lens distortion correction
                     img = cv.undistort_img(img, **self.camera_config.lens_pars)
-            if grayscale:
+            if method == "grayscale":
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
                 img = img.mean(axis=2)
-            else:
+            elif method == "rgb":
                 # turn bgr to rgb for plotting purposes
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            elif method == "hsv":
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         self.frame_count = n + 1
         cap.release()
         return img
@@ -235,7 +254,7 @@ Camera configuration: {:s}
             # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs
             if hasattr(self.camera_config, "lens_pars"):
                 kwargs["lens_corr"] = True
-        frames = [get_frame(n=n, **kwargs) for n in range(self.start_frame, self.end_frame)]
+        frames = [get_frame(n=n, **kwargs) for n in range(self.end_frame - self.start_frame)]
         sample = frames[0].compute()
         data_array = [da.from_delayed(
             frame,
@@ -287,7 +306,7 @@ Camera configuration: {:s}
         if len(sample.shape) == 3:
             del coords["rgb"]
         # add coordinate grids (i.e. without time)
-        frames = frames.frames.add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
+        frames = frames.frames._add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
         frames.name = "frames"
         return frames
 
