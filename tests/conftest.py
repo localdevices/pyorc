@@ -1,5 +1,6 @@
 import os
 import pytest
+
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -109,7 +110,10 @@ def vid():
         start_frame=0,
         end_frame=2,
     )
-    return vid
+    yield vid
+    # vid.release()
+    # del vid
+    # return
 
 @pytest.fixture
 def vid_cam_config(cam_config):
@@ -120,5 +124,22 @@ def vid_cam_config(cam_config):
         camera_config=cam_config,
         h_a=0.
     )
-    return vid
+    yield vid
+    # vid.release()
+    # del vid
+    # return
+
+
+@pytest.fixture
+def frames_grayscale(vid_cam_config):
+    return vid_cam_config.get_frames()
+
+
+@pytest.fixture
+def frames_rgb(vid_cam_config):
+    return vid_cam_config.get_frames(method="rgb")
+
+@pytest.fixture
+def frames_proj(frames_grayscale):
+    return frames_grayscale.frames.project()
 

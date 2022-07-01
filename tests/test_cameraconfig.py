@@ -80,7 +80,6 @@ def test_lens_position(cam_config, lens_position):
     assert(cam_config.lens_position==lens_position)
     x, y, z = lens_position
     x, y = helpers.xy_transform(x, y, cam_config.crs, 4326)
-    print(x, y)
     cam_config.set_lens_position(x, y, z, crs=4326)
     assert(np.allclose(cam_config.lens_position, lens_position))
 
@@ -92,15 +91,17 @@ def test_to_dict(cam_config, cam_config_dict):
 
 def test_to_file(tmpdir, cam_config, cam_config_str):
     fn = os.path.join(tmpdir, "cam_config.json")
-    print(f"Writing to {fn}")
     cam_config.to_file(fn)
     with open(fn, "r") as f:
         data = f.read()
         assert(data==cam_config_str)
 
 
-def test_load_camera_config(cam_config_fn, cam_config):
+def test_load_camera_config(cam_config_fn, cam_config, lens_position):
     cam_config2 = pyorc.load_camera_config(cam_config_fn)
+    # cam_config does not have lens position
+    cam_config2.set_lens_position(*lens_position)
+    cam_config2.set_lens_position(*lens_position)
     # only h_ref was different in the .json file, adapt this and then compare
     cam_config2.gcps["h_ref"] = 0.
     assert(cam_config2.gcps == cam_config.gcps)
