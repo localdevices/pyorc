@@ -13,7 +13,7 @@ from .. import cv, const
 from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
 
 
-class Video(cv2.VideoCapture):
+class Video:  #(cv2.VideoCapture)
     def __repr__(self):
         template = """
 Filename: {:s}
@@ -36,10 +36,9 @@ Camera configuration: {:s}
             **kwargs
     ):
         """
-        Video class, strongly inherited from cv2.VideoCapture. This class extends cv2.VideoCapture by adding a
-        camera configuration to it, and a start and end frame to read from the video. Several methods are added to
-        read frames into memory or into a xr.DataArray with attributes. These can then be processed with other pyorc
-        API functionalities.
+        Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
+        frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
+        These can then be processed with other pyorc API functionalities.
 
         :param fn: str, locally stored video file
         :param camera_config: CameraConfig object, containing all information about the camera, lens parameters, lens
@@ -65,11 +64,12 @@ Camera configuration: {:s}
                     "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
                     "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
-        super().__init__(*args, **kwargs)
+        # super().__init__(*args, **kwargs)
+        cap = cv2.VideoCapture(fn)
         # explicitly open file for reading
-        self.open(fn)
+        # self.open(fn)
         # set end and start frame
-        self.frame_count = int(self.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if start_frame is not None:
             if (start_frame > self.frame_count and self.frame_count > 0):
                 raise ValueError("Start frame is larger than total amount of frames")
@@ -84,7 +84,7 @@ Camera configuration: {:s}
             end_frame = self.frame_count
         self.end_frame = end_frame
         self.start_frame = start_frame
-        self.fps = self.get(cv2.CAP_PROP_FPS)
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
         # set other properties
         # if h_a is not None:
@@ -94,6 +94,10 @@ Camera configuration: {:s}
             self.camera_config = camera_config
         self.fn = fn
         self._stills = {}  # here all stills are stored lazily
+        # nothing to be done at this stage, release file for now.
+        # self.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        cap.release()
+        del cap
 
     @property
     def camera_config(self):
@@ -226,13 +230,14 @@ Camera configuration: {:s}
             if method == "grayscale":
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
-                img = img.mean(axis=2)
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #  mean(axis=2)
             elif method == "rgb":
                 # turn bgr to rgb for plotting purposes
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             elif method == "hsv":
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         self.frame_count = n + 1
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         cap.release()
         return img
 

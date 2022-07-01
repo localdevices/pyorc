@@ -211,6 +211,7 @@ class Frames(ORCBase):
         frames_proj = frames_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         # in case resolution was changed, overrule the camera_config attribute
         frames_proj.attrs.update(camera_config = camera_config.to_json())
+        frames_proj.name = "frames"
         return frames_proj
 
 
@@ -300,44 +301,22 @@ class Frames(ORCBase):
             filtered frames (i.e. difference between first and second gaussian convolution)
 
         """
-        def convert_edge(img, stride_1, stride_2):
-            """
-            internal function, see main method
-            """
-            if not(isinstance(img, np.ndarray)):
-                img = img.values
-            # load values here
-            blur1 = cv2.GaussianBlur(img.astype("float32"), (stride_1, stride_1), 0)
-            blur2 = cv2.GaussianBlur(img.astype("float32"), (stride_2, stride_2), 0)
-            edges = blur2 - blur1
-            return edges
 
-        shape = self._obj[0].shape  # single-frame shape does not change
-        da_convert_edge = dask.delayed(convert_edge)
+        # shape = self._obj[0].shape  # single-frame shape does not change
+        # da_convert_edge = dask.delayed(cv._convert_edge)
         stride_1 = wdw_1 * 2 + 1
         stride_2 = wdw_2 * 2 + 1
-        imgs = [da_convert_edge(frame.values, stride_1, stride_2) for frame in self._obj]
-        # prepare axes
-        # Setup coordinates
-        coords = {
-            "time": self._obj.time,
-            "y": self._obj.y,
-            "x": self._obj.x
-        }
-        # add a coordinate if RGB frames are used
-        frames_edge = helpers.delayed_to_da(
-            imgs,
-            shape,
-            "float32",
-            coords=coords,
-            attrs=self._obj.attrs,
-            name="edges",
-            object_type=xr.DataArray
+        return xr.apply_ufunc(
+            cv._convert_edge,
+            self._obj, stride_1, stride_2,
+            input_core_dims=[["y", "x"], [], []],
+            output_core_dims=[["y", "x"]],
+            vectorize=True,
+            #     exclude_dims=set(("y",)),
+            #         kwargs={"stride_1": 5, "stride_2": 9},
+            dask="parallelized",
+            keep_attrs=True
         )
-        if "xp" in self._obj.coords:
-            frames_edge["xp"] = self._obj["xp"]
-            frames_edge["yp"] = self._obj["yp"]
-        return frames_edge
 
 
     def reduce_rolling(self, samples=25):

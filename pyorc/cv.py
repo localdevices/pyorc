@@ -5,6 +5,16 @@ from shapely.geometry import Polygon, LineString
 from shapely.affinity import rotate
 
 
+def _convert_edge(img, stride_1, stride_2):
+    """
+    internal function to do emphasize gradients with a band filter method, see main method
+    """
+    blur1 = cv2.GaussianBlur(img.astype("float32"), (stride_1, stride_1), 0)
+    blur2 = cv2.GaussianBlur(img.astype("float32"), (stride_2, stride_2), 0)
+    edges = blur2 - blur1
+    return edges
+
+
 def _corr_color(img, alpha=None, beta=None, gamma=0.5):
     """
     Grey scaling, contrast- and gamma correction. Both alpha and beta need to be
