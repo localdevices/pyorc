@@ -21,6 +21,7 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-benchmark
+  - pytest-lazy-fixture
   - pyproj
   - python
   - rasterio
