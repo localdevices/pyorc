@@ -1,0 +1,35 @@
+name: pyorc-dev
+
+channels:
+  - conda-forge
+
+# note that these are the developer dependencies,
+# if you only want the user dependencies, see
+# install_requires in setup.py
+dependencies:
+  - cartopy
+  - descartes
+  - geojson
+  - geopandas
+  - geos
+  - jupyter
+  - matplotlib
+  - netCDF4
+  - numpy
+  - opencv
+  - pip
+  - pytest
+  - pytest-cov
+  - pytest-benchmark
+  - pyproj
+  - python
+  - rasterio
+  - requests
+  - scikit-image
+  - scipy
+  - shapely
+  - tqdm
+  - xarray
+  - pip:
+    - openpiv
+
