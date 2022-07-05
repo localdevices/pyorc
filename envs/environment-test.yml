@@ -1,4 +1,4 @@
-name: pyorc-dev
+name: pyorc-test
 
 channels:
   - conda-forge
