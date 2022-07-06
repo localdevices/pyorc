@@ -1,9 +1,6 @@
 import os
 import pytest
-
-import numpy as np
 import pandas as pd
-import xarray as xr
 
 import pyorc
 EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples", "ngwerere")
@@ -145,3 +142,21 @@ def frames_proj(frames_grayscale):
 def ani_mp4():
     yield "temp.mp4"
     os.remove("temp.mp4")
+
+
+@pytest.fixture
+def piv(frames_proj):
+    # provide a short piv object
+    return frames_proj.frames.get_piv()
+
+
+@pytest.fixture
+def cross_section(frames_proj):
+    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere_cross_section.csv")
+    cross_section = pd.read_csv(fn)
+    x = cross_section["x"]
+    y = cross_section["y"]
+    z = cross_section["z"]
+    # provide a short piv object
+    return x, y, z
+
