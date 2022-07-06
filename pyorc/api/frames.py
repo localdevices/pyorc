@@ -149,25 +149,20 @@ class Frames(ORCBase):
              projected frames and x and y in local coordinate system (origin: top-left), lat and lon if a crs was
              provided.
         """
-        # retrieve the M and shape from camera config with said h_a
         camera_config = copy.deepcopy(self.camera_config)
         if resolution is not None:
             camera_config.resolution = resolution
         M = camera_config.get_M(self.h_a)
         shape = camera_config.shape
-        # get orthoprojected frames as delayed objects
-        get_ortho = dask.delayed(cv.get_ortho)
-        imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in self._obj]
-        # prepare axes
-        time = self._obj.time
+        # prepare all coordinates
         y = np.flipud(np.linspace(
-            camera_config.resolution/2,
-            camera_config.resolution*(shape[0]-0.5),
+            camera_config.resolution / 2,
+            camera_config.resolution * (shape[0] - 0.5),
             shape[0])
         )
         x = np.linspace(
-            camera_config.resolution/2,
-            camera_config.resolution*(shape[1]-0.5), shape[1]
+            camera_config.resolution / 2,
+            camera_config.resolution * (shape[1] - 0.5), shape[1]
         )
         cols, rows = np.meshgrid(
             np.arange(len(x)),
@@ -184,36 +179,42 @@ class Frames(ORCBase):
         else:
             lons = None
             lats = None
-        # Setup coordinates
         coords = {
-            "time": time,
             "y": y,
-            "x": x
+            "x": x,
         }
-        # add a coordinate if RGB frames are used
-        if "rgb" in self._obj.coords:
-            coords["rgb"] = np.array([0, 1, 2])
-            shape = (*shape, 3)
-        # prepare a dask data array
-        frames_proj = helpers.delayed_to_da(
-            imgs,
-            shape,
-            "uint8",
-            coords=coords,
-            attrs=self._obj.attrs,
-            object_type=xr.DataArray
-        )
-        # remove time coordinate for the spatial variables (and rgb in case rgb frames are used)
-        del coords["time"]
-        if "rgb" in self._obj.coords:
-            del coords["rgb"]
-        # add coordinate meshes to projected frames and return
-        frames_proj = frames_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
-        # in case resolution was changed, overrule the camera_config attribute
-        frames_proj.attrs.update(camera_config = camera_config.to_json())
-        frames_proj.name = "frames"
-        return frames_proj
-
+        f = xr.apply_ufunc(
+            cv.get_ortho, self._obj,
+            kwargs={
+                "M": M,
+                "shape": tuple(np.flipud(shape)),
+                "flags": cv2.INTER_AREA
+            },
+            input_core_dims=[["y", "x"]],
+            output_core_dims=[["new_y", "new_x"]],
+            dask_gufunc_kwargs={
+                "output_sizes": {
+                    "new_y": len(y),
+                    "new_x": len(x)
+                },
+            },
+            output_dtypes=[self._obj.dtype],
+            vectorize=True,
+            exclude_dims=set(("y", "x")),
+            dask="parallelized",
+            keep_attrs=True
+        ).rename({
+            "new_y": "y",
+            "new_x": "x"
+        })
+        f["y"] = y
+        f["x"] = x
+        # assign coordinates
+        f = f.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        if "rgb" in f.dims and len(f.dims) == 4:
+            # ensure that "rgb" is the last dimension
+            f = f.transpose("time", "y", "x", "rgb")
+        return f
 
     def landmask(self, dilate_iter=10, samples=15):
         """Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much
