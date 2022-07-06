@@ -61,7 +61,7 @@ def piv(
     v_x, v_y, s2n = openpiv.pyprocess.extended_search_area_piv(
         frame_a, frame_b, search_area_size=search_area_size, overlap=overlap, window_size=window_size, **kwargs
     )
-    cols, rows = openpiv.pyprocess.get_coordinates(
+    cols, rows = get_piv_size(
         image_size=frame_a.shape, search_area_size=search_area_size, overlap=overlap
     )
 
@@ -77,6 +77,10 @@ def piv(
         corr = np.zeros(s2n.shape)
         corr[:] = np.nan
     return cols, rows, v_x * res_x, v_y * res_y, s2n, corr
+
+
+def get_piv_size(**kwargs):
+    return openpiv.pyprocess.get_coordinates(**kwargs)
 
 
 def piv_corr(
