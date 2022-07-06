@@ -125,9 +125,6 @@ def vid_cam_config(cam_config):
         h_a=0.
     )
     yield vid
-    # vid.release()
-    # del vid
-    # return
 
 
 @pytest.fixture
@@ -143,3 +140,8 @@ def frames_rgb(vid_cam_config):
 def frames_proj(frames_grayscale):
     return frames_grayscale.frames.project()
 
+
+@pytest.fixture
+def ani_mp4():
+    yield "temp.mp4"
+    os.remove("temp.mp4")

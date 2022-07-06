@@ -53,7 +53,6 @@ def test_reduce_rolling(frames_grayscale, samples=1):
     [
         pytest.lazy_fixture("frames_grayscale"),
         pytest.lazy_fixture("frames_rgb"),
-        pytest.lazy_fixture("frames_proj"),
     ]
 )
 @pytest.mark.parametrize(
@@ -61,5 +60,41 @@ def test_reduce_rolling(frames_grayscale, samples=1):
     [0, -1]
 )
 def test_plot(frames, idx):
-    frames[idx].plot()
+    frames[idx].frames.plot()
+    frames[idx].frames.plot(mode="camera")
 
+
+@pytest.mark.parametrize(
+    "idx",
+    [0, -1]
+)
+def test_plot_proj(frames_proj, idx):
+    frames_proj[idx].frames.plot()
+    frames_proj[idx].frames.plot(mode="geographical")
+
+
+@pytest.mark.parametrize(
+    "window_size, result",
+    [
+        (5, [ 0.1287729 , -0.01711009, -0.00664764, -0.01628049]),
+        (10, [ 0.05766379,  0.04514623,  0.00432828, -0.01051793]),
+        (15, [0.08111688, 0.26014498, 0.06920814, 0.02797562])
+    ]
+)
+def test_get_piv(frames_proj, window_size, result):
+    piv = frames_proj.frames.get_piv(window_size=window_size)
+    piv_mean = piv.mean(dim="time", keep_attrs=True)
+    # check if results are stable
+    assert(np.allclose(piv_mean["v_x"].values.flatten()[-4:], result))
+
+
+@pytest.mark.parametrize(
+    "frames",
+    [
+        pytest.lazy_fixture("frames_grayscale"),
+        pytest.lazy_fixture("frames_rgb"),
+        pytest.lazy_fixture("frames_proj"),
+    ]
+)
+def test_to_ani(frames, ani_mp4):
+    frames.frames.to_ani(ani_mp4, progress_bar=False)
