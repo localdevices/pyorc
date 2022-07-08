@@ -151,12 +151,9 @@ def piv(frames_proj):
 
 
 @pytest.fixture
-def cross_section(frames_proj):
-    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere_cross_section.csv")
-    cross_section = pd.read_csv(fn)
-    x = cross_section["x"]
-    y = cross_section["y"]
-    z = cross_section["z"]
+def piv_transect(piv, cross_section):
+    x, y, z = cross_section["x"], cross_section["y"], cross_section["z"]
     # provide a short piv object
-    return x, y, z
+    return piv.velocimetry.get_transect(x, y, z)
+
 

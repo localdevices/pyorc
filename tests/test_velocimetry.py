@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def test_filter_temporal_angle(piv):
     # check if the method runs
@@ -61,7 +61,7 @@ def test_replace_outliers(piv):
     ]
 )
 def test_get_transect(piv, cross_section, distance, nr_points):
-    x, y, z = cross_section
+    x, y, z = cross_section["x"], cross_section["y"], cross_section["z"]
     ds_points = piv.velocimetry.get_transect(x, y, z, crs=32735, rolling=4, distance=distance)
     # check if the angle is computed correctly
     assert(np.isclose(ds_points["v_dir"][0].values, -4.61351806))
@@ -92,4 +92,7 @@ def test_plot(piv, mode, method):
             # skipping the test, because streamplot only works local
             plot = False
     if plot:
-        piv.mean(dim="time", keep_attrs=True).velocimetry.plot()
+        piv.mean(dim="time", keep_attrs=True).velocimetry.plot(method=method, mode=mode)
+    plt.close("all")
+
+

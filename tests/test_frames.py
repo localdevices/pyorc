@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 @pytest.mark.parametrize(
     "frames, resolution, dims, shape",
@@ -61,7 +61,7 @@ def test_reduce_rolling(frames_grayscale, samples=1):
 def test_plot(frames, idx):
     frames[idx].frames.plot()
     frames[idx].frames.plot(mode="camera")
-
+    plt.close("all")
 
 @pytest.mark.parametrize(
     "idx",
@@ -70,6 +70,7 @@ def test_plot(frames, idx):
 def test_plot_proj(frames_proj, idx):
     frames_proj[idx].frames.plot()
     frames_proj[idx].frames.plot(mode="geographical")
+    plt.close("all")
 
 
 @pytest.mark.parametrize(
