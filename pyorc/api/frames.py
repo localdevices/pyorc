@@ -223,6 +223,9 @@ class Frames(ORCBase):
         if "rgb" in f.dims and len(f.dims) == 4:
             # ensure that "rgb" is the last dimension
             f = f.transpose("time", "y", "x", "rgb")
+        # in case resolution was changed, overrule the camera_config attribute
+        f.attrs.update(camera_config=camera_config.to_json())
+
         return f
 
 
