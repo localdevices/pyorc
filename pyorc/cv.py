@@ -15,36 +15,6 @@ def _convert_edge(img, stride_1, stride_2):
     return edges
 
 
-def _corr_color(img, alpha=None, beta=None, gamma=0.5):
-    """
-    Grey scaling, contrast- and gamma correction. Both alpha and beta need to be
-    defined in order to apply contrast correction.
-
-    :param img: np.ndarray, 3D cv2 img object
-    :param alpha=None: float, gain parameter for contrast correction)
-    :param beta=None: float, bias parameter for contrast correction
-    :param gamma=0.5 float, brightness parameter for gamma correction (default: 0.5)
-    :return img: np.ndarray, 2D gray scale
-    """
-
-    # turn image into grey scale
-    corr_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-
-    if alpha and beta:
-        # apply contrast correction
-        corr_img = cv2.convertScaleAbs(corr_img, alpha=alpha, beta=beta)
-
-    # apply gamma correction
-    inv_gamma = 1.0 / gamma
-    table = np.array(
-        [((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]
-    ).astype("uint8")
-
-    corr_img = cv2.LUT(corr_img, table)
-
-    return corr_img
-
-
 def _get_dist_coefs(k1):
     """
     Establish distance coefficient matrix for use in cv2.undistort
@@ -77,7 +47,7 @@ def _get_cam_mtx(height, width, c=2.0, f=1.0):
     return mtx
 
 
-def get_shape(bbox, resolution=0.01, round=1):
+def _get_shape(bbox, resolution=0.01, round=1):
     """
     defines the number of rows and columns needed in a target raster, to fit a given bounding box.
 
@@ -94,7 +64,7 @@ def get_shape(bbox, resolution=0.01, round=1):
     return cols, rows
 
 
-def get_transform(bbox, resolution=0.01):
+def _get_transform(bbox, resolution=0.01):
     """Return a rotated Affine transformation that fits with the bounding box and resolution.
 
     Parameters
@@ -130,7 +100,7 @@ def get_transform(bbox, resolution=0.01):
     )
 
 
-def get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
+def _get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
     """Get the actual x, y locations of ground control points at the actual water level
 
     Parameters
@@ -215,7 +185,7 @@ def transform_to_bbox(coords, bbox, res):
     """
     # first assemble x and y coordinates
     xs, ys = zip(*coords)
-    transform = get_transform(bbox, res)
+    transform = _get_transform(bbox, res)
     rows, cols = rasterio.transform.rowcol(transform, xs, ys)
     return list(zip(cols, rows))
 

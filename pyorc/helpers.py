@@ -39,57 +39,6 @@ def affine_from_grid(xi, yi):
     return Affine(dx_col, dy_col, xul, dx_row, dy_row, yul)
 
 
-def delayed_to_da(delayed_das, shape, dtype, coords, attrs={}, name=None, object_type=xr.DataArray):
-    """Convert a list of delayed 2D arrays (assumed to be time steps of grids) into a 3D xr.DataArray with dask arrays
-    with all axes.
-
-    Parameters
-    ----------
-    delayed_das: xr.DataArray or list
-    shape: tuple
-        foreseen shape of data arrays (rows, cols)
-    dtype: str or dtype
-        e.g. "uint8" of data arrays
-    coords: tuple of str
-        dimensions of the xr.DataArray being prepared, usually ("time", "y", "x").
-    attrs: dict, optional
-        attributes for xr.DataArray (default: {})
-    name: str, optional
-        name of variable, default: None
-    object_type: type
-        type of object to create from lazy array (default: xr.DataArray)
-
-    Returns
-    -------
-    object of object_type
-        default: xr.DataArray
-    """
-    if isinstance(delayed_das, list):
-        data_array = da.stack(
-            [da.from_delayed(
-                d,
-                dtype=dtype,
-                shape=shape
-            ) for d in delayed_das],
-            axis=0
-        )
-    else:
-        data_array = da.from_delayed(
-            delayed_das,
-            dtype=dtype,
-            shape=shape
-        )
-    for n, (coord, values) in enumerate(coords.items()):
-        assert(len(values) == data_array.shape[n]), f"Length of {coord} axis {len(values)} is not equal to amount of data arrays {data_array.shape[n]}"
-    return object_type(
-        data_array,
-        dims=tuple(coords.keys()),
-        coords=coords,
-        attrs=attrs,
-        name=name
-    )
-
-
 def depth_integrate(depth, v, v_corr=0.85, name="q"):
     """Integrate velocities [m s-1] to depth-integrated velocity [m2 s-1] using depth information
 
@@ -119,27 +68,6 @@ def depth_integrate(depth, v, v_corr=0.85, name="q"):
     # set name
     q.name = name
     return q
-
-
-def distance_pts(c1, c2):
-    """Compute distance between c1 and c2
-
-    Parameters
-    ----------
-
-    c1 : tuple
-        (x, y), coordinate 1
-    c2: tuple
-        (x, y), coordinate 2
-
-    Returns
-    -------
-    dist : float
-        distance between c1 and c2
-    """
-    x1, y1 = c1
-    x2, y2 = c2
-    return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
 def deserialize_attr(data_array, attr, dtype=np.array, args_parse=False):
@@ -334,6 +262,7 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     obj : np.array (3D)
         stack of 2-D arrays, with strided neighbours (length 1st dim : (stride*2+1)**2 )
     """
+    array = copy.deepcopy(array)
     array[np.isnan(array)] = missing
     array_move = []
     for vert in range(-stride, stride+1):
@@ -605,5 +534,8 @@ def xy_transform(x, y, crs_from, crs_to):
     # transform dst coordinates to local projection
     x_trans, y_trans = transform.transform(x, y)
     if np.all(np.isinf(x_trans)):
-        raise ValueError("Transformation did not give valid results, please check if the provided crs of input coordinates is correct.")
+        raise ValueError(
+            "Transformation did not give valid results, please check if the provided crs of input "
+            "coordinates is correct."
+        )
     return transform.transform(x, y)

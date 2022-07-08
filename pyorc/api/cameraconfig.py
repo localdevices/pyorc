@@ -109,7 +109,7 @@ class CameraConfig:
         cols : int
             Amount of columns in projected frame
         """
-        cols, rows = cv.get_shape(
+        cols, rows = cv._get_shape(
             shapely.wkt.loads(self.bbox),
             resolution=self.resolution,
             round=10
@@ -127,7 +127,7 @@ class CameraConfig:
 
         """
         bbox = shapely.wkt.loads(self.bbox)
-        return cv.get_transform(bbox, resolution=self.resolution)
+        return cv._get_transform(bbox, resolution=self.resolution)
 
     def get_depth(self, z, h_a=None):
         """Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
@@ -200,7 +200,7 @@ class CameraConfig:
         else:
             h_ref = self.gcps["h_ref"]
             lens_position = self.lens_position
-            dst_a = cv.get_gcps_a(
+            dst_a = cv._get_gcps_a(
                 lens_position,
                 h_a,
                 self.gcps["dst"],
