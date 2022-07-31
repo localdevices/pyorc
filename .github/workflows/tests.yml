@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [ pytest ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
