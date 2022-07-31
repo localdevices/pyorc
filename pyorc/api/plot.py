@@ -100,6 +100,9 @@ def _base_plot(plot_func):
             x = ref._obj["x"].values
             y = ref._obj["y"].values
             u, v, s = ref.get_uv_local()
+            if not(is_transect) and plot_func.__name__ == "scatter":
+                x, y = np.meshgrid(x, y)
+
             if plot_func.__name__ == "streamplot":
                 # flipping of variables is needed
                 y = np.flipud(y)

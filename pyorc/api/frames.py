@@ -27,6 +27,7 @@ class Frames(ORCBase):
         """
         super(Frames, self).__init__(xarray_obj)
 
+
     def get_piv(self, **kwargs):
         """Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to
         trigger actual computation. The dataset returned contains velocity information for each interrogation window
@@ -45,42 +46,30 @@ class Frames(ORCBase):
 
         """
         camera_config = copy.deepcopy(self.camera_config)
+        dt = self._obj["time"].diff(dim="time")
+
+        # add a number of kwargs for the piv function
         if "window_size" in kwargs:
             camera_config.window_size = kwargs["window_size"]
-            del kwargs["window_size"]
-        # forward the computation to piv
-        dask_piv = dask.delayed(piv_process.piv, nout=6)
-        v_x, v_y, s2n, corr = [], [], [], []
-        frames_a = self._obj[0:-1]
-        frames_b = self._obj[1:]
-        for frame_a, frame_b in zip(frames_a, frames_b):
-            # select the time difference in seconds
-            dt = frame_b.time - frame_a.time
-            # perform lazy piv graph computation
-            cols, rows, _v_x, _v_y, _s2n, _corr = dask_piv(
-                frame_a,
-                frame_b,
-                res_x=camera_config.resolution,
-                res_y=camera_config.resolution,
-                dt=float(dt.values),
-                search_area_size=camera_config.window_size,
-                **kwargs,
-            )
-            # append to result
-            v_x.append(_v_x), v_y.append(_v_y), s2n.append(_s2n), corr.append(_corr)
-        # compute one sample for the spacing
-        cols, rows, _v_x, _v_y, _s2n, _corr = piv_process.piv(
-            frame_a,
-            frame_b,
-            res_x=camera_config.resolution,
-            res_y=camera_config.resolution,
-            dt=float(dt.values),
-            search_area_size=camera_config.window_size,
-            **kwargs,
+        kwargs["search_area_size"] = camera_config.window_size
+        kwargs["window_size"] = camera_config.window_size
+        kwargs["res_x"] = camera_config.resolution
+        kwargs["res_y"] = camera_config.resolution
+        # set an overlap if not provided in kwargs
+        if not("overlap" in kwargs):
+            kwargs["overlap"] = int(round(camera_config.window_size) / 2)
+        # first get rid of coordinates that need to be recalculated
+        coords_drop = list(set(self._obj.coords) - set(self._obj.dims))
+        obj = self._obj.drop(coords_drop)
+        # get frames and shifted frames in time
+        frames1 = obj.shift(time=1)[1:]
+        frames2 = obj[1:]
+        # get the cols and rows coordinates of the expected results
+        cols, rows = piv_process.get_piv_size(
+            image_size=frames1[0].shape,
+            search_area_size=kwargs["search_area_size"],
+            overlap=kwargs["overlap"]
         )
-        # extract global attributes from origin
-        global_attrs = self._obj.attrs
-        time = (self._obj.time[0:-1].values + self._obj.time[1:].values) / 2  # frame to frame differences
         # retrieve the x and y-axis belonging to the results
         x, y = helpers.get_axes(cols, rows, self.camera_config.resolution)
         # convert in projected and latlon coordinates
@@ -94,6 +83,7 @@ class Frames(ORCBase):
         else:
             lons = None
             lats = None
+
         M = camera_config.get_M(self.h_a, reverse=True)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
@@ -101,30 +91,49 @@ class Frames(ORCBase):
         shape_y, shape_x = self.camera_shape
         yp = shape_y - yp
         coords = {
-            "time": time,
             "y": y,
             "x": x
         }
-        # establish the full xr.Dataset
-        v_x, v_y, s2n, corr = [
-            helpers.delayed_to_da(
-                data,
-                (len(y), len(x)),
-                np.float32,
-                coords=coords,
-                attrs=attrs,
-                name=name
-            ) for data, (name, attrs) in zip((v_x, v_y, s2n, corr), const.PIV_ATTRS.items())]
-        ds = xr.merge([v_x, v_y, s2n, corr])
-        del coords["time"]
-        # prepare the xs, ys, lons and lats grids for geographical projections and add to xr.Dataset
+        # retrieve all data arrays
+        v_x, v_y, s2n, corr = xr.apply_ufunc(
+            piv_process.piv,
+            frames1,
+            frames2,
+            dt,
+            kwargs=kwargs,
+            input_core_dims=[["y", "x"], ["y", "x"], []],
+            output_core_dims=[["new_y", "new_x"]] * 4,
+            dask_gufunc_kwargs={
+                "output_sizes": {
+                    "new_y": len(y),
+                    "new_x": len(x)
+                },
+            },
+            output_dtypes=[np.float32] * 4,
+            vectorize=True,
+            keep_attrs=True,
+            dask="parallelized",
+        )
+        # merge all DataArrays in one Dataset
+        ds = xr.merge([
+            v_x.rename("v_x"),
+            v_y.rename("v_y"),
+            s2n.rename("s2n"),
+            corr.rename("corr")
+        ]).rename({
+            "new_x": "x",
+            "new_y": "y"
+        })
+        # add y and x-axis values
+        ds["y"] = y
+        ds["x"] = x
+
+        # add all 2D-coordinates
         ds = ds.velocimetry._add_xy_coords(
             [xp, yp, xs, ys, lons, lats],
             coords,
             {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
         )
-        # add piv object functionality and attrs to dataset and return
-        ds = xr.Dataset(ds, attrs=global_attrs)
         # in case window_size was changed, overrule the camera_config attribute
         ds.attrs.update(camera_config=camera_config.to_json())
         # set encoding
@@ -149,25 +158,20 @@ class Frames(ORCBase):
              projected frames and x and y in local coordinate system (origin: top-left), lat and lon if a crs was
              provided.
         """
-        # retrieve the M and shape from camera config with said h_a
         camera_config = copy.deepcopy(self.camera_config)
         if resolution is not None:
             camera_config.resolution = resolution
         M = camera_config.get_M(self.h_a)
         shape = camera_config.shape
-        # get orthoprojected frames as delayed objects
-        get_ortho = dask.delayed(cv.get_ortho)
-        imgs = [get_ortho(frame, M, tuple(np.flipud(shape)), flags=cv2.INTER_AREA) for frame in self._obj]
-        # prepare axes
-        time = self._obj.time
+        # prepare all coordinates
         y = np.flipud(np.linspace(
-            camera_config.resolution/2,
-            camera_config.resolution*(shape[0]-0.5),
+            camera_config.resolution / 2,
+            camera_config.resolution * (shape[0] - 0.5),
             shape[0])
         )
         x = np.linspace(
-            camera_config.resolution/2,
-            camera_config.resolution*(shape[1]-0.5), shape[1]
+            camera_config.resolution / 2,
+            camera_config.resolution * (shape[1] - 0.5), shape[1]
         )
         cols, rows = np.meshgrid(
             np.arange(len(x)),
@@ -184,34 +188,45 @@ class Frames(ORCBase):
         else:
             lons = None
             lats = None
-        # Setup coordinates
         coords = {
-            "time": time,
             "y": y,
-            "x": x
+            "x": x,
         }
-        # add a coordinate if RGB frames are used
-        if "rgb" in self._obj.coords:
-            coords["rgb"] = np.array([0, 1, 2])
-            shape = (*shape, 3)
-        # prepare a dask data array
-        frames_proj = helpers.delayed_to_da(
-            imgs,
-            shape,
-            "uint8",
-            coords=coords,
-            attrs=self._obj.attrs,
-            object_type=xr.DataArray
-        )
-        # remove time coordinate for the spatial variables (and rgb in case rgb frames are used)
-        del coords["time"]
-        if "rgb" in self._obj.coords:
-            del coords["rgb"]
-        # add coordinate meshes to projected frames and return
-        frames_proj = frames_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        f = xr.apply_ufunc(
+            cv.get_ortho, self._obj,
+            kwargs={
+                "M": M,
+                "shape": tuple(np.flipud(shape)),
+                "flags": cv2.INTER_AREA
+            },
+            input_core_dims=[["y", "x"]],
+            output_core_dims=[["new_y", "new_x"]],
+            dask_gufunc_kwargs={
+                "output_sizes": {
+                    "new_y": len(y),
+                    "new_x": len(x)
+                },
+            },
+            output_dtypes=[self._obj.dtype],
+            vectorize=True,
+            exclude_dims=set(("y", "x")),
+            dask="parallelized",
+            keep_attrs=True
+        ).rename({
+            "new_y": "y",
+            "new_x": "x"
+        })
+        f["y"] = y
+        f["x"] = x
+        # assign coordinates
+        f = f.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        if "rgb" in f.dims and len(f.dims) == 4:
+            # ensure that "rgb" is the last dimension
+            f = f.transpose("time", "y", "x", "rgb")
         # in case resolution was changed, overrule the camera_config attribute
-        frames_proj.attrs.update(camera_config = camera_config.to_json())
-        return frames_proj
+        f.attrs.update(camera_config=camera_config.to_json())
+
+        return f
 
 
     def landmask(self, dilate_iter=10, samples=15):
@@ -300,44 +315,22 @@ class Frames(ORCBase):
             filtered frames (i.e. difference between first and second gaussian convolution)
 
         """
-        def convert_edge(img, stride_1, stride_2):
-            """
-            internal function, see main method
-            """
-            if not(isinstance(img, np.ndarray)):
-                img = img.values
-            # load values here
-            blur1 = cv2.GaussianBlur(img.astype("float32"), (stride_1, stride_1), 0)
-            blur2 = cv2.GaussianBlur(img.astype("float32"), (stride_2, stride_2), 0)
-            edges = blur2 - blur1
-            return edges
 
-        shape = self._obj[0].shape  # single-frame shape does not change
-        da_convert_edge = dask.delayed(convert_edge)
+        # shape = self._obj[0].shape  # single-frame shape does not change
+        # da_convert_edge = dask.delayed(cv._convert_edge)
         stride_1 = wdw_1 * 2 + 1
         stride_2 = wdw_2 * 2 + 1
-        imgs = [da_convert_edge(frame.values, stride_1, stride_2) for frame in self._obj]
-        # prepare axes
-        # Setup coordinates
-        coords = {
-            "time": self._obj.time,
-            "y": self._obj.y,
-            "x": self._obj.x
-        }
-        # add a coordinate if RGB frames are used
-        frames_edge = helpers.delayed_to_da(
-            imgs,
-            shape,
-            "float32",
-            coords=coords,
-            attrs=self._obj.attrs,
-            name="edges",
-            object_type=xr.DataArray
+        return xr.apply_ufunc(
+            cv._convert_edge,
+            self._obj, stride_1, stride_2,
+            input_core_dims=[["y", "x"], [], []],
+            output_core_dims=[["y", "x"]],
+            vectorize=True,
+            #     exclude_dims=set(("y",)),
+            #         kwargs={"stride_1": 5, "stride_2": 9},
+            dask="parallelized",
+            keep_attrs=True
         )
-        if "xp" in self._obj.coords:
-            frames_edge["xp"] = self._obj["xp"]
-            frames_edge["yp"] = self._obj["yp"]
-        return frames_edge
 
 
     def reduce_rolling(self, samples=25):
@@ -374,6 +367,7 @@ class Frames(ORCBase):
             figure_kwargs=const.FIGURE_ARGS,
             video_kwargs=const.VIDEO_ARGS,
             anim_kwargs=const.ANIM_ARGS,
+            progress_bar=True,
             **kwargs
     ):
         """Store an animation of the frames in the object
@@ -411,8 +405,12 @@ class Frames(ORCBase):
         ax = plt.subplot(111)
 
         im = ax.imshow(self._obj[0], **kwargs)
+        if progress_bar:
+            frames = tqdm(range(len(self._obj)))
+        else:
+            frames = range(len(self._obj))
         anim = FuncAnimation(
-            f, animate, init_func=init, frames=tqdm(range(len(self._obj))), **anim_kwargs
+            f, animate, init_func=init, frames=frames, **anim_kwargs
         )
         anim.save(fn, **video_kwargs)
 

@@ -5,7 +5,7 @@ import xarray as xr
 
 
 def piv(
-    frame_a, frame_b, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None, overlap=None,
+    frame_a, frame_b, dt, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None, overlap=None,
         **kwargs
 ):
     """PIV analysis following keyword arguments from openpiv. This function also computes the correlations per
@@ -59,11 +59,11 @@ def piv(
     window_size = search_area_size if window_size is None else window_size
     overlap = int(round(window_size)/2) if overlap is None else overlap
     v_x, v_y, s2n = openpiv.pyprocess.extended_search_area_piv(
-        frame_a, frame_b, search_area_size=search_area_size, overlap=overlap, window_size=window_size, **kwargs
+        frame_a, frame_b, dt=dt, search_area_size=search_area_size, overlap=overlap, window_size=window_size, **kwargs
     )
-    cols, rows = openpiv.pyprocess.get_coordinates(
-        image_size=frame_a.shape, search_area_size=search_area_size, overlap=overlap
-    )
+    # cols, rows = get_piv_size(
+    #     image_size=frame_a.shape, search_area_size=search_area_size, overlap=overlap
+    # )
 
     if correlation:
         corr = piv_corr(
@@ -76,7 +76,11 @@ def piv(
     else:
         corr = np.zeros(s2n.shape)
         corr[:] = np.nan
-    return cols, rows, v_x * res_x, v_y * res_y, s2n, corr
+    return v_x * res_x, v_y * res_y, s2n, corr
+
+
+def get_piv_size(**kwargs):
+    return openpiv.pyprocess.get_coordinates(**kwargs)
 
 
 def piv_corr(

@@ -595,7 +595,7 @@ class Velocimetry(ORCBase):
 
         """
         # TO-DO: make replacement decision dependent on amount of non-NaN values in neighbourhood
-        u, v = self._obj[v_x].values, self._obj[v_y].values
+        u, v = copy.deepcopy(self._obj[v_x].values), copy.deepcopy(self._obj[v_y].values)
         for n in range(max_iter):
             u_move = helpers.neighbour_stack(u, stride=wdw)
             v_move = helpers.neighbour_stack(v, stride=wdw)
