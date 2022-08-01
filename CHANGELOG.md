@@ -1,3 +1,29 @@
+## [0.2.2] - 2022-08-01
+### Added
+- pytest
+
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- small improvements and bug fixes
+
+### Security
+
+## [0.2.1] - 2022-06-22
+### Added
+- Documentation
+
+### Changed
+- docstrings (numpy format, and completed)
+
+### Deprecated
+### Removed
+### Fixed
+- small improvements and bug fixes
+
+### Security
+
 ## [0.2.0] - 2022-05-18
 ### Added
 - API for entire library

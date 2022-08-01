@@ -1,4 +1,4 @@
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 from .api.cameraconfig import CameraConfig, load_camera_config, get_camera_config
 from .api.video import Video
 from .api.frames import Frames
