@@ -53,7 +53,7 @@ author = 'Hessel Winsemius'
 # The full version, including alpha/beta/rc tags
 # TODO: uncomment this as soon as we have a version number on the package within pypi
 # release = pkg_resources.get_distribution("ODMax").version
-release = '0.2.1'
+release = '0.2.2'
 
 # -- General configuration ---------------------------------------------------
 
