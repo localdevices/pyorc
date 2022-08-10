@@ -400,6 +400,7 @@ def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
         return np.maximum(_v, 0)
 
     # fill per grouped dimension
+    v.load()
     v_group = copy.deepcopy(v).groupby(dim)
     return v_group.map(log_fit)
 
@@ -424,7 +425,7 @@ def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
 
     """
 
-    def log_interp(_v, d_0=0.1):
+    def log_interp(_v):
         # scale with log depth
         c = xr.DataArray(_v / np.log(np.maximum(dist_wall, d_0) / d_0))
         # fill dry points with the nearest valid value for c
@@ -436,8 +437,9 @@ def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
         return _v
 
     # fill per grouped dimension
+    v.load()
     v_group = copy.deepcopy(v).groupby(dim)
-    return v_group.map(log_interp, d_0)
+    return v_group.map(log_interp)
 
 
 def wrap_mse(pars_iter, *args):
