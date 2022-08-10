@@ -155,6 +155,45 @@ class CameraConfig:
         z_pressure = np.maximum(self.gcps["z_0"] - h_ref + h_a, z)
         return z_pressure - z
 
+
+    def get_dist_shore(self, x, y, z, h_a=None):
+        """Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
+        in local reference (e.g. staff gauge).
+
+        Parameters
+        ----------
+        z : list of floats
+            measured bathymetry point depths
+        h_a : float, optional
+            actual water level measured [m], if not set, assumption is that a single video
+            is processed and thus changes in water level are not relevant. (default: None)
+
+        Returns
+        -------
+        depths : list of floats
+
+        """
+        # retrieve depth
+        depth = self.get_depth(z, h_a=h_a)
+        if h_a is None:
+            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is provided"
+            h_a = 0.
+            h_ref = 0.
+        else:
+            h_ref = self.gcps["h_ref"]
+        z_dry = depth <= 0
+        z_dry[[0, -1]] = True
+        # compute distance to nearest dry points with Pythagoras
+        dist_shore = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
+        return dist_shore
+
+
+    def get_dist_wall(self, x, y, z, h_a=None):
+        depth = self.get_depth(z, h_a=h_a)
+        dist_shore = self.get_dist_shore(x, y, z, h_a=h_a)
+        dist_wall = (dist_shore**2 + depth**2)**0.5
+        return dist_wall
+
     def z_to_h(self, z):
         """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)
 

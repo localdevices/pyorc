@@ -7,6 +7,7 @@ from pyorc import helpers
 from .plot import _Transect_PlotMethods
 from .orcbase import ORCBase
 
+
 @xr.register_dataset_accessor("transect")
 class Transect(ORCBase):
     """Transect functionalities that can be applied on ``xarray.Dataset``"""
@@ -57,13 +58,13 @@ class Transect(ORCBase):
         v_eff = np.cos(angle_diff) * v_scalar
         v_eff.attrs = {
             "standard_name": "velocity",
-            "long_name": "velocity in perpendicular direction of cross section, measured by angle in radians, measured from up-direction",
+            "long_name": "velocity in perpendicular direction of cross section, measured by angle in radians, "
+                         "measured from up-direction",
             "units": "m s-1",
         }
         # set name
         v_eff.name = "v_eff_nofill"  # there still may be gaps in this series
         self._obj["v_eff_nofill"] = v_eff
-
 
     def get_xyz_perspective(self, M=None, xs=None, ys=None, mask_outside=True):
         """Get camera-perspective column, row coordinates from cross-section locations.
@@ -154,7 +155,6 @@ class Transect(ORCBase):
         Q.name = "Q"
         self._obj[Q_name] = Q
 
-
     def get_q(self, v_corr=0.9, fill_method="zeros"):
         """Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
         depth-average velocity.
@@ -164,9 +164,10 @@ class Transect(ORCBase):
         v_corr : float, optional
             correction factor (default: 0.9)
         fill_method : method to fill missing values. "zeros" fills NaNS with zeros, "interpolate" interpolates values
-            from nearest neighbour, "log_profile" fits a 4-parameter logarithmic profile with depth and with changing
-             velocities towards banks on known velocities, and fills missing with the fitted relationship.
-             (Default value = "zeros")
+            from nearest neighbour, "log_interp" interpolates values linearly with velocities scaled by the log of
+             depth over a roughness length, "log_fit" fits a 4-parameter logarithmic profile with depth and with
+             changing velocities towards banks on known velocities, and fills missing with the fitted relationship
+             (experimental) (Default value = "zeros").
 
         Returns
         -------
@@ -176,7 +177,8 @@ class Transect(ORCBase):
 
         """
         # aggregate to a limited set of quantiles
-        assert(fill_method in ["zeros", "log_profile", "interpolate"]), f'fill_method must be "zeros", "log_profile", or "interpolate", instead "{fill_method}" given'
+        assert(fill_method in ["zeros", "log_fit", "log_interp", "interpolate"]),\
+            f'fill_method must be "zeros", "log_fit", "log_interp", or "interpolate", instead "{fill_method}" given'
         ds = self._obj
         x = ds["xcoords"].values
         y = ds["ycoords"].values
@@ -185,8 +187,12 @@ class Transect(ORCBase):
         depth = self.camera_config.get_depth(z, self.h_a)
         if fill_method == "zeros":
             ds["v_eff"] = ds["v_eff_nofill"].fillna(0.)
-        elif fill_method == "log_profile":
-            ds["v_eff"] = helpers.velocity_fill(x, y, depth, ds["v_eff_nofill"], groupby="quantile")
+        elif fill_method == "log_fit":
+            dist_shore = self.camera_config.get_dist_shore(x, y, z, self.h_a)
+            ds["v_eff"] = helpers.velocity_log_fit(ds["v_eff_nofill"], depth, dist_shore, dim="quantile")
+        elif fill_method == "log_interp":
+            dist_wall = self.camera_config.get_dist_wall(x, y, z, self.h_a)
+            ds["v_eff"] = helpers.velocity_log_interp(ds["v_eff_nofill"], dist_wall, dim="quantile")
         elif fill_method == "interpolate":
             depth = ds.zcoords*0 + self.camera_config.get_depth(ds.zcoords, self.h_a)
             # interpolate gaps in between known values

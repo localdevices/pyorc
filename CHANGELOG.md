@@ -1,3 +1,16 @@
+## [0.2.3] - 2022-08-10
+### Added
+### Changed
+- pyorc.transect.get_q added method="log_interp" using a log-depth normalized velocity and linear interpolation 
+
+### Deprecated
+### Removed
+### Fixed
+- pyorc.transect.get_q improved method="log_fit" (former "log_profile"), so that it works if no dry bed points are found
+
+### Security
+
+
 ## [0.2.2] - 2022-08-01
 ### Added
 - pytest

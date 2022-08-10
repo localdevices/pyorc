@@ -14,7 +14,8 @@ def test_get_river_flow(piv_transect):
     "fill_method",
     [
         "zeros",
-        "log_profile",
+        "log_interp",
+        "log_fit",
         "interpolate",
     ]
 )
