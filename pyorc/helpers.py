@@ -204,7 +204,7 @@ def log_profile(X, z0, k_max, s0=0., s1=0.):
     k_max: float
         maximum scale factor of log-profile function [-]
     s0: float, optional
-        distance from bank (defaukt: 0.) where k equals zero (and thus velocity is zero) [m]
+        distance from bank (default: 0.) where k equals zero (and thus velocity is zero) [m]
     s1: float, optional
         distance from bank (default: 0. meaning no difference over distance) where k=k_max (k cannot be larger than
         k_max) [m]
@@ -215,8 +215,8 @@ def log_profile(X, z0, k_max, s0=0., s1=0.):
         V values from log-profile, equal shape as arrays inside X [m s-1]
     """
     z, s = X
-    k = k_max * np.minimum(np.maximum((s-s0)/(s1-s0), 0), 1)
-    v = k*np.maximum(np.log(np.maximum(z, 1e-6)/z0), 0)
+    k = k_max * np.minimum(np.maximum((s - s0) / (s1 - s0), 0), 1)
+    v = k * np.maximum(np.log(np.maximum(z, 1e-6) / z0), 0)
     return v
 
 
@@ -265,11 +265,11 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     array = copy.deepcopy(array)
     array[np.isnan(array)] = missing
     array_move = []
-    for vert in range(-stride, stride+1):
-        for horz in range(-stride, stride+1):
-            conv_arr = np.zeros((abs(vert)*2+1, abs(horz)*2+1))
-            _y = int(np.floor((abs(vert)*2+1)/2)) + vert
-            _x = int(np.floor((abs(horz)*2+1)/2)) + horz
+    for vert in range(-stride, stride + 1):
+        for horz in range(-stride, stride + 1):
+            conv_arr = np.zeros((abs(vert) * 2 + 1, abs(horz) * 2 + 1))
+            _y = int(np.floor((abs(vert) * 2 + 1) / 2)) + vert
+            _x = int(np.floor((abs(horz) * 2 + 1) / 2)) + horz
             conv_arr[_y, _x] = 1
             array_move.append(convolve2d(array, conv_arr, mode="same", fillvalue=np.nan))
     array_move = np.stack(array_move)
@@ -289,7 +289,6 @@ def optimize_log_profile(
         seed=0,
         **kwargs
 ):
-
     """optimize velocity log profile relation of v=k*max(z/z0) with k a function of distance to bank and k_max
     A differential evolution optimizer is used.
 
@@ -299,7 +298,7 @@ def optimize_log_profile(
         depths [m]
     v : list
         surface velocities [m s-1]
-    dist_bank : list
+    dist_bank : list, optional
         distances to bank [m]
     **kwargs : keyword arguments for scipy.optimize.differential_evolution
 
@@ -309,7 +308,7 @@ def optimize_log_profile(
         fitted parameters of log_profile {z_0, k_max, s0 and s1}
     """
     if dist_bank is None:
-        dist_bank = np.inf(len(v))
+        dist_bank = np.ones(len(v)) * np.inf
     v = np.array(v)
     z = np.array(z)
     X = (z, dist_bank)
@@ -361,20 +360,18 @@ def rotate_u_v(u, v, theta, deg=False):
     return u2, v2
 
 
-def velocity_fill(x, y, depth, v, groupby="quantile"):
+def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
     """Fill missing surface velocities using a velocity depth profile with
 
     Parameters
     ----------
-    x : xr.DataArray (points)
-        x-coordinates of bathymetry depths (ref. CRS)
-    y : xr.DataArray (points)
-        y-coordinates of bathymetry depths (ref. CRS)
-    depth : xr.DataArray (points)
-        depths [m]
     v : xr.DataArray (time, points)
         effective velocity at surface [m s-1]
-    groupby: str, optional
+    depth : xr.DataArray (points)
+        bathymetry depths [m]
+    dist_shore : xr.DataArray (points)
+        shortest distance to a dry river bed point
+    dim: str, optional
         dimension over which data should be grouped, default: "quantile", dimension must exist in v, typically
         "quantile" or "time"
 
@@ -384,18 +381,63 @@ def velocity_fill(x, y, depth, v, groupby="quantile"):
     v_fill: xr.DataArray (quantile or time, points)
         filled surface velocities  [m s-1]
     """
-    def fit(_v):
-        pars = optimize_log_profile(depth[np.isfinite(_v).values], _v[np.isfinite(_v).values], dist_bank[np.isfinite(_v).values])
-        _v[np.isnan(_v).values] = log_profile((depth[np.isnan(_v).values], dist_bank[np.isnan(_v).values]), **pars)
+
+    def log_fit(_v):
+        pars = optimize_log_profile(
+            depth[np.isfinite(_v).values],
+            _v[np.isfinite(_v).values],
+            dist_shore[np.isfinite(_v).values]
+        )
+        _v[np.isnan(_v).values] = log_profile(
+            (
+                depth[np.isnan(_v).values],
+                dist_shore[np.isnan(_v).values]
+            ),
+            **pars
+        )
         # enforce that velocities are zero with zero depth
-        _v[depth<=0] = 0.
+        _v[depth <= 0] = 0.
         return np.maximum(_v, 0)
 
-    z_dry = depth <= 0
-    dist_bank = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
-    # per time slice or quantile, fill missings
-    v_group = copy.deepcopy(v).groupby(groupby)
-    return v_group.map(fit)
+    # fill per grouped dimension
+    v_group = copy.deepcopy(v).groupby(dim)
+    return v_group.map(log_fit)
+
+
+def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
+    """
+
+    Parameters
+    ----------
+    v : xr.DataArray (time, points)
+        effective velocity at surface [m s-1]
+    dist_wall : xr.DataArray (points)
+        shortest distance to the river bed
+    d_0 : float, optional
+        roughness length (default: 0.1)
+    dim: str, optional
+        dimension over which data should be grouped, default: "quantile", dimension must exist in v, typically
+        "quantile" or "time"
+
+    Returns
+    -------
+
+    """
+
+    def log_interp(_v, d_0=0.1):
+        # scale with log depth
+        c = xr.DataArray(_v / np.log(np.maximum(dist_wall, d_0) / d_0))
+        # fill dry points with the nearest valid value for c
+        c[dist_wall == 0] = c.interpolate_na(dim="points", method="nearest", fill_value="extrapolate")[dist_wall == 0]
+        # interpolate with linear interpolation
+        c = c.interpolate_na(dim="points")
+        # use filled c to interpret missing v
+        _v[np.isnan(_v)] = (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[np.isnan(_v)]
+        return _v
+
+    # fill per grouped dimension
+    v_group = copy.deepcopy(v).groupby(dim)
+    return v_group.map(log_interp, d_0)
 
 
 def wrap_mse(pars_iter, *args):
@@ -474,6 +516,7 @@ def xy_angle(x, y):
     angles[0] = np.arctan2(x[1] - x[0], y[1] - y[0])
     angles[-1] = np.arctan2(x[-1] - x[-2], y[-1] - y[-2])
     return angles
+
 
 def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     """
