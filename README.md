@@ -1,7 +1,8 @@
 pyOpenRiverCam
 ==============
 
-[![PyPI](https://badge.fury.io/py/pyopenrivercam.svg)](https://pypi.org/project/pyopenrivercam/)
+[![PyPI](https://badge.fury.io/py/pyopenrivercam.svg)](https://pypi.org/project/pyopenrivercam)
+[![Conda-Forge](https://anaconda.org/conda-forge/pyopenrivercam/badges/version.svg)](https://anaconda.org/conda-forge/pyopenrivercam)
 [![codecov](https://codecov.io/gh/localdevices/pyorc/branch/main/graph/badge.svg?token=0740LBNK6J)](https://codecov.io/gh/localdevices/pyorc)
 [![docs_latest](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://localdevices.github.io/pyorc/latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/localdevices/pyorc.git/main?labpath=examples)
@@ -38,9 +39,9 @@ If you wish to fund this or other work on features, please contact us at info@ra
 
 > **_note:_**  For instructions how to get Anaconda (with lots of pre-installed libraries) or Miniconda (light weight) installed, please go to https://docs.conda.io/projects/conda/en/latest/
 
-> **_manual:_** A full manual with examples is forthcoming.
+> **_manual:_** Please go to https://localdevices.github.io/pyorc for the latest documentation
 
-> **_compatibility:_** At this moment **pyorc** works any video compatible with OpenCV.
+> **_compatibility:_** At this moment **pyorc** works with any video compatible with OpenCV as long as it has proper metadata.
 
 Installation
 ------------
@@ -48,8 +49,8 @@ Installation
 To get started with **pyorc**, we recommend to setup a python virtual environment. 
 We recommend using a Miniconda or Anaconda environment as this will ease installation, and will allow you to use all
 functionalities without any trouble. Especially geographical plotting with `cartopy` can be difficult to get installed. 
-With a `conda` environment this is solved. We have also conveniently packaged all dependencies for you. 
-In the subsections below, you can find specific instructions. 
+With a `conda` environment and our `conda-forge` package this is solved. In the subsections below, you can find specific
+instructions for different use cases. 
 
 ### Installation for direct use
 
@@ -57,28 +58,22 @@ If you simply want to add **pyorc** to an existing python installation or virtua
 instructions.
 
 First activate the environment you want **pyorc** to be installed in (if you don't care about virtual environments, then 
-simply skip this step). Dependencies `rasterio`, `geopandas` and `cartopy` are known to be difficult to install with
-`pip`. Therefore, we highly recommend to use a conda environment that already includes these dependencies before
-installation. You can simply install these libraries as follows:
+simply skip this step). You can simply install pyorc with all its dependencies as follows:
 
 ```
 conda activate <name-of-your-environment>
-conda install -c conda-forge cartopy geopandas rasterio
+conda install -c conda-forge pyopenrivercam
 ```
 
-Then install **pyorc** as follows:
+If you use mamba as a package mananager, then the steps are the same, except for the installation step, which is:
 ```
-pip install pyopenrivercam
+mamba install pyopenrivercam
 ```
-That's it! You are good to go!
 
 ### Installation from latest code base
 
 To install **pyorc** from scratch in a new virtual environment from the code base, go through these steps. Logical cases
-when you wish to install from the code base are:
-* You wish to have the very latest non-released version
-* You wish to develop on the code
-* You want to use our pre-packaged conda environment with all dependencies to setup a good virtual environment
+when you wish to install from the code base are when you wish to have the very latest non-released version.
 
 First, clone the code with `git` and move into the cloned folder.
 
@@ -87,12 +82,21 @@ git clone https://github.com/localdevices/pyorc.git
 cd pyorc
 ```
 
-Setup a virtual environment and install the package as follows:
+Setup a virtual environment with all dependencies as follows:
 ```
-conda env create -f environment.yml
+conda env create -f envs/pyorc-dev.yml
+conda activate pyorc-dev
 ```
-That's it, you are good to go.
-
+then install **pyorc** from the code base as follows:
+```
+pip install .
+```
+> **_note:_** **pyorc** is now installed in a virtual environment called `pyorc-dev`. This means that if you wish to run
+python with **pyorc**. You need to always first activate this environment before running python (or jupyter). This is
+done with the following command:
+```
+conda activate pyorc-dev
+```
 ### Installation from latest code base as developer
 
 Clone the repository with ssh and move into the cloned folder.
@@ -104,7 +108,7 @@ cd pyorc
 
 Setup a virtual developers environment and install the package as follows:
 ```
-conda env create -f environment-dev.yml
+conda env create -f envs/pyorc-dev.yml
 conda activate pyorc-dev
 pip install -e .
 ```

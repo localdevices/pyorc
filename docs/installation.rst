@@ -16,11 +16,42 @@ Miniforge_ and Miniconda_ will install Python and the conda package manager.
 
 In general, **mamba** is a lot faster than **conda** and requires less memory.
 
+.. _install_conda-forge:
+
+Installation from conda-forge package
+=====================================
+We always recommend working in a dedicated virtual environment for **pyorc**. If you need a new virtual environment,
+then you can make and then activate one with the following commands
+
+.. code-block:: console
+
+    $ conda create --name <YOUR-FAVORITE-NAME>
+    $ conda activate <YOUR-FAVORITE-NAME>
+
+Naturally `<YOUR-FAVORITE-NAME>` should be replaced by a name of your liking for instance `pyorc`. If you already have
+a virtual environment, then please skip the first line, and only use the last line to activate the environment you want
+to use.
+
+Once the environment is prepared, install the latest `conda-forge` package, with all dependencies using the following
+command:
+
+.. code-block:: console
+
+    $ conda install -c conda-forge pyopenrivercam
+
+Mamba users will have a faster experience. They can use the following command instead:
+
+.. code-block:: console
+
+    $ mamba install pyopenrivercam
+
+
 .. _install_pip:
 
 Installation from pypi with pip
 ===============================
 
+This may be useful for deployment on servers or Docker environments.
 First activate the environment you want **pyorc** to be installed in (if you don't care about virtual environments, then
 simply skip this step). Dependencies **rasterio**, **geopandas** and **cartopy** are known to be difficult to install with
 **pip**. Therefore, we highly recommend to use a conda environment that already includes these dependencies before
