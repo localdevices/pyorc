@@ -3,6 +3,53 @@ import numpy as np
 import rasterio
 from shapely.geometry import Polygon, LineString
 from shapely.affinity import rotate
+from tqdm import tqdm
+from scipy.cluster.vq import vq, kmeans
+import operator
+
+def _classify_displacements(positions, method="kmeans", q_threshold=0.8, abs_threshold=None, op=operator.le):
+    """
+    Classifies set of displacements in two based on a difference measure. Can e.g. be used to
+    mask values that are not moving enough (in case one wishes to detect water)
+    or values that move too much (in case one wishes to detect stable points for image stabilization).
+
+    Parameters
+    ----------
+    p: list of arrays
+        time sequences of x,y locations per points
+    tolerance: float (0-1), optional
+        tolerance percentile of the standard deviation. Default: 0.8 meaning that points that have a standard deviation
+        smaller than (larger or equal than, if option selected) the 0.8 quantile of all standard deviations kept.
+    op: operator, optional
+        type of operation to test against (default: operator.ge)
+
+    Returns
+    -------
+    p: list of arrays
+        time sequences of x,y locations per points, after filtering
+    """
+    assert(method in ["kmeans", "std", "dist"]), f'Method must be "kmeans", "std" or "dist", but instead is {method}.'
+    if q_threshold is not None:
+        assert (0.99 > q_threshold > 0.01), \
+            f'q_threshold represents a quantile and must be between 0.01 and 0.99, {q_threshold} given '
+    if method in ["kmeans", "std"]:
+        test_variable = positions.std(axis=0).mean(axis=-1)
+    elif method == "dist":
+        distance_xy = positions[-1] - positions[0]
+        test_variable = (distance_xy[:, 0]**2 + distance_xy[:, 1]**2)**0.5
+    if method == "kmeans":
+        centroids, mean_value = kmeans(test_variable, 2)
+        clusters, distances = vq(test_variable, np.sort(centroids))
+        return clusters == 0
+    # if not kmeans, then follow the same route for "dist" or "std"
+    # derive tolerance quantile
+    if abs_threshold is None:
+        # tolerance from quantile in distribution
+        tolerance = np.quantile(test_variable, q_threshold)  # PARAMETER
+    else:
+        # tolerance as absolute value
+        tolerance = abs_threshold
+    return op(test_variable, tolerance)
 
 
 def _convert_edge(img, stride_1, stride_2):
@@ -45,6 +92,89 @@ def _get_cam_mtx(height, width, c=2.0, f=1.0):
     mtx[0, 0] = f  # define focal length x
     mtx[1, 1] = f  # define focal length y
     return mtx
+
+def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
+    """
+    compute displacements from trackable features found in start frame
+
+    Parameters
+    ----------
+    cap : cv2.Capture object
+        video object, opened with cv2
+    start_frame : int, optional
+        first frame to perform point displacement analysis (default : 0)
+    end_frame : int, optional
+        last frame to process (must be larger than start_frame). Default: None, meaning the last frame in the video will
+        be used).
+    n_pts : int, optional
+        Number of features to track. If not set, the square root of the amount of pixels of the frames will be used
+
+    Returns
+    -------
+    positions : np.ndarray [M x N x 2]
+        positions of the points from frame to frame with M the amount of frames, N the amount of points, and 2 the x, y
+        coordinates
+    status : np.ndarray [M x N]
+        status of tracking of points, normally 1 is expected, 0 means that tracking for point in given frame did not
+         yield results (see also
+         https://docs.opencv.org/4.x/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323)
+
+    """
+    # set end_frame to last if not defined
+    if end_frame is None:
+        end_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    # get start frame and points
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+
+    # Read first frame
+    _, prev = cap.read()
+
+    # Convert frame to grayscale
+    prev_gray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
+
+    # prepare outputs
+    n_frames = end_frame - start_frame
+    transforms = np.zeros((n_frames - 1, 3), np.float32)
+
+    if n_pts is None:
+        # use the square root of nr of pixels in a frame to decide on n_pts
+        n_pts = int(np.sqrt(len(prev_gray.flatten())))
+
+    # prepare storage for points
+    positions = np.zeros((0, n_pts, 2), np.float32)
+    stats = np.ones((1, n_pts))
+
+    prev_pts = cv2.goodFeaturesToTrack(
+        prev_gray,
+        maxCorners=n_pts,
+        qualityLevel=0.01,
+        minDistance=10,
+        blockSize=1
+    )
+    # add start point to matrix
+    positions = np.append(positions, np.swapaxes(prev_pts, 0, 1), axis=0)
+    # loop through start to end frame
+    for i in tqdm(range(n_frames - 1)):
+        # Read next frame
+        success, curr = cap.read()
+        if not success:
+            raise IOError(f"Could not read frame {start_frame + i} from video")
+
+        # Convert to grayscale
+        curr_gray = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
+
+        # Calculate optical flow
+        curr_pts, status, err = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, prev_pts, None)
+
+        # store curr_pts
+        positions = np.append(positions, np.swapaxes(curr_pts, 0, 1), axis=0)
+        stats = np.append(stats, np.swapaxes(status, 0, 1), axis=0)
+        # prepare next frame
+        prev_gray = curr_gray
+        prev_pts = curr_pts
+    return positions, stats
+
 
 
 def _get_shape(bbox, resolution=0.01, round=1):
@@ -139,6 +269,39 @@ def _get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
     _dest_y = list(cam_y + (np.array(y) - cam_y) * rel_diff)
     dest_out = list(zip(_dest_x, _dest_y))
     return dest_out
+
+def m_from_displacement(p1, p2):
+    """
+    Calculate transform from pair of point locations
+
+    Parameters
+    ----------
+    p1
+    p2
+
+    Returns
+    -------
+
+    """
+    # add dim in the middle to match cv2 required array shape
+    prev_pts = np.float64(np.expand_dims(p1, 1))
+    curr_pts = np.float64(np.expand_dims(p2, 1))
+    return cv2.estimateAffinePartial2D(prev_pts, curr_pts)[0]
+
+
+def ms_from_displacements(p):
+    """
+    Computes all transforms from list of point locations
+
+    Parameters
+    ----------
+    p:
+
+    Returns
+    -------
+
+    """
+    return [m_from_displacement(p1, p2) for p1, p2 in zip(p[0:-1], p[1:])]
 
 
 def get_M(src, dst):

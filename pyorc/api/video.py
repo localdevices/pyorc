@@ -32,6 +32,7 @@ Camera configuration: {:s}
             h_a=None,
             start_frame=None,
             end_frame=None,
+            stabilize=True,
             *args,
             **kwargs
     ):
@@ -67,7 +68,7 @@ Camera configuration: {:s}
         # super().__init__(*args, **kwargs)
         cap = cv2.VideoCapture(fn)
         # explicitly open file for reading
-        # self.open(fn)
+
         # set end and start frame
         self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if start_frame is not None:
@@ -84,6 +85,18 @@ Camera configuration: {:s}
             end_frame = self.frame_count
         self.end_frame = end_frame
         self.start_frame = start_frame
+        if stabilize:
+            # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
+            # get the displacements of trackable features
+            positions, stats = cv._get_displacements(cap, start_frame=self.start_frame, end_frame=self.end_frame)
+
+            # find kmeans classes for dry and wet particles and filter for likely land features
+            classes = cv._classify_displacements(positions, method="kmeans")
+            positions_sel = positions[:, classes, :]
+            # now remove the upper quantiles of distance (i.e. very large trajectories) as well, to filter out water
+            classes = cv._classify_displacements(positions_sel, method="dist", q_threshold=0.95)
+            positions_sel = positions_sel[:, classes, :]
+
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
         # set other properties
