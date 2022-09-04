@@ -155,8 +155,10 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
     # add start point to matrix
     positions = np.append(positions, np.swapaxes(prev_pts, 0, 1), axis=0)
     # loop through start to end frame
-    for i in tqdm(range(n_frames - 1)):
+    pbar = tqdm(range(n_frames - 1))
+    for i in pbar:
         # Read next frame
+        pbar.set_description(f"Processing frame {i}/{n_frames - 1}")
         success, curr = cap.read()
         if not success:
             raise IOError(f"Could not read frame {start_frame + i} from video")
@@ -176,7 +178,6 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
     return positions, stats
 
 
-
 def _get_shape(bbox, resolution=0.01, round=1):
     """
     defines the number of rows and columns needed in a target raster, to fit a given bounding box.
@@ -192,6 +193,24 @@ def _get_shape(bbox, resolution=0.01, round=1):
     cols = int(np.ceil((box_length / resolution) / round)) * round
     rows = int(np.ceil((box_width / resolution) / round)) * round
     return cols, rows
+
+
+def _get_trajectory(cap, start_frame, end_frame):
+    # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
+    # get the displacements of trackable features
+    positions, stats = _get_displacements(cap, start_frame=start_frame, end_frame=end_frame)
+    # find kmeans classes for dry and wet particles and filter for likely land features
+    classes = _classify_displacements(positions, method="kmeans")
+    # select positions which are classified as water
+    positions_sel = positions[:, classes, :]
+    # now remove the upper quantiles of distance (i.e. very large trajectories) as well, to filter out water
+    classes = _classify_displacements(positions_sel, method="dist", q_threshold=0.4)
+    positions_sel = positions_sel[:, classes, :]
+    # retrieve the transformation matrices
+    ms = _ms_from_displacements(positions_sel)
+    # get the entire trajectory from all frames
+    return _trajectory_from_ms(ms)
+
 
 
 def _get_transform(bbox, resolution=0.01):
@@ -289,7 +308,7 @@ def m_from_displacement(p1, p2):
     return cv2.estimateAffinePartial2D(prev_pts, curr_pts)[0]
 
 
-def ms_from_displacements(p):
+def _ms_from_displacements(p):
     """
     Computes all transforms from list of point locations
 
@@ -303,6 +322,68 @@ def ms_from_displacements(p):
     """
     return [m_from_displacement(p1, p2) for p1, p2 in zip(p[0:-1], p[1:])]
 
+
+def _transform(img, dx, dy, da, reverse=True):
+    """
+    transforms an image with a certain dx, dy, angle displacement
+    Parameters
+    ----------
+    img :
+    dx :
+    dy :
+    da :
+    reverse : boolean, optional
+        if True (default), reverses the direction of transformation by using negatives of the provided transform
+
+    Returns
+    -------
+    img :
+
+    """
+    h = img.shape[0]
+    w = img.shape[1]
+    if reverse:
+        dx = -dx
+        dy = -dy
+        da = -da
+
+    # Construct transformation matrix accordingly to dx, dy, da
+    m = np.zeros((2, 3), np.float32)
+    m[0, 0] = np.cos(da)
+    m[0, 1] = -np.sin(da)
+    m[1, 0] = np.sin(da)
+    m[1, 1] = np.cos(da)
+    m[0, 2] = dx
+    m[1, 2] = dy
+    # Apply affine wrapping to the given frame
+    img_transform = cv2.warpAffine(img, m, (w, h))
+
+    # # Fix border artifacts
+    # frame_stabilized = fixBorder(frame_stabilized)
+    return img_transform
+
+def _trajectory_from_ms(ms):
+    """
+    Compute the trajectory as dx, dy, da (angle) of transformation matrices, following frame-to-frame movements of
+    fixed points
+
+    Parameters
+    ----------
+    ms : list of np.ndarray
+        n 2x3 transformation matrices of frame-to-frame differences
+
+    Returns
+    -------
+    trajectory : np.ndarray [nx3]
+        the trajectory of fixed points with n (amount of frames) x, y, a values
+
+    """
+    dxs = [0] + [m[0, 2] for m in ms]
+    dys = [0] + [m[1, 2] for m in ms]
+    # Extract rotation angle
+    das = [0] + [np.arctan2(m[1, 0], m[0, 0]) for m in ms]
+    transforms = np.array([[dx, dy, da] for dx, dy, da in zip(dxs, dys, das)])
+    return np.cumsum(transforms, axis=0)
 
 def get_M(src, dst):
     """Retrieve transformation matrix for between (4) src and (4) dst points

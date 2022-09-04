@@ -23,7 +23,13 @@ end frame: {:d}
 Camera configuration: {:s}
         """.format
 
-        return template(self.fn, self.fps, self.start_frame, self.end_frame, self.camera_config.__repr__() if hasattr(self, "camera_config") else "none")
+        return template(
+            self.fn,
+            self.fps,
+            self.start_frame,
+            self.end_frame,
+            self.camera_config.__repr__() if hasattr(self, "camera_config") else "none"
+        )
 
     def __init__(
             self,
@@ -54,6 +60,7 @@ Camera configuration: {:s}
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
+        self.trajectory = None
         if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
             if h_a is not None:
@@ -86,16 +93,7 @@ Camera configuration: {:s}
         self.end_frame = end_frame
         self.start_frame = start_frame
         if stabilize:
-            # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
-            # get the displacements of trackable features
-            positions, stats = cv._get_displacements(cap, start_frame=self.start_frame, end_frame=self.end_frame)
-
-            # find kmeans classes for dry and wet particles and filter for likely land features
-            classes = cv._classify_displacements(positions, method="kmeans")
-            positions_sel = positions[:, classes, :]
-            # now remove the upper quantiles of distance (i.e. very large trajectories) as well, to filter out water
-            classes = cv._classify_displacements(positions_sel, method="dist", q_threshold=0.95)
-            positions_sel = positions_sel[:, classes, :]
+            self.trajectory = cv._get_trajectory(cap, self.start_frame, self.end_frame)
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
@@ -236,6 +234,9 @@ Camera configuration: {:s}
         except:
             raise IOError(f"Cannot read")
         if ret:
+            if self.trajectory is not None:
+                # correct for stabilization
+                img = cv._transform(img, *self.trajectory[n])
             if lens_corr:
                 if self.camera_config.lens_pars is not None:
                     # apply lens distortion correction

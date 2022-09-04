@@ -414,4 +414,24 @@ class Frames(ORCBase):
         )
         anim.save(fn, **video_kwargs)
 
+
+    def to_video(
+            self,
+            fn,
+            video_format=cv2.VideoWriter_fourcc(*"mp4v"),
+            fps=None
+    ):
+        if fps is None:
+            # estimate it from the time differences
+            fps = 1/(self._obj["time"][1].values - self._obj["time"][0].values)
+        h = self._obj.shape[1]
+        w = self._obj.shape[2]
+        out = cv2.VideoWriter(fn, video_format, fps, (w, h))
+        pbar = tqdm(self._obj)
+        pbar.set_description("Writing frames")
+        for f in pbar:
+            img = cv2.cvtColor(f.values, cv2.COLOR_RGB2BGR) if f.shape == 3 else f.values
+            out.write(img)
+        out.release()
+
     plot = _frames_plot
