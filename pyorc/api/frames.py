@@ -60,7 +60,7 @@ class Frames(ORCBase):
             kwargs["overlap"] = int(round(camera_config.window_size) / 2)
         # first get rid of coordinates that need to be recalculated
         coords_drop = list(set(self._obj.coords) - set(self._obj.dims))
-        obj = self._obj.drop(coords_drop)
+        obj = self._obj.drop_vars(coords_drop)
         # get frames and shifted frames in time
         frames1 = obj.shift(time=1)[1:]
         frames2 = obj[1:]
@@ -421,6 +421,22 @@ class Frames(ORCBase):
             video_format=cv2.VideoWriter_fourcc(*"mp4v"),
             fps=None
     ):
+        """
+        Write frames to a video file without any layout
+
+        Parameters
+        ----------
+        fn : str
+            Path to output file
+        video_format : cv2.VideoWriter_fourcc, optional
+            A VideoWriter preference, default is cv2.VideoWriter_fourcc(*"mp4v")
+        fps : float, optional
+            Frames per second, if not provided, derived from original video
+
+        Returns
+        -------
+        None
+        """
         if fps is None:
             # estimate it from the time differences
             fps = 1/(self._obj["time"][1].values - self._obj["time"][0].values)
@@ -430,7 +446,7 @@ class Frames(ORCBase):
         pbar = tqdm(self._obj)
         pbar.set_description("Writing frames")
         for f in pbar:
-            img = cv2.cvtColor(f.values, cv2.COLOR_RGB2BGR) if f.shape == 3 else f.values
+            img = cv2.cvtColor(f.values, cv2.COLOR_RGB2BGR) if len(f.shape) == 3 else f.values
             out.write(img)
         out.release()
 

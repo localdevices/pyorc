@@ -98,3 +98,7 @@ def test_get_piv(frames_proj, window_size, result):
 )
 def test_to_ani(frames, ani_mp4):
     frames.frames.to_ani(ani_mp4, progress_bar=False)
+
+def test_to_video(frames_rgb_stabilize, ani_mp4):
+    # only store the first 3 frames
+    frames_rgb_stabilize[0:3].frames.to_video(ani_mp4)

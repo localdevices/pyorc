@@ -38,7 +38,7 @@ Camera configuration: {:s}
             h_a=None,
             start_frame=None,
             end_frame=None,
-            stabilize=True,
+            stabilize=None,
             *args,
             **kwargs
     ):
@@ -47,20 +47,38 @@ Camera configuration: {:s}
         frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
         These can then be processed with other pyorc API functionalities.
 
-        :param fn: str, locally stored video file
-        :param camera_config: CameraConfig object, containing all information about the camera, lens parameters, lens
-            position, ground control points with GPS coordinates, and all referencing information (see CameraConfig),
-            needed to reproject frames on a horizontal geographically referenced plane.
-        :param h_a: float, actual height [m], measured in local vertical reference during the video (e.g. a staff gauge
-            in view of the camera)
-        :param start_frame: int, first frame to use in analysis
-        :param end_frame: int, last frame to use in analysis
-        :param args: list or tuple, arguments to pass to cv2.VideoCapture on initialization.
-        :param kwargs: dict, keyword arguments to pass to cv2.VideoCapture on initialization.
+        Parameters
+        ----------
+        fn : str
+            Locally stored video file
+        camera_config : pyorc.CameraConfig, optional
+            contains all information about the camera, lens parameters, lens position, ground control points with GPS
+            coordinates, and all referencing information (see CameraConfig), needed to reproject frames on a horizontal
+            geographically referenced plane.
+        h_a : float, optional
+            actual height [m], measured in local vertical reference during the video (e.g. a staff gauge in view of
+            the camera)
+        start_frame : int, optional
+            first frame to use in analysis (default: 0)
+        end_frame : int, optional
+            last frame to use in analysis (if not set, last frame available in video will be used)
+        stabilize : optional
+            If set, the video will be stabilized by attempting to find rigid points (see recipe) and track these with
+            Lukas Kanade optical flow.
+        recipe : dict, optional
+            filter recipes used to distinguish rigid points from moving points for stabilization. Two flavours are
+            currently implemented under pyorc.const.CLASSIFY_STANDING_CAM (for a camera that is kept as much as possible
+            in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is moving across the objective).
+        args : list
+            arguments to pass to cv2.VideoCapture on initialization.
+        kwargs : dict
+            keyword arguments to pass to cv2.VideoCapture on initialization.
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
-        self.trajectory = None
+        assert(stabilize in ["fixed", "moving"]), 'stabilize must be "fixed" or "moving"'
+        # self.trajectory = None
+        self.ms = None
         if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
             if h_a is not None:
@@ -92,8 +110,11 @@ Camera configuration: {:s}
             end_frame = self.frame_count
         self.end_frame = end_frame
         self.start_frame = start_frame
-        if stabilize:
-            self.trajectory = cv._get_trajectory(cap, self.start_frame, self.end_frame)
+        if stabilize is not None:
+            # select the right recipe dependent on the movie being fixed or moving
+            recipe = const.CLASSIFY_STANDING_CAM if stabilize == "fixed" else const.CLASSIFY_MOVING_CAM
+            self.get_pos_feats(cap, recipe=recipe)
+            self.get_ms()
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
@@ -155,6 +176,7 @@ Camera configuration: {:s}
             self._end_frame = self.frame_count
         else:
             self._end_frame = min(self.frame_count, end_frame)
+
 
     @property
     def h_a(self):
@@ -234,9 +256,14 @@ Camera configuration: {:s}
         except:
             raise IOError(f"Cannot read")
         if ret:
-            if self.trajectory is not None:
+            if self.ms is not None:
+            # if self.trajectory is not None:
                 # correct for stabilization
-                img = cv._transform(img, *self.trajectory[n])
+                # img = cv._transform(img, *self.trajectory[n])
+                h = img.shape[0]
+                w = img.shape[1]
+                img = cv2.warpAffine(img, self.ms[n-1], (w, h))
+
             if lens_corr:
                 if self.camera_config.lens_pars is not None:
                     # apply lens distortion correction
@@ -329,3 +356,25 @@ Camera configuration: {:s}
         frames.name = "frames"
         return frames
 
+
+    def get_pos_feats(self, cap, recipe=const.CLASSIFY_STANDING_CAM):
+        # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
+        # get the displacements of trackable features
+        positions, stats = cv._get_displacements(
+            cap,
+            start_frame=self.start_frame,
+            end_frame=self.end_frame
+        )
+        # filter features that belong to actual camera movement
+        for recipe in recipe:
+            classes = cv._classify_displacements(positions, **recipe)
+            # select positions which are classified as water
+            positions = positions[:, classes, :]
+            stats = stats[:, classes]
+        self.feats_pos = positions
+        self.feats_stats = stats
+
+
+    def get_ms(self):
+        # retrieve the transformation matrices for stabilization
+        self.ms = cv._ms_from_displacements(self.feats_pos, self.feats_stats)

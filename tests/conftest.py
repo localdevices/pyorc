@@ -125,13 +125,34 @@ def vid_cam_config(cam_config):
 
 
 @pytest.fixture
+def vid_cam_config_stabilize(cam_config):
+    vid = pyorc.Video(
+        os.path.join(EXAMPLE_DATA_DIR, "ngwerere_20191103.mp4"),
+        start_frame=0,
+        end_frame=125,
+        camera_config=cam_config,
+        h_a=0.,
+        stabilize=True
+    )
+    yield vid
+
+
+@pytest.fixture
 def frames_grayscale(vid_cam_config):
     return vid_cam_config.get_frames()
 
 
 @pytest.fixture
+def frames_rgb_stabilize(vid_cam_config_stabilize):
+    return vid_cam_config_stabilize.get_frames(method="rgb")
+
+
+@pytest.fixture
 def frames_rgb(vid_cam_config):
     return vid_cam_config.get_frames(method="rgb")
+
+
+
 
 @pytest.fixture
 def frames_proj(frames_grayscale):

@@ -9,23 +9,34 @@ import operator
 
 def _classify_displacements(positions, method="kmeans", q_threshold=0.8, abs_threshold=None, op=operator.le):
     """
-    Classifies set of displacements in two based on a difference measure. Can e.g. be used to
-    mask values that are not moving enough (in case one wishes to detect water)
-    or values that move too much (in case one wishes to detect stable points for image stabilization).
+    Classifies set of displacements of points through time in two groups based on a difference measure. Can e.g. be used
+    to mask values that are not moving enough (in case one wishes to detect water) or values that move too much
+    (in case one wishes to detect rigid points for image stabilization).
 
     Parameters
     ----------
-    p: list of arrays
+    positions : list of arrays
         time sequences of x,y locations per points
-    tolerance: float (0-1), optional
-        tolerance percentile of the standard deviation. Default: 0.8 meaning that points that have a standard deviation
-        smaller than (larger or equal than, if option selected) the 0.8 quantile of all standard deviations kept.
+    method : str, optional
+        method to filter or split points into population. Currently implemented are "kmeans" (split using a simple
+        kmeans classification with two assumed groups), "std" (split using a standard deviation criterium), or "dist"
+        (using an absolute distance in pixels).
+    q_threshold: float (0-1), optional
+        tolerance percentile used for either the "dist" or "std" method (i.e. points that move more or less than the
+        distance, measured as provided quantile, based on all points in the population are in either one or the other
+        group). Default: 0.8 meaning that points that have a standard deviation smaller than (larger or equal than, if
+        other operator is selected) the 0.8 quantile of all standard deviations are returned.
+    abs_threshold: float (0-1), optional
+        tolerance absolute value used for either the "dist" or "std" method (i.e. points that move more or less than the
+        distance, measured as provided absolute threshold, based on all points in the population are in either one or
+        the other group). Overrules q_threshold when set.
     op: operator, optional
-        type of operation to test against (default: operator.ge)
+        type of operation to test point values (default: operator.ge)
 
     Returns
     -------
-    p: list of arrays
+    filter: np.ndarray 1D [length positions]
+        Boolean per position, defining if a point filters out as True or False given the set criterion.
         time sequences of x,y locations per points, after filtering
     """
     assert(method in ["kmeans", "std", "dist"]), f'Method must be "kmeans", "std" or "dist", but instead is {method}.'
@@ -195,24 +206,6 @@ def _get_shape(bbox, resolution=0.01, round=1):
     return cols, rows
 
 
-def _get_trajectory(cap, start_frame, end_frame):
-    # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
-    # get the displacements of trackable features
-    positions, stats = _get_displacements(cap, start_frame=start_frame, end_frame=end_frame)
-    # find kmeans classes for dry and wet particles and filter for likely land features
-    classes = _classify_displacements(positions, method="kmeans")
-    # select positions which are classified as water
-    positions_sel = positions[:, classes, :]
-    # now remove the upper quantiles of distance (i.e. very large trajectories) as well, to filter out water
-    classes = _classify_displacements(positions_sel, method="dist", q_threshold=0.4)
-    positions_sel = positions_sel[:, classes, :]
-    # retrieve the transformation matrices
-    ms = _ms_from_displacements(positions_sel)
-    # get the entire trajectory from all frames
-    return _trajectory_from_ms(ms)
-
-
-
 def _get_transform(bbox, resolution=0.01):
     """Return a rotated Affine transformation that fits with the bounding box and resolution.
 
@@ -289,101 +282,88 @@ def _get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
     dest_out = list(zip(_dest_x, _dest_y))
     return dest_out
 
-def m_from_displacement(p1, p2):
+
+def m_from_displacement(p1, p2, status):
     """
-    Calculate transform from pair of point locations
+    Calculate transform from pair of point locations, derived from Lukas Kanade optical flow.
+    The accompanying status array (see
+    https://docs.opencv.org/3.4/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323 is used to only
+    select points that were found in the optical flow algorithm.
 
     Parameters
     ----------
-    p1
-    p2
+    p1 : np.ndarray [n x 2]
+        point locations
+    p2 : np.ndarray [n x 2]
+        point locations (same as p1, but possibly displaced or rotated)
 
     Returns
     -------
+    m : affine matrix derived for 2D affine transform. Can be used with cv2.warpAffine
 
     """
+    # remove any points that have a status zero according to optical flow
+    p1 = p1[status == 1]
+    p2 = p2[status == 1]
     # add dim in the middle to match cv2 required array shape
     prev_pts = np.float64(np.expand_dims(p1, 1))
     curr_pts = np.float64(np.expand_dims(p2, 1))
     return cv2.estimateAffinePartial2D(prev_pts, curr_pts)[0]
 
 
-def _ms_from_displacements(p):
+def _ms_from_displacements(p, stats, key_point=0):
     """
-    Computes all transforms from list of point locations
+    Computes all transform matrices from list of point locations, found in frames, that are possibly moving.
+    The function returns transformation matrices that transform the position of all frames to one single frame (default
+    is the first frame)
 
     Parameters
     ----------
-    p:
+    p : np.ndarray [t x n x 2]
+        Location of traceable rigid body corner points (e.g. detected with good features to track and traced with
+        Lukas Kanade optical flow) through time
+        with t time steps, for n number of points, row column coordinates
+    stats : np.ndarray [t x n]
+        status of resolving optical flow (zero: not resolved, one: resolved, see
+        https://docs.opencv.org/3.4/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323
+    center_frame : int, optional
 
     Returns
     -------
+    ms : list
+        Contains affine transform matrix for each set of points. This list can be used to affine transform each
+        frame to match as closely as possible the frame chosen as central frame.
 
     """
-    return [m_from_displacement(p1, p2) for p1, p2 in zip(p[0:-1], p[1:])]
+    assert key_point >= 0 and key_point < len(p), f"Key point {int(key_point)} must be within range of point locations (0 - {len(p) - 1}."
+    return [m_from_displacement(p2, p[int(key_point)], status) for p2, status in zip(p, stats)]
 
 
-def _transform(img, dx, dy, da, reverse=True):
+def _transform(img, m):
     """
-    transforms an image with a certain dx, dy, angle displacement
+    Affine transforms an image using a specified affine transform matrix. Typically the transformation is derived
+    for image stabilization purposes.
+
     Parameters
     ----------
-    img :
-    dx :
-    dy :
-    da :
-    reverse : boolean, optional
-        if True (default), reverses the direction of transformation by using negatives of the provided transform
+    img : np.ndarray 2D [MxN] or 3D [MxNx3] if RGB image
+        Image used as input
+    m : np.ndarray [2x3]
+        Affine transformation
 
     Returns
     -------
-    img :
+    img_transform : np.ndarray 2D [MxN] or 3D [MxNx3] if RGB image
+        Image after affine transform applied
 
     """
+
     h = img.shape[0]
     w = img.shape[1]
-    if reverse:
-        dx = -dx
-        dy = -dy
-        da = -da
-
-    # Construct transformation matrix accordingly to dx, dy, da
-    m = np.zeros((2, 3), np.float32)
-    m[0, 0] = np.cos(da)
-    m[0, 1] = -np.sin(da)
-    m[1, 0] = np.sin(da)
-    m[1, 1] = np.cos(da)
-    m[0, 2] = dx
-    m[1, 2] = dy
     # Apply affine wrapping to the given frame
     img_transform = cv2.warpAffine(img, m, (w, h))
-
-    # # Fix border artifacts
-    # frame_stabilized = fixBorder(frame_stabilized)
     return img_transform
 
-def _trajectory_from_ms(ms):
-    """
-    Compute the trajectory as dx, dy, da (angle) of transformation matrices, following frame-to-frame movements of
-    fixed points
-
-    Parameters
-    ----------
-    ms : list of np.ndarray
-        n 2x3 transformation matrices of frame-to-frame differences
-
-    Returns
-    -------
-    trajectory : np.ndarray [nx3]
-        the trajectory of fixed points with n (amount of frames) x, y, a values
-
-    """
-    dxs = [0] + [m[0, 2] for m in ms]
-    dys = [0] + [m[1, 2] for m in ms]
-    # Extract rotation angle
-    das = [0] + [np.arctan2(m[1, 0], m[0, 0]) for m in ms]
-    transforms = np.array([[dx, dy, da] for dx, dy, da in zip(dxs, dys, das)])
-    return np.cumsum(transforms, axis=0)
 
 def get_M(src, dst):
     """Retrieve transformation matrix for between (4) src and (4) dst points
