@@ -4,6 +4,7 @@ import dask
 import dask.array as da
 import json
 
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import warnings
@@ -76,8 +77,8 @@ Camera configuration: {:s}
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
-        assert(stabilize in ["fixed", "moving"]), 'stabilize must be "fixed" or "moving"'
-        # self.trajectory = None
+        assert(stabilize in ["fixed", "moving", None]), 'stabilize must be "fixed" or "moving"'
+        self.feats_pos = None
         self.ms = None
         if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
@@ -113,8 +114,8 @@ Camera configuration: {:s}
         if stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
             recipe = const.CLASSIFY_STANDING_CAM if stabilize == "fixed" else const.CLASSIFY_MOVING_CAM
-            self.get_pos_feats(cap, recipe=recipe)
-            self.get_ms()
+            self._get_pos_feats(cap, recipe=recipe)
+            self._get_ms()
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
@@ -257,12 +258,10 @@ Camera configuration: {:s}
             raise IOError(f"Cannot read")
         if ret:
             if self.ms is not None:
-            # if self.trajectory is not None:
                 # correct for stabilization
-                # img = cv._transform(img, *self.trajectory[n])
                 h = img.shape[0]
                 w = img.shape[1]
-                img = cv2.warpAffine(img, self.ms[n-1], (w, h))
+                img = cv2.warpAffine(img, self.ms[n], (w, h))
 
             if lens_corr:
                 if self.camera_config.lens_pars is not None:
@@ -357,7 +356,7 @@ Camera configuration: {:s}
         return frames
 
 
-    def get_pos_feats(self, cap, recipe=const.CLASSIFY_STANDING_CAM):
+    def _get_pos_feats(self, cap, recipe=const.CLASSIFY_STANDING_CAM):
         # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
         # get the displacements of trackable features
         positions, stats = cv._get_displacements(
@@ -375,6 +374,31 @@ Camera configuration: {:s}
         self.feats_stats = stats
 
 
-    def get_ms(self):
+    def _get_ms(self):
         # retrieve the transformation matrices for stabilization
         self.ms = cv._ms_from_displacements(self.feats_pos, self.feats_stats)
+
+
+    def plot_rigid_pts(self, ax=None, **kwargs):
+        """
+        Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an
+        axes object.
+
+
+        Parameters
+        ----------
+        ax : plt.axes object, optional
+            If None (default), use the current axes.
+        **kwargs : additional keyword arguments to `matplotlib.pyplot.scatter` wrapped Matplotlib function.
+
+
+        Returns
+        -------
+
+        """
+        assert self.feats_pos is not None, "No stabilization applied hence no rigid points available to plot"
+        if ax is None:
+            ax = plt.axes()
+        for t_p in np.swapaxes(self.feats_pos, 0, 1):
+            p = ax.scatter(t_p[:, 0], t_p[:, 1], c=np.linspace(0, 1, len(t_p)), **kwargs)
+        return p

@@ -109,7 +109,7 @@ CLASSIFY_STANDING_CAM = [
     },
     {
         "method": "dist",
-        "q_threshold": 0.5,
+        "q_threshold": 0.8,
         "op": operator.le
     }
 ]

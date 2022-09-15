@@ -159,9 +159,9 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
     prev_pts = cv2.goodFeaturesToTrack(
         prev_gray,
         maxCorners=n_pts,
-        qualityLevel=0.01,
+        qualityLevel=0.1,
         minDistance=10,
-        blockSize=1
+        blockSize=3
     )
     # add start point to matrix
     positions = np.append(positions, np.swapaxes(prev_pts, 0, 1), axis=0)
@@ -169,7 +169,7 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
     pbar = tqdm(range(n_frames - 1))
     for i in pbar:
         # Read next frame
-        pbar.set_description(f"Processing frame {i}/{n_frames - 1}")
+        pbar.set_description(f"Stabilizing frames")
         success, curr = cap.read()
         if not success:
             raise IOError(f"Could not read frame {start_frame + i} from video")
@@ -311,7 +311,7 @@ def m_from_displacement(p1, p2, status):
     return cv2.estimateAffinePartial2D(prev_pts, curr_pts)[0]
 
 
-def _ms_from_displacements(p, stats, key_point=0):
+def _ms_from_displacements(pts, stats, key_point=0):
     """
     Computes all transform matrices from list of point locations, found in frames, that are possibly moving.
     The function returns transformation matrices that transform the position of all frames to one single frame (default
@@ -319,7 +319,7 @@ def _ms_from_displacements(p, stats, key_point=0):
 
     Parameters
     ----------
-    p : np.ndarray [t x n x 2]
+    pts : np.ndarray [t x n x 2]
         Location of traceable rigid body corner points (e.g. detected with good features to track and traced with
         Lukas Kanade optical flow) through time
         with t time steps, for n number of points, row column coordinates
@@ -335,8 +335,14 @@ def _ms_from_displacements(p, stats, key_point=0):
         frame to match as closely as possible the frame chosen as central frame.
 
     """
-    assert key_point >= 0 and key_point < len(p), f"Key point {int(key_point)} must be within range of point locations (0 - {len(p) - 1}."
-    return [m_from_displacement(p2, p[int(key_point)], status) for p2, status in zip(p, stats)]
+    assert key_point >= 0 and key_point < len(pts), f"Key point {int(key_point)} must be within range of point locations (0 - {len(pts) - 1}."
+    # TODO: approach to remove points before going to transformation is not working properly yet.
+    # # remove points that at some point disappear, by finding which points have status that sometimes is zero
+    # idx = stats.min(axis=0) == 0
+    # pts_sel = pts[:, idx, :]
+    # stats_sel = stats[:, idx]
+
+    return [m_from_displacement(p2, pts[int(key_point)], status) for p2, status in zip(pts, stats)]
 
 
 def _transform(img, m):
