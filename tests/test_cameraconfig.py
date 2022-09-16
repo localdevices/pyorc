@@ -100,7 +100,7 @@ def test_to_file(tmpdir, cam_config, cam_config_str):
     cam_config.to_file(fn)
     with open(fn, "r") as f:
         data = f.read()
-        assert(data==cam_config_str)
+        assert(data == cam_config_str)
 
 
 def test_load_camera_config(cam_config_fn, cam_config, lens_position):
