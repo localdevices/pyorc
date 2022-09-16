@@ -24,7 +24,8 @@ def gcps():
         z_0=1182.2,
         h_ref=0.
     )
-    
+
+
 @pytest.fixture
 def lens_position():
     return [642732.6705, 8304289.010, 1188.5]
@@ -37,20 +38,23 @@ def corners():
         [1200, 236],
         [1600, 834]
     ]
-    
+
+
 @pytest.fixture
 def lens_pars():
     return {
         "k1": 0,
-        "c": 2,
-        "f": 4
+        "c": 2.0,
+        "f": 1.0
     }
 
+
 @pytest.fixture
-def cam_config(gcps, lens_position, corners):
+def cam_config(gcps, lens_position, lens_pars, corners):
     return pyorc.CameraConfig(
         gcps=gcps,
         lens_position=lens_position,
+        lens_pars=lens_pars,
         corners=corners,
         window_size=25,
         resolution=0.01,
@@ -91,7 +95,12 @@ def cam_config_dict():
             'z_0': 1182.2
         },
         'window_size': 25,
-        'corners': [[292, 817], [50, 166], [1200, 236], [1600, 834]]
+        'corners': [[292, 817], [50, 166], [1200, 236], [1600, 834]],
+        'lens_pars': {
+            'k1': -3e-06,
+            'c': 2,
+            'f': 4.0
+        }
     }
 
 
@@ -132,7 +141,7 @@ def vid_cam_config_stabilize(cam_config):
         end_frame=125,
         camera_config=cam_config,
         h_a=0.,
-        stabilize=True
+        stabilize="fixed"
     )
     yield vid
 

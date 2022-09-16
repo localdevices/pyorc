@@ -40,8 +40,6 @@ Camera configuration: {:s}
             start_frame=None,
             end_frame=None,
             stabilize=None,
-            *args,
-            **kwargs
     ):
         """
         Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
@@ -70,15 +68,13 @@ Camera configuration: {:s}
             filter recipes used to distinguish rigid points from moving points for stabilization. Two flavours are
             currently implemented under pyorc.const.CLASSIFY_STANDING_CAM (for a camera that is kept as much as possible
             in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is moving across the objective).
-        args : list
-            arguments to pass to cv2.VideoCapture on initialization.
-        kwargs : dict
-            keyword arguments to pass to cv2.VideoCapture on initialization.
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
         assert(stabilize in ["fixed", "moving", None]), 'stabilize must be "fixed" or "moving"'
         self.feats_pos = None
+        self.feats_stats = None
+        self.feats_errs = None
         self.ms = None
         if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
@@ -120,7 +116,6 @@ Camera configuration: {:s}
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
         # set other properties
-        # if h_a is not None:
         self.h_a = h_a
         # make camera config part of the vidoe object
         if camera_config is not None:
@@ -128,7 +123,6 @@ Camera configuration: {:s}
         self.fn = fn
         self._stills = {}  # here all stills are stored lazily
         # nothing to be done at this stage, release file for now.
-        # self.set(cv2.CAP_PROP_POS_FRAMES, 0)
         cap.release()
         del cap
 
@@ -359,7 +353,7 @@ Camera configuration: {:s}
     def _get_pos_feats(self, cap, recipe=const.CLASSIFY_STANDING_CAM):
         # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
         # get the displacements of trackable features
-        positions, stats = cv._get_displacements(
+        positions, stats, errs = cv._get_displacements(
             cap,
             start_frame=self.start_frame,
             end_frame=self.end_frame
@@ -372,7 +366,7 @@ Camera configuration: {:s}
             stats = stats[:, classes]
         self.feats_pos = positions
         self.feats_stats = stats
-
+        self.feats_errs = errs
 
     def _get_ms(self):
         # retrieve the transformation matrices for stabilization

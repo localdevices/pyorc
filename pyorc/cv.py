@@ -155,6 +155,7 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
     # prepare storage for points
     positions = np.zeros((0, n_pts, 2), np.float32)
     stats = np.ones((1, n_pts))
+    errs = np.ones((1, n_pts))
 
     prev_pts = cv2.goodFeaturesToTrack(
         prev_gray,
@@ -183,10 +184,11 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
         # store curr_pts
         positions = np.append(positions, np.swapaxes(curr_pts, 0, 1), axis=0)
         stats = np.append(stats, np.swapaxes(status, 0, 1), axis=0)
+        errs = np.append(errs, np.swapaxes(err, 0, 1), axis=0)
         # prepare next frame
         prev_gray = curr_gray
         prev_pts = curr_pts
-    return positions, stats
+    return positions, stats, errs
 
 
 def _get_shape(bbox, resolution=0.01, round=1):
@@ -311,7 +313,7 @@ def m_from_displacement(p1, p2, status):
     return cv2.estimateAffinePartial2D(prev_pts, curr_pts)[0]
 
 
-def _ms_from_displacements(pts, stats, key_point=0):
+def _ms_from_displacements(pts, stats, key_point=0, smooth=True):
     """
     Computes all transform matrices from list of point locations, found in frames, that are possibly moving.
     The function returns transformation matrices that transform the position of all frames to one single frame (default
@@ -339,10 +341,37 @@ def _ms_from_displacements(pts, stats, key_point=0):
     # TODO: approach to remove points before going to transformation is not working properly yet.
     # # remove points that at some point disappear, by finding which points have status that sometimes is zero
     # idx = stats.min(axis=0) == 0
-    # pts_sel = pts[:, idx, :]
-    # stats_sel = stats[:, idx]
+    # pts = pts[:, idx, :]
+    # stats = stats[:, idx]
 
-    return [m_from_displacement(p2, pts[int(key_point)], status) for p2, status in zip(pts, stats)]
+    ms = [m_from_displacement(p2, pts[int(key_point)], status) for p2, status in zip(pts, stats)]
+    if smooth:
+        ms = _ms_smooth(ms)
+    return ms
+
+def _ms_smooth(ms, q=98):
+    def fill_1d(yp, xp):
+        idx = np.isfinite(yp)
+        yp_sel = yp[idx]
+        xp_sel = xp[idx]
+        return np.interp(xp, xp_sel, yp_sel)
+
+    ms = np.array(ms).reshape(len(ms), 6)
+
+    dms = np.diff(ms, axis=0)
+    tol = np.percentile(np.abs(dms), q, axis=0)
+
+    # remove values beyond the quyantile
+    dms[np.abs(dms) > tol] = np.nan
+
+    # also remove when one of the signals is nan
+    dms[np.isnan(dms.sum(axis=-1))] = np.nan
+
+    # fill the removed values with linear interpolated values
+    dms_fill = np.apply_along_axis(fill_1d, 0, dms, np.arange(len(dms)))
+    dms_fill = np.append(np.expand_dims(ms[0], 0), dms_fill, axis=0)
+    ms_out = list(np.cumsum(dms_fill, axis=0).reshape(len(ms), 2, 3))
+    return ms_out
 
 
 def _transform(img, m):
@@ -440,9 +469,6 @@ def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
         img : np.ndarray
             reprojected data with shape=shape
     """
-    if not(isinstance(img, np.ndarray)):
-        # load values here
-        img = img.values
     return cv2.warpPerspective(img, M, shape, flags=flags)
 
 
@@ -467,13 +493,9 @@ def get_aoi(src, dst, src_corners):
     # dst AOI remains the same for any movie
     M_gcp = get_M(src=src, dst=dst)
     # prepare a simple temporary np.array of the src_corners
-    try:
-        _src_corners = np.array(
-            src_corners
-        )
-    except:
-        raise ValueError("src_corner coordinates not having expected format")
-    assert(_src_corners.shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is {src_corners.shape}"
+    _src_corners = np.array(src_corners)
+    assert(_src_corners.shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. " \
+                                        f"Current shape is {src_corners.shape} "
     # reproject corner points to the actual space in coordinates
     _dst_corners = cv2.perspectiveTransform(np.float32([_src_corners]), M_gcp)[0]
     polygon = Polygon(_dst_corners)
