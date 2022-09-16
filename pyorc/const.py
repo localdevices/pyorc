@@ -1,3 +1,4 @@
+import operator
 # attributes for PIV variables
 PIV_ATTRS = {
     "v_x": {
@@ -88,3 +89,27 @@ FIGURE_ARGS = {
     "figsize": (16, 9),
     "frameon": False,
 }
+
+CLASSIFY_MOVING_CAM = [
+    {
+        "method": "kmeans",
+        "op": operator.ge
+    },
+    {
+        "method": "dist",
+        "q_threshold": 0.5,
+        "op": operator.ge
+    }
+]
+
+CLASSIFY_STANDING_CAM = [
+    {
+        "method": "kmeans",
+        "op": operator.le
+    },
+    {
+        "method": "dist",
+        "q_threshold": 0.8,
+        "op": operator.le
+    }
+]

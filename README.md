@@ -128,14 +128,14 @@ License
 
 **pyorc** uses the following libraries and software with said licenses.
 
-| Package                | Version  | License                            |
-|------------------------|----------|------------------------------------|
-| numpy                  | 1.21.4   | BSD License                        |
-| opencv-python-headless | 4.5.4.60 | MIT License                        |                                                                                      
-| openpiv                | 0.23.8   | GPLv3                              |                                                                                      
-| matplotlib             | 3.5.1    | Python Software Foundation License |                                                               
-| geopandas              | 0.10.2   | BSD License                        |                                                                                              
- | pandas                 | 1.3.5    | BSD License                        |                                                                                      
+| Package    | Version | License                            |
+|------------|---------|------------------------------------|
+| numpy      | 1.23.2  | BSD License                        |
+| opencv2    | 4.6.0   | MIT License                        |                                                                                      
+| openpiv    | 0.23.8  | GPLv3                              |                                                                                      
+| matplotlib | 3.5.3   | Python Software Foundation License |                                                               
+| geopandas  | 0.10.2  | BSD License                        |                                                                                              
+ | pandas     | 1.4.3   | BSD License                        |                                                                                      
 
 Project organisation
 --------------------
@@ -151,4 +151,6 @@ Project organisation
         ├── ...             <- individual notebooks and folder with example data files
     ├── pyorc               <- pyorc library
         ├── ...             <- pyorc functions and API files
+    ├── tests               <- pytest suite
+        ├── ...             <- pytest functions on API level
 

@@ -205,18 +205,14 @@ class Velocimetry(ORCBase):
         # s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            # s_std = s.std(dim="time")
             x_std = self._obj[v_x].std(dim="time")
             y_std = self._obj[v_y].std(dim="time")
-        x_mean = self._obj[v_x].mean(dim="time")
-        y_mean = self._obj[v_y].mean(dim="time")
-        x_var = np.abs(x_std / x_mean)
-        y_var = np.abs(y_std / y_mean)
-
-        # s_mean = s.mean(dim="time")
-        # s_var = s_std / s_mean
-        x_condition = np.abs((self._obj[v_x] - x_mean) / x_std) < tolerance_sample
-        y_condition = np.abs((self._obj[v_y] - y_mean) / y_std) < tolerance_sample
+            x_mean = self._obj[v_x].mean(dim="time")
+            y_mean = self._obj[v_y].mean(dim="time")
+            x_var = np.abs(x_std / x_mean)
+            y_var = np.abs(y_std / y_mean)
+            x_condition = np.abs((self._obj[v_x] - x_mean) / x_std) < tolerance_sample
+            y_condition = np.abs((self._obj[v_y] - y_mean) / y_std) < tolerance_sample
         if mode == "or":
             condition = np.any([x_condition, y_condition], axis=0)
         else:
@@ -379,7 +375,7 @@ class Velocimetry(ORCBase):
             return ds_slice
         ds_g = self._obj.groupby("time")
         self._obj.update(
-            ds_g.apply(
+            ds_g.map(
                 _filter_nan,
                 v_x=v_x,
                 v_y=v_y,
@@ -437,7 +433,7 @@ class Velocimetry(ORCBase):
             return ds_slice
         ds_g = self._obj.groupby("time")
         self._obj.update(
-            ds_g.apply(_filter_median, v_x=v_x, v_y=v_y, tolerance=tolerance, wdw=wdw, missing=missing)
+            ds_g.map(_filter_median, v_x=v_x, v_y=v_y, tolerance=tolerance, wdw=wdw, missing=missing)
         )
 
 

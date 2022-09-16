@@ -206,10 +206,7 @@ class CameraConfig:
         -------
         h : float
         """
-        if self.gcps["h_ref"] is None:
-            h_ref = 0.
-        else:
-            h_ref = self.gcps["h_ref"]
+        h_ref = 0 if self.gcps["h_ref"] is None else self.gcps["h_ref"]
         h = z + h_ref - self.gcps["z_0"]
         return h
 

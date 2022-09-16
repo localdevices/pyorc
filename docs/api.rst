@@ -95,6 +95,7 @@ Class and properties
     Video.end_frame
     Video.start_frame
     Video.corners
+    Video.plot_rigid_pts
 
 Getting frames from video objects
 ---------------------------------

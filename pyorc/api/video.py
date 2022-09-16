@@ -4,6 +4,7 @@ import dask
 import dask.array as da
 import json
 
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import warnings
@@ -23,7 +24,13 @@ end frame: {:d}
 Camera configuration: {:s}
         """.format
 
-        return template(self.fn, self.fps, self.start_frame, self.end_frame, self.camera_config.__repr__() if hasattr(self, "camera_config") else "none")
+        return template(
+            self.fn,
+            self.fps,
+            self.start_frame,
+            self.end_frame,
+            self.camera_config.__repr__() if hasattr(self, "camera_config") else "none"
+        )
 
     def __init__(
             self,
@@ -32,27 +39,43 @@ Camera configuration: {:s}
             h_a=None,
             start_frame=None,
             end_frame=None,
-            *args,
-            **kwargs
+            stabilize=None,
     ):
         """
         Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
         frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
         These can then be processed with other pyorc API functionalities.
 
-        :param fn: str, locally stored video file
-        :param camera_config: CameraConfig object, containing all information about the camera, lens parameters, lens
-            position, ground control points with GPS coordinates, and all referencing information (see CameraConfig),
-            needed to reproject frames on a horizontal geographically referenced plane.
-        :param h_a: float, actual height [m], measured in local vertical reference during the video (e.g. a staff gauge
-            in view of the camera)
-        :param start_frame: int, first frame to use in analysis
-        :param end_frame: int, last frame to use in analysis
-        :param args: list or tuple, arguments to pass to cv2.VideoCapture on initialization.
-        :param kwargs: dict, keyword arguments to pass to cv2.VideoCapture on initialization.
+        Parameters
+        ----------
+        fn : str
+            Locally stored video file
+        camera_config : pyorc.CameraConfig, optional
+            contains all information about the camera, lens parameters, lens position, ground control points with GPS
+            coordinates, and all referencing information (see CameraConfig), needed to reproject frames on a horizontal
+            geographically referenced plane.
+        h_a : float, optional
+            actual height [m], measured in local vertical reference during the video (e.g. a staff gauge in view of
+            the camera)
+        start_frame : int, optional
+            first frame to use in analysis (default: 0)
+        end_frame : int, optional
+            last frame to use in analysis (if not set, last frame available in video will be used)
+        stabilize : optional
+            If set, the video will be stabilized by attempting to find rigid points (see recipe) and track these with
+            Lukas Kanade optical flow.
+        recipe : dict, optional
+            filter recipes used to distinguish rigid points from moving points for stabilization. Two flavours are
+            currently implemented under pyorc.const.CLASSIFY_STANDING_CAM (for a camera that is kept as much as possible
+            in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is moving across the objective).
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
+        assert(stabilize in ["fixed", "moving", None]), 'stabilize must be "fixed" or "moving"'
+        self.feats_pos = None
+        self.feats_stats = None
+        self.feats_errs = None
+        self.ms = None
         if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
             if h_a is not None:
@@ -67,7 +90,7 @@ Camera configuration: {:s}
         # super().__init__(*args, **kwargs)
         cap = cv2.VideoCapture(fn)
         # explicitly open file for reading
-        # self.open(fn)
+
         # set end and start frame
         self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if start_frame is not None:
@@ -84,10 +107,15 @@ Camera configuration: {:s}
             end_frame = self.frame_count
         self.end_frame = end_frame
         self.start_frame = start_frame
+        if stabilize is not None:
+            # select the right recipe dependent on the movie being fixed or moving
+            recipe = const.CLASSIFY_STANDING_CAM if stabilize == "fixed" else const.CLASSIFY_MOVING_CAM
+            self._get_pos_feats(cap, recipe=recipe)
+            self._get_ms()
+
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.frame_number = 0
         # set other properties
-        # if h_a is not None:
         self.h_a = h_a
         # make camera config part of the vidoe object
         if camera_config is not None:
@@ -95,7 +123,6 @@ Camera configuration: {:s}
         self.fn = fn
         self._stills = {}  # here all stills are stored lazily
         # nothing to be done at this stage, release file for now.
-        # self.set(cv2.CAP_PROP_POS_FRAMES, 0)
         cap.release()
         del cap
 
@@ -144,6 +171,7 @@ Camera configuration: {:s}
             self._end_frame = self.frame_count
         else:
             self._end_frame = min(self.frame_count, end_frame)
+
 
     @property
     def h_a(self):
@@ -223,6 +251,12 @@ Camera configuration: {:s}
         except:
             raise IOError(f"Cannot read")
         if ret:
+            if self.ms is not None:
+                # correct for stabilization
+                h = img.shape[0]
+                w = img.shape[1]
+                img = cv2.warpAffine(img, self.ms[n], (w, h))
+
             if lens_corr:
                 if self.camera_config.lens_pars is not None:
                     # apply lens distortion correction
@@ -315,3 +349,50 @@ Camera configuration: {:s}
         frames.name = "frames"
         return frames
 
+
+    def _get_pos_feats(self, cap, recipe=const.CLASSIFY_STANDING_CAM):
+        # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
+        # get the displacements of trackable features
+        positions, stats, errs = cv._get_displacements(
+            cap,
+            start_frame=self.start_frame,
+            end_frame=self.end_frame
+        )
+        # filter features that belong to actual camera movement
+        for recipe in recipe:
+            classes = cv._classify_displacements(positions, **recipe)
+            # select positions which are classified as water
+            positions = positions[:, classes, :]
+            stats = stats[:, classes]
+        self.feats_pos = positions
+        self.feats_stats = stats
+        self.feats_errs = errs
+
+    def _get_ms(self):
+        # retrieve the transformation matrices for stabilization
+        self.ms = cv._ms_from_displacements(self.feats_pos, self.feats_stats)
+
+
+    def plot_rigid_pts(self, ax=None, **kwargs):
+        """
+        Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an
+        axes object.
+
+
+        Parameters
+        ----------
+        ax : plt.axes object, optional
+            If None (default), use the current axes.
+        **kwargs : additional keyword arguments to `matplotlib.pyplot.scatter` wrapped Matplotlib function.
+
+
+        Returns
+        -------
+
+        """
+        assert self.feats_pos is not None, "No stabilization applied hence no rigid points available to plot"
+        if ax is None:
+            ax = plt.axes()
+        for t_p in np.swapaxes(self.feats_pos, 0, 1):
+            p = ax.scatter(t_p[:, 0], t_p[:, 1], c=np.linspace(0, 1, len(t_p)), **kwargs)
+        return p

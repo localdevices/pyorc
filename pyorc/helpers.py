@@ -307,8 +307,8 @@ def optimize_log_profile(
     pars : dict
         fitted parameters of log_profile {z_0, k_max, s0 and s1}
     """
-    if dist_bank is None:
-        dist_bank = np.ones(len(v)) * np.inf
+    # replace by infinites if not provided
+    dist_bank = np.ones(len(v)) * np.inf if dist_bank is None else dist_bank
     v = np.array(v)
     z = np.array(z)
     X = (z, dist_bank)
@@ -349,9 +349,7 @@ def rotate_u_v(u, v, theta, deg=False):
     v_rot : float, np.ndarray or xr.DataArray
         rotated y-direction component of vector
     """
-    if deg:
-        # convert to radians first
-        theta = np.radians(theta)
+    theta = np.radians(theta) if deg else theta
     c, s = np.cos(theta), np.sin(theta)
     r = np.array(((c, -s), (s, c)))
     # compute rotations with dot-product
@@ -578,9 +576,16 @@ def xy_transform(x, y, crs_from, crs_to):
     transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
     # transform dst coordinates to local projection
     x_trans, y_trans = transform.transform(x, y)
-    if np.all(np.isinf(x_trans)):
-        raise ValueError(
-            "Transformation did not give valid results, please check if the provided crs of input "
-            "coordinates is correct."
+    # check if finites are found, if not raise error
+    assert(
+        not(
+            np.all(np.isinf(x_trans))
         )
+    ), "Transformation did not give valid results, please check if the provided crs of input coordinates is correct."
+
+    # if np.all(np.isinf(x_trans)):
+    #     raise ValueError(
+    #         "Transformation did not give valid results, please check if the provided crs of input "
+    #         "coordinates is correct."
+    #     )
     return transform.transform(x, y)

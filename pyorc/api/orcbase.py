@@ -56,10 +56,13 @@ class ORCBase(object):
 
     @camera_shape.setter
     def camera_shape(self, cam_shape):
-        if isinstance(cam_shape, str):
-            self._camera_shape = helpers.deserialize_attr(self._obj, "camera_shape", np.array)
-        else:
-            self._camera_shape = self._obj.camera_shape
+        self._camera_shape = self._obj.camera_shape if not(isinstance(cam_shape, str)) else np.array(
+            eval(self._obj.camera_shape)
+        )
+        # if isinstance(cam_shape, str):
+        #     self._camera_shape = helpers.deserialize_attr(self._obj, "camera_shape", np.array)
+        # else:
+        #     self._camera_shape = self._obj.camera_shape
 
     def _set_camera_config(self):
         # set the camera config
