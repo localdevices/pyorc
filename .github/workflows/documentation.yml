@@ -1,0 +1,55 @@
+name: Build Docs
+
+# We don't want pushes (or PRs) to gh-pages to kick anything off
+on:
+  workflow_dispatch
+
+jobs:
+  # Build docs on Linux
+  Docs:
+    name: linux docs
+    runs-on: ubuntu-latest
+    env:
+      DOC_VERSION: dev
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: "3.10"
+          mamba-version: "*"
+          channels: conda-forge,defaults
+          channel-priority: true
+          environment-file: envs/pyorc-dev.yml
+          activate-environment: pyorc-dev
+
+      - name: Install pyorc
+        run: pip install .
+
+      - name: Install docs requirements
+        run: pip install -r docs/requirements.txt
+
+      - name: Build docs
+        run: |
+          pushd docs
+          make html
+          popd
+
+      - name: Set doc version
+        run: echo "DOC_VERSION=$(python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
+
+      - name: Upload to GitHub Pages
+        if: ${{ github.event_name != 'pull_request'}}
+        uses: peaceiris/actions-gh-pages@v3.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build/html
+          exclude_assets: '.buildinfo,_sources/*,_examples/*.ipynb'
+          destination_dir: ./${{ env.DOC_VERSION }}
+          keep_files: false
+          full_commit_message: Deploy ${{ env.DOC_VERSION }} to GitHub Pages
