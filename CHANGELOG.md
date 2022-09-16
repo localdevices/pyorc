@@ -1,3 +1,18 @@
+## [0.2.4] - 2022-09-16
+### Added
+- pyorc.Video added stabilize option for video stabilization
+- Start with user guide
+- Improved pytest code coverage
+
+### Changed
+
+### Deprecated
+### Removed
+### Fixed
+
+### Security
+
+
 ## [0.2.3] - 2022-08-10
 ### Added
 ### Changed
