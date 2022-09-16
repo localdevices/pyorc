@@ -1,6 +1,0 @@
-﻿pyorc.Frames.camera\_config
-===========================
-
-.. currentmodule:: pyorc
-
-.. autoproperty:: Frames.camera_config

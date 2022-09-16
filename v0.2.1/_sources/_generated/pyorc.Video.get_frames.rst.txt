@@ -1,6 +1,0 @@
-﻿pyorc.Video.get\_frames
-=======================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Video.get_frames

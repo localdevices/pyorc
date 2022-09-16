@@ -1,6 +1,0 @@
-﻿pyorc.CameraConfig.transform
-============================
-
-.. currentmodule:: pyorc
-
-.. autoproperty:: CameraConfig.transform

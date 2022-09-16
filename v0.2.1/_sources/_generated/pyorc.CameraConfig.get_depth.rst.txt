@@ -1,6 +1,0 @@
-﻿pyorc.CameraConfig.get\_depth
-=============================
-
-.. currentmodule:: pyorc
-
-.. automethod:: CameraConfig.get_depth

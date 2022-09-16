@@ -1,6 +1,0 @@
-﻿pyorc.Transect.plot.quiver
-==========================
-
-.. currentmodule:: pyorc
-
-.. autoaccessormethod:: Transect.plot.quiver

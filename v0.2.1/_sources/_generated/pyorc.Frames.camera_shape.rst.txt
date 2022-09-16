@@ -1,6 +1,0 @@
-﻿pyorc.Frames.camera\_shape
-==========================
-
-.. currentmodule:: pyorc
-
-.. autoproperty:: Frames.camera_shape

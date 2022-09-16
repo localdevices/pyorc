@@ -1,6 +1,0 @@
-﻿pyorc.Video.camera\_config
-==========================
-
-.. currentmodule:: pyorc
-
-.. autoproperty:: Video.camera_config

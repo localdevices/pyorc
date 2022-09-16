@@ -1,6 +1,0 @@
-﻿pyorc.Transect.camera\_shape
-============================
-
-.. currentmodule:: pyorc
-
-.. autoproperty:: Transect.camera_shape

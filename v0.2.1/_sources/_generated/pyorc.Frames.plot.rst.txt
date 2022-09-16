@@ -1,6 +1,0 @@
-﻿pyorc.Frames.plot
-=================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Frames.plot

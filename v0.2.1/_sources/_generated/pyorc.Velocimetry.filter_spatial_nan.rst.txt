@@ -1,6 +1,0 @@
-﻿pyorc.Velocimetry.filter\_spatial\_nan
-======================================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Velocimetry.filter_spatial_nan

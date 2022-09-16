@@ -1,6 +1,0 @@
-﻿pyorc.CameraConfig.set\_lens\_pars
-==================================
-
-.. currentmodule:: pyorc
-
-.. automethod:: CameraConfig.set_lens_pars

@@ -1,6 +1,0 @@
-﻿pyorc.Transect.plot
-===================
-
-.. currentmodule:: pyorc
-
-.. autoaccessormethod:: Transect.plot

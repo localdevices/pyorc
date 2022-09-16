@@ -1,6 +1,0 @@
-﻿pyorc.Transect.get\_river\_flow
-===============================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Transect.get_river_flow

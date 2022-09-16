@@ -1,6 +1,0 @@
-﻿pyorc.CameraConfig.plot
-=======================
-
-.. currentmodule:: pyorc
-
-.. automethod:: CameraConfig.plot

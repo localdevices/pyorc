@@ -1,6 +1,0 @@
-﻿pyorc.Velocimetry.camera\_config
-================================
-
-.. currentmodule:: pyorc
-
-.. autoproperty:: Velocimetry.camera_config

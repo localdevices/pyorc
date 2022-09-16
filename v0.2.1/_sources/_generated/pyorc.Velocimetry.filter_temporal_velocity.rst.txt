@@ -1,6 +1,0 @@
-﻿pyorc.Velocimetry.filter\_temporal\_velocity
-============================================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Velocimetry.filter_temporal_velocity

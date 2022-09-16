@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyorc.api.transect &#8212; pyorc 0.2.4 documentation</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyorc/api/transect';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">pyorc 0.2.4 documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../intro.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../quickstart.html">
+                        Quick start
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../manual/index.html">
+                        Manual
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api.html">
+                        API reference
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../intro.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../quickstart.html">
+                        Quick start
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../manual/index.html">
+                        Manual
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api.html">
+                        API reference
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for pyorc.api.transect</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">from</span> <span class="nn">xarray.core</span> <span class="kn">import</span> <span class="n">utils</span>
+
+<span class="kn">from</span> <span class="nn">pyorc</span> <span class="kn">import</span> <span class="n">helpers</span>
+<span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">_Transect_PlotMethods</span>
+<span class="kn">from</span> <span class="nn">.orcbase</span> <span class="kn">import</span> <span class="n">ORCBase</span>
+
+
+<div class="viewcode-block" id="Transect"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.html#pyorc.Transect">[docs]</a><span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;transect&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Transect</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transect functionalities that can be applied on ``xarray.Dataset``&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Transect.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.html#pyorc.Transect.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a transect ``xarray.Dataset`` containing cross sectional velocities in [time, points] dimensions</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xarray_obj: xr.Dataset</span>
+<span class="sd">            transect data fields (from ``pyorc.Velocimetry.get_transect``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Transect</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Transect.vector_to_scalar"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">vector_to_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_x : str, optional</span>
+<span class="sd">            name of variable containing x-directional velocities. (default: &quot;v_x&quot;)</span>
+<span class="sd">        v_y :</span>
+<span class="sd">            name of variable containing y-directional velocities. (default: &quot;v_y&quot;)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        da : xr.DataArray</span>
+<span class="sd">            velocities perpendicular to cross section [time, points]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># find points that are located on the area of interest</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">ys</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="c1"># compute per velocity vector in the dataset, what its angle is</span>
+        <span class="n">v_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">])</span>
+        <span class="c1"># compute the scalar value of velocity</span>
+        <span class="n">v_scalar</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_x</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_y</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+
+        <span class="c1"># compute difference in angle between velocity and perpendicular of cross section</span>
+        <span class="n">flow_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;v_dir&quot;</span><span class="p">]</span>
+        <span class="n">angle_diff</span> <span class="o">=</span> <span class="n">v_angle</span> <span class="o">-</span> <span class="n">flow_dir</span>
+        <span class="c1"># compute effective velocity in the flow direction (i.e. perpendicular to cross section)</span>
+        <span class="n">v_eff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle_diff</span><span class="p">)</span> <span class="o">*</span> <span class="n">v_scalar</span>
+        <span class="n">v_eff</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;standard_name&quot;</span><span class="p">:</span> <span class="s2">&quot;velocity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;long_name&quot;</span><span class="p">:</span> <span class="s2">&quot;velocity in perpendicular direction of cross section, measured by angle in radians, &quot;</span>
+                         <span class="s2">&quot;measured from up-direction&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;m s-1&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># set name</span>
+        <span class="n">v_eff</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;v_eff_nofill&quot;</span>  <span class="c1"># there still may be gaps in this series</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;v_eff_nofill&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_eff</span></div>
+
+<div class="viewcode-block" id="Transect.get_xyz_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyz_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_outside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get camera-perspective column, row coordinates from cross-section locations.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        M : np.ndarray, optional</span>
+<span class="sd">             perspective transform matrix (Default value = None)</span>
+<span class="sd">        xs : np.array, optional</span>
+<span class="sd">            x-coordinates to transform, derived from self.x if not provided (Default value = None)</span>
+<span class="sd">        ys :</span>
+<span class="sd">            y-coordinates to transform, derived from self.y if not provided (Default value = None)</span>
+<span class="sd">        mask_outside :</span>
+<span class="sd">            values not fitting in the original camera frame are set to NaN (Default value = True)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cols : list of ints</span>
+<span class="sd">            columns of locations in original camera perspective</span>
+<span class="sd">        rows : list of ints</span>
+<span class="sd">            rows of locations in original camera perspective</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">xs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="n">ys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># compute bathymetry as measured in local height reference (such as staff gauge)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">h_ref</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span>
+        <span class="n">hs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">z_to_h</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">zcoords</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># zs = (self._obj.zcoords - self.camera_config.gcps[&quot;z_0&quot;] + h_ref).values</span>
+        <span class="k">if</span> <span class="n">M</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Ms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hs</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># use user defined M instead</span>
+            <span class="n">Ms</span> <span class="o">=</span> <span class="p">[</span><span class="n">M</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs</span><span class="p">]</span>
+        <span class="c1"># compute row and column position of vectors in original reprojected background image col/row coordinates</span>
+        <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
+            <span class="n">helpers</span><span class="o">.</span><span class="n">xy_to_perspective</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span>
+                <span class="n">y</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                <span class="n">M</span><span class="p">,</span>
+                <span class="n">reverse_y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">M</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">Ms</span><span class="p">)</span>
+        <span class="p">])</span>
+
+        <span class="c1"># ensure y coordinates start at the top in the right orientation</span>
+        <span class="n">shape_y</span><span class="p">,</span> <span class="n">shape_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">shape_y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_outside</span><span class="p">:</span>
+            <span class="c1"># remove values that do not fit in the frames</span>
+            <span class="n">cols</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">cols</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cols</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">rows</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">rows</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rows</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">return</span> <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span></div>
+
+
+<div class="viewcode-block" id="Transect.get_river_flow"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_river_flow.html#pyorc.Transect.get_river_flow">[docs]</a>    <span class="k">def</span> <span class="nf">get_river_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">Q_name</span><span class="o">=</span><span class="s2">&quot;river_flow&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1]</span>
+<span class="sd">        estimating one or several quantiles over the time dimension. Depth average velocities must first have been</span>
+<span class="sd">        estimated using get_q. A variable &quot;Q&quot; will be added to Dataset, with only &quot;quantiles&quot; as dimension.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        q_name : str, optional</span>
+<span class="sd">             name of variable where depth integrated velocities [m2 s-1] are stored (Default value = &quot;q&quot;)</span>
+<span class="sd">        Q_name : str, optional</span>
+<span class="sd">             name of variable where resulting width integrated river flow estimates must be stored</span>
+<span class="sd">             (Default value = &quot;river_flow&quot;)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;q&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dataset must contain variable &quot;</span><span class="si">{</span><span class="n">q_name</span><span class="si">}</span><span class="s1">&quot;, which is the depth-integrated velocity [m2 s-1], perpendicular to cross-section. Create this with ds.transect.get_q&#39;</span><span class="p">)</span>
+        <span class="c1"># integrate over the distance coordinates (s-coord)</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">q_name</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="s2">&quot;scoords&quot;</span><span class="p">)</span>
+        <span class="n">Q</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;standard_name&quot;</span><span class="p">:</span> <span class="s2">&quot;river_discharge&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;long_name&quot;</span><span class="p">:</span> <span class="s2">&quot;River Flow&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;m3 s-1&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># set name</span>
+        <span class="n">Q</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Q&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">Q_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span></div>
+
+<div class="viewcode-block" id="Transect.get_q"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_q.html#pyorc.Transect.get_q">[docs]</a>    <span class="k">def</span> <span class="nf">get_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_corr</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">fill_method</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and</span>
+<span class="sd">        depth-average velocity.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_corr : float, optional</span>
+<span class="sd">            correction factor (default: 0.9)</span>
+<span class="sd">        fill_method : method to fill missing values. &quot;zeros&quot; fills NaNS with zeros, &quot;interpolate&quot; interpolates values</span>
+<span class="sd">            from nearest neighbour, &quot;log_interp&quot; interpolates values linearly with velocities scaled by the log of</span>
+<span class="sd">             depth over a roughness length, &quot;log_fit&quot; fits a 4-parameter logarithmic profile with depth and with</span>
+<span class="sd">             changing velocities towards banks on known velocities, and fills missing with the fitted relationship</span>
+<span class="sd">             (experimental) (Default value = &quot;zeros&quot;).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds : xr.Dataset</span>
+<span class="sd">            Transect for selected quantiles in time, with &quot;q_nofill&quot; containing the integrated values, and &quot;q&quot; the</span>
+<span class="sd">            integrated values, filled with chosen fill method.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># aggregate to a limited set of quantiles</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">fill_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;zeros&quot;</span><span class="p">,</span> <span class="s2">&quot;log_fit&quot;</span><span class="p">,</span> <span class="s2">&quot;log_interp&quot;</span><span class="p">,</span> <span class="s2">&quot;interpolate&quot;</span><span class="p">]),</span>\
+            <span class="sa">f</span><span class="s1">&#39;fill_method must be &quot;zeros&quot;, &quot;log_fit&quot;, &quot;log_interp&quot;, or &quot;interpolate&quot;, instead &quot;</span><span class="si">{</span><span class="n">fill_method</span><span class="si">}</span><span class="s1">&quot; given&#39;</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;xcoords&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;ycoords&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;zcoords&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># add filled surface velocities with a logarithmic profile curve fit</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">get_depth</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fill_method</span> <span class="o">==</span> <span class="s2">&quot;zeros&quot;</span><span class="p">:</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff_nofill&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fill_method</span> <span class="o">==</span> <span class="s2">&quot;log_fit&quot;</span><span class="p">:</span>
+            <span class="n">dist_shore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">get_dist_shore</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">velocity_log_fit</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff_nofill&quot;</span><span class="p">],</span> <span class="n">depth</span><span class="p">,</span> <span class="n">dist_shore</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;quantile&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fill_method</span> <span class="o">==</span> <span class="s2">&quot;log_interp&quot;</span><span class="p">:</span>
+            <span class="n">dist_wall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">get_dist_wall</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">velocity_log_interp</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff_nofill&quot;</span><span class="p">],</span> <span class="n">dist_wall</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;quantile&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fill_method</span> <span class="o">==</span> <span class="s2">&quot;interpolate&quot;</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">zcoords</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">get_depth</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">zcoords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
+            <span class="c1"># interpolate gaps in between known values</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff_nofill&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;points&quot;</span><span class="p">)</span>
+            <span class="c1"># anywhere where depth == 0, remove values</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># fill NAs with zeros</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
+        <span class="c1"># compute q for both non-filled and filled velocities</span>
+        <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;q_nofill&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">depth_integrate</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff_nofill&quot;</span><span class="p">],</span> <span class="n">v_corr</span><span class="o">=</span><span class="n">v_corr</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;q_nofill&quot;</span><span class="p">)</span>
+        <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;q&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">depth_integrate</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;v_eff&quot;</span><span class="p">],</span> <span class="n">v_corr</span><span class="o">=</span><span class="n">v_corr</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ds</span></div>
+
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">UncachedAccessor</span><span class="p">(</span><span class="n">_Transect_PlotMethods</span><span class="p">)</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022, Rainbow Sensing.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

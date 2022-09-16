@@ -1,6 +1,0 @@
-﻿pyorc.Frames.project
-====================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Frames.project

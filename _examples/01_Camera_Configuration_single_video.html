@@ -1,0 +1,995 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Setup a camera configuration for processing a single video &#8212; pyorc 0.2.4 documentation</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_examples/01_Camera_Configuration_single_video';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Analyze surface velocities of a video with velocimetry" href="02_Process_velocimetry.html" />
+    <link rel="prev" title="Quick start" href="../quickstart.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">pyorc 0.2.4 documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../intro.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="../quickstart.html">
+                        Quick start
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../manual/index.html">
+                        Manual
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../api.html">
+                        API reference
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../intro.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="../quickstart.html">
+                        Quick start
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../manual/index.html">
+                        Manual
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../api.html">
+                        API reference
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Table of Content
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Setup a camera configuration for processing a single video
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="02_Process_velocimetry.html">
+   Analyze surface velocities of a video with velocimetry
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="03_Plotting_and_filtering_velocimetry_results.html">
+   Immersive plotting and analyzing results
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">
+   Obtain a discharge measurement over a cross section
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="Setup-a-camera-configuration-for-processing-a-single-video">
+<h1>Setup a camera configuration for processing a single video<a class="headerlink" href="#Setup-a-camera-configuration-for-processing-a-single-video" title="Permalink to this heading">#</a></h1>
+<p>To process a video, a camera configuration is needed. The camera configuration makes the processing aware how to project the movie’s frames to an orthorectified plane with real-world distances, and a user defined area of interest and processing resolution. It also tells the processing what the water level during the survey video is, so that the depth can be estimated, once bathymetry cross-sections are added. The process for a fixed video setup that takes videos with changing water level
+conditions is slightly more advanced. Therefore we here start with the assumption that you walk to a stream with a smart phone and a GPS (RTK) device or a spirit level instrument, record control points and record a short video for just one single observation.</p>
+<p>In this notebook, we will extract one frame from the survey video to grab the control points. For this example, field observations were collected at the Ngwerere River, in Lusaka. We will first setup an empty camera configuration, and then gradually fill this with the required information. Along the way we plot what we have in a geospatial plot. The information we add is: * Ground-control points (row and columns locations in the frame as well as real world coordinates) * Row and column
+coordinates that define the area of interest. * The water level during the video and survey (set at zero, because this survey was only done for one single video, this is only relevant if multiple videos with different water levels are processed) * The position of the camera lens. This is relevant in case multiple videos with different water levels are processed. We here add this, but it is not actually used.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span> <span class="nn">pyorc</span>
+<span class="kn">import</span> <span class="nn">cartopy</span>
+<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Open-movie-and-plot-the-first-frame">
+<h1>Open movie and plot the first frame<a class="headerlink" href="#Open-movie-and-plot-the-first-frame" title="Permalink to this heading">#</a></h1>
+<p>We use the pyorc Video class to open a video file and extract frame number #0 (remember, python starts counting at zero instead of one). Several markers have been placed, some as square shaped checkerboard patterns, others spraypainted with black paint on a rock. All markers are more or less at the water level. If you want to interactively view coordinates you can add <code class="docutils literal notranslate"><span class="pre">%matplotlib</span> <span class="pre">notebook</span></code> to the top of the cell. You can then hover over the image with your mouse and see the coordinates in the
+bottom-right. velocimetry is normally done on one image channel (greyscale), but we first explicitly use <code class="docutils literal notranslate"><span class="pre">method=&quot;rgb&quot;</span></code> to extract one frame in rgb colorspace for finding the points.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># uncomment line below if you want to view coordinates interactively</span>
+<span class="c1">#%matplotlib notebook</span>
+<span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;ngwerere/ngwerere_20191103.mp4&quot;</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">video_file</span><span class="p">,</span> <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_frame</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># we only need one frame</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get_frame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;rgb&quot;</span><span class="p">)</span>
+
+<span class="c1"># plot frame on a notebook-style window</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.image.AxesImage at 0x7f66b622a770&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_3_1.png" src="../_images/_examples_01_Camera_Configuration_single_video_3_1.png" />
+</div>
+</div>
+<p>You can identify different marker x (column) and y (row) positions in the camera’s objective. Below, we have put several of these into a “src” part of the required gcp dictionary. Then we plot the frame and coordinates together.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">gcps</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">src</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">[</span><span class="mi">1421</span><span class="p">,</span> <span class="mi">1001</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1251</span><span class="p">,</span> <span class="mi">460</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">421</span><span class="p">,</span> <span class="mi">432</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">470</span><span class="p">,</span> <span class="mi">607</span><span class="p">]</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]),</span> <span class="s2">&quot;rx&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Control points&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f66b61214b0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_5_1.png" src="../_images/_examples_01_Camera_Configuration_single_video_5_1.png" />
+</div>
+</div>
+<p>Now we add the rest of the information:</p>
+<ul class="simple">
+<li><p>the real world coordinates of the GCPs. These were measured using an RTK GPS unit in the Universe Transverse Mercator (UTM) 35S coordinate reference system (EPSG code 32735). We add these to the GCPs using another key called “dst”.</p></li>
+<li><p>the water level during the survey as measured in the EPSG 32735 projection (<code class="docutils literal notranslate"><span class="pre">z_0</span></code>), which is measured by the RTK GPS unit. This is used to later compute depths from a bathymetry section, measured in the same EPSG 32735 ellipsoid vertical reference.</p></li>
+<li><p>the coordinate reference system (<code class="docutils literal notranslate"><span class="pre">crs</span></code>). The camera configuration then understands that everything we do is in UTM 35S. Really nice, because it makes our results geographically aware and geographical plots can be made. We add the crs to the camera configuration while setting it up.</p></li>
+</ul>
+<p>Note that in case you have a fixed camera that regularly takes movies at different water levels, you also would need to set the following:</p>
+<ul class="simple">
+<li><p>the locally measured water level <code class="docutils literal notranslate"><span class="pre">h_ref</span></code> during your survey. Typically this comes from a staff gauge, that a local person reads out or a pressure gauge. For each video, a new water level must then be provided, which is used to relocate the ground control points to the right location for the new water level, and to estimate the depth over cross-sections, applied later in the process. Since we here process a single video, we don’t have to worry about this.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># first add our UTM 35S coordinates. This MUST be in precisely the same order as the src coordinates.</span>
+<span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mf">642735.8076</span><span class="p">,</span> <span class="mf">8304292.1190</span><span class="p">],</span>  <span class="c1"># lowest right coordinate</span>
+    <span class="p">[</span><span class="mf">642737.5823</span><span class="p">,</span> <span class="mf">8304295.593</span><span class="p">],</span>  <span class="c1"># highest right coordinate</span>
+    <span class="p">[</span><span class="mf">642732.7864</span><span class="p">,</span> <span class="mf">8304298.4250</span><span class="p">],</span>  <span class="c1"># highest left coordinate</span>
+    <span class="p">[</span><span class="mf">642732.6705</span><span class="p">,</span> <span class="mf">8304296.8580</span><span class="p">]</span>  <span class="c1"># highest right coordinate</span>
+<span class="p">]</span>
+
+<span class="c1"># # if we would use this video as survey in video, the lines below are also needed,</span>
+<span class="c1"># # and proper values need to be filled in. They are now commented out.</span>
+<span class="c1"># gcps[&quot;h_ref&quot;] = &lt;your locally measured water level during survey in&gt;</span>
+<span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1182.2</span>
+
+<span class="c1"># now we use everything to make a camera configuration</span>
+<span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">gcps</span><span class="o">=</span><span class="n">gcps</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32735</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<p>Below we make a quick plot. Cartopy is used to make the plot geographically aware. We use GoogleTiles, using the satellite style, to get some awareness of the surroundings.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tiles</span><span class="o">=</span><span class="s2">&quot;GoogleTiles&quot;</span><span class="p">,</span> <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="s2">&quot;satellite&quot;</span><span class="p">})</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_9_0.png" src="../_images/_examples_01_Camera_Configuration_single_video_9_0.png" />
+</div>
+</div>
+<p>Finally we add information to define our area of interest, and how the camera objective must be reprojected and the resolution of the velocimetry. * For the area of interest, 4 coordinates must be selected in the camera perspective. A geographically rectangular box will be shaped around those to make a suitable area of interest. We can simply use pixel (column row) xy coordinates for this, so we can select them using the original frame. Below, 4 points are selected and shown in the camera
+objective. * a target resolution (in meters) must be selected. The resolution is used to reproject the camera objective to a planar projection with real-world coordinates. * a window size (in number of pixels) is needed. Velocimetry will be performed in windows of this size. Since the stream is quite small, we use 1 centimeter (0.01 m) and a 25 pixel (so 25 centimeter) window size, used to find patterns on the water to trace.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">corners</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mi">292</span><span class="p">,</span> <span class="mi">817</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">166</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1200</span><span class="p">,</span> <span class="mi">236</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1600</span><span class="p">,</span> <span class="mi">834</span><span class="p">]</span>
+<span class="p">]</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">set_corners</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="mi">25</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]),</span> <span class="s2">&quot;rx&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Control points&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">corners</span><span class="p">),</span> <span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Corners of AOI&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x7f66b5fef160&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_12_1.png" src="../_images/_examples_01_Camera_Configuration_single_video_12_1.png" />
+</div>
+</div>
+<p>Now that all information is entered, we show the final camera configuration as a plot. The rectangular box can be clearly seen now.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">ax</span> <span class="o">=</span> <span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tiles</span><span class="o">=</span><span class="s2">&quot;GoogleTiles&quot;</span><span class="p">,</span> <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="s2">&quot;satellite&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" src="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" />
+</div>
+</div>
+<p>Our camera configuration is ready. Below we still show a string representation and then we store the configuration to a file for use in our next notebook using the <code class="docutils literal notranslate"><span class="pre">.to_file</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">cam_config</span><span class="p">)</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">&quot;ngwerere.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{
+    &#34;crs&#34;: &#34;PROJCRS[\&#34;WGS 84 / UTM zone 35S\&#34;,BASEGEOGCRS[\&#34;WGS 84\&#34;,ENSEMBLE[\&#34;World Geodetic System 1984 ensemble\&#34;,MEMBER[\&#34;World Geodetic System 1984 (Transit)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G730)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G873)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1150)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1674)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1762)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G2139)\&#34;],ELLIPSOID[\&#34;WGS 84\&#34;,6378137,298.257223563,LENGTHUNIT[\&#34;metre\&#34;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&#34;Greenwich\&#34;,0,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433]],ID[\&#34;EPSG\&#34;,4326]],CONVERSION[\&#34;UTM zone 35S\&#34;,METHOD[\&#34;Transverse Mercator\&#34;,ID[\&#34;EPSG\&#34;,9807]],PARAMETER[\&#34;Latitude of natural origin\&#34;,0,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433],ID[\&#34;EPSG\&#34;,8801]],PARAMETER[\&#34;Longitude of natural origin\&#34;,27,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433],ID[\&#34;EPSG\&#34;,8802]],PARAMETER[\&#34;Scale factor at natural origin\&#34;,0.9996,SCALEUNIT[\&#34;unity\&#34;,1],ID[\&#34;EPSG\&#34;,8805]],PARAMETER[\&#34;False easting\&#34;,500000,LENGTHUNIT[\&#34;metre\&#34;,1],ID[\&#34;EPSG\&#34;,8806]],PARAMETER[\&#34;False northing\&#34;,10000000,LENGTHUNIT[\&#34;metre\&#34;,1],ID[\&#34;EPSG\&#34;,8807]]],CS[Cartesian,2],AXIS[\&#34;(E)\&#34;,east,ORDER[1],LENGTHUNIT[\&#34;metre\&#34;,1]],AXIS[\&#34;(N)\&#34;,north,ORDER[2],LENGTHUNIT[\&#34;metre\&#34;,1]],USAGE[SCOPE[\&#34;Engineering survey, topographic mapping.\&#34;],AREA[\&#34;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&#34;],BBOX[-80,24,0,30]],ID[\&#34;EPSG\&#34;,32735]]&#34;,
+    &#34;resolution&#34;: 0.01,
+    &#34;gcps&#34;: {
+        &#34;src&#34;: [
+            [
+                1421,
+                1001
+            ],
+            [
+                1251,
+                460
+            ],
+            [
+                421,
+                432
+            ],
+            [
+                470,
+                607
+            ]
+        ],
+        &#34;dst&#34;: [
+            [
+                642735.8076,
+                8304292.119
+            ],
+            [
+                642737.5823,
+                8304295.593
+            ],
+            [
+                642732.7864,
+                8304298.425
+            ],
+            [
+                642732.6705,
+                8304296.858
+            ]
+        ],
+        &#34;h_ref&#34;: null,
+        &#34;z_0&#34;: 1182.2
+    },
+    &#34;window_size&#34;: 25,
+    &#34;corners&#34;: [
+        [
+            292,
+            817
+        ],
+        [
+            50,
+            166
+        ],
+        [
+            1200,
+            236
+        ],
+        [
+            1600,
+            834
+        ]
+    ]
+}
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="../quickstart.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Quick start</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="02_Process_velocimetry.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Analyze surface velocities of a video with velocimetry</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Setup a camera configuration for processing a single video
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Open-movie-and-plot-the-first-frame">
+   Open movie and plot the first frame
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/_examples/01_Camera_Configuration_single_video.ipynb.txt">
+        <i class="fas fa-file-alt"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022, Rainbow Sensing.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

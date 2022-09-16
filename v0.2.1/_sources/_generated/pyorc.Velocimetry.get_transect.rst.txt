@@ -1,6 +1,0 @@
-﻿pyorc.Velocimetry.get\_transect
-===============================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Velocimetry.get_transect

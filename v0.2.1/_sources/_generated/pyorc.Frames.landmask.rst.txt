@@ -1,6 +1,0 @@
-﻿pyorc.Frames.landmask
-=====================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Frames.landmask

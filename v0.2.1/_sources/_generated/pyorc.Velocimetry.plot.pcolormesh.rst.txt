@@ -1,6 +1,0 @@
-﻿pyorc.Velocimetry.plot.pcolormesh
-=================================
-
-.. currentmodule:: pyorc
-
-.. autoaccessormethod:: Velocimetry.plot.pcolormesh

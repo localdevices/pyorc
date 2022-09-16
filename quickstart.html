@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Welcome to pyOpenRiverCam’s documentation! &#8212; pyorc 0.2.4 documentation</title>
+    <title>Quick start &#8212; pyorc 0.2.4 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -35,10 +35,11 @@
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'quickstart';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="intro.html" />
+    <link rel="next" title="Setup a camera configuration for processing a single video" href="_examples/01_Camera_Configuration_single_video.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -78,7 +79,7 @@
   
 
 
-<a class="navbar-brand logo" href="#">
+<a class="navbar-brand logo" href="index.html">
 
   
   
@@ -121,8 +122,8 @@
                 </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="quickstart.html">
+                <li class="nav-item current active">
+                    <a class="nav-link" href="#">
                         Quick start
                     </a>
                 </li>
@@ -192,7 +193,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -221,8 +222,8 @@
                 </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="quickstart.html">
+                <li class="nav-item current active">
+                    <a class="nav-link" href="#">
                         Quick start
                     </a>
                 </li>
@@ -270,6 +271,45 @@
   </div>
 
   
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Table of Content
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="_examples/01_Camera_Configuration_single_video.html">
+   Setup a camera configuration for processing a single video
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="_examples/02_Process_velocimetry.html">
+   Analyze surface velocities of a video with velocimetry
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="_examples/03_Plotting_and_filtering_velocimetry_results.html">
+   Immersive plotting and analyzing results
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="_examples/04_Extracting_crosssection_velocities_and_discharge.html">
+   Obtain a discharge measurement over a cross section
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -291,44 +331,29 @@
             
             <article class="bd-article" role="main">
               
-  <section id="welcome-to-pyopenrivercam-s-documentation">
-<span id="index-page"></span><h1>Welcome to pyOpenRiverCam’s documentation!<a class="headerlink" href="#welcome-to-pyopenrivercam-s-documentation" title="Permalink to this heading">#</a></h1>
-<p><strong>pyorc</strong>, short for “pyOpenRiverCam” is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for
-computations on the fully open software stack OpenRiverCam. <strong>pyorc</strong> can only be successful if the underlying methods
-are made available openly for all. Currently <strong>pyorc</strong> implements Large-scale Particle Image Velocimetry (LSPIV) based
-flow analysis using the OpenPIV library and reprojections and image pre-processing with OpenCV. We wish to extend this
-to Large-scale Particle Tracking Velocimetry (LSPTV) and Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV using open
-libraries or extensions to this code.</p>
-<img alt="_images/ngwerere.jpg" src="_images/ngwerere.jpg" />
-<p>Image: Example of pyorc velocimetry over Ngwerere river at the Zambezi Road crossing - Lusaka, Zambia.</p>
-<p>Current capabilities are:</p>
+  <section id="quick-start">
+<span id="quickstart"></span><h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">#</a></h1>
+<p>The best start for <em>pyorc</em> is to go through a number of examples that demonstrate how to move from a video
+and some field work to estimates of surface velocity and discharge, and insightful plots.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<div>
+    All examples can also be performed interactively without installation of *pyorc*. Click here for the interactive
+    version.
+    <a href="https://mybinder.org/v2/gh/localdevices/pyorc.git/main?labpath=examples{{ docname|e }}" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
+</div></div>
+<section id="list-of-examples">
+<span id="examples"></span><h2>List of examples<a class="headerlink" href="#list-of-examples" title="Permalink to this heading">#</a></h2>
+<p>For a static (non-interactive) view of the examples follow one of the links below:</p>
 <ul class="simple">
-<li><p>Reading of frames and reprojection to surface</p></li>
-<li><p>Velocimetry estimation at user-defined resolution</p></li>
-<li><p>Discharge estimation over provided cross-section</p></li>
-<li><p>Plotting of velocimetry results and cross-section flows in camera, geographical and orthoprojected perspectives.</p></li>
+<li><p><a class="reference internal" href="_examples/01_Camera_Configuration_single_video.html"><span class="doc">Setting up a camera configuration</span></a></p></li>
+<li><p><a class="reference internal" href="_examples/02_Process_velocimetry.html"><span class="doc">Analyze surface velocity with Particle Image Velocimetry</span></a></p></li>
+<li><p><a class="reference internal" href="_examples/03_Plotting_and_filtering_velocimetry_results.html"><span class="doc">Filtering spurious velocities and plotting</span></a></p></li>
+<li><p><a class="reference internal" href="_examples/04_Extracting_crosssection_velocities_and_discharge.html"><span class="doc">Extracting cross-sections and discharge estimation</span></a></p></li>
 </ul>
-<p>We use the well-known <a class="reference external" href="https://docs.xarray.dev/">xarray</a> data models and computation pipelines (with dask) throughout the entire library to
-guarantee an easy interoperability with other tools and methods, and allow for lazy computing.</p>
-<p>We are seeking funding for the following frequently requested functionalities:
-* A command-line interface for processing single or batch videos
-* Implementation of better filtering in pre-processing
-* Improved efficiency of processing
-* Establishing on-site edge computation through a raspberry-pi camera setup
-* Implementation of additional processing algorithms (STIV and LSPTV)</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><strong>pyorc</strong> has been created by <a class="reference external" href="https://rainbowsensing.com">Rainbow Sensing</a> to support local people, with local
-devices and software to monitor their environment. If you like <strong>pyorc</strong>, require additional functionalities or want
-to contact us for other work or ideas, please email us on <a class="reference external" href="mailto:info&#37;&#52;&#48;rainbowsensing&#46;com">info<span>&#64;</span>rainbowsensing<span>&#46;</span>com</a></p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Acknowledgement: the development of <strong>pyorc</strong> has been funded partly by the World Meteorological Organisation and
-partly by in-kind contributions of Rainbow Sensing.</p>
-</div>
 <div class="toctree-wrapper compound">
 </div>
+</section>
 </section>
 
 
@@ -339,10 +364,17 @@ partly by in-kind contributions of Rainbow Sensing.</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='right-next' id="next-link" href="intro.html" title="next page">
+  <a class='left-prev' id="prev-link" href="installation.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Installation</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="_examples/01_Camera_Configuration_single_video.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Introduction</p>
+      <p class="prev-next-title">Setup a camera configuration for processing a single video</p>
   </div>
   <i class="fas fa-angle-right"></i>
   </a>
@@ -357,12 +389,29 @@ partly by in-kind contributions of Rainbow Sensing.</p>
               
 <div class="toc-item">
   
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#list-of-examples">
+   List of examples
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
-    <a href="_sources/index.rst.txt">
+    <a href="_sources/quickstart.rst.txt">
         <i class="fas fa-file-alt"></i> Show Source
     </a>
 </div>

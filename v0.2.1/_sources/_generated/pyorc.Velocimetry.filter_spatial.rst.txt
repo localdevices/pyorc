@@ -1,6 +1,0 @@
-﻿pyorc.Velocimetry.filter\_spatial
-=================================
-
-.. currentmodule:: pyorc
-
-.. automethod:: Velocimetry.filter_spatial
