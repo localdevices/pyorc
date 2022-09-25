@@ -2,6 +2,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import shapely.wkt
+from shapely.geometry import Polygon
 
 from matplotlib import patches
 from pyproj import CRS, Transformer
@@ -95,7 +96,9 @@ class CameraConfig:
 
         """
         assert (hasattr(self, "corners")), "CameraConfig object has no corners, set these with CameraConfig.set_corners"
-        return cv.get_aoi(self.gcps["src"], self.gcps["dst"], self.corners).__str__()
+        return self.get_bbox().__str__()
+
+
 
     @property
     def shape(self):
@@ -129,6 +132,35 @@ class CameraConfig:
         bbox = shapely.wkt.loads(self.bbox)
         return cv._get_transform(bbox, resolution=self.resolution)
 
+
+    def get_bbox(self, camera=False):
+        """
+
+        Parameters
+        ----------
+        geographical : bool, optional
+
+        Returns
+        -------
+        A bounding box, that in the used CRS is perfectly rectangular, and aligned in the up/downstream direction.
+        It can (and certainly will) be rotated with respect to a typical bbox with xlim, ylim coordinates.
+        If user sets ``camera=True`` then the geographical bounding box will be converted into a camera perspective, using
+        the homography belonging to the available ground control points and current water level.
+
+        This can then be used to reconstruct the grid for velocimetry calculations.
+        """
+        import cv2
+        bbox = cv.get_aoi(self.gcps["src"], self.gcps["dst"], self.corners)
+        if camera:
+            coords = list(bbox.exterior.coords)
+            # convert to perspective rowcol coordinates
+            M = self.get_M(reverse=True)
+            bbox = Polygon(cv2.perspectiveTransform(np.float32([coords]), M)[0])
+            # bbox = Polygon(cv.transform_to_bbox(coords, bbox, self.resolution))
+        return bbox
+
+
+
     def get_depth(self, z, h_a=None):
         """Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
         in local reference (e.g. staff gauge).
@@ -154,6 +186,34 @@ class CameraConfig:
             h_ref = self.gcps["h_ref"]
         z_pressure = np.maximum(self.gcps["z_0"] - h_ref + h_a, z)
         return z_pressure - z
+
+
+    def get_dst_a(self, h_a=None):
+        """
+        h_a : float, optional
+            actual water level measured [m], if not set, assumption is that a single video
+            is processed and thus changes in water level are not relevant. (default: None)
+
+        Returns
+        -------
+        Actual locations of control points (in case these are only x, y) given the current set water level and
+        the camera location
+        """
+        # map where the destination points are with the actual water level h_a.
+        if h_a is None or self.gcps["h_ref"] is None:
+            # fill in the same value for h_ref and h_a
+            dst_a = self.gcps["dst"]
+        else:
+            h_ref = self.gcps["h_ref"]
+            lens_position = self.lens_position
+            dst_a = cv._get_gcps_a(
+                lens_position,
+                h_a,
+                self.gcps["dst"],
+                self.gcps["z_0"],
+                h_ref,
+            )
+        return dst_a
 
 
     def get_dist_shore(self, x, y, z, h_a=None):
@@ -211,7 +271,7 @@ class CameraConfig:
         return h
 
 
-    def get_M(self, h_a=None, reverse=False):
+    def get_M(self, h_a=None, to_bbox_grid=False, reverse=False):
         """Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
         ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.
 
@@ -219,6 +279,8 @@ class CameraConfig:
         ----------
         h_a : float, optional
             actual water level [m] (Default: None)
+        to_bbox_grid : bool, optional
+            if set, the M will be computed in row, column values of the target bbox, with set resolution
         reverse : bool, optional
             if True, the reverse matrix is prepared, which can be used to transform projected
             coordinates back to the original camera perspective. (Default: False)
@@ -229,29 +291,22 @@ class CameraConfig:
             2x3 transformation matrix
 
         """
-        # map where the destination points are with the actual water level h_a.
-        if h_a is None or self.gcps["h_ref"] is None:
-            # fill in the same value for h_ref and h_a
-            dst_a = self.gcps["dst"]
-        else:
-            h_ref = self.gcps["h_ref"]
-            lens_position = self.lens_position
-            dst_a = cv._get_gcps_a(
-                lens_position,
-                h_a,
-                self.gcps["dst"],
-                self.gcps["z_0"],
-                h_ref,
+        if to_bbox_grid:
+            # lookup where the destination points are in row/column space
+            # dst_a is the destination point locations position with the actual water level
+            dst_a = cv.transform_to_bbox(
+                self.get_dst_a(h_a),
+                shapely.wkt.loads(self.bbox),
+                self.resolution
             )
-
-        # lookup where the destination points are in row/column space
-        dst_colrow_a = cv.transform_to_bbox(dst_a, shapely.wkt.loads(self.bbox), self.resolution)
+        else:
+            dst_a = self.get_dst_a(h_a)
         if reverse:
             # retrieve and return M reverse for destination row and col
-            return cv.get_M(src=dst_colrow_a, dst=self.gcps["src"])
+            return cv.get_M(src=dst_a, dst=self.gcps["src"])
         else:
             # retrieve and return M for destination row and col
-            return cv.get_M(src=self.gcps["src"], dst=dst_colrow_a)
+            return cv.get_M(src=self.gcps["src"], dst=dst_a)
 
     def set_corners(self, corners):
         """

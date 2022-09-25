@@ -423,7 +423,7 @@ def get_M(src, dst):
     return M
 
 
-def transform_to_bbox(coords, bbox, res):
+def transform_to_bbox(coords, bbox, resolution):
     """transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
 
     Parameters
@@ -433,7 +433,7 @@ def transform_to_bbox(coords, bbox, res):
     bbox : shapely Polygon
         Bounding box. The coordinate order is very important and has to be upstream-left, downstream-left,
         downstream-right, upstream-right, upstream-left
-    res : float
+    resolution : float
         resolution of target pixels within bbox
 
     Returns
@@ -444,7 +444,7 @@ def transform_to_bbox(coords, bbox, res):
     """
     # first assemble x and y coordinates
     xs, ys = zip(*coords)
-    transform = _get_transform(bbox, res)
+    transform = _get_transform(bbox, resolution)
     rows, cols = rasterio.transform.rowcol(transform, xs, ys)
     return list(zip(cols, rows))
 

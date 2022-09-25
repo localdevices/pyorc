@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import pyorc
+import pytest
 
 from pyorc import helpers
 from shapely.geometry import Polygon
@@ -16,6 +17,12 @@ def test_repr(cam_config):
 
 def test_bbox(cam_config):
     bbox = shapely.wkt.loads(cam_config.bbox)
+    assert(isinstance(bbox, Polygon))
+
+
+def test_get_bbox(cam_config, vid):
+    bbox = cam_config.get_bbox(camera=True)
+    coords = bbox.exterior.coords
     assert(isinstance(bbox, Polygon))
 
 
@@ -54,12 +61,31 @@ def test_z_to_h(cam_config, cross_section):
         0.25, 0.325, 0.4
     ])))
 
-
-def test_get_M(cam_config, h_a):
-    M = cam_config.get_M(h_a=h_a)
-    M_expected = np.array([[-4.60858728e-01, -6.35455550e-01, 1.28925099e+03],
-                           [ 6.54313311e-01,  5.39379066e-02, -8.38203094e+00],
-                           [-2.72899866e-04,  1.10694660e-03,  1.00000000e+00]])
+@pytest.mark.parametrize(
+    "to_bbox_grid, M_expected",
+    [
+        (
+            True, np.array(
+                [
+                    [-4.60858728e-01, -6.35455550e-01, 1.28925099e+03],
+                    [ 6.54313311e-01,  5.39379066e-02, -8.38203094e+00],
+                    [-2.72899866e-04,  1.10694660e-03,  1.00000000e+00]
+                ]
+            )
+        ),
+        (
+            False, np.array(
+                [
+                    [-8.89918459e+01,  8.08347684e+02,  6.42730857e+05],
+                    [-1.14991078e+03,  1.04441206e+04,  8.30430709e+06],
+                    [-1.38471193e-04,  1.25767826e-03,  1.00000000e+00]
+                ]
+            )
+        )
+    ]
+)
+def test_get_M(cam_config, h_a, to_bbox_grid, M_expected):
+    M = cam_config.get_M(h_a=h_a, to_bbox_grid=to_bbox_grid)
     assert(np.allclose(M, M_expected))
 
 
