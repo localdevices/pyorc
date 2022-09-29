@@ -3,6 +3,7 @@ import os
 import pyorc
 import pytest
 
+from cartopy.mpl.geoaxes import GeoAxesSubplot
 from pyorc import helpers
 from shapely.geometry import Polygon
 from rasterio import Affine
@@ -22,7 +23,6 @@ def test_bbox(cam_config):
 
 def test_get_bbox(cam_config, vid):
     bbox = cam_config.get_bbox(camera=True)
-    coords = bbox.exterior.coords
     assert(isinstance(bbox, Polygon))
 
 
@@ -144,7 +144,21 @@ def test_load_camera_config(cam_config_fn, cam_config, lens_position):
     assert(cam_config2.resolution == cam_config.resolution)
 
 
-def test_plot(cam_config):
-    from cartopy.mpl.geoaxes import GeoAxesSubplot
-    ax = cam_config.plot()
-    assert(isinstance(ax, GeoAxesSubplot))
+@pytest.mark.parametrize(
+    "camera",
+    [
+        True,
+        False
+    ]
+)
+def test_plot(cam_config, vid, camera):
+    import matplotlib
+    ax = cam_config.plot(camera=camera)
+    if camera:
+        assert(
+            isinstance(ax, matplotlib.axes._subplots.Subplot)
+        )
+    else:
+        assert(
+            isinstance(ax, GeoAxesSubplot)
+        )

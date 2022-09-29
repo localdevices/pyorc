@@ -1,8 +1,8 @@
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-import shapely.wkt
-from shapely.geometry import Polygon
+from shapely import ops, wkt
+from shapely.geometry import Polygon, LineString, Point
 
 from matplotlib import patches
 from pyproj import CRS, Transformer
@@ -113,7 +113,7 @@ class CameraConfig:
             Amount of columns in projected frame
         """
         cols, rows = cv._get_shape(
-            shapely.wkt.loads(self.bbox),
+            wkt.loads(self.bbox),
             resolution=self.resolution,
             round=10
         )
@@ -129,7 +129,7 @@ class CameraConfig:
         transform : rasterio.transform.Affine object
 
         """
-        bbox = shapely.wkt.loads(self.bbox)
+        bbox = wkt.loads(self.bbox)
         return cv._get_transform(bbox, resolution=self.resolution)
 
 
@@ -296,7 +296,7 @@ class CameraConfig:
             # dst_a is the destination point locations position with the actual water level
             dst_a = cv.transform_to_bbox(
                 self.get_dst_a(h_a),
-                shapely.wkt.loads(self.bbox),
+                wkt.loads(self.bbox),
                 self.resolution
             )
         else:
@@ -419,8 +419,29 @@ class CameraConfig:
 
         self.lens_position = [x, y, z]
 
-    def plot(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}):
-        """Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
+
+    # def plot(self, camera=False, **kwargs):
+    #     # define plot kwargs
+    #     if not (hasattr(self, "gcps")):
+    #         raise ValueError("No GCPs found yet, please populate the gcps attribute with set_gcps first.")
+    #
+    #     if camera:
+    #         ax = self.plot_camera_view(**kwargs)
+    #     else:
+    #         ax = self.plot_geo_view(**kwargs)
+    #     return ax
+    #
+    #
+    # def plot_camera_view(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}):
+    #     """"""
+    #     from shapely.geometry import LineString, Point
+    #     from shapely import ops
+    #
+
+
+    def plot(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}, camera=False):
+        """
+        Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
         to be in the right location. Requires cartopy to be installed.
 
         Parameters
@@ -445,32 +466,36 @@ class CameraConfig:
         ax : plt.axes
 
         """
-        # define plot kwargs
-        from shapely.geometry import LineString, Point
-        from shapely import ops
-        if not (hasattr(self, "gcps")):
-            raise ValueError("No GCPs found yet, please populate the gcps attribute with set_gcps first.")
+        # if there is an axes, get the extent
+        xlim = ax.get_xlim() if ax is not None else None
+        ylim = ax.get_ylim() if ax is not None else None
+
         # prepare points for plotting
-        points = [Point(x, y) for x, y in self.gcps["dst"]]
+        if camera:
+            points = [Point(x, y) for x, y in self.gcps["src"]]
+        else:
+            points = [Point(x, y) for x, y in self.gcps["dst"]]
+
         if hasattr(self, "corners"):
-            bbox = shapely.wkt.loads(self.bbox)
-        if hasattr(self, "lens_position"):
-            points.append(Point(self.lens_position[0], self.lens_position[1]))
-        # transform points in case a crs is provided
-        if hasattr(self, "crs"):
-            # make a transformer to lat lon
-            transform = Transformer.from_crs(CRS.from_user_input(self.crs), CRS.from_epsg(4326), always_xy=True).transform
-            points = [ops.transform(transform, p) for p in points]
-            if hasattr(self, "corners"):
-                bbox = ops.transform(transform, bbox)
-        xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
-        extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
+            bbox = self.get_bbox(camera=camera)
+        if not(camera):
+            if (hasattr(self, "lens_position") and not(camera)):
+                points.append(Point(self.lens_position[0], self.lens_position[1]))
+            # transform points in case a crs is provided
+            if hasattr(self, "crs"):
+                # make a transformer to lat lon
+                transform = Transformer.from_crs(CRS.from_user_input(self.crs), CRS.from_epsg(4326), always_xy=True).transform
+                points = [ops.transform(transform, p) for p in points]
+                if hasattr(self, "corners"):
+                    bbox = ops.transform(transform, bbox)
+            xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
+            extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
         x = [p.x for p in points]
         y = [p.y for p in points]
 
         if ax is None:
             f = plt.figure(figsize=figsize)
-            if hasattr(self, "crs"):
+            if (hasattr(self, "crs") and not(camera)):
                 try:
                     import cartopy
                     import cartopy.io.img_tiles as cimgt
@@ -488,19 +513,27 @@ class CameraConfig:
                 ax.set_extent(extent, crs=ccrs.PlateCarree())
                 if tiles is not None:
                     ax.add_image(tiler, zoom_level, zorder=1)
+            else:
+                ax = plt.subplot()
         if hasattr(ax, "add_geometries"):
             import cartopy.crs as ccrs
-            plot_kwargs = dict(transform= ccrs.PlateCarree())
+            plot_kwargs = dict(transform=ccrs.PlateCarree())
         else:
             plot_kwargs = {}
-        ax.plot(x[0:4], y[0:4], ".", label="Control points", markersize=12, markeredgecolor="w", zorder=2, **plot_kwargs)
-        if hasattr(self, "lens_position"):
+        ax.plot(x[0:len(self.gcps["dst"])], y[0:len(self.gcps["dst"])], ".", label="Control points", markersize=12, markeredgecolor="w", zorder=2, **plot_kwargs)
+        if len(x) > len(self.gcps["dst"]):
             ax.plot(x[-1], y[-1], ".", label="Lens position", markersize=12, zorder=2, markeredgecolor="w", **plot_kwargs)
         if hasattr(self, "corners"):
             bbox_x, bbox_y = bbox.exterior.xy
             bbox_coords = list(zip(bbox_x, bbox_y))
             patch = patches.Polygon(bbox_coords, alpha=0.5, zorder=2, edgecolor="w", label="Area of interest", **plot_kwargs)
             ax.add_patch(patch)
+        if camera:
+            # make sure that zero is on the top
+            ax.set_aspect("equal")
+            if xlim is not None:
+                ax.set_xlim(xlim)
+                ax.set_ylim(ylim)
         ax.legend()
         return ax
 
