@@ -1,8 +1,8 @@
 .. _manual:
 
-======
-Manual
-======
+==========
+User Guide
+==========
 
 .. note::
 
@@ -66,6 +66,6 @@ principles for velocimetry and transect results throughout this manual. We wish 
 
     Videos <video>
     Camera configurations <camera_config>
-    Frames <frames>
+    Frames <frames/frames.ipynb>
     Velocimetry <velocimetry>
     Transects <transect>

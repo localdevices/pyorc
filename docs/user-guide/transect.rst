@@ -1,7 +1,7 @@
-.. _velocimetry:
+.. _transect_ug:
 
-Velocimetry
-===========
+Transect
+========
 
 .. note::
 

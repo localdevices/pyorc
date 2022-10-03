@@ -58,6 +58,6 @@ We are seeking funding for the following frequently requested functionalities:
    intro
    installation
    quickstart
-   manual/index.rst
+   user-guide/index.rst
    api.rst
 

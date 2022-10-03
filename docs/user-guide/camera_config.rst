@@ -1,4 +1,4 @@
-.. _camera_config:
+.. _camera_config_ug:
 
 Camera configurations
 =====================

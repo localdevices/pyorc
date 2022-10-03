@@ -1,12 +1,8 @@
-.. _videos:
+.. _video_ug:
 
 Videos
 ======
 
-
-.. note::
-
-   This manual is a work in progress.
 
 Videos and video files are at the core of *pyorc*. Any analysis starts with a video file. Notably, these can be acquired
 from different platforms, with suggestions given in the table below.
@@ -49,7 +45,7 @@ Essential for almost all steps after opening a video is to supply a ``CameraConf
 all information from the camera's lens characteristics, perspective, geographical awareness as derived from a sample
 image or frame, with control point information in view. As soon as you wish to work with the frames in the video
 (e.g. by calling the method ``get_frames``) you MUST specify a camera configuration. You can find more information in
-:ref:`camera_config` section.
+:ref:`camera_config_ug` section.
 
 The current water level
 -----------------------
@@ -126,6 +122,20 @@ A working example to obtain a stabilized video from our example section is provi
     )
     video
 
+If you wish to plot which points were found in the stabilization process, then you can use the method ``video.plot_rigid_pts``.
+This makes a scatter plot of the found assumed rigid points on the image frame. Of course it is adviced to also plot
+the first image frame on the axes, so that you understand where these points are in the objective. This can be done for example
+as follows:
+
+.. code::
+
+    import matplotlib.pyplot as plt
+    img = video.get_frame(0, method="rgb")
+    ax = plt.axes()
+    ax.imshow(img)
+    cam_config.plot_rigid_points(ax=ax)
+
+
 .. note::
 
     If you choose to only treat a very short part of a video such as only one second, then it may be difficult for the
@@ -144,7 +154,6 @@ A working example to obtain a stabilized video from our example section is provi
 
 
 
-
 .. |videostab| image:: ../_images/video_stable.gif
    :scale: 80%
    :align: middle
@@ -152,3 +161,13 @@ A working example to obtain a stabilized video from our example section is provi
 .. |videounstab| image:: ../_images/video_unstable.gif
    :scale: 80%
    :align: middle
+
+
+Getting frames
+--------------
+When your video object is setup with a :ref:`camera configuration <camera_config_ug>`, optional stabilization,
+and start and end frame, then extracting frames, and working with these to sharpen features, reproject and store these
+becomes very easy. To extract all frames, you only need to call ``video.get_frames()``. This will five you grayscale
+frames, in a ``xr.DataArray`` object. The structure of this object follows a specific data model for frames, and
+therefore, methods that work on sets of frames can be applied, as described in the next section on :ref:`frames`.
+

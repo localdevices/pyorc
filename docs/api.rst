@@ -44,7 +44,7 @@ Setting of properties and attributes
 .. autosummary::
     :toctree: _generated
 
-    CameraConfig.set_corners
+    CameraConfig.set_bbox_from_corners
     CameraConfig.set_gcps
     CameraConfig.set_lens_pars
     CameraConfig.set_lens_position

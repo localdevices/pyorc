@@ -1,7 +1,7 @@
-.. _frames:
+.. _velocimetry_ug:
 
-Frames
-======
+Velocimetry
+===========
 
 .. note::
 
