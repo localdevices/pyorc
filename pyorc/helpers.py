@@ -357,6 +357,9 @@ def rotate_u_v(u, v, theta, deg=False):
     v2 = r[1, 0] * u + r[1, 1] * v
     return u2, v2
 
+def round_to_multiple(number, multiple):
+    return multiple * round(number / multiple)
+
 
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
     """Fill missing surface velocities using a velocity depth profile with

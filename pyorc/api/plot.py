@@ -348,12 +348,6 @@ class _Velocimetry_PlotMethods:
     For example, Dataset.velocimetry.plot.pcolormesh. When called without a subfunction, quiver will be used
     """
     def __init__(self, velocimetry):
-        """
-        Blah blah blah
-        Parameters
-        ----------
-        velocimetry
-        """
         # make the original dataset also available on the plotting object
         self.velocimetry = velocimetry
         self._obj = velocimetry._obj
@@ -440,7 +434,7 @@ class _Velocimetry_PlotMethods:
         """
         # retrieve the backward transformation array
         velocimetry = self._obj.velocimetry
-        M = velocimetry.camera_config.get_M(velocimetry.h_a, reverse=True)
+        M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
         # get the shape of the original frames
         shape_y, shape_x = velocimetry.camera_shape
         xi, yi = np.meshgrid(self._obj.x, self._obj.y)
@@ -450,7 +444,12 @@ class _Velocimetry_PlotMethods:
         # follow the velocity vector over a short distance (dt*velocity)
         x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
         # project the found displacement points to camera projection
-        xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, velocimetry.camera_config.resolution, M)
+        xp_moved, yp_moved = helpers.xy_to_perspective(
+            x_moved.values,
+            y_moved.values,
+            velocimetry.camera_config.resolution,
+            M
+        )
 
         # convert row counts to start at the top of the frame instead of bottom
         yp_moved = shape_y - yp_moved

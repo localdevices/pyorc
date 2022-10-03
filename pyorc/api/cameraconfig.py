@@ -1,3 +1,5 @@
+import copy
+import cv2
 import json
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,36 +19,48 @@ class CameraConfig:
     coordinates
     """
     def __str__(self):
-        return self.to_json()
+        return str(self.to_json())
 
     def __repr__(self):
         return self.to_json()
 
     def __init__(
             self,
+            height,
+            width,
             crs=None,
             window_size=15,
             resolution=0.01,
+            bbox=None,
+            camera_matrix=None,
+            dist_coeffs=None,
             lens_position=None,
             corners=None,
             gcps=None,
-            lens_pars=None
+            lens_pars=None,
+
     ):
         """
 
         Parameters
         ----------
+        height : int
+            height of frame in pixels
+        width : int
+            width of frame in pixels
         crs : int, dict or str, optional
             Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). Only used if
             the data has no native CRS.
         window_size : int
             pixel size of interrogation window (default: 15)
-        resolution : float
-            resolution in m. of projected pixels
+        resolution : float, optional
+            resolution in m. of projected pixels (default: 0.01)
+        bbox : array-like, optional
+            bounding box in geographical coordinates
         lens_position : list of floats (3),
             x, y, z coordinate of lens position in CRS
         corners : list of lists of floats (2)
-            [x, y] coordinates defining corners of area of interest in camera cols/rows
+            [x, y] coordinates defining corners of area of interest in camera cols/rows, bbox will be computed from this
         gcps : dict
             Can contain "src": list of 4 lists, with column, row locations in objective of control points,
             "dst": list of 4 lists, with x, y locations (local or global coordinate reference system) of control points,
@@ -62,7 +76,11 @@ class CameraConfig:
             "f": float, focal length (default: 1.)
 
         """
+        assert(isinstance(height, int)), 'height must be provided as type "int"'
+        assert(isinstance(width, int)), 'width must be provided as type "int"'
         assert (isinstance(window_size, int)), 'window_size must be of type "int"'
+        self.height = height
+        self.width = width
         if crs is not None:
             try:
                 crs = CRS.from_user_input(crs)
@@ -78,12 +96,21 @@ class CameraConfig:
             self.set_gcps(**gcps)
         if lens_pars is not None:
             self.set_lens_pars(**lens_pars)
+        else:
+            self.set_lens_pars()
+
+        # camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option
+        if camera_matrix is not None:
+            self.camera_matrix = camera_matrix
+        if dist_coeffs is not None:
+            self.dist_coeffs = dist_coeffs
+        if bbox is not None:
+            self.bbox = bbox
         if window_size is not None:
             self.window_size = window_size
         # override the transform and bbox with the set corners
         if corners is not None:
-            self.set_corners(corners)
-
+            self.set_bbox_from_corners(corners)
     @property
     def bbox(self):
         """
@@ -95,10 +122,58 @@ class CameraConfig:
             bbox of area of interest
 
         """
-        assert (hasattr(self, "corners")), "CameraConfig object has no corners, set these with CameraConfig.set_corners"
-        return self.get_bbox().__str__()
+        return self._bbox
+
+    @bbox.setter
+    def bbox(self, pol):
+        self._bbox = pol
 
 
+    @property
+    def camera_matrix(self):
+        return self._camera_matrix
+
+
+    @camera_matrix.setter
+    def camera_matrix(self, camera_matrix):
+        self._camera_matrix = camera_matrix.tolist() if isinstance(camera_matrix, np.ndarray) else camera_matrix
+
+
+    @property
+    def dist_coeffs(self):
+        return self._dist_coeffs
+
+
+    @dist_coeffs.setter
+    def dist_coeffs(self, dist_coeffs):
+        self._dist_coeffs = dist_coeffs.tolist() if isinstance(dist_coeffs, np.ndarray) else dist_coeffs
+
+
+
+    @property
+    def gcp_reduced(self):
+        """
+        Get the location of gcp destination points, reduced with their mean for better local projection
+
+        Returns
+        -------
+        gcp_reduced : np.ndarray
+            Reduced coordinate (x, y) or (x, y, z) of gcp destination points
+        """
+        return np.array(self.gcps["dst"]) - self.gcp_mean
+
+
+    @property
+    def gcp_mean(self):
+        """
+        Get the mean location of gcp destination points
+
+        Returns
+        -------
+        gcp_mean : np.ndarray
+            mean coordinate (x, y) or (x, y, z) of gcp destination points
+        """
+        return np.array(self.gcps["dst"]).mean(axis=0)
 
     @property
     def shape(self):
@@ -113,9 +188,9 @@ class CameraConfig:
             Amount of columns in projected frame
         """
         cols, rows = cv._get_shape(
-            wkt.loads(self.bbox),
+            self.bbox,
             resolution=self.resolution,
-            round=10
+            round=1
         )
         return rows, cols
 
@@ -129,16 +204,21 @@ class CameraConfig:
         transform : rasterio.transform.Affine object
 
         """
-        bbox = wkt.loads(self.bbox)
-        return cv._get_transform(bbox, resolution=self.resolution)
+        return cv._get_transform(self.bbox, resolution=self.resolution)
 
 
-    def get_bbox(self, camera=False):
+    def get_bbox(self, camera=False, h_a=None):
         """
 
         Parameters
         ----------
-        geographical : bool, optional
+        camera : bool, optional
+            If set, the bounding box will be returned as row and column coordinates in the camera perspective.
+            In this case ``h_a`` may be set to provide the right water level, to estimate the bounding box for.
+        h_a : float, optional
+            If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
+            using h_a as a present water level. In case a video with higher (lower) water levels is used, this
+            will result in a different perspective plane than the control video.
 
         Returns
         -------
@@ -149,14 +229,21 @@ class CameraConfig:
 
         This can then be used to reconstruct the grid for velocimetry calculations.
         """
-        import cv2
-        bbox = cv.get_aoi(self.gcps["src"], self.gcps["dst"], self.corners)
+        # # get homography, this is the only place besides self.get_M where cv.get_M is used.
+        # M_gcp = self.get_M()
+        # # TODO: make derivation dependent on 3D or 2D point availability
+        # # if self.gcps["src"].shape == 3:
+        # #     # TODO: homography from solvepnp
+        # bbox = cv.get_aoi(M_gcp, self.corners)
+        bbox = self.bbox
         if camera:
-            coords = list(bbox.exterior.coords)
+            coords = np.array(bbox.exterior.coords)
             # convert to perspective rowcol coordinates
-            M = self.get_M(reverse=True)
+            M = self.get_M(reverse=True, h_a=h_a)
+            # reduce coords by control point mean
+            coords -= self.gcp_mean
+            # TODO: re-distort if needed
             bbox = Polygon(cv2.perspectiveTransform(np.float32([coords]), M)[0])
-            # bbox = Polygon(cv.transform_to_bbox(coords, bbox, self.resolution))
         return bbox
 
 
@@ -271,7 +358,7 @@ class CameraConfig:
         return h
 
 
-    def get_M(self, h_a=None, to_bbox_grid=False, reverse=False):
+    def get_M(self, h_a=None, to_bbox_grid=False, reverse=False, **lens_pars):
         """Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
         ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.
 
@@ -291,26 +378,34 @@ class CameraConfig:
             2x3 transformation matrix
 
         """
+        src = cv.undistort_points(self.gcps["src"], self.camera_matrix, self.dist_coeffs)
         if to_bbox_grid:
             # lookup where the destination points are in row/column space
             # dst_a is the destination point locations position with the actual water level
             dst_a = cv.transform_to_bbox(
                 self.get_dst_a(h_a),
-                wkt.loads(self.bbox),
+                self.bbox,
                 self.resolution
             )
         else:
             dst_a = self.get_dst_a(h_a)
+            # reduce dst_a with its mean to get much more accurate projection result in case x and y order of
+            # magnitude is very large
+            dst_a -= self.gcp_mean
+        # src_a = self.get_src(**lens_pars)
         if reverse:
             # retrieve and return M reverse for destination row and col
-            return cv.get_M(src=dst_a, dst=self.gcps["src"])
+            return cv.get_M_2D(src=dst_a, dst=src)
         else:
             # retrieve and return M for destination row and col
-            return cv.get_M(src=self.gcps["src"], dst=dst_a)
+            return cv.get_M_2D(src=src, dst=dst_a)
 
-    def set_corners(self, corners):
+
+
+    def set_bbox_from_corners(self, corners):
         """
-        Assign corner coordinates to camera configuration
+        Establish bbox based on a set of camera perspective corner points Assign corner coordinates to camera
+        configuration
 
         Parameters
         ----------
@@ -319,17 +414,33 @@ class CameraConfig:
 
         """
         assert (np.array(corners).shape == (4,
-                                            2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is {corners.shape}"
-        self.corners = corners
+                                            2)), f"a list of lists of 4 coordinates must be given, resulting in (4, " \
+                                                 f"2) shape. Current shape is {corners.shape} "
+
+        # get homography, this is the only place besides self.get_M where cv.get_M is used.
+        M_gcp = self.get_M()
+        # TODO: make derivation dependent on 3D or 2D point availability
+        # if self.gcps["src"].shape == 3:
+        #     # TODO: homography from solvepnp
+        bbox = cv.get_aoi(M_gcp, corners, resolution=self.resolution)
+        # bbox is offset by self.gcp_mean. Regenerate bbox after adding offset
+        bbox_xy = np.array(bbox.exterior.coords)
+        bbox_xy += self.gcp_mean
+        bbox = Polygon(bbox_xy)
+        self.bbox = bbox
 
     def set_lens_pars(self, k1=0, c=2, f=4):
         """Set the lens parameters of the given CameraConfig
 
         Parameters
         ----------
-        k1 : float
+        height : int
+            height of image frame
+        width : int
+            width of image frame
+        k1 : float, optional
             lens curvature [-], zero (default) means no curvature
-        c : float
+        c : float, optional
             optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the
             centre.
         f : float, optional
@@ -340,11 +451,8 @@ class CameraConfig:
         assert (isinstance(k1, (int, float))), "k1 must be a float"
         assert (isinstance(c, (int, float))), "k1 must be a float"
         assert (isinstance(f, (int, float))), "k1 must be a float"
-        self.lens_pars = {
-            "k1": k1,
-            "c": c,
-            "f": f
-        }
+        self.dist_coeffs = cv._get_dist_coefs(k1)
+        self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, f=f)
 
     def set_gcps(self, src, dst, z_0=None, h_ref=None, crs=None):
         """Set ground control points for the given CameraConfig
@@ -418,25 +526,6 @@ class CameraConfig:
             x, y = helpers.xy_transform(x, y, crs, self.crs)
 
         self.lens_position = [x, y, z]
-
-
-    # def plot(self, camera=False, **kwargs):
-    #     # define plot kwargs
-    #     if not (hasattr(self, "gcps")):
-    #         raise ValueError("No GCPs found yet, please populate the gcps attribute with set_gcps first.")
-    #
-    #     if camera:
-    #         ax = self.plot_camera_view(**kwargs)
-    #     else:
-    #         ax = self.plot_geo_view(**kwargs)
-    #     return ax
-    #
-    #
-    # def plot_camera_view(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}):
-    #     """"""
-    #     from shapely.geometry import LineString, Point
-    #     from shapely import ops
-    #
 
 
     def plot(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}, camera=False):
@@ -547,13 +636,19 @@ class CameraConfig:
 
         """
 
-        d = self.__dict__
+        d = copy.deepcopy(self.__dict__)
         # replace underscore keys for keys without underscore
         for k in list(d.keys()):
             if k[0] == "_":
                 d[k[1:]] = d.pop(k)
 
         return d
+
+    def to_dict_str(self):
+        dict = self.to_dict()
+        # convert anything that is not string in string
+        dict_str = {k: v if not(isinstance(v, Polygon)) else v.__str__() for k, v in dict.items() }
+        return dict_str
 
     def to_file(self, fn):
         """Write the CameraConfig object to json structure
@@ -576,8 +671,19 @@ class CameraConfig:
         json_str : str
             json string with CameraConfig components
         """
-        return json.dumps(self, default=lambda o: o.to_dict(), indent=4)
+        return json.dumps(self, default=lambda o: o.to_dict_str(), indent=4)
 
+depr_warning_height_width = """
+Your camera configuration does not have a property "height" and/or "width", probably because your configuration file is 
+from an older < 0.3.0 version. Please rectify this by editing your .json config file. The top of your file should e.g.
+look as follows for a HD video:
+{
+    "height": 1080,
+    "width": 1920,
+    "crs": ....
+    ...
+}
+"""
 
 def get_camera_config(s):
     """Read camera config from string
@@ -592,7 +698,15 @@ def get_camera_config(s):
     cam_config : CameraConfig
 
     """
+    from warnings import warn
     d = json.loads(s)
+    if (not("height") in d or not("width") in d):
+        raise IOError(depr_warning_height_width)
+    # ensure the bbox is a Polygon object
+    if "bbox" in d:
+        if isinstance(d["bbox"], str):
+            d["bbox"] = wkt.loads(d["bbox"])
+
     return CameraConfig(**d)
 
 

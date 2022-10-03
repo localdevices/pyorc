@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 @pytest.mark.parametrize(
     "frames, resolution, dims, shape",
     [
-        (pytest.lazy_fixture("frames_grayscale"), 0.1, 3, (90, 110)),
-        (pytest.lazy_fixture("frames_grayscale"), 0.01, 3, (840, 1100)),
-        (pytest.lazy_fixture("frames_grayscale"), 0.005, 3, (1680, 2190)),
+        # (pytest.lazy_fixture("frames_grayscale"), 0.1, 3, (90, 110)),
+        # (pytest.lazy_fixture("frames_grayscale"), 0.01, 3, (840, 1100)),
+        # (pytest.lazy_fixture("frames_grayscale"), 0.005, 3, (1680, 2190)),
         (pytest.lazy_fixture("frames_rgb"), 0.1, 4, (90, 110, 3)),
     ]
 )
@@ -20,6 +20,11 @@ def test_project(frames, resolution, dims, shape):
     assert(len(frames_proj.dims) == dims), f"Expected nr of dims is {dims}, but {len(frames_proj.dims)} found"
     # check shape of x, y grids
     assert(frames_proj.isel(time=0).shape == shape), f"Projected frames shape {frames_proj.isel(time=0).shape} do not have expected shape {shape}"
+    import matplotlib
+    matplotlib.use('Qt5Agg')
+    import matplotlib.pyplot as plt
+    plt.imshow(frames_proj[0])
+    plt.show()
 
 
 @pytest.mark.parametrize(
@@ -99,6 +104,15 @@ def test_get_piv(frames_proj, window_size, result):
 def test_to_ani(frames, ani_mp4):
     frames.frames.to_ani(ani_mp4, progress_bar=False)
 
-def test_to_video(frames_rgb_stabilize, ani_mp4):
+
+@pytest.mark.parametrize(
+    "frames",
+    [
+        pytest.lazy_fixture("frames_grayscale"),
+        pytest.lazy_fixture("frames_rgb_stabilize"),
+        pytest.lazy_fixture("frames_proj"),
+    ]
+)
+def test_to_video(frames, ani_mp4):
     # only store the first 3 frames
-    frames_rgb_stabilize[0:3].frames.to_video(ani_mp4)
+    frames[0:3].frames.to_video(ani_mp4)

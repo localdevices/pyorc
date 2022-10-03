@@ -4,6 +4,7 @@ import cv2
 import dask
 import matplotlib.pyplot as plt
 import numpy as np
+import rasterio
 import xarray as xr
 
 from matplotlib.animation import FuncAnimation, FFMpegWriter
@@ -84,9 +85,13 @@ class Frames(ORCBase):
             lons = None
             lats = None
 
-        M = camera_config.get_M(self.h_a, reverse=True)
+        M = camera_config.get_M(self.h_a, to_bbox_grid=True, reverse=True)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
-        xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
+        xp, yp = helpers.xy_to_perspective(
+            *np.meshgrid(x, np.flipud(y)),
+            self.camera_config.resolution,
+            M
+        )
         # ensure y coordinates start at the top in the right orientation (different from order of a CRS)
         shape_y, shape_x = self.camera_shape
         yp = shape_y - yp
@@ -161,8 +166,15 @@ class Frames(ORCBase):
         camera_config = copy.deepcopy(self.camera_config)
         if resolution is not None:
             camera_config.resolution = resolution
-        M = camera_config.get_M(self.h_a)
+        # convert bounding box coords into row/column space
         shape = camera_config.shape
+        # get camera perspective bbox corners
+        src = camera_config.get_bbox(camera=True, h_a=self.h_a).exterior.coords[0:4]
+        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
+        # get geographic coordinates bbox corners
+        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
+        M = cv.get_M_2D(src, dst)
+
         # prepare all coordinates
         y = np.flipud(np.linspace(
             camera_config.resolution / 2,
@@ -406,7 +418,7 @@ class Frames(ORCBase):
 
         im = ax.imshow(self._obj[0], **kwargs)
         if progress_bar:
-            frames = tqdm(range(len(self._obj)))
+            frames = tqdm(range(len(self._obj)), position=0, leave=True)
         else:
             frames = range(len(self._obj))
         anim = FuncAnimation(
@@ -443,10 +455,19 @@ class Frames(ORCBase):
         h = self._obj.shape[1]
         w = self._obj.shape[2]
         out = cv2.VideoWriter(fn, video_format, fps, (w, h))
-        pbar = tqdm(self._obj)
+        pbar = tqdm(self._obj, position=0, leave=True)
         pbar.set_description("Writing frames")
-        for f in pbar:
-            img = cv2.cvtColor(f.values, cv2.COLOR_RGB2BGR) if len(f.shape) == 3 else f.values
+        for n, f in enumerate(pbar):
+            if len(f.shape) == 3:
+                img = cv2.cvtColor(f.values, cv2.COLOR_RGB2BGR)
+            else:
+                img = f.values
+                if n == 0:
+                    # make a scale between 0 and 255, only with first frame
+                    img_min = img.min(axis=0).min(axis=0)
+                    img_max = img.max(axis=0).max(axis=0)
+                img = np.uint8(255*((img - img_min)/(img_max - img_min)))
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
             out.write(img)
         out.release()
 

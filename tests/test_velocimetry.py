@@ -71,9 +71,9 @@ def test_get_transect(piv, cross_section, distance, nr_points):
 @pytest.mark.parametrize(
     "mode",
     [
-        "local",
+        # "local",
         "camera",
-        "geographical"
+        # "geographical"
     ]
 )
 @pytest.mark.parametrize(
