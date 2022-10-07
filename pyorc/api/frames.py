@@ -28,7 +28,6 @@ class Frames(ORCBase):
         """
         super(Frames, self).__init__(xarray_obj)
 
-
     def get_piv(self, **kwargs):
         """Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to
         trigger actual computation. The dataset returned contains velocity information for each interrogation window
@@ -145,7 +144,6 @@ class Frames(ORCBase):
         ds.velocimetry.set_encoding()
         return ds
 
-
     def project(self, resolution=None):
         """Project frames into a projected frames object, with information from the camera_config attr.
         This requires that the CameraConfig contains full gcp information. If a CRS is provided, also "lat" and "lon"
@@ -240,7 +238,6 @@ class Frames(ORCBase):
 
         return f
 
-
     def landmask(self, dilate_iter=10, samples=15):
         """Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much
         higher than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation
@@ -280,7 +277,6 @@ class Frames(ORCBase):
         # make mask 3-dimensional
         return (self._obj * mask)
 
-
     def normalize(self, samples=15):
         """Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and
         helps to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and
@@ -309,8 +305,7 @@ class Frames(ORCBase):
         frames_norm = ((frames_reduce - frames_min) / (frames_max - frames_min) * 255).astype("uint8")
         return frames_norm
 
-
-    def edge_detect(self, wdw_1=2, wdw_2=4):
+    def edge_detect(self, wdw_1=1, wdw_2=2):
         """Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved
         images and computes their difference to detect edges.
 
@@ -344,7 +339,6 @@ class Frames(ORCBase):
             keep_attrs=True
         )
 
-
     def reduce_rolling(self, samples=25):
         """Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use
         Frames.normalize).
@@ -371,7 +365,6 @@ class Frames(ORCBase):
         frames_norm = (frames_thres * 255 / frames_thres.max(axis=-1).max(axis=-1)).astype("uint8")
         frames_norm = frames_norm.where(roll_mean != 0, 0)
         return frames_norm
-
 
     def to_ani(
             self,
@@ -425,7 +418,6 @@ class Frames(ORCBase):
             f, animate, init_func=init, frames=frames, **anim_kwargs
         )
         anim.save(fn, **video_kwargs)
-
 
     def to_video(
             self,
