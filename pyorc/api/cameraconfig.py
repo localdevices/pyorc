@@ -111,6 +111,7 @@ class CameraConfig:
         # override the transform and bbox with the set corners
         if corners is not None:
             self.set_bbox_from_corners(corners)
+
     @property
     def bbox(self):
         """
@@ -128,27 +129,21 @@ class CameraConfig:
     def bbox(self, pol):
         self._bbox = pol
 
-
     @property
     def camera_matrix(self):
         return self._camera_matrix
-
 
     @camera_matrix.setter
     def camera_matrix(self, camera_matrix):
         self._camera_matrix = camera_matrix.tolist() if isinstance(camera_matrix, np.ndarray) else camera_matrix
 
-
     @property
     def dist_coeffs(self):
         return self._dist_coeffs
 
-
     @dist_coeffs.setter
     def dist_coeffs(self, dist_coeffs):
         self._dist_coeffs = dist_coeffs.tolist() if isinstance(dist_coeffs, np.ndarray) else dist_coeffs
-
-
 
     @property
     def gcp_reduced(self):
@@ -161,7 +156,6 @@ class CameraConfig:
             Reduced coordinate (x, y) or (x, y, z) of gcp destination points
         """
         return np.array(self.gcps["dst"]) - self.gcp_mean
-
 
     @property
     def gcp_mean(self):
@@ -206,7 +200,6 @@ class CameraConfig:
         """
         return cv._get_transform(self.bbox, resolution=self.resolution)
 
-
     def get_bbox(self, camera=False, h_a=None):
         """
 
@@ -224,8 +217,8 @@ class CameraConfig:
         -------
         A bounding box, that in the used CRS is perfectly rectangular, and aligned in the up/downstream direction.
         It can (and certainly will) be rotated with respect to a typical bbox with xlim, ylim coordinates.
-        If user sets ``camera=True`` then the geographical bounding box will be converted into a camera perspective, using
-        the homography belonging to the available ground control points and current water level.
+        If user sets ``camera=True`` then the geographical bounding box will be converted into a camera perspective,
+        using the homography belonging to the available ground control points and current water level.
 
         This can then be used to reconstruct the grid for velocimetry calculations.
         """
@@ -240,11 +233,10 @@ class CameraConfig:
             bbox = Polygon(cv2.perspectiveTransform(np.float32([coords]), M)[0])
         return bbox
 
-
-
     def get_depth(self, z, h_a=None):
-        """Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
-        in local reference (e.g. staff gauge).
+        """
+        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level,
+        measured in local reference (e.g. staff gauge).
 
         Parameters
         ----------
@@ -260,14 +252,14 @@ class CameraConfig:
 
         """
         if h_a is None:
-            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is provided"
+            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is " \
+                                                "provided "
             h_a = 0.
             h_ref = 0.
         else:
             h_ref = self.gcps["h_ref"]
         z_pressure = np.maximum(self.gcps["z_0"] - h_ref + h_a, z)
         return z_pressure - z
-
 
     def get_dst_a(self, h_a=None):
         """
@@ -296,13 +288,17 @@ class CameraConfig:
             )
         return dst_a
 
-
     def get_dist_shore(self, x, y, z, h_a=None):
-        """Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
+        """
+        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
         in local reference (e.g. staff gauge).
 
         Parameters
         ----------
+        x : list of floats
+            measured bathymetry point x-coordinates
+        y : list of floats
+            measured bathymetry point y-coordinates
         z : list of floats
             measured bathymetry point depths
         h_a : float, optional
@@ -317,17 +313,17 @@ class CameraConfig:
         # retrieve depth
         depth = self.get_depth(z, h_a=h_a)
         if h_a is None:
-            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is provided"
-            h_a = 0.
-            h_ref = 0.
-        else:
-            h_ref = self.gcps["h_ref"]
+            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is " \
+                                                "provided "
+            # h_a = 0.
+            # h_ref = 0.
+        # else:
+            # h_ref = self.gcps["h_ref"]
         z_dry = depth <= 0
         z_dry[[0, -1]] = True
         # compute distance to nearest dry points with Pythagoras
         dist_shore = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
         return dist_shore
-
 
     def get_dist_wall(self, x, y, z, h_a=None):
         depth = self.get_depth(z, h_a=h_a)
@@ -350,7 +346,6 @@ class CameraConfig:
         h_ref = 0 if self.gcps["h_ref"] is None else self.gcps["h_ref"]
         h = z + h_ref - self.gcps["z_0"]
         return h
-
 
     def get_M(self, h_a=None, to_bbox_grid=False, reverse=False, **lens_pars):
         """Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
@@ -408,7 +403,6 @@ class CameraConfig:
                 reverse=reverse
             )
 
-
     def get_z_a(self, h_a=None):
         """
         h_a : float, optional
@@ -424,7 +418,6 @@ class CameraConfig:
             return self.gcps["z_0"]
         else:
             return self.gcps["z_0"] + (h_a - self.gcps["h_ref"])
-
 
     def set_bbox_from_corners(self, corners):
         """
@@ -458,10 +451,6 @@ class CameraConfig:
 
         Parameters
         ----------
-        height : int
-            height of image frame
-        width : int
-            width of image frame
         k1 : float, optional
             lens curvature [-], zero (default) means no curvature
         c : float, optional
@@ -479,7 +468,8 @@ class CameraConfig:
         self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, f=f)
 
     def set_gcps(self, src, dst, z_0, h_ref=None, crs=None):
-        """Set ground control points for the given CameraConfig
+        """
+        Set ground control points for the given CameraConfig
 
         Parameters
         ----------
@@ -519,7 +509,9 @@ class CameraConfig:
         if crs is not None:
             if not (hasattr(self, "crs")):
                 raise ValueError(
-                    'CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided destination coordinates are in a locally defined coordinate reference system, e.g. established with a spirit level.')
+                    'CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided '
+                    'destination coordinates are in a locally defined coordinate reference system, e.g. established '
+                    'with a spirit level.')
             dst = helpers.xyz_transform(dst, crs, CRS.from_wkt(self.crs))
         # if there is no h_ref, then no local gauge system, so set h_ref to zero
         if h_ref is None:
@@ -554,7 +546,6 @@ class CameraConfig:
             x, y = helpers.xyz_transform([[x, y]], crs, self.crs)[0]
         self.lens_position = [x, y, z]
 
-
     def plot(
             self,
             figsize=(13, 8),
@@ -562,8 +553,8 @@ class CameraConfig:
             tiles=None,
             buffer=0.0005,
             zoom_level=19,
-            tiles_kwargs={},
-            camera=False
+            camera=False,
+            tiles_kwargs={}
     ):
         """
         Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
@@ -581,6 +572,8 @@ class CameraConfig:
             buffer in lat-lon around points, used to set extent (default: 0.0005)
         zoom_level : int, optional
             zoom level of image tiler service (default: 18)
+        camera : bool, optional
+            If set to True, all camera config information will be back projected to the original camera objective.
         **tiles_kwargs
             additional keyword arguments to pass to ax.add_image when tiles are added
         8) :
@@ -603,13 +596,16 @@ class CameraConfig:
 
         if hasattr(self, "_bbox"):
             bbox = self.get_bbox(camera=camera)
-        if not(camera):
-            if (hasattr(self, "lens_position") and not(camera)):
+        if not camera:
+            if hasattr(self, "lens_position") and not camera:
                 points.append(Point(self.lens_position[0], self.lens_position[1]))
             # transform points in case a crs is provided
             if hasattr(self, "crs"):
                 # make a transformer to lat lon
-                transform = Transformer.from_crs(CRS.from_user_input(self.crs), CRS.from_epsg(4326), always_xy=True).transform
+                transform = Transformer.from_crs(
+                    CRS.from_user_input(self.crs),
+                    CRS.from_epsg(4326),
+                    always_xy=True).transform
                 points = [ops.transform(transform, p) for p in points]
                 if hasattr(self, "_bbox"):
                     bbox = ops.transform(transform, bbox)
@@ -627,7 +623,8 @@ class CameraConfig:
                     import cartopy.crs as ccrs
                 except ModuleNotFoundError:
                     raise ModuleNotFoundError(
-                        'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try again.')
+                        'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try '
+                        'again.')
                 if tiles is not None:
                     tiler = getattr(cimgt, tiles)(**tiles_kwargs)
                     crs = tiler.crs
@@ -647,11 +644,27 @@ class CameraConfig:
             plot_kwargs = {}
         ax.plot(x[0:len(self.gcps["dst"])], y[0:len(self.gcps["dst"])], ".", label="Control points", markersize=12, markeredgecolor="w", zorder=2, **plot_kwargs)
         if len(x) > len(self.gcps["dst"]):
-            ax.plot(x[-1], y[-1], ".", label="Lens position", markersize=12, zorder=2, markeredgecolor="w", **plot_kwargs)
+            ax.plot(
+                x[-1],
+                y[-1],
+                ".",
+                label="Lens position",
+                markersize=12,
+                zorder=2,
+                markeredgecolor="w",
+                **plot_kwargs
+            )
         if hasattr(self, "_bbox"):
             bbox_x, bbox_y = bbox.exterior.xy
             bbox_coords = list(zip(bbox_x, bbox_y))
-            patch = patches.Polygon(bbox_coords, alpha=0.5, zorder=2, edgecolor="w", label="Area of interest", **plot_kwargs)
+            patch = patches.Polygon(
+                bbox_coords,
+                alpha=0.5,
+                zorder=2,
+                edgecolor="w",
+                label="Area of interest",
+                **plot_kwargs
+            )
             ax.add_patch(patch)
         if camera:
             # make sure that zero is on the top
@@ -683,7 +696,7 @@ class CameraConfig:
     def to_dict_str(self):
         dict = self.to_dict()
         # convert anything that is not string in string
-        dict_str = {k: v if not(isinstance(v, Polygon)) else v.__str__() for k, v in dict.items() }
+        dict_str = {k: v if not(isinstance(v, Polygon)) else v.__str__() for k, v in dict.items()}
         return dict_str
 
     def to_file(self, fn):
@@ -709,6 +722,7 @@ class CameraConfig:
         """
         return json.dumps(self, default=lambda o: o.to_dict_str(), indent=4)
 
+
 depr_warning_height_width = """
 Your camera configuration does not have a property "height" and/or "width", probably because your configuration file is 
 from an older < 0.3.0 version. Please rectify this by editing your .json config file. The top of your file should e.g.
@@ -720,6 +734,7 @@ look as follows for a HD video:
     ...
 }
 """
+
 
 def get_camera_config(s):
     """Read camera config from string
@@ -736,13 +751,12 @@ def get_camera_config(s):
     """
     from warnings import warn
     d = json.loads(s)
-    if (not("height") in d or not("width") in d):
+    if not "height" in d or not "width" in d:
         raise IOError(depr_warning_height_width)
     # ensure the bbox is a Polygon object
     if "bbox" in d:
         if isinstance(d["bbox"], str):
             d["bbox"] = wkt.loads(d["bbox"])
-
     return CameraConfig(**d)
 
 
