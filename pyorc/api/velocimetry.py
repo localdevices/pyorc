@@ -490,7 +490,12 @@ class Velocimetry(ORCBase):
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
         if crs is not None:
             # transform coordinates of cross section
-            x, y = helpers.xy_transform(x, y, crs_from=crs, crs_to=CRS.from_wkt(self.camera_config.crs))
+            x, y = zip(*helpers.xyz_transform(
+                list(zip(*(x, y))),
+                crs_from=crs,
+                crs_to=CRS.from_wkt(self.camera_config.crs)
+            ))
+            x, y = list(x), list(y)
         if distance is None:
             # interpret suitable sampling distance from grid resolution
             distance = np.abs(np.diff(self._obj.x)[0])

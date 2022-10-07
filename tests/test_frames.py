@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 @pytest.mark.parametrize(
     "frames, resolution, dims, shape",
     [
-        # (pytest.lazy_fixture("frames_grayscale"), 0.1, 3, (90, 110)),
-        # (pytest.lazy_fixture("frames_grayscale"), 0.01, 3, (840, 1100)),
-        # (pytest.lazy_fixture("frames_grayscale"), 0.005, 3, (1680, 2190)),
-        (pytest.lazy_fixture("frames_rgb"), 0.1, 4, (90, 110, 3)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.1, 3, (83, 97)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.01, 3, (821, 965)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.005, 3, (1642, 1930)),
+        (pytest.lazy_fixture("frames_rgb"), 0.1, 4, (83, 97, 3)),
     ]
 )
 def test_project(frames, resolution, dims, shape):
@@ -43,7 +43,7 @@ def test_edge_detect(frames_proj):
     frames_edge = frames_proj.frames.edge_detect()
     assert(frames_edge.shape == frames_proj.shape)
     assert(frames_edge[0, 0, 0].values.dtype == "float32"), f'dtype of result is {frames_edge[0, 0, 0].values.dtype}, expected "float32"'
-    assert(np.allclose(frames_edge.values.flatten()[-4:], [-3.6447144, -6.9251404, -5.4156494, -3.6206055]))
+    assert(np.allclose(frames_edge.values.flatten()[-4:], [3.0936584, 0.9899597, 2.1243286, 3.5952148]))
 
 
 
@@ -81,16 +81,16 @@ def test_plot_proj(frames_proj, idx):
 @pytest.mark.parametrize(
     "window_size, result",
     [
-        (5, [ 0.1287729 , -0.01711009, -0.00664764, -0.01628049]),
-        (10, [ 0.05766379,  0.04514623,  0.00432828, -0.01051793]),
-        (15, [0.08111688, 0.26014498, 0.06920814, 0.02797562])
+        (5, [0.06478927, np.nan, np.nan, 0.08308388]),
+        (10, [0.32011113, 0.22834961, 0.29223198, 0.31207517]),
+        (15, [0.29699332, 0.33740216, 0.33087003, 0.25027668])
     ]
 )
 def test_get_piv(frames_proj, window_size, result):
     piv = frames_proj.frames.get_piv(window_size=window_size)
     piv_mean = piv.mean(dim="time", keep_attrs=True)
     # check if results are stable
-    assert(np.allclose(piv_mean["v_x"].values.flatten()[-4:], result))
+    assert(np.allclose(piv_mean["v_x"].values.flatten()[-4:], result, equal_nan=True))
 
 
 @pytest.mark.parametrize(

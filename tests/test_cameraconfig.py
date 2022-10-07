@@ -115,7 +115,7 @@ def test_lens_position(cam_config, lens_position):
     # transform to epsg:4326 and see if the automated transform works
     assert(cam_config.lens_position==lens_position)
     x, y, z = lens_position
-    x, y = helpers.xy_transform(x, y, cam_config.crs, 4326)
+    x, y = helpers.xyz_transform([[x, y]], cam_config.crs, 4326)[0]
     cam_config.set_lens_position(x, y, z, crs=4326)
     assert(np.allclose(cam_config.lens_position, lens_position))
 

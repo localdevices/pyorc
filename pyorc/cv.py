@@ -406,9 +406,9 @@ def _transform(img, m):
     return img_transform
 
 
-def get_M_2D(src, dst):
+def get_M_2D(src, dst, reverse=False):
     """
-    Retrieve transformation matrix for between (4) src and (4) dst points with only x, y coordinates (no z)
+    Retrieve homography matrix for between (4) src and (4) dst points with only x, y coordinates (no z)
 
     Parameters
     ----------
@@ -416,43 +416,79 @@ def get_M_2D(src, dst):
         [x, y] with source coordinates, typically cols and rows in image
     dst : list of lists
         [x, y] with target coordinates after reprojection, can e.g. be in crs [m]
+    reverse : bool, optional
+        If set, the reverse homography to back-project to camera objective will be retrieved
 
     Returns
     -------
     M : np.ndarray
-        transformation matrix, used in cv2.warpPerspective
+        homography matrix (3x3), used in cv2.warpPerspective
     """
     # set points to float32
     _src = np.float32(src)
     _dst = np.float32(dst)
     # define transformation matrix based on GCPs
-    M = cv2.getPerspectiveTransform(_src, _dst)
+    if reverse:
+        M = cv2.getPerspectiveTransform(_dst, _src)
+    else:
+        M = cv2.getPerspectiveTransform(_src, _dst)
     return M
 
-
-def get_M_3D(src, dst):
+def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., reverse=False):
     """
-    Retrieve transformation matrix for between (minimal 6) src and (minimal 6) dst points
-    with x, y, and z coordinates
+    Retrieve homography matrix for between (6+) 2D src and (6+) 3D dst (x, y, z) points
 
     Parameters
     ----------
     src : list of lists
-        [x, y, z] with source coordinates, typically cols and rows in image
+        [x, y] with source coordinates, typically cols and rows in image
     dst : list of lists
         [x, y, z] with target coordinates after reprojection, can e.g. be in crs [m]
+    camera_matrix : np.ndarray (3x3)
+        Camera intrinsic matrix
+    dist_coeffs : p.ndarray, optional
+        1xN array with distortion coefficients (N = 4, 5 or 8)
+    z : float, optional
+        Elevation plane (real-world coordinate crs) of projected image
+    reverse : bool, optional
+        If set, the reverse homography to back-project to camera objective will be retrieved
 
     Returns
     -------
     M : np.ndarray
-        transformation matrix, used in cv2.warpPerspective
+        homography matrix (3x3), used in cv2.warpPerspective
+
+    Notes
+    -----
+    See rectification workflow OpenCV
+    http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
+    Code based on:
+    https://www.openearth.nl/flamingo/_modules/flamingo/rectification/rectification.html
+
     """
     # set points to float32
     _src = np.float32(src)
     _dst = np.float32(dst)
+    # import pdb;pdb.set_trace()
+    camera_matrix = np.float32(camera_matrix)
+    dist_coeffs = np.float32(dist_coeffs)
     # define transformation matrix based on GCPs
-    M = cv2.getPerspectiveTransform(_src, _dst)
-    return M
+    success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs)
+    # convert rotation vector to rotation matrix
+    R = cv2.Rodrigues(rvec)[0]
+    # assume height of projection plane
+    R[:, 2] = R[:, 2] * z
+    # add translation vector
+    R[:, 2] = R[:, 2] + tvec.flatten()
+    # compute homography
+    if reverse:
+        # From perspective to objective
+        M = np.dot(camera_matrix, R)
+    else:
+        # from objective to perspective
+        M = np.linalg.inv(np.dot(camera_matrix, R))
+    # normalize homography before returning
+    return M / M[-1, -1]
 
 
 def transform_to_bbox(coords, bbox, resolution):

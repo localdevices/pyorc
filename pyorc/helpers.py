@@ -555,15 +555,13 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     return xp, yp
 
 
-def xy_transform(x, y, crs_from, crs_to):
+def xyz_transform(points, crs_from, crs_to):
     """transforms set of x and y coordinates from one CRS to another
 
     Parameters
     ----------
-    x : np.ndarray
-        x-coordinates in crs_from
-    y : np.ndarray
-        y-coordinates in crs_from
+    points : list of lists
+        xyz-coordinates or xy-coordinates in crs_from
     crs_from : int, dict or str, optional
         Coordinate Reference System (source). Accepts EPSG codes (int or str) proj (str or dict) or wkt (str).
     crs_to : int, dict or str, optional
@@ -576,6 +574,10 @@ def xy_transform(x, y, crs_from, crs_to):
     y_trans : np.ndarray
         y-coordinates transformed
     """
+    points = np.array(points)
+    x = points[:, 0]
+    y = points[:, 1]
+
     transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
     # transform dst coordinates to local projection
     x_trans, y_trans = transform.transform(x, y)
@@ -585,10 +587,7 @@ def xy_transform(x, y, crs_from, crs_to):
             np.all(np.isinf(x_trans))
         )
     ), "Transformation did not give valid results, please check if the provided crs of input coordinates is correct."
-
-    # if np.all(np.isinf(x_trans)):
-    #     raise ValueError(
-    #         "Transformation did not give valid results, please check if the provided crs of input "
-    #         "coordinates is correct."
-    #     )
-    return transform.transform(x, y)
+    points[:, 0] = x_trans
+    points[:, 1] = y_trans
+    return points.tolist()
+    # return transform.transform(x, y)

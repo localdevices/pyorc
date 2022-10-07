@@ -229,19 +229,13 @@ class CameraConfig:
 
         This can then be used to reconstruct the grid for velocimetry calculations.
         """
-        # # get homography, this is the only place besides self.get_M where cv.get_M is used.
-        # M_gcp = self.get_M()
-        # # TODO: make derivation dependent on 3D or 2D point availability
-        # # if self.gcps["src"].shape == 3:
-        # #     # TODO: homography from solvepnp
-        # bbox = cv.get_aoi(M_gcp, self.corners)
         bbox = self.bbox
         if camera:
             coords = np.array(bbox.exterior.coords)
             # convert to perspective rowcol coordinates
             M = self.get_M(reverse=True, h_a=h_a)
             # reduce coords by control point mean
-            coords -= self.gcp_mean
+            coords -= self.gcp_mean[0:2]
             # TODO: re-distort if needed
             bbox = Polygon(cv2.perspectiveTransform(np.float32([coords]), M)[0])
         return bbox
@@ -387,19 +381,49 @@ class CameraConfig:
                 self.bbox,
                 self.resolution
             )
+            dst_a = np.array(dst_a)
         else:
             dst_a = self.get_dst_a(h_a)
             # reduce dst_a with its mean to get much more accurate projection result in case x and y order of
             # magnitude is very large
             dst_a -= self.gcp_mean
         # src_a = self.get_src(**lens_pars)
-        if reverse:
-            # retrieve and return M reverse for destination row and col
-            return cv.get_M_2D(src=dst_a, dst=src)
+        if dst_a.shape[-1] == 3:
+            # compute the water level in the coordinate system reduced with the mean gcp coordinate
+            z_a = self.get_z_a(h_a)
+            z_a -= self.gcp_mean[-1]
+            # treating 3D homography
+            return cv.get_M_3D(
+                src=src,
+                dst=dst_a,
+                camera_matrix=self.camera_matrix,
+                dist_coeffs=self.dist_coeffs,
+                z=z_a,
+                reverse=reverse
+            )
         else:
-            # retrieve and return M for destination row and col
-            return cv.get_M_2D(src=src, dst=dst_a)
+            return cv.get_M_2D(
+                src=src,
+                dst=dst_a,
+                reverse=reverse
+            )
 
+
+    def get_z_a(self, h_a=None):
+        """
+        h_a : float, optional
+            actual water level measured [m], if not set, assumption is that a single video
+            is processed and thus changes in water level are not relevant. (default: None)
+
+        Returns
+        -------
+        Actual locations of control points (in case these are only x, y) given the current set water level and
+        the camera location
+        """
+        if h_a is None:
+            return self.gcps["z_0"]
+        else:
+            return self.gcps["z_0"] + (h_a - self.gcps["h_ref"])
 
 
     def set_bbox_from_corners(self, corners):
@@ -425,7 +449,7 @@ class CameraConfig:
         bbox = cv.get_aoi(M_gcp, corners, resolution=self.resolution)
         # bbox is offset by self.gcp_mean. Regenerate bbox after adding offset
         bbox_xy = np.array(bbox.exterior.coords)
-        bbox_xy += self.gcp_mean
+        bbox_xy += self.gcp_mean[0:2]
         bbox = Polygon(bbox_xy)
         self.bbox = bbox
 
@@ -454,7 +478,7 @@ class CameraConfig:
         self.dist_coeffs = cv._get_dist_coefs(k1)
         self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, f=f)
 
-    def set_gcps(self, src, dst, z_0=None, h_ref=None, crs=None):
+    def set_gcps(self, src, dst, z_0, h_ref=None, crs=None):
         """Set ground control points for the given CameraConfig
 
         Parameters
@@ -478,24 +502,28 @@ class CameraConfig:
             reprojected to the local crs of the CameraConfig. (Default: None)
 
         """
-        assert (isinstance(src, list)), f"src must be a list of 4 numbers"
-        assert (isinstance(dst, list)), f"dst must be a list of 4 numbers"
-        assert (len(src) == 4), f"4 source points are expected in src, but {len(src)} were found"
-        assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
+        assert (isinstance(src, list)), f"src must be a list of (x, y) or (x, y, z) coordinates"
+        assert (isinstance(dst, list)), f"dst must be a list of (x, y) or (x, y, z) coordinates"
+        if np.array(dst).shape[1] == 2:
+            assert (len(src) == 4), f"4 source points are expected in src, but {len(src)} were found"
+            assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
+        else:
+            assert(len(src) == len(dst)), f"Amount of (x, y, z) coordinates in src ({len(src)}) and dst ({len(dst)} must be equal"
+            assert(len(src) >= 6), f"for (x, y, z) points, at least 6 pairs must be available, only {len(src)} provided"
         if h_ref is not None:
             assert (isinstance(h_ref, (float, int))), "h_ref must contain a float number"
         if z_0 is not None:
-            assert (isinstance(z_0, (float, int))), "z_0 must contain a float number"
+            assert (isinstance(z_0, (float, int))), "z_0 must be provided as type float"
         assert (all(isinstance(x, (float, int)) for p in src for x in p)), "src contains non-int parts"
         assert (all(isinstance(x, (float, int)) for p in dst for x in p)), "dst contains non-float parts"
         if crs is not None:
             if not (hasattr(self, "crs")):
                 raise ValueError(
                     'CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided destination coordinates are in a locally defined coordinate reference system, e.g. established with a spirit level.')
-            _x, _y = zip(*dst)
-            x, y = helpers.xy_transform(_x, _y, crs, CRS.from_wkt(self.crs))
-            # replace transformed coordinates
-            dst = list(zip(x, y))
+            dst = helpers.xyz_transform(dst, crs, CRS.from_wkt(self.crs))
+        # if there is no h_ref, then no local gauge system, so set h_ref to zero
+        if h_ref is None:
+            h_ref = 0.
         self.gcps = {
             "src": src,
             "dst": dst,
@@ -523,12 +551,20 @@ class CameraConfig:
         if crs is not None:
             if self.crs is None:
                 raise ValueError("CameraConfig does not contain a crs, ")
-            x, y = helpers.xy_transform(x, y, crs, self.crs)
-
+            x, y = helpers.xyz_transform([[x, y]], crs, self.crs)[0]
         self.lens_position = [x, y, z]
 
 
-    def plot(self, figsize=(13, 8), ax=None, tiles=None, buffer=0.0005, zoom_level=19, tiles_kwargs={}, camera=False):
+    def plot(
+            self,
+            figsize=(13, 8),
+            ax=None,
+            tiles=None,
+            buffer=0.0005,
+            zoom_level=19,
+            tiles_kwargs={},
+            camera=False
+    ):
         """
         Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
         to be in the right location. Requires cartopy to be installed.
@@ -563,9 +599,9 @@ class CameraConfig:
         if camera:
             points = [Point(x, y) for x, y in self.gcps["src"]]
         else:
-            points = [Point(x, y) for x, y in self.gcps["dst"]]
+            points = [Point(p[0], p[1]) for p in self.gcps["dst"]]
 
-        if hasattr(self, "corners"):
+        if hasattr(self, "_bbox"):
             bbox = self.get_bbox(camera=camera)
         if not(camera):
             if (hasattr(self, "lens_position") and not(camera)):
@@ -575,7 +611,7 @@ class CameraConfig:
                 # make a transformer to lat lon
                 transform = Transformer.from_crs(CRS.from_user_input(self.crs), CRS.from_epsg(4326), always_xy=True).transform
                 points = [ops.transform(transform, p) for p in points]
-                if hasattr(self, "corners"):
+                if hasattr(self, "_bbox"):
                     bbox = ops.transform(transform, bbox)
             xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
             extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
@@ -612,7 +648,7 @@ class CameraConfig:
         ax.plot(x[0:len(self.gcps["dst"])], y[0:len(self.gcps["dst"])], ".", label="Control points", markersize=12, markeredgecolor="w", zorder=2, **plot_kwargs)
         if len(x) > len(self.gcps["dst"]):
             ax.plot(x[-1], y[-1], ".", label="Lens position", markersize=12, zorder=2, markeredgecolor="w", **plot_kwargs)
-        if hasattr(self, "corners"):
+        if hasattr(self, "_bbox"):
             bbox_x, bbox_y = bbox.exterior.xy
             bbox_coords = list(zip(bbox_x, bbox_y))
             patch = patches.Polygon(bbox_coords, alpha=0.5, zorder=2, edgecolor="w", label="Area of interest", **plot_kwargs)
