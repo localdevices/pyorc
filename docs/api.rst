@@ -77,6 +77,7 @@ Plotting methods
     :toctree: _generated
 
     CameraConfig.plot
+    CameraConfig.plot_bbox
 
 .. _video:
 

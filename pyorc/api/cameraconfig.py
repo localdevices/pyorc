@@ -584,6 +584,8 @@ class CameraConfig:
         ax : plt.axes
 
         """
+        # initiate transform
+        transform = None
         # if there is an axes, get the extent
         xlim = ax.get_xlim() if ax is not None else None
         ylim = ax.get_ylim() if ax is not None else None
@@ -594,8 +596,6 @@ class CameraConfig:
         else:
             points = [Point(p[0], p[1]) for p in self.gcps["dst"]]
 
-        if hasattr(self, "_bbox"):
-            bbox = self.get_bbox(camera=camera)
         if not camera:
             if hasattr(self, "lens_position") and not camera:
                 points.append(Point(self.lens_position[0], self.lens_position[1]))
@@ -607,8 +607,6 @@ class CameraConfig:
                     CRS.from_epsg(4326),
                     always_xy=True).transform
                 points = [ops.transform(transform, p) for p in points]
-                if hasattr(self, "_bbox"):
-                    bbox = ops.transform(transform, bbox)
             xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
             extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
         x = [p.x for p in points]
@@ -625,7 +623,16 @@ class CameraConfig:
             plot_kwargs = dict(transform=ccrs.PlateCarree())
         else:
             plot_kwargs = {}
-        ax.plot(x[0:len(self.gcps["dst"])], y[0:len(self.gcps["dst"])], ".", label="Control points", markersize=12, markeredgecolor="w", zorder=2, **plot_kwargs)
+        ax.plot(
+            x[0:len(self.gcps["dst"])],
+            y[0:len(self.gcps["dst"])],
+            ".",
+            label="Control points",
+            markersize=12,
+            markeredgecolor="w",
+            zorder=2,
+            **plot_kwargs
+        )
         if len(x) > len(self.gcps["dst"]):
             ax.plot(
                 x[-1],
@@ -637,18 +644,15 @@ class CameraConfig:
                 markeredgecolor="w",
                 **plot_kwargs
             )
-        if hasattr(self, "_bbox"):
-            bbox_x, bbox_y = bbox.exterior.xy
-            bbox_coords = list(zip(bbox_x, bbox_y))
-            patch = patches.Polygon(
-                bbox_coords,
-                alpha=0.5,
-                zorder=2,
-                edgecolor="w",
-                label="Area of interest",
-                **plot_kwargs
-            )
-            ax.add_patch(patch)
+        patch_kwargs = {
+            **plot_kwargs,
+            "alpha": 0.5,
+            "zorder": 2,
+            "edgecolor": "w",
+            "label": "Area of interest",
+            **plot_kwargs
+        }
+        self.plot_bbox(ax=ax, camera=camera, transform=transform, **patch_kwargs)
         if camera:
             # make sure that zero is on the top
             ax.set_aspect("equal")
@@ -658,9 +662,10 @@ class CameraConfig:
         ax.legend()
         return ax
 
-
-    def plot_bbox(self, ax=None, camera=False, h_a=None):
+    def plot_bbox(self, ax=None, camera=False, transform=None, h_a=None, **kwargs):
         """
+        Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera
+        Field Of View (``camera=True``).
 
         Parameters
         ----------
@@ -668,6 +673,8 @@ class CameraConfig:
             if not provided, axes is setup (Default: None)
         camera : bool, optional
             If set to True, all camera config information will be back projected to the original camera objective.
+        transform : pyproj transformer transformation function, optional
+            used to reproject bbox to axes object projection (e.g. lat lon)
         h_a : float, optional
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level. In case a video with higher (lower) water levels is used, this
@@ -677,7 +684,20 @@ class CameraConfig:
         -------
         p : matplotlib.patch mappable
         """
+        # collect information to plot
+        bbox = self.get_bbox(camera=camera, h_a=h_a)
+        if camera is False and transform is not None:
+            # geographical projection is needed
+            bbox = ops.transform(transform, bbox)
 
+        bbox_x, bbox_y = bbox.exterior.xy
+        bbox_coords = list(zip(bbox_x, bbox_y))
+        patch = patches.Polygon(
+            bbox_coords,
+            **kwargs
+        )
+        p = ax.add_patch(patch)
+        return p
 
     def to_dict(self):
         """Return the CameraConfig object as dictionary
@@ -698,9 +718,9 @@ class CameraConfig:
         return d
 
     def to_dict_str(self):
-        dict = self.to_dict()
+        d = self.to_dict()
         # convert anything that is not string in string
-        dict_str = {k: v if not(isinstance(v, Polygon)) else v.__str__() for k, v in dict.items()}
+        dict_str = {k: v if not(isinstance(v, Polygon)) else v.__str__() for k, v in d.items()}
         return dict_str
 
     def to_file(self, fn):
