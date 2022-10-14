@@ -65,7 +65,7 @@ principles for velocimetry and transect results throughout this manual. We wish 
     :caption: Table of Content
 
     Videos <video>
-    Camera configurations <camera_config>
+    Camera configurations <camera_config/index>
     Frames <frames/frames.ipynb>
     Velocimetry <velocimetry>
     Transects <transect>
