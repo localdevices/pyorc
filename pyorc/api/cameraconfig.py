@@ -773,7 +773,6 @@ def get_camera_config(s):
     cam_config : CameraConfig
 
     """
-    from warnings import warn
     d = json.loads(s)
     if not "height" in d or not "width" in d:
         raise IOError(depr_warning_height_width)
