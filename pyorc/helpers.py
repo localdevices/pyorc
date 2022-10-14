@@ -1,6 +1,7 @@
 import copy
 import cv2
-import dask.array as da
+
+import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
@@ -133,6 +134,27 @@ def get_axes(cols, rows, resolution):
         )
     )
     return x, y
+
+
+def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
+    try:
+        import cartopy
+        import cartopy.io.img_tiles as cimgt
+        import cartopy.crs as ccrs
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try '
+            'again.')
+    if tiles is not None:
+        tiler = getattr(cimgt, tiles)(**kwargs)
+        crs = tiler.crs
+    else:
+        crs = ccrs.PlateCarree()
+    ax = plt.subplot(projection=crs)
+    ax.set_extent(extent, crs=ccrs.PlateCarree())
+    if tiles is not None:
+        ax.add_image(tiler, zoom_level, zorder=1)
+    return ax
 
 
 def get_xs_ys(cols, rows, transform):

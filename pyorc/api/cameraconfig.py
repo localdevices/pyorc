@@ -617,24 +617,7 @@ class CameraConfig:
         if ax is None:
             f = plt.figure(figsize=figsize)
             if (hasattr(self, "crs") and not(camera)):
-                try:
-                    import cartopy
-                    import cartopy.io.img_tiles as cimgt
-                    import cartopy.crs as ccrs
-                except ModuleNotFoundError:
-                    raise ModuleNotFoundError(
-                        'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try '
-                        'again.')
-                if tiles is not None:
-                    tiler = getattr(cimgt, tiles)(**tiles_kwargs)
-                    crs = tiler.crs
-                else:
-                    crs = ccrs.PlateCarree()
-                # make point collection
-                ax = plt.subplot(projection=crs)
-                ax.set_extent(extent, crs=ccrs.PlateCarree())
-                if tiles is not None:
-                    ax.add_image(tiler, zoom_level, zorder=1)
+                ax = helpers.get_geo_axes(tiles=tiles, extent=extent, zoom_level=zoom_level, **tiles_kwargs)
             else:
                 ax = plt.subplot()
         if hasattr(ax, "add_geometries"):
@@ -674,6 +657,27 @@ class CameraConfig:
                 ax.set_ylim(ylim)
         ax.legend()
         return ax
+
+
+    def plot_bbox(self, ax=None, camera=False, h_a=None):
+        """
+
+        Parameters
+        ----------
+        ax : plt.axes, optional
+            if not provided, axes is setup (Default: None)
+        camera : bool, optional
+            If set to True, all camera config information will be back projected to the original camera objective.
+        h_a : float, optional
+            If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
+            using h_a as a present water level. In case a video with higher (lower) water levels is used, this
+            will result in a different perspective plane than the control video.
+
+        Returns
+        -------
+        p : matplotlib.patch mappable
+        """
+
 
     def to_dict(self):
         """Return the CameraConfig object as dictionary
