@@ -47,6 +47,7 @@ Setting of properties and attributes
     CameraConfig.set_bbox_from_corners
     CameraConfig.set_gcps
     CameraConfig.set_lens_pars
+    CameraConfig.set_lens_calibration
     CameraConfig.set_lens_position
 
 Exporting

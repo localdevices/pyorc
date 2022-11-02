@@ -38,6 +38,7 @@ class CameraConfig:
             corners=None,
             gcps=None,
             lens_pars=None,
+            calibration_video=None
 
     ):
         """
@@ -74,7 +75,10 @@ class CameraConfig:
             Lens parameters, containing: "k1": float, barrel lens distortion parameter (default: 0.),
             "c": float, optical center (default: 2.),
             "f": float, focal length (default: 1.)
-
+        calibration_video : str, optional
+            local path to video file containing a checkerboard pattern. Must be 9x6 if called directly, otherwise use
+            ``.calibrate_camera`` explicitly and provide ``chessboard_size`` explicitly. When used, an automated camera
+            calibration on the video file will be attempted.
         """
         assert(isinstance(height, int)), 'height must be provided as type "int"'
         assert(isinstance(width, int)), 'width must be provided as type "int"'
@@ -98,7 +102,8 @@ class CameraConfig:
             self.set_lens_pars(**lens_pars)
         else:
             self.set_lens_pars()
-
+        if calibration_video is not None:
+            self.set_lens_calibration(calibration_video, plot=False)
         # camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option
         if camera_matrix is not None:
             self.camera_matrix = camera_matrix
@@ -199,6 +204,54 @@ class CameraConfig:
 
         """
         return cv._get_transform(self.bbox, resolution=self.resolution)
+
+    def set_lens_calibration(
+        self,
+        fn,
+        df=None,
+        chessboard_size=(9, 6),
+        max_imgs=30,
+        tolerance=0.1,
+        plot=True,
+        progress_bar=True
+    ):
+        """
+        Calibrates and sets the properties ``camera_matrix`` and ``dist_coeffs`` using a video of a chessboard pattern.
+        Follows methods described on https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
+
+        Parameters
+        ----------
+        fn : str
+            path to video file
+        df : int, optional
+            amount of frames to skip after a valid frame with corner points is found, defaults to fps of video.
+        chessboard_size : tuple, optional
+            amount of internal corner points expected on chessboard pattern, default is (9, 6).
+        max_imgs : int, optional
+            maximum amount of images to use for calibration (default: 30).
+        tolerance : float, optional
+            error tolerance alowed for reprojection of corner points (default: 0.1, if set to None, no filtering will
+            be done). images that exceed the tolerance are excluded from calibration. This is to remove images with
+            spuriously defined points, or blurry images.
+        plot : bool, optional
+            if set, chosen frames will be plotted for the user to inspect on-=the-fly with a one-second delay
+            (default: True).
+        progress_bar : bool, optional
+            if set, a progress bar going through the frames is plotted (default: True).
+
+
+        """
+        camera_matrix, dist_coeffs = cv.calibrate_camera(
+            fn,
+            df,
+            chessboard_size,
+            max_imgs,
+            tolerance,
+            plot,
+            progress_bar
+        )
+        self.camera_matrix = camera_matrix
+        self.dist_coeffs = dist_coeffs
 
     def get_bbox(self, camera=False, h_a=None):
         """
