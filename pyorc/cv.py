@@ -413,7 +413,6 @@ def _transform(img, m):
 
 def calibrate_camera(
         fn,
-        df=None,
         chessboard_size=(9, 6),
         max_imgs=30,
         tolerance=0.1,
@@ -426,9 +425,10 @@ def calibrate_camera(
     https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
     """
     cap = cv2.VideoCapture(fn)
-    if df is None:
-        # get from framerate
-        df = int(cap.get(cv2.CAP_PROP_FPS))
+    # make a list of logical frames in order to read
+    frames_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    frames_list = helpers.staggered_index(start=0, end=frames_count - 1)
+
     # set the expected object points from the chessboard size
     objp = np.zeros((chessboard_size[0] * chessboard_size[1], 3), np.float32)
     objp[:, :2] = np.mgrid[0:chessboard_size[0], 0:chessboard_size[1]].T.reshape(-1, 2)
@@ -440,12 +440,14 @@ def calibrate_camera(
     ret_img, img = cap.read()
     frame_size = img.shape[1], img.shape[0]
     if progress_bar:
-        pbar = tqdm(total=int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))
-        pbar.update(1)
-    while ret_img:
+        frames_list = tqdm(frames_list, position=0, leave=True)
+        # pbar.update(1)
+    for f in frames_list:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, f)
+        ret_img, img = cap.read()
         if ret_img:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            cur_f = cap.get(cv2.CAP_PROP_POS_FRAMES)
+            # cur_f = cap.get(cv2.CAP_PROP_POS_FRAMES)
             ret, corners = cv2.findChessboardCorners(gray, chessboard_size, flags=cv2.CALIB_CB_FAST_CHECK)
             if ret:
                 # append the expected point coordinates
@@ -455,21 +457,27 @@ def calibrate_camera(
                 img_pts.append(corners)
                 if plot:
                     cv2.drawChessboardCorners(img, chessboard_size, corners2, ret)
-                    cv2.imshow("img", img)
-                    cv2.waitKey(1000)
+                    # add frame number
+                    cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 8, 2)
+                    cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, 2)
+                    height = 960
+                    width = int(img.shape[1]*height/img.shape[0])
+                    imS = cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
+                    cv2.imshow("img", imS)
+                    cv2.waitKey(500)
                 #         print(corners)
                 # skip 25 frames
-                cap.set(cv2.CAP_PROP_POS_FRAMES, cur_f + df)
+                # cap.set(cv2.CAP_PROP_POS_FRAMES, cur_f + df)
                 if len(imgs) == max_imgs:
                     print(f"Maximum required images {max_imgs} found")
                     break
-                if progress_bar:
-                    pbar.update(df)
-        ret_img, img = cap.read()
-        if progress_bar:
-            pbar.update(1)
+                # if progress_bar:
+                #     pbar.update(df)
+    #     ret_img, img = cap.read()
+    #     if progress_bar:
+    #         pbar.update(1)
     if progress_bar:
-        pbar.close()
+        frames_list.close()
 
     cap.release()
     # close the plot window if relevant

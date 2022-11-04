@@ -383,6 +383,39 @@ def round_to_multiple(number, multiple):
     return multiple * round(number / multiple)
 
 
+def staggered_index(start=0, end=100):
+    """
+    Returns a list of staggered indexes that start at the outer indexes and gradually move inwards
+
+    Parameters
+    ----------
+    start : int, optional
+        start index number (default: 0)
+    end : int, optional
+        end index number (default: 100)
+
+    Returns
+    -------
+    idx : list
+        staggered indexes from start to end
+    """
+    # make list of frames in order to read, starting with start + end frame
+    idx_order = [start, end]
+    # make sorted representation of frames
+    idx_sort = np.array(idx_order)
+    idx_sort.sort()
+    while True:
+        idx_new = (np.round((idx_sort[0:-1] + idx_sort[1:]) / 2)).astype("int")
+        # check which of these are already on the list
+        idx_new = list(set(idx_new).difference(idx_order))
+        if len(idx_new) == 0:
+            # we have treated all idxs
+            break
+        idx_order += idx_new
+        idx_sort = np.array(idx_order)
+        idx_sort.sort()
+    return idx_order
+
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
     """Fill missing surface velocities using a velocity depth profile with
 

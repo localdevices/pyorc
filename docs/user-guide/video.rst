@@ -133,7 +133,7 @@ as follows:
     img = video.get_frame(0, method="rgb")
     ax = plt.axes()
     ax.imshow(img)
-    cam_config.plot_rigid_points(ax=ax)
+    video.plot_rigid_pts(ax=ax)
 
 
 .. note::

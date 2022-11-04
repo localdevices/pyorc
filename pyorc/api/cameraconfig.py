@@ -208,7 +208,6 @@ class CameraConfig:
     def set_lens_calibration(
         self,
         fn,
-        df=None,
         chessboard_size=(9, 6),
         max_imgs=30,
         tolerance=0.1,
@@ -243,7 +242,6 @@ class CameraConfig:
         """
         camera_matrix, dist_coeffs = cv.calibrate_camera(
             fn,
-            df,
             chessboard_size,
             max_imgs,
             tolerance,
