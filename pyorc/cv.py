@@ -1,6 +1,7 @@
 import copy
 import cv2
 import numpy as np
+import os
 import rasterio
 from pyorc import helpers
 from shapely.geometry import Polygon, LineString
@@ -415,15 +416,17 @@ def calibrate_camera(
         fn,
         chessboard_size=(9, 6),
         max_imgs=30,
-        tolerance=0.1,
         plot=True,
         progress_bar=True,
-        criteria = criteria,
+        criteria=criteria,
+        to_file=False,
+        tolerance = 0.1,
 ):
     """
     Intrinsic matrix calculation and distortion coefficients calculation following
     https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
     """
+    dir = os.path.split(os.path.abspath(fn))[0]
     cap = cv2.VideoCapture(fn)
     # make a list of logical frames in order to read
     frames_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -455,27 +458,27 @@ def calibrate_camera(
                 imgs.append(copy.deepcopy(img))
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
                 img_pts.append(corners)
+                cv2.drawChessboardCorners(img, chessboard_size, corners2, ret)
+                # add frame number
+                cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 8, 2)
+                cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, 2)
+                height = 720
+                width = int(img.shape[1] * height / img.shape[0])
+                imS = cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
                 if plot:
-                    cv2.drawChessboardCorners(img, chessboard_size, corners2, ret)
-                    # add frame number
-                    cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 8, 2)
-                    cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, 2)
-                    height = 960
-                    width = int(img.shape[1]*height/img.shape[0])
-                    imS = cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
                     cv2.imshow("img", imS)
                     cv2.waitKey(500)
+                if to_file:
+                    # write a small version to jpg
+                    jpg = os.path.join(dir, "frame_{:06d}.png".format(int(f)))
+                    cv2.imwrite(jpg, imS)
+
                 #         print(corners)
                 # skip 25 frames
                 # cap.set(cv2.CAP_PROP_POS_FRAMES, cur_f + df)
                 if len(imgs) == max_imgs:
                     print(f"Maximum required images {max_imgs} found")
                     break
-                # if progress_bar:
-                #     pbar.update(df)
-    #     ret_img, img = cap.read()
-    #     if progress_bar:
-    #         pbar.update(1)
     if progress_bar:
         frames_list.close()
 
@@ -483,18 +486,20 @@ def calibrate_camera(
     # close the plot window if relevant
     cv2.destroyAllWindows()
     # do calibration
+    print(frame_size)
     ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
-    if tolerance is not None:
-        # remove badly performing images and recalibrate
-        errs = []
-        for n, i in enumerate(range(len(obj_pts))):
-            img_pts2, _ = cv2.projectPoints(obj_pts[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
-            errs.append(cv2.norm(img_pts[i], img_pts2, cv2.NORM_L2) / len(img_pts2))
+    # remove badly performing images and recalibrate
+    errs = []
+    for n, i in enumerate(range(len(obj_pts))):
+        img_pts2, _ = cv2.projectPoints(obj_pts[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
+        errs.append(cv2.norm(img_pts[i], img_pts2, cv2.NORM_L2) / len(img_pts2))
 
+    if tolerance is not None:
         # remove high error
         idx = np.array(errs) < tolerance
         obj_pts = list(np.array(obj_pts)[idx])
         img_pts = list(np.array(img_pts)[idx])
+        print(len(img_pts))
         # do calibration
         ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
         errs = []

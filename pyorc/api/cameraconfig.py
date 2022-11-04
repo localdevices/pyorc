@@ -210,9 +210,9 @@ class CameraConfig:
         fn,
         chessboard_size=(9, 6),
         max_imgs=30,
-        tolerance=0.1,
         plot=True,
-        progress_bar=True
+        progress_bar=True,
+        **kwargs
     ):
         """
         Calibrates and sets the properties ``camera_matrix`` and ``dist_coeffs`` using a video of a chessboard pattern.
@@ -244,9 +244,9 @@ class CameraConfig:
             fn,
             chessboard_size,
             max_imgs,
-            tolerance,
             plot,
-            progress_bar
+            progress_bar,
+            **kwargs
         )
         self.camera_matrix = camera_matrix
         self.dist_coeffs = dist_coeffs
@@ -524,10 +524,10 @@ class CameraConfig:
 
         Parameters
         ----------
-        src : list of lists (4)
+        src : list of lists (4 or 6+)
             [x, y] pairs of columns and rows in the frames of the original video
-        dst : list of lists (4)
-            [x, y] pairs of real world coordinates in the given coordinate reference system.
+        dst : list of lists (4 or 6+)
+            [x, y] or [x, y, z] pairs of real world coordinates in the given coordinate reference system.
         z_0 : float
             Water level measured in global reference system such as a geoid or ellipsoid used
             by a GPS device. All other surveyed points (lens position and cross section) must have the same vertical
