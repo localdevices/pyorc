@@ -15,6 +15,7 @@ import sphinx_autosummary_accessors
 import os
 import sys
 from distutils.dir_util import copy_tree
+import pyorc
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
@@ -51,8 +52,8 @@ author = 'Hessel Winsemius'
 
 # The full version, including alpha/beta/rc tags
 # TODO: uncomment this as soon as we have a version number on the package within pypi
-# release = pkg_resources.get_distribution("ODMax").version
-release = '0.2.4'
+# release = pkg_resources.get_distribution("pyorc").version
+release = pyorc.__version__ # '0.3.0'
 
 # -- General configuration ---------------------------------------------------
 

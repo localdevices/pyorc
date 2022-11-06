@@ -56,7 +56,7 @@ class CameraConfig:
             pixel size of interrogation window (default: 15)
         resolution : float, optional
             resolution in m. of projected pixels (default: 0.01)
-        bbox : array-like, optional
+        bbox : shapely.geometry.Polygon, optional
             bounding box in geographical coordinates
         lens_position : list of floats (3),
             x, y, z coordinate of lens position in CRS
@@ -636,7 +636,7 @@ class CameraConfig:
 
         """
         # initiate transform
-        transform = None
+        transformer = None
         # if there is an axes, get the extent
         xlim = ax.get_xlim() if ax is not None else None
         ylim = ax.get_ylim() if ax is not None else None
@@ -653,11 +653,11 @@ class CameraConfig:
             # transform points in case a crs is provided
             if hasattr(self, "crs"):
                 # make a transformer to lat lon
-                transform = Transformer.from_crs(
+                transformer = Transformer.from_crs(
                     CRS.from_user_input(self.crs),
                     CRS.from_epsg(4326),
                     always_xy=True).transform
-                points = [ops.transform(transform, p) for p in points]
+                points = [ops.transform(transformer, p) for p in points]
             xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
             extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
         x = [p.x for p in points]
@@ -703,7 +703,8 @@ class CameraConfig:
             "label": "Area of interest",
             **plot_kwargs
         }
-        self.plot_bbox(ax=ax, camera=camera, transform=transform, **patch_kwargs)
+        if hasattr(self, "bbox"):
+            self.plot_bbox(ax=ax, camera=camera, transformer=transformer, **patch_kwargs)
         if camera:
             # make sure that zero is on the top
             ax.set_aspect("equal")
@@ -713,7 +714,7 @@ class CameraConfig:
         ax.legend()
         return ax
 
-    def plot_bbox(self, ax=None, camera=False, transform=None, h_a=None, **kwargs):
+    def plot_bbox(self, ax=None, camera=False, transformer=None, h_a=None, **kwargs):
         """
         Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera
         Field Of View (``camera=True``).
@@ -724,7 +725,7 @@ class CameraConfig:
             if not provided, axes is setup (Default: None)
         camera : bool, optional
             If set to True, all camera config information will be back projected to the original camera objective.
-        transform : pyproj transformer transformation function, optional
+        transformer : pyproj transformer transformation function, optional
             used to reproject bbox to axes object projection (e.g. lat lon)
         h_a : float, optional
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
@@ -737,9 +738,9 @@ class CameraConfig:
         """
         # collect information to plot
         bbox = self.get_bbox(camera=camera, h_a=h_a)
-        if camera is False and transform is not None:
+        if camera is False and transformer is not None:
             # geographical projection is needed
-            bbox = ops.transform(transform, bbox)
+            bbox = ops.transform(transformer, bbox)
 
         bbox_x, bbox_y = bbox.exterior.xy
         bbox_coords = list(zip(bbox_x, bbox_y))

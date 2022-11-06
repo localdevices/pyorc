@@ -127,13 +127,13 @@ stored in a generic text (json) format.
 
 .. code-block:: python
 
-    cam_config = pyorc.CameraConfig(height=1080, width=1920, crs=28992)
+    cam_config = pyorc.CameraConfig(height=1080, width=1920, crs=32631)
     cam_config
 
     {
         "height": 1080,
         "width": 1920,
-        "crs": "PROJCRS[\"Amersfoort / RD New\",BASEGEOGCRS[\"Amersfoort\",DATUM[\"Amersfoort\",ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4289]],CONVERSION[\"RD New\",METHOD[\"Oblique Stereographic\",ID[\"EPSG\",9809]],PARAMETER[\"Latitude of natural origin\",52.1561605555556,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",5.38763888888889,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Scale factor at natural origin\",0.9999079,SCALEUNIT[\"unity\",1],ID[\"EPSG\",8805]],PARAMETER[\"False easting\",155000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",463000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting (X)\",east,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing (Y)\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],USAGE[SCOPE[\"Engineering survey, topographic mapping.\"],AREA[\"Netherlands - onshore, including Waddenzee, Dutch Wadden Islands and 12-mile offshore coastal zone.\"],BBOX[50.75,3.2,53.7,7.22]],ID[\"EPSG\",28992]]",
+        "crs": "PROJCRS[\"WGS 84 / UTM zone 31N\",BASEGEOGCRS[\"WGS 84\",ENSEMBLE[\"World Geodetic System 1984 ensemble\",MEMBER[\"World Geodetic System 1984 (Transit)\"],MEMBER[\"World Geodetic System 1984 (G730)\"],MEMBER[\"World Geodetic System 1984 (G873)\"],MEMBER[\"World Geodetic System 1984 (G1150)\"],MEMBER[\"World Geodetic System 1984 (G1674)\"],MEMBER[\"World Geodetic System 1984 (G1762)\"],MEMBER[\"World Geodetic System 1984 (G2139)\"],ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]],CONVERSION[\"UTM zone 31N\",METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]],PARAMETER[\"Latitude of natural origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",3,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Scale factor at natural origin\",0.9996,SCALEUNIT[\"unity\",1],ID[\"EPSG\",8805]],PARAMETER[\"False easting\",500000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],USAGE[SCOPE[\"Engineering survey, topographic mapping.\"],AREA[\"Between 0\u00b0E and 6\u00b0E, northern hemisphere between equator and 84\u00b0N, onshore and offshore. Algeria. Andorra. Belgium. Benin. Burkina Faso. Denmark - North Sea. France. Germany - North Sea. Ghana. Luxembourg. Mali. Netherlands. Niger. Nigeria. Norway. Spain. Togo. United Kingdom (UK) - North Sea.\"],BBOX[0,0,84,6]],ID[\"EPSG\",32631]]",
         "resolution": 0.05,
         "window_size": 10,
         "dist_coeffs": [
@@ -390,25 +390,160 @@ is available. This is only useful if you also have provided a CRS when creating 
 for instance measure your control points in WGS84 lat-lon (EPSG code 4326) then pass ``crs=4326`` and your coordinates
 will be automatically transformed to the local CRS used for your camera configuration.
 
+A full example that supplies GCPs to the existing camera configuration in variable ``cam_config`` is shown below:
+
+.. code-block:: python
+
+    src = [
+        [1335, 1016],
+        [270, 659],
+        [607, 214],
+        [1257, 268]
+    ]  # source coordinates on the frames of the movie
+    dst = [
+        [6.0478836167, 49.8830484917],
+        [6.047858455, 49.8830683367],
+        [6.0478831833, 49.8830964883],
+        [6.0479187017, 49.8830770317]
+    ]  # destination locations in long/lat locations, as measured with RTK GNSS.
+    z_0 = 306.595  # measured water level in the projection of the GPS device
+    crs = 4326  # coordinate reference system of the GPS device, EPSG code 4326 is WGS84 longitude/latitude.
+
+    cam_config.set_gcps(src=src, dst=dst, z_0=z_0, crs=crs)
+
 Setting the lens position
 -------------------------
+For treatment of multiple videos, the water surface must also be reprojected to a new water level. This requires the
+position of the x, y, z of the lens position. This can be provided using a simple method ``set_lens_position``. You only
+need to provide x, y, z and the CRS (if this is different from the CRS of the camera configuration itself.
 
-TODO
+A full example supplying the lens position to the existing ``cam_config`` is shown below:
+
+.. code-block:: python
+
+    lens_position = [6.0478872, 49.8830221, 309.8]  # lon, lat, elevation position of the camera
+    cam_config.set_lens_position(*lens_position, crs=4326)
+
 
 Setting the area of interest
 ----------------------------
+**pyorc** is organized such that it processes a planar rectangular shaped area as shown in the example below
+over the Wark River in Luxemburg. The results of reprojection and velocity estimation will all fit in this
+area of interest in the form of raster maps. **pyorc** is also very flexible in the rotation of the grid. River sections
+almost never follow an ideal north-south or east-west direction, and therefore it is much more practical to allow
+for a rotated grid.
 
-TODO
+.. image:: ../../_images/wark_cam_config.jpg
 
-CameraConfig properties
------------------------
+The area of interest can theoretically be provided directly, simply by providing
+a ``shapely.geometry.Polygon`` with 5 bounding points as follows (pseudo-code):
 
-TODO
+.. code-block:: python
+
+    cam_config.bbox = Polygon(...)
+
+However, this is quite risky, as you are then responsible
+for ensuring that the area of interest is rectangular, has exactly 4 corners and fits in the FOV. Currently, there are no checks
+and balances in place, to either inform the user about wrongfully supplied Polyons, or Polygons that are entirely
+outside of the FOV.
+
+Therefore, a much more intuitive approach is to use ``set_bbox_from_corners``. You simply supply 4 approximate
+corner points of the area of interest *within the camera FOV*. **pyorc** will then find the best planar bounding box
+around these roughly chosen corner points and return this for you. A few things to bear in mind while choosing these:
+
+* Ensure you provide the corner points in the right order. So no diagonal order, but always along the expected Polygon
+  bounds.
+* If you intend to process multiple videos with the same camera configuration, ensure you choose the points wide
+  enough so that with higher water levels, they will likely still give a good fit around the water body of interest.
+* *Important*: if water follows a clear dominant flow direction (e.g. in a straight relatively uniform section) then
+  you may use the angular filter later on, to remove spurious velocities that are not in the flow direction. In order
+  to make the area of interest flow direction aware, ensure to provide the points in the following order:
+    - upstream left-bank
+    - downstream left-bank
+    - downstream right-bank
+    - upstream right-bank
+  where left and right banks are defined as if you are looking in downstream direction.
+
+Below we show how the corners are provided to the existing ``cam_config``.
+
+.. code-block::
+
+    corners = [
+        [255, 118],
+        [1536, 265],
+        [1381, 1019],
+        [88, 628]
+    ]
+    cam_config.set_bbox_from_corners(corners)
+
+This yields the bounding box shown in the figure above, which is the same as the one shown in the perspective below.
+You can see that the rectangular area is chosen such that the chosen corner points at least fit in the bounding box,
+and the orientation is chosen such that it follows the middle line between the chosen points as closely as possible.
+
+.. image:: ../../_images/wark_cam_config_persp.jpg
+
+CameraConfig properties and other methods
+-----------------------------------------
+When a full camera configuration is available, you can access and inspect several properties and access a few other
+methods that may be useful if you wish to program around the API. We refer to the :ref:`API documentation <cameraconfig>`.
 
 CameraConfig plots
 ------------------
+We highly recommend to first inspect your camera configuration graphically, before doing any further work with it.
+Examples have already been shown throughout this manual, but you can also plot your own camera configurations, either
+in planar view, or in the original camera FOV. For this the ``plot`` method has been developed. This method can
+always be applied on an existing matplotlib axes object, by supplying the ``ax`` keyword and referring the the axes
+object you wish to use.
 
-TODO
+Planar plotting
+~~~~~~~~~~~~~~~
+Planar plotting is done by default. The most simple approach is:
+
+.. code-block:: python
+
+    cam_config.plot()
+
+This will yield just the camera configuration information, and can always be used, whether you have a geographically
+aware camera configuration (CRS provided) or not. If the camera configuration is geographically aware, then you
+can also add a satellite or other open map as a background. **pyorc** uses the ``cartopy`` package to do this. You can
+control this with the ``tiles`` keyword to define a tiles layer (see `this page <https://scitools.org.uk/cartopy/docs/v0.16/cartopy/io/img_tiles.html>`_)
+
+Additional keywords you may want to pass to the tiles set can be defined in the keyword ``tiles_kwargs``. Finally, the
+zoom level applied can be given in the keyword ``zoom_level``. By default, a very high zoom level (18) is chosen,
+because mostly, areas of interest cover only a small geographical region. The geographical view shown above can be
+displayed as follows:
+
+.. code-block:: python
+
+    cam_config.plot(tiles="GoogleTiles", tiles_kwargs=dict(style="satellite"))
+
+
+Plotting in camera FOV
+~~~~~~~~~~~~~~~~~~~~~~
+
+To plot in the camera FOV, simply set ``camera=True``.
+
+.. code-block:: python
+
+    cam_config.plot(camera=True)
+
+This may look a little awkward, because plotting in matplotlib is defaulting to having the 0, 0 point in the bottom left
+while your camera images have it at the top-left. Furthermore, you cannot really interpret what the FOV looks like. Hence
+it makes more sense to utilize one frame from an actual video to enhance the plotting. Here we use the video on which
+the camera configuration is based, extract one frame, and plot it within one axes.
+
+.. code-block:: python
+
+    fn = r"20220507_122801.mp4"
+    video = pyorc.Video(fn, camera_config=cam_config, start_frame=0, end_frame=1)
+
+    # get the first frame as a simple numpy array
+    frame = video.get_frame(0, method="rgb")
+    # combine everything in axes object "ax"
+    ax = plt.axes()
+    ax.imshow(frame)
+    cam_config.plot(ax=ax, camera=True)
+
 
 
 
