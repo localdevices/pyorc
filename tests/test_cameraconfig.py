@@ -181,3 +181,6 @@ def test_cv_undistort_points(cam_config):
     # check if points are back to originals after back adn forth undistortion and distortion
     assert(np.allclose(src, src_back_dist))
 
+
+def test_camera_calib(cam_config_calib, calib_video):
+    cam_config_calib.set_lens_calibration(calib_video, max_imgs=5, plot=False, progress_bar=False)

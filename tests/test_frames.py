@@ -20,11 +20,11 @@ def test_project(frames, resolution, dims, shape):
     assert(len(frames_proj.dims) == dims), f"Expected nr of dims is {dims}, but {len(frames_proj.dims)} found"
     # check shape of x, y grids
     assert(frames_proj.isel(time=0).shape == shape), f"Projected frames shape {frames_proj.isel(time=0).shape} do not have expected shape {shape}"
-    import matplotlib
-    matplotlib.use('Qt5Agg')
-    import matplotlib.pyplot as plt
-    plt.imshow(frames_proj[0])
-    plt.show()
+    # import matplotlib
+    # matplotlib.use('Qt5Agg')
+    # import matplotlib.pyplot as plt
+    # plt.imshow(frames_proj[0])
+    # plt.show()
 
 
 @pytest.mark.parametrize(
@@ -43,7 +43,7 @@ def test_edge_detect(frames_proj):
     frames_edge = frames_proj.frames.edge_detect()
     assert(frames_edge.shape == frames_proj.shape)
     assert(frames_edge[0, 0, 0].values.dtype == "float32"), f'dtype of result is {frames_edge[0, 0, 0].values.dtype}, expected "float32"'
-    assert(np.allclose(frames_edge.values.flatten()[-4:], [3.0936584, 0.9899597, 2.1243286, 3.5952148]))
+    assert(np.allclose(frames_edge.values.flatten()[-4:], [3.46875  , 0.328125 , 1.9140625, 4.34375  ]))
 
 
 

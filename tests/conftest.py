@@ -5,7 +5,7 @@ from shapely import wkt
 import pyorc
 import numpy as np
 
-EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples", "ngwerere")
+EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples")
 
 # sample data, for Ngwerere
 @pytest.fixture
@@ -31,6 +31,11 @@ def gcps():
 @pytest.fixture
 def lens_position():
     return [642732.6705, 8304289.010, 1188.5]
+
+
+@pytest.fixture
+def calib_video():
+    return os.path.join(EXAMPLE_DATA_DIR, "camera_calib", "camera_calib_720p.mkv")
 
 @pytest.fixture
 def bbox():
@@ -75,14 +80,22 @@ def cam_config(gcps, lens_position, lens_pars, corners):
 
 
 @pytest.fixture
+def cam_config_calib():
+    return pyorc.CameraConfig(
+        height=720,
+        width=1280,
+    )
+
+
+@pytest.fixture
 def cross_section():
-    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere_cross_section.csv")
+    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cross_section.csv")
     return pd.read_csv(fn)
 
 
 @pytest.fixture
 def cam_config_fn():
-    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere.json")
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.json")
 
 
 @pytest.fixture
@@ -122,7 +135,7 @@ def cam_config_str():
 @pytest.fixture
 def vid():
     vid = pyorc.Video(
-        os.path.join(EXAMPLE_DATA_DIR, "ngwerere_20191103.mp4"),
+        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
         start_frame=0,
         end_frame=2,
     )
@@ -134,7 +147,7 @@ def vid():
 @pytest.fixture
 def vid_cam_config(cam_config):
     vid = pyorc.Video(
-        os.path.join(EXAMPLE_DATA_DIR, "ngwerere_20191103.mp4"),
+        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
         start_frame=0,
         end_frame=2,
         camera_config=cam_config,
@@ -146,7 +159,7 @@ def vid_cam_config(cam_config):
 @pytest.fixture
 def vid_cam_config_stabilize(cam_config):
     vid = pyorc.Video(
-        os.path.join(EXAMPLE_DATA_DIR, "ngwerere_20191103.mp4"),
+        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
         start_frame=0,
         end_frame=125,
         camera_config=cam_config,

@@ -3,6 +3,7 @@ import cv2
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from shapely import ops, wkt
 from shapely.geometry import Polygon, LineString, Point
 
@@ -240,6 +241,7 @@ class CameraConfig:
 
 
         """
+        assert(os.path.isfile(fn)), f"Video calibration file {fn} not found"
         camera_matrix, dist_coeffs = cv.calibrate_camera(
             fn,
             chessboard_size,
