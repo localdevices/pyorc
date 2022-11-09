@@ -30,6 +30,7 @@ For a static (non-interactive) view of the examples follow one of the links belo
 * `Analyze surface velocity with Particle Image Velocimetry <_examples/02_Process_velocimetry.ipynb>`_
 * `Filtering spurious velocities and plotting <_examples/03_Plotting_and_filtering_velocimetry_results.ipynb>`_
 * `Extracting cross-sections and discharge estimation <_examples/04_Extracting_crosssection_velocities_and_discharge.ipynb>`_
+* `Performing camera calibration with a video of a chessboard pattern <_examples/05_Camera_calibration.ipynb>`_
 
 .. toctree::
     :maxdepth: 1
