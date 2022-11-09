@@ -257,10 +257,11 @@ Camera configuration: {:s}
                 w = img.shape[1]
                 img = cv2.warpAffine(img, self.ms[n], (w, h))
 
-            if lens_corr:
-                if self.camera_config.lens_pars is not None:
-                    # apply lens distortion correction
-                    img = cv.undistort_img(img, **self.camera_config.lens_pars)
+            # if lens_corr:
+            #     if self.camera_config.lens_pars is not None:
+            # apply lens distortion correction
+            if hasattr(self, "camera_config"):
+                img = cv.undistort_img(img, self.camera_config.camera_matrix, self.camera_config.dist_coeffs)
             if method == "grayscale":
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
@@ -289,10 +290,10 @@ Camera configuration: {:s}
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
         get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
-        if not("lens_corr" in kwargs):
-            # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs
-            if hasattr(self.camera_config, "lens_pars"):
-                kwargs["lens_corr"] = True
+        # if not("lens_corr" in kwargs):
+        #     # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs
+        #     if hasattr(self.camera_config, "lens_pars"):
+        #         kwargs["lens_corr"] = True
         frames = [get_frame(n=n, **kwargs) for n in range(self.end_frame - self.start_frame)]
         sample = frames[0].compute()
         data_array = [da.from_delayed(
@@ -300,21 +301,23 @@ Camera configuration: {:s}
             dtype=sample.dtype,
             shape=sample.shape
         ) for frame in frames]
-        if "lens_corr" in kwargs:
-            if kwargs["lens_corr"]:
+        # if "lens_corr" in kwargs:
+        #     if kwargs["lens_corr"]:
                 # also correct the control point src
-                camera_config.gcps["src"] = cv.undistort_points(
-                    camera_config.gcps["src"],
-                    sample.shape[0],
-                    sample.shape[1],
-                    **self.camera_config.lens_pars
-                )
-                camera_config.corners = cv.undistort_points(
-                    camera_config.corners,
-                    sample.shape[0],
-                    sample.shape[1],
-                    **self.camera_config.lens_pars
-                )
+        camera_config.gcps["src"] = cv.undistort_points(
+            camera_config.gcps["src"],
+            camera_config.camera_matrix,
+            camera_config.dist_coeffs,
+                    # sample.shape[0],
+                    # sample.shape[1],
+                    # **self.camera_config.lens_pars
+        )
+                # camera_config.corners = cv.undistort_points(
+                #     camera_config.corners,
+                #     sample.shape[0],
+                #     sample.shape[1],
+                #     **self.camera_config.lens_pars
+                # )
         time = np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)
         y = np.flipud(np.arange(data_array[0].shape[0]))

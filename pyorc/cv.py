@@ -420,7 +420,8 @@ def calibrate_camera(
         progress_bar=True,
         criteria=criteria,
         to_file=False,
-        tolerance = 0.1,
+        frame_limit=None,
+        tolerance=None,
 ):
     """
     Intrinsic matrix calculation and distortion coefficients calculation following
@@ -442,6 +443,8 @@ def calibrate_camera(
 
     ret_img, img = cap.read()
     frame_size = img.shape[1], img.shape[0]
+    if frame_limit is not None:
+        frames_list = frames_list[0:frame_limit]
     if progress_bar:
         frames_list = tqdm(frames_list, position=0, leave=True)
         # pbar.update(1)
@@ -486,7 +489,9 @@ def calibrate_camera(
     # close the plot window if relevant
     cv2.destroyAllWindows()
     # do calibration
-    print(frame_size)
+    assert(len(obj_pts) > 5),\
+        f"A minimum of 5 frames with chessboard patterns must be available, only {len(obj_pts)} found. Please check " \
+        f"if the video contains chessboard patterns of size {chessboard_size} "
     ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
     # remove badly performing images and recalibrate
     errs = []
@@ -695,7 +700,7 @@ def get_aoi(M, src_corners, resolution=None):
     return bbox
 
 
-def undistort_img(img, k1=0.0, c=2.0, f=1.0):
+def undistort_img(img, camera_matrix, dist_coeffs):
     """Lens distortion correction of image based on lens characteristics.
     Function by Gerben Gerritsen / Sten Schurer, 2019.
 
@@ -717,15 +722,14 @@ def undistort_img(img, k1=0.0, c=2.0, f=1.0):
     """
 
     # define imagery characteristics
-    height, width, __ = img.shape
-    dist = _get_dist_coefs(k1)
-
-    # get camera matrix
-    mtx = _get_cam_mtx(height, width, c=c, f=f)
+    # height, width, __ = img.shape
+    # dist = _get_dist_coefs(k1)
+    #
+    # # get camera matrix
+    # mtx = _get_cam_mtx(height, width, c=c, f=f)
 
     # correct image for lens distortion
-    corr_img = cv2.undistort(img, mtx, dist)
-    return corr_img
+    return cv2.undistort(img, np.array(camera_matrix), np.array(dist_coeffs))
 
 
 def distort_points(points, camera_matrix, dist_coeffs):
