@@ -95,6 +95,7 @@ def _base_plot(plot_func):
 
         # check if dataset is a transect or not
         is_transect = True if "points" in ref._obj.dims else False
+
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
         if mode == "local":
             x = ref._obj["x"].values
@@ -139,10 +140,12 @@ def _base_plot(plot_func):
                 ax.plot(x, y, "#00FF88", linewidth=2, alpha=0.3, **kwargs_line)
                 ax.plot(x, y, "#00FF88", linewidth=1, alpha=0.3, **kwargs_line)
                 if mode == "camera":
-                    x_bottom, y_bottom = ref._obj.transect.get_xyz_perspective()
-                    ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=3, **kwargs_line)
-                    ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=2, **kwargs_line)
-                    ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=1, **kwargs_line)
+                    # lens position is needed, so check this
+                    if hasattr(ref._obj.camera_config, "lens_position"):
+                        x_bottom, y_bottom = ref._obj.transect.get_xyz_perspective()
+                        ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=3, **kwargs_line)
+                        ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=2, **kwargs_line)
+                        ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=1, **kwargs_line)
         if mode == "geographical" and not(is_transect):
             ax.set_extent(
                 [
@@ -279,7 +282,7 @@ class _Transect_PlotMethods:
         v_dir = "v_dir"
         # retrieve the backward transformation array
         transect = self._obj.transect
-        M = transect.camera_config.get_M(transect.h_a, reverse=True)
+        M = transect.camera_config.get_M(transect.h_a, reverse=True, to_bbox_grid=True)
 
         x, y = self._obj.x, self._obj.y
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])

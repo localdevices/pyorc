@@ -305,13 +305,8 @@ class CameraConfig:
 
         """
         if h_a is None:
-            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is " \
-                                                "provided "
-            h_a = 0.
-            h_ref = 0.
-        else:
-            h_ref = self.gcps["h_ref"]
-        z_pressure = np.maximum(self.gcps["z_0"] - h_ref + h_a, z)
+            h_a = self.gcps["h_ref"]
+        z_pressure = np.maximum(self.gcps["z_0"] - self.gcps["h_ref"] + h_a, z)
         return z_pressure - z
 
     def get_dst_a(self, h_a=None):
@@ -326,7 +321,7 @@ class CameraConfig:
         the camera location
         """
         # map where the destination points are with the actual water level h_a.
-        if h_a is None or self.gcps["h_ref"] is None:
+        if h_a is None or h_a == self.gcps["h_ref"]:
             # fill in the same value for h_ref and h_a
             dst_a = self.gcps["dst"]
         else:
@@ -400,7 +395,7 @@ class CameraConfig:
         h = z + h_ref - self.gcps["z_0"]
         return h
 
-    def get_M(self, h_a=None, to_bbox_grid=False, reverse=False, **lens_pars):
+    def get_M(self, h_a=None, to_bbox_grid=False, reverse=False):
         """Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
         ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.
 
