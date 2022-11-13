@@ -3,6 +3,13 @@ import numpy as np
 import xarray as xr
 from pyorc import helpers
 
+depr_warning = """
+
+The camera configuration of this pyorc output does not have a property "height" and/or "width", because it has been 
+established with version < 0.3.0 version. Adding height and width property. This behaviour is deprecated. Please resave
+your results with ``.to_netcdf()`` to make them compatible with later versions. 
+"""
+
 class ORCBase(object):
     def __init__(self, xarray_obj):
         self._obj = xarray_obj
@@ -34,10 +41,25 @@ class ORCBase(object):
 
     @camera_config.setter
     def camera_config(self, cam_config):
+        import warnings
         if isinstance(cam_config, str):
             # convert into a camera_config object
             from pyorc import get_camera_config
-            self._camera_config = get_camera_config(cam_config)
+            # START DEPRECATION BEHAVIOUR
+            # =====================
+            # check if cam config contains height/width
+            cam_config_json = json.loads(cam_config)
+            if "height" in cam_config_json and "width" in cam_config_json:
+                self._camera_config = get_camera_config(cam_config)
+            else:
+                warnings.simplefilter('always', DeprecationWarning)
+                warnings.warn(depr_warning, DeprecationWarning, stacklevel=2)
+                cam_config_json["height"], cam_config_json["width"] = eval(self._obj.camera_shape)
+                self._camera_config = get_camera_config(json.dumps(cam_config_json))
+                # ensure the metadata also gets updated
+                self._obj.attrs["camera_config"] = self._camera_config.to_json()
+            # END DEPRECATION BEHAVIOUR
+            # =====================
         else:
             self._camera_config = cam_config
 
@@ -59,10 +81,6 @@ class ORCBase(object):
         self._camera_shape = self._obj.camera_shape if not(isinstance(cam_shape, str)) else np.array(
             eval(self._obj.camera_shape)
         )
-        # if isinstance(cam_shape, str):
-        #     self._camera_shape = helpers.deserialize_attr(self._obj, "camera_shape", np.array)
-        # else:
-        #     self._camera_shape = self._obj.camera_shape
 
     def _set_camera_config(self):
         # set the camera config

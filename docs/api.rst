@@ -44,9 +44,10 @@ Setting of properties and attributes
 .. autosummary::
     :toctree: _generated
 
-    CameraConfig.set_corners
+    CameraConfig.set_bbox_from_corners
     CameraConfig.set_gcps
     CameraConfig.set_lens_pars
+    CameraConfig.set_lens_calibration
     CameraConfig.set_lens_position
 
 Exporting
@@ -77,6 +78,7 @@ Plotting methods
     :toctree: _generated
 
     CameraConfig.plot
+    CameraConfig.plot_bbox
 
 .. _video:
 

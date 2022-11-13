@@ -7,7 +7,7 @@ def test_get_river_flow(piv_transect):
     piv_transect.transect.get_q()
     piv_transect.transect.get_river_flow()
     # because we only have PIV for one time step, all quantiles will have the same values
-    assert(np.allclose(piv_transect.river_flow.values, [0.08093874, 0.08093874, 0.08093874, 0.08093874, 0.08093874]))
+    assert(np.allclose(piv_transect.river_flow.values, [0.08225803, 0.08225803, 0.08225803, 0.08225803, 0.08225803]))
 
 
 @pytest.mark.parametrize(

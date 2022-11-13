@@ -95,6 +95,7 @@ def _base_plot(plot_func):
 
         # check if dataset is a transect or not
         is_transect = True if "points" in ref._obj.dims else False
+
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
         if mode == "local":
             x = ref._obj["x"].values
@@ -126,9 +127,9 @@ def _base_plot(plot_func):
             y = ref._obj["yp"].values
             u, v, s = ref.get_uv_camera()
         if plot_func.__name__ in ["quiver", "streamplot"]:
-            primitive = plot_func(x, y, u, v, s, ax, *args, **kwargs)
+            primitive = plot_func("", x, y, u, v, s, ax, *args, **kwargs)
         else:
-            primitive = plot_func(x, y, s, ax, *args, **kwargs)
+            primitive = plot_func("", x, y, s, ax, *args, **kwargs)
         if add_colorbar:
             cb = cbar(ax, primitive)
         if mode == "local":
@@ -139,10 +140,12 @@ def _base_plot(plot_func):
                 ax.plot(x, y, "#00FF88", linewidth=2, alpha=0.3, **kwargs_line)
                 ax.plot(x, y, "#00FF88", linewidth=1, alpha=0.3, **kwargs_line)
                 if mode == "camera":
-                    x_bottom, y_bottom = ref._obj.transect.get_xyz_perspective()
-                    ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=3, **kwargs_line)
-                    ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=2, **kwargs_line)
-                    ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=1, **kwargs_line)
+                    # lens position is needed, so check this
+                    if hasattr(ref._obj.camera_config, "lens_position"):
+                        x_bottom, y_bottom = ref._obj.transect.get_xyz_perspective()
+                        ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=3, **kwargs_line)
+                        ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=2, **kwargs_line)
+                        ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=1, **kwargs_line)
         if mode == "geographical" and not(is_transect):
             ax.set_extent(
                 [
@@ -229,7 +232,7 @@ def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
 
 class _Transect_PlotMethods:
     """Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
-    For example, Dataset.velocimetry.plot.pcolormesh
+    For example, Dataset.velocimetry.plot.pcolormesh. When called without a subfunction, quiver will be used.
     """
 
     def __init__(self, transect):
@@ -279,7 +282,7 @@ class _Transect_PlotMethods:
         v_dir = "v_dir"
         # retrieve the backward transformation array
         transect = self._obj.transect
-        M = transect.camera_config.get_M(transect.h_a, reverse=True)
+        M = transect.camera_config.get_M(transect.h_a, reverse=True, to_bbox_grid=True)
 
         x, y = self._obj.x, self._obj.y
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
@@ -345,7 +348,7 @@ class _Transect_PlotMethods:
 
 class _Velocimetry_PlotMethods:
     """Enables use of ds.velocimetry.plot functions as attributes on a Dataset containing velocimetry results.
-    For example, Dataset.velocimetry.plot.pcolormesh
+    For example, Dataset.velocimetry.plot.pcolormesh. When called without a subfunction, quiver will be used
     """
     def __init__(self, velocimetry):
         # make the original dataset also available on the plotting object
@@ -434,7 +437,7 @@ class _Velocimetry_PlotMethods:
         """
         # retrieve the backward transformation array
         velocimetry = self._obj.velocimetry
-        M = velocimetry.camera_config.get_M(velocimetry.h_a, reverse=True)
+        M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
         # get the shape of the original frames
         shape_y, shape_x = velocimetry.camera_shape
         xi, yi = np.meshgrid(self._obj.x, self._obj.y)
@@ -444,7 +447,12 @@ class _Velocimetry_PlotMethods:
         # follow the velocity vector over a short distance (dt*velocity)
         x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
         # project the found displacement points to camera projection
-        xp_moved, yp_moved = helpers.xy_to_perspective(x_moved.values, y_moved.values, velocimetry.camera_config.resolution, M)
+        xp_moved, yp_moved = helpers.xy_to_perspective(
+            x_moved.values,
+            y_moved.values,
+            velocimetry.camera_config.resolution,
+            M
+        )
 
         # convert row counts to start at the top of the frame instead of bottom
         yp_moved = shape_y - yp_moved
@@ -460,7 +468,7 @@ class _Velocimetry_PlotMethods:
 
 
 @_base_plot
-def quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
+def quiver(_, x, y, u, v, s=None, ax=None, *args, **kwargs):
     """Creates quiver plot from velocimetry results on new or existing axes
     
     Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
@@ -475,7 +483,7 @@ def quiver(x, y, u, v, s=None, ax=None, *args, **kwargs):
 
 
 @_base_plot
-def scatter(x, y, c=None, ax=None, *args, **kwargs):
+def scatter(_, x, y, c=None, ax=None, *args, **kwargs):
     """Creates scatter plot of velocimetry or transect results on new or existing axes
     
     Wraps :py:func:`matplotlib:matplotlib.pyplot.scatter`.
@@ -485,7 +493,7 @@ def scatter(x, y, c=None, ax=None, *args, **kwargs):
 
 
 @_base_plot
-def streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwargs):
+def streamplot(_, x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwargs):
     """Creates streamplot of velocimetry results on new or existing axes
     
     Wraps :py:func:`matplotlib:matplotlib.pyplot.streamplot`. Additional input arguments:
@@ -500,7 +508,7 @@ def streamplot(x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwarg
 
 
 @_base_plot
-def pcolormesh(x, y, s=None, ax=None, *args, **kwargs):
+def pcolormesh(_, x, y, s=None, ax=None, *args, **kwargs):
     """Creates pcolormesh plot from velocimetry results on new or existing axes
     
     Wraps :py:func:`matplotlib:matplotlib.pyplot.pcolormesh`.

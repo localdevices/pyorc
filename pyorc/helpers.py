@@ -1,6 +1,7 @@
 import copy
 import cv2
-import dask.array as da
+
+import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
@@ -133,6 +134,27 @@ def get_axes(cols, rows, resolution):
         )
     )
     return x, y
+
+
+def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
+    try:
+        import cartopy
+        import cartopy.io.img_tiles as cimgt
+        import cartopy.crs as ccrs
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try '
+            'again.')
+    if tiles is not None:
+        tiler = getattr(cimgt, tiles)(**kwargs)
+        crs = tiler.crs
+    else:
+        crs = ccrs.PlateCarree()
+    ax = plt.subplot(projection=crs)
+    ax.set_extent(extent, crs=ccrs.PlateCarree())
+    if tiles is not None:
+        ax.add_image(tiler, zoom_level, zorder=1)
+    return ax
 
 
 def get_xs_ys(cols, rows, transform):
@@ -357,6 +379,42 @@ def rotate_u_v(u, v, theta, deg=False):
     v2 = r[1, 0] * u + r[1, 1] * v
     return u2, v2
 
+def round_to_multiple(number, multiple):
+    return multiple * round(number / multiple)
+
+
+def staggered_index(start=0, end=100):
+    """
+    Returns a list of staggered indexes that start at the outer indexes and gradually move inwards
+
+    Parameters
+    ----------
+    start : int, optional
+        start index number (default: 0)
+    end : int, optional
+        end index number (default: 100)
+
+    Returns
+    -------
+    idx : list
+        staggered indexes from start to end
+    """
+    # make list of frames in order to read, starting with start + end frame
+    idx_order = [start, end]
+    # make sorted representation of frames
+    idx_sort = np.array(idx_order)
+    idx_sort.sort()
+    while True:
+        idx_new = (np.round((idx_sort[0:-1] + idx_sort[1:]) / 2)).astype("int")
+        # check which of these are already on the list
+        idx_new = list(set(idx_new).difference(idx_order))
+        if len(idx_new) == 0:
+            # we have treated all idxs
+            break
+        idx_order += idx_new
+        idx_sort = np.array(idx_order)
+        idx_sort.sort()
+    return idx_order
 
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
     """Fill missing surface velocities using a velocity depth profile with
@@ -552,15 +610,13 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
     return xp, yp
 
 
-def xy_transform(x, y, crs_from, crs_to):
+def xyz_transform(points, crs_from, crs_to):
     """transforms set of x and y coordinates from one CRS to another
 
     Parameters
     ----------
-    x : np.ndarray
-        x-coordinates in crs_from
-    y : np.ndarray
-        y-coordinates in crs_from
+    points : list of lists
+        xyz-coordinates or xy-coordinates in crs_from
     crs_from : int, dict or str, optional
         Coordinate Reference System (source). Accepts EPSG codes (int or str) proj (str or dict) or wkt (str).
     crs_to : int, dict or str, optional
@@ -573,6 +629,10 @@ def xy_transform(x, y, crs_from, crs_to):
     y_trans : np.ndarray
         y-coordinates transformed
     """
+    points = np.array(points)
+    x = points[:, 0]
+    y = points[:, 1]
+
     transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
     # transform dst coordinates to local projection
     x_trans, y_trans = transform.transform(x, y)
@@ -582,10 +642,7 @@ def xy_transform(x, y, crs_from, crs_to):
             np.all(np.isinf(x_trans))
         )
     ), "Transformation did not give valid results, please check if the provided crs of input coordinates is correct."
-
-    # if np.all(np.isinf(x_trans)):
-    #     raise ValueError(
-    #         "Transformation did not give valid results, please check if the provided crs of input "
-    #         "coordinates is correct."
-    #     )
-    return transform.transform(x, y)
+    points[:, 0] = x_trans
+    points[:, 1] = y_trans
+    return points.tolist()
+    # return transform.transform(x, y)

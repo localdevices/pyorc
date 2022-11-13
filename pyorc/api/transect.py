@@ -101,7 +101,7 @@ class Transect(ORCBase):
         hs = self.camera_config.z_to_h(self._obj.zcoords).values
         # zs = (self._obj.zcoords - self.camera_config.gcps["z_0"] + h_ref).values
         if M is None:
-            Ms = [self.camera_config.get_M(h, reverse=True) for h in hs]
+            Ms = [self.camera_config.get_M(h, reverse=True, to_bbox_grid=True) for h in hs]
         else:
             # use user defined M instead
             Ms = [M for _ in hs]

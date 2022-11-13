@@ -1,11 +1,18 @@
+import copy
 import cv2
 import numpy as np
+import os
 import rasterio
+from pyorc import helpers
 from shapely.geometry import Polygon, LineString
 from shapely.affinity import rotate
 from tqdm import tqdm
 from scipy.cluster.vq import vq, kmeans
 import operator
+
+
+# criteria for finding subpix corners
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 def _classify_displacements(positions, method="kmeans", q_threshold=0.8, abs_threshold=None, op=operator.le):
     """
@@ -75,7 +82,7 @@ def _convert_edge(img, stride_1, stride_2):
 
 def _get_dist_coefs(k1):
     """
-    Establish distance coefficient matrix for use in cv2.undistort
+    Establish distortion coefficient matrix for use in cv2.undistort
 
     :param k1: barrel lens distortion parameter
     :return: distance coefficient matrix (4 parameter)
@@ -98,10 +105,15 @@ def _get_cam_mtx(height, width, c=2.0, f=1.0):
     """
     # define camera matrix
     mtx = np.eye(3, dtype=np.float32)
+    # mtx[0, 2] = width / c  # define center x
+    # mtx[1, 2] = height / c  # define center y
+    # mtx[0, 0] = f  # define focal length x
+    # mtx[1, 1] = f  # define focal length y
+
     mtx[0, 2] = width / c  # define center x
     mtx[1, 2] = height / c  # define center y
-    mtx[0, 0] = f  # define focal length x
-    mtx[1, 1] = f  # define focal length y
+    mtx[0, 0] = width  # define focal length x
+    mtx[1, 1] = width  # define focal length y
     return mtx
 
 def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
@@ -167,7 +179,7 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
     # add start point to matrix
     positions = np.append(positions, np.swapaxes(prev_pts, 0, 1), axis=0)
     # loop through start to end frame
-    pbar = tqdm(range(n_frames - 1))
+    pbar = tqdm(range(n_frames - 1), position=0, leave=True)
     for i in pbar:
         # Read next frame
         pbar.set_description(f"Stabilizing frames")
@@ -400,8 +412,112 @@ def _transform(img, m):
     return img_transform
 
 
-def get_M(src, dst):
-    """Retrieve transformation matrix for between (4) src and (4) dst points
+def calibrate_camera(
+        fn,
+        chessboard_size=(9, 6),
+        max_imgs=30,
+        plot=True,
+        progress_bar=True,
+        criteria=criteria,
+        to_file=False,
+        frame_limit=None,
+        tolerance=None,
+):
+    """
+    Intrinsic matrix calculation and distortion coefficients calculation following
+    https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
+    """
+    dir = os.path.split(os.path.abspath(fn))[0]
+    cap = cv2.VideoCapture(fn)
+    # make a list of logical frames in order to read
+    frames_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    frames_list = helpers.staggered_index(start=0, end=frames_count - 1)
+
+    # set the expected object points from the chessboard size
+    objp = np.zeros((chessboard_size[0] * chessboard_size[1], 3), np.float32)
+    objp[:, :2] = np.mgrid[0:chessboard_size[0], 0:chessboard_size[1]].T.reshape(-1, 2)
+
+    obj_pts = []
+    img_pts = []
+    imgs = []
+
+    ret_img, img = cap.read()
+    frame_size = img.shape[1], img.shape[0]
+    if frame_limit is not None:
+        frames_list = frames_list[0:frame_limit]
+    if progress_bar:
+        frames_list = tqdm(frames_list, position=0, leave=True)
+        # pbar.update(1)
+    for f in frames_list:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, f)
+        ret_img, img = cap.read()
+        if ret_img:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            # cur_f = cap.get(cv2.CAP_PROP_POS_FRAMES)
+            ret, corners = cv2.findChessboardCorners(gray, chessboard_size, flags=cv2.CALIB_CB_FAST_CHECK)
+            if ret:
+                # append the expected point coordinates
+                obj_pts.append(objp)
+                imgs.append(copy.deepcopy(img))
+                corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+                img_pts.append(corners)
+                cv2.drawChessboardCorners(img, chessboard_size, corners2, ret)
+                # add frame number
+                cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 8, 2)
+                cv2.putText(img, f"Frame {f}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, 2)
+                height = 720
+                width = int(img.shape[1] * height / img.shape[0])
+                imS = cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
+                if plot:
+                    cv2.imshow("img", imS)
+                    cv2.waitKey(500)
+                if to_file:
+                    # write a small version to jpg
+                    jpg = os.path.join(dir, "frame_{:06d}.png".format(int(f)))
+                    cv2.imwrite(jpg, imS)
+
+                #         print(corners)
+                # skip 25 frames
+                # cap.set(cv2.CAP_PROP_POS_FRAMES, cur_f + df)
+                if len(imgs) == max_imgs:
+                    print(f"Maximum required images {max_imgs} found")
+                    break
+    if progress_bar:
+        frames_list.close()
+
+    cap.release()
+    # close the plot window if relevant
+    cv2.destroyAllWindows()
+    # do calibration
+    assert(len(obj_pts) >= 5),\
+        f"A minimum of 5 frames with chessboard patterns must be available, only {len(obj_pts)} found. Please check " \
+        f"if the video contains chessboard patterns of size {chessboard_size} "
+    ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
+    # remove badly performing images and recalibrate
+    errs = []
+    for n, i in enumerate(range(len(obj_pts))):
+        img_pts2, _ = cv2.projectPoints(obj_pts[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
+        errs.append(cv2.norm(img_pts[i], img_pts2, cv2.NORM_L2) / len(img_pts2))
+
+    if tolerance is not None:
+        # remove high error
+        idx = np.array(errs) < tolerance
+        obj_pts = list(np.array(obj_pts)[idx])
+        img_pts = list(np.array(img_pts)[idx])
+        print(len(img_pts))
+        # do calibration
+        ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
+        errs = []
+        for n, i in enumerate(range(len(obj_pts))):
+            img_pts2, _ = cv2.projectPoints(obj_pts[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
+            errs.append(cv2.norm(img_pts[i], img_pts2, cv2.NORM_L2) / len(img_pts2))
+    print(f"Average error on point reconstruction is {np.array(errs).mean()}")
+    return camera_matrix, dist_coeffs
+
+
+def get_M_2D(src, dst, reverse=False):
+    """
+    Retrieve homography matrix for between (4) src and (4) dst points with only x, y coordinates (no z)
 
     Parameters
     ----------
@@ -409,21 +525,82 @@ def get_M(src, dst):
         [x, y] with source coordinates, typically cols and rows in image
     dst : list of lists
         [x, y] with target coordinates after reprojection, can e.g. be in crs [m]
+    reverse : bool, optional
+        If set, the reverse homography to back-project to camera objective will be retrieved
 
     Returns
     -------
     M : np.ndarray
-        transformation matrix, used in cv2.warpPerspective
+        homography matrix (3x3), used in cv2.warpPerspective
     """
     # set points to float32
     _src = np.float32(src)
     _dst = np.float32(dst)
     # define transformation matrix based on GCPs
-    M = cv2.getPerspectiveTransform(_src, _dst)
+    if reverse:
+        M = cv2.getPerspectiveTransform(_dst, _src)
+    else:
+        M = cv2.getPerspectiveTransform(_src, _dst)
     return M
 
+def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., reverse=False):
+    """
+    Retrieve homography matrix for between (6+) 2D src and (6+) 3D dst (x, y, z) points
 
-def transform_to_bbox(coords, bbox, res):
+    Parameters
+    ----------
+    src : list of lists
+        [x, y] with source coordinates, typically cols and rows in image
+    dst : list of lists
+        [x, y, z] with target coordinates after reprojection, can e.g. be in crs [m]
+    camera_matrix : np.ndarray (3x3)
+        Camera intrinsic matrix
+    dist_coeffs : p.ndarray, optional
+        1xN array with distortion coefficients (N = 4, 5 or 8)
+    z : float, optional
+        Elevation plane (real-world coordinate crs) of projected image
+    reverse : bool, optional
+        If set, the reverse homography to back-project to camera objective will be retrieved
+
+    Returns
+    -------
+    M : np.ndarray
+        homography matrix (3x3), used in cv2.warpPerspective
+
+    Notes
+    -----
+    See rectification workflow OpenCV
+    http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
+    Code based on:
+    https://www.openearth.nl/flamingo/_modules/flamingo/rectification/rectification.html
+
+    """
+    # set points to float32
+    _src = np.float32(src)
+    _dst = np.float32(dst)
+    # import pdb;pdb.set_trace()
+    camera_matrix = np.float32(camera_matrix)
+    dist_coeffs = np.float32(dist_coeffs)
+    # define transformation matrix based on GCPs
+    success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs)
+    # convert rotation vector to rotation matrix
+    R = cv2.Rodrigues(rvec)[0]
+    # assume height of projection plane
+    R[:, 2] = R[:, 2] * z
+    # add translation vector
+    R[:, 2] = R[:, 2] + tvec.flatten()
+    # compute homography
+    if reverse:
+        # From perspective to objective
+        M = np.dot(camera_matrix, R)
+    else:
+        # from objective to perspective
+        M = np.linalg.inv(np.dot(camera_matrix, R))
+    # normalize homography before returning
+    return M / M[-1, -1]
+
+
+def transform_to_bbox(coords, bbox, resolution):
     """transforms a set of coordinates defined in crs of bbox, into a set of coordinates in cv2 compatible pixels
 
     Parameters
@@ -433,7 +610,7 @@ def transform_to_bbox(coords, bbox, res):
     bbox : shapely Polygon
         Bounding box. The coordinate order is very important and has to be upstream-left, downstream-left,
         downstream-right, upstream-right, upstream-left
-    res : float
+    resolution : float
         resolution of target pixels within bbox
 
     Returns
@@ -444,8 +621,8 @@ def transform_to_bbox(coords, bbox, res):
     """
     # first assemble x and y coordinates
     xs, ys = zip(*coords)
-    transform = _get_transform(bbox, res)
-    rows, cols = rasterio.transform.rowcol(transform, xs, ys)
+    transform = _get_transform(bbox, resolution)
+    rows, cols = rasterio.transform.rowcol(transform, xs, ys, op=float)
     return list(zip(cols, rows))
 
 
@@ -472,7 +649,7 @@ def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
     return cv2.warpPerspective(img, M, shape, flags=flags)
 
 
-def get_aoi(src, dst, src_corners):
+def get_aoi(M, src_corners, resolution=None):
     """Get rectangular AOI from 4 user defined points within frames.
 
     Parameters
@@ -491,13 +668,12 @@ def get_aoi(src, dst, src_corners):
     """
     # retrieve the M transformation matrix for the conditions during GCP. These are used to define the AOI so that
     # dst AOI remains the same for any movie
-    M_gcp = get_M(src=src, dst=dst)
     # prepare a simple temporary np.array of the src_corners
     _src_corners = np.array(src_corners)
     assert(_src_corners.shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. " \
                                         f"Current shape is {src_corners.shape} "
     # reproject corner points to the actual space in coordinates
-    _dst_corners = cv2.perspectiveTransform(np.float32([_src_corners]), M_gcp)[0]
+    _dst_corners = cv2.perspectiveTransform(np.float32([_src_corners]), M)[0]
     polygon = Polygon(_dst_corners)
     coords = np.array(polygon.exterior.coords)
     # estimate the angle of the bounding box
@@ -511,6 +687,12 @@ def get_aoi(src, dst, src_corners):
         polygon, -angle, origin=tuple(_dst_corners[0]), use_radians=True
     )
     xmin, ymin, xmax, ymax = polygon_rotate.bounds
+    if resolution is not None:
+        xmin = helpers.round_to_multiple(xmin, resolution)
+        xmax = helpers.round_to_multiple(xmax, resolution)
+        ymin = helpers.round_to_multiple(ymin, resolution)
+        ymax = helpers.round_to_multiple(ymax, resolution)
+
     bbox_coords = [(xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax)]
     bbox = Polygon(bbox_coords)
     # now rotate back
@@ -518,7 +700,7 @@ def get_aoi(src, dst, src_corners):
     return bbox
 
 
-def undistort_img(img, k1=0.0, c=2.0, f=1.0):
+def undistort_img(img, camera_matrix, dist_coeffs):
     """Lens distortion correction of image based on lens characteristics.
     Function by Gerben Gerritsen / Sten Schurer, 2019.
 
@@ -540,18 +722,63 @@ def undistort_img(img, k1=0.0, c=2.0, f=1.0):
     """
 
     # define imagery characteristics
-    height, width, __ = img.shape
-    dist = _get_dist_coefs(k1)
-
-    # get camera matrix
-    mtx = _get_cam_mtx(height, width, c=c, f=f)
+    # height, width, __ = img.shape
+    # dist = _get_dist_coefs(k1)
+    #
+    # # get camera matrix
+    # mtx = _get_cam_mtx(height, width, c=c, f=f)
 
     # correct image for lens distortion
-    corr_img = cv2.undistort(img, mtx, dist)
-    return corr_img
+    return cv2.undistort(img, np.array(camera_matrix), np.array(dist_coeffs))
 
 
-def undistort_points(points, height, width, k1=0.0, c=2.0, f=1.0):
+def distort_points(points, camera_matrix, dist_coeffs):
+    """
+    Distorts x, y point locations with provided lens parameters, so that points
+    can be back projected on original (distorted) frame positions.
+
+    Adapted from https://answers.opencv.org/question/148670/re-distorting-a-set-of-points-after-camera-calibration/
+
+    Parameters
+    ----------
+    points : list of lists
+        undistorted points [x, y], provided as float
+    camera_matrix : array-like [3x3]
+        camera matrix
+    dist_coeffs : array-like [4]
+        distortion coefficients
+
+    Returns
+    -------
+    points : list of lists
+        distorted point coordinates [x, y] as floats
+    """
+
+    points = np.array(points, dtype='float32')
+    # ptsTemp = np.array([], dtype='float32')
+    # make empty rotation and translation vectors (we are only undistorting)
+    rtemp = ttemp = np.array([0, 0, 0], dtype='float32')
+    # normalize the points to be independent of the camera matrix using undistortPoints with no distortion matrix
+    ptsOut = cv2.undistortPoints(points, camera_matrix, None)
+    #convert points to 3d points
+    ptsTemp = cv2.convertPointsToHomogeneous(ptsOut)
+    # project them back to image space using the distortion matrix
+    return np.int32(
+        np.round(
+            cv2.projectPoints(
+                ptsTemp,
+                rtemp,
+                ttemp,
+                camera_matrix,
+                dist_coeffs,
+                ptsOut
+            )[0][:,0]
+        )
+    ).tolist();
+
+
+
+def undistort_points(points, camera_matrix, dist_coeffs, reverse=False):
     """Undistorts x, y point locations with provided lens parameters, so that points
     can be undistorted together with images from that lens.
 
@@ -559,29 +786,26 @@ def undistort_points(points, height, width, k1=0.0, c=2.0, f=1.0):
     ----------
     points : list of lists
         points [x, y], provided as float
-    height: int
-        height of camera images [nr. of pixels]
-    width: int
-        width of camera images [nr. of pixels]
-    k1: float, optional
-        barrel lens distortion parameter (default: 0.)
-    c: float, optional
-        optical center (default: 2.)
-    f: float, optional
-        focal length (default: 1.)
+    camera_matrix : array-like [3x3]
+        camera matrix
+    dist_coeffs : array-like [4]
+        distortion coefficients
 
     Returns
     -------
     points : list of lists
         undistorted point coordinates [x, y] as floats
     """
-    mtx = _get_cam_mtx(height, width, c=c, f=f)
-    dist = _get_dist_coefs(k1)
+    camera_matrix = np.array(camera_matrix)
+    dist_coeffs = np.array(dist_coeffs)
+    if reverse:
+        return distort_points(points, camera_matrix, dist_coeffs)
+
     points_undistort = cv2.undistortPoints(
         np.expand_dims(np.float32(points), axis=1),
-        mtx,
-        dist,
-        P=mtx
+        camera_matrix,
+        dist_coeffs,
+        P=camera_matrix
     )
     return points_undistort[:, 0].tolist()
 
