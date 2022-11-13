@@ -458,10 +458,12 @@ around these roughly chosen corner points and return this for you. A few things 
 * *Important*: if water follows a clear dominant flow direction (e.g. in a straight relatively uniform section) then
   you may use the angular filter later on, to remove spurious velocities that are not in the flow direction. In order
   to make the area of interest flow direction aware, ensure to provide the points in the following order:
+
     - upstream left-bank
     - downstream left-bank
     - downstream right-bank
     - upstream right-bank
+
   where left and right banks are defined as if you are looking in downstream direction.
 
 Below we show how the corners are provided to the existing ``cam_config``.
