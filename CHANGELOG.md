@@ -1,3 +1,26 @@
+## [0.3.0] - 2022-11-13
+### Added
+- Video.set_lens_calibration added automated camera calibration with chessboard
+- User guide
+- Improved pytest code coverage
+
+### Changed
+- several API modifications to accommodate lens calibration and 6-point orthorectification 
+- CameraConfig format changed
+- CameraConfig.lens_parameters no longer used (replaced by camera_matrix and dist_coeffs)
+- CameraConfig.gcps extended orthorectification with 6(+)-point x, y, z perspective option
+- CameraConfig.set_corners changed into set_bbox_from_corners (setting a POLYGON as property bbox)
+
+### Deprecated
+
+### Removed
+- CameraConfig.set_lens_parameters
+
+### Fixed
+
+### Security
+
+
 ## [0.2.4] - 2022-09-16
 ### Added
 - pyorc.Video added stabilize option for video stabilization
