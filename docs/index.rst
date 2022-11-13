@@ -20,6 +20,23 @@ libraries or extensions to this code.
 
 Image: Example of pyorc velocimetry over Ngwerere river at the Zambezi Road crossing - Lusaka, Zambia.
 
+For whom?
+=========
+**pyorc** offers a "Application Programming Interface" in the well-known computer language python, and performs the full
+processing chain from your field work collected videos and control points to fully processed, and visualized results.
+Example users are:
+
+- Water managers, geospatial service providers, drone operators, hydrometrists, environmental resources managers, and so
+  on who wish to process their video data in a simple to use python platform and workflow/
+- Programmers who wish to establish their own applications, graphical interfaces, dashboards or other applications on
+  top of the API.
+- Researchers wishing to have a fully integrated and open-source tool chain to kick start their research in optical
+  hydraulic flow observations, having the liberty to publish their *entire* research, including the processing methods.
+- Developers who wish to further develop methods along with the core development team of **pyorc**.
+
+Capabilities
+============
+
 Current capabilities are:
 
 * Reading of frames and reprojection to surface
@@ -30,12 +47,18 @@ Current capabilities are:
 We use the well-known xarray_ data models and computation pipelines (with dask) throughout the entire library to
 guarantee an easy interoperability with other tools and methods, and allow for lazy computing. 
 
+Support us
+==========
 We are seeking funding for the following frequently requested functionalities:
+
 * A command-line interface for processing single or batch videos
 * Implementation of better filtering in pre-processing
-* Improved efficiency of processing
+* Improved efficiency of processing (e.g. through GPU/TPU acceleration)
 * Establishing on-site edge computation through a raspberry-pi camera setup
 * Implementation of additional processing algorithms (STIV and LSPTV)
+* Establishment of dashboard environments for several use cases
+
+Please contact us at info@rainbowsensing.com for further information.
 
 .. note::
    **pyorc** has been created by `Rainbow Sensing <https://rainbowsensing.com>`_ to support local people, with local
@@ -43,8 +66,8 @@ We are seeking funding for the following frequently requested functionalities:
    to contact us for other work or ideas, please email us on info@rainbowsensing.com
 
 .. note::
-   Acknowledgement: the development of **pyorc** has been funded partly by the World Meteorological Organisation and
-   partly by in-kind contributions of Rainbow Sensing.
+   Acknowledgement: the development of **pyorc** has been funded partly by the World Meteorological Organisation,
+   Rijkswaterstaat and in-kind contributions of Rainbow Sensing.
 
 
 .. _xarray: https://docs.xarray.dev/
