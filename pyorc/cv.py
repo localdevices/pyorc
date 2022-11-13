@@ -489,7 +489,7 @@ def calibrate_camera(
     # close the plot window if relevant
     cv2.destroyAllWindows()
     # do calibration
-    assert(len(obj_pts) > 5),\
+    assert(len(obj_pts) >= 5),\
         f"A minimum of 5 frames with chessboard patterns must be available, only {len(obj_pts)} found. Please check " \
         f"if the video contains chessboard patterns of size {chessboard_size} "
     ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
