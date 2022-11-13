@@ -12,14 +12,11 @@
 - CameraConfig.set_corners changed into set_bbox_from_corners (setting a POLYGON as property bbox)
 
 ### Deprecated
-
 ### Removed
 - CameraConfig.set_lens_parameters
 
 ### Fixed
-
 ### Security
-
 
 ## [0.2.4] - 2022-09-16
 ### Added
