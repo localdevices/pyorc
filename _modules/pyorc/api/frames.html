@@ -5,15 +5,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.frames &#8212; pyorc 0.2.4 documentation</title>
+    <title>pyorc.api.frames &#8212; pyorc 0.3.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -22,17 +22,20 @@
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyorc/api/frames';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -58,7 +61,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -68,7 +71,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -88,7 +91,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.2.4 documentation</p>
+    <p class="title logo__title">pyorc 0.3.0 documentation</p>
   
 </a>
     
@@ -127,8 +130,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../../../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -148,16 +151,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -172,14 +175,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -227,8 +230,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../../../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -251,10 +254,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -296,6 +299,7 @@
 <span class="kn">import</span> <span class="nn">dask</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">rasterio</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
 <span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span><span class="p">,</span> <span class="n">FFMpegWriter</span>
@@ -318,7 +322,6 @@
 <span class="sd">            frames data fields (from pyorc.Video.get_frames)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Frames</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
-
 
 <div class="viewcode-block" id="Frames.get_piv"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.get_piv.html#pyorc.Frames.get_piv">[docs]</a>    <span class="k">def</span> <span class="nf">get_piv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform PIV computation on projected frames. Only a pipeline graph to computation is setup. Call a result to</span>
@@ -376,9 +379,13 @@
             <span class="n">lons</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">lats</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="n">M</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">,</span> <span class="n">to_bbox_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># compute row and column position of vectors in original reprojected background image col/row coordinates</span>
-        <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xy_to_perspective</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+        <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xy_to_perspective</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">M</span>
+        <span class="p">)</span>
         <span class="c1"># ensure y coordinates start at the top in the right orientation (different from order of a CRS)</span>
         <span class="n">shape_y</span><span class="p">,</span> <span class="n">shape_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span>
         <span class="n">yp</span> <span class="o">=</span> <span class="n">shape_y</span> <span class="o">-</span> <span class="n">yp</span>
@@ -432,7 +439,6 @@
         <span class="n">ds</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">set_encoding</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ds</span></div>
 
-
 <div class="viewcode-block" id="Frames.project"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.project.html#pyorc.Frames.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Project frames into a projected frames object, with information from the camera_config attr.</span>
 <span class="sd">        This requires that the CameraConfig contains full gcp information. If a CRS is provided, also &quot;lat&quot; and &quot;lon&quot;</span>
@@ -453,8 +459,15 @@
         <span class="n">camera_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
-        <span class="n">M</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
+        <span class="c1"># convert bounding box coords into row/column space</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">shape</span>
+        <span class="c1"># get camera perspective bbox corners</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">dst_xy</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">()</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="c1"># get geographic coordinates bbox corners</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">transform_to_bbox</span><span class="p">(</span><span class="n">dst_xy</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M_2D</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+
         <span class="c1"># prepare all coordinates</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
             <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
@@ -520,7 +533,6 @@
 
         <span class="k">return</span> <span class="n">f</span></div>
 
-
 <div class="viewcode-block" id="Frames.landmask"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.landmask.html#pyorc.Frames.landmask">[docs]</a>    <span class="k">def</span> <span class="nf">landmask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dilate_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much</span>
 <span class="sd">        higher than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation</span>
@@ -560,7 +572,6 @@
         <span class="c1"># make mask 3-dimensional</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="Frames.normalize"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.normalize.html#pyorc.Frames.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove the mean of sampled frames. This is typically used to remove non-moving background from foreground, and</span>
 <span class="sd">        helps to increase contrast when river bottoms are visible, or when the objective contains partly illuminated and</span>
@@ -589,8 +600,7 @@
         <span class="n">frames_norm</span> <span class="o">=</span> <span class="p">((</span><span class="n">frames_reduce</span> <span class="o">-</span> <span class="n">frames_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">frames_max</span> <span class="o">-</span> <span class="n">frames_min</span><span class="p">)</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frames_norm</span></div>
 
-
-<div class="viewcode-block" id="Frames.edge_detect"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect">[docs]</a>    <span class="k">def</span> <span class="nf">edge_detect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wdw_1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">wdw_2</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.edge_detect"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect">[docs]</a>    <span class="k">def</span> <span class="nf">edge_detect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wdw_1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wdw_2</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert frames in edges, using a band convolution filter. The filter uses two slightly differently convolved</span>
 <span class="sd">        images and computes their difference to detect edges.</span>
 
@@ -624,7 +634,6 @@
             <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="Frames.reduce_rolling"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_rolling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use</span>
 <span class="sd">        Frames.normalize).</span>
@@ -651,7 +660,6 @@
         <span class="n">frames_norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">frames_thres</span> <span class="o">*</span> <span class="mi">255</span> <span class="o">/</span> <span class="n">frames_thres</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
         <span class="n">frames_norm</span> <span class="o">=</span> <span class="n">frames_norm</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">roll_mean</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frames_norm</span></div>
-
 
 <div class="viewcode-block" id="Frames.to_ani"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani">[docs]</a>    <span class="k">def</span> <span class="nf">to_ani</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -698,14 +706,13 @@
 
         <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">progress_bar</span><span class="p">:</span>
-            <span class="n">frames</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)))</span>
+            <span class="n">frames</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)),</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">frames</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">))</span>
         <span class="n">anim</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">animate</span><span class="p">,</span> <span class="n">init_func</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="n">frames</span><span class="p">,</span> <span class="o">**</span><span class="n">anim_kwargs</span>
         <span class="p">)</span>
         <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">**</span><span class="n">video_kwargs</span><span class="p">)</span></div>
-
 
     <span class="k">def</span> <span class="nf">to_video</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -735,10 +742,19 @@
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">video_format</span><span class="p">,</span> <span class="n">fps</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
-        <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+        <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s2">&quot;Writing frames&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
-            <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2BGR</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pbar</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2BGR</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># make a scale between 0 and 255, only with first frame</span>
+                    <span class="n">img_min</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">img_max</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">255</span><span class="o">*</span><span class="p">((</span><span class="n">img</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">img_max</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">)))</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_GRAY2BGR</span><span class="p">)</span>
             <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
@@ -761,6 +777,11 @@
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
 <div class="toc-item">
   
 </div>
@@ -786,7 +807,7 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -803,7 +824,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

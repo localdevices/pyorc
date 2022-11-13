@@ -6,15 +6,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Frames.landmask &#8212; pyorc 0.2.4 documentation</title>
+    <title>pyorc.Frames.landmask &#8212; pyorc 0.3.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -23,17 +23,20 @@
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Frames.landmask';</script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -61,7 +64,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -71,7 +74,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -91,7 +94,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.2.4 documentation</p>
+    <p class="title logo__title">pyorc 0.3.0 documentation</p>
   
 </a>
     
@@ -130,8 +133,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -151,16 +154,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -175,14 +178,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -230,8 +233,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -254,10 +257,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -278,388 +281,118 @@
   </p>
   <div class="bd-toc-item navbar-nav">
     <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.html">
-   pyorc.CameraConfig
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.bbox.html">
-   pyorc.CameraConfig.bbox
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.shape.html">
-   pyorc.CameraConfig.shape
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.transform.html">
-   pyorc.CameraConfig.transform
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.html">pyorc.CameraConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.bbox.html">pyorc.CameraConfig.bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.shape.html">pyorc.CameraConfig.shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.transform.html">pyorc.CameraConfig.transform</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.set_corners.html">
-   pyorc.CameraConfig.set_corners
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.set_gcps.html">
-   pyorc.CameraConfig.set_gcps
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">
-   pyorc.CameraConfig.set_lens_pars
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">
-   pyorc.CameraConfig.set_lens_position
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html">pyorc.CameraConfig.set_bbox_from_corners</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_gcps.html">pyorc.CameraConfig.set_gcps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">pyorc.CameraConfig.set_lens_pars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html">pyorc.CameraConfig.set_lens_calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">pyorc.CameraConfig.set_lens_position</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.to_dict.html">
-   pyorc.CameraConfig.to_dict
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.to_file.html">
-   pyorc.CameraConfig.to_file
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.to_json.html">
-   pyorc.CameraConfig.to_json
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_dict.html">pyorc.CameraConfig.to_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_file.html">pyorc.CameraConfig.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_json.html">pyorc.CameraConfig.to_json</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.get_M.html">
-   pyorc.CameraConfig.get_M
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.get_depth.html">
-   pyorc.CameraConfig.get_depth
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.z_to_h.html">
-   pyorc.CameraConfig.z_to_h
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_M.html">pyorc.CameraConfig.get_M</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_depth.html">pyorc.CameraConfig.get_depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.z_to_h.html">pyorc.CameraConfig.z_to_h</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.CameraConfig.plot.html">
-   pyorc.CameraConfig.plot
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot.html">pyorc.CameraConfig.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot_bbox.html">pyorc.CameraConfig.plot_bbox</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.html">
-   pyorc.Video
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.camera_config.html">
-   pyorc.Video.camera_config
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.fps.html">
-   pyorc.Video.fps
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.end_frame.html">
-   pyorc.Video.end_frame
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.start_frame.html">
-   pyorc.Video.start_frame
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.corners.html">
-   pyorc.Video.corners
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.plot_rigid_pts.html">
-   pyorc.Video.plot_rigid_pts
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.camera_config.html">pyorc.Video.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.fps.html">pyorc.Video.fps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.corners.html">pyorc.Video.corners</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.plot_rigid_pts.html">pyorc.Video.plot_rigid_pts</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.get_frame.html">
-   pyorc.Video.get_frame
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Video.get_frames.html">
-   pyorc.Video.get_frames
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frames.html">pyorc.Video.get_frames</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.html">
-   pyorc.Frames
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.camera_config.html">
-   pyorc.Frames.camera_config
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.camera_shape.html">
-   pyorc.Frames.camera_shape
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.h_a.html">
-   pyorc.Frames.h_a
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.html">pyorc.Frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.camera_config.html">pyorc.Frames.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.camera_shape.html">pyorc.Frames.camera_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.h_a.html">pyorc.Frames.h_a</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.edge_detect.html">
-   pyorc.Frames.edge_detect
-  </a>
- </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   pyorc.Frames.landmask
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.normalize.html">
-   pyorc.Frames.normalize
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.reduce_rolling.html">
-   pyorc.Frames.reduce_rolling
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Frames.landmask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.project.html">
-   pyorc.Frames.project
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.project.html">pyorc.Frames.project</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.get_piv.html">
-   pyorc.Frames.get_piv
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.get_piv.html">pyorc.Frames.get_piv</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.plot.html">
-   pyorc.Frames.plot
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Frames.to_ani.html">
-   pyorc.Frames.to_ani
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.plot.html">pyorc.Frames.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.to_ani.html">pyorc.Frames.to_ani</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.html">
-   pyorc.Velocimetry
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.camera_config.html">
-   pyorc.Velocimetry.camera_config
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.camera_shape.html">
-   pyorc.Velocimetry.camera_shape
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.h_a.html">
-   pyorc.Velocimetry.h_a
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.html">pyorc.Velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.camera_config.html">pyorc.Velocimetry.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.camera_shape.html">pyorc.Velocimetry.camera_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.h_a.html">pyorc.Velocimetry.h_a</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html">
-   pyorc.Velocimetry.filter_temporal
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html">
-   pyorc.Velocimetry.filter_temporal_angle
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html">
-   pyorc.Velocimetry.filter_temporal_neighbour
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html">
-   pyorc.Velocimetry.filter_temporal_std
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html">
-   pyorc.Velocimetry.filter_temporal_velocity
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html">
-   pyorc.Velocimetry.filter_temporal_corr
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html">pyorc.Velocimetry.filter_temporal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html">pyorc.Velocimetry.filter_temporal_angle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html">pyorc.Velocimetry.filter_temporal_neighbour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html">pyorc.Velocimetry.filter_temporal_std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html">pyorc.Velocimetry.filter_temporal_velocity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html">pyorc.Velocimetry.filter_temporal_corr</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html">
-   pyorc.Velocimetry.filter_spatial
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html">
-   pyorc.Velocimetry.filter_spatial_nan
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html">
-   pyorc.Velocimetry.filter_spatial_median
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html">pyorc.Velocimetry.filter_spatial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html">pyorc.Velocimetry.filter_spatial_nan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html">pyorc.Velocimetry.filter_spatial_median</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">
-   pyorc.Velocimetry.replace_outliers
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.get_transect.html">
-   pyorc.Velocimetry.get_transect
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.set_encoding.html">
-   pyorc.Velocimetry.set_encoding
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html">pyorc.Velocimetry.set_encoding</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.plot.html">
-   pyorc.Velocimetry.plot
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.plot.pcolormesh.html">
-   pyorc.Velocimetry.plot.pcolormesh
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.plot.scatter.html">
-   pyorc.Velocimetry.plot.scatter
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.plot.streamplot.html">
-   pyorc.Velocimetry.plot.streamplot
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Velocimetry.plot.quiver.html">
-   pyorc.Velocimetry.plot.quiver
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.html">pyorc.Velocimetry.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.pcolormesh.html">pyorc.Velocimetry.plot.pcolormesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.scatter.html">pyorc.Velocimetry.plot.scatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.streamplot.html">pyorc.Velocimetry.plot.streamplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.quiver.html">pyorc.Velocimetry.plot.quiver</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.html">
-   pyorc.Transect
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.camera_config.html">
-   pyorc.Transect.camera_config
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.camera_shape.html">
-   pyorc.Transect.camera_shape
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.h_a.html">
-   pyorc.Transect.h_a
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.html">pyorc.Transect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_config.html">pyorc.Transect.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_shape.html">pyorc.Transect.camera_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.h_a.html">pyorc.Transect.h_a</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">
-   pyorc.Transect.vector_to_scalar
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.get_xyz_perspective.html">
-   pyorc.Transect.get_xyz_perspective
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">pyorc.Transect.vector_to_scalar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_xyz_perspective.html">pyorc.Transect.get_xyz_perspective</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.get_river_flow.html">
-   pyorc.Transect.get_river_flow
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.get_q.html">
-   pyorc.Transect.get_q
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_river_flow.html">pyorc.Transect.get_river_flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_q.html">pyorc.Transect.get_q</a></li>
 </ul>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.plot.html">
-   pyorc.Transect.plot
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.plot.quiver.html">
-   pyorc.Transect.plot.quiver
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="pyorc.Transect.plot.scatter.html">
-   pyorc.Transect.plot.scatter
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.plot.html">pyorc.Transect.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.plot.quiver.html">pyorc.Transect.plot.quiver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.plot.scatter.html">pyorc.Transect.plot.scatter</a></li>
 </ul>
 
   </div>
@@ -724,7 +457,7 @@ number to speed up calculation (Default value = 15)</p></li>
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
   <a class='left-prev' id="prev-link" href="pyorc.Frames.edge_detect.html" title="previous page">
-      <i class="fas fa-angle-left"></i>
+      <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
           <p class="prev-next-title">pyorc.Frames.edge_detect</p>
@@ -735,7 +468,7 @@ number to speed up calculation (Default value = 15)</p></li>
       <p class="prev-next-subtitle">next</p>
       <p class="prev-next-title">pyorc.Frames.normalize</p>
   </div>
-  <i class="fas fa-angle-right"></i>
+  <i class="fa-solid fa-angle-right"></i>
   </a>
 </div>
             </footer>
@@ -748,13 +481,39 @@ number to speed up calculation (Default value = 15)</p></li>
               
 <div class="toc-item">
   
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pyorc.Frames.landmask">
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     Frames.landmask()
+    </span>
+   </code>
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
     <a href="../_sources/_generated/pyorc.Frames.landmask.rst.txt">
-        <i class="fas fa-file-alt"></i> Show Source
+        <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>
 
@@ -777,7 +536,7 @@ number to speed up calculation (Default value = 15)</p></li>
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -794,7 +553,7 @@ number to speed up calculation (Default value = 15)</p></li>
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

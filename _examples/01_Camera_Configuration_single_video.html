@@ -6,15 +6,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Setup a camera configuration for processing a single video &#8212; pyorc 0.2.4 documentation</title>
+    <title>Setup a camera configuration for processing a single video &#8212; pyorc 0.3.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -23,17 +23,20 @@
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -63,7 +66,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -73,7 +76,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -93,7 +96,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.2.4 documentation</p>
+    <p class="title logo__title">pyorc 0.3.0 documentation</p>
   
 </a>
     
@@ -132,8 +135,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -153,16 +156,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -177,14 +180,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -232,8 +235,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -256,10 +259,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -279,32 +282,14 @@
     Section Navigation
   </p>
   <div class="bd-toc-item navbar-nav">
-    <p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Table of Content
- </span>
-</p>
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
 <ul class="current nav bd-sidenav">
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   Setup a camera configuration for processing a single video
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="02_Process_velocimetry.html">
-   Analyze surface velocities of a video with velocimetry
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="03_Plotting_and_filtering_velocimetry_results.html">
-   Immersive plotting and analyzing results
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">
-   Obtain a discharge measurement over a cross section
-  </a>
- </li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Setup a camera configuration for processing a single video</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="02_Process_velocimetry.html">Analyze surface velocities of a video with velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_Plotting_and_filtering_velocimetry_results.html">Immersive plotting and analyzing results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">Obtain a discharge measurement over a cross section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_Camera_calibration.html">Camera calibration with chessboard pattern</a></li>
 </ul>
 
   </div>
@@ -443,10 +428,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -634,7 +620,7 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f66b622a770&gt;
+&lt;matplotlib.image.AxesImage at 0x7f85c70a9d80&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -672,7 +658,7 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f66b61214b0&gt;
+&lt;matplotlib.legend.Legend at 0x7f85c6fe0580&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -709,8 +695,11 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 <span class="c1"># gcps[&quot;h_ref&quot;] = &lt;your locally measured water level during survey in&gt;</span>
 <span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1182.2</span>
 
+<span class="c1"># set the height and width</span>
+<span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
 <span class="c1"># now we use everything to make a camera configuration</span>
-<span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">gcps</span><span class="o">=</span><span class="n">gcps</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32735</span><span class="p">)</span>
+<span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">gcps</span><span class="o">=</span><span class="n">gcps</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32735</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -742,7 +731,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
     <span class="p">[</span><span class="mi">1200</span><span class="p">,</span> <span class="mi">236</span><span class="p">],</span>
     <span class="p">[</span><span class="mi">1600</span><span class="p">,</span> <span class="mi">834</span><span class="p">]</span>
 <span class="p">]</span>
-<span class="n">cam_config</span><span class="o">.</span><span class="n">set_corners</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">set_bbox_from_corners</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
 <span class="n">cam_config</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.01</span>
 <span class="n">cam_config</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="mi">25</span>
 </pre></div>
@@ -766,7 +755,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f66b5fef160&gt;
+&lt;matplotlib.legend.Legend at 0x7f85c70377c0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -776,21 +765,36 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 <img alt="../_images/_examples_01_Camera_Configuration_single_video_12_1.png" src="../_images/_examples_01_Camera_Configuration_single_video_12_1.png" />
 </div>
 </div>
-<p>Now that all information is entered, we show the final camera configuration as a plot. The rectangular box can be clearly seen now.</p>
+<p>Now that all information is entered, we show the final camera configuration as a plot, both in geographical projection and in camera perspective. The rectangular box can be clearly seen now.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="n">ax</span> <span class="o">=</span> <span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tiles</span><span class="o">=</span><span class="s2">&quot;GoogleTiles&quot;</span><span class="p">,</span> <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="s2">&quot;satellite&quot;</span><span class="p">})</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tiles</span><span class="o">=</span><span class="s2">&quot;GoogleTiles&quot;</span><span class="p">,</span> <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="s2">&quot;satellite&quot;</span><span class="p">})</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;ngwerere_camconfig.jpg&quot;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">72</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" src="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" src="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" />
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_14_1.png" src="../_images/_examples_01_Camera_Configuration_single_video_14_1.png" />
 </div>
 </div>
 <p>Our camera configuration is ready. Below we still show a string representation and then we store the configuration to a file for use in our next notebook using the <code class="docutils literal notranslate"><span class="pre">.to_file</span></code> method.</p>
@@ -809,6 +813,8 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {
+    &#34;height&#34;: 1080,
+    &#34;width&#34;: 1920,
     &#34;crs&#34;: &#34;PROJCRS[\&#34;WGS 84 / UTM zone 35S\&#34;,BASEGEOGCRS[\&#34;WGS 84\&#34;,ENSEMBLE[\&#34;World Geodetic System 1984 ensemble\&#34;,MEMBER[\&#34;World Geodetic System 1984 (Transit)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G730)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G873)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1150)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1674)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1762)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G2139)\&#34;],ELLIPSOID[\&#34;WGS 84\&#34;,6378137,298.257223563,LENGTHUNIT[\&#34;metre\&#34;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&#34;Greenwich\&#34;,0,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433]],ID[\&#34;EPSG\&#34;,4326]],CONVERSION[\&#34;UTM zone 35S\&#34;,METHOD[\&#34;Transverse Mercator\&#34;,ID[\&#34;EPSG\&#34;,9807]],PARAMETER[\&#34;Latitude of natural origin\&#34;,0,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433],ID[\&#34;EPSG\&#34;,8801]],PARAMETER[\&#34;Longitude of natural origin\&#34;,27,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433],ID[\&#34;EPSG\&#34;,8802]],PARAMETER[\&#34;Scale factor at natural origin\&#34;,0.9996,SCALEUNIT[\&#34;unity\&#34;,1],ID[\&#34;EPSG\&#34;,8805]],PARAMETER[\&#34;False easting\&#34;,500000,LENGTHUNIT[\&#34;metre\&#34;,1],ID[\&#34;EPSG\&#34;,8806]],PARAMETER[\&#34;False northing\&#34;,10000000,LENGTHUNIT[\&#34;metre\&#34;,1],ID[\&#34;EPSG\&#34;,8807]]],CS[Cartesian,2],AXIS[\&#34;(E)\&#34;,east,ORDER[1],LENGTHUNIT[\&#34;metre\&#34;,1]],AXIS[\&#34;(N)\&#34;,north,ORDER[2],LENGTHUNIT[\&#34;metre\&#34;,1]],USAGE[SCOPE[\&#34;Engineering survey, topographic mapping.\&#34;],AREA[\&#34;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&#34;],BBOX[-80,24,0,30]],ID[\&#34;EPSG\&#34;,32735]]&#34;,
     &#34;resolution&#34;: 0.01,
     &#34;gcps&#34;: {
@@ -848,38 +854,44 @@ objective. * a target resolution (in meters) must be selected. The resolution is
                 8304296.858
             ]
         ],
-        &#34;h_ref&#34;: null,
+        &#34;h_ref&#34;: 0.0,
         &#34;z_0&#34;: 1182.2
     },
     &#34;window_size&#34;: 25,
-    &#34;corners&#34;: [
+    &#34;dist_coeffs&#34;: [
         [
-            292,
-            817
+            0.0
         ],
         [
-            50,
-            166
+            0.0
         ],
         [
-            1200,
-            236
+            0.0
         ],
         [
-            1600,
-            834
+            0.0
         ]
-    ]
+    ],
+    &#34;camera_matrix&#34;: [
+        [
+            1920.0,
+            0.0,
+            960.0
+        ],
+        [
+            0.0,
+            1920.0,
+            540.0
+        ],
+        [
+            0.0,
+            0.0,
+            1.0
+        ]
+    ],
+    &#34;bbox&#34;: &#34;POLYGON ((642730.3267177228 8304292.875101833, 642731.297608523 8304302.476136727, 642739.456000869 8304301.651131073, 642738.4851100688 8304292.050096178, 642730.3267177228 8304292.875101833))&#34;
 }
 </pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 </div>
 </section>
 
@@ -892,7 +904,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
   <a class='left-prev' id="prev-link" href="../quickstart.html" title="previous page">
-      <i class="fas fa-angle-left"></i>
+      <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
           <p class="prev-next-title">Quick start</p>
@@ -903,7 +915,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
       <p class="prev-next-subtitle">next</p>
       <p class="prev-next-title">Analyze surface velocities of a video with velocimetry</p>
   </div>
-  <i class="fas fa-angle-right"></i>
+  <i class="fa-solid fa-angle-right"></i>
   </a>
 </div>
             </footer>
@@ -917,7 +929,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 <div class="toc-item">
   
 <div class="tocsection onthispage">
-    <i class="fas fa-list"></i> On this page
+    <i class="fa-solid fa-list"></i> On this page
 </div>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
@@ -938,13 +950,18 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 
 <div class="toc-item">
   
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
     <a href="../_sources/_examples/01_Camera_Configuration_single_video.ipynb.txt">
-        <i class="fas fa-file-alt"></i> Show Source
+        <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>
 
@@ -967,7 +984,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -984,7 +1001,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

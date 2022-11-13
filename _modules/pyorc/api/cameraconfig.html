@@ -5,15 +5,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.cameraconfig &#8212; pyorc 0.2.4 documentation</title>
+    <title>pyorc.api.cameraconfig &#8212; pyorc 0.3.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -22,17 +22,20 @@
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyorc/api/cameraconfig';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -58,7 +61,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -68,7 +71,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -88,7 +91,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.2.4 documentation</p>
+    <p class="title logo__title">pyorc 0.3.0 documentation</p>
   
 </a>
     
@@ -127,8 +130,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../../../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -148,16 +151,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -172,14 +175,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -227,8 +230,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../../../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -251,10 +254,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -290,10 +293,14 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for pyorc.api.cameraconfig</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">shapely.wkt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">shapely</span> <span class="kn">import</span> <span class="n">ops</span><span class="p">,</span> <span class="n">wkt</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
 
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">patches</span>
 <span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span><span class="p">,</span> <span class="n">Transformer</span>
@@ -308,36 +315,49 @@
 <span class="sd">    coordinates</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CameraConfig.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.html#pyorc.CameraConfig.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
+            <span class="n">height</span><span class="p">,</span>
+            <span class="n">width</span><span class="p">,</span>
             <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">window_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-            <span class="n">resolution</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+            <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">camera_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">dist_coeffs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">lens_position</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">corners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">gcps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">lens_pars</span><span class="o">=</span><span class="kc">None</span>
+            <span class="n">lens_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">calibration_video</span><span class="o">=</span><span class="kc">None</span>
+
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        height : int</span>
+<span class="sd">            height of frame in pixels</span>
+<span class="sd">        width : int</span>
+<span class="sd">            width of frame in pixels</span>
 <span class="sd">        crs : int, dict or str, optional</span>
 <span class="sd">            Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). Only used if</span>
 <span class="sd">            the data has no native CRS.</span>
 <span class="sd">        window_size : int</span>
 <span class="sd">            pixel size of interrogation window (default: 15)</span>
-<span class="sd">        resolution : float</span>
-<span class="sd">            resolution in m. of projected pixels</span>
+<span class="sd">        resolution : float, optional</span>
+<span class="sd">            resolution in m. of projected pixels (default: 0.01)</span>
+<span class="sd">        bbox : shapely.geometry.Polygon, optional</span>
+<span class="sd">            bounding box in geographical coordinates</span>
 <span class="sd">        lens_position : list of floats (3),</span>
 <span class="sd">            x, y, z coordinate of lens position in CRS</span>
 <span class="sd">        corners : list of lists of floats (2)</span>
-<span class="sd">            [x, y] coordinates defining corners of area of interest in camera cols/rows</span>
+<span class="sd">            [x, y] coordinates defining corners of area of interest in camera cols/rows, bbox will be computed from this</span>
 <span class="sd">        gcps : dict</span>
 <span class="sd">            Can contain &quot;src&quot;: list of 4 lists, with column, row locations in objective of control points,</span>
 <span class="sd">            &quot;dst&quot;: list of 4 lists, with x, y locations (local or global coordinate reference system) of control points,</span>
@@ -351,9 +371,16 @@
 <span class="sd">            Lens parameters, containing: &quot;k1&quot;: float, barrel lens distortion parameter (default: 0.),</span>
 <span class="sd">            &quot;c&quot;: float, optical center (default: 2.),</span>
 <span class="sd">            &quot;f&quot;: float, focal length (default: 1.)</span>
-
+<span class="sd">        calibration_video : str, optional</span>
+<span class="sd">            local path to video file containing a checkerboard pattern. Must be 9x6 if called directly, otherwise use</span>
+<span class="sd">            ``.calibrate_camera`` explicitly and provide ``chessboard_size`` explicitly. When used, an automated camera</span>
+<span class="sd">            calibration on the video file will be attempted.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="nb">int</span><span class="p">)),</span> <span class="s1">&#39;height must be provided as type &quot;int&quot;&#39;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)),</span> <span class="s1">&#39;width must be provided as type &quot;int&quot;&#39;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">window_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">)),</span> <span class="s1">&#39;window_size must be of type &quot;int&quot;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
@@ -369,11 +396,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">set_gcps</span><span class="p">(</span><span class="o">**</span><span class="n">gcps</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">lens_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_pars</span><span class="p">(</span><span class="o">**</span><span class="n">lens_pars</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_pars</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">calibration_video</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_calibration</span><span class="p">(</span><span class="n">calibration_video</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option</span>
+        <span class="k">if</span> <span class="n">camera_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span>
+        <span class="k">if</span> <span class="n">dist_coeffs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span>
+        <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span>
         <span class="k">if</span> <span class="n">window_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="n">window_size</span>
         <span class="c1"># override the transform and bbox with the set corners</span>
         <span class="k">if</span> <span class="n">corners</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_corners</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_bbox_from_corners</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -386,8 +424,51 @@
 <span class="sd">            bbox of area of interest</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;corners&quot;</span><span class="p">)),</span> <span class="s2">&quot;CameraConfig object has no corners, set these with CameraConfig.set_corners&quot;</span>
-        <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_aoi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bbox</span>
+
+    <span class="nd">@bbox</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pol</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bbox</span> <span class="o">=</span> <span class="n">pol</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">camera_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_matrix</span>
+
+    <span class="nd">@camera_matrix</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">camera_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_matrix</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">camera_matrix</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dist_coeffs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_coeffs</span>
+
+    <span class="nd">@dist_coeffs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">dist_coeffs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_coeffs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_coeffs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">dist_coeffs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gcp_reduced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the location of gcp destination points, reduced with their mean for better local projection</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        gcp_reduced : np.ndarray</span>
+<span class="sd">            Reduced coordinate (x, y) or (x, y, z) of gcp destination points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gcp_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the mean location of gcp destination points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        gcp_mean : np.ndarray</span>
+<span class="sd">            mean coordinate (x, y) or (x, y, z) of gcp destination points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -402,9 +483,9 @@
 <span class="sd">            Amount of columns in projected frame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_shape</span><span class="p">(</span>
-            <span class="n">shapely</span><span class="o">.</span><span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span>
             <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-            <span class="nb">round</span><span class="o">=</span><span class="mi">10</span>
+            <span class="nb">round</span><span class="o">=</span><span class="mi">1</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span>
 
@@ -418,12 +499,92 @@
 <span class="sd">        transform : rasterio.transform.Affine object</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">bbox</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_transform</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CameraConfig.set_lens_calibration"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_calibration.html#pyorc.CameraConfig.set_lens_calibration">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_calibration</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fn</span><span class="p">,</span>
+        <span class="n">chessboard_size</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">max_imgs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calibrates and sets the properties ``camera_matrix`` and ``dist_coeffs`` using a video of a chessboard pattern.</span>
+<span class="sd">        Follows methods described on https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fn : str</span>
+<span class="sd">            path to video file</span>
+<span class="sd">        df : int, optional</span>
+<span class="sd">            amount of frames to skip after a valid frame with corner points is found, defaults to fps of video.</span>
+<span class="sd">        chessboard_size : tuple, optional</span>
+<span class="sd">            amount of internal corner points expected on chessboard pattern, default is (9, 6).</span>
+<span class="sd">        max_imgs : int, optional</span>
+<span class="sd">            maximum amount of images to use for calibration (default: 30).</span>
+<span class="sd">        tolerance : float, optional</span>
+<span class="sd">            error tolerance alowed for reprojection of corner points (default: 0.1, if set to None, no filtering will</span>
+<span class="sd">            be done). images that exceed the tolerance are excluded from calibration. This is to remove images with</span>
+<span class="sd">            spuriously defined points, or blurry images.</span>
+<span class="sd">        plot : bool, optional</span>
+<span class="sd">            if set, chosen frames will be plotted for the user to inspect on-=the-fly with a one-second delay</span>
+<span class="sd">            (default: True).</span>
+<span class="sd">        progress_bar : bool, optional</span>
+<span class="sd">            if set, a progress bar going through the frames is plotted (default: True).</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;Video calibration file </span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2"> not found&quot;</span>
+        <span class="n">camera_matrix</span><span class="p">,</span> <span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">calibrate_camera</span><span class="p">(</span>
+            <span class="n">fn</span><span class="p">,</span>
+            <span class="n">chessboard_size</span><span class="p">,</span>
+            <span class="n">max_imgs</span><span class="p">,</span>
+            <span class="n">plot</span><span class="p">,</span>
+            <span class="n">progress_bar</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span></div>
+
+    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        camera : bool, optional</span>
+<span class="sd">            If set, the bounding box will be returned as row and column coordinates in the camera perspective.</span>
+<span class="sd">            In this case ``h_a`` may be set to provide the right water level, to estimate the bounding box for.</span>
+<span class="sd">        h_a : float, optional</span>
+<span class="sd">            If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,</span>
+<span class="sd">            using h_a as a present water level. In case a video with higher (lower) water levels is used, this</span>
+<span class="sd">            will result in a different perspective plane than the control video.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A bounding box, that in the used CRS is perfectly rectangular, and aligned in the up/downstream direction.</span>
+<span class="sd">        It can (and certainly will) be rotated with respect to a typical bbox with xlim, ylim coordinates.</span>
+<span class="sd">        If user sets ``camera=True`` then the geographical bounding box will be converted into a camera perspective,</span>
+<span class="sd">        using the homography belonging to the available ground control points and current water level.</span>
+
+<span class="sd">        This can then be used to reconstruct the grid for velocimetry calculations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span>
+        <span class="k">if</span> <span class="n">camera</span><span class="p">:</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+            <span class="c1"># convert to perspective rowcol coordinates</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
+            <span class="c1"># reduce coords by control point mean</span>
+            <span class="n">coords</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="c1"># TODO: re-distort if needed</span>
+            <span class="n">bbox</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">perspectiveTransform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">coords</span><span class="p">]),</span> <span class="n">M</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">bbox</span>
 
 <div class="viewcode-block" id="CameraConfig.get_depth"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_depth.html#pyorc.CameraConfig.get_depth">[docs]</a>    <span class="k">def</span> <span class="nf">get_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured</span>
-<span class="sd">        in local reference (e.g. staff gauge).</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level,</span>
+<span class="sd">        measured in local reference (e.g. staff gauge).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -439,21 +600,48 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;No actual water level is provided, but a reference water level is provided&quot;</span>
-            <span class="n">h_a</span> <span class="o">=</span> <span class="mf">0.</span>
-            <span class="n">h_ref</span> <span class="o">=</span> <span class="mf">0.</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">h_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span>
-        <span class="n">z_pressure</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">h_ref</span> <span class="o">+</span> <span class="n">h_a</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+            <span class="n">h_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span>
+        <span class="n">z_pressure</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">h_a</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">z_pressure</span> <span class="o">-</span> <span class="n">z</span></div>
 
+    <span class="k">def</span> <span class="nf">get_dst_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        h_a : float, optional</span>
+<span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
+<span class="sd">            is processed and thus changes in water level are not relevant. (default: None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Actual locations of control points (in case these are only x, y) given the current set water level and</span>
+<span class="sd">        the camera location</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># map where the destination points are with the actual water level h_a.</span>
+        <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">h_a</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]:</span>
+            <span class="c1"># fill in the same value for h_ref and h_a</span>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span>
+            <span class="n">lens_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_gcps_a</span><span class="p">(</span>
+                <span class="n">lens_position</span><span class="p">,</span>
+                <span class="n">h_a</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">],</span>
+                <span class="n">h_ref</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">dst_a</span>
 
     <span class="k">def</span> <span class="nf">get_dist_shore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured</span>
 <span class="sd">        in local reference (e.g. staff gauge).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        x : list of floats</span>
+<span class="sd">            measured bathymetry point x-coordinates</span>
+<span class="sd">        y : list of floats</span>
+<span class="sd">            measured bathymetry point y-coordinates</span>
 <span class="sd">        z : list of floats</span>
 <span class="sd">            measured bathymetry point depths</span>
 <span class="sd">        h_a : float, optional</span>
@@ -468,17 +656,17 @@
         <span class="c1"># retrieve depth</span>
         <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_depth</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;No actual water level is provided, but a reference water level is provided&quot;</span>
-            <span class="n">h_a</span> <span class="o">=</span> <span class="mf">0.</span>
-            <span class="n">h_ref</span> <span class="o">=</span> <span class="mf">0.</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">h_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span>
+            <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;No actual water level is provided, but a reference water level is &quot;</span> \
+                                                <span class="s2">&quot;provided &quot;</span>
+            <span class="c1"># h_a = 0.</span>
+            <span class="c1"># h_ref = 0.</span>
+        <span class="c1"># else:</span>
+            <span class="c1"># h_ref = self.gcps[&quot;h_ref&quot;]</span>
         <span class="n">z_dry</span> <span class="o">=</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="mi">0</span>
         <span class="n">z_dry</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># compute distance to nearest dry points with Pythagoras</span>
         <span class="n">dist_shore</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(((</span><span class="n">x</span><span class="p">[</span><span class="n">z_dry</span><span class="p">]</span> <span class="o">-</span> <span class="n">_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">z_dry</span><span class="p">]</span> <span class="o">-</span> <span class="n">_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">for</span> <span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)])</span>
         <span class="k">return</span> <span class="n">dist_shore</span>
-
 
     <span class="k">def</span> <span class="nf">get_dist_wall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_depth</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
@@ -502,8 +690,7 @@
         <span class="n">h</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="n">h_ref</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">h</span></div>
 
-
-<div class="viewcode-block" id="CameraConfig.get_M"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M">[docs]</a>    <span class="k">def</span> <span class="nf">get_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.get_M"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M">[docs]</a>    <span class="k">def</span> <span class="nf">get_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_bbox_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the</span>
 <span class="sd">        ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.</span>
 
@@ -511,6 +698,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        h_a : float, optional</span>
 <span class="sd">            actual water level [m] (Default: None)</span>
+<span class="sd">        to_bbox_grid : bool, optional</span>
+<span class="sd">            if set, the M will be computed in row, column values of the target bbox, with set resolution</span>
 <span class="sd">        reverse : bool, optional</span>
 <span class="sd">            if True, the reverse matrix is prepared, which can be used to transform projected</span>
 <span class="sd">            coordinates back to the original camera perspective. (Default: False)</span>
@@ -521,33 +710,62 @@
 <span class="sd">            2x3 transformation matrix</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># map where the destination points are with the actual water level h_a.</span>
-        <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># fill in the same value for h_ref and h_a</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">h_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span>
-            <span class="n">lens_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_gcps_a</span><span class="p">(</span>
-                <span class="n">lens_position</span><span class="p">,</span>
-                <span class="n">h_a</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">],</span>
-                <span class="n">h_ref</span><span class="p">,</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">to_bbox_grid</span><span class="p">:</span>
+            <span class="c1"># lookup where the destination points are in row/column space</span>
+            <span class="c1"># dst_a is the destination point locations position with the actual water level</span>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">transform_to_bbox</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_dst_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span>
             <span class="p">)</span>
-
-        <span class="c1"># lookup where the destination points are in row/column space</span>
-        <span class="n">dst_colrow_a</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">transform_to_bbox</span><span class="p">(</span><span class="n">dst_a</span><span class="p">,</span> <span class="n">shapely</span><span class="o">.</span><span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
-            <span class="c1"># retrieve and return M reverse for destination row and col</span>
-            <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">dst_colrow_a</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">])</span>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dst_a</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># retrieve and return M for destination row and col</span>
-            <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst_colrow_a</span><span class="p">)</span></div>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dst_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span>
+            <span class="c1"># reduce dst_a with its mean to get much more accurate projection result in case x and y order of</span>
+            <span class="c1"># magnitude is very large</span>
+            <span class="n">dst_a</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span>
+        <span class="c1"># src_a = self.get_src(**lens_pars)</span>
+        <span class="k">if</span> <span class="n">dst_a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># compute the water level in the coordinate system reduced with the mean gcp coordinate</span>
+            <span class="n">z_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_z_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span>
+            <span class="n">z_a</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># treating 3D homography</span>
+            <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M_3D</span><span class="p">(</span>
+                <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
+                <span class="n">dst</span><span class="o">=</span><span class="n">dst_a</span><span class="p">,</span>
+                <span class="n">camera_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
+                <span class="n">dist_coeffs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span>
+                <span class="n">z</span><span class="o">=</span><span class="n">z_a</span><span class="p">,</span>
+                <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M_2D</span><span class="p">(</span>
+                <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
+                <span class="n">dst</span><span class="o">=</span><span class="n">dst_a</span><span class="p">,</span>
+                <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span>
+            <span class="p">)</span></div>
 
-<div class="viewcode-block" id="CameraConfig.set_corners"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_corners.html#pyorc.CameraConfig.set_corners">[docs]</a>    <span class="k">def</span> <span class="nf">set_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_z_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Assign corner coordinates to camera configuration</span>
+<span class="sd">        h_a : float, optional</span>
+<span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
+<span class="sd">            is processed and thus changes in water level are not relevant. (default: None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Actual locations of control points (in case these are only x, y) given the current set water level and</span>
+<span class="sd">        the camera location</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">h_a</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="CameraConfig.set_bbox_from_corners"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners">[docs]</a>    <span class="k">def</span> <span class="nf">set_bbox_from_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Establish bbox based on a set of camera perspective corner points Assign corner coordinates to camera</span>
+<span class="sd">        configuration</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -556,17 +774,29 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span>
-                                            <span class="mi">2</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. Current shape is </span><span class="si">{</span><span class="n">corners</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">corners</span> <span class="o">=</span> <span class="n">corners</span></div>
+                                            <span class="mi">2</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;a list of lists of 4 coordinates must be given, resulting in (4, &quot;</span> \
+                                                 <span class="sa">f</span><span class="s2">&quot;2) shape. Current shape is </span><span class="si">{</span><span class="n">corners</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> &quot;</span>
+
+        <span class="c1"># get homography, this is the only place besides self.get_M where cv.get_M is used.</span>
+        <span class="n">M_gcp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_M</span><span class="p">()</span>
+        <span class="c1"># TODO: make derivation dependent on 3D or 2D point availability</span>
+        <span class="c1"># if self.gcps[&quot;src&quot;].shape == 3:</span>
+        <span class="c1">#     # TODO: homography from solvepnp</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_aoi</span><span class="p">(</span><span class="n">M_gcp</span><span class="p">,</span> <span class="n">corners</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="c1"># bbox is offset by self.gcp_mean. Regenerate bbox after adding offset</span>
+        <span class="n">bbox_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">bbox_xy</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">bbox_xy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_lens_pars"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the lens parameters of the given CameraConfig</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        k1 : float</span>
+<span class="sd">        k1 : float, optional</span>
 <span class="sd">            lens curvature [-], zero (default) means no curvature</span>
-<span class="sd">        c : float</span>
+<span class="sd">        c : float, optional</span>
 <span class="sd">            optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the</span>
 <span class="sd">            centre.</span>
 <span class="sd">        f : float, optional</span>
@@ -577,21 +807,19 @@
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lens_pars</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;k1&quot;</span><span class="p">:</span> <span class="n">k1</span><span class="p">,</span>
-            <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span>
-            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="n">f</span>
-        <span class="p">}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_dist_coefs</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_cam_mtx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CameraConfig.set_gcps"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">set_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h_ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set ground control points for the given CameraConfig</span>
+<div class="viewcode-block" id="CameraConfig.set_gcps"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">set_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="p">,</span> <span class="n">h_ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ground control points for the given CameraConfig</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        src : list of lists (4)</span>
+<span class="sd">        src : list of lists (4 or 6+)</span>
 <span class="sd">            [x, y] pairs of columns and rows in the frames of the original video</span>
-<span class="sd">        dst : list of lists (4)</span>
-<span class="sd">            [x, y] pairs of real world coordinates in the given coordinate reference system.</span>
+<span class="sd">        dst : list of lists (4 or 6+)</span>
+<span class="sd">            [x, y] or [x, y, z] pairs of real world coordinates in the given coordinate reference system.</span>
 <span class="sd">        z_0 : float</span>
 <span class="sd">            Water level measured in global reference system such as a geoid or ellipsoid used</span>
 <span class="sd">            by a GPS device. All other surveyed points (lens position and cross section) must have the same vertical</span>
@@ -607,24 +835,30 @@
 <span class="sd">            reprojected to the local crs of the CameraConfig. (Default: None)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;src must be a list of 4 numbers&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;dst must be a list of 4 numbers&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;4 source points are expected in src, but </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span><span class="si">}</span><span class="s2"> were found&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;4 destination points are expected in dst, but </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span><span class="si">}</span><span class="s2"> were found&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;src must be a list of (x, y) or (x, y, z) coordinates&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="nb">list</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;dst must be a list of (x, y) or (x, y, z) coordinates&quot;</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;4 source points are expected in src, but </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span><span class="si">}</span><span class="s2"> were found&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;4 destination points are expected in dst, but </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span><span class="si">}</span><span class="s2"> were found&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">dst</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;Amount of (x, y, z) coordinates in src (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span><span class="si">}</span><span class="s2">) and dst (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span><span class="si">}</span><span class="s2"> must be equal&quot;</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">6</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;for (x, y, z) points, at least 6 pairs must be available, only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span><span class="si">}</span><span class="s2"> provided&quot;</span>
         <span class="k">if</span> <span class="n">h_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">h_ref</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))),</span> <span class="s2">&quot;h_ref must contain a float number&quot;</span>
         <span class="k">if</span> <span class="n">z_0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">z_0</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))),</span> <span class="s2">&quot;z_0 must contain a float number&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">z_0</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))),</span> <span class="s2">&quot;z_0 must be provided as type float&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">src</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="p">)),</span> <span class="s2">&quot;src contains non-int parts&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">dst</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="p">)),</span> <span class="s2">&quot;dst contains non-float parts&quot;</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s1">&#39;CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided destination coordinates are in a locally defined coordinate reference system, e.g. established with a spirit level.&#39;</span><span class="p">)</span>
-            <span class="n">_x</span><span class="p">,</span> <span class="n">_y</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">dst</span><span class="p">)</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xy_transform</span><span class="p">(</span><span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">))</span>
-            <span class="c1"># replace transformed coordinates</span>
-            <span class="n">dst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+                    <span class="s1">&#39;CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided &#39;</span>
+                    <span class="s1">&#39;destination coordinates are in a locally defined coordinate reference system, e.g. established &#39;</span>
+                    <span class="s1">&#39;with a spirit level.&#39;</span><span class="p">)</span>
+            <span class="n">dst</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xyz_transform</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">))</span>
+        <span class="c1"># if there is no h_ref, then no local gauge system, so set h_ref to zero</span>
+        <span class="k">if</span> <span class="n">h_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">h_ref</span> <span class="o">=</span> <span class="mf">0.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;src&quot;</span><span class="p">:</span> <span class="n">src</span><span class="p">,</span>
             <span class="s2">&quot;dst&quot;</span><span class="p">:</span> <span class="n">dst</span><span class="p">,</span>
@@ -652,12 +886,21 @@
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CameraConfig does not contain a crs, &quot;</span><span class="p">)</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xy_transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xyz_transform</span><span class="p">([[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]],</span> <span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="CameraConfig.plot"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot.html#pyorc.CameraConfig.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{}):</span>
-        <span class="sd">&quot;&quot;&quot;Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems</span>
+<div class="viewcode-block" id="CameraConfig.plot"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot.html#pyorc.CameraConfig.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+            <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">tiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span>
+            <span class="n">zoom_level</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span>
+            <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{}</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems</span>
 <span class="sd">        to be in the right location. Requires cartopy to be installed.</span>
 
 <span class="sd">        Parameters</span>
@@ -672,6 +915,8 @@
 <span class="sd">            buffer in lat-lon around points, used to set extent (default: 0.0005)</span>
 <span class="sd">        zoom_level : int, optional</span>
 <span class="sd">            zoom level of image tiler service (default: 18)</span>
+<span class="sd">        camera : bool, optional</span>
+<span class="sd">            If set to True, all camera config information will be back projected to the original camera objective.</span>
 <span class="sd">        **tiles_kwargs</span>
 <span class="sd">            additional keyword arguments to pass to ax.add_image when tiles are added</span>
 <span class="sd">        8) :</span>
@@ -682,64 +927,121 @@
 <span class="sd">        ax : plt.axes</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># define plot kwargs</span>
-        <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
-        <span class="kn">from</span> <span class="nn">shapely</span> <span class="kn">import</span> <span class="n">ops</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;gcps&quot;</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No GCPs found yet, please populate the gcps attribute with set_gcps first.&quot;</span><span class="p">)</span>
+        <span class="c1"># initiate transform</span>
+        <span class="n">transformer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># if there is an axes, get the extent</span>
+        <span class="n">xlim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span> <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span> <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
         <span class="c1"># prepare points for plotting</span>
-        <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]]</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;corners&quot;</span><span class="p">):</span>
-            <span class="n">bbox</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;lens_position&quot;</span><span class="p">):</span>
-            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-        <span class="c1"># transform points in case a crs is provided</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">):</span>
-            <span class="c1"># make a transformer to lat lon</span>
-            <span class="n">transform</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">),</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="mi">4326</span><span class="p">),</span> <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span>
-            <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;corners&quot;</span><span class="p">):</span>
-                <span class="n">bbox</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
-        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">LineString</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span><span class="p">))</span>
-        <span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">-</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">buffer</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">camera</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">camera</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;lens_position&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">camera</span><span class="p">:</span>
+                <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="c1"># transform points in case a crs is provided</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">):</span>
+                <span class="c1"># make a transformer to lat lon</span>
+                <span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span>
+                    <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">),</span>
+                    <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="mi">4326</span><span class="p">),</span>
+                    <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span>
+                <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">transformer</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">]</span>
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">LineString</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span><span class="p">))</span>
+            <span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">-</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">buffer</span><span class="p">]</span>
         <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">):</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="kn">import</span> <span class="nn">cartopy</span>
-                    <span class="kn">import</span> <span class="nn">cartopy.io.img_tiles</span> <span class="k">as</span> <span class="nn">cimgt</span>
-                    <span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
-                <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
-                        <span class="s1">&#39;Geographic plotting requires cartopy. Please install it with &quot;conda install cartopy&quot; and try again.&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">tiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">tiler</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cimgt</span><span class="p">,</span> <span class="n">tiles</span><span class="p">)(</span><span class="o">**</span><span class="n">tiles_kwargs</span><span class="p">)</span>
-                    <span class="n">crs</span> <span class="o">=</span> <span class="n">tiler</span><span class="o">.</span><span class="n">crs</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">crs</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">()</span>
-                <span class="c1"># make point collection</span>
-                <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">set_extent</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
-                <span class="k">if</span> <span class="n">tiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">tiler</span><span class="p">,</span> <span class="n">zoom_level</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">camera</span><span class="p">)):</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_geo_axes</span><span class="p">(</span><span class="n">tiles</span><span class="o">=</span><span class="n">tiles</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="n">zoom_level</span><span class="p">,</span> <span class="o">**</span><span class="n">tiles_kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="s2">&quot;add_geometries&quot;</span><span class="p">):</span>
             <span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
-            <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
+            <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Control points&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;lens_position&quot;</span><span class="p">):</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Lens position&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;corners&quot;</span><span class="p">):</span>
-            <span class="n">bbox_x</span><span class="p">,</span> <span class="n">bbox_y</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">xy</span>
-            <span class="n">bbox_coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">bbox_x</span><span class="p">,</span> <span class="n">bbox_y</span><span class="p">))</span>
-            <span class="n">patch</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">bbox_coords</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Area of interest&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">])],</span>
+            <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">])],</span>
+            <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Control points&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">markeredgecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">plot_kwargs</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Lens position&quot;</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">markeredgecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">plot_kwargs</span>
+            <span class="p">)</span>
+        <span class="n">patch_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">,</span>
+            <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;edgecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Area of interest&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">plot_kwargs</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;bbox&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_bbox</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="n">camera</span><span class="p">,</span> <span class="n">transformer</span><span class="o">=</span><span class="n">transformer</span><span class="p">,</span> <span class="o">**</span><span class="n">patch_kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">camera</span><span class="p">:</span>
+            <span class="c1"># make sure that zero is on the top</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="CameraConfig.plot_bbox"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot_bbox.html#pyorc.CameraConfig.plot_bbox">[docs]</a>    <span class="k">def</span> <span class="nf">plot_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transformer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera</span>
+<span class="sd">        Field Of View (``camera=True``).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ax : plt.axes, optional</span>
+<span class="sd">            if not provided, axes is setup (Default: None)</span>
+<span class="sd">        camera : bool, optional</span>
+<span class="sd">            If set to True, all camera config information will be back projected to the original camera objective.</span>
+<span class="sd">        transformer : pyproj transformer transformation function, optional</span>
+<span class="sd">            used to reproject bbox to axes object projection (e.g. lat lon)</span>
+<span class="sd">        h_a : float, optional</span>
+<span class="sd">            If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,</span>
+<span class="sd">            using h_a as a present water level. In case a video with higher (lower) water levels is used, this</span>
+<span class="sd">            will result in a different perspective plane than the control video.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        p : matplotlib.patch mappable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># collect information to plot</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="n">camera</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">camera</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">transformer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># geographical projection is needed</span>
+            <span class="n">bbox</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">transformer</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
+
+        <span class="n">bbox_x</span><span class="p">,</span> <span class="n">bbox_y</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">xy</span>
+        <span class="n">bbox_coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">bbox_x</span><span class="p">,</span> <span class="n">bbox_y</span><span class="p">))</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+            <span class="n">bbox_coords</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span></div>
 
 <div class="viewcode-block" id="CameraConfig.to_dict"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the CameraConfig object as dictionary</span>
@@ -751,13 +1053,19 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
         <span class="c1"># replace underscore keys for keys without underscore</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="k">if</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">d</span></div>
+
+    <span class="k">def</span> <span class="nf">to_dict_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="c1"># convert anything that is not string in string</span>
+        <span class="n">dict_str</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">))</span> <span class="k">else</span> <span class="n">v</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">dict_str</span>
 
 <div class="viewcode-block" id="CameraConfig.to_file"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_file.html#pyorc.CameraConfig.to_file">[docs]</a>    <span class="k">def</span> <span class="nf">to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write the CameraConfig object to json structure</span>
@@ -780,7 +1088,20 @@
 <span class="sd">        json_str : str</span>
 <span class="sd">            json string with CameraConfig components</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict_str</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div></div>
+
+
+<span class="n">depr_warning_height_width</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Your camera configuration does not have a property &quot;height&quot; and/or &quot;width&quot;, probably because your configuration file is </span>
+<span class="s2">from an older &lt; 0.3.0 version. Please rectify this by editing your .json config file. The top of your file should e.g.</span>
+<span class="s2">look as follows for a HD video:</span>
+<span class="s2">{</span>
+<span class="s2">    &quot;height&quot;: 1080,</span>
+<span class="s2">    &quot;width&quot;: 1920,</span>
+<span class="s2">    &quot;crs&quot;: ....</span>
+<span class="s2">    ...</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">get_camera_config</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -797,6 +1118,12 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;height&quot;</span> <span class="ow">in</span> <span class="n">d</span> <span class="ow">or</span> <span class="ow">not</span> <span class="s2">&quot;width&quot;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="n">depr_warning_height_width</span><span class="p">)</span>
+    <span class="c1"># ensure the bbox is a Polygon object</span>
+    <span class="k">if</span> <span class="s2">&quot;bbox&quot;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">CameraConfig</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
 
 
@@ -836,6 +1163,11 @@
               
 <div class="toc-item">
   
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
@@ -859,7 +1191,7 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -876,7 +1208,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

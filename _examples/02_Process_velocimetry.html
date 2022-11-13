@@ -6,15 +6,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Analyze surface velocities of a video with velocimetry &#8212; pyorc 0.2.4 documentation</title>
+    <title>Analyze surface velocities of a video with velocimetry &#8212; pyorc 0.3.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -23,17 +23,20 @@
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -63,7 +66,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -73,7 +76,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -93,7 +96,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.2.4 documentation</p>
+    <p class="title logo__title">pyorc 0.3.0 documentation</p>
   
 </a>
     
@@ -132,8 +135,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -153,16 +156,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -177,14 +180,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -232,8 +235,8 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../manual/index.html">
-                        Manual
+                    <a class="nav-link" href="../user-guide/index.html">
+                        User Guide
                     </a>
                 </li>
                 
@@ -256,10 +259,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -279,32 +282,14 @@
     Section Navigation
   </p>
   <div class="bd-toc-item navbar-nav">
-    <p aria-level="2" class="caption" role="heading">
- <span class="caption-text">
-  Table of Content
- </span>
-</p>
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
 <ul class="current nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="01_Camera_Configuration_single_video.html">
-   Setup a camera configuration for processing a single video
-  </a>
- </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   Analyze surface velocities of a video with velocimetry
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="03_Plotting_and_filtering_velocimetry_results.html">
-   Immersive plotting and analyzing results
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">
-   Obtain a discharge measurement over a cross section
-  </a>
- </li>
+<li class="toctree-l1"><a class="reference internal" href="01_Camera_Configuration_single_video.html">Setup a camera configuration for processing a single video</a></li>
+
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Analyze surface velocities of a video with velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_Plotting_and_filtering_velocimetry_results.html">Immersive plotting and analyzing results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">Obtain a discharge measurement over a cross section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_Camera_calibration.html">Camera calibration with chessboard pattern</a></li>
 </ul>
 
   </div>
@@ -443,10 +428,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -624,10 +610,18 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">load_camera_config</span><span class="p">(</span><span class="s2">&quot;ngwerere/ngwerere.json&quot;</span><span class="p">)</span>
 <span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;ngwerere/ngwerere_20191103.mp4&quot;</span>
-<span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">video_file</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span> <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_frame</span><span class="o">=</span><span class="mi">125</span><span class="p">)</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">video_file</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span> <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_frame</span><span class="o">=</span><span class="mi">125</span><span class="p">,</span> <span class="n">stabilize</span><span class="o">=</span><span class="s2">&quot;fixed&quot;</span><span class="p">)</span>
 <span class="n">video</span>
 <br/></pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Stabilizing frames: 100%|██████████| 124/124 [00:05&lt;00:00, 23.02it/s]
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -641,6 +635,8 @@ FPS: 30.000000
 start frame: 0
 end frame: 125
 Camera configuration: {
+    &#34;height&#34;: 1080,
+    &#34;width&#34;: 1920,
     &#34;crs&#34;: &#34;PROJCRS[\&#34;WGS 84 / UTM zone 35S\&#34;,BASEGEOGCRS[\&#34;WGS 84\&#34;,ENSEMBLE[\&#34;World Geodetic System 1984 ensemble\&#34;,MEMBER[\&#34;World Geodetic System 1984 (Transit)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G730)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G873)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1150)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1674)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G1762)\&#34;],MEMBER[\&#34;World Geodetic System 1984 (G2139)\&#34;],ELLIPSOID[\&#34;WGS 84\&#34;,6378137,298.257223563,LENGTHUNIT[\&#34;metre\&#34;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&#34;Greenwich\&#34;,0,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433]],ID[\&#34;EPSG\&#34;,4326]],CONVERSION[\&#34;UTM zone 35S\&#34;,METHOD[\&#34;Transverse Mercator\&#34;,ID[\&#34;EPSG\&#34;,9807]],PARAMETER[\&#34;Latitude of natural origin\&#34;,0,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433],ID[\&#34;EPSG\&#34;,8801]],PARAMETER[\&#34;Longitude of natural origin\&#34;,27,ANGLEUNIT[\&#34;degree\&#34;,0.0174532925199433],ID[\&#34;EPSG\&#34;,8802]],PARAMETER[\&#34;Scale factor at natural origin\&#34;,0.9996,SCALEUNIT[\&#34;unity\&#34;,1],ID[\&#34;EPSG\&#34;,8805]],PARAMETER[\&#34;False easting\&#34;,500000,LENGTHUNIT[\&#34;metre\&#34;,1],ID[\&#34;EPSG\&#34;,8806]],PARAMETER[\&#34;False northing\&#34;,10000000,LENGTHUNIT[\&#34;metre\&#34;,1],ID[\&#34;EPSG\&#34;,8807]]],CS[Cartesian,2],AXIS[\&#34;(E)\&#34;,east,ORDER[1],LENGTHUNIT[\&#34;metre\&#34;,1]],AXIS[\&#34;(N)\&#34;,north,ORDER[2],LENGTHUNIT[\&#34;metre\&#34;,1]],USAGE[SCOPE[\&#34;Engineering survey, topographic mapping.\&#34;],AREA[\&#34;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&#34;],BBOX[-80,24,0,30]],ID[\&#34;EPSG\&#34;,32735]]&#34;,
     &#34;resolution&#34;: 0.01,
     &#34;gcps&#34;: {
@@ -680,28 +676,42 @@ Camera configuration: {
                 8304296.858
             ]
         ],
-        &#34;h_ref&#34;: null,
+        &#34;h_ref&#34;: 0.0,
         &#34;z_0&#34;: 1182.2
     },
     &#34;window_size&#34;: 25,
-    &#34;corners&#34;: [
+    &#34;dist_coeffs&#34;: [
         [
-            292,
-            817
+            0.0
         ],
         [
-            50,
-            166
+            0.0
         ],
         [
-            1200,
-            236
+            0.0
         ],
         [
-            1600,
-            834
+            0.0
         ]
-    ]
+    ],
+    &#34;camera_matrix&#34;: [
+        [
+            1920.0,
+            0.0,
+            960.0
+        ],
+        [
+            0.0,
+            1920.0,
+            540.0
+        ],
+        [
+            0.0,
+            0.0,
+            1.0
+        ]
+    ],
+    &#34;bbox&#34;: &#34;POLYGON ((642730.3267177228 8304292.875101833, 642731.297608523 8304302.476136727, 642739.456000869 8304301.651131073, 642738.4851100688 8304292.050096178, 642730.3267177228 8304292.875101833))&#34;
 }
 
 </pre></div></div>
@@ -985,6 +995,11 @@ body.vscode-dark {
   grid-column: 4;
 }
 
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
 .xr-var-name,
 .xr-var-dims,
 .xr-var-dtype,
@@ -1006,14 +1021,16 @@ body.vscode-dark {
 }
 
 .xr-var-attrs,
-.xr-var-data {
+.xr-var-data,
+.xr-index-data {
   display: none;
   background-color: var(--xr-background-color) !important;
   padding-bottom: 5px !important;
 }
 
 .xr-var-attrs-in:checked ~ .xr-var-attrs,
-.xr-var-data-in:checked ~ .xr-var-data {
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
   display: block;
 }
 
@@ -1023,13 +1040,16 @@ body.vscode-dark {
 
 .xr-var-name span,
 .xr-var-data,
+.xr-index-name div,
+.xr-index-data,
 .xr-attrs {
   padding-left: 25px !important;
 }
 
 .xr-attrs,
 .xr-var-attrs,
-.xr-var-data {
+.xr-var-data,
+.xr-index-data {
   grid-column: 1 / -1;
 }
 
@@ -1067,7 +1087,8 @@ dl.xr-attrs {
 }
 
 .xr-icon-database,
-.xr-icon-file-text2 {
+.xr-icon-file-text2,
+.xr-no-icon {
   display: inline-block;
   vertical-align: middle;
   width: 1em;
@@ -1086,11 +1107,11 @@ Coordinates:
     yp       (y, x) int64 1079 1079 1079 1079 1079 1079 1079 ... 0 0 0 0 0 0 0
 Attributes:
     camera_shape:   [1080, 1920]
-    camera_config:  {\n    &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOG...
-    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 125</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-e5a5e430-d04e-46be-803a-8da6ad640150' class='xr-array-in' type='checkbox' checked><label for='section-e5a5e430-d04e-46be-803a-8da6ad640150' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    camera_config:  {\n    &quot;height&quot;: 1080,\n    &quot;width&quot;: 1920,\n    &quot;crs&quot;: &quot;P...
+    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 125</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-e484d1fe-eee4-49a9-984b-c68f78ac95f0' class='xr-array-in' type='checkbox' checked><label for='section-e484d1fe-eee4-49a9-984b-c68f78ac95f0' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
-            <table>
+            <table style="border-collapse: collapse;">
                 <thead>
                     <tr>
                         <td> </td>
@@ -1112,14 +1133,12 @@ Attributes:
                         <td> (1, 1080, 1920) </td>
                     </tr>
                     <tr>
-                        <th> Count </th>
-                        <td> 251 Graph Layers </td>
-                        <td> 125 Chunks </td>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 125 chunks in 251 graph layers </td>
                     </tr>
                     <tr>
-                    <th> Type </th>
-                    <td> uint8 </td>
-                    <td> numpy.ndarray </td>
+                        <th> Data type </th>
+                        <td colspan="2"> uint8 numpy.ndarray </td>
                     </tr>
                 </tbody>
             </table>
@@ -1203,7 +1222,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-2671e823-60e9-4b95-8bfa-4253ba24c96a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-2671e823-60e9-4b95-8bfa-4253ba24c96a' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.1 4.133</div><input id='attrs-c88a5bad-5f77-4610-8740-e3672ce15380' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c88a5bad-5f77-4610-8740-e3672ce15380' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e9a9236b-c7e3-424b-8a01-4edb5d9a3260' class='xr-var-data-in' type='checkbox'><label for='data-e9a9236b-c7e3-424b-8a01-4edb5d9a3260' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
+</table></div></div></li><li class='xr-section-item'><input id='section-f0091957-1e6f-4882-b410-155de156fc80' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f0091957-1e6f-4882-b410-155de156fc80' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.1 4.133</div><input id='attrs-3850c12b-b2e1-4d50-84c3-4a63d2e2b4c4' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-3850c12b-b2e1-4d50-84c3-4a63d2e2b4c4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-486360dc-4b69-40e9-b240-42b1dcd8fc40' class='xr-var-data-in' type='checkbox'><label for='data-486360dc-4b69-40e9-b240-42b1dcd8fc40' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
        0.233333, 0.266667, 0.3     , 0.333333, 0.366667, 0.4     , 0.433333,
        0.466667, 0.5     , 0.533333, 0.566667, 0.6     , 0.633333, 0.666667,
        0.7     , 0.733333, 0.766667, 0.8     , 0.833333, 0.866667, 0.9     ,
@@ -1220,38 +1239,55 @@ Attributes:
        3.266667, 3.3     , 3.333333, 3.366667, 3.4     , 3.433333, 3.466667,
        3.5     , 3.533333, 3.566667, 3.6     , 3.633333, 3.666667, 3.7     ,
        3.733333, 3.766667, 3.8     , 3.833333, 3.866667, 3.9     , 3.933333,
-       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-7b37e7c4-40af-4749-ac4b-47c93089dd7a' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-7b37e7c4-40af-4749-ac4b-47c93089dd7a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-04ae466f-91ff-4a29-aae2-d697514dc4cc' class='xr-var-data-in' type='checkbox'><label for='data-04ae466f-91ff-4a29-aae2-d697514dc4cc' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-308e66d9-d3bb-4ed5-bacc-db4cb95ead09' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-308e66d9-d3bb-4ed5-bacc-db4cb95ead09' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a24e8994-6a53-4f34-ad88-1e07b9cb98bc' class='xr-var-data-in' type='checkbox'><label for='data-a24e8994-6a53-4f34-ad88-1e07b9cb98bc' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-a44f0094-0abd-4fe3-80e9-5ea91fcda67f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a44f0094-0abd-4fe3-80e9-5ea91fcda67f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1b1a065e-3285-46a8-9513-8b78dc0efead' class='xr-var-data-in' type='checkbox'><label for='data-1b1a065e-3285-46a8-9513-8b78dc0efead' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
+       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-ff362867-d3b7-46da-8fbf-355770b14ea8' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-ff362867-d3b7-46da-8fbf-355770b14ea8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e09b6cd4-78b1-4242-a0f0-2df026f39a14' class='xr-var-data-in' type='checkbox'><label for='data-e09b6cd4-78b1-4242-a0f0-2df026f39a14' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-37cd56ee-e16e-46be-a136-61c970b4c5a3' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-37cd56ee-e16e-46be-a136-61c970b4c5a3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-393fc4aa-1883-40cc-a30b-6e2a17e0c80b' class='xr-var-data-in' type='checkbox'><label for='data-393fc4aa-1883-40cc-a30b-6e2a17e0c80b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-dd250b91-ad58-4879-b290-8acd1d1bb694' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-dd250b91-ad58-4879-b290-8acd1d1bb694' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-363df68b-238f-4ffa-8727-5631177d7343' class='xr-var-data-in' type='checkbox'><label for='data-363df68b-238f-4ffa-8727-5631177d7343' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        ...,
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-6d4d2341-2d6f-4d6f-8778-11fb599a96cb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-6d4d2341-2d6f-4d6f-8778-11fb599a96cb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5d506bdb-06f0-490c-83f1-e183ec4e473d' class='xr-var-data-in' type='checkbox'><label for='data-5d506bdb-06f0-490c-83f1-e183ec4e473d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
+       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-f80ed262-1bfc-4cb3-9cc3-14db6d3fcabb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f80ed262-1bfc-4cb3-9cc3-14db6d3fcabb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-cf1b9129-3733-498b-a7e6-418d4b1eeea3' class='xr-var-data-in' type='checkbox'><label for='data-cf1b9129-3733-498b-a7e6-418d4b1eeea3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
        [1078, 1078, 1078, ..., 1078, 1078, 1078],
        [1077, 1077, 1077, ..., 1077, 1077, 1077],
        ...,
        [   2,    2,    2, ...,    2,    2,    2],
        [   1,    1,    1, ...,    1,    1,    1],
-       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-387fbcd4-e5a8-4bd5-a093-ce4fab3bb8be' class='xr-section-summary-in' type='checkbox'  checked><label for='section-387fbcd4-e5a8-4bd5-a093-ce4fab3bb8be' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
+       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-df38e155-3ae5-45f6-b6e7-90eea3084c62' class='xr-section-summary-in' type='checkbox'  ><label for='section-df38e155-3ae5-45f6-b6e7-90eea3084c62' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-cbb2a93b-b9c4-4e84-b807-3318e761ad9d' class='xr-index-data-in' type='checkbox'/><label for='index-cbb2a93b-b9c4-4e84-b807-3318e761ad9d' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333333, 0.06666666666666667,
+                              0.1, 0.13333333333333333, 0.16666666666666666,
+                              0.2, 0.23333333333333334, 0.26666666666666666,
+                              0.3,
+              ...
+               3.8333333333333335,  3.8666666666666667,                 3.9,
+                3.933333333333333,   3.966666666666667,                 4.0,
+                4.033333333333333,   4.066666666666666,                 4.1,
+                4.133333333333334],
+             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=125))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-08dee0c2-6c34-430d-b887-591b7bf78e5b' class='xr-index-data-in' type='checkbox'/><label for='index-08dee0c2-6c34-430d-b887-591b7bf78e5b' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
+            ...
+               9,    8,    7,    6,    5,    4,    3,    2,    1,    0],
+           dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-446e4a1c-a686-4339-800c-200580548ad8' class='xr-index-data-in' type='checkbox'/><label for='index-446e4a1c-a686-4339-800c-200580548ad8' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
+            ...
+            1910, 1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919],
+           dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-b3d4a22a-c5f7-47b8-bc9a-424bb53f9be8' class='xr-section-summary-in' type='checkbox'  checked><label for='section-b3d4a22a-c5f7-47b8-bc9a-424bb53f9be8' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
+    &quot;height&quot;: 1080,
+    &quot;width&quot;: 1920,
     &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOGCRS[\&quot;WGS 84\&quot;,ENSEMBLE[\&quot;World Geodetic System 1984 ensemble\&quot;,MEMBER[\&quot;World Geodetic System 1984 (Transit)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G730)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G873)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1150)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1674)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1762)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G2139)\&quot;],ELLIPSOID[\&quot;WGS 84\&quot;,6378137,298.257223563,LENGTHUNIT[\&quot;metre\&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&quot;Greenwich\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433]],ID[\&quot;EPSG\&quot;,4326]],CONVERSION[\&quot;UTM zone 35S\&quot;,METHOD[\&quot;Transverse Mercator\&quot;,ID[\&quot;EPSG\&quot;,9807]],PARAMETER[\&quot;Latitude of natural origin\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8801]],PARAMETER[\&quot;Longitude of natural origin\&quot;,27,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8802]],PARAMETER[\&quot;Scale factor at natural origin\&quot;,0.9996,SCALEUNIT[\&quot;unity\&quot;,1],ID[\&quot;EPSG\&quot;,8805]],PARAMETER[\&quot;False easting\&quot;,500000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8806]],PARAMETER[\&quot;False northing\&quot;,10000000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8807]]],CS[Cartesian,2],AXIS[\&quot;(E)\&quot;,east,ORDER[1],LENGTHUNIT[\&quot;metre\&quot;,1]],AXIS[\&quot;(N)\&quot;,north,ORDER[2],LENGTHUNIT[\&quot;metre\&quot;,1]],USAGE[SCOPE[\&quot;Engineering survey, topographic mapping.\&quot;],AREA[\&quot;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&quot;],BBOX[-80,24,0,30]],ID[\&quot;EPSG\&quot;,32735]]&quot;,
     &quot;resolution&quot;: 0.01,
     &quot;gcps&quot;: {
         &quot;src&quot;: [
             [
-                1421,
-                1001
+                1421.0,
+                1001.0
             ],
             [
-                1251,
-                460
+                1251.0,
+                460.0
             ],
             [
-                421,
-                432
+                421.0,
+                432.0
             ],
             [
-                470,
-                607
+                470.0,
+                607.0
             ]
         ],
         &quot;dst&quot;: [
@@ -1272,28 +1308,42 @@ Attributes:
                 8304296.858
             ]
         ],
-        &quot;h_ref&quot;: null,
+        &quot;h_ref&quot;: 0.0,
         &quot;z_0&quot;: 1182.2
     },
     &quot;window_size&quot;: 25,
-    &quot;corners&quot;: [
+    &quot;dist_coeffs&quot;: [
         [
-            292,
-            817
+            0.0
         ],
         [
-            50,
-            166
+            0.0
         ],
         [
-            1200,
-            236
+            0.0
         ],
         [
-            1600,
-            834
+            0.0
         ]
-    ]
+    ],
+    &quot;camera_matrix&quot;: [
+        [
+            1920.0,
+            0.0,
+            960.0
+        ],
+        [
+            0.0,
+            1920.0,
+            540.0
+        ],
+        [
+            0.0,
+            0.0,
+            1.0
+        ]
+    ],
+    &quot;bbox&quot;: &quot;POLYGON ((642730.3267177228 8304292.875101833, 642731.297608523 8304302.476136727, 642739.456000869 8304301.651131073, 642738.4851100688 8304292.050096178, 642730.3267177228 8304292.875101833))&quot;
 }</dd><dt><span>h_a :</span></dt><dd>null</dd></dl></div></li></ul></div></div></div>
 </div>
 <p>The frames object is really a <code class="docutils literal notranslate"><span class="pre">xarray.DataFrame</span></code> object, with some additional functionalities under the method <code class="docutils literal notranslate"><span class="pre">.frames</span></code>. The beauty of our API is that it also uses lazy dask arrays to prevent very lengthy runs that then result in gibberish because of a small mistake along the way. We can see the shape and datatype of the end result, without actually computing everything, until we request a sample. Let’s have a look at only the first frame with the plotting functionalities. If you want to
@@ -1315,7 +1365,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f95f02bf8b0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fbb29e18ee0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1344,7 +1394,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f95ddedfdf0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fbb2b95cb80&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1371,7 +1421,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f95dcd6c700&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fbb2b840880&gt;
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1449,7 +1499,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[########################################] | 100% Completed | 160.97 s
+[########################################] | 100% Completed | 153.59 s
 </pre></div></div>
 </div>
 </section>
@@ -1468,7 +1518,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
   <a class='left-prev' id="prev-link" href="01_Camera_Configuration_single_video.html" title="previous page">
-      <i class="fas fa-angle-left"></i>
+      <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
           <p class="prev-next-title">Setup a camera configuration for processing a single video</p>
@@ -1479,7 +1529,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
       <p class="prev-next-subtitle">next</p>
       <p class="prev-next-title">Immersive plotting and analyzing results</p>
   </div>
-  <i class="fas fa-angle-right"></i>
+  <i class="fa-solid fa-angle-right"></i>
   </a>
 </div>
             </footer>
@@ -1493,7 +1543,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
 <div class="toc-item">
   
 <div class="tocsection onthispage">
-    <i class="fas fa-list"></i> On this page
+    <i class="fa-solid fa-list"></i> On this page
 </div>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
@@ -1529,13 +1579,18 @@ for storing, just to see a progress bar. If you are not interested in that, you 
 
 <div class="toc-item">
   
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
     <a href="../_sources/_examples/02_Process_velocimetry.ipynb.txt">
-        <i class="fas fa-file-alt"></i> Show Source
+        <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>
 
@@ -1558,7 +1613,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -1575,7 +1630,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>
