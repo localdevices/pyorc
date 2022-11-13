@@ -36,10 +36,10 @@ def test_shape(cam_config):
 
 
 def test_transform(cam_config):
-    assert(cam_config.transform == Affine(
+    assert(np.allclose(cam_config.transform, Affine(
         0.0010061044563599466, 0.009949258958479906, 642730.3058131004,
         0.009949258958479906, -0.0010061044563599508, 8304292.867164782
-    ))
+    )))
 
 
 def test_get_depth(cam_config, cross_section, h_a):
