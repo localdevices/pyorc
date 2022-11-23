@@ -151,7 +151,8 @@ def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
     else:
         crs = ccrs.PlateCarree()
     ax = plt.subplot(projection=crs)
-    ax.set_extent(extent, crs=ccrs.PlateCarree())
+    if extent is not None:
+        ax.set_extent(extent, crs=ccrs.PlateCarree())
     if tiles is not None:
         ax.add_image(tiler, zoom_level, zorder=1)
     return ax
