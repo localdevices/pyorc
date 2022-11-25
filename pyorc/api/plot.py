@@ -5,7 +5,7 @@ from matplotlib import patheffects
 from matplotlib.collections import QuadMesh
 import matplotlib.ticker as mticker
 
-from pyorc import helpers
+from pyorc import helpers, cv
 
 
 def _base_plot(plot_func):
@@ -435,9 +435,17 @@ class _Velocimetry_PlotMethods:
             scalar velocity
 
         """
-        # retrieve the backward transformation array
+        # retrieve the backward transformation array from x, y to persective row column
         velocimetry = self._obj.velocimetry
-        M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
+        camera_config = velocimetry.camera_config
+        # M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
+        src = camera_config.get_bbox(camera=True, h_a=velocimetry.h_a).exterior.coords[0:4]
+        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
+        # get geographic coordinates bbox corners
+        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
+        M = cv.get_M_2D(src, dst, reverse=True)
+
+
         # get the shape of the original frames
         shape_y, shape_x = velocimetry.camera_shape
         xi, yi = np.meshgrid(self._obj.x, self._obj.y)
