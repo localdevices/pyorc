@@ -90,6 +90,7 @@ FIGURE_ARGS = {
     "frameon": False,
 }
 
+
 CLASSIFY_MOVING_CAM = [
     {
         "method": "kmeans",
@@ -113,3 +114,8 @@ CLASSIFY_STANDING_CAM = [
         "op": operator.le
     }
 ]
+
+CLASSIFY_CAM = {
+    "fixed": CLASSIFY_STANDING_CAM,
+    "moving": CLASSIFY_MOVING_CAM
+}

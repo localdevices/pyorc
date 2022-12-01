@@ -5,7 +5,7 @@ from matplotlib import patheffects
 from matplotlib.collections import QuadMesh
 import matplotlib.ticker as mticker
 
-from pyorc import helpers
+from pyorc import helpers, cv
 
 
 def _base_plot(plot_func):
@@ -435,9 +435,16 @@ class _Velocimetry_PlotMethods:
             scalar velocity
 
         """
-        # retrieve the backward transformation array
+        # retrieve the backward transformation array from x, y to persective row column
         velocimetry = self._obj.velocimetry
-        M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
+        camera_config = velocimetry.camera_config
+        # M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
+        src = camera_config.get_bbox(camera=True, h_a=velocimetry.h_a).exterior.coords[0:4]
+        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
+        # get geographic coordinates bbox corners
+        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
+        M = cv.get_M_2D(src, dst, reverse=True)
+
         # get the shape of the original frames
         shape_y, shape_x = velocimetry.camera_shape
         xi, yi = np.meshgrid(self._obj.x, self._obj.y)
@@ -453,16 +460,23 @@ class _Velocimetry_PlotMethods:
             velocimetry.camera_config.resolution,
             M
         )
-
+        xp, yp = helpers.xy_to_perspective(
+            xi,
+            yi,
+            velocimetry.camera_config.resolution,
+            M
+        )
         # convert row counts to start at the top of the frame instead of bottom
         yp_moved = shape_y - yp_moved
-
+        yp = shape_y - yp
         # missing values end up at the top-left, replace these with nan
         yp_moved[yp_moved == shape_y] = np.nan  # ds["yp"].values[yp_moved == shape_y]
         xp_moved[xp_moved == 0] = np.nan  # ds["xp"].values[xp_moved == 0]
 
         # estimate the projected velocity vector
-        u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
+        u, v = xp_moved - xp, yp_moved - yp
+        self._obj["xp"][:] = xp[:]
+        self._obj["yp"][:] = yp[:]
         s = ((self._obj["v_x"] ** 2 + self._obj["v_y"] ** 2) ** 0.5).values
         return u, v, s
 

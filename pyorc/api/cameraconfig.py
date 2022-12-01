@@ -176,6 +176,18 @@ class CameraConfig:
         return np.array(self.gcps["dst"]).mean(axis=0)
 
     @property
+    def gcp_dims(self):
+        """
+
+        Returns
+        -------
+        dims : int
+            amount of dimensions of gcps (can be 2 or 3)
+
+        """
+        return len(self.gcps["dst"][0])
+
+    @property
     def shape(self):
         """
         Returns rows and columns in projected frames from ``Frames.project``
@@ -426,7 +438,8 @@ class CameraConfig:
             )
             dst_a = np.array(dst_a)
         else:
-            dst_a = self.get_dst_a(h_a)
+            # in case we are dealing with a 2D 4-point, then reproject points on water surface, else keep 3D points
+            dst_a = self.get_dst_a(h_a) if self.gcp_dims == 2 else self.gcps["dst"]
             # reduce dst_a with its mean to get much more accurate projection result in case x and y order of
             # magnitude is very large
             dst_a -= self.gcp_mean
