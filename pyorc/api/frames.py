@@ -84,7 +84,14 @@ class Frames(ORCBase):
             lons = None
             lats = None
 
-        M = camera_config.get_M(self.h_a, to_bbox_grid=True, reverse=True)
+        # new approach to getting M (from bbox coordinates)
+        src = camera_config.get_bbox(camera=True, h_a=self.h_a).exterior.coords[0:4]
+        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
+        # get geographic coordinates bbox corners
+        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
+        M = cv.get_M_2D(src, dst, reverse=True)
+        # TODO: remove when above 4 lines work
+        # M = camera_config.get_M(self.h_a, to_bbox_grid=True, reverse=True)
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(
             *np.meshgrid(x, np.flipud(y)),

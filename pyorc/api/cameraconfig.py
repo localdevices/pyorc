@@ -265,7 +265,7 @@ class CameraConfig:
         self.camera_matrix = camera_matrix
         self.dist_coeffs = dist_coeffs
 
-    def get_bbox(self, camera=False, h_a=None):
+    def get_bbox(self, camera=False, h_a=None, redistort=False):
         """
 
         Parameters
@@ -277,6 +277,10 @@ class CameraConfig:
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level. In case a video with higher (lower) water levels is used, this
             will result in a different perspective plane than the control video.
+        redistort : bool, optional
+            If set in combination with ``camera``, the bbox will be redistorted in the camera objective using the
+            distortion coefficients and camera matrix. Not used in orthorectification because this occurs by default
+            on already undistorted images.
 
         Returns
         -------
@@ -295,7 +299,13 @@ class CameraConfig:
             # reduce coords by control point mean
             coords -= self.gcp_mean[0:2]
             # TODO: re-distort if needed
-            bbox = Polygon(cv2.perspectiveTransform(np.float32([coords]), M)[0])
+            corners = cv2.perspectiveTransform(np.float32([coords]), M)[0]
+            if redistort:
+                # for visualization on still distorted frames this can be done. DO NOT do this if used for
+                # orthorectification, as this typically occurs on undistorted images.
+                corners = cv.undistort_points(corners, self.camera_matrix, self.dist_coeffs, reverse=True)
+
+            bbox = Polygon(corners)
         return bbox
 
     def get_depth(self, z, h_a=None):
