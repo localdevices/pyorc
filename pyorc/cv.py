@@ -116,7 +116,7 @@ def _get_cam_mtx(height, width, c=2.0, f=1.0):
     mtx[1, 1] = width  # define focal length y
     return mtx
 
-def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
+def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None):
     """
     compute displacements from trackable features found in start frame
 
@@ -131,6 +131,10 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
         be used).
     n_pts : int, optional
         Number of features to track. If not set, the square root of the amount of pixels of the frames will be used
+    split : int, optional
+        Number of regions to split the entire field of view in to find points equally spread, defaults to 2
+    mask : np.ndarray (2D), optional
+        if set, the areas that are one, are assumed to be region of interest and therefore masked out for finding points
 
     Returns
     -------
@@ -152,32 +156,96 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
 
     # Read first frame
     _, prev = cap.read()
-
     # Convert frame to grayscale
     prev_gray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
+    if mask is not None:
+        prev_gray[mask > 0] = 0.
 
     # prepare outputs
-    n_frames = end_frame - start_frame
+    n_frames = int(end_frame) - int(start_frame)
     transforms = np.zeros((n_frames - 1, 3), np.float32)
+
 
     if n_pts is None:
         # use the square root of nr of pixels in a frame to decide on n_pts
         n_pts = int(np.sqrt(len(prev_gray.flatten())))
 
+    # split image in smaller chunks if user wants
+    v = 0
+    h = 0
+    ver_split, hor_split = np.int16(np.ceil(np.array(prev_gray.shape) / split))
+    prev_pts = np.zeros((0, 1, 2), np.float32)
+    while v < prev_gray.shape[0]:
+        while h < prev_gray.shape[1]:
+            sub_img = prev_gray[v:v + ver_split, h:h + hor_split]
+            # get points over several quadrants
+            subimg_pts = cv2.goodFeaturesToTrack(
+                sub_img,
+                maxCorners=int(n_pts/split**2),
+                qualityLevel=0.3,
+                minDistance=10,
+                blockSize=1
+            )
+            # add offsets for quadrants
+            if subimg_pts is not None:
+                subimg_pts[:, :, 0] += h
+                subimg_pts[:, :, 1] += v
+                prev_pts = np.append(prev_pts, subimg_pts, axis=0)
+            h += hor_split
+        h = 0
+        v += ver_split
+    # # get points over several quadrants
+    # prev_pts = cv2.goodFeaturesToTrack(
+    #     prev_gray,
+    #     maxCorners=n_pts,
+    #     qualityLevel=0.1,
+    #     minDistance=10,
+    #     blockSize=3
+    # )
+    # add start point to matrix
+
+    # get another frame a little bit ahead in time
+    # get start frame and points
+    # cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame + 30)
+    #
+    # success, curr = cap.read()
+    # Convert to grayscale
+    # curr_gray = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
+
+    # # Calculate optical flow
+    # curr_pts, status, err = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, prev_pts, None)
+    # # Calculate optical flow
+    # curr_pts, status, err = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, prev_pts, None)
+
+    # # store curr_pts
+    # positions = np.append(positions, np.swapaxes(curr_pts, 0, 1), axis=0)
+    # stats = np.append(stats, np.swapaxes(status, 0, 1), axis=0)
+    # errs = np.append(errs, np.swapaxes(err, 0, 1), axis=0)
+
+    # import matplotlib.pyplot as plt
+    # import matplotlib
+    # matplotlib.use("Qt5Agg")
+    # plt.imshow(prev_gray, cmap="Greys_r")
+    # x = prev_pts[:, :, 0].flatten()
+    # y = prev_pts[:, :, 1].flatten()
+    # intensity = prev_gray[np.int16(y), np.int16(x)]
+    # # x_curr = prev_pts[intensity<100, :, 0].flatten()
+    # # y_curr = prev_pts[intensity<100, :, 1].flatten()
+    # # x_curr = curr_pts[status.flatten()==1, :, 0].flatten()
+    # # y_curr = curr_pts[status.flatten()==1, :, 1].flatten()
+    # # prev_pts = prev_pts[intensity < 100]
+    #
+    # plt.plot(x, y, ".")
+    # # # plt.plot(x[status.flatten()==0], y[status.flatten()==0], "ro")
+    # # plt.plot(x_curr, y_curr, "r.")
+    # plt.show()
+    positions = np.swapaxes(prev_pts, 0, 1)
+    # update n_pts to the amount truly found
+    n_pts = positions.shape[1]
     # prepare storage for points
-    positions = np.zeros((0, n_pts, 2), np.float32)
+    # positions = np.zeros((0, n_pts, 2), np.float32)
     stats = np.ones((1, n_pts))
     errs = np.ones((1, n_pts))
-
-    prev_pts = cv2.goodFeaturesToTrack(
-        prev_gray,
-        maxCorners=n_pts,
-        qualityLevel=0.1,
-        minDistance=10,
-        blockSize=3
-    )
-    # add start point to matrix
-    positions = np.append(positions, np.swapaxes(prev_pts, 0, 1), axis=0)
     # loop through start to end frame
     pbar = tqdm(range(n_frames - 1), position=0, leave=True)
     for i in pbar:
@@ -189,7 +257,8 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None):
 
         # Convert to grayscale
         curr_gray = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
-
+        if mask is not None:
+            curr_gray[mask > 0] = 0.
         # Calculate optical flow
         curr_pts, status, err = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, prev_pts, None)
 
@@ -340,7 +409,7 @@ def _ms_from_displacements(pts, stats, key_point=0, smooth=True):
     stats : np.ndarray [t x n]
         status of resolving optical flow (zero: not resolved, one: resolved, see
         https://docs.opencv.org/3.4/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323
-    center_frame : int, optional
+    key_point : int, optional
 
     Returns
     -------
@@ -351,7 +420,7 @@ def _ms_from_displacements(pts, stats, key_point=0, smooth=True):
     """
     assert key_point >= 0 and key_point < len(pts), f"Key point {int(key_point)} must be within range of point locations (0 - {len(pts) - 1}."
     # TODO: approach to remove points before going to transformation is not working properly yet.
-    # # remove points that at some point disappear, by finding which points have status that sometimes is zero
+    # remove points that at some point disappear, by finding which points have status that sometimes is zero
     # idx = stats.min(axis=0) == 0
     # pts = pts[:, idx, :]
     # stats = stats[:, idx]
@@ -382,6 +451,7 @@ def _ms_smooth(ms, q=98):
     # fill the removed values with linear interpolated values
     dms_fill = np.apply_along_axis(fill_1d, 0, dms, np.arange(len(dms)))
     dms_fill = np.append(np.expand_dims(ms[0], 0), dms_fill, axis=0)
+
     ms_out = list(np.cumsum(dms_fill, axis=0).reshape(len(ms), 2, 3))
     return ms_out
 

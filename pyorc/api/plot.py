@@ -282,12 +282,19 @@ class _Transect_PlotMethods:
         v_dir = "v_dir"
         # retrieve the backward transformation array
         transect = self._obj.transect
-        M = transect.camera_config.get_M(transect.h_a, reverse=True, to_bbox_grid=True)
+        camera_config = transect.camera_config
+        # M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
+        src = camera_config.get_bbox(camera=True, h_a=transect.h_a).exterior.coords[0:4]
+        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
+        # get geographic coordinates bbox corners
+        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
+        M = cv.get_M_2D(src, dst, reverse=True)
+        # M = transect.camera_config.get_M(transect.h_a, reverse=True, to_bbox_grid=True)
 
         x, y = self._obj.x, self._obj.y
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
         _v = self._obj[v_eff] * np.cos(self._obj[v_dir])
-        s = self._obj[v_eff].values
+        s = np.abs(self._obj[v_eff].values)
         x_moved, y_moved = x + _u * dt, y + _v * dt
         xp, yp = transect.get_xyz_perspective(M=M, xs=x.values, ys=y.values)
         xp_moved, yp_moved = transect.get_xyz_perspective(M=M, xs=x_moved.values, ys=y_moved.values)

@@ -40,6 +40,7 @@ Camera configuration: {:s}
             start_frame=None,
             end_frame=None,
             stabilize=None,
+            mask_exterior=None,
     ):
         """
         Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
@@ -62,20 +63,20 @@ Camera configuration: {:s}
         end_frame : int, optional
             last frame to use in analysis (if not set, last frame available in video will be used)
         stabilize : optional
-            If set, the video will be stabilized by attempting to find rigid points (see recipe) and track these with
-            Lukas Kanade optical flow.
-        recipe : dict, optional
-            filter recipes used to distinguish rigid points from moving points for stabilization. Two flavours are
-            currently implemented under pyorc.const.CLASSIFY_STANDING_CAM (for a camera that is kept as much as possible
-            in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is moving across the objective).
+            If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with
+            Lukas Kanade optical flow. "fixed" for FOV that is meant to be in one place, "moving" for a moving FOV.
+        mask_exterior : list of lists,
+            set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
+            The mask is used to select region (on land) for rigid point search for stabilization.
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
-        assert(stabilize in ["fixed", "moving", None]), 'stabilize must be "fixed" or "moving"'
+        assert(stabilize in ["fixed", "moving", "all", None]), 'stabilize must be "fixed", "moving" or "all"'
         self.feats_pos = None
         self.feats_stats = None
         self.feats_errs = None
         self.ms = None
+        self.mask = None
         if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
             if h_a is not None:
@@ -85,12 +86,16 @@ Camera configuration: {:s}
                     "configuration. "
                 assert (isinstance(camera_config.gcps["h_ref"], float)),\
                     "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
-                    "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
+                    "reprojection. You must supply z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
         # super().__init__(*args, **kwargs)
         cap = cv2.VideoCapture(fn)
+        self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         # explicitly open file for reading
-
+        if mask_exterior is not None:
+            # set a mask based on the roi points
+            self.set_mask_from_exterior(mask_exterior)
         # set end and start frame
         self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if start_frame is not None:
@@ -109,7 +114,7 @@ Camera configuration: {:s}
         self.start_frame = start_frame
         if stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
-            recipe = const.CLASSIFY_STANDING_CAM if stabilize == "fixed" else const.CLASSIFY_MOVING_CAM
+            recipe = const.CLASSIFY_CAM[stabilize] if stabilize in const.CLASSIFY_CAM else []
             self._get_pos_feats(cap, recipe=recipe)
             self._get_ms()
 
@@ -125,6 +130,25 @@ Camera configuration: {:s}
         # nothing to be done at this stage, release file for now.
         cap.release()
         del cap
+
+
+    @property
+    def mask(self):
+        """
+
+        Returns
+        -------
+        np.ndarray
+            Mask of region of interest
+        """
+        return self._mask
+
+    @mask.setter
+    def mask(self, mask):
+        if mask is None:
+            self._mask = None
+        else:
+            self._mask = mask
 
     @property
     def camera_config(self):
@@ -167,10 +191,11 @@ Camera configuration: {:s}
 
     @end_frame.setter
     def end_frame(self, end_frame=None):
+        # sometimes last frames are not read by OpenCV, hence we skip the last frame always
         if end_frame is None:
-            self._end_frame = self.frame_count
+            self._end_frame = self.frame_count - 1
         else:
-            self._end_frame = min(self.frame_count, end_frame)
+            self._end_frame = min(self.frame_count - 1, end_frame)
 
 
     @property
@@ -304,14 +329,12 @@ Camera configuration: {:s}
         # if "lens_corr" in kwargs:
         #     if kwargs["lens_corr"]:
                 # also correct the control point src
-        camera_config.gcps["src"] = cv.undistort_points(
-            camera_config.gcps["src"],
-            camera_config.camera_matrix,
-            camera_config.dist_coeffs,
-                    # sample.shape[0],
-                    # sample.shape[1],
-                    # **self.camera_config.lens_pars
-        )
+        if hasattr(camera_config, "gcps"):
+            camera_config.gcps["src"] = cv.undistort_points(
+                camera_config.gcps["src"],
+                camera_config.camera_matrix,
+                camera_config.dist_coeffs,
+            )
                 # camera_config.corners = cv.undistort_points(
                 #     camera_config.corners,
                 #     sample.shape[0],
@@ -353,13 +376,20 @@ Camera configuration: {:s}
         return frames
 
 
-    def _get_pos_feats(self, cap, recipe=const.CLASSIFY_STANDING_CAM):
+    def set_mask_from_exterior(self, exterior):
+        mask_coords = np.array([exterior], dtype=np.int32)
+        mask = np.zeros((self.height, self.width), np.uint8)
+        self.mask = cv2.fillPoly(mask, [mask_coords], 255)
+
+    def _get_pos_feats(self, cap, split=2, recipe=const.CLASSIFY_STANDING_CAM):
         # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
         # get the displacements of trackable features
         positions, stats, errs = cv._get_displacements(
             cap,
             start_frame=self.start_frame,
-            end_frame=self.end_frame
+            end_frame=self.end_frame,
+            split=split,
+            mask=self.mask
         )
         # filter features that belong to actual camera movement
         for recipe in recipe:
