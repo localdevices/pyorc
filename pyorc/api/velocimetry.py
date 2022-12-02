@@ -438,7 +438,7 @@ class Velocimetry(ORCBase):
 
 
     def get_transect(
-            self, x, y, z=None,
+            self, x, y, z=None, s=None,
             crs=None,
             v_eff=True,
             xs="xs",
@@ -463,6 +463,10 @@ class Velocimetry(ORCBase):
             y-coordinates on which interpolation should be done
         z : tuple or list-like
             z-coordinates on which interpolation should be done, defaults: None
+        s : tuple or list-like
+            distance from bank coordinates on which interpolation should be done, defaults: None
+            if set, these distances will be precisely respected, and not interpolated. ``distance`` will be ignored.
+
         crs : int, dict or str, optional
             coordinate reference system (e.g. EPSG code) in which x, y and z are measured (default: None),
             None assumes crs is the same as crs of xr.Dataset.
@@ -496,11 +500,12 @@ class Velocimetry(ORCBase):
                 crs_to=CRS.from_wkt(self.camera_config.crs)
             ))
             x, y = list(x), list(y)
-        if distance is None:
-            # interpret suitable sampling distance from grid resolution
-            distance = np.abs(np.diff(self._obj.x)[0])
-            # interpolate to a suitable set of points
-        x, y, z, s = helpers.xy_equidistant(x, y, distance=distance, z=z)
+        if s is None:
+            if distance is None:
+                # interpret suitable sampling distance from grid resolution
+                distance = np.abs(np.diff(self._obj.x)[0])
+                # interpolate to a suitable set of points
+            x, y, z, s = helpers.xy_equidistant(x, y, distance=distance, z=z)
 
         # make a cols and rows temporary variable
         coli, rowi = np.meshgrid(np.arange(len(self._obj["x"])), np.arange(len(self._obj["y"])))
@@ -541,7 +546,7 @@ class Velocimetry(ORCBase):
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
             raise ValueError(
-                "No valid velocimetry points found over bathymetry. Check if the bethymetry is within the camera objective")
+                "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera objective")
         # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
         # found back from this dataset
         ds_points = ds_points.assign_coords(xcoords=("points", list(x)))

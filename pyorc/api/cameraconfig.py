@@ -176,6 +176,18 @@ class CameraConfig:
         return np.array(self.gcps["dst"]).mean(axis=0)
 
     @property
+    def gcp_dims(self):
+        """
+
+        Returns
+        -------
+        dims : int
+            amount of dimensions of gcps (can be 2 or 3)
+
+        """
+        return len(self.gcps["dst"][0])
+
+    @property
     def shape(self):
         """
         Returns rows and columns in projected frames from ``Frames.project``
@@ -253,7 +265,7 @@ class CameraConfig:
         self.camera_matrix = camera_matrix
         self.dist_coeffs = dist_coeffs
 
-    def get_bbox(self, camera=False, h_a=None):
+    def get_bbox(self, camera=False, h_a=None, redistort=False):
         """
 
         Parameters
@@ -265,6 +277,10 @@ class CameraConfig:
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level. In case a video with higher (lower) water levels is used, this
             will result in a different perspective plane than the control video.
+        redistort : bool, optional
+            If set in combination with ``camera``, the bbox will be redistorted in the camera objective using the
+            distortion coefficients and camera matrix. Not used in orthorectification because this occurs by default
+            on already undistorted images.
 
         Returns
         -------
@@ -283,7 +299,13 @@ class CameraConfig:
             # reduce coords by control point mean
             coords -= self.gcp_mean[0:2]
             # TODO: re-distort if needed
-            bbox = Polygon(cv2.perspectiveTransform(np.float32([coords]), M)[0])
+            corners = cv2.perspectiveTransform(np.float32([coords]), M)[0]
+            if redistort:
+                # for visualization on still distorted frames this can be done. DO NOT do this if used for
+                # orthorectification, as this typically occurs on undistorted images.
+                corners = cv.undistort_points(corners, self.camera_matrix, self.dist_coeffs, reverse=True)
+
+            bbox = Polygon(corners)
         return bbox
 
     def get_depth(self, z, h_a=None):
@@ -426,7 +448,8 @@ class CameraConfig:
             )
             dst_a = np.array(dst_a)
         else:
-            dst_a = self.get_dst_a(h_a)
+            # in case we are dealing with a 2D 4-point, then reproject points on water surface, else keep 3D points
+            dst_a = self.get_dst_a(h_a) if self.gcp_dims == 2 else self.gcps["dst"]
             # reduce dst_a with its mean to get much more accurate projection result in case x and y order of
             # magnitude is very large
             dst_a -= self.gcp_mean
