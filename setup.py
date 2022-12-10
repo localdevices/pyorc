@@ -47,8 +47,11 @@ setup(
         "dev": ["pytest", "pytest-cov"],
         "optional": [],
     },
-    # entry_points="""
-    # """,
+    entry_points={
+        "console_scripts": [
+            "pyorc = pyorc.cli.main:cli"
+        ]
+    },
     include_package_data=True,
     license="GPLv3",
     zip_safe=False,
