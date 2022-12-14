@@ -290,7 +290,7 @@ class Velocimetry(ORCBase):
         self._obj[v_y] = self._obj[v_y].where(self._obj[corr] > tolerance)
         # return ds
 
-    def filter_temporal_count(self, tolerance=0.5):
+    def filter_temporal_count(self, tolerance=0.33):
         """Masks values with a too low correlation.
 
         Parameters
