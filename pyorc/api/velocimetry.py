@@ -595,8 +595,9 @@ class Velocimetry(ORCBase):
             ds_effective = ds_effective.where(missing_tolerance)
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
-            raise ValueError(
-                "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera objective")
+            warnings.warn(
+                "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera objective or anything is visible in objective."
+            )
         # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
         # found back from this dataset
         ds_points = ds_points.assign_coords(xcoords=("points", list(x)))
