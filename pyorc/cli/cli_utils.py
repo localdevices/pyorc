@@ -17,6 +17,8 @@ def parse_json(ctx, param, value):
     return kwargs
 
 def parse_corners(ctx, param, value):
+    if value is None:
+        return None
     # check if list contains lists of 2 values
     print(value)
     print(json.loads(value))
