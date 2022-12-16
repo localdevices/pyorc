@@ -32,9 +32,10 @@ def parse_corners(ctx, param, value):
 
 
 def validate_file(ctx, param, value):
-    if not(os.path.isfile(value)):
-        raise click.FileError(f"{value}")
-    return value
+    if value is not None:
+        if not(os.path.isfile(value)):
+            raise click.FileError(f"{value}")
+        return value
 
 
 def parse_src(ctx, param, value):
@@ -50,7 +51,7 @@ def parse_src(ctx, param, value):
 def parse_dst(ctx, param, value):
     value = parse_json(ctx, param, value)
     if value is not None:
-        if len(value == 4):
+        if len(value) == 4:
             # assume [x, y] pairs are provided
             len_points = 2
         elif len(value) < 6:

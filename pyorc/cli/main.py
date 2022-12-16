@@ -80,14 +80,26 @@ def cli(ctx, info, debug):  # , quiet, verbose):
     help="Coordinate reference system to be used for camera configuration"
 )
 @click.option(
+    "--z0",
+    type=float,
+    help="Water level [m] +CRS (e.g. geoid or ellipsoid of GPS)"
+)
+@click.option(
+    "--href",
+    type=float,
+    help="Water level [m] +local datum (e.g. staff or pressure gauge)"
+)
+@click.option(
     "--shapefile",
     type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
-    help="shapefile or geojson containing point geometries with x, y (4) or x, y, z (6 or more) coordinates with ground control points"
+    help="shapefile or geojson containing point geometries with x, y (4) or x, y, z (6 or more) coordinates with ground control points",
+    callback=cli_utils.validate_file
 )
 @click.option(
     "--corners",
     type=str,
-    callback=cli_utils.parse_corners
+    callback=cli_utils.parse_corners,
+    help="Video ojective corner points as list of 4 [column, row] points"
 )
 @click.pass_context
 @typechecked
@@ -98,25 +110,28 @@ def camera_config(
         src: Optional[List[List[float]]],
         dst: Optional[List[List[float]]],
         crs: Optional[Union[str, int]],
+        z0: Optional[float],
+        href: Optional[float],
         shapefile: Optional[str],
         corners: Optional[List[List]]
 ):
-    click.echo(videofile)
-    if videofile is not None:
-        assert(os.path.isfile(videofile)), f"file {videofile} not available"
-
-    click.echo(type(videofile))
     logger = log.setuplog("cameraconfig", os.path.abspath("pyorc.log"), append=False)
     logger.info(f"Preparing your cameraconfig file in {output}")
     logger.info(f"Found video file  {videofile}")
+
     if src is not None:
         logger.info("Source points found and validated")
     if dst is not None:
         logger.info("Destination points found and validated")
-
-    click.echo(type(crs))
-#     # pass
-
+    if not z0:
+        z0 = click.prompt("z0 not provided, please enter a number, or Enter for default", default=0.0)
+    if not href:
+        href = click.prompt("href not provided, please enter a number, or Enter for default", default=0.0)
+    if not src:
+        logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
+        if click.confirm('Do you want to continue and provide source points interactively?', default=True):
+            logger.error("Interactive clicker is not implemented yet.")
+    raise NotImplementedError
 
 ## VELOCIMETRY
 @cli.command(short_help="Estimate velocimetry")

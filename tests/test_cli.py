@@ -14,7 +14,6 @@ def test_cli_cam_config(cli_obj):
 
 
 def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst):
-    print(json.dumps(gcps_src))
     result = cli_obj.invoke(
         cli, [
             'camera-config',
@@ -24,9 +23,9 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst):
             json.dumps(gcps_src),
             '--dst',
             json.dumps(gcps_dst),
-            'OUTPUT.json',
             '--crs',
             '32735',
+            'OUTPUT.json',
 
         ],
         echo=True
