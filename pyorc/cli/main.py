@@ -1,5 +1,7 @@
 # Main command line routines
 import click
+from typing import List, Optional, Union
+from typeguard import typechecked
 import os
 import warnings
 import numpy as np
@@ -57,16 +59,24 @@ def cli(ctx, info, debug):  # , quiet, verbose):
     "--videofile",
     type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
     help="video file with required objective and resolution and control points in view",
+    callback=cli_utils.validate_file
 )
 @click.option(
-    "--gcps",
+    "--src",
     type=str,
-    callback=cli_utils.parse_json,
-    help='Ground control points in json format or as filename. Should at minimum contain "dst" with list of lists with real world locations'
+    callback=cli_utils.parse_src,
+    help='Source control points as list of [column, row] pairs.'
+)
+@click.option(
+    "--dst",
+    type=str,
+    callback=cli_utils.parse_dst,
+    help='Destination control points as list of 4 [x, y] pairs, or at least 6 [x, y, z] pairs in local coordinate system.'
 )
 @click.option(
     "--crs",
     type=str,
+    callback=cli_utils.parse_str_num,
     help="Coordinate reference system to be used for camera configuration"
 )
 @click.option(
@@ -80,10 +90,31 @@ def cli(ctx, info, debug):  # , quiet, verbose):
     callback=cli_utils.parse_corners
 )
 @click.pass_context
-def camera_config(ctx, output, videofile, gcps, crs, shapefile, corners):
+@typechecked
+def camera_config(
+        ctx,
+        output: str,
+        videofile: str,
+        src: Optional[List[List[float]]],
+        dst: Optional[List[List[float]]],
+        crs: Optional[Union[str, int]],
+        shapefile: Optional[str],
+        corners: Optional[List[List]]
+):
+    click.echo(videofile)
+    if videofile is not None:
+        assert(os.path.isfile(videofile)), f"file {videofile} not available"
+
+    click.echo(type(videofile))
     logger = log.setuplog("cameraconfig", os.path.abspath("pyorc.log"), append=False)
     logger.info(f"Preparing your cameraconfig file in {output}")
-    click.echo(gcps)
+    logger.info(f"Found video file  {videofile}")
+    if src is not None:
+        logger.info("Source points found and validated")
+    if dst is not None:
+        logger.info("Destination points found and validated")
+
+    click.echo(type(crs))
 #     # pass
 
 

@@ -1,28 +1,39 @@
+import functools
+import numpy as np
 import os
 import pytest
 import pandas as pd
 from shapely import wkt
 import pyorc
-import numpy as np
+import sys
+from click.testing import CliRunner
 
 EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples")
 
+
+@pytest.fixture
+def gcps_src():
+    return [
+        [1421, 1001],
+        [1251, 460],
+        [421, 432],
+        [470, 607]
+    ]
+
+@pytest.fixture
+def gcps_dst():
+    return [
+        [642735.8076, 8304292.1190],  # lowest right coordinate
+        [642737.5823, 8304295.593],  # highest right coordinate
+        [642732.7864, 8304298.4250],  # highest left coordinate
+        [642732.6705, 8304296.8580]  # highest right coordinate
+    ]
 # sample data, for Ngwerere
 @pytest.fixture
-def gcps():
+def gcps(gcps_src, gcps_dst):
     return dict(
-        src=[
-            [1421, 1001],
-            [1251, 460],
-            [421, 432],
-            [470, 607]
-        ],
-        dst=[
-            [642735.8076, 8304292.1190],  # lowest right coordinate
-            [642737.5823, 8304295.593],  # highest right coordinate
-            [642732.7864, 8304298.4250],  # highest left coordinate
-            [642732.6705, 8304296.8580]  # highest right coordinate
-        ],
+        src=gcps_src,
+        dst=gcps_dst,
         z_0=1182.2,
         h_ref=0.
     )
@@ -133,9 +144,13 @@ def cam_config_str():
 
 
 @pytest.fixture
-def vid():
+def vid_file():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4")
+
+@pytest.fixture
+def vid(vid_file):
     vid = pyorc.Video(
-        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
+        vid_file,
         start_frame=0,
         end_frame=2,
     )
@@ -210,3 +225,30 @@ def piv_transect(piv, cross_section):
     return piv.velocimetry.get_transect(x, y, z)
 
 
+@pytest.fixture
+def cli_obj():
+    """Yield a click.testing.CliRunner to invoke the CLI."""
+    class_ = CliRunner
+
+    def invoke_wrapper(f):
+        """Augment CliRunner.invoke to emit its output to stdout.
+
+        This enables pytest to show the output in its logs on test
+        failures.
+
+        """
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            echo = kwargs.pop('echo', False)
+            result = f(*args, **kwargs)
+
+            if echo is True:
+                sys.stdout.write(result.output)
+            return result
+
+        return wrapper
+
+    class_.invoke = invoke_wrapper(class_.invoke)
+    cli_runner = class_()
+
+    yield cli_runner
