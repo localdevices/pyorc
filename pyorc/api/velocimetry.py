@@ -39,6 +39,7 @@ class Velocimetry(ORCBase):
             kwargs_angle={},
             kwargs_velocity={},
             kwargs_neighbour={},
+            kwargs_count={},
             inplace=False
     ):
         """Masks values using several filters that use temporal variations or comparison as basis.
@@ -81,7 +82,8 @@ class Velocimetry(ORCBase):
 
         """
         # load dataset in memory and update self
-        ds = copy.deepcopy(self._obj.load())
+        ds = copy.deepcopy(self._obj)
+        ds.load()
         # start with entirely independent filters
         if filter_corr:
             ds.velocimetry.filter_temporal_corr(v_x=v_x, v_y=v_y, **kwargs_corr)
@@ -96,7 +98,7 @@ class Velocimetry(ORCBase):
             ds.velocimetry.filter_temporal_angle(v_x=v_x, v_y=v_y, **kwargs_angle)
         # finalize with absolute count threshold filter
         if filter_count:
-            ds.velocimetry.filter_temporal_count(tolerance=0.25)
+            ds.velocimetry.filter_temporal_count(**kwargs_count)
         ds.attrs = self._obj.attrs
         if inplace:
             self._obj.update(ds)
@@ -305,7 +307,9 @@ class Velocimetry(ORCBase):
             count filtered velocity vectors as [time, y, x]
         """
         # pass
-        self._obj = self._obj.where(self._obj["v_x"].count(dim="time") > tolerance*len(self._obj.time))
+        count_filter = copy.deepcopy(self._obj["v_x"].count(dim="time") > tolerance * len(self._obj.time))
+        self._obj["v_x"] = self._obj["v_x"].where(count_filter)
+        self._obj["v_y"] = self._obj["v_y"].where(count_filter)
 
 
     def filter_spatial(
@@ -582,7 +586,7 @@ class Velocimetry(ORCBase):
 
         # interpolate velocities over points
         if wdw == 0:
-            ds_points = self._obj.interp(x=_x, y=_y)
+            ds_points = self._obj.interp(x=_x, y=_y, method="nearest")
         else:
             # collect points within a stride, collate and analyze for outliers
             ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(wdw_x_min, wdw_x_max + 1) for y_stride in
