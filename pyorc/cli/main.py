@@ -5,10 +5,10 @@ from typeguard import typechecked
 import os
 import warnings
 import numpy as np
-from . import cli_utils
-from . import log
+from pyorc.cli import cli_utils
+from pyorc.cli import log
 # import pyorc api below
-from .. import __version__
+from pyorc import __version__
 # import cli components below
 
 
@@ -123,15 +123,15 @@ def camera_config(
         logger.info("Source points found and validated")
     if dst is not None:
         logger.info("Destination points found and validated")
-    if not z0:
+    if z0 is None:
         z0 = click.prompt("z0 not provided, please enter a number, or Enter for default", default=0.0)
-    if not href:
+    if href is None:
         href = click.prompt("href not provided, please enter a number, or Enter for default", default=0.0)
     if not src:
         logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide source points interactively?', default=True):
             logger.error("Interactive clicker is not implemented yet.")
-    raise NotImplementedError
+    # raise NotImplementedError
 
 ## VELOCIMETRY
 @cli.command(short_help="Estimate velocimetry")

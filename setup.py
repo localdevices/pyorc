@@ -23,6 +23,7 @@ setup(
     test_suite="tests",
     python_requires=">=3.8",
     install_requires=[
+        "click",
         "cython; platform_machine == 'armv7l'",
         "dask",
         "descartes",
@@ -41,6 +42,7 @@ setup(
         "scipy",
         "shapely",
         "tqdm",
+        "typeguard",
         "xarray",
     ],
     extras_require={

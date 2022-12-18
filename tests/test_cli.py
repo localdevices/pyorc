@@ -25,6 +25,10 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst):
             json.dumps(gcps_dst),
             '--crs',
             '32735',
+            '--z0',
+            '0.0',
+            '--href',
+            '5.6',
             'OUTPUT.json',
 
         ],
