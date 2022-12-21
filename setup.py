@@ -21,7 +21,7 @@ setup(
     packages=find_packages(),
     package_dir={"pyorc": "pyorc"},
     test_suite="tests",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
         "click",
         "cython; platform_machine == 'armv7l'",
