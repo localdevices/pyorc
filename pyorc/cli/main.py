@@ -9,6 +9,7 @@ from pyorc.cli import cli_utils
 from pyorc.cli import log
 # import pyorc api below
 from pyorc import __version__
+import pyorc
 # import cli components below
 
 
@@ -20,6 +21,13 @@ def print_info(ctx, param, value):
     click.echo(f"PyOpenRiverCam, Copyright Localdevices, Rainbow Sensing")
     ctx.exit()
 
+def print_license(ctx, param, value):
+    if not value:
+        return {}
+    click.echo(f"GNU Affero General Public License v3 (AGPLv3). See https://www.gnu.org/licenses/agpl-3.0.en.html")
+    ctx.exit()
+
+
 
 @click.group()
 @click.version_option(__version__, message="PyOpenRiverCam version: %(version)s")
@@ -30,6 +38,14 @@ def print_info(ctx, param, value):
     is_eager=True,
     help="Print information and version of PyOpenRiverCam",
     callback=print_info,
+)
+@click.option(
+    "--license",
+    default=False,
+    is_flag=True,
+    is_eager=True,
+    help="Print license information for PyOpenRiverCam",
+    callback=print_license,
 )
 @click.option(
     '--debug/--no-debug',
@@ -62,6 +78,12 @@ def cli(ctx, info, debug):  # , quiet, verbose):
     callback=cli_utils.validate_file
 )
 @click.option(
+    "--crs",
+    type=str,
+    callback=cli_utils.parse_str_num,
+    help="Coordinate reference system to be used for camera configuration"
+)
+@click.option(
     "--src",
     type=str,
     callback=cli_utils.parse_src,
@@ -71,13 +93,7 @@ def cli(ctx, info, debug):  # , quiet, verbose):
     "--dst",
     type=str,
     callback=cli_utils.parse_dst,
-    help='Destination control points as list of 4 [x, y] pairs, or at least 6 [x, y, z] pairs in local coordinate system.'
-)
-@click.option(
-    "--crs",
-    type=str,
-    callback=cli_utils.parse_str_num,
-    help="Coordinate reference system to be used for camera configuration"
+    help='Destination control points as list of 4 [x, y] pairs, or at least 6 [x, y, z]. If --crs_gcps is provided, --dst is assumed to be in this CRS."'
 )
 @click.option(
     "--z0",
@@ -90,10 +106,32 @@ def cli(ctx, info, debug):  # , quiet, verbose):
     help="Water level [m] +local datum (e.g. staff or pressure gauge)"
 )
 @click.option(
+    "--crs_gcps",
+    type=str,
+    callback=cli_utils.parse_str_num,
+    help="Coordinate reference system in which destination GCP points (--dst) are measured"
+)
+@click.option(
+    "--resolution",
+    type=float,
+    help="Target resolution [m] for ortho-projection."
+)
+@click.option(
+    "--window_size",
+    type=int,
+    help="Target window size [px] for interrogation window for Particle Image Velocimetry"
+)
+@click.option(
     "--shapefile",
     type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
-    help="shapefile or geojson containing point geometries with x, y (4) or x, y, z (6 or more) coordinates with ground control points",
+    help="Shapefile containing dst GCP points [x, y] or [x, y, z] in its geometry",
     callback=cli_utils.validate_file
+)
+@click.option(
+    "--lens_position",
+    type=str,
+    help="Lens position as [x, y, z]. If --crs_gcps is provided, --lens_position is assumed to be in this CRS.",
+    callback=cli_utils.parse_json
 )
 @click.option(
     "--corners",
@@ -107,11 +145,15 @@ def camera_config(
         ctx,
         output: str,
         videofile: str,
+        crs: Optional[Union[str, int]],
         src: Optional[List[List[float]]],
         dst: Optional[List[List[float]]],
-        crs: Optional[Union[str, int]],
         z0: Optional[float],
         href: Optional[float],
+        crs_gcps: Optional[Union[str, int]],
+        resolution: Optional[float],
+        window_size: Optional[int],
+        lens_position: Optional[List[float]],
         shapefile: Optional[str],
         corners: Optional[List[List]]
 ):
@@ -119,18 +161,49 @@ def camera_config(
     logger.info(f"Preparing your cameraconfig file in {output}")
     logger.info(f"Found video file  {videofile}")
 
+
     if src is not None:
         logger.info("Source points found and validated")
     if dst is not None:
         logger.info("Destination points found and validated")
     if z0 is None:
-        z0 = click.prompt("z0 not provided, please enter a number, or Enter for default", default=0.0)
+        z0: float = click.prompt("--z0 not provided, please enter a number, or Enter for default", default=0.0)
     if href is None:
-        href = click.prompt("href not provided, please enter a number, or Enter for default", default=0.0)
+        href: float = click.prompt("--href not provided, please enter a number, or Enter for default", default=0.0)
+    if resolution is None:
+        resolution: float = click.prompt("--resolution not provided, please enter a number, or Enter for default", default=0.05)
+    if window_size is None:
+        window_size: int = click.prompt("--window_size not provided, please enter a number, or Enter for default", default=10)
+
     if not src:
         logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide source points interactively?', default=True):
-            logger.error("Interactive clicker is not implemented yet.")
+            raise click.UsageError("Interactive clicker is not implemented yet.")
+    if not corners:
+        logger.warning("No corner points for projection provided. No problem, you can interactively click them in your objective")
+        if click.confirm('Do you want to continue and provide corners interactively?', default=True):
+            raise click.UsageError("Interactive clicker is not implemented yet.")
+
+
+    if crs is None and crs_gcps is not None:
+        raise click.UsageError(f"--crs is None while --crs_gcps is {crs_gcps}, please supply --crs.")
+    gcps = {
+        "src": src,
+        "dst": dst,
+        "z_0": z0,
+        "h_ref": href,
+        "crs": crs_gcps
+    }
+    pyorc.service.camera_config(
+        video_file=videofile,
+        cam_config_file=output,
+        gcps=gcps,
+        crs=crs,
+        resolution=resolution,
+        window_size=window_size,
+        lens_position=lens_position,
+        corners=corners
+    )
     # raise NotImplementedError
 
 ## VELOCIMETRY

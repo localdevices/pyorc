@@ -5,3 +5,4 @@ from .api.video import Video
 from .api.frames import Frames
 from .api.velocimetry import Velocimetry
 from .api.transect import Transect
+from . import service

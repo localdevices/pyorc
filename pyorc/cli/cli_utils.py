@@ -24,10 +24,10 @@ def parse_corners(ctx, param, value):
     print(value)
     print(json.loads(value))
     corners = json.loads(value)
-    assert(len(corners)==4), "--corners must contain a list of lists with exactly 4 points"
+    assert(len(corners) == 4), "--corners must contain a list of lists with exactly 4 points"
     for n, val in enumerate(corners):
         assert(isinstance(val, list)), f"--corners value {n} is not a list {val}"
-        assert(len(val)==2), f"--corners value {n} must contain row, column coordinate but consists of {len(val)} numbers"
+        assert(len(val) == 2), f"--corners value {n} must contain row, column coordinate but consists of {len(val)} numbers"
     return [[int(x), int(y)] for x, y in corners]
 
 
