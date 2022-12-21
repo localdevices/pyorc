@@ -1,6 +1,8 @@
 import click
 import os
 import json
+import pyorc
+import yaml
 
 def parse_json(ctx, param, value):
     if value is None:
@@ -36,6 +38,47 @@ def validate_file(ctx, param, value):
         if not(os.path.isfile(value)):
             raise click.FileError(f"{value}")
         return value
+
+def validate_dir(ctx, param, value):
+    if not(os.path.isdir(value)):
+        os.makedirs(value)
+    return value
+def parse_recipe(ctx, param, recipe_file):
+    """
+    Read and validate entire recipe from top to bottom
+
+    Parameters
+    ----------
+    recipe
+
+    Returns
+    -------
+
+    """
+    with open(recipe_file, "r") as f:
+        body = f.read()
+    recipe = yaml.load(body, Loader=yaml.FullLoader)
+
+    valid_classes = ["frames", "velocimetry", "transect"]
+    for k in recipe:
+        if k not in valid_classes:
+            raise ValueError(f"key '{k}' is not allowed, must be one of {valid_classes}")
+        # loop through all methods and check if their inputs are valid
+        cls = getattr(pyorc, k.capitalize())
+        for m in recipe[k]:
+            if not hasattr(cls, m):
+                raise ValueError(f"Class '{k.capitalize()}' does not have a method '{m}'")
+            method = getattr(cls, m)
+            # find valid args to method
+            valid_args = method.__code__.co_varnames
+            if recipe[k][m] is None:
+                # replace for empty dict
+                recipe[k][m] = {}
+            for arg in recipe[k][m]:
+                if not(arg in valid_args):
+                    raise ValueError(f"Method '{k.capitalize()}.{m}' does not have input argument '{arg}', must be one of {valid_args}")
+    print(recipe)
+    return recipe
 
 
 def parse_src(ctx, param, value):

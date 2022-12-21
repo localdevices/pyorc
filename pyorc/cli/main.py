@@ -3,8 +3,9 @@ import click
 from typing import List, Optional, Union
 from typeguard import typechecked
 import os
-import warnings
-import numpy as np
+import yaml
+
+# import CLI components
 from pyorc.cli import cli_utils
 from pyorc.cli import log
 # import pyorc api below
@@ -53,7 +54,7 @@ def print_license(ctx, param, value):
     envvar='REPO_DEBUG'
 )
 @click.pass_context
-def cli(ctx, info, debug):  # , quiet, verbose):
+def cli(ctx, info, license, debug):  # , quiet, verbose):
     """Command line interface for hydromt models."""
     if ctx.obj is None:
         ctx.obj = {}
@@ -210,30 +211,38 @@ def camera_config(
 @cli.command(short_help="Estimate velocimetry")
 @click.argument(
     'OUTPUT',
-    type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
+    type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
+    callback=cli_utils.validate_dir,
     required=True,
 )
 @click.option(
     "-v",
     "--videofile",
-    type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
+    type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="video file with required objective and resolution and control points in view",
+    callback=cli_utils.validate_file,
+    required=True
 )
 @click.option(
-    "-o",
-    "--optionsfile",
-    type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
+    "-r",
+    "--recipe",
+    type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="Options file (*.yml)",
+    callback=cli_utils.parse_recipe,
+    required=True
 )
 @click.option(
     "-c",
     "--cameraconfig",
-    type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
+    type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="Camera config file (*.json)",
+    callback=cli_utils.validate_file,
+    required=True
 )
 @click.pass_context
-def velocimetry(ctx, output, videofile, optionsfile, cameraconfig):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig):
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False)
     logger.info(f"Preparing your velocimetry result in {output}")
+    # read yaml
     pass
 

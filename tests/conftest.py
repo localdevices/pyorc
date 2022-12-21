@@ -3,6 +3,7 @@ import numpy as np
 import os
 import pytest
 import pandas as pd
+import shutil
 from shapely import wkt
 import pyorc
 import sys
@@ -10,6 +11,38 @@ from click.testing import CliRunner
 
 EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples")
 
+# fixtures with input and output files and folders
+@pytest.fixture
+def calib_video():
+    return os.path.join(EXAMPLE_DATA_DIR, "camera_calib", "camera_calib_720p.mkv")
+
+@pytest.fixture
+def cross_section():
+    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cross_section.csv")
+    return pd.read_csv(fn)
+
+
+@pytest.fixture
+def cam_config_fn():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.json")
+
+
+@pytest.fixture
+def cli_output_dir():
+    dir = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "outputs")
+    yield dir
+    shutil.rmtree(dir)
+
+@pytest.fixture
+def cli_recipe_fn():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.yml")
+
+@pytest.fixture
+def cli_cam_config_output():
+    cam_config_fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cli.json")
+    yield cam_config_fn
+    # remove after test
+    os.remove(cam_config_fn)
 
 @pytest.fixture
 def gcps_src():
@@ -43,10 +76,6 @@ def gcps(gcps_src, gcps_dst):
 def lens_position():
     return [642732.6705, 8304289.010, 1188.5]
 
-
-@pytest.fixture
-def calib_video():
-    return os.path.join(EXAMPLE_DATA_DIR, "camera_calib", "camera_calib_720p.mkv")
 
 @pytest.fixture
 def bbox():
@@ -97,16 +126,6 @@ def cam_config_calib():
         width=1280,
     )
 
-
-@pytest.fixture
-def cross_section():
-    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cross_section.csv")
-    return pd.read_csv(fn)
-
-
-@pytest.fixture
-def cam_config_fn():
-    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.json")
 
 
 @pytest.fixture
