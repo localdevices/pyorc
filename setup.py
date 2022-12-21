@@ -55,7 +55,7 @@ setup(
         ]
     },
     include_package_data=True,
-    license="GPLv3",
+    license="AGPLv3",
     zip_safe=False,
     classifiers=[
         # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -64,7 +64,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Hydrology",
         "Topic :: Scientific/Engineering :: Image Processing",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
