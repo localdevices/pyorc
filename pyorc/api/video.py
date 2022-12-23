@@ -110,7 +110,19 @@ Camera configuration: {:s}
                 )
         else:
             end_frame = self.frame_count
+        # test if last frame is available, if not search until available frame is found and give warning
+        cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame - 1)
+        ret, img = cap.read()
+        if ret == False:
+            warnings.warn(f"End frame {end_frame} cannot be read from file. Video may be damaged or improperly formatted. Searching for last available frame")
+            while not(ret):
+                end_frame -= 1
+                cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame - 1)
+                ret, img = cap.read()
+            warnings.warn(f"Available end frame found at position {end_frame}")
+
         self.end_frame = end_frame
+
         self.start_frame = start_frame
         if stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
