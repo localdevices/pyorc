@@ -108,21 +108,20 @@ Camera configuration: {:s}
                 raise ValueError(
                     f"Start frame {start_frame} is larger than end frame {end_frame}"
                 )
+            # end frame cannot be larger than total amount of available frames
+            end_frame = np.minimum(end_frame, self.frame_count)
         else:
             end_frame = self.frame_count
-        # test if last frame is available, if not search until available frame is found and give warning
-        cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame - 1)
-        ret, img = cap.read()
-        if ret == False:
-            warnings.warn(f"End frame {end_frame} cannot be read from file. Video may be damaged or improperly formatted. Searching for last available frame")
-            while not(ret):
-                end_frame -= 1
-                cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame - 1)
-                ret, img = cap.read()
-            warnings.warn(f"Available end frame found at position {end_frame}")
+        # extract times and frame numbers as far as available
+        time, frame_number = cv.get_time_frames(cap, start_frame, end_frame)
+        # check if end_frame changed
+        if frame_number[-1] != end_frame:
+            warnings.warn(f"End frame {end_frame} cannot be read from file. End frame is adapted to {frame_number[-1]}")
+            end_frame = frame_number[-1]
 
         self.end_frame = end_frame
-
+        self.time = time
+        self.frame_number = frame_number
         self.start_frame = start_frame
         if stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
@@ -131,7 +130,6 @@ Camera configuration: {:s}
             self._get_ms()
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
-        self.frame_number = 0
         # set other properties
         self.h_a = h_a
         # make camera config part of the vidoe object
@@ -222,8 +220,6 @@ Camera configuration: {:s}
     def h_a(self, h_a):
         if h_a is not None:
             assert(isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
-            if h_a > 10:
-                warnings.warn(f"Your water level is {h_a} meters, which is very high for a locally referenced reading. Make sure this value is correct and expressed in unit meters.")
             if h_a < 0:
                 warnings.warn("Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.")
         self._h_a = h_a
@@ -331,7 +327,7 @@ Camera configuration: {:s}
         #     # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs
         #     if hasattr(self.camera_config, "lens_pars"):
         #         kwargs["lens_corr"] = True
-        frames = [get_frame(n=n, **kwargs) for n in range(self.end_frame - self.start_frame)]
+        frames = [get_frame(n=n, **kwargs) for n in self.frame_number] #range(self.end_frame - self.start_frame)
         sample = frames[0].compute()
         data_array = [da.from_delayed(
             frame,
@@ -353,7 +349,7 @@ Camera configuration: {:s}
                 #     sample.shape[1],
                 #     **self.camera_config.lens_pars
                 # )
-        time = np.arange(len(data_array))*1/self.fps
+        time = np.array(self.time) * 0.001 # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)
         y = np.flipud(np.arange(data_array[0].shape[0]))
         x = np.arange(data_array[0].shape[1])

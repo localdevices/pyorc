@@ -140,9 +140,7 @@ def vid():
         end_frame=2,
     )
     yield vid
-    # vid.release()
-    # del vid
-    # return
+
 
 @pytest.fixture
 def vid_cam_config(cam_config):

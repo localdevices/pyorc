@@ -162,7 +162,7 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None, split=2, 
         prev_gray[mask > 0] = 0.
 
     # prepare outputs
-    n_frames = int(end_frame) - int(start_frame)
+    n_frames = int(end_frame + 1) - int(start_frame)
     transforms = np.zeros((n_frames - 1, 3), np.float32)
 
 
@@ -668,6 +668,51 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., revers
         M = np.linalg.inv(np.dot(camera_matrix, R))
     # normalize homography before returning
     return M / M[-1, -1]
+
+def get_time_frames(cap, start_frame, end_frame):
+    """
+    Gets a list of valid time stamps and frame numbers for the provided video capture object, starting from start_frame
+    ending at end_frame
+
+    Parameters
+        ----------
+        cap : cv2.VideoCapture
+            Opened VideoCapture object
+        start_frame : int
+            first frame to consider for reading
+        end_frame : int
+            last frame to consider for reading
+
+        Returns
+        -------
+        time : list
+            list with valid time stamps in milliseconds. each time stamp belongs to the start of the frame in frame number
+        frame_number : list
+            list with valid frame numbers
+
+    """
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+    ret, img = cap.read()  # read first frame
+    n = start_frame
+    time = []
+    frame_number = []
+    while ret:
+        if n > end_frame:
+            break
+        t1 = cap.get(cv2.CAP_PROP_POS_MSEC)
+        ret, img = cap.read()  # read frame 1 + ...
+        frame_number.append(n)
+        time.append(t1)
+        if ret == False:
+            break
+        # cv2.imwrite("test_{:04d}.jpg".format(n), img)
+        t2 = cap.get(cv2.CAP_PROP_POS_MSEC)
+        if t2 <= 0.:
+            # we can no longer estimate time difference in the last frame read, so stop reading and set end_frame to one frame back
+            break
+
+        n += 1
+    return time, frame_number
 
 
 def transform_to_bbox(coords, bbox, resolution):
