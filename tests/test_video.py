@@ -51,6 +51,6 @@ def test_get_frame(video, method, result):
 def test_get_frames(video, method):
     # check if the right amount of frames is extracted
     frames = video.get_frames()
-    assert(len(frames) == video.end_frame - video.start_frame)
+    assert(len(frames) == video.end_frame - video.start_frame + 1)
     # check if the time difference is well taken from the fps of the video
     assert(np.allclose(np.diff(frames.time.values), [1./video.fps]))
