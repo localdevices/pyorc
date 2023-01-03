@@ -8,6 +8,7 @@ from pyproj import CRS
 from scipy.interpolate import interp1d
 from .orcbase import ORCBase
 from .plot import _Velocimetry_PlotMethods
+from .filter import _Velocimetry_FilterMethods
 from .. import helpers, const
 from xarray.core import utils
 
@@ -105,6 +106,8 @@ class Velocimetry(ORCBase):
         else:
             return ds
 
+    # add filter methods
+    filter = utils.UncachedAccessor(_Velocimetry_FilterMethods)
     def filter_temporal_angle(
             self,
             v_x="v_x",

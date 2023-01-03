@@ -1,13 +1,17 @@
 import operator
 # attributes for PIV variables
+
+v_x = "v_x"
+v_y = "v_y"
+
 PIV_ATTRS = {
-    "v_x": {
+    v_x: {
         "standard_name": "sea_water_x_velocity",
         "long_name": "Flow element center velocity vector, x-component",
         "units": "m s-1",
         "coordinates": "lon lat",
     },
-    "v_y": {
+    v_y: {
         "standard_name": "sea_water_x_velocity",
         "long_name": "Flow element center velocity vector, x-component",
         "units": "m s-1",
