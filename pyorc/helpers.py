@@ -384,6 +384,26 @@ def round_to_multiple(number, multiple):
     return multiple * round(number / multiple)
 
 
+def stack_window(
+    ds,
+    wdw=1,
+    wdw_x_min=None,
+    wdw_x_max=None,
+    wdw_y_min=None,
+    wdw_y_max=None,
+    dim="stride"
+):
+    # set strides
+    wdw_x_min = -wdw if wdw_x_min is None else wdw_x_min
+    wdw_x_max = wdw if wdw_x_max is None else wdw_x_max
+    wdw_y_min = -wdw if wdw_y_min is None else wdw_y_min
+    wdw_y_max = wdw if wdw_y_max is None else wdw_y_max
+
+    return xr.concat(
+        [ds.shift(x=x_stride, y=y_stride) for x_stride in range(wdw_x_min, wdw_x_max + 1) for y_stride in
+         range(wdw_y_min, wdw_y_max)], dim=dim)
+
+
 def staggered_index(start=0, end=100):
     """
     Returns a list of staggered indexes that start at the outer indexes and gradually move inwards

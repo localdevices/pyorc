@@ -8,7 +8,7 @@ from pyproj import CRS
 from scipy.interpolate import interp1d
 from .orcbase import ORCBase
 from .plot import _Velocimetry_PlotMethods
-from .filter import _Velocimetry_FilterMethods
+from .mask import _Velocimetry_MaskMethods
 from .. import helpers, const
 from xarray.core import utils
 
@@ -24,6 +24,39 @@ class Velocimetry(ORCBase):
             velocimetry data fields (from ``pyorc.Frames.get_piv``)
         """
         super(Velocimetry, self).__init__(xarray_obj)
+
+    @property
+    def is_velocimetry(self):
+        """
+        Checks if the data contained in the object seems to be velocimetry data by checking naming of dims
+        and available variables.
+
+        Returns
+        -------
+        is_velocimetry : bool
+            If True, the dataset likely contains velocimetry data
+
+        """
+        # check for dims, difference between available and allowed should be zero in length
+        unknown_dims = set(self._obj.dims).difference(set(["time", "y", "x"]))
+        if len(unknown_dims) != 0:
+            print(f"Unknown dimension(s) found: {unknown_dims}")
+            return False
+        missed_dims = set(["y", "x"]).difference(set(self._obj.dims))
+        if len(missed_dims) != 0:
+            print(f"Dimensions missing: {missed_dims}")
+            return False
+        # check for
+        missed_vars = set(const.ENCODE_VARS).difference(set(self._obj.data_vars))
+        if len(missed_vars) != 0:
+            print(f"Variables missing: {missed_vars}")
+            return False
+        # check for available metadata
+        if not(hasattr(self._obj, "camera_config")):
+            print("camera_config metadata is missing")
+            return False
+        return True
+
 
     def filter_temporal(
             self,
@@ -83,6 +116,11 @@ class Velocimetry(ORCBase):
 
         """
         # load dataset in memory and update self
+        warnings.warn(
+            'This function is deprecated. Individual filters can now be defined using ``ds.velocimetry.mask``',
+            DeprecationWarning,
+            stacklevel=2
+        )
         ds = copy.deepcopy(self._obj)
         ds.load()
         # start with entirely independent filters
@@ -107,7 +145,7 @@ class Velocimetry(ORCBase):
             return ds
 
     # add filter methods
-    filter = utils.UncachedAccessor(_Velocimetry_FilterMethods)
+    mask = utils.UncachedAccessor(_Velocimetry_MaskMethods)
     def filter_temporal_angle(
             self,
             v_x="v_x",
@@ -116,7 +154,8 @@ class Velocimetry(ORCBase):
             angle_tolerance=0.25 * np.pi,
             filter_per_timestep=True,
     ):
-        """filters on the expected angle. The function filters points entirely where the mean angle over time
+        """
+        filters on the expected angle. The function filters points entirely where the mean angle over time
         deviates more than input parameter angle_bounds (in radians). The function also filters individual
         estimates in time, in case the user wants this (filter_per_timestep=True), in case the angle on
         a specific time step deviates more than the defined amount from the average.
@@ -143,6 +182,11 @@ class Velocimetry(ORCBase):
             angle filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.angle``, and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
         # TODO: make function working appropriately, if angles are close to zero (2*pi)
         # first filter on the temporal mean. This is to ensure that widely varying results in angle are deemed not
         # to be trusted.
@@ -179,6 +223,11 @@ class Velocimetry(ORCBase):
             xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.rolling``, and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         s_roll = s.fillna(0.).rolling(time=roll, center=True).max()
         self._obj[v_x] = self._obj[v_x].where(s > tolerance * s_roll)
@@ -197,8 +246,8 @@ class Velocimetry(ORCBase):
             name of y-directional velocity (Default: "v_y")
         tolerance :  float
             amount of standard deviations tolerance
-        tolerance_sample :
-             (Default value = 1.0)
+        tolerance_sample : float
+            amount of standard deviations tolerance (Default value = 1.0)
         tolerance_var :
              (Default value = 5.)
         mode : str
@@ -210,8 +259,13 @@ class Velocimetry(ORCBase):
         ds_filter : xr.Dataset
             standard deviation filtered velocity vectors as [time, y, x]
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.outliers`` and ``ds.velocimetry.mask.variance`` '
+            'and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
 
-        # s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             x_std = self._obj[v_x].std(dim="time")
@@ -259,6 +313,12 @@ class Velocimetry(ORCBase):
         ds_filter : xr.Dataset
             velocity-range filtered velocity vectors as [time, y, x]
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.minmax`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         self._obj[v_x] = self._obj[v_x].where(s > s_min)
         self._obj[v_x] = self._obj[v_x].where(s < s_max)
@@ -291,12 +351,20 @@ class Velocimetry(ORCBase):
         ds_filter : xr.Dataset
             correlation filtered velocity vectors as [time, y, x]
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.corr`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self._obj[v_x] = self._obj[v_x].where(self._obj[corr] > tolerance)
         self._obj[v_y] = self._obj[v_y].where(self._obj[corr] > tolerance)
         # return ds
 
     def filter_temporal_count(self, tolerance=0.33):
-        """Masks values with a too low correlation.
+        """
+        Masks locations with a too low amount of valid velocities in time, measured by fraction with ``tolerance``.
+        Usually applied *after* having applied several other filters.
 
         Parameters
         ----------
@@ -309,7 +377,12 @@ class Velocimetry(ORCBase):
         ds_filter : xr.Dataset
             count filtered velocity vectors as [time, y, x]
         """
-        # pass
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.count`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         count_filter = copy.deepcopy(self._obj["v_x"].count(dim="time") > tolerance * len(self._obj.time))
         self._obj["v_x"] = self._obj["v_x"].where(count_filter)
         self._obj["v_y"] = self._obj["v_y"].where(count_filter)
@@ -350,6 +423,11 @@ class Velocimetry(ORCBase):
             spatially filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is deprecated. Individual filters can now be defined using ``ds.velocimetry.mask``',
+            DeprecationWarning,
+            stacklevel=2
+        )
         # work on v_x and v_y only
         ds_temp = self._obj[[v_x, v_y]].copy(deep=True).load()
         if filter_nan:
@@ -388,6 +466,11 @@ class Velocimetry(ORCBase):
             NaN filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.window_nan`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
         def _filter_nan(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.3, wdw=1, missing=-9999.):
             """
             internal function, see main function
@@ -415,7 +498,8 @@ class Velocimetry(ORCBase):
         )
 
     def filter_spatial_median(self, v_x="v_x", v_y="v_y", tolerance=0.7, wdw=1, missing=-9999.):
-        """Masks values when their value deviates more than x standard deviations from the median of its neighbours
+        """
+        Masks values when their value deviates more than x standard deviations from the median of its neighbours
         (inc. itself).
 
         Parameters
@@ -437,6 +521,12 @@ class Velocimetry(ORCBase):
             std filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.window_mean`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         def _filter_median(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.7, wdw=1, missing=-9999.):
             """
             internal function, see main method
@@ -538,12 +628,6 @@ class Velocimetry(ORCBase):
         ds_points: xr.Dataset
             interpolated data at the supplied x and y coordinates over quantiles
         """
-        # set strides
-        wdw_x_min = -wdw if wdw_x_min is None else wdw_x_min
-        wdw_x_max = wdw if wdw_x_max is None else wdw_x_max
-        wdw_y_min = -wdw if wdw_y_min is None else wdw_y_min
-        wdw_y_max = wdw if wdw_y_max is None else wdw_y_max
-
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
         if crs is not None:
             # transform coordinates of cross section
@@ -592,8 +676,17 @@ class Velocimetry(ORCBase):
             ds_points = self._obj.interp(x=_x, y=_y, method="nearest")
         else:
             # collect points within a stride, collate and analyze for outliers
-            ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(wdw_x_min, wdw_x_max + 1) for y_stride in
-                                range(wdw_y_min, wdw_y_max + 1)], dim="stride")
+            ds_wdw = helpers.stack_window(
+                self._obj,
+                wdw=wdw,
+                wdw_x_min=wdw_x_min,
+                wdw_x_max=wdw_x_max,
+                wdw_y_min=wdw_y_min,
+                wdw_y_max=wdw_y_max
+
+            )
+            # ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(wdw_x_min, wdw_x_max + 1) for y_stride in
+            #                     range(wdw_y_min, wdw_y_max + 1)], dim="stride")
             # use the median (not mean) to prevent a large influence of serious outliers
             missing_tolerance = ds_wdw.mean(dim="time").count(dim="stride") > tolerance * len(ds_wdw.stride)
             # missing_tolerance = ds_wdw.count(dim="stride") > tolerance*len(ds_wdw.stride)

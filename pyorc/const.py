@@ -3,6 +3,8 @@ import operator
 
 v_x = "v_x"
 v_y = "v_y"
+s2n = "s2n"
+corr = "corr"
 
 PIV_ATTRS = {
     v_x: {
@@ -17,13 +19,13 @@ PIV_ATTRS = {
         "units": "m s-1",
         "coordinates": "lon lat"
     },
-    "s2n": {
+    s2n: {
         "standard_name": "ratio",
         "long_name": "signal to noise ratio",
         "units": "",
         "coordinates": "lon lat",
     },
-    "corr": {
+    corr: {
         "standard_name": "correlation_coefficient",
         "long_name": "correlation coefficient between frames",
         "units": "",
@@ -86,7 +88,7 @@ ENCODING_PARAMS = {
     "_FillValue": -9999
 }
 
-ENCODE_VARS = ["v_x", "v_y", "corr", "s2n"]
+ENCODE_VARS = [v_x, v_y, corr, s2n]
 ENCODING = {k: ENCODING_PARAMS for k in ENCODE_VARS}
 
 FIGURE_ARGS = {
