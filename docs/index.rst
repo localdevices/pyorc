@@ -80,6 +80,7 @@ Please contact us at info@rainbowsensing.com for further information.
 
    intro
    installation
+   quickstart
    user-guide/index.rst
    api.rst
 
