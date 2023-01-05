@@ -718,7 +718,9 @@ class Velocimetry(ORCBase):
         ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
         if rolling is not None:
             ds_points = ds_points.rolling(time=rolling, min_periods=1).mean()
-        ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
         if v_eff:
             # add the effective velocity, perpendicular to cross section direction
             ds_points.transect.vector_to_scalar()

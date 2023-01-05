@@ -1,3 +1,4 @@
+import copy
 import functools
 import numpy as np
 import warnings
@@ -86,7 +87,7 @@ class _Velocimetry_MaskMethods:
         self._obj = velocimetry._obj
         # Add to class _FilterMethods
 
-    def __call__(self, mask, *args, **kwargs):
+    def __call__(self, mask, inplace=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -100,13 +101,23 @@ class _Velocimetry_MaskMethods:
         ds : xr.Dataset
             Dataset containing filtered velocimetry results
         """
-        if isinstance(mask, list):
+        if not(isinstance(mask, list)):
             # combine masks
-            masks = xr.concat(mask, dim="mask")
-            mask = masks.all(dim="mask")
-            self._obj[v_x] = self._obj[v_x].where(mask)
-            self._obj[v_y] = self._obj[v_y].where(mask)
-
+            mask = [mask]
+        if inplace:
+            for m in mask:
+                self._obj[v_x] = self._obj[v_x].where(m)
+                self._obj[v_y] = self._obj[v_y].where(m)
+                self._obj[corr] = self._obj[corr].where(m)
+                self._obj[s2n] = self._obj[s2n].where(m)
+        else:
+            ds = copy.deepcopy(self._obj)
+            for m in mask:
+                ds[v_x] = ds[v_x].where(m)
+                ds[v_y] = ds[v_y].where(m)
+                ds[corr] = ds[corr].where(m)
+                ds[s2n] = ds[s2n].where(m)
+            return ds
     @_base_mask(time_allowed=True)
     def minmax(self, s_min=0.1, s_max=5.):
         """
@@ -281,7 +292,7 @@ class _Velocimetry_MaskMethods:
         return mask
 
     @_base_mask()
-    def window_mean(self, tolerance=0.7, wdw=1, mode="and", **kwargs):
+    def window_mean(self, tolerance=0.7, wdw=1, mode="or", **kwargs):
         """
     Masks values when their value deviates more than tolerance (measured as relative fraction) from the mean of its
     neighbours (inc. itself).

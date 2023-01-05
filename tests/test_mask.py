@@ -48,3 +48,13 @@ def test_mask_window_mean(piv):
     piv = piv.isel(time=1)
     piv.velocimetry.mask.window_mean(inplace=True)
 
+
+def test_mask(piv):
+    # make two masks, one which works only with time, and one without, combine.
+    piv_mean = piv.mean(dim="time", keep_attrs=True)
+    mask1 = piv.velocimetry.mask.angle()
+    mask2 = piv_mean.velocimetry.mask.window_mean()
+    # combine masks and test inplace=False/True
+    piv.velocimetry.mask([mask1, mask2])
+    piv.velocimetry.mask([mask1, mask2], inplace=True)
+
