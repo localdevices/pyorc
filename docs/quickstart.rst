@@ -39,6 +39,6 @@ For a static (non-interactive) view of the examples follow one of the links belo
 
     Setup a camera configuration for processing a single video <_examples/01_Camera_Configuration_single_video.ipynb>
     Analyze surface velocities of a video with velocimetry <_examples/02_Process_velocimetry.ipynb>
-    Immersive plotting and analyzing results <_examples/03_Plotting_and_filtering_velocimetry_results.ipynb>
+    Immersive plotting and analyzing results <_examples/03_Plotting_and_masking_velocimetry_results.ipynb>
     Obtain a discharge measurement over a cross section <_examples/04_Extracting_crosssection_velocities_and_discharge.ipynb>
     Camera calibration with chessboard pattern <_examples/05_Camera_calibration.ipynb>
