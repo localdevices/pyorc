@@ -1,4 +1,4 @@
-sphinx
+sphinx==5.3  # >6.0 causes bug in pydata_sphinx_theme
 sphinx_autosummary_accessors
 sphinxcontrib-programoutput
 sphinx_rtd_theme

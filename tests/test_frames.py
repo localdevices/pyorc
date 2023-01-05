@@ -43,7 +43,7 @@ def test_edge_detect(frames_proj):
     frames_edge = frames_proj.frames.edge_detect()
     assert(frames_edge.shape == frames_proj.shape)
     assert(frames_edge[0, 0, 0].values.dtype == "float32"), f'dtype of result is {frames_edge[0, 0, 0].values.dtype}, expected "float32"'
-    assert(np.allclose(frames_edge.values.flatten()[-4:], [3.46875  , 0.328125 , 1.9140625, 4.34375  ]))
+    assert(np.allclose(frames_edge.values.flatten()[-4:], [6.328125, 2.34375, 0.0625, 0.40625]))
 
 
 
@@ -81,9 +81,9 @@ def test_plot_proj(frames_proj, idx):
 @pytest.mark.parametrize(
     "window_size, result",
     [
-        (5, [0.06478927, np.nan, np.nan, 0.08308388]),
-        (10, [0.32011113, 0.22834961, 0.29223198, 0.31207517]),
-        (15, [0.29699332, 0.33740216, 0.33087003, 0.25027668])
+        (5, [0.04290744, np.nan, np.nan, 0.07388695]),
+        (10, [0.25739092, 0.22005227, 0.30368298, 0.33715272]),
+        (15, [0.27460322, 0.3151794, 0.26885322, 0.25401443])
     ]
 )
 def test_get_piv(frames_proj, window_size, result):

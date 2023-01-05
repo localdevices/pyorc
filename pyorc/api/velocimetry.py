@@ -8,6 +8,7 @@ from pyproj import CRS
 from scipy.interpolate import interp1d
 from .orcbase import ORCBase
 from .plot import _Velocimetry_PlotMethods
+from .mask import _Velocimetry_MaskMethods
 from .. import helpers, const
 from xarray.core import utils
 
@@ -24,6 +25,39 @@ class Velocimetry(ORCBase):
         """
         super(Velocimetry, self).__init__(xarray_obj)
 
+    @property
+    def is_velocimetry(self):
+        """
+        Checks if the data contained in the object seems to be velocimetry data by checking naming of dims
+        and available variables.
+
+        Returns
+        -------
+        is_velocimetry : bool
+            If True, the dataset likely contains velocimetry data
+
+        """
+        # check for dims, difference between available and allowed should be zero in length
+        unknown_dims = set(self._obj.dims).difference(set(["time", "y", "x"]))
+        if len(unknown_dims) != 0:
+            print(f"Unknown dimension(s) found: {unknown_dims}")
+            return False
+        missed_dims = set(["y", "x"]).difference(set(self._obj.dims))
+        if len(missed_dims) != 0:
+            print(f"Dimensions missing: {missed_dims}")
+            return False
+        # check for
+        missed_vars = set(const.ENCODE_VARS).difference(set(self._obj.data_vars))
+        if len(missed_vars) != 0:
+            print(f"Variables missing: {missed_vars}")
+            return False
+        # check for available metadata
+        if not(hasattr(self._obj, "camera_config")):
+            print("camera_config metadata is missing")
+            return False
+        return True
+
+
     def filter_temporal(
             self,
             v_x="v_x",
@@ -33,11 +67,13 @@ class Velocimetry(ORCBase):
             filter_velocity=True,
             filter_corr=True,
             filter_neighbour=True,
+            filter_count=True,
             kwargs_corr={},
             kwargs_std={},
             kwargs_angle={},
             kwargs_velocity={},
             kwargs_neighbour={},
+            kwargs_count={},
             inplace=False
     ):
         """Masks values using several filters that use temporal variations or comparison as basis.
@@ -80,7 +116,13 @@ class Velocimetry(ORCBase):
 
         """
         # load dataset in memory and update self
-        ds = copy.deepcopy(self._obj.load())
+        warnings.warn(
+            'This function is deprecated. Individual filters can now be defined using ``ds.velocimetry.mask``',
+            DeprecationWarning,
+            stacklevel=2
+        )
+        ds = copy.deepcopy(self._obj)
+        ds.load()
         # start with entirely independent filters
         if filter_corr:
             ds.velocimetry.filter_temporal_corr(v_x=v_x, v_y=v_y, **kwargs_corr)
@@ -88,17 +130,22 @@ class Velocimetry(ORCBase):
             ds.velocimetry.filter_temporal_velocity(v_x=v_x, v_y=v_y, **kwargs_velocity)
         if filter_neighbour:
             ds.velocimetry.filter_temporal_neighbour(v_x=v_x, v_y=v_y, **kwargs_neighbour)
-        # finalize with temporally dependent filters
+        # continue with temporally dependent filters
         if filter_std:
             ds.velocimetry.filter_temporal_std(v_x=v_x, v_y=v_y, **kwargs_std)
         if filter_angle:
             ds.velocimetry.filter_temporal_angle(v_x=v_x, v_y=v_y, **kwargs_angle)
+        # finalize with absolute count threshold filter
+        if filter_count:
+            ds.velocimetry.filter_temporal_count(**kwargs_count)
         ds.attrs = self._obj.attrs
         if inplace:
             self._obj.update(ds)
         else:
             return ds
 
+    # add filter methods
+    mask = utils.UncachedAccessor(_Velocimetry_MaskMethods)
     def filter_temporal_angle(
             self,
             v_x="v_x",
@@ -107,7 +154,8 @@ class Velocimetry(ORCBase):
             angle_tolerance=0.25 * np.pi,
             filter_per_timestep=True,
     ):
-        """filters on the expected angle. The function filters points entirely where the mean angle over time
+        """
+        filters on the expected angle. The function filters points entirely where the mean angle over time
         deviates more than input parameter angle_bounds (in radians). The function also filters individual
         estimates in time, in case the user wants this (filter_per_timestep=True), in case the angle on
         a specific time step deviates more than the defined amount from the average.
@@ -134,6 +182,11 @@ class Velocimetry(ORCBase):
             angle filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.angle``, and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
         # TODO: make function working appropriately, if angles are close to zero (2*pi)
         # first filter on the temporal mean. This is to ensure that widely varying results in angle are deemed not
         # to be trusted.
@@ -170,6 +223,11 @@ class Velocimetry(ORCBase):
             xr.Dataset, containing time-neighbour filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.rolling``, and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         s_roll = s.fillna(0.).rolling(time=roll, center=True).max()
         self._obj[v_x] = self._obj[v_x].where(s > tolerance * s_roll)
@@ -199,8 +257,13 @@ class Velocimetry(ORCBase):
         ds_filter : xr.Dataset
             standard deviation filtered velocity vectors as [time, y, x]
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.outliers`` and ``ds.velocimetry.mask.variance`` '
+            'and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
 
-        # s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             x_std = self._obj[v_x].std(dim="time")
@@ -248,6 +311,12 @@ class Velocimetry(ORCBase):
         ds_filter : xr.Dataset
             velocity-range filtered velocity vectors as [time, y, x]
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.minmax`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
         self._obj[v_x] = self._obj[v_x].where(s > s_min)
         self._obj[v_x] = self._obj[v_x].where(s < s_max)
@@ -280,9 +349,42 @@ class Velocimetry(ORCBase):
         ds_filter : xr.Dataset
             correlation filtered velocity vectors as [time, y, x]
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.corr`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self._obj[v_x] = self._obj[v_x].where(self._obj[corr] > tolerance)
         self._obj[v_y] = self._obj[v_y].where(self._obj[corr] > tolerance)
         # return ds
+
+    def filter_temporal_count(self, tolerance=0.33):
+        """
+        Masks locations with a too low amount of valid velocities in time, measured by fraction with ``tolerance``.
+        Usually applied *after* having applied several other filters.
+
+        Parameters
+        ----------
+        tolerance : float (0-1)
+            tolerance for fractional amount of valid velocities after all filters. If less than the fraction is
+            available, the entire velocity will be set to missings.
+
+        Returns
+        -------
+        ds_filter : xr.Dataset
+            count filtered velocity vectors as [time, y, x]
+        """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.count`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+        count_filter = copy.deepcopy(self._obj["v_x"].count(dim="time") > tolerance * len(self._obj.time))
+        self._obj["v_x"] = self._obj["v_x"].where(count_filter)
+        self._obj["v_y"] = self._obj["v_y"].where(count_filter)
+
 
     def filter_spatial(
             self,
@@ -319,6 +421,11 @@ class Velocimetry(ORCBase):
             spatially filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is deprecated. Individual filters can now be defined using ``ds.velocimetry.mask``',
+            DeprecationWarning,
+            stacklevel=2
+        )
         # work on v_x and v_y only
         ds_temp = self._obj[[v_x, v_y]].copy(deep=True).load()
         if filter_nan:
@@ -357,6 +464,11 @@ class Velocimetry(ORCBase):
             NaN filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.window_nan`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
         def _filter_nan(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.3, wdw=1, missing=-9999.):
             """
             internal function, see main function
@@ -384,7 +496,8 @@ class Velocimetry(ORCBase):
         )
 
     def filter_spatial_median(self, v_x="v_x", v_y="v_y", tolerance=0.7, wdw=1, missing=-9999.):
-        """Masks values when their value deviates more than x standard deviations from the median of its neighbours
+        """
+        Masks values when their value deviates more than x standard deviations from the median of its neighbours
         (inc. itself).
 
         Parameters
@@ -406,6 +519,12 @@ class Velocimetry(ORCBase):
             std filtered velocity vectors as [time, y, x]
 
         """
+        warnings.warn(
+            'This function is replaced by ``ds.velocimetry.mask.window_mean`` and will not be available starting from v0.5.0',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         def _filter_median(ds_slice, v_x="v_x", v_y="v_y", tolerance=0.7, wdw=1, missing=-9999.):
             """
             internal function, see main method
@@ -443,7 +562,12 @@ class Velocimetry(ORCBase):
             ys="ys",
             distance=None,
             wdw=1,
+            wdw_x_min=None,
+            wdw_x_max=None,
+            wdw_y_min=None,
+            wdw_y_max=None,
             rolling=None,
+            tolerance=0.5,
             quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]
     ):
         """Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the
@@ -464,7 +588,6 @@ class Velocimetry(ORCBase):
         s : tuple or list-like
             distance from bank coordinates on which interpolation should be done, defaults: None
             if set, these distances will be precisely respected, and not interpolated. ``distance`` will be ignored.
-
         crs : int, dict or str, optional
             coordinate reference system (e.g. EPSG code) in which x, y and z are measured (default: None),
             None assumes crs is the same as crs of xr.Dataset.
@@ -477,8 +600,22 @@ class Velocimetry(ORCBase):
         distance : float, optional
             sampling distance over the cross-section in [m]. the bathymetry points will be interpolated to match this
             distance. If not set, the distance will be estimated from the velocimetry grid resolution. (default: None)
-        wdw : int, window size to use for sampling the velocity. zero means, only cell itself, 1 means 3x3 window.
-            (default: 1)
+        wdw : int, optional
+            window size to use for sampling the velocity. zero means, only cell itself, 1 means 3x3 window.
+            (default: 1) wdw is used to fill wdw_x_min and wdwd_y_min with its negative (-wdw) value, and wdw_y_min and
+            wdw_y_max with its positive value, to create a sampling window.
+        wdw_x_min : int, optional
+            window size in negative x-direction of grid (must be negative), overrules wdw in negative x-direction if set
+        wdw_x_max : int, optional
+            window size in positive x-direction of grid, overrules wdw in positive x-direction if set
+        wdw_y_min : int, optional
+            window size in negative y-direction of grid (must be negative), overrules wdw in negative y-direction if set
+        wdw_y_max : int, optional
+            window size in positive y-direction of grid, overrules wdw in positive x-direction if set.
+        tolerance : float (0-1), optional
+            tolerance on the required amount of sampled data in the window defined by wdw and/or wdw_x_min, wdw_x_max,
+            wdw_y_min and wdw_y_max (if set). At least this fraction of cells each time step must have a data value
+            to return a value. Otherwise the location is given a nan as value.
         rolling : int, optional
             if set other than None (default), a rolling mean over time is applied, before deriving quantile estimates.
         quantiles : list of floats (0-1), optional
@@ -534,17 +671,37 @@ class Velocimetry(ORCBase):
 
         # interpolate velocities over points
         if wdw == 0:
-            ds_points = self._obj.interp(x=_x, y=_y)
+            ds_points = self._obj.interp(x=_x, y=_y, method="nearest")
         else:
             # collect points within a stride, collate and analyze for outliers
-            ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(-wdw, wdw + 1) for y_stride in
-                                range(-wdw, wdw + 1)], dim="stride")
+            ds_wdw = helpers.stack_window(
+                self._obj,
+                wdw=wdw,
+                wdw_x_min=wdw_x_min,
+                wdw_x_max=wdw_x_max,
+                wdw_y_min=wdw_y_min,
+                wdw_y_max=wdw_y_max
+
+            )
+            # ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(wdw_x_min, wdw_x_max + 1) for y_stride in
+            #                     range(wdw_y_min, wdw_y_max + 1)], dim="stride")
             # use the median (not mean) to prevent a large influence of serious outliers
-            ds_effective = ds_wdw.mean(dim="stride", keep_attrs=True)
+            missing_tolerance = ds_wdw.mean(dim="time").count(dim="stride") > tolerance * len(ds_wdw.stride)
+            # missing_tolerance = ds_wdw.count(dim="stride") > tolerance*len(ds_wdw.stride)
+            ds_effective = ds_wdw.median(dim="stride", keep_attrs=True)
+            # remove velocities that are too few in samples
+            ds_effective = ds_effective.where(missing_tolerance)
+            # scipy does not tolerate np.float32 since scipy=1.10.0, so first convert to np.float64
+            for var in ds_effective:
+                ds_effective[var] = ds_effective[var].astype(np.float64)
+            for coord in ds_effective.coords:
+                ds_effective[coord] = ds_effective[coord].astype(np.float64)
+
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
-            raise ValueError(
-                "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera objective")
+            warnings.warn(
+                "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera objective or anything is visible in objective."
+            )
         # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
         # found back from this dataset
         ds_points = ds_points.assign_coords(xcoords=("points", list(x)))
@@ -565,7 +722,9 @@ class Velocimetry(ORCBase):
         ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
         if rolling is not None:
             ds_points = ds_points.rolling(time=rolling, min_periods=1).mean()
-        ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            ds_points = ds_points.quantile(quantiles, dim="time", keep_attrs=True)
         if v_eff:
             # add the effective velocity, perpendicular to cross section direction
             ds_points.transect.vector_to_scalar()
