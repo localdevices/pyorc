@@ -693,6 +693,12 @@ class Velocimetry(ORCBase):
             ds_effective = ds_wdw.median(dim="stride", keep_attrs=True)
             # remove velocities that are too few in samples
             ds_effective = ds_effective.where(missing_tolerance)
+            # scipy does not tolerate np.float32 since scipy=1.10.0, so first convert to np.float64
+            for var in ds_effective:
+                ds_effective[var] = ds_effective[var].astype(np.float64)
+            for coord in ds_effective.coords:
+                ds_effective[coord] = ds_effective[coord].astype(np.float64)
+
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
             warnings.warn(
