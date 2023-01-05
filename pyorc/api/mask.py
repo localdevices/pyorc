@@ -300,7 +300,7 @@ class _Velocimetry_MaskMethods:
     Parameters
     ----------
     tolerance: float, optional
-        amount of velocity [m s-1] tolerance (default: 0.7)
+        amount of velocity relative to the mean velocity  (default: 0.7)
     wdw : int, optional
         window used to determine relevant neighbours
     wdw_x_min : int, optional
