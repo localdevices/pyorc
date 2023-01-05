@@ -43,7 +43,7 @@ Mamba users will have a faster experience. They can use the following command in
 
 .. code-block:: console
 
-    $ mamba install pyopenrivercam
+    $ mamba install -c conda-forge pyopenrivercam
 
 
 .. _install_pip:
