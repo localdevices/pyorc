@@ -1,7 +1,5 @@
 import os.path
-
 from pyorc import CameraConfig, Video
-import cv2
 import matplotlib.pyplot as plt
 
 def camera_config(video_file, cam_config_file, lens_position=None, corners=None, **kwargs):

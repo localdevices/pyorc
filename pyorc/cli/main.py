@@ -243,6 +243,7 @@ def camera_config(
 def velocimetry(ctx, output, videofile, recipe, cameraconfig):
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False)
     logger.info(f"Preparing your velocimetry result in {output}")
+    processor = pyorc.service.VelocityFlowProcessor(recipe, videofile, cameraconfig, output)
     # read yaml
     pass
 
