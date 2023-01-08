@@ -61,7 +61,8 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
     print(result)
 
 
-
+def test_service_video(velocity_flow_processor):
+    raise NotImplementedError
 
 
 

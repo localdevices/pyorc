@@ -28,6 +28,11 @@ def cam_config_fn():
 
 
 @pytest.fixture
+def recipe_yml():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.yml")
+
+
+@pytest.fixture
 def cli_output_dir():
     dir = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "outputs")
     yield dir
@@ -267,5 +272,22 @@ def cli_obj():
 
     class_.invoke = invoke_wrapper(class_.invoke)
     cli_runner = class_()
-
     yield cli_runner
+
+
+@pytest.fixture
+def recipe(recipe_yml):
+    from pyorc.cli import cli_utils
+    return cli_utils.parse_recipe("a", "b", recipe_yml)
+
+
+@pytest.fixture
+def velocity_flow_processor(recipe, vid_file, cam_config_fn, cli_output_dir):
+
+    return pyorc.service.VelocityFlowProcessor(
+        recipe,
+        vid_file,
+        cam_config_fn,
+        cli_output_dir
+    )
+
