@@ -17,7 +17,7 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
     result = cli_obj.invoke(
         cli, [
             'camera-config',
-            '-v',
+            '-V',
             vid_file,
             '--src',
             json.dumps(gcps_src),
@@ -37,6 +37,7 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
             '25',
             '--corners',
             json.dumps(corners),
+            '-vvv',
             cli_cam_config_output,
 
         ],
@@ -48,17 +49,18 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
     result = cli_obj.invoke(
         cli, [
             'velocimetry',
-            '-v',
+            '-V',
             vid_file,
             '-c',
             cam_config_fn,
             '-r',
             cli_recipe_fn,
+            '-vvv',
             cli_output_dir
         ],
         echo=True
     )
-    print(result)
+    assert result.exit_code == 0
 
 
 def test_service_video(velocity_flow_processor):

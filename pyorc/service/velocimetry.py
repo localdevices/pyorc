@@ -1,14 +1,31 @@
 import os.path
+
+import pyorc
 from pyorc import CameraConfig, Video
 import cv2
 import logging
 import yaml
 import matplotlib.pyplot as plt
-
+import functools
 from typing import Optional, Dict
 
 logger = logging.getLogger(__name__)
 from dask.diagnostics import ProgressBar
+
+
+def apply_methods(obj, subclass, logger=logger, **kwargs):
+    for m, _kwargs in kwargs.items():
+        # get the subclass with the expected methods
+        cls = getattr(obj, subclass)
+        if not(hasattr(cls, m)):
+            raise ValueError(f'Method "{m}" for {subclass} does not exist, please check your recipe')
+        logger.debug(f"Applying {m} on frames with parameters {_kwargs}")
+        meth = getattr(cls, m)
+        obj = meth(**_kwargs)
+
+    return obj
+
+
 class VelocityFlowProcessor(object):
     """
     General processor class for processing of videos in to velocities and flow and derivative products
@@ -88,12 +105,12 @@ class VelocityFlowProcessor(object):
         self._fn_cam_config = fn_cam_config
 
     @property
-    def video_fn(self):
-        return self._video_fn
+    def fn_video(self):
+        return self._fn_video
 
-    @video_fn.setter
-    def video_fn(self, video_fn):
-        self._video_fn = video_fn
+    @fn_video.setter
+    def fn_video(self, fn_video):
+        self._fn_video = fn_video
 
 
     def set_status_fn(self, fn):
@@ -130,6 +147,9 @@ class VelocityFlowProcessor(object):
 
         """
 
+        self.video(**self.recipe["video"])
+        self.frames(**self.recipe["frames"])
+        self.velocimetry(**self.recipe["velocimetry"])
         # TODO: read in video file with cam configuration
 
         # TODO: if present, perform frame processing activities
@@ -157,36 +177,57 @@ class VelocityFlowProcessor(object):
         -------
 
         """
-    def video(self):
+    def video(self, **kwargs):
         # TODO prepare reader
-        # self.video = ...
+        self.video_obj = pyorc.Video(
+            self.fn_video,
+            camera_config=self.fn_cam_config,
+            **kwargs
+        )
         # some checks ...
-        self.logger.info(f"Video successfully read from {self.video_fn} with start frame and end frame") # TODO add start frame and end frame
-
+        self.logger.info(f"Video successfully read from {self.fn_video}")
         # at the end
-        # self.da_frames = self.video.get_frames()
-        raise NotImplementedError
+        self.da_frames = self.video_obj.get_frames()
+        self.logger.debug(f"{len(self.da_frames)} frames retrieved from video")
 
-    def frames(self):
-        write = True  # TODO: get this from recipe
+    def frames(self, **kwargs):
         # TODO: preprocess steps
+        if "project" not in kwargs:
+            kwargs["project"] = {}
+        # iterate over steps in processing
+        self.da_frames = apply_methods(
+            self.da_frames,
+            "frames",
+            logger=self.logger,
+            **kwargs
+        )
+        # for m, _kwargs in kwargs.items():
+        #     if not(hasattr(self.da_frames.frames, m)):
+        #         raise ValueError(f'Method "{m}" for frames does not exist, please check your recipe')
+        #     self.logger.debug(f"Applying {m} on frames with parameters {_kwargs}")
+        #     meth = getattr(self.da_frames.frames, m)
+        #     self.da_frames = meth(**_kwargs)
+        self.logger.info(f'Frames are preprocessed')
 
-        # at the end
-        # self.da_proj = self.da_frames.frames.project()
-        # if present: to_video
-        # self.piv = self.da_proj.get_piv
+
+    def velocimetry(self, default="get_piv", write=False, **kwargs):
+        if len(kwargs) > 1:
+            raise OverflowError(f"Too many arguments under velocimetry, only one allowed, but {len(kwargs)} given.")
+        if len(kwargs) == 0:
+            kwargs[default] = {}
+        # get velocimetry results
+        self.velocimetry_obj = apply_methods(self.da_frames, "frames", logger=self.logger, **kwargs)
+        m = list(kwargs.keys())[0]
+        parameters = kwargs[m]
+        self.logger.info(f"Velocimetry derived with method {m} with parameters {parameters}")
         if write:
-            delayed_obj = self.piv.to_netcdf(self.fn_piv, compute=False)
+            delayed_obj = self.velocimetry_obj.to_netcdf(self.fn_piv, compute=False)
             with ProgressBar():
                 delayed_obj.compute()
+            self.logger.info(f"Velocimetry written to {self.fn_piv}")
 
-        raise NotImplementedError
-
-
-
-    def mask(self):
+    def mask(self, write=False, **kwargs):
         # TODO go through several masking groups
-        write = True  # TODO: get this from recipe
         piv_masked = self.piv
         for mask_group in self.recipe.mask:
             print("get masks per step")

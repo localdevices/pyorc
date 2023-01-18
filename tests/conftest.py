@@ -36,7 +36,8 @@ def recipe_yml():
 def cli_output_dir():
     dir = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "outputs")
     yield dir
-    shutil.rmtree(dir)
+    if os.path.isdir(dir):
+        shutil.rmtree(dir)
 
 @pytest.fixture
 def cli_recipe_fn():

@@ -29,6 +29,16 @@ def print_license(ctx, param, value):
     ctx.exit()
 
 
+verbose_opt = click.option("--verbose", "-v", count=True, help="Increase verbosity.")
+video_opt = click.option(
+    "-V",
+    "--videofile",
+    type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
+    help="video file with required objective and resolution and control points in view",
+    callback=cli_utils.validate_file,
+    required=True
+)
+
 
 @click.group()
 @click.version_option(__version__, message="PyOpenRiverCam version: %(version)s")
@@ -71,13 +81,7 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
     required=True,
 )
-@click.option(
-    "-v",
-    "--videofile",
-    type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
-    help="video file with required objective and resolution and control points in view",
-    callback=cli_utils.validate_file
-)
+@video_opt
 @click.option(
     "--crs",
     type=str,
@@ -140,6 +144,7 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     callback=cli_utils.parse_corners,
     help="Video ojective corner points as list of 4 [column, row] points"
 )
+@verbose_opt
 @click.pass_context
 @typechecked
 def camera_config(
@@ -156,9 +161,11 @@ def camera_config(
         window_size: Optional[int],
         lens_position: Optional[List[float]],
         shapefile: Optional[str],
-        corners: Optional[List[List]]
+        corners: Optional[List[List]],
+        verbose: int
 ):
-    logger = log.setuplog("cameraconfig", os.path.abspath("pyorc.log"), append=False)
+    log_level = max(10, 30 - 10 * verbose)
+    logger = log.setuplog("cameraconfig", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your cameraconfig file in {output}")
     logger.info(f"Found video file  {videofile}")
 
@@ -215,14 +222,7 @@ def camera_config(
     callback=cli_utils.validate_dir,
     required=True,
 )
-@click.option(
-    "-v",
-    "--videofile",
-    type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
-    help="video file with required objective and resolution and control points in view",
-    callback=cli_utils.validate_file,
-    required=True
-)
+@video_opt
 @click.option(
     "-r",
     "--recipe",
@@ -239,11 +239,21 @@ def camera_config(
     callback=cli_utils.validate_file,
     required=True
 )
+@verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig):
-    logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False)
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, verbose):
+    log_level = max(10, 30 - 10 * verbose)
+    logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
-    processor = pyorc.service.VelocityFlowProcessor(recipe, videofile, cameraconfig, output)
+    processor = pyorc.service.VelocityFlowProcessor(
+        recipe,
+        videofile,
+        cameraconfig,
+        output,
+        logger=logger
+    )
+    # process video following the settings
+    processor.process()
     # read yaml
     pass
 
