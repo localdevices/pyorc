@@ -1,0 +1,51 @@
+video:
+    start_frame: 0
+    end_frame: 20
+
+frames:
+  normalize:
+  edge_detect:
+    wdw_1: 1
+    wdw_2: 2
+  minmax:
+    min: -5
+    max: 5
+
+velocimetry:
+  get_piv:
+      window_size: 10
+  write: True
+
+
+
+plot:
+  plot_quiver:
+    frames:
+    velocimetry:
+      alpha: 0.4
+      cmap: rainbow
+      scale: 400
+      width: 0.0015
+      add_colorbar: True
+      vmax: 1.
+    mode: camera
+    reducer: mean
+    write_pars:
+      dpi: 100
+      bbox_inches: tight
+#mask:
+
+  #filter_temporal_corr:
+  #filter_temporal_velocity:
+  #filter_temporal_neighbour:
+  #filter_temporal_std:
+  #filter_temporal_angle:
+  #filter_spatial:
+      #filter_nan: False
+      #kwargs_median:
+        #wdw: 2
+
+
+
+
+

@@ -160,6 +160,7 @@ Visualizing frames
 
     Frames.plot
     Frames.to_ani
+    Frames.to_video
 
 .. _velocimetry:
 

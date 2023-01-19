@@ -16,164 +16,148 @@ The camera configuration methods of **pyorc** are meant for this purpose.
 
 Setting up a camera configuration
 ---------------------------------
-In **pyorc** all camera configuration is collected into one single class called ``CameraConfig``. It can be imported
-from the main library and then be used to add information about the lens characteristics and the relation between
-real-world and row-column coordinates. Once completed, the camera configuration can be added to a video to make it lens
-and geographically aware. You can also add a camera configuration, stored in a JSON-formatted file to a video.
-Once this is done, the video has added intelligence about the real-world, and you can orthorectify its frames.
-Below a simple example is shown, where only the expected size of the objective in ``height`` and ``width`` is provided.
 
-.. code-block:: python
+.. tab-set::
 
-    cam_config = pyorc.CameraConfig(height=1080, width=1920)
-    cam_config
+    .. tab-item:: Command-line
 
-    {
-        "height": 1080,
-        "width": 1920,
-        "resolution": 0.05,
-        "window_size": 10,
-        "dist_coeffs": [
-            [
-                0.0
-            ],
-            [
-                0.0
-            ],
-            [
-                0.0
-            ],
-            [
-                0.0
-            ]
-        ],
-        "camera_matrix": [
-            [
-                1920.0,
-                0.0,
-                960.0
-            ],
-            [
-                0.0,
-                1920.0,
-                540.0
-            ],
-            [
-                0.0,
-                0.0,
-                1.0
-            ]
-        ]
-    }
+        The command-line interface supports setting up a camera configuration through a subcommand. To see the options
+        simply call the subcommand with ``--help`` as follows:
 
-You can see that the inline representation of the ``CameraConfig`` object is basically a dictionary with pieces of
-information in it. In this example we can already see a few components that are estimated from default values. These
-can all be modified, or updated with several methods after the object has been established. The different parts we can
-see here already are as follows:
+        .. code-block:: cmd
 
-* ``height`` and ``width``: these are simply the height and width of the expected objective of a raw video. You must
-  at minimum provide these to generate a ``CameraConfig`` object.
-* ``resolution``: this is the resolution in meters, in which you will get your orthoprojected frames, once you have
-  a complete ``CameraConfig`` including information on geographical coordinates and image coordinates, and a bounding
-  box, that defines which area you are interested in for velocity estimation. As you
-  can see, a default value of 0.05 is selected, which in many cases is suitable for velocimetry purposes.
-* ``window_size``: this is the amount of orthorectified pixels in which one may expect to find a pattern and also.
-  the size of a window in which a velocity vector will be generated. A default is here set at 10. In smaller streams
-  you may decide to reduce this number, but we highly recommend not to make it lower than 5, to ensure that there are
-  enough pixels to distinguish patterns in. If patterns seem to be really small, then you may decide to reduce the resolution
-  instead. **pyorc** automatically uses an overlap between windows of 50% to use as much information as possible over
-  the area of interest. With the default settings this would mean you would get a velocity vector every
-  0.05 * 10 / 2 = 0.25 meters.
-* ``dist_coeffs``: this is a vector of at minimum 4 numbers defining respectively radial (max. 6) and tangential (2)
-  distortion coefficients of the used camera lens. As you can see these default to zeros only, meaning we assume no
-  significant distortion if you do not explicitly provide information for this.
-* ``camera_matrix``: the intrinsic matrix of the camera lens, allowing to transform a coordinate relative to the camera lens
-  coordinate system (still in 3D) into an image coordinate (2D, i.e. a pixel coordinate). More on this can be found
-  e.g. on `this blog. <https://towardsdatascience.com/what-are-intrinsic-and-extrinsic-camera-parameters-in-computer-vision-7071b72fb8ec>`_
+            pyorc camera-config --help
 
-As you can see, the camera configuration does not yet have any real-world information and therefore is not sufficient
-to perform orthorectification. Below we describe how you can establish a full camera configuration.
+    .. tab-item:: API
+
+        In **pyorc** all camera configuration is collected into one single class called ``CameraConfig``. It can be imported
+        from the main library and then be used to add information about the lens characteristics and the relation between
+        real-world and row-column coordinates. Once completed, the camera configuration can be added to a video to make it lens
+        and geographically aware. You can also add a camera configuration, stored in a JSON-formatted file to a video.
+        Once this is done, the video has added intelligence about the real-world, and you can orthorectify its frames.
+        Below a simple example is shown, where only the expected size of the objective in ``height`` and ``width`` is provided.
+
+            .. literalinclude:: ./cam_config.py
+                :language: python
+
+        You can see that the inline representation of the ``CameraConfig`` object is basically a dictionary with pieces of
+        information in it. In this example we can already see a few components that are estimated from default values. These
+        can all be modified, or updated with several methods after the object has been established. The different parts we can
+        see here already are as follows:
+
+        * ``height`` and ``width``: these are simply the height and width of the expected objective of a raw video. You must
+          at minimum provide these to generate a ``CameraConfig`` object.
+        * ``resolution``: this is the resolution in meters, in which you will get your orthoprojected frames, once you have
+          a complete ``CameraConfig`` including information on geographical coordinates and image coordinates, and a bounding
+          box, that defines which area you are interested in for velocity estimation. As you
+          can see, a default value of 0.05 is selected, which in many cases is suitable for velocimetry purposes.
+        * ``window_size``: this is the amount of orthorectified pixels in which one may expect to find a pattern and also.
+          the size of a window in which a velocity vector will be generated. A default is here set at 10. In smaller streams
+          you may decide to reduce this number, but we highly recommend not to make it lower than 5, to ensure that there are
+          enough pixels to distinguish patterns in. If patterns seem to be really small, then you may decide to reduce the resolution
+          instead. **pyorc** automatically uses an overlap between windows of 50% to use as much information as possible over
+          the area of interest. With the default settings this would mean you would get a velocity vector every
+          0.05 * 10 / 2 = 0.25 meters.
+        * ``dist_coeffs``: this is a vector of at minimum 4 numbers defining respectively radial (max. 6) and tangential (2)
+          distortion coefficients of the used camera lens. As you can see these default to zeros only, meaning we assume no
+          significant distortion if you do not explicitly provide information for this.
+        * ``camera_matrix``: the intrinsic matrix of the camera lens, allowing to transform a coordinate relative to the camera lens
+          coordinate system (still in 3D) into an image coordinate (2D, i.e. a pixel coordinate). More on this can be found
+          e.g. on `this blog. <https://towardsdatascience.com/what-are-intrinsic-and-extrinsic-camera-parameters-in-computer-vision-7071b72fb8ec>`_
+
+        As you can see, the camera configuration does not yet have any real-world information and therefore is not sufficient
+        to perform orthorectification. Below we describe how you can establish a full camera configuration.
+
 
 Making the camera configuration geographically aware
 ----------------------------------------------------
-In case you are able to perform your field measurements with a RTK GNSS device, then your camera configuration
-can be made entirely geographically aware. You can then export or visualize your results in a geographical map later
-on, or use your results in GIS software such as QGIS. You do this simply by passing the keyword ``crs`` to the camera
-configuration and enter a projection. Several ways to pass a projection are possible such as:
 
-* EPSG codes (see EPSG.io)
-* proj4 strings
-* Well-Know-Text format strings (WKT)
+.. tab-set::
 
-Because **pyorc** intends to measure velocities in distance metrics, it is compulsory to select a locally valid meter
-projected coordinate reference system, and not for instance an ellipsoidal coordinate system such as the typical
-WGS84 latitude longitude CRS. For instance in the Netherlands you may use Rijksdriehoek (EPSG code 28992). In Zambia
-the UTM35S projection (EPSG code 32735) is appropriate, whilst in Tanzania, we may select the UTM37S projection (EPSG code
-32737). IF you use a non-appropriate or non-local system, you may get either very wrong results, or get errors during
-the process. To find a locally relevant system, we strongly recommend to visit the `EPSG site <https://epsg.io>`_ and
-search for your location. If you do not have RTK GNSS, then simply skip this step and ensure you make your own local
-coordinate system, with unit meter distances.
+    .. tab-item:: Command-line
 
-Once your camera configuration is geographically aware, we can pass all other geographical information we may need in
-any projection, as long as we notify the camera configuration which projection that is. For instance, if we measure
-our ground control points (GCPs, see later in this manual) with an RTK GNSS set, and store our results as WGS84 lat-lon
-points, then we do not have to go through the trouble of converting these points into the system we chose for our camera
-configuration. Instead we just pass the CRS of the WGS84 lat-lon (e.g. using the EPSG code 4326) while we add the GCPs
-to our configuration. We will see this later in this manual.
+        Lorem ipsum
 
-Below, we show what the configuration would look like if we would add the Rijksdriehoek projection to our camera
-configuration. You can see that the code is converted into a Well-Known-Text format, so that it can also easily be
-stored in a generic text (json) format.
+    .. tab-item:: API
 
-.. code-block:: python
+        In case you are able to perform your field measurements with a RTK GNSS device, then your camera configuration
+        can be made entirely geographically aware. You can then export or visualize your results in a geographical map later
+        on, or use your results in GIS software such as QGIS. You do this simply by passing the keyword ``crs`` to the camera
+        configuration and enter a projection. Several ways to pass a projection are possible such as:
 
-    cam_config = pyorc.CameraConfig(height=1080, width=1920, crs=32631)
-    cam_config
+        * EPSG codes (see EPSG.io)
+        * proj4 strings
+        * Well-Know-Text format strings (WKT)
 
-    {
-        "height": 1080,
-        "width": 1920,
-        "crs": "PROJCRS[\"WGS 84 / UTM zone 31N\",BASEGEOGCRS[\"WGS 84\",ENSEMBLE[\"World Geodetic System 1984 ensemble\",MEMBER[\"World Geodetic System 1984 (Transit)\"],MEMBER[\"World Geodetic System 1984 (G730)\"],MEMBER[\"World Geodetic System 1984 (G873)\"],MEMBER[\"World Geodetic System 1984 (G1150)\"],MEMBER[\"World Geodetic System 1984 (G1674)\"],MEMBER[\"World Geodetic System 1984 (G1762)\"],MEMBER[\"World Geodetic System 1984 (G2139)\"],ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]],CONVERSION[\"UTM zone 31N\",METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]],PARAMETER[\"Latitude of natural origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",3,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Scale factor at natural origin\",0.9996,SCALEUNIT[\"unity\",1],ID[\"EPSG\",8805]],PARAMETER[\"False easting\",500000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],USAGE[SCOPE[\"Engineering survey, topographic mapping.\"],AREA[\"Between 0\u00b0E and 6\u00b0E, northern hemisphere between equator and 84\u00b0N, onshore and offshore. Algeria. Andorra. Belgium. Benin. Burkina Faso. Denmark - North Sea. France. Germany - North Sea. Ghana. Luxembourg. Mali. Netherlands. Niger. Nigeria. Norway. Spain. Togo. United Kingdom (UK) - North Sea.\"],BBOX[0,0,84,6]],ID[\"EPSG\",32631]]",
-        "resolution": 0.05,
-        "window_size": 10,
-        "dist_coeffs": [
-            [
-                0.0
-            ],
-            [
-                0.0
-            ],
-            [
-                0.0
-            ],
-            [
-                0.0
-            ]
-        ],
-        "camera_matrix": [
-            [
-                1920.0,
-                0.0,
-                960.0
-            ],
-            [
-                0.0,
-                1920.0,
-                540.0
-            ],
-            [
-                0.0,
-                0.0,
-                1.0
-            ]
-        ]
-    }
+        Because **pyorc** intends to measure velocities in distance metrics, it is compulsory to select a locally valid meter
+        projected coordinate reference system, and not for instance an ellipsoidal coordinate system such as the typical
+        WGS84 latitude longitude CRS. For instance in the Netherlands you may use Rijksdriehoek (EPSG code 28992). In Zambia
+        the UTM35S projection (EPSG code 32735) is appropriate, whilst in Tanzania, we may select the UTM37S projection (EPSG code
+        32737). IF you use a non-appropriate or non-local system, you may get either very wrong results, or get errors during
+        the process. To find a locally relevant system, we strongly recommend to visit the `EPSG site <https://epsg.io>`_ and
+        search for your location. If you do not have RTK GNSS, then simply skip this step and ensure you make your own local
+        coordinate system, with unit meter distances.
 
-.. note::
+        Once your camera configuration is geographically aware, we can pass all other geographical information we may need in
+        any projection, as long as we notify the camera configuration which projection that is. For instance, if we measure
+        our ground control points (GCPs, see later in this manual) with an RTK GNSS set, and store our results as WGS84 lat-lon
+        points, then we do not have to go through the trouble of converting these points into the system we chose for our camera
+        configuration. Instead we just pass the CRS of the WGS84 lat-lon (e.g. using the EPSG code 4326) while we add the GCPs
+        to our configuration. We will see this later in this manual.
 
-   A smart phone also has a GNSS chipset, however, this is by far not accurate enough to provide the measurements needed
-   for **pyorc**. We recommend using a (ideal!) RTK GNSS device with a base station setup close enough to warrant
-   accurate results, or otherwise a total station or spirit level.
+        Below, we show what the configuration would look like if we would add the Rijksdriehoek projection to our camera
+        configuration. You can see that the code is converted into a Well-Known-Text format, so that it can also easily be
+        stored in a generic text (json) format.
+
+        .. code-block:: python
+
+            cam_config = pyorc.CameraConfig(height=1080, width=1920, crs=32631)
+            cam_config
+
+            {
+                "height": 1080,
+                "width": 1920,
+                "crs": "PROJCRS[\"WGS 84 / UTM zone 31N\",BASEGEOGCRS[\"WGS 84\",ENSEMBLE[\"World Geodetic System 1984 ensemble\",MEMBER[\"World Geodetic System 1984 (Transit)\"],MEMBER[\"World Geodetic System 1984 (G730)\"],MEMBER[\"World Geodetic System 1984 (G873)\"],MEMBER[\"World Geodetic System 1984 (G1150)\"],MEMBER[\"World Geodetic System 1984 (G1674)\"],MEMBER[\"World Geodetic System 1984 (G1762)\"],MEMBER[\"World Geodetic System 1984 (G2139)\"],ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]],CONVERSION[\"UTM zone 31N\",METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]],PARAMETER[\"Latitude of natural origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",3,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Scale factor at natural origin\",0.9996,SCALEUNIT[\"unity\",1],ID[\"EPSG\",8805]],PARAMETER[\"False easting\",500000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],USAGE[SCOPE[\"Engineering survey, topographic mapping.\"],AREA[\"Between 0\u00b0E and 6\u00b0E, northern hemisphere between equator and 84\u00b0N, onshore and offshore. Algeria. Andorra. Belgium. Benin. Burkina Faso. Denmark - North Sea. France. Germany - North Sea. Ghana. Luxembourg. Mali. Netherlands. Niger. Nigeria. Norway. Spain. Togo. United Kingdom (UK) - North Sea.\"],BBOX[0,0,84,6]],ID[\"EPSG\",32631]]",
+                "resolution": 0.05,
+                "window_size": 10,
+                "dist_coeffs": [
+                    [
+                        0.0
+                    ],
+                    [
+                        0.0
+                    ],
+                    [
+                        0.0
+                    ],
+                    [
+                        0.0
+                    ]
+                ],
+                "camera_matrix": [
+                    [
+                        1920.0,
+                        0.0,
+                        960.0
+                    ],
+                    [
+                        0.0,
+                        1920.0,
+                        540.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            }
+
+        .. note::
+
+           A smart phone also has a GNSS chipset, however, this is by far not accurate enough to provide the measurements needed
+           for **pyorc**. We recommend using a (ideal!) RTK GNSS device with a base station setup close enough to warrant
+           accurate results, or otherwise a total station or spirit level.
 
 
 Storing and loading a camera configuration
