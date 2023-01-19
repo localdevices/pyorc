@@ -239,9 +239,16 @@ def camera_config(
     callback=cli_utils.validate_file,
     required=True
 )
+@click.option(
+    "-u",
+    "--update",
+    is_flag=True,
+    default=False,
+    help="Only update requested output files with changed inputs or if not present on file system",
+)
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, verbose):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, update, verbose):
     log_level = max(10, 30 - 10 * verbose)
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
@@ -250,6 +257,7 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, verbose):
         videofile,
         cameraconfig,
         output,
+        update=update,
         logger=logger
     )
     # process video following the settings

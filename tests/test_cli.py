@@ -32,7 +32,7 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
             '--lens_position',
             json.dumps(lens_position),
             '--resolution',
-            '0.01',
+            '0.03',
             '--window_size',
             '25',
             '--corners',
@@ -56,7 +56,8 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
             '-r',
             cli_recipe_fn,
             '-vvv',
-            cli_output_dir
+            cli_output_dir,
+            '-u'
         ],
         echo=True
     )

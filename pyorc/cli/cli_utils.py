@@ -61,30 +61,37 @@ def parse_recipe(ctx, param, recipe_file):
         body = f.read()
     recipe = yaml.load(body, Loader=yaml.FullLoader)
 
-    valid_classes = ["video", "frames", "velocimetry", "transect"]  # allowed classes
+    valid_classes = ["video", "frames", "velocimetry", "transect", "plot"]  # allowed classes
     required_classes = ["video", "frames", "velocimetry"]  # mandatory classes (if not present, these are added)
-    check_args = ["video", "frames"]  # check if arguments to underlying methods are valid in these classes
+    check_args = {
+        "video": "video",
+        "frames": "frames",
+        # "velocimetry": "frames"
+    } # check if arguments to underlying methods called by recipe section are available and get valid arguments
+    skip_checks = ["plot"]  # these sections are not checked for valid inputs
     process_methods = ["write"]  # methods that are specifically needed within process steps and not part of pyorc class methods
-    for k in recipe:
+    for k in recipe:  # main section
         if k not in valid_classes:
             raise ValueError(f"key '{k}' is not allowed, must be one of {valid_classes}")
-        if k in check_args:
-            # loop through all methods and check if their inputs are valid
-            cls = getattr(pyorc, k.capitalize())
-            for m in recipe[k]:
-                if m not in process_methods:
-                    if (not hasattr(cls, m)):
-                        raise ValueError(f"Class '{k.capitalize()}' does not have a method or property '{m}'")
-                    method = getattr(cls, m)
-                    # find valid args to method
-                    if hasattr(method, "__call__"):
-                        valid_args = method.__code__.co_varnames
-                        if recipe[k][m] is None:
-                            # replace for empty dict
-                            recipe[k][m] = {}
+        # if k in check_args:
+        # loop through all methods and check if their inputs are valid
+        for m in recipe[k]:  # method in section
+            if recipe[k][m] is None:
+                # replace for empty dict
+                recipe[k][m] = {}
+            if m not in process_methods and k in check_args:
+                # get the subclass that is called within the section of interest
+                cls = getattr(pyorc, check_args[k].capitalize())
+                if (not hasattr(cls, m)):
+                    raise ValueError(f"Class '{check_args[k].capitalize()}' does not have a method or property '{m}'")
+                method = getattr(cls, m)
+                # find valid args to method
+                if hasattr(method, "__call__"):
+                    if k in check_args:
+                        valid_args = method.__code__.co_varnames[:method.__code__.co_argcount]  # get input args to method
                         for arg in recipe[k][m]:
                             if not(arg in valid_args):
-                                raise ValueError(f"Method '{k.capitalize()}.{m}' does not have input argument '{arg}', must be one of {valid_args}")
+                                raise ValueError(f"Method '{check_args[k].capitalize()}.{m}' does not have input argument '{arg}', must be one of {valid_args}")
     # add empty dicts for missing but compulsory classes
     for _c in required_classes:
         if _c not in recipe:
