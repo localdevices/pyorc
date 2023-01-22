@@ -39,7 +39,7 @@ def test_mask_window_nan(piv):
     # check if the method runs
     # first do filter that creates some missings
     piv.velocimetry.mask.minmax(s_max=0.6, inplace=True)
-    piv = piv.isel(time=1)
+    # piv = piv.isel(time=1)
     piv.velocimetry.mask.window_nan(inplace=True)
 
 
