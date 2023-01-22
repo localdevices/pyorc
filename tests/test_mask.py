@@ -45,7 +45,7 @@ def test_mask_window_nan(piv):
 
 def test_mask_window_mean(piv):
     # check if the method runs
-    piv = piv.isel(time=1)
+    # piv = piv.isel(time=1)
     piv.velocimetry.mask.window_mean(inplace=True)
 
 
