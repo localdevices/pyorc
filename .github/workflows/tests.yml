@@ -17,14 +17,14 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest" ] #, "macos-latest", "windows-latest"]
-        python-version: ["3.10"] # fix tests to support older versions
+        python-version: ["3.9"] # fix tests to support older versions
     
     steps:
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
-          mamba-version: "*"
+          # mamba-version: "*"
           channels: conda-forge,defaults
           channel-priority: true
           environment-file: envs/pyorc-test.yml
