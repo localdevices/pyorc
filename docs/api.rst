@@ -179,28 +179,36 @@ Class and properties
     Velocimetry.camera_shape
     Velocimetry.h_a
 
-Temporal filters
-----------------
+Temporal masking methods
+------------------------
+
+The mask methods below either require or may have a dimension "time" in the data. Therefore they are most logically
+applied before doing any reducing over time.
 
 .. autosummary::
     :toctree: _generated
+    :template: accessor_method.rst
 
-    Velocimetry.filter_temporal
-    Velocimetry.filter_temporal_angle
-    Velocimetry.filter_temporal_neighbour
-    Velocimetry.filter_temporal_std
-    Velocimetry.filter_temporal_velocity
-    Velocimetry.filter_temporal_corr
+    Velocimetry.mask.minmax
+    Velocimetry.mask.corr
+    Velocimetry.mask.angle
+    Velocimetry.mask.rolling
+    Velocimetry.mask.outliers
+    Velocimetry.mask.variance
+    Velocimetry.mask.count
 
-Spatial filters
----------------
+Spatial masking methods
+-----------------------
+
+The spatial masking methods below only work on time reduced grid. First apply a time reducer so that there is no
+time axis in the data anymore, before applying these. Not doing so will return a clear error message.
 
 .. autosummary::
     :toctree: _generated
+    :template: accessor_method.rst
 
-    Velocimetry.filter_spatial
-    Velocimetry.filter_spatial_nan
-    Velocimetry.filter_spatial_median
+    Velocimetry.mask.window_mean
+    Velocimetry.mask.window_nan
 
 Data infilling
 --------------

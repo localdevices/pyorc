@@ -1,10 +1,14 @@
+import copy
+
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def test_filter_temporal_angle(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_temporal_angle()
+
 
 
 def test_filter_temporal_velocity(piv):
@@ -13,37 +17,42 @@ def test_filter_temporal_velocity(piv):
 
 
 def test_filter_temporal_corr(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_temporal_corr()
 
 
 def test_filter_temporal_neighbour(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_temporal_neighbour()
 
 
+
 def test_filter_temporal_std(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_temporal_std()
 
 
+
+
 def test_filter_temporal(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_temporal()
 
 
 def test_filter_spatial_nan(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_spatial_nan()
 
 
+
 def test_filter_spatial_median(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_spatial_median()
 
 
+
 def test_filter_spatial(piv):
-    # check if the method runs
+    # check if the method runs DEPRECATED
     piv.velocimetry.filter_spatial()
 
 

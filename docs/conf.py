@@ -42,7 +42,7 @@ shutil.copy("../examples/01_Camera_Configuration_single_video.ipynb", "_examples
 #
 # Notebook 02 requires considerable rendering time. Therefore it is not executed unless a final build is done
 shutil.copy("../examples/02_Process_velocimetry.ipynb", "_examples")
-shutil.copy("../examples/03_Plotting_and_filtering_velocimetry_results.ipynb", "_examples")
+shutil.copy("../examples/03_Plotting_and_masking_velocimetry_results.ipynb", "_examples")
 shutil.copy("../examples/04_Extracting_crosssection_velocities_and_discharge.ipynb", "_examples")
 shutil.copy("../examples/05_Camera_calibration.ipynb", "_examples")
 
@@ -53,9 +53,8 @@ copyright = '2022, Rainbow Sensing'
 author = 'Hessel Winsemius'
 
 # The full version, including alpha/beta/rc tags
-# TODO: uncomment this as soon as we have a version number on the package within pypi
 # release = pkg_resources.get_distribution("pyorc").version
-release = pyorc.__version__ # '0.3.0'
+release = pyorc.__version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -117,7 +116,7 @@ html_context = {
 }
 
 
-remove_from_toctrees = ["_generated/*"]
+remove_from_toctrees = ["_generated/*", "_build/doctrees/*"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

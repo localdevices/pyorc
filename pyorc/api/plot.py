@@ -68,6 +68,9 @@ def _base_plot(plot_func):
             mappable of wrapped matplotlib function
 
         """
+        # in case persistent transform is in kwargs_line, remove this
+        if "transform" in kwargs_line:
+            del kwargs_line["transform"]
         ax = _prepare_axes(ax=ax, mode=mode)
         # update ax
 
