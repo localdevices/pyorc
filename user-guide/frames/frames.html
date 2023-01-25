@@ -6,30 +6,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Frames &#8212; pyorc 0.3.0 documentation</title>
-  <script>
+    <title>Frames &#8212; pyorc 0.3.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -51,6 +52,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -96,7 +101,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.3.0 documentation</p>
+    <p class="title logo__title">pyorc 0.3.3 documentation</p>
   
 </a>
     
@@ -113,39 +118,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -154,19 +159,21 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -179,11 +186,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -213,39 +222,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -259,11 +268,11 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -303,8 +312,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -605,7 +617,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Stabilizing frames: 100%|██████████| 124/124 [00:05&lt;00:00, 22.83it/s]
+Stabilizing frames: 100%|██████████| 125/125 [00:03&lt;00:00, 33.55it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -976,10 +988,10 @@ dl.xr-attrs {
   stroke: currentColor;
   fill: currentColor;
 }
-</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;frames&#x27; (time: 125, y: 1080, x: 1920, rgb: 3)&gt;
-dask.array&lt;stack, shape=(125, 1080, 1920, 3), dtype=uint8, chunksize=(1, 1080, 1920, 3), chunktype=numpy.ndarray&gt;
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;frames&#x27; (time: 126, y: 1080, x: 1920, rgb: 3)&gt;
+dask.array&lt;stack, shape=(126, 1080, 1920, 3), dtype=uint8, chunksize=(1, 1080, 1920, 3), chunktype=numpy.ndarray&gt;
 Coordinates:
-  * time     (time) float64 0.0 0.03333 0.06667 0.1 ... 4.033 4.067 4.1 4.133
+  * time     (time) float64 0.0 0.03333 0.06667 0.1 ... 4.067 4.1 4.133 4.167
   * y        (y) int64 1079 1078 1077 1076 1075 1074 1073 1072 ... 6 5 4 3 2 1 0
   * x        (x) int64 0 1 2 3 4 5 6 7 ... 1913 1914 1915 1916 1917 1918 1919
   * rgb      (rgb) int64 0 1 2
@@ -988,7 +1000,7 @@ Coordinates:
 Attributes:
     camera_shape:   [1080, 1920]
     camera_config:  {\n    &quot;height&quot;: 1080,\n    &quot;width&quot;: 1920,\n    &quot;crs&quot;: &quot;P...
-    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 125</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li><li><span class='xr-has-index'>rgb</span>: 3</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-8f443ebf-ddaf-4d33-bee6-59e612227014' class='xr-array-in' type='checkbox' checked><label for='section-8f443ebf-ddaf-4d33-bee6-59e612227014' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920, 3), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li><li><span class='xr-has-index'>rgb</span>: 3</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-8583c891-317e-4fe9-b37b-be72bef2ab1f' class='xr-array-in' type='checkbox' checked><label for='section-8583c891-317e-4fe9-b37b-be72bef2ab1f' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920, 3), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1003,18 +1015,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 741.58 MiB </td>
+                        <td> 747.51 MiB </td>
                         <td> 5.93 MiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (125, 1080, 1920, 3) </td>
+                        <td> (126, 1080, 1920, 3) </td>
                         <td> (1, 1080, 1920, 3) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 125 chunks in 251 graph layers </td>
+                        <td colspan="2"> 126 chunks in 253 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1047,8 +1059,8 @@ Attributes:
   <line x1="14" y1="0" x2="14" y2="25" />
   <line x1="15" y1="0" x2="15" y2="25" />
   <line x1="16" y1="0" x2="16" y2="25" />
-  <line x1="17" y1="0" x2="17" y2="25" />
-  <line x1="19" y1="0" x2="19" y2="25" />
+  <line x1="18" y1="0" x2="18" y2="25" />
+  <line x1="18" y1="0" x2="18" y2="25" />
   <line x1="20" y1="0" x2="20" y2="25" />
   <line x1="21" y1="0" x2="21" y2="25" />
   <line x1="22" y1="0" x2="22" y2="25" />
@@ -1062,15 +1074,15 @@ Attributes:
   <line x1="31" y1="0" x2="31" y2="25" />
   <line x1="32" y1="0" x2="32" y2="25" />
   <line x1="33" y1="0" x2="33" y2="25" />
-  <line x1="34" y1="0" x2="34" y2="25" />
+  <line x1="35" y1="0" x2="35" y2="25" />
   <line x1="36" y1="0" x2="36" y2="25" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="0.0,0.0 36.10546982927663,0.0 36.10546982927663,25.412616514582485 0.0,25.412616514582485" style="fill:#8B4903A0;stroke-width:0"/>
+  <polygon points="0.0,0.0 36.153343503141755,0.0 36.153343503141755,25.412616514582485 0.0,25.412616514582485" style="fill:#8B4903A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="18.052735" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >125</text>
-  <text x="56.105470" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,56.105470,12.706308)">1</text>
+  <text x="18.076672" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >126</text>
+  <text x="56.153344" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,56.153344,12.706308)">1</text>
 
 
   <!-- Horizontal lines -->
@@ -1113,7 +1125,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-93adb374-dc78-42cc-8d1d-2fbcbe4d8d14' class='xr-section-summary-in' type='checkbox'  checked><label for='section-93adb374-dc78-42cc-8d1d-2fbcbe4d8d14' class='xr-section-summary' >Coordinates: <span>(6)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.1 4.133</div><input id='attrs-118d3f28-2cc7-41c8-814e-c72a67102ec9' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-118d3f28-2cc7-41c8-814e-c72a67102ec9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2690d861-d67a-44b6-9796-2f047cb5ca74' class='xr-var-data-in' type='checkbox'><label for='data-2690d861-d67a-44b6-9796-2f047cb5ca74' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
+</table></div></div></li><li class='xr-section-item'><input id='section-9cc80e26-4476-4b7d-90ed-634713e70706' class='xr-section-summary-in' type='checkbox'  checked><label for='section-9cc80e26-4476-4b7d-90ed-634713e70706' class='xr-section-summary' >Coordinates: <span>(6)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-edd2f97e-6521-44ce-b995-2505ce22201b' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-edd2f97e-6521-44ce-b995-2505ce22201b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5d98fc17-e0e2-4495-a8c2-a3dd9fd31ec3' class='xr-var-data-in' type='checkbox'><label for='data-5d98fc17-e0e2-4495-a8c2-a3dd9fd31ec3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
        0.233333, 0.266667, 0.3     , 0.333333, 0.366667, 0.4     , 0.433333,
        0.466667, 0.5     , 0.533333, 0.566667, 0.6     , 0.633333, 0.666667,
        0.7     , 0.733333, 0.766667, 0.8     , 0.833333, 0.866667, 0.9     ,
@@ -1130,34 +1142,34 @@ Attributes:
        3.266667, 3.3     , 3.333333, 3.366667, 3.4     , 3.433333, 3.466667,
        3.5     , 3.533333, 3.566667, 3.6     , 3.633333, 3.666667, 3.7     ,
        3.733333, 3.766667, 3.8     , 3.833333, 3.866667, 3.9     , 3.933333,
-       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-25c5c3cb-c9f9-43ae-8bab-04a9d75c124c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-25c5c3cb-c9f9-43ae-8bab-04a9d75c124c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4d76f750-9e41-4ec8-8b6a-6a305870f9a0' class='xr-var-data-in' type='checkbox'><label for='data-4d76f750-9e41-4ec8-8b6a-6a305870f9a0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-8df68198-b067-47a3-b27a-fddbfa614e88' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8df68198-b067-47a3-b27a-fddbfa614e88' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4b6bf7a3-d462-4d89-a23a-5ba01d5b3e26' class='xr-var-data-in' type='checkbox'><label for='data-4b6bf7a3-d462-4d89-a23a-5ba01d5b3e26' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>rgb</span></div><div class='xr-var-dims'>(rgb)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2</div><input id='attrs-a2a8d4c3-822d-471d-a3fa-a298f5709b30' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a2a8d4c3-822d-471d-a3fa-a298f5709b30' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-740a2bde-c9dd-4366-9744-7b35e9253d7b' class='xr-var-data-in' type='checkbox'><label for='data-740a2bde-c9dd-4366-9744-7b35e9253d7b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0, 1, 2])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-1c139566-8c2e-4ca3-8792-e5deb21040cc' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1c139566-8c2e-4ca3-8792-e5deb21040cc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b1ed9421-2951-4295-b068-9f35b0b8614f' class='xr-var-data-in' type='checkbox'><label for='data-b1ed9421-2951-4295-b068-9f35b0b8614f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
+       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-30c4b0aa-5250-428e-a562-6f22bcf2b051' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-30c4b0aa-5250-428e-a562-6f22bcf2b051' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-13c1a8b0-b3ae-473a-b378-aee4495254d3' class='xr-var-data-in' type='checkbox'><label for='data-13c1a8b0-b3ae-473a-b378-aee4495254d3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-3bf0044f-ef28-4e4c-84c8-ae029c6ac063' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-3bf0044f-ef28-4e4c-84c8-ae029c6ac063' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5c12b639-322d-492e-a214-61e64732ba47' class='xr-var-data-in' type='checkbox'><label for='data-5c12b639-322d-492e-a214-61e64732ba47' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>rgb</span></div><div class='xr-var-dims'>(rgb)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2</div><input id='attrs-1f59c47a-e10c-4093-8b2f-3e5779e2de4f' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-1f59c47a-e10c-4093-8b2f-3e5779e2de4f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-676d5d83-6d45-4d7d-99a8-25f824a1692c' class='xr-var-data-in' type='checkbox'><label for='data-676d5d83-6d45-4d7d-99a8-25f824a1692c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0, 1, 2])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-9efd84c1-0613-428b-9381-b9b9a6a932f9' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9efd84c1-0613-428b-9381-b9b9a6a932f9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-53004626-aeb1-4921-ba9f-c8a598a19399' class='xr-var-data-in' type='checkbox'><label for='data-53004626-aeb1-4921-ba9f-c8a598a19399' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        ...,
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-e89415ad-2a52-4529-a3c9-e5bf6244a8d5' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e89415ad-2a52-4529-a3c9-e5bf6244a8d5' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-27a34838-4de5-4c24-8c63-b24b628aa5b0' class='xr-var-data-in' type='checkbox'><label for='data-27a34838-4de5-4c24-8c63-b24b628aa5b0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
+       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-de98acaf-5540-40d9-a096-f52bdbb7117b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-de98acaf-5540-40d9-a096-f52bdbb7117b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-9893feba-f5f2-4030-b8cf-76939ec19d85' class='xr-var-data-in' type='checkbox'><label for='data-9893feba-f5f2-4030-b8cf-76939ec19d85' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
        [1078, 1078, 1078, ..., 1078, 1078, 1078],
        [1077, 1077, 1077, ..., 1077, 1077, 1077],
        ...,
        [   2,    2,    2, ...,    2,    2,    2],
        [   1,    1,    1, ...,    1,    1,    1],
-       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-e736b2ef-6179-4aa7-8465-350be9a94fd8' class='xr-section-summary-in' type='checkbox'  ><label for='section-e736b2ef-6179-4aa7-8465-350be9a94fd8' class='xr-section-summary' >Indexes: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-263a698f-2ab4-4ee2-a164-62e1b8b75888' class='xr-index-data-in' type='checkbox'/><label for='index-263a698f-2ab4-4ee2-a164-62e1b8b75888' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333333, 0.06666666666666667,
-                              0.1, 0.13333333333333333, 0.16666666666666666,
-                              0.2, 0.23333333333333334, 0.26666666666666666,
+       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ba635b0e-577f-4f1e-b154-a4bde4b1b155' class='xr-section-summary-in' type='checkbox'  ><label for='section-ba635b0e-577f-4f1e-b154-a4bde4b1b155' class='xr-section-summary' >Indexes: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-aff7083d-8bfe-49fa-a571-2c391962b224' class='xr-index-data-in' type='checkbox'/><label for='index-aff7083d-8bfe-49fa-a571-2c391962b224' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333334, 0.06666666666666668,
+                              0.1, 0.13333333333333336, 0.16666666666666666,
+                              0.2, 0.23333333333333334,  0.2666666666666667,
                               0.3,
               ...
-               3.8333333333333335,  3.8666666666666667,                 3.9,
-                3.933333333333333,   3.966666666666667,                 4.0,
-                4.033333333333333,   4.066666666666666,                 4.1,
-                4.133333333333334],
-             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=125))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-30673fbc-1ee5-4da0-8bdc-8e244e6387c0' class='xr-index-data-in' type='checkbox'/><label for='index-30673fbc-1ee5-4da0-8bdc-8e244e6387c0' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
+               3.8666666666666667,                 3.9,   3.933333333333333,
+               3.9666666666666672,                 4.0,   4.033333333333333,
+                4.066666666666666,                 4.1,   4.133333333333333,
+                4.166666666666667],
+             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-742df3ac-cbc1-4455-a48f-161ae3d41cd7' class='xr-index-data-in' type='checkbox'/><label for='index-742df3ac-cbc1-4455-a48f-161ae3d41cd7' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
             ...
                9,    8,    7,    6,    5,    4,    3,    2,    1,    0],
-           dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-9e147304-31e2-4b3a-baef-7513298b23bb' class='xr-index-data-in' type='checkbox'/><label for='index-9e147304-31e2-4b3a-baef-7513298b23bb' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
+           dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-a28434aa-a5ab-41c2-b503-417b272cd7d4' class='xr-index-data-in' type='checkbox'/><label for='index-a28434aa-a5ab-41c2-b503-417b272cd7d4' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
             ...
             1910, 1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919],
-           dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>rgb</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-64ea5140-1548-4e06-a8bc-d48da616da7f' class='xr-index-data-in' type='checkbox'/><label for='index-64ea5140-1548-4e06-a8bc-d48da616da7f' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([0, 1, 2], dtype=&#x27;int64&#x27;, name=&#x27;rgb&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-cb2b6718-91fb-4ef3-8b7d-8dfd15ea547d' class='xr-section-summary-in' type='checkbox'  checked><label for='section-cb2b6718-91fb-4ef3-8b7d-8dfd15ea547d' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
+           dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>rgb</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-2b6db233-a04d-4625-ab8d-6f95e1edd6ca' class='xr-index-data-in' type='checkbox'/><label for='index-2b6db233-a04d-4625-ab8d-6f95e1edd6ca' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([0, 1, 2], dtype=&#x27;int64&#x27;, name=&#x27;rgb&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-57f03cf9-73bf-4030-8706-b108954f36c4' class='xr-section-summary-in' type='checkbox'  checked><label for='section-57f03cf9-73bf-4030-8706-b108954f36c4' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
     &quot;height&quot;: 1080,
     &quot;width&quot;: 1920,
     &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOGCRS[\&quot;WGS 84\&quot;,ENSEMBLE[\&quot;World Geodetic System 1984 ensemble\&quot;,MEMBER[\&quot;World Geodetic System 1984 (Transit)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G730)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G873)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1150)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1674)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1762)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G2139)\&quot;],ELLIPSOID[\&quot;WGS 84\&quot;,6378137,298.257223563,LENGTHUNIT[\&quot;metre\&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&quot;Greenwich\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433]],ID[\&quot;EPSG\&quot;,4326]],CONVERSION[\&quot;UTM zone 35S\&quot;,METHOD[\&quot;Transverse Mercator\&quot;,ID[\&quot;EPSG\&quot;,9807]],PARAMETER[\&quot;Latitude of natural origin\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8801]],PARAMETER[\&quot;Longitude of natural origin\&quot;,27,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8802]],PARAMETER[\&quot;Scale factor at natural origin\&quot;,0.9996,SCALEUNIT[\&quot;unity\&quot;,1],ID[\&quot;EPSG\&quot;,8805]],PARAMETER[\&quot;False easting\&quot;,500000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8806]],PARAMETER[\&quot;False northing\&quot;,10000000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8807]]],CS[Cartesian,2],AXIS[\&quot;(E)\&quot;,east,ORDER[1],LENGTHUNIT[\&quot;metre\&quot;,1]],AXIS[\&quot;(N)\&quot;,north,ORDER[2],LENGTHUNIT[\&quot;metre\&quot;,1]],USAGE[SCOPE[\&quot;Engineering survey, topographic mapping.\&quot;],AREA[\&quot;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&quot;],BBOX[-80,24,0,30]],ID[\&quot;EPSG\&quot;,32735]]&quot;,
@@ -1262,17 +1274,17 @@ arguments, you would not get this. A few things are noteworthy to further explai
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">AttributeError</span>                            Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In [2], line 1</span>
+Cell <span class="ansi-green-fg">In[2], line 1</span>
 <span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">da_frames</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">frames</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">plot</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/plot.py:187</span>, in <span class="ansi-cyan-fg">_frames_plot</span><span class="ansi-blue-fg">(ref, ax, mode, *args, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    185</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">time</span><span style="color: rgb(175,0,0)">&#34;</span> <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>coords:
-<span class="ansi-green-intense-fg ansi-bold">    186</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>time<span style="color: rgb(98,98,98)">.</span>size <span style="color: rgb(98,98,98)">&gt;</span> <span style="color: rgb(98,98,98)">1</span>:
-<span class="ansi-green-fg">--&gt; 187</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">AttributeError</span>(<span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">Object contains dimension </span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">time</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)"> with length </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">len</span>(ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>time)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">. Reduce dataset by selecting one time step or taking a median, mean or other statistic.</span><span style="color: rgb(175,0,0)">&#39;</span>)
-<span class="ansi-green-intense-fg ansi-bold">    188</span> ax <span style="color: rgb(98,98,98)">=</span> _prepare_axes(ax<span style="color: rgb(98,98,98)">=</span>ax, mode<span style="color: rgb(98,98,98)">=</span>mode)
-<span class="ansi-green-intense-fg ansi-bold">    189</span> f <span style="color: rgb(98,98,98)">=</span> ax<span style="color: rgb(98,98,98)">.</span>figure  <span style="color: rgb(95,135,135)"># handle to figure</span>
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/plot.py:190</span>, in <span class="ansi-cyan-fg">_frames_plot</span><span class="ansi-blue-fg">(ref, ax, mode, *args, **kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    188</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">time</span><span style="color: rgb(175,0,0)">&#34;</span> <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>coords:
+<span class="ansi-green-intense-fg ansi-bold">    189</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>time<span style="color: rgb(98,98,98)">.</span>size <span style="color: rgb(98,98,98)">&gt;</span> <span style="color: rgb(98,98,98)">1</span>:
+<span class="ansi-green-fg">--&gt; 190</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">AttributeError</span>(<span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">Object contains dimension </span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">time</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)"> with length </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">len</span>(ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>time)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">. Reduce dataset by selecting one time step or taking a median, mean or other statistic.</span><span style="color: rgb(175,0,0)">&#39;</span>)
+<span class="ansi-green-intense-fg ansi-bold">    191</span> ax <span style="color: rgb(98,98,98)">=</span> _prepare_axes(ax<span style="color: rgb(98,98,98)">=</span>ax, mode<span style="color: rgb(98,98,98)">=</span>mode)
+<span class="ansi-green-intense-fg ansi-bold">    192</span> f <span style="color: rgb(98,98,98)">=</span> ax<span style="color: rgb(98,98,98)">.</span>figure  <span style="color: rgb(95,135,135)"># handle to figure</span>
 
-<span class="ansi-red-fg">AttributeError</span>: Object contains dimension &#34;time&#34; with length 125. Reduce dataset by selecting one time step or taking a median, mean or other statistic.
+<span class="ansi-red-fg">AttributeError</span>: Object contains dimension &#34;time&#34; with length 126. Reduce dataset by selecting one time step or taking a median, mean or other statistic.
 </pre></div></div>
 </div>
 <p>That gave an error. You can see that the API gives specific feedback that the <code class="docutils literal notranslate"><span class="pre">.frames.plot</span></code> method does not work on a frames array with several time steps. This is simply because you can only plot one step at the time. You can select a step, with normal <code class="docutils literal notranslate"><span class="pre">xarray</span></code> methods, which are very similar to <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, and then try it again.</p>
@@ -1291,7 +1303,7 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fe6b1d5ffd0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fd756eef8b0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1328,7 +1340,7 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fe6b1a14520&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fd754a26b60&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1362,7 +1374,7 @@ expertise usually sufficient, but dependent on the scale of structure that you m
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fe6b192bbb0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fd754785ff0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1397,7 +1409,7 @@ expertise usually sufficient, but dependent on the scale of structure that you m
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7fe69158b250&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7fd754a247c0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1788,10 +1800,10 @@ dl.xr-attrs {
   stroke: currentColor;
   fill: currentColor;
 }
-</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;frames&#x27; (time: 125, y: 821, x: 965)&gt;
-dask.array&lt;transpose, shape=(125, 821, 965), dtype=float32, chunksize=(1, 821, 965), chunktype=numpy.ndarray&gt;
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;frames&#x27; (time: 126, y: 821, x: 965)&gt;
+dask.array&lt;transpose, shape=(126, 821, 965), dtype=float32, chunksize=(1, 821, 965), chunktype=numpy.ndarray&gt;
 Coordinates:
-  * time     (time) float64 0.0 0.03333 0.06667 0.1 ... 4.033 4.067 4.1 4.133
+  * time     (time) float64 0.0 0.03333 0.06667 0.1 ... 4.067 4.1 4.133 4.167
   * y        (y) float64 8.205 8.195 8.185 8.175 ... 0.035 0.025 0.015 0.005
   * x        (x) float64 0.005 0.015 0.025 0.035 ... 9.615 9.625 9.635 9.645
     xs       (y, x) float64 6.427e+05 6.427e+05 ... 6.427e+05 6.427e+05
@@ -1801,7 +1813,7 @@ Coordinates:
 Attributes:
     camera_shape:   [1080, 1920]
     camera_config:  {\n    &quot;height&quot;: 1080,\n    &quot;width&quot;: 1920,\n    &quot;crs&quot;: &quot;P...
-    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 125</li><li><span class='xr-has-index'>y</span>: 821</li><li><span class='xr-has-index'>x</span>: 965</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-89b4c4b5-e4df-4b73-9341-dd04a89ac08f' class='xr-array-in' type='checkbox' checked><label for='section-89b4c4b5-e4df-4b73-9341-dd04a89ac08f' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 821, 965), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 821</li><li><span class='xr-has-index'>x</span>: 965</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-3a331e2b-bae3-483a-b30e-d9ab44ca1c76' class='xr-array-in' type='checkbox' checked><label for='section-3a331e2b-bae3-483a-b30e-d9ab44ca1c76' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 821, 965), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1816,18 +1828,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 377.78 MiB </td>
+                        <td> 380.80 MiB </td>
                         <td> 3.02 MiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (125, 821, 965) </td>
+                        <td> (126, 821, 965) </td>
                         <td> (1, 821, 965) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 125 chunks in 279 graph layers </td>
+                        <td colspan="2"> 126 chunks in 281 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1857,16 +1869,16 @@ Attributes:
   <line x1="22" y1="12" x2="22" y2="114" />
   <line x1="23" y1="13" x2="23" y2="115" />
   <line x1="24" y1="14" x2="24" y2="116" />
-  <line x1="25" y1="15" x2="25" y2="118" />
+  <line x1="26" y1="16" x2="26" y2="118" />
   <line x1="27" y1="17" x2="27" y2="119" />
   <line x1="28" y1="18" x2="28" y2="120" />
   <line x1="29" y1="19" x2="29" y2="121" />
-  <line x1="30" y1="20" x2="30" y2="122" />
+  <line x1="30" y1="20" x2="30" y2="123" />
   <line x1="32" y1="22" x2="32" y2="124" />
   <line x1="33" y1="23" x2="33" y2="125" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 33.51597359897109,23.515973598971087 33.51597359897109,125.60923784767576 10.0,102.09326424870467" style="fill:#8B4903A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 33.53989110926297,23.539891109262964 33.53989110926297,125.63315535796764 10.0,102.09326424870467" style="fill:#8B4903A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="130" y2="0" style="stroke-width:2" />
@@ -1882,7 +1894,7 @@ Attributes:
   <line x1="22" y1="12" x2="142" y2="12" />
   <line x1="23" y1="13" x2="143" y2="13" />
   <line x1="24" y1="14" x2="144" y2="14" />
-  <line x1="25" y1="15" x2="145" y2="15" />
+  <line x1="26" y1="16" x2="146" y2="16" />
   <line x1="27" y1="17" x2="147" y2="17" />
   <line x1="28" y1="18" x2="148" y2="18" />
   <line x1="29" y1="19" x2="149" y2="19" />
@@ -1895,7 +1907,7 @@ Attributes:
   <line x1="130" y1="0" x2="153" y2="23" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 130.0,0.0 153.51597359897107,23.515973598971087 33.51597359897109,23.515973598971087" style="fill:#8B4903A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 130.0,0.0 153.53989110926295,23.539891109262964 33.53989110926297,23.539891109262964" style="fill:#8B4903A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
   <line x1="33" y1="23" x2="153" y2="23" style="stroke-width:2" />
@@ -1906,16 +1918,16 @@ Attributes:
   <line x1="153" y1="23" x2="153" y2="125" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="33.51597359897109,23.515973598971087 153.51597359897107,23.515973598971087 153.51597359897107,125.60923784767576 33.51597359897109,125.60923784767576" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="33.53989110926297,23.539891109262964 153.53989110926295,23.539891109262964 153.53989110926295,125.63315535796764 33.53989110926297,125.63315535796764" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="93.515974" y="145.609238" font-size="1.0rem" font-weight="100" text-anchor="middle" >965</text>
-  <text x="173.515974" y="74.562606" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,173.515974,74.562606)">821</text>
-  <text x="11.757987" y="133.851251" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,11.757987,133.851251)">125</text>
+  <text x="93.539891" y="145.633155" font-size="1.0rem" font-weight="100" text-anchor="middle" >965</text>
+  <text x="173.539891" y="74.586523" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,173.539891,74.586523)">821</text>
+  <text x="11.769946" y="133.863210" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,11.769946,133.863210)">126</text>
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-400f833b-1ddd-47dd-a7bb-c30eee9dcdd2' class='xr-section-summary-in' type='checkbox'  checked><label for='section-400f833b-1ddd-47dd-a7bb-c30eee9dcdd2' class='xr-section-summary' >Coordinates: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.1 4.133</div><input id='attrs-b564baf7-12cd-45a2-a045-22d926809faa' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-b564baf7-12cd-45a2-a045-22d926809faa' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5685dd74-ad0a-4b1d-a443-0d14bb0d85a1' class='xr-var-data-in' type='checkbox'><label for='data-5685dd74-ad0a-4b1d-a443-0d14bb0d85a1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
+</table></div></div></li><li class='xr-section-item'><input id='section-c0abca7f-9108-4a07-a716-cfda52e65788' class='xr-section-summary-in' type='checkbox'  checked><label for='section-c0abca7f-9108-4a07-a716-cfda52e65788' class='xr-section-summary' >Coordinates: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-4c92b451-7fcb-440a-90e3-5bc24c01e8aa' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-4c92b451-7fcb-440a-90e3-5bc24c01e8aa' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-337b78a2-fc92-4319-8f76-91ed1d46f7e1' class='xr-var-data-in' type='checkbox'><label for='data-337b78a2-fc92-4319-8f76-91ed1d46f7e1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
        0.233333, 0.266667, 0.3     , 0.333333, 0.366667, 0.4     , 0.433333,
        0.466667, 0.5     , 0.533333, 0.566667, 0.6     , 0.633333, 0.666667,
        0.7     , 0.733333, 0.766667, 0.8     , 0.833333, 0.866667, 0.9     ,
@@ -1932,7 +1944,7 @@ Attributes:
        3.266667, 3.3     , 3.333333, 3.366667, 3.4     , 3.433333, 3.466667,
        3.5     , 3.533333, 3.566667, 3.6     , 3.633333, 3.666667, 3.7     ,
        3.733333, 3.766667, 3.8     , 3.833333, 3.866667, 3.9     , 3.933333,
-       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>8.205 8.195 8.185 ... 0.015 0.005</div><input id='attrs-4b3bcbc2-a1cd-448f-9bfc-33ad209ce624' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-4b3bcbc2-a1cd-448f-9bfc-33ad209ce624' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c88e3236-3742-4c9c-a8d2-88cf87ea5f10' class='xr-var-data-in' type='checkbox'><label for='data-c88e3236-3742-4c9c-a8d2-88cf87ea5f10' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([8.205e+00, 8.195e+00, 8.185e+00, ..., 2.500e-02, 1.500e-02, 5.000e-03])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.005 0.015 0.025 ... 9.635 9.645</div><input id='attrs-29c0277d-f175-43a7-adb5-ae9108dc46b2' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-29c0277d-f175-43a7-adb5-ae9108dc46b2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6089c27b-054c-46d0-91b6-cb748e5c4d03' class='xr-var-data-in' type='checkbox'><label for='data-6089c27b-054c-46d0-91b6-cb748e5c4d03' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([5.000e-03, 1.500e-02, 2.500e-02, ..., 9.625e+00, 9.635e+00, 9.645e+00])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xs</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>6.427e+05 6.427e+05 ... 6.427e+05</div><input id='attrs-f8968572-7ecd-4fa1-b2c4-86b98f1e03f5' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f8968572-7ecd-4fa1-b2c4-86b98f1e03f5' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a035b9dc-22a5-46da-9b4f-13dabf9618f5' class='xr-var-data-in' type='checkbox'><label for='data-a035b9dc-22a5-46da-9b4f-13dabf9618f5' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>x-coordinate in Cartesian system</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><pre>array([[642730.3321954 , 642730.33320151, 642730.33420761, ...,
+       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>8.205 8.195 8.185 ... 0.015 0.005</div><input id='attrs-135dbaca-6844-4b1e-9080-759e5a4dc180' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-135dbaca-6844-4b1e-9080-759e5a4dc180' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ff2d273c-32c1-4d0c-9b12-62365a35c161' class='xr-var-data-in' type='checkbox'><label for='data-ff2d273c-32c1-4d0c-9b12-62365a35c161' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([8.205e+00, 8.195e+00, 8.185e+00, ..., 2.500e-02, 1.500e-02, 5.000e-03])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.005 0.015 0.025 ... 9.635 9.645</div><input id='attrs-4b6d97e7-8ccc-4e42-b18e-157515871190' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-4b6d97e7-8ccc-4e42-b18e-157515871190' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-46e2c817-17d1-452d-bcd3-d797649792db' class='xr-var-data-in' type='checkbox'><label for='data-46e2c817-17d1-452d-bcd3-d797649792db' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([5.000e-03, 1.500e-02, 2.500e-02, ..., 9.625e+00, 9.635e+00, 9.645e+00])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xs</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>6.427e+05 6.427e+05 ... 6.427e+05</div><input id='attrs-c5a0c443-e257-4c64-9721-c15368d958c6' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c5a0c443-e257-4c64-9721-c15368d958c6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-27b98d5d-ddfa-4e37-9577-874e398ef729' class='xr-var-data-in' type='checkbox'><label for='data-27b98d5d-ddfa-4e37-9577-874e398ef729' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>x-coordinate in Cartesian system</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><pre>array([[642730.3321954 , 642730.33320151, 642730.33420761, ...,
         642731.30006789, 642731.301074  , 642731.3020801 ],
        [642730.34214466, 642730.34315077, 642730.34415687, ...,
         642731.31001715, 642731.31102325, 642731.31202936],
@@ -1944,7 +1956,7 @@ Attributes:
        [642738.48063849, 642738.4816446 , 642738.4826507 , ...,
         642739.44851098, 642739.44951708, 642739.45052319],
        [642738.49058775, 642738.49159385, 642738.49259996, ...,
-        642739.45846024, 642739.45946634, 642739.46047245]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>ys</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>8.304e+06 8.304e+06 ... 8.304e+06</div><input id='attrs-dd57f09c-716b-473d-a9c9-758d5d2ca36a' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-dd57f09c-716b-473d-a9c9-758d5d2ca36a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-58c774cb-34ce-4b19-9c63-7078bb23ff68' class='xr-var-data-in' type='checkbox'><label for='data-58c774cb-34ce-4b19-9c63-7078bb23ff68' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>y-coordinate in Cartesian system</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><pre>array([[8304292.87957341, 8304292.88952267, 8304292.89947193, ...,
+        642739.45846024, 642739.45946634, 642739.46047245]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>ys</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>8.304e+06 8.304e+06 ... 8.304e+06</div><input id='attrs-28f46404-6481-418d-9a4c-248a26042f16' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-28f46404-6481-418d-9a4c-248a26042f16' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5a045151-f81e-4035-8401-83ec46506e24' class='xr-var-data-in' type='checkbox'><label for='data-5a045151-f81e-4035-8401-83ec46506e24' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>y-coordinate in Cartesian system</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><pre>array([[8304292.87957341, 8304292.88952267, 8304292.89947193, ...,
         8304302.45076053, 8304302.46070979, 8304302.47065905],
        [8304292.87856731, 8304292.88851656, 8304292.89846582, ...,
         8304302.44975442, 8304302.45970368, 8304302.46965294],
@@ -1956,7 +1968,7 @@ Attributes:
        [8304292.05557386, 8304292.06552312, 8304292.07547238, ...,
         8304301.62676098, 8304301.63671024, 8304301.6466595 ],
        [8304292.05456776, 8304292.06451701, 8304292.07446627, ...,
-        8304301.62575487, 8304301.63570413, 8304301.64565339]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>28.33 28.33 28.33 ... 28.33 28.33</div><input id='attrs-13390e74-1600-473f-afea-6a5aef300bd4' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-13390e74-1600-473f-afea-6a5aef300bd4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6d50f241-19fe-49d2-b386-c7af813cf1e7' class='xr-var-data-in' type='checkbox'><label for='data-6d50f241-19fe-49d2-b386-c7af813cf1e7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd></dl></div><div class='xr-var-data'><pre>array([[28.32961496, 28.32961497, 28.32961498, ..., 28.32962343,
+        8304301.62575487, 8304301.63570413, 8304301.64565339]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>28.33 28.33 28.33 ... 28.33 28.33</div><input id='attrs-c107d540-930f-4945-9a68-473040a93a0c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c107d540-930f-4945-9a68-473040a93a0c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-75f2a7ac-4144-4d79-876c-d9481a2bd4e8' class='xr-var-data-in' type='checkbox'><label for='data-75f2a7ac-4144-4d79-876c-d9481a2bd4e8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd></dl></div><div class='xr-var-data'><pre>array([[28.32961496, 28.32961497, 28.32961498, ..., 28.32962343,
         28.32962344, 28.32962344],
        [28.32961505, 28.32961506, 28.32961507, ..., 28.32962352,
         28.32962353, 28.32962354],
@@ -1968,7 +1980,7 @@ Attributes:
        [28.3296909 , 28.32969091, 28.32969092, ..., 28.32969937,
         28.32969938, 28.32969938],
        [28.32969099, 28.329691  , 28.32969101, ..., 28.32969946,
-        28.32969947, 28.32969948]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>-15.33 -15.33 ... -15.33 -15.33</div><input id='attrs-019c81b5-b638-4b83-a218-9e7738759cec' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-019c81b5-b638-4b83-a218-9e7738759cec' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-338522be-c616-4cc7-8600-235e8c1ad7e0' class='xr-var-data-in' type='checkbox'><label for='data-338522be-c616-4cc7-8600-235e8c1ad7e0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd></dl></div><div class='xr-var-data'><pre>array([[-15.33400626, -15.33400617, -15.33400608, ..., -15.3339197 ,
+        28.32969947, 28.32969948]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>-15.33 -15.33 ... -15.33 -15.33</div><input id='attrs-cc1bd945-44bb-4180-a45e-7cd334bb24f6' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-cc1bd945-44bb-4180-a45e-7cd334bb24f6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ab4f01be-2bf2-4035-a9ca-cfdb5ff4bbff' class='xr-var-data-in' type='checkbox'><label for='data-ab4f01be-2bf2-4035-a9ca-cfdb5ff4bbff' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd></dl></div><div class='xr-var-data'><pre>array([[-15.33400626, -15.33400617, -15.33400608, ..., -15.3339197 ,
         -15.33391961, -15.33391952],
        [-15.33400627, -15.33400618, -15.33400609, ..., -15.3339197 ,
         -15.33391961, -15.33391952],
@@ -1980,16 +1992,16 @@ Attributes:
        [-15.33401325, -15.33401316, -15.33401307, ..., -15.33392669,
         -15.3339266 , -15.33392651],
        [-15.33401326, -15.33401317, -15.33401308, ..., -15.3339267 ,
-        -15.33392661, -15.33392652]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-3e4770af-4ad3-4aa9-8508-9e523b1d94f7' class='xr-section-summary-in' type='checkbox'  ><label for='section-3e4770af-4ad3-4aa9-8508-9e523b1d94f7' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-6f85b58d-01bc-40ac-b66f-4dc835c5f3c1' class='xr-index-data-in' type='checkbox'/><label for='index-6f85b58d-01bc-40ac-b66f-4dc835c5f3c1' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333333, 0.06666666666666667,
-                              0.1, 0.13333333333333333, 0.16666666666666666,
-                              0.2, 0.23333333333333334, 0.26666666666666666,
+        -15.33392661, -15.33392652]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-a30315e9-a117-43bf-981e-d2368d54c5dd' class='xr-section-summary-in' type='checkbox'  ><label for='section-a30315e9-a117-43bf-981e-d2368d54c5dd' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-71d9f966-e4da-4b8e-a7af-aa3bc489746f' class='xr-index-data-in' type='checkbox'/><label for='index-71d9f966-e4da-4b8e-a7af-aa3bc489746f' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333334, 0.06666666666666668,
+                              0.1, 0.13333333333333336, 0.16666666666666666,
+                              0.2, 0.23333333333333334,  0.2666666666666667,
                               0.3,
               ...
-               3.8333333333333335,  3.8666666666666667,                 3.9,
-                3.933333333333333,   3.966666666666667,                 4.0,
-                4.033333333333333,   4.066666666666666,                 4.1,
-                4.133333333333334],
-             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=125))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-1c78f27e-3a49-4b03-8b09-273987a22319' class='xr-index-data-in' type='checkbox'/><label for='index-1c78f27e-3a49-4b03-8b09-273987a22319' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([               8.205,                8.195,    8.184999999999999,
+               3.8666666666666667,                 3.9,   3.933333333333333,
+               3.9666666666666672,                 4.0,   4.033333333333333,
+                4.066666666666666,                 4.1,   4.133333333333333,
+                4.166666666666667],
+             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-246d1750-b74a-49fc-839a-ba859cec935b' class='xr-index-data-in' type='checkbox'/><label for='index-246d1750-b74a-49fc-839a-ba859cec935b' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([               8.205,                8.195,    8.184999999999999,
                  8.174999999999999,                8.165,                8.155,
                              8.145,                8.135,                8.125,
                              8.115,
@@ -1998,7 +2010,7 @@ Attributes:
                0.06499999999999999, 0.054999999999999986,  0.04499999999999999,
               0.034999999999999996, 0.024999999999999998,                0.015,
                              0.005],
-             dtype=&#x27;float64&#x27;, name=&#x27;y&#x27;, length=821))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-741af206-8410-47a5-8a58-c1f17dffcb82' class='xr-index-data-in' type='checkbox'/><label for='index-741af206-8410-47a5-8a58-c1f17dffcb82' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([               0.005,                0.015, 0.024999999999999998,
+             dtype=&#x27;float64&#x27;, name=&#x27;y&#x27;, length=821))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-c29f6252-8a15-4b64-8ec1-3e4a6aab83d6' class='xr-index-data-in' type='checkbox'/><label for='index-c29f6252-8a15-4b64-8ec1-3e4a6aab83d6' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([               0.005,                0.015, 0.024999999999999998,
               0.034999999999999996,  0.04499999999999999, 0.054999999999999986,
                0.06499999999999999,                0.075,  0.08499999999999999,
                0.09499999999999999,
@@ -2007,7 +2019,7 @@ Attributes:
                  9.584999999999999,    9.594999999999999,    9.604999999999999,
                  9.614999999999998,                9.625,                9.635,
                              9.645],
-             dtype=&#x27;float64&#x27;, name=&#x27;x&#x27;, length=965))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-9b597e23-352d-4def-a605-6aef5d0db026' class='xr-section-summary-in' type='checkbox'  checked><label for='section-9b597e23-352d-4def-a605-6aef5d0db026' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
+             dtype=&#x27;float64&#x27;, name=&#x27;x&#x27;, length=965))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-73aa8f08-3d51-4d18-a62f-909ea3f2b30b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-73aa8f08-3d51-4d18-a62f-909ea3f2b30b' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
     &quot;height&quot;: 1080,
     &quot;width&quot;: 1920,
     &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOGCRS[\&quot;WGS 84\&quot;,ENSEMBLE[\&quot;World Geodetic System 1984 ensemble\&quot;,MEMBER[\&quot;World Geodetic System 1984 (Transit)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G730)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G873)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1150)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1674)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1762)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G2139)\&quot;],ELLIPSOID[\&quot;WGS 84\&quot;,6378137,298.257223563,LENGTHUNIT[\&quot;metre\&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&quot;Greenwich\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433]],ID[\&quot;EPSG\&quot;,4326]],CONVERSION[\&quot;UTM zone 35S\&quot;,METHOD[\&quot;Transverse Mercator\&quot;,ID[\&quot;EPSG\&quot;,9807]],PARAMETER[\&quot;Latitude of natural origin\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8801]],PARAMETER[\&quot;Longitude of natural origin\&quot;,27,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8802]],PARAMETER[\&quot;Scale factor at natural origin\&quot;,0.9996,SCALEUNIT[\&quot;unity\&quot;,1],ID[\&quot;EPSG\&quot;,8805]],PARAMETER[\&quot;False easting\&quot;,500000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8806]],PARAMETER[\&quot;False northing\&quot;,10000000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8807]]],CS[Cartesian,2],AXIS[\&quot;(E)\&quot;,east,ORDER[1],LENGTHUNIT[\&quot;metre\&quot;,1]],AXIS[\&quot;(N)\&quot;,north,ORDER[2],LENGTHUNIT[\&quot;metre\&quot;,1]],USAGE[SCOPE[\&quot;Engineering survey, topographic mapping.\&quot;],AREA[\&quot;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&quot;],BBOX[-80,24,0,30]],ID[\&quot;EPSG\&quot;,32735]]&quot;,
@@ -2151,7 +2163,7 @@ camera’s objective plot are provided below. Note that the <code class="docutil
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Writing frames: 100%|██████████| 30/30 [00:14&lt;00:00,  2.10it/s]
+Writing frames: 100%|██████████| 30/30 [00:12&lt;00:00,  2.48it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2276,7 +2288,8 @@ Writing frames: 100%|██████████| 30/30 [00:14&lt;00:00,  2.1
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -2288,6 +2301,16 @@ Writing frames: 100%|██████████| 30/30 [00:14&lt;00:00,  2.1
 
 </p>
 
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
   </div>
   
   <div class="footer-item">

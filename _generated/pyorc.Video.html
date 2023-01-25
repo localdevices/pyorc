@@ -6,30 +6,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Video &#8212; pyorc 0.3.0 documentation</title>
-  <script>
+    <title>pyorc.Video &#8212; pyorc 0.3.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -49,6 +50,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -94,7 +99,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.3.0 documentation</p>
+    <p class="title logo__title">pyorc 0.3.3 documentation</p>
   
 </a>
     
@@ -111,39 +116,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../api.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -152,19 +157,21 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -177,11 +184,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -211,39 +220,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../api.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -257,11 +266,11 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -349,17 +358,17 @@
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.h_a.html">pyorc.Velocimetry.h_a</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html">pyorc.Velocimetry.filter_temporal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html">pyorc.Velocimetry.filter_temporal_angle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html">pyorc.Velocimetry.filter_temporal_neighbour</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html">pyorc.Velocimetry.filter_temporal_std</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html">pyorc.Velocimetry.filter_temporal_velocity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html">pyorc.Velocimetry.filter_temporal_corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.minmax.html">pyorc.Velocimetry.mask.minmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.corr.html">pyorc.Velocimetry.mask.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.angle.html">pyorc.Velocimetry.mask.angle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.rolling.html">pyorc.Velocimetry.mask.rolling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.outliers.html">pyorc.Velocimetry.mask.outliers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.variance.html">pyorc.Velocimetry.mask.variance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.count.html">pyorc.Velocimetry.mask.count</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html">pyorc.Velocimetry.filter_spatial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html">pyorc.Velocimetry.filter_spatial_nan</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html">pyorc.Velocimetry.filter_spatial_median</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_mean.html">pyorc.Velocimetry.mask.window_mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_nan.html">pyorc.Velocimetry.mask.window_nan</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
@@ -407,8 +416,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -425,7 +437,7 @@
 <h1>pyorc.Video<a class="headerlink" href="#pyorc-video" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyorc.Video">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_exterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video" title="Permalink to this definition">#</a></dt>
 <dd><p>Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
 frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
 These can then be processed with other pyorc API functionalities.</p>
@@ -440,17 +452,16 @@ geographically referenced plane.</p></li>
 the camera)</p></li>
 <li><p><strong>start_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – first frame to use in analysis (default: 0)</p></li>
 <li><p><strong>end_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – last frame to use in analysis (if not set, last frame available in video will be used)</p></li>
-<li><p><strong>stabilize</strong> (<em>optional</em>) – If set, the video will be stabilized by attempting to find rigid points (see recipe) and track these with
-Lukas Kanade optical flow.</p></li>
-<li><p><strong>recipe</strong> (<em>dict</em><em>, </em><em>optional</em>) – filter recipes used to distinguish rigid points from moving points for stabilization. Two flavours are
-currently implemented under pyorc.const.CLASSIFY_STANDING_CAM (for a camera that is kept as much as possible
-in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is moving across the objective).</p></li>
+<li><p><strong>stabilize</strong> (<em>optional</em>) – If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with
+Lukas Kanade optical flow. “fixed” for FOV that is meant to be in one place, “moving” for a moving FOV.</p></li>
+<li><p><strong>mask_exterior</strong> (<em>list</em><em> of </em><em>lists</em><em>,</em>) – set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
+The mask is used to select region (on land) for rigid point search for stabilization.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Video.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_exterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
 frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
 These can then be processed with other pyorc API functionalities.</p>
@@ -465,11 +476,10 @@ geographically referenced plane.</p></li>
 the camera)</p></li>
 <li><p><strong>start_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – first frame to use in analysis (default: 0)</p></li>
 <li><p><strong>end_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – last frame to use in analysis (if not set, last frame available in video will be used)</p></li>
-<li><p><strong>stabilize</strong> (<em>optional</em>) – If set, the video will be stabilized by attempting to find rigid points (see recipe) and track these with
-Lukas Kanade optical flow.</p></li>
-<li><p><strong>recipe</strong> (<em>dict</em><em>, </em><em>optional</em>) – filter recipes used to distinguish rigid points from moving points for stabilization. Two flavours are
-currently implemented under pyorc.const.CLASSIFY_STANDING_CAM (for a camera that is kept as much as possible
-in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is moving across the objective).</p></li>
+<li><p><strong>stabilize</strong> (<em>optional</em>) – If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with
+Lukas Kanade optical flow. “fixed” for FOV that is meant to be in one place, “moving” for a moving FOV.</p></li>
+<li><p><strong>mask_exterior</strong> (<em>list</em><em> of </em><em>lists</em><em>,</em>) – set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
+The mask is used to select region (on land) for rigid point search for stabilization.</p></li>
 </ul>
 </dd>
 </dl>
@@ -493,6 +503,9 @@ in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is mov
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.plot_rigid_pts.html#pyorc.Video.plot_rigid_pts" title="pyorc.Video.plot_rigid_pts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rigid_pts</span></code></a>([ax])</p></td>
 <td><p>Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an axes object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mask_from_exterior</span></code>(exterior)</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -518,7 +531,10 @@ in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is mov
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_a</span></code></p></td>
 <td><p>Actual water level [m] during video</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.start_frame.html#pyorc.Video.start_frame" title="pyorc.Video.start_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_frame</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code></p></td>
+<td><p>returns: Mask of region of interest :rtype: np.ndarray</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Video.start_frame.html#pyorc.Video.start_frame" title="pyorc.Video.start_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_frame</span></code></a></p></td>
 <td><p>int, first frame considered in analysis</p></td>
 </tr>
 </tbody>
@@ -626,7 +642,8 @@ in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is mov
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -638,6 +655,16 @@ in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is mov
 
 </p>
 
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
   </div>
   
   <div class="footer-item">

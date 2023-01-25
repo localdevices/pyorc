@@ -5,30 +5,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.video &#8212; pyorc 0.3.0 documentation</title>
-  <script>
+    <title>pyorc.api.video &#8212; pyorc 0.3.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
@@ -46,6 +47,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -91,7 +96,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.3.0 documentation</p>
+    <p class="title logo__title">pyorc 0.3.3 documentation</p>
   
 </a>
     
@@ -108,39 +113,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -149,19 +154,21 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -174,11 +181,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -208,39 +217,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -254,11 +263,11 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -278,8 +287,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -312,11 +324,11 @@
 <div class="viewcode-block" id="Video"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video">[docs]</a><span class="k">class</span> <span class="nc">Video</span><span class="p">:</span>  <span class="c1">#(cv2.VideoCapture)</span>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">Filename: </span><span class="si">{:s}</span><span class="s2"></span>
-<span class="s2">FPS: </span><span class="si">{:f}</span><span class="s2"></span>
-<span class="s2">start frame: </span><span class="si">{:d}</span><span class="s2"></span>
-<span class="s2">end frame: </span><span class="si">{:d}</span><span class="s2"></span>
-<span class="s2">Camera configuration: </span><span class="si">{:s}</span><span class="s2"></span>
+<span class="s2">Filename: </span><span class="si">{:s}</span>
+<span class="s2">FPS: </span><span class="si">{:f}</span>
+<span class="s2">start frame: </span><span class="si">{:d}</span>
+<span class="s2">end frame: </span><span class="si">{:d}</span>
+<span class="s2">Camera configuration: </span><span class="si">{:s}</span>
 <span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span>
 
         <span class="k">return</span> <span class="n">template</span><span class="p">(</span>
@@ -335,8 +347,9 @@
             <span class="n">start_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">end_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">stabilize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">mask_exterior</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end</span>
 <span class="sd">        frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.</span>
 <span class="sd">        These can then be processed with other pyorc API functionalities.</span>
@@ -357,20 +370,20 @@
 <span class="sd">        end_frame : int, optional</span>
 <span class="sd">            last frame to use in analysis (if not set, last frame available in video will be used)</span>
 <span class="sd">        stabilize : optional</span>
-<span class="sd">            If set, the video will be stabilized by attempting to find rigid points (see recipe) and track these with</span>
-<span class="sd">            Lukas Kanade optical flow.</span>
-<span class="sd">        recipe : dict, optional</span>
-<span class="sd">            filter recipes used to distinguish rigid points from moving points for stabilization. Two flavours are</span>
-<span class="sd">            currently implemented under pyorc.const.CLASSIFY_STANDING_CAM (for a camera that is kept as much as possible</span>
-<span class="sd">            in the same place) and pyorc.const.CLASSIFY_MOVING_CAM (for a camera that is moving across the objective).</span>
+<span class="sd">            If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with</span>
+<span class="sd">            Lukas Kanade optical flow. &quot;fixed&quot; for FOV that is meant to be in one place, &quot;moving&quot; for a moving FOV.</span>
+<span class="sd">        mask_exterior : list of lists,</span>
+<span class="sd">            set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.</span>
+<span class="sd">            The mask is used to select region (on land) for rigid point search for stabilization.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">start_frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))),</span> <span class="s1">&#39;start_frame must be of type &quot;int&quot;&#39;</span>
         <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">end_frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))),</span> <span class="s1">&#39;end_frame must be of type &quot;int&quot;&#39;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">stabilize</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span> <span class="s2">&quot;moving&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]),</span> <span class="s1">&#39;stabilize must be &quot;fixed&quot; or &quot;moving&quot;&#39;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">stabilize</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span> <span class="s2">&quot;moving&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]),</span> <span class="s1">&#39;stabilize must be &quot;fixed&quot;, &quot;moving&quot; or &quot;all&quot;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feats_pos</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feats_stats</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feats_errs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ms</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">camera_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># check if h_a is supplied, if so, then also z_0 and h_ref must be available</span>
             <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -380,12 +393,16 @@
                     <span class="s2">&quot;configuration. &quot;</span>
                 <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">)),</span>\
                     <span class="s2">&quot;h_a was supplied, but camera config&#39;s gcps do not contain h_ref, this is needed for dynamic &quot;</span> \
-                    <span class="s2">&quot;reprojection. You can supplying z_0 and h_ref in the camera_config&#39;s gcps upon making a camera &quot;</span> \
+                    <span class="s2">&quot;reprojection. You must supply z_0 and h_ref in the camera_config&#39;s gcps upon making a camera &quot;</span> \
                     <span class="s2">&quot;configuration. &quot;</span>
         <span class="c1"># super().__init__(*args, **kwargs)</span>
         <span class="n">cap</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
         <span class="c1"># explicitly open file for reading</span>
-
+        <span class="k">if</span> <span class="n">mask_exterior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># set a mask based on the roi points</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_mask_from_exterior</span><span class="p">(</span><span class="n">mask_exterior</span><span class="p">)</span>
         <span class="c1"># set end and start frame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_COUNT</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">start_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -398,18 +415,28 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Start frame </span><span class="si">{</span><span class="n">start_frame</span><span class="si">}</span><span class="s2"> is larger than end frame </span><span class="si">{</span><span class="n">end_frame</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
+            <span class="c1"># end frame cannot be larger than total amount of available frames</span>
+            <span class="n">end_frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">end_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">end_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span>
+        <span class="c1"># extract times and frame numbers as far as available</span>
+        <span class="n">time</span><span class="p">,</span> <span class="n">frame_number</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_time_frames</span><span class="p">(</span><span class="n">cap</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">)</span>
+        <span class="c1"># check if end_frame changed</span>
+        <span class="k">if</span> <span class="n">frame_number</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">end_frame</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;End frame </span><span class="si">{</span><span class="n">end_frame</span><span class="si">}</span><span class="s2"> cannot be read from file. End frame is adapted to </span><span class="si">{</span><span class="n">frame_number</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">end_frame</span> <span class="o">=</span> <span class="n">frame_number</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span> <span class="o">=</span> <span class="n">end_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span> <span class="o">=</span> <span class="n">frame_number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span> <span class="o">=</span> <span class="n">start_frame</span>
         <span class="k">if</span> <span class="n">stabilize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># select the right recipe dependent on the movie being fixed or moving</span>
-            <span class="n">recipe</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">CLASSIFY_STANDING_CAM</span> <span class="k">if</span> <span class="n">stabilize</span> <span class="o">==</span> <span class="s2">&quot;fixed&quot;</span> <span class="k">else</span> <span class="n">const</span><span class="o">.</span><span class="n">CLASSIFY_MOVING_CAM</span>
+            <span class="n">recipe</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">CLASSIFY_CAM</span><span class="p">[</span><span class="n">stabilize</span><span class="p">]</span> <span class="k">if</span> <span class="n">stabilize</span> <span class="ow">in</span> <span class="n">const</span><span class="o">.</span><span class="n">CLASSIFY_CAM</span> <span class="k">else</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_pos_feats</span><span class="p">(</span><span class="n">cap</span><span class="p">,</span> <span class="n">recipe</span><span class="o">=</span><span class="n">recipe</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_ms</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">fps</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FPS</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># set other properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h_a</span> <span class="o">=</span> <span class="n">h_a</span>
         <span class="c1"># make camera config part of the vidoe object</span>
@@ -421,9 +448,28 @@
         <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="k">del</span> <span class="n">cap</span></div>
 
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Mask of region of interest</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>
+
+    <span class="nd">@mask</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">mask</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">camera_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return: CameraConfig object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -431,7 +477,7 @@
 
     <span class="nd">@camera_config</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">camera_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_config_input</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set camera config as a serializable object from either a filename, json string or a dict</span>
 <span class="sd">        :param camera_config_input: str, dict, CameraConfig object, filename string, or json string containing camera</span>
 <span class="sd">            configuration.</span>
@@ -454,7 +500,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return: int, last frame considered in analysis</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -462,15 +508,16 @@
 
     <span class="nd">@end_frame</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># sometimes last frames are not read by OpenCV, hence we skip the last frame always</span>
         <span class="k">if</span> <span class="n">end_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">)</span>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return: Actual water level [m] during video</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -480,15 +527,13 @@
     <span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">h_a</span><span class="p">,</span> <span class="nb">float</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;The actual water level must be a float, you supplied a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">if</span> <span class="n">h_a</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Your water level is </span><span class="si">{</span><span class="n">h_a</span><span class="si">}</span><span class="s2"> meters, which is very high for a locally referenced reading. Make sure this value is correct and expressed in unit meters.&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">h_a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_h_a</span> <span class="o">=</span> <span class="n">h_a</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">start_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return: int, first frame considered in analysis</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -503,7 +548,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return: float, frames per second</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -517,7 +562,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return: list of 4 lists (int) with [column, row] locations of area of interest in video objective</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -528,7 +573,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span> <span class="o">=</span> <span class="n">corners</span>
 
 <div class="viewcode-block" id="Video.get_frame"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frame.html#pyorc.Video.get_frame">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="n">lens_corr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.</span>
 
 <span class="sd">        :param n: int, frame number to retrieve</span>
@@ -572,7 +617,7 @@
         <span class="k">return</span> <span class="n">img</span></div>
 
 <div class="viewcode-block" id="Video.get_frames"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frames.html#pyorc.Video.get_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`, expected to be read</span>
 <span class="sd">        lazily. The xr.DataArray will contain all coordinate variables and attributes, needed for further processing</span>
 <span class="sd">        steps.</span>
@@ -589,7 +634,7 @@
         <span class="c1">#     # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs</span>
         <span class="c1">#     if hasattr(self.camera_config, &quot;lens_pars&quot;):</span>
         <span class="c1">#         kwargs[&quot;lens_corr&quot;] = True</span>
-        <span class="n">frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_frame</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span><span class="p">)]</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_frame</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span><span class="p">]</span> <span class="c1">#range(self.end_frame - self.start_frame)</span>
         <span class="n">sample</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
         <span class="n">data_array</span> <span class="o">=</span> <span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">from_delayed</span><span class="p">(</span>
             <span class="n">frame</span><span class="p">,</span>
@@ -599,21 +644,19 @@
         <span class="c1"># if &quot;lens_corr&quot; in kwargs:</span>
         <span class="c1">#     if kwargs[&quot;lens_corr&quot;]:</span>
                 <span class="c1"># also correct the control point src</span>
-        <span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_points</span><span class="p">(</span>
-            <span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span>
-            <span class="n">camera_config</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
-            <span class="n">camera_config</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span>
-                    <span class="c1"># sample.shape[0],</span>
-                    <span class="c1"># sample.shape[1],</span>
-                    <span class="c1"># **self.camera_config.lens_pars</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">camera_config</span><span class="p">,</span> <span class="s2">&quot;gcps&quot;</span><span class="p">):</span>
+            <span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_points</span><span class="p">(</span>
+                <span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span>
+                <span class="n">camera_config</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
+                <span class="n">camera_config</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span>
+            <span class="p">)</span>
                 <span class="c1"># camera_config.corners = cv.undistort_points(</span>
                 <span class="c1">#     camera_config.corners,</span>
                 <span class="c1">#     sample.shape[0],</span>
                 <span class="c1">#     sample.shape[1],</span>
                 <span class="c1">#     **self.camera_config.lens_pars</span>
                 <span class="c1"># )</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_array</span><span class="p">))</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">fps</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="c1"># measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps</span>
         <span class="c1"># y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -648,13 +691,20 @@
         <span class="k">return</span> <span class="n">frames</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_get_pos_feats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cap</span><span class="p">,</span> <span class="n">recipe</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">CLASSIFY_STANDING_CAM</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_mask_from_exterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exterior</span><span class="p">):</span>
+        <span class="n">mask_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">exterior</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">fillPoly</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="n">mask_coords</span><span class="p">],</span> <span class="mi">255</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_pos_feats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cap</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">recipe</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">CLASSIFY_STANDING_CAM</span><span class="p">):</span>
         <span class="c1"># go through the entire set of frames to gather transformation matrices per frame (except for the first one)</span>
         <span class="c1"># get the displacements of trackable features</span>
         <span class="n">positions</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">errs</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_displacements</span><span class="p">(</span>
             <span class="n">cap</span><span class="p">,</span>
             <span class="n">start_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span><span class="p">,</span>
-            <span class="n">end_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span>
+            <span class="n">end_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span><span class="p">,</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span>
         <span class="p">)</span>
         <span class="c1"># filter features that belong to actual camera movement</span>
         <span class="k">for</span> <span class="n">recipe</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">:</span>
@@ -672,7 +722,7 @@
 
 
 <div class="viewcode-block" id="Video.plot_rigid_pts"><a class="viewcode-back" href="../../../_generated/pyorc.Video.plot_rigid_pts.html#pyorc.Video.plot_rigid_pts">[docs]</a>    <span class="k">def</span> <span class="nf">plot_rigid_pts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an</span>
 <span class="sd">        axes object.</span>
 
@@ -742,7 +792,8 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -754,6 +805,16 @@
 
 </p>
 
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
   </div>
   
   <div class="footer-item">

@@ -6,30 +6,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Velocimetry &#8212; pyorc 0.3.0 documentation</title>
-  <script>
+    <title>pyorc.Velocimetry &#8212; pyorc 0.3.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -49,6 +50,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -94,7 +99,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.3.0 documentation</p>
+    <p class="title logo__title">pyorc 0.3.3 documentation</p>
   
 </a>
     
@@ -111,39 +116,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../api.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -152,19 +157,21 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -177,11 +184,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -211,39 +220,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../api.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -257,11 +266,11 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -349,17 +358,17 @@
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.h_a.html">pyorc.Velocimetry.h_a</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html">pyorc.Velocimetry.filter_temporal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html">pyorc.Velocimetry.filter_temporal_angle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html">pyorc.Velocimetry.filter_temporal_neighbour</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html">pyorc.Velocimetry.filter_temporal_std</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html">pyorc.Velocimetry.filter_temporal_velocity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html">pyorc.Velocimetry.filter_temporal_corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.minmax.html">pyorc.Velocimetry.mask.minmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.corr.html">pyorc.Velocimetry.mask.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.angle.html">pyorc.Velocimetry.mask.angle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.rolling.html">pyorc.Velocimetry.mask.rolling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.outliers.html">pyorc.Velocimetry.mask.outliers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.variance.html">pyorc.Velocimetry.mask.variance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.count.html">pyorc.Velocimetry.mask.count</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html">pyorc.Velocimetry.filter_spatial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html">pyorc.Velocimetry.filter_spatial_nan</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html">pyorc.Velocimetry.filter_spatial_median</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_mean.html">pyorc.Velocimetry.mask.window_mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_nan.html">pyorc.Velocimetry.mask.window_nan</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
@@ -407,8 +416,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -454,40 +466,43 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyorc.Velocimetry.__init__" title="pyorc.Velocimetry.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(xarray_obj)</p></td>
 <td><p>Initialize a velocimetry <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial.html#pyorc.Velocimetry.filter_spatial" title="pyorc.Velocimetry.filter_spatial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial</span></code></a>([v_x, v_y, filter_nan, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial</span></code>([v_x, v_y, filter_nan, ...])</p></td>
 <td><p>Masks velocity values on a number of spatial filters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_median.html#pyorc.Velocimetry.filter_spatial_median" title="pyorc.Velocimetry.filter_spatial_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_median</span></code></a>([v_x, v_y, tolerance, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_median</span></code>([v_x, v_y, tolerance, ...])</p></td>
 <td><p>Masks values when their value deviates more than x standard deviations from the median of its neighbours (inc.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_spatial_nan.html#pyorc.Velocimetry.filter_spatial_nan" title="pyorc.Velocimetry.filter_spatial_nan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_nan</span></code></a>([v_x, v_y, tolerance, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_nan</span></code>([v_x, v_y, tolerance, ...])</p></td>
 <td><p>Masks values if their surrounding neighbours (inc.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal.html#pyorc.Velocimetry.filter_temporal" title="pyorc.Velocimetry.filter_temporal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal</span></code></a>([v_x, v_y, filter_std, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal</span></code>([v_x, v_y, filter_std, ...])</p></td>
 <td><p>Masks values using several filters that use temporal variations or comparison as basis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_angle.html#pyorc.Velocimetry.filter_temporal_angle" title="pyorc.Velocimetry.filter_temporal_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_angle</span></code></a>([v_x, v_y, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_angle</span></code>([v_x, v_y, ...])</p></td>
 <td><p>filters on the expected angle.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_corr.html#pyorc.Velocimetry.filter_temporal_corr" title="pyorc.Velocimetry.filter_temporal_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_corr</span></code></a>([v_x, v_y, corr, tolerance])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_corr</span></code>([v_x, v_y, corr, tolerance])</p></td>
 <td><p>Masks values with a too low correlation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_neighbour.html#pyorc.Velocimetry.filter_temporal_neighbour" title="pyorc.Velocimetry.filter_temporal_neighbour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_neighbour</span></code></a>([v_x, v_y, roll, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_count</span></code>([tolerance])</p></td>
+<td><p>Masks locations with a too low amount of valid velocities in time, measured by fraction with <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_neighbour</span></code>([v_x, v_y, roll, ...])</p></td>
 <td><p>Masks values if neighbours over a certain rolling length before and after, have a significantly higher velocity than value under consideration, measured by tolerance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_std.html#pyorc.Velocimetry.filter_temporal_std" title="pyorc.Velocimetry.filter_temporal_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_std</span></code></a>([v_x, v_y, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_std</span></code>([v_x, v_y, ...])</p></td>
 <td><p>Masks values if they deviate more than x standard deviations from the mean.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.filter_temporal_velocity.html#pyorc.Velocimetry.filter_temporal_velocity" title="pyorc.Velocimetry.filter_temporal_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_velocity</span></code></a>([v_x, v_y, s_min, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_velocity</span></code>([v_x, v_y, s_min, ...])</p></td>
 <td><p>Masks values if the velocity scalar lies outside a user-defined valid range.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transect</span></code></a>(x, y[, z, crs, v_eff, xs, ys, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transect</span></code></a>(x, y[, z, s, crs, v_eff, xs, ...])</p></td>
 <td><p>Interpolate all variables to supplied x and y coordinates of a cross section.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_outliers</span></code></a>([v_x, v_y, wdw, max_iter, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_outliers</span></code></a>([v_x, v_y, wdw, max_iter, ...])</p></td>
 <td><p>Replace missing values using neighbourhood operators.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_encoding</span></code></a>([enc_pars])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_encoding</span></code></a>([enc_pars])</p></td>
 <td><p>Set encoding parameters for all typical variables in a velocimetry dataset.</p></td>
 </tr>
 </tbody>
@@ -507,6 +522,9 @@
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.h_a.html#pyorc.Velocimetry.h_a" title="pyorc.Velocimetry.h_a"><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_a</span></code></a></p></td>
 <td><p>Actual water level belonging to the processed video</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_velocimetry</span></code></p></td>
+<td><p>Checks if the data contained in the object seems to be velocimetry data by checking naming of dims and available variables.</p></td>
 </tr>
 </tbody>
 </table>
@@ -613,7 +631,8 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -625,6 +644,16 @@
 
 </p>
 
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
   </div>
   
   <div class="footer-item">

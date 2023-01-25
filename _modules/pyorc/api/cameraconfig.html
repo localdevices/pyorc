@@ -5,30 +5,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.cameraconfig &#8212; pyorc 0.3.0 documentation</title>
-  <script>
+    <title>pyorc.api.cameraconfig &#8212; pyorc 0.3.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
@@ -46,6 +47,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -91,7 +96,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.3.0 documentation</p>
+    <p class="title logo__title">pyorc 0.3.3 documentation</p>
   
 </a>
     
@@ -108,39 +113,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -149,19 +154,21 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -174,11 +181,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -208,39 +217,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../quickstart.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -254,11 +263,11 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -278,8 +287,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -310,7 +322,7 @@
 
 
 <div class="viewcode-block" id="CameraConfig"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.html#pyorc.CameraConfig">[docs]</a><span class="k">class</span> <span class="nc">CameraConfig</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Camera configuration containing information about the perspective of the camera with respect to real world</span>
 <span class="sd">    coordinates</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -337,7 +349,7 @@
             <span class="n">calibration_video</span><span class="o">=</span><span class="kc">None</span>
 
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -415,7 +427,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns geographical bbox fitting around corners points of area of interest in camera perspective</span>
 
 <span class="sd">        Returns</span>
@@ -448,7 +460,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gcp_reduced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the location of gcp destination points, reduced with their mean for better local projection</span>
 
 <span class="sd">        Returns</span>
@@ -460,7 +472,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gcp_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the mean location of gcp destination points</span>
 
 <span class="sd">        Returns</span>
@@ -471,8 +483,20 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gcp_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dims : int</span>
+<span class="sd">            amount of dimensions of gcps (can be 2 or 3)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns rows and columns in projected frames from ``Frames.project``</span>
 
 <span class="sd">        Returns</span>
@@ -491,7 +515,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns Affine transform of projected frames from ``Frames.project``</span>
 
 <span class="sd">        Returns</span>
@@ -510,7 +534,7 @@
         <span class="n">progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calibrates and sets the properties ``camera_matrix`` and ``dist_coeffs`` using a video of a chessboard pattern.</span>
 <span class="sd">        Follows methods described on https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html</span>
 
@@ -548,8 +572,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span></div>
 
-    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">redistort</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -560,6 +584,10 @@
 <span class="sd">            If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,</span>
 <span class="sd">            using h_a as a present water level. In case a video with higher (lower) water levels is used, this</span>
 <span class="sd">            will result in a different perspective plane than the control video.</span>
+<span class="sd">        redistort : bool, optional</span>
+<span class="sd">            If set in combination with ``camera``, the bbox will be redistorted in the camera objective using the</span>
+<span class="sd">            distortion coefficients and camera matrix. Not used in orthorectification because this occurs by default</span>
+<span class="sd">            on already undistorted images.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -578,11 +606,17 @@
             <span class="c1"># reduce coords by control point mean</span>
             <span class="n">coords</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
             <span class="c1"># TODO: re-distort if needed</span>
-            <span class="n">bbox</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">perspectiveTransform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">coords</span><span class="p">]),</span> <span class="n">M</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">corners</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">perspectiveTransform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">coords</span><span class="p">]),</span> <span class="n">M</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">redistort</span><span class="p">:</span>
+                <span class="c1"># for visualization on still distorted frames this can be done. DO NOT do this if used for</span>
+                <span class="c1"># orthorectification, as this typically occurs on undistorted images.</span>
+                <span class="n">corners</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_points</span><span class="p">(</span><span class="n">corners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">bbox</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">bbox</span>
 
 <div class="viewcode-block" id="CameraConfig.get_depth"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_depth.html#pyorc.CameraConfig.get_depth">[docs]</a>    <span class="k">def</span> <span class="nf">get_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level,</span>
 <span class="sd">        measured in local reference (e.g. staff gauge).</span>
 
@@ -605,7 +639,7 @@
         <span class="k">return</span> <span class="n">z_pressure</span> <span class="o">-</span> <span class="n">z</span></div>
 
     <span class="k">def</span> <span class="nf">get_dst_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        h_a : float, optional</span>
 <span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
 <span class="sd">            is processed and thus changes in water level are not relevant. (default: None)</span>
@@ -632,7 +666,7 @@
         <span class="k">return</span> <span class="n">dst_a</span>
 
     <span class="k">def</span> <span class="nf">get_dist_shore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured</span>
 <span class="sd">        in local reference (e.g. staff gauge).</span>
 
@@ -675,7 +709,7 @@
         <span class="k">return</span> <span class="n">dist_wall</span>
 
 <div class="viewcode-block" id="CameraConfig.z_to_h"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.z_to_h.html#pyorc.CameraConfig.z_to_h">[docs]</a>    <span class="k">def</span> <span class="nf">z_to_h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -691,7 +725,7 @@
         <span class="k">return</span> <span class="n">h</span></div>
 
 <div class="viewcode-block" id="CameraConfig.get_M"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M">[docs]</a>    <span class="k">def</span> <span class="nf">get_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_bbox_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the</span>
 <span class="sd">        ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.</span>
 
 <span class="sd">        Parameters</span>
@@ -721,7 +755,8 @@
             <span class="p">)</span>
             <span class="n">dst_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dst_a</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dst_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span>
+            <span class="c1"># in case we are dealing with a 2D 4-point, then reproject points on water surface, else keep 3D points</span>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dst_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_dims</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span>
             <span class="c1"># reduce dst_a with its mean to get much more accurate projection result in case x and y order of</span>
             <span class="c1"># magnitude is very large</span>
             <span class="n">dst_a</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span>
@@ -747,7 +782,7 @@
             <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">get_z_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        h_a : float, optional</span>
 <span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
 <span class="sd">            is processed and thus changes in water level are not relevant. (default: None)</span>
@@ -763,7 +798,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">h_a</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="CameraConfig.set_bbox_from_corners"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners">[docs]</a>    <span class="k">def</span> <span class="nf">set_bbox_from_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Establish bbox based on a set of camera perspective corner points Assign corner coordinates to camera</span>
 <span class="sd">        configuration</span>
 
@@ -790,7 +825,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_lens_pars"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the lens parameters of the given CameraConfig</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the lens parameters of the given CameraConfig</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -811,7 +846,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_cam_mtx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_gcps"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">set_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="p">,</span> <span class="n">h_ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set ground control points for the given CameraConfig</span>
 
 <span class="sd">        Parameters</span>
@@ -867,7 +902,7 @@
         <span class="p">}</span></div>
 
 <div class="viewcode-block" id="CameraConfig.set_lens_position"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_position.html#pyorc.CameraConfig.set_lens_position">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the geographical position of the lens of current CameraConfig.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the geographical position of the lens of current CameraConfig.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -899,7 +934,7 @@
             <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{}</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems</span>
 <span class="sd">        to be in the right location. Requires cartopy to be installed.</span>
 
@@ -1007,7 +1042,7 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="CameraConfig.plot_bbox"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot_bbox.html#pyorc.CameraConfig.plot_bbox">[docs]</a>    <span class="k">def</span> <span class="nf">plot_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transformer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera</span>
 <span class="sd">        Field Of View (``camera=True``).</span>
 
@@ -1044,7 +1079,7 @@
         <span class="k">return</span> <span class="n">p</span></div>
 
 <div class="viewcode-block" id="CameraConfig.to_dict"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the CameraConfig object as dictionary</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CameraConfig object as dictionary</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1068,7 +1103,7 @@
         <span class="k">return</span> <span class="n">dict_str</span>
 
 <div class="viewcode-block" id="CameraConfig.to_file"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_file.html#pyorc.CameraConfig.to_file">[docs]</a>    <span class="k">def</span> <span class="nf">to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Write the CameraConfig object to json structure</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the CameraConfig object to json structure</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1081,7 +1116,7 @@
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="CameraConfig.to_json"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_json.html#pyorc.CameraConfig.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert CameraConfig object to string</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert CameraConfig object to string</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1105,7 +1140,7 @@
 
 
 <span class="k">def</span> <span class="nf">get_camera_config</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read camera config from string</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read camera config from string</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1128,7 +1163,7 @@
 
 
 <span class="k">def</span> <span class="nf">load_camera_config</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load a CameraConfig from a geojson file.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a CameraConfig from a geojson file.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1191,7 +1226,8 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -1203,6 +1239,16 @@
 
 </p>
 
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
   </div>
   
   <div class="footer-item">

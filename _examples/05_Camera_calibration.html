@@ -6,30 +6,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Camera calibration &#8212; pyorc 0.3.0 documentation</title>
-  <script>
+    <title>Camera calibration &#8212; pyorc 0.3.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -51,6 +52,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -96,7 +101,7 @@
 
   
   
-    <p class="title logo__title">pyorc 0.3.0 documentation</p>
+    <p class="title logo__title">pyorc 0.3.3 documentation</p>
   
 </a>
     
@@ -113,39 +118,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../quickstart.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -154,19 +159,21 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -179,11 +186,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -213,39 +222,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../intro.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../quickstart.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
                         Quick start
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../user-guide/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user-guide/index.html">
                         User Guide
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../api.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
                         API reference
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -259,11 +268,11 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -287,7 +296,7 @@
 <li class="toctree-l1"><a class="reference internal" href="01_Camera_Configuration_single_video.html">Setup a camera configuration for processing a single video</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="02_Process_velocimetry.html">Analyze surface velocities of a video with velocimetry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="03_Plotting_and_filtering_velocimetry_results.html">Immersive plotting and analyzing results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_Plotting_and_masking_velocimetry_results.html">Immersive plotting and analyzing results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">Obtain a discharge measurement over a cross section</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Camera calibration with chessboard pattern</a></li>
 </ul>
@@ -304,8 +313,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -611,19 +623,28 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:119: UserWarning: End frame 401 cannot be read from file. End frame is adapted to 352
+  warnings.warn(f&#34;End frame {end_frame} cannot be read from file. End frame is adapted to {frame_number[-1]}&#34;)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f8491221960&gt;
+&lt;matplotlib.image.AxesImage at 0x7f3d0c3e23e0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_05_Camera_calibration_3_1.png" src="../_images/_examples_05_Camera_calibration_3_1.png" />
+<img alt="../_images/_examples_05_Camera_calibration_3_2.png" src="../_images/_examples_05_Camera_calibration_3_2.png" />
 </div>
 </div>
 <p>The algorithm uses automatic detection of chessboard corners. It only detects chessboard corners <em>within</em> the image, so not at the edge. Hence, this is a 9x6 pattern, which is the default setting. Let’s now first make a default camera configuration, without the camera calibration applied.</p>
@@ -697,7 +718,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 50/50 [00:07&lt;00:00,  6.89it/s]
+100%|██████████| 50/50 [00:06&lt;00:00,  7.55it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -707,36 +728,36 @@ div.rendered_html tbody tr:hover {
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">AssertionError</span>                            Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In [4], line 1</span>
+Cell <span class="ansi-green-fg">In[4], line 1</span>
 <span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">cam_config</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">set_lens_calibration</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">fn</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">chessboard_size</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">11</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">8</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">frame_limit</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">50</span><span class="ansi-yellow-bg">)</span>
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/cameraconfig.py:245</span>, in <span class="ansi-cyan-fg">CameraConfig.set_lens_calibration</span><span class="ansi-blue-fg">(self, fn, chessboard_size, max_imgs, plot, progress_bar, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    218</span> <span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    219</span> <span style="color: rgb(175,0,0)">Calibrates and sets the properties ``camera_matrix`` and ``dist_coeffs`` using a video of a chessboard pattern.</span>
-<span class="ansi-green-intense-fg ansi-bold">    220</span> <span style="color: rgb(175,0,0)">Follows methods described on https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html</span>
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/cameraconfig.py:257</span>, in <span class="ansi-cyan-fg">CameraConfig.set_lens_calibration</span><span class="ansi-blue-fg">(self, fn, chessboard_size, max_imgs, plot, progress_bar, **kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    230</span> <span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    231</span> <span style="color: rgb(175,0,0)">Calibrates and sets the properties ``camera_matrix`` and ``dist_coeffs`` using a video of a chessboard pattern.</span>
+<span class="ansi-green-intense-fg ansi-bold">    232</span> <span style="color: rgb(175,0,0)">Follows methods described on https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html</span>
 <span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    242</span>
-<span class="ansi-green-intense-fg ansi-bold">    243</span> <span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    244</span> <span class="ansi-bold" style="color: rgb(0,135,0)">assert</span>(os<span style="color: rgb(98,98,98)">.</span>path<span style="color: rgb(98,98,98)">.</span>isfile(fn)), <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">Video calibration file </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>fn<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> not found</span><span style="color: rgb(175,0,0)">&#34;</span>
-<span class="ansi-green-fg">--&gt; 245</span> camera_matrix, dist_coeffs <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">cv</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">calibrate_camera</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">    246</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">fn</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    247</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">chessboard_size</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    248</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">max_imgs</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    249</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">plot</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    250</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">progress_bar</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    251</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">kwargs</span>
-<span class="ansi-green-intense-fg ansi-bold">    252</span> <span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    253</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>camera_matrix <span style="color: rgb(98,98,98)">=</span> camera_matrix
-<span class="ansi-green-intense-fg ansi-bold">    254</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>dist_coeffs <span style="color: rgb(98,98,98)">=</span> dist_coeffs
+<span class="ansi-green-intense-fg ansi-bold">    254</span>
+<span class="ansi-green-intense-fg ansi-bold">    255</span> <span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    256</span> <span class="ansi-bold" style="color: rgb(0,135,0)">assert</span>(os<span style="color: rgb(98,98,98)">.</span>path<span style="color: rgb(98,98,98)">.</span>isfile(fn)), <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">Video calibration file </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>fn<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> not found</span><span style="color: rgb(175,0,0)">&#34;</span>
+<span class="ansi-green-fg">--&gt; 257</span> camera_matrix, dist_coeffs <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">cv</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">calibrate_camera</span><span class="ansi-yellow-bg">(</span>
+<span class="ansi-green-intense-fg ansi-bold">    258</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">fn</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    259</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">chessboard_size</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    260</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">max_imgs</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    261</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">plot</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    262</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">progress_bar</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    263</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">kwargs</span>
+<span class="ansi-green-intense-fg ansi-bold">    264</span> <span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    265</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>camera_matrix <span style="color: rgb(98,98,98)">=</span> camera_matrix
+<span class="ansi-green-intense-fg ansi-bold">    266</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>dist_coeffs <span style="color: rgb(98,98,98)">=</span> dist_coeffs
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/cv.py:492</span>, in <span class="ansi-cyan-fg">calibrate_camera</span><span class="ansi-blue-fg">(fn, chessboard_size, max_imgs, plot, progress_bar, criteria, to_file, frame_limit, tolerance)</span>
-<span class="ansi-green-intense-fg ansi-bold">    490</span> cv2<span style="color: rgb(98,98,98)">.</span>destroyAllWindows()
-<span class="ansi-green-intense-fg ansi-bold">    491</span> <span style="color: rgb(95,135,135)"># do calibration</span>
-<span class="ansi-green-fg">--&gt; 492</span> <span class="ansi-bold" style="color: rgb(0,135,0)">assert</span>(<span style="color: rgb(0,135,0)">len</span>(obj_pts) <span style="color: rgb(98,98,98)">&gt;</span><span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">5</span>),\
-<span class="ansi-green-intense-fg ansi-bold">    493</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">A minimum of 5 frames with chessboard patterns must be available, only </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">len</span>(obj_pts)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> found. Please check </span><span style="color: rgb(175,0,0)">&#34;</span> \
-<span class="ansi-green-intense-fg ansi-bold">    494</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">if the video contains chessboard patterns of size </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>chessboard_size<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> </span><span style="color: rgb(175,0,0)">&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    495</span> ret, camera_matrix, dist_coeffs, rvecs, tvecs <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>calibrateCamera(obj_pts, img_pts, frame_size, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>)
-<span class="ansi-green-intense-fg ansi-bold">    496</span> <span style="color: rgb(95,135,135)"># remove badly performing images and recalibrate</span>
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/cv.py:562</span>, in <span class="ansi-cyan-fg">calibrate_camera</span><span class="ansi-blue-fg">(fn, chessboard_size, max_imgs, plot, progress_bar, criteria, to_file, frame_limit, tolerance)</span>
+<span class="ansi-green-intense-fg ansi-bold">    560</span> cv2<span style="color: rgb(98,98,98)">.</span>destroyAllWindows()
+<span class="ansi-green-intense-fg ansi-bold">    561</span> <span style="color: rgb(95,135,135)"># do calibration</span>
+<span class="ansi-green-fg">--&gt; 562</span> <span class="ansi-bold" style="color: rgb(0,135,0)">assert</span>(<span style="color: rgb(0,135,0)">len</span>(obj_pts) <span style="color: rgb(98,98,98)">&gt;</span><span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">5</span>),\
+<span class="ansi-green-intense-fg ansi-bold">    563</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">A minimum of 5 frames with chessboard patterns must be available, only </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">len</span>(obj_pts)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> found. Please check </span><span style="color: rgb(175,0,0)">&#34;</span> \
+<span class="ansi-green-intense-fg ansi-bold">    564</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">if the video contains chessboard patterns of size </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>chessboard_size<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> </span><span style="color: rgb(175,0,0)">&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    565</span> ret, camera_matrix, dist_coeffs, rvecs, tvecs <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>calibrateCamera(obj_pts, img_pts, frame_size, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>)
+<span class="ansi-green-intense-fg ansi-bold">    566</span> <span style="color: rgb(95,135,135)"># remove badly performing images and recalibrate</span>
 
 <span class="ansi-red-fg">AssertionError</span>: A minimum of 5 frames with chessboard patterns must be available, only 0 found. Please check if the video contains chessboard patterns of size (11, 8)
 </pre></div></div>
@@ -756,23 +777,7 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-  9%|▉         | 38/401 [00:06&lt;00:58,  6.24it/s]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Maximum required images 30 found
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-
+  9%|▉         | 38/401 [00:05&lt;00:52,  6.98it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -780,6 +785,7 @@ Maximum required images 30 found
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Maximum required images 30 found
 Average error on point reconstruction is 0.08864044887689718
 </pre></div></div>
 </div>
@@ -800,8 +806,8 @@ Let’s check what the intrinsic matrix and distortion coefficients look like.</
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Camera Matrix: [[944.3875397827766, 0.0, 632.7985944169991], [0.0, 943.8943229208952, 333.37555234551064], [0.0, 0.0, 1.0]]
-Distortion coefficients: [[0.04231134144851151, -0.14818720134478286, -0.007924199398552679, 0.0005261764435479734, 0.34505368681585485]]
+Camera Matrix: [[944.3875397830265, 0.0, 632.7985944169997], [0.0, 943.8943229210023, 333.3755523455209], [0.0, 0.0, 1.0]]
+Distortion coefficients: [[0.04231134145042998, -0.14818720135114832, -0.00792419939903394, 0.0005261764434961309, 0.34505368670918896]]
 </pre></div></div>
 </div>
 <p>They are now clearly different from the default. We can also plot the images, written to disk to verify if we are happy with the found coverage of poses. If a large part of the VOF or rotations is missing, we can still extend the amount of frames</p>
@@ -884,7 +890,7 @@ Distortion coefficients: [[0.04231134144851151, -0.14818720134478286, -0.0079241
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f847cad8a30&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f3cf8d7cf10&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -994,7 +1000,8 @@ Distortion coefficients: [[0.04231134144851151, -0.14818720134478286, -0.0079241
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -1006,6 +1013,16 @@ Distortion coefficients: [[0.04231134144851151, -0.14818720134478286, -0.0079241
 
 </p>
 
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
   </div>
   
   <div class="footer-item">
