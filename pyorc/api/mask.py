@@ -36,33 +36,41 @@ def _base_mask(time_allowed=False, time_required=False):
         mask_func.__doc__ = f"{mask_func.__doc__}{commondoc}"
         # wrap function so that it takes over the docstring and is seen as integral part of the class
         @functools.wraps(mask_func)
-        def wrapper_func(ref, inplace=False, *args, **kwargs):
+        def wrapper_func(ref, inplace=False, reduce_time=False, *args, **kwargs):
             # check if obj seems to contain velocimetry data
-            if not(ref._obj.velocimetry.is_velocimetry):
+            if reduce_time and "time" in ref._obj:
+                ds = ref._obj.mean(dim="time", keep_attrs=True)
+            else:
+                ds = ref._obj
+            if not(ds.velocimetry.is_velocimetry):
                 raise AssertionError("Dataset is not a valid velocimetry dataset")
             if time_required:
                 # then automatically time is also allowed
                 # time_allowed = True
-                if not("time" in ref._obj.dims):
+                if not("time" in ds.dims):
                     raise AssertionError(
-                f'This mask requires dimension "time". The dataset does not contain dimension "time".'
-                f'Apply this mask before applying any reducers in time.'
+                f'This mask requires dimension "time". The dataset does not contain dimension "time" or you have set'
+                f'reduce_time=True. Apply this mask without applying any reducers in time.'
             )
-            if not(time_allowed) and not(time_required):
-                if "time" in ref._obj.dims:
-                    raise AssertionError(
-                f'This mask can only work without dimension "time". The dataset contains dimension "time".'
-                f'Reduce this by applying a reducer or selecting a time step. '
-                f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
-            )
+            # if not(time_allowed) and not(time_required):
+            #     if "time" in ref._obj.dims:
+            #         raise AssertionError(
+            #     f'This mask can only work without dimension "time". The dataset contains dimension "time".'
+            #     f'Reduce this by applying a reducer or selecting a time step. '
+            #     f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
+            # )
             if time_required:
-                if not("time" in ref._obj):
+                if not("time" in ds):
                     raise AssertionError(
                 f'This mask requires dimension "time". The dataset does not contain dimension "time".'
                 f'Apply this mask before applying any reducers in time.'
             )
-            # apply the wrapped mask function
-            mask = mask_func(ref, **kwargs)
+            if not(time_allowed or time_required) and "time" in ds:
+                # function must be applied per time step
+                mask = ds.groupby("time").map(mask_func, **kwargs)
+            else:
+                # apply the wrapped mask function as is
+                mask = mask_func(ds, **kwargs)
             # apply mask if inplace
             if inplace:
                 # set the _obj data points
@@ -131,7 +139,7 @@ class _Velocimetry_MaskMethods:
         maximum scalar velocity [m s-1] (default: 5.)
 
         """
-        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
+        s = (self[v_x] ** 2 + self[v_y] ** 2) ** 0.5
         # create filter
         mask = (s > s_min) & (s < s_max)
         return mask
@@ -154,7 +162,7 @@ class _Velocimetry_MaskMethods:
     angle_tolerance : float (0 - 2*pi)
         maximum deviation from expected angle allowed (default: 0.25 * np.pi).
         """
-        angle = np.arctan2(self._obj[v_x], self._obj[v_y])
+        angle = np.arctan2(self[v_x], self[v_y])
         mask = np.abs(angle - angle_expected) < angle_tolerance
         return mask
 
@@ -170,7 +178,7 @@ class _Velocimetry_MaskMethods:
         tolerance for fractional amount of valid velocities after all filters. If less than the fraction is
         available, the entire velocity will be set to missings.
         """
-        mask = self._obj[v_x].count(dim="time") > tolerance * len(self._obj.time)
+        mask = self[v_x].count(dim="time") > tolerance * len(self.time)
         return mask
 
 
@@ -184,7 +192,7 @@ class _Velocimetry_MaskMethods:
     tolerance : float (0-1)
         tolerance for correlation value (default: 0.1). If correlation is lower than tolerance, it is masked
         """
-        return self._obj[corr] > tolerance
+        return self[corr] > tolerance
 
 
     @_base_mask(time_required=True)
@@ -203,12 +211,12 @@ class _Velocimetry_MaskMethods:
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            x_std = self._obj[v_x].std(dim="time")
-            y_std = self._obj[v_y].std(dim="time")
-            x_mean = self._obj[v_x].mean(dim="time")
-            y_mean = self._obj[v_y].mean(dim="time")
-            x_condition = np.abs((self._obj[v_x] - x_mean) / x_std) < tolerance
-            y_condition = np.abs((self._obj[v_y] - y_mean) / y_std) < tolerance
+            x_std = self[v_x].std(dim="time")
+            y_std = self[v_y].std(dim="time")
+            x_mean = self[v_x].mean(dim="time")
+            y_mean = self[v_y].mean(dim="time")
+            x_condition = np.abs((self[v_x] - x_mean) / x_std) < tolerance
+            y_condition = np.abs((self[v_y] - y_mean) / y_std) < tolerance
         if mode == "or":
             mask = x_condition | y_condition
         else:
@@ -229,10 +237,10 @@ class _Velocimetry_MaskMethods:
          can be "and" (default) or "or". If "or" ("and"), then only one (both) of two vector components need(s) to
          be within tolerance.
         """
-        x_std = self._obj[v_x].std(dim="time")
-        y_std = self._obj[v_y].std(dim="time")
-        x_mean = np.maximum(self._obj[v_x].mean(dim="time"), 1e30)
-        y_mean = np.maximum(self._obj[v_y].mean(dim="time"), 1e30)
+        x_std = self[v_x].std(dim="time")
+        y_std = self[v_y].std(dim="time")
+        x_mean = np.maximum(self[v_x].mean(dim="time"), 1e30)
+        y_mean = np.maximum(self[v_y].mean(dim="time"), 1e30)
         x_var = np.abs(x_std / x_mean)
         y_var = np.abs(y_std / y_mean)
         x_condition = x_var < tolerance
@@ -255,7 +263,7 @@ class _Velocimetry_MaskMethods:
     wdw : int, optional
         amount of time steps in rolling window (centred) (default: 5)
         """
-        s = (self._obj[v_x] ** 2 + self._obj[v_y] ** 2) ** 0.5
+        s = (self[v_x] ** 2 + self[v_y] ** 2) ** 0.5
         s_rolling = s.fillna(0.).rolling(time=wdw, center=True).max()
         mask = s > tolerance * s_rolling
         return mask
@@ -286,7 +294,7 @@ class _Velocimetry_MaskMethods:
         window size in positive y-direction of grid, overrules wdw in positive x-direction if set.
         """
         # collect points within a stride, collate and analyze for nan fraction
-        ds_wdw = helpers.stack_window(self._obj, wdw=wdw, **kwargs)
+        ds_wdw = helpers.stack_window(self, wdw=wdw, **kwargs)
         valid_neighbours = ds_wdw[v_x].count(dim="stride")
         mask = valid_neighbours >= tolerance * len(ds_wdw.stride)
         return mask
@@ -316,10 +324,10 @@ class _Velocimetry_MaskMethods:
          be within tolerance.
         """
         # collect points within a stride, collate and analyze for median value and deviation
-        ds_wdw = helpers.stack_window(self._obj, wdw=wdw, **kwargs)
+        ds_wdw = helpers.stack_window(self, wdw=wdw, **kwargs)
         ds_mean = ds_wdw.mean(dim="stride")
-        x_condition = np.abs(self._obj[v_x] - ds_mean[v_x]) / ds_mean[v_x] < tolerance
-        y_condition = np.abs(self._obj[v_y] - ds_mean[v_y]) / ds_mean[v_y] < tolerance
+        x_condition = np.abs(self[v_x] - ds_mean[v_x]) / ds_mean[v_x] < tolerance
+        y_condition = np.abs(self[v_y] - ds_mean[v_y]) / ds_mean[v_y] < tolerance
         if mode == "or":
             mask = x_condition | y_condition
         else:

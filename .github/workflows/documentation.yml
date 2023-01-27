@@ -22,7 +22,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: "3.10"
-          mamba-version: "*"
+          # mamba-version: "*"
           channels: conda-forge,defaults
           channel-priority: true
           environment-file: envs/pyorc-dev.yml

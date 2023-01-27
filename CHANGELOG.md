@@ -1,3 +1,35 @@
+## [0.3.3] - 2023-01-24
+### Added
+- Documentation for velocimetry and masking
+### Changed
+- filtering changed into mask as subclass pyorc.Velocimetry.mask
+### Deprecated
+- all functions starting with pyorc.Velocimetry.filter....
+### Removed
+### Fixed
+### Security
+
+
+## [0.3.2] - 2023-01-05
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- scipy 1.10.0 release causing regression error in xarray.Dataset.interp
+### Security
+
+## [0.3.1] - 2022-12-02
+### Added
+- perspective transform with 6 gcps
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- several small bugs
+### Security
+
+
 ## [0.3.0] - 2022-11-13
 ### Added
 - Video.set_lens_calibration added automated camera calibration with chessboard
