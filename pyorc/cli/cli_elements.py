@@ -142,6 +142,7 @@ class BaseSelect:
             else:
                 self.button3.set_active(False)
                 self.button3.label.set_color("grey")
+
         self.ax.figure.canvas.draw()
 
     def on_left_click(self, event):
@@ -227,7 +228,7 @@ class AoiSelect(BaseSelect):
         self.title = self.ax.text(
             xloc,
             yloc,
-            "Select corners of AOI in the following order with left and right as seen looking "
+            "Select corners of bounding box in the following order with left and right as seen looking "
             "downstream:\nUpstream-left\nDownstream-left\nDownstream-right\nUpstream-right",
             size=12,
             va="top",
@@ -258,16 +259,18 @@ class AoiSelect(BaseSelect):
             )
             self.pts_t.append(pt)
             # check if all points are complete
-            if len(self.src) == self.required_clicks:
-                self.camera_config.set_bbox_from_corners(self.src)
-                self.camera_config.plot_bbox(ax=self.ax, camera=True)
-            else:
-                # remove plot if present
-                if self.cam_config_cam is not None:
-                    self.cam_config_cam.remove()
-                    self.cam_config_geo.remove()
 
-
+    def on_click(self, event):
+        super(AoiSelect, self).on_click(event)
+        if len(self.src) == self.required_clicks:
+            self.camera_config.set_bbox_from_corners(self.src)
+            self.cam_config_cam = self.camera_config.plot_bbox(ax=self.ax, camera=True, alpha=0.5, zorder=2, edgecolor="w")
+        else:
+            # remove plot if present
+            if self.cam_config_cam is not None:
+                self.cam_config_cam.remove()
+                self.cam_config_geo.remove()
+                self.ax.draw_idle()
 
 
 class GcpSelect(BaseSelect):

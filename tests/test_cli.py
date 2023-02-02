@@ -83,7 +83,7 @@ def test_gcps_interact(gcps_dst, frame_rgb):
 def test_aoi_interact(frame_rgb, cam_config_without_aoi):
     import matplotlib.pyplot as plt
     # convert dst to
-    crs = 32735
+    crs = cam_config_without_aoi.crs  # 32735
     src = cam_config_without_aoi.gcps["src"]
     dst = xyz_transform(cam_config_without_aoi.gcps["dst"], crs_from=crs, crs_to=4326)
     selector = AoiSelect(frame_rgb, src, dst, cam_config_without_aoi)
