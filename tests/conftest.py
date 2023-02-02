@@ -124,6 +124,18 @@ def cam_config(gcps, lens_position, lens_pars, corners):
         crs=32735
         )
 
+@pytest.fixture
+def cam_config_without_aoi(lens_position, gcps):
+    return pyorc.CameraConfig(
+        height=1080,
+        width=1920,
+        lens_position=lens_position,
+        gcps=gcps,
+        window_size=25,
+        resolution=0.01,
+        crs=32735
+        )
+
 
 @pytest.fixture
 def cam_config_calib():
@@ -206,6 +218,9 @@ def vid_cam_config_stabilize(cam_config):
     )
     yield vid
 
+@pytest.fixture
+def frame_rgb(vid_cam_config):
+    return vid_cam_config.get_frame(0, method="rgb")
 
 @pytest.fixture
 def frames_grayscale(vid_cam_config):

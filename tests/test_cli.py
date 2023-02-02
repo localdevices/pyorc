@@ -1,5 +1,7 @@
 from click.testing import CliRunner
 from pyorc.cli.main import cli
+from pyorc.cli.cli_elements import GcpSelect, AoiSelect
+from pyorc.helpers import xyz_transform
 import json
 
 def test_cli_cam_config(cli_obj):
@@ -68,4 +70,22 @@ def test_service_video(velocity_flow_processor):
     raise NotImplementedError
 
 
+def test_gcps_interact(gcps_dst, frame_rgb):
+    import matplotlib.pyplot as plt
+    # convert dst to
+    crs=32735
+    dst = xyz_transform(gcps_dst, crs_from=crs, crs_to=4326)
+    selector = GcpSelect(frame_rgb, dst)
+    # uncomment below to test the interaction, not suitable for automated unit test
+    # plt.show(block=True)
 
+
+def test_aoi_interact(frame_rgb, cam_config_without_aoi):
+    import matplotlib.pyplot as plt
+    # convert dst to
+    crs = 32735
+    src = cam_config_without_aoi.gcps["src"]
+    dst = xyz_transform(cam_config_without_aoi.gcps["dst"], crs_from=crs, crs_to=4326)
+    selector = AoiSelect(frame_rgb, src, dst, cam_config_without_aoi)
+    # uncomment below to test the interaction, not suitable for automated unit test
+    plt.show(block=True)
