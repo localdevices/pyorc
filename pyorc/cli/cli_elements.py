@@ -1,13 +1,13 @@
-
-import pyorc
-from matplotlib.backend_bases import MouseButton
+import cartopy.crs as ccrs
+import cartopy.io.img_tiles as cimgt
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patheffects
+from matplotlib.backend_bases import MouseButton
 from matplotlib.widgets import Button
+from matplotlib.patches import Polygon
 from mpl_toolkits.axes_grid1 import Divider, Size
-import cartopy.crs as ccrs
-import cartopy.io.img_tiles as cimgt
+from pyorc import helpers
 
 path_effects = [
     patheffects.Stroke(linewidth=2, foreground="w"),
@@ -21,20 +21,25 @@ corner_labels = [
     "upstream-right"
 ]
 class BaseSelect:
-    def __init__(self, img, dst, buffer=0.0002, zoom_level=19):
+    def __init__(self, img, dst, crs=None, buffer=0.0002, zoom_level=19):
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
         # fig = plt.figure(figsize=(12, 7))
-        tiler = getattr(cimgt, "GoogleTiles")(style="satellite")
         xmin = np.array(dst)[:, 0].min()
         xmax = np.array(dst)[:, 0].max()
         ymin = np.array(dst)[:, 1].min()
         ymax = np.array(dst)[:, 1].max()
         extent = [xmin - buffer, xmax + buffer, ymin-buffer, ymax + buffer]
         # extent = [4.5, 4.51, 51.2, 51.21]
-        ax_geo = fig.add_axes([0., 0., 1, 1], projection=tiler.crs)
-        ax_geo.set_extent(extent, crs=ccrs.PlateCarree())
-        ax_geo.add_image(tiler, zoom_level, zorder=1)
+        if crs is not None:
+            tiler = getattr(cimgt, "GoogleTiles")(style="satellite")
+            ax_geo = fig.add_axes([0., 0., 1, 1], projection=tiler.crs)
+            ax_geo.set_extent(extent, crs=ccrs.PlateCarree())
+            ax_geo.add_image(tiler, zoom_level, zorder=1)
+        else:
+            ax_geo = fig.add_axes([0., 0., 1, 1])
+            ax_geo.set_aspect("equal")
+        plt.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
         ax_geo.set_visible(False)
         ax = fig.add_axes([0.2, 0.1, 0.7, 0.8])
         ax.set_facecolor("k")
@@ -44,26 +49,36 @@ class BaseSelect:
         # fig, ax = plt.subplots()
         ax.imshow(img)
         ax.set_title("Left: add point, right: remove point, close: store in .src")
-        # # make empty plot
-        # self.p, = ax.plot([], [], "o", color="w", markeredgecolor="k", zorder=3)
-        # TODO: ensure all coordinates are first transformed to latlon for plotting purposes
-        # TODO: if no crs provided, then provide a normal axes with equal lengths on x and y axis
-        self.p_geo = ax_geo.plot(*list(zip(*dst)), "o", color="w", markeredgecolor="k", zorder=3, transform=ccrs.PlateCarree())
-        transform = ccrs.PlateCarree()._as_mpl_transform(ax_geo)
+        kwargs = dict(
+            color="w",
+            markeredgecolor="k",
+            markersize=10,
+            zorder=3,
+            label="Control points"
+        )
+        kwargs_text = dict(
+            xytext=(6, 6),
+            textcoords="offset points",
+            zorder=4,
+            path_effects=[
+                patheffects.Stroke(linewidth=3, foreground="w"),
+                patheffects.Normal(),
+            ],
+        )
+        if crs is not None:
+            kwargs["transform"] = ccrs.PlateCarree()
+            transform = ccrs.PlateCarree()._as_mpl_transform(ax_geo)
+            kwargs_text["xycoords"] = transform
+        self.p_geo = ax_geo.plot(
+            *list(zip(*dst)), "o",
+            **kwargs
+        )
         for n, _pt in enumerate(dst):
             pt = ax_geo.annotate(
                 n + 1,
-                xytext=(4, 4),
-                xy=_pt,
-                textcoords="offset points",
-                zorder=4,
-                path_effects=[
-                    patheffects.Stroke(linewidth=3, foreground="w"),
-                    patheffects.Normal(),
-                ],
-                xycoords=transform
+                xy = _pt,
+                **kwargs_text
             )
-
         self.fig = fig
         self.ax_geo = ax_geo
         self.ax = ax  # add axes
@@ -152,7 +167,7 @@ class BaseSelect:
             self.p.set_data(*list(zip(*self.src)))
             pt = self.ax.annotate(
                 len(self.src),
-                xytext=(4, 4),
+                xytext=(6, 6),
                 xy=(event.xdata, event.ydata),
                 textcoords="offset points",
                 zorder=4,
@@ -203,14 +218,18 @@ class AoiSelect(BaseSelect):
     """
 
     def __init__(self, img, src, dst, camera_config):
-        super(AoiSelect, self).__init__(img, dst)
+        if hasattr(camera_config, "crs"):
+            crs = camera_config.crs
+        else:
+            crs = None
+        super(AoiSelect, self).__init__(img, dst, crs=crs)
         # make empty plot
         self.camera_config = camera_config
-        self.p_gcps, = self.ax.plot(*list(zip(*src)), "o", color="w", markeredgecolor="k", zorder=3)
+        self.p_gcps, = self.ax.plot(*list(zip(*src)), "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
         self.pts_t_gcps = [
             self.ax.annotate(
                 n + 1,
-                xytext=(4, 4),
+                xytext=(6, 6),
                 xy=xy,
                 textcoords="offset points",
                 zorder=4,
@@ -223,6 +242,27 @@ class AoiSelect(BaseSelect):
         # self.pts_t.append(pt)
 
         self.p, = self.ax.plot([], [], "o", markersize=10, color="c", markeredgecolor="w", zorder=3)
+        kwargs = dict(
+            markersize=10,
+            color="c",
+            markeredgecolor="w",
+            zorder=3,
+        )
+        if hasattr(self.camera_config, "crs"):
+            kwargs["transform"] = ccrs.PlateCarree()
+        self.p_geo, = self.ax_geo.plot(
+            [], [], "o",
+            **kwargs
+        )
+        # plot an empty polygon
+        pol = Polygon(np.zeros((0, 2)), edgecolor="w", alpha=0.5, linewidth=2)
+        if hasattr(self.camera_config, "crs"):
+            pol_geo = Polygon(np.zeros((0, 2)), edgecolor="w", alpha=0.5, linewidth=2, transform=ccrs.PlateCarree(),
+                              zorder=3)
+        else:
+            pol_geo = Polygon(np.zeros((0, 2)), edgecolor="w", alpha=0.5, linewidth=2, zorder=3)
+        self.p_bbox_geo = self.ax_geo.add_patch(pol_geo)
+        self.p_bbox = self.ax.add_patch(pol)
         xloc = self.ax.get_xlim()[0] + 50
         yloc = self.ax.get_ylim()[-1] + 50
         self.title = self.ax.text(
@@ -237,8 +277,8 @@ class AoiSelect(BaseSelect):
 
         # # TODO: if no crs provided, then provide a normal axes with equal lengths on x and y axis
         self.required_clicks = 4
-        self.cam_config_cam = None
-        self.cam_config_geo = None
+        # self.cam_config_cam = None
+        # self.cam_config_geo = None
         plt.show(block=True)
 
     def on_left_click(self, event):
@@ -248,7 +288,7 @@ class AoiSelect(BaseSelect):
             self.p.set_data(*list(zip(*self.src)))
             pt = self.ax.annotate(
                 corner_labels[len(self.src) - 1],
-                xytext=(4, 4),
+                xytext=(6, 6),
                 xy=(event.xdata, event.ydata),
                 textcoords="offset points",
                 zorder=4,
@@ -259,18 +299,39 @@ class AoiSelect(BaseSelect):
             )
             self.pts_t.append(pt)
             # check if all points are complete
+            if len(self.src) == self.required_clicks:
+                self.camera_config.set_bbox_from_corners(self.src)
+                bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True).exterior.xy))
+                bbox_geo = list(zip(*self.camera_config.get_bbox().exterior.xy))
+                if hasattr(self.camera_config, "crs"):
+                    bbox_geo = helpers.xyz_transform(
+                        bbox_geo,
+                        crs_from=self.camera_config.crs,
+                        crs_to=4326
+                    )
+                self.p_bbox.set_xy(bbox_cam)
+                self.p_bbox_geo.set_xy(bbox_geo)
+                # self.cam_config_cam = self.camera_config.plot_bbox(ax=self.ax, camera=True, alpha=0.5, zorder=2,
+                #                                                    edgecolor="w")
+                # self.cam_config_geo = self.camera_config.plot(ax=self.ax_geo, camera=False)
+                self.ax.figure.canvas.draw()
 
     def on_click(self, event):
         super(AoiSelect, self).on_click(event)
-        if len(self.src) == self.required_clicks:
-            self.camera_config.set_bbox_from_corners(self.src)
-            self.cam_config_cam = self.camera_config.plot_bbox(ax=self.ax, camera=True, alpha=0.5, zorder=2, edgecolor="w")
-        else:
+        # if len(self.src) == self.required_clicks and self.cam_config_cam is None:
+        #     self.camera_config.set_bbox_from_corners(self.src)
+        #     self.cam_config_cam = self.camera_config.plot_bbox(ax=self.ax, camera=True, alpha=0.5, zorder=2, edgecolor="w")
+        #     self.cam_config_geo = self.camera_config.plot(ax=self.ax_geo, camera=False)
+        if not(len(self.src) == self.required_clicks):
             # remove plot if present
-            if self.cam_config_cam is not None:
-                self.cam_config_cam.remove()
-                self.cam_config_geo.remove()
-                self.ax.draw_idle()
+            self.p_bbox.set_xy(np.zeros((0, 2)))
+            self.p_bbox_geo.set_xy(np.zeros((0, 2)))
+            # self.cam_config_cam.remove()
+                # self.cam_config_geo.remove()
+                # self.cam_config_cam = None
+                # self.cam_config_geo = None
+            self.ax.figure.canvas.draw()
+                # self.ax.draw_idle()
 
 
 class GcpSelect(BaseSelect):
@@ -278,10 +339,23 @@ class GcpSelect(BaseSelect):
     Selector tool to provide source GCP coordinates to pyOpenRiverCam
     """
 
-    def __init__(self, img, dst):
-        super(GcpSelect, self).__init__(img, dst)
+    def __init__(self, img, dst, crs=None):
+        super(GcpSelect, self).__init__(img, dst, crs=crs)
         # make empty plot
-        self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", zorder=3)
+        self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
+        kwargs = dict(
+            color="r",
+            markeredgecolor="w",
+            zorder=4,
+            markersize=10,
+            label="Selected control points"
+        )
+        if crs is not None:
+            kwargs["transform"] = ccrs.PlateCarree()
+        self.p_geo_selected, = self.ax_geo.plot(
+            [], [], "o",
+            **kwargs
+        )
         xloc = self.ax.get_xlim()[0] + 50
         yloc = self.ax.get_ylim()[-1] + 50
         self.title = self.ax.text(
@@ -291,7 +365,15 @@ class GcpSelect(BaseSelect):
             size=12,
             path_effects=path_effects
         )
-
+        self.ax_geo.legend()
         # # TODO: if no crs provided, then provide a normal axes with equal lengths on x and y axis
         self.required_clicks = len(self.dst)
 
+    def on_click(self, event):
+        super(GcpSelect, self).on_click(event)
+        # update selected dst points
+        dst_sel = self.dst[:len(self.src)]
+        if len(dst_sel) > 0:
+            self.p_geo_selected.set_data(*list(zip(*dst_sel)))
+        else:
+            self.p_geo_selected.set_data([], [])

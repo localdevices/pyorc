@@ -73,19 +73,26 @@ def test_service_video(velocity_flow_processor):
 def test_gcps_interact(gcps_dst, frame_rgb):
     import matplotlib.pyplot as plt
     # convert dst to
-    crs=32735
-    dst = xyz_transform(gcps_dst, crs_from=crs, crs_to=4326)
-    selector = GcpSelect(frame_rgb, dst)
+    crs = 32735
+    # crs = None
+    if crs is not None:
+        dst = xyz_transform(gcps_dst, crs_from=crs, crs_to=4326)
+    else:
+        dst = gcps_dst
+    selector = GcpSelect(frame_rgb, dst, crs=crs)
     # uncomment below to test the interaction, not suitable for automated unit test
-    # plt.show(block=True)
+    plt.show(block=True)
 
 
 def test_aoi_interact(frame_rgb, cam_config_without_aoi):
     import matplotlib.pyplot as plt
     # convert dst to
-    crs = cam_config_without_aoi.crs  # 32735
+    del cam_config_without_aoi.crs
     src = cam_config_without_aoi.gcps["src"]
-    dst = xyz_transform(cam_config_without_aoi.gcps["dst"], crs_from=crs, crs_to=4326)
+    if hasattr(cam_config_without_aoi, "crs"):
+        dst = xyz_transform(cam_config_without_aoi.gcps["dst"], crs_from=cam_config_without_aoi.crs, crs_to=4326)
+    else:
+        dst = cam_config_without_aoi.gcps["dst"]
     selector = AoiSelect(frame_rgb, src, dst, cam_config_without_aoi)
     # uncomment below to test the interaction, not suitable for automated unit test
     plt.show(block=True)
