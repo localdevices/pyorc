@@ -195,7 +195,7 @@ def camera_config(
     if not src:
         logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide source points interactively?', default=True):
-            src = cli_utils.get_gcps_interactive(videofile, dst, crs=crs)
+            src = cli_utils.get_gcps_interactive(videofile, dst, crs=crs, logger=logger)
 
     if crs is None and crs_gcps is not None:
         raise click.UsageError(f"--crs is None while --crs_gcps is {crs_gcps}, please supply --crs.")
@@ -209,7 +209,7 @@ def camera_config(
     if not corners:
         logger.warning("No corner points for projection provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide corners interactively?', default=True):
-            corners = cli_utils.get_corners_interactive(videofile, gcps, crs=crs)
+            corners = cli_utils.get_corners_interactive(videofile, gcps, crs=crs, logger=logger)
 
     pyorc.service.camera_config(
         video_file=videofile,
@@ -221,7 +221,8 @@ def camera_config(
         lens_position=lens_position,
         corners=corners
     )
-    # raise NotImplementedError
+    logger.info(f"Camera configuration created and stored in {output}")
+
 
 ## VELOCIMETRY
 @cli.command(short_help="Estimate velocimetry")

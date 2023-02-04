@@ -1,6 +1,7 @@
 import click
 import geopandas as gpd
 import json
+import logging
 import matplotlib.pyplot as plt
 import os
 import pyorc
@@ -11,7 +12,7 @@ from pyorc import Video, helpers, CameraConfig
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect
 
 
-def get_corners_interactive(fn, gcps, crs=None):
+def get_corners_interactive(fn, gcps, crs=None, logger=logging):
     vid = Video(fn, start_frame=0, end_frame=1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
@@ -22,20 +23,20 @@ def get_corners_interactive(fn, gcps, crs=None):
         dst = gcps["dst"]
     # setup preliminary cam config
     cam_config = CameraConfig(height=frame.shape[0], width=frame.shape[1], gcps=gcps, crs=crs)
-    selector = AoiSelect(frame, src, dst, cam_config)
+    selector = AoiSelect(frame, src, dst, cam_config, logger=logger)
     # uncomment below to test the interaction, not suitable for automated unit test
     plt.show(block=True)
     return selector.src
 
     # setup a cam_config without
 
-def get_gcps_interactive(fn, dst, crs=None):
+def get_gcps_interactive(fn, dst, crs=None, logger=logging):
     vid = Video(fn, start_frame=0, end_frame=1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     if crs is not None:
         dst = helpers.xyz_transform(dst, crs_from=crs, crs_to=4326)
-    selector = GcpSelect(frame, dst, crs=crs)
+    selector = GcpSelect(frame, dst, crs=crs, logger=logger)
     # uncomment below to test the interaction, not suitable for automated unit test
     plt.show(block=True)
     return selector.src

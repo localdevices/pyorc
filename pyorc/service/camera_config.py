@@ -23,8 +23,6 @@ def camera_config(video_file, cam_config_file, lens_position=None, corners=None,
     # prepare file name for geographical and objective overview
     fn_geo = f"{os.path.splitext(cam_config_file)[0]}_geo.jpg"
     fn_cam = f"{os.path.splitext(cam_config_file)[0]}_cam.jpg"
-    print(fn_geo)
-
     # open video for dimensions
     video = Video(video_file)
     # extract first frame
@@ -39,7 +37,6 @@ def camera_config(video_file, cam_config_file, lens_position=None, corners=None,
         cam_config.set_lens_position(*lens_position, crs=kwargs["gcps"]["crs"])
     if corners is not None:
         cam_config.set_bbox_from_corners(corners)
-    print(cam_config)
     cam_config.to_file(cam_config_file)
     if kwargs["crs"] is not None:
         ax = cam_config.plot(tiles="GoogleTiles", tiles_kwargs={"style": "satellite"})

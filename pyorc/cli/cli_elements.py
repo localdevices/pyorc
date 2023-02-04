@@ -1,5 +1,6 @@
 import cartopy.crs as ccrs
 import cartopy.io.img_tiles as cimgt
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patheffects
@@ -21,7 +22,8 @@ corner_labels = [
     "upstream-right"
 ]
 class BaseSelect:
-    def __init__(self, img, dst, crs=None, buffer=0.0002, zoom_level=19):
+    def __init__(self, img, dst, crs=None, buffer=0.0002, zoom_level=19, logger=logging):
+        self.logger = logger
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
         # fig = plt.figure(figsize=(12, 7))
@@ -125,7 +127,6 @@ class BaseSelect:
         self.on_close(event)
 
     def on_close(self, event):
-        print('disconnecting callback')
         self.ax.figure.canvas.mpl_disconnect(self.press_event)
         self.ax.figure.canvas.mpl_disconnect(self.release_event)
         self.ax.figure.canvas.mpl_disconnect(self.close_event)
@@ -162,7 +163,7 @@ class BaseSelect:
 
     def on_left_click(self, event):
         if event.xdata is not None:
-            print(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
+            self.logger.debug(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
             self.src.append([int(np.round(event.xdata)), int(np.round(event.ydata))])
             self.p.set_data(*list(zip(*self.src)))
             pt = self.ax.annotate(
@@ -187,6 +188,7 @@ class BaseSelect:
     def on_right_click(self, event):
         # remove the last added point
         if len(self.pts_t) > 0:
+            self.logger.debug("Removing last generated point")
             self.pts_t[-1].remove()
             del self.pts_t[-1]
         if len(self.src) > 0:
@@ -217,12 +219,12 @@ class AoiSelect(BaseSelect):
     Selector tool to provide source GCP coordinates to pyOpenRiverCam
     """
 
-    def __init__(self, img, src, dst, camera_config):
+    def __init__(self, img, src, dst, camera_config, logger=logging):
         if hasattr(camera_config, "crs"):
             crs = camera_config.crs
         else:
             crs = None
-        super(AoiSelect, self).__init__(img, dst, crs=crs)
+        super(AoiSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
         self.camera_config = camera_config
         self.p_gcps, = self.ax.plot(*list(zip(*src)), "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
@@ -283,7 +285,7 @@ class AoiSelect(BaseSelect):
 
     def on_left_click(self, event):
         if event.xdata is not None:
-            print(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
+            self.logger.debug(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
             self.src.append([int(np.round(event.xdata)), int(np.round(event.ydata))])
             self.p.set_data(*list(zip(*self.src)))
             pt = self.ax.annotate(
@@ -339,8 +341,8 @@ class GcpSelect(BaseSelect):
     Selector tool to provide source GCP coordinates to pyOpenRiverCam
     """
 
-    def __init__(self, img, dst, crs=None):
-        super(GcpSelect, self).__init__(img, dst, crs=crs)
+    def __init__(self, img, dst, crs=None, logger=logging):
+        super(GcpSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
         self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
         kwargs = dict(
