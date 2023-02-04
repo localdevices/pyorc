@@ -1,8 +1,44 @@
 import click
-import os
+import geopandas as gpd
 import json
+import matplotlib.pyplot as plt
+import os
 import pyorc
+from shapely.geometry import Point
 import yaml
+
+from pyorc import Video, helpers, CameraConfig
+from pyorc.cli.cli_elements import GcpSelect, AoiSelect
+
+
+def get_corners_interactive(fn, gcps, crs=None):
+    vid = Video(fn, start_frame=0, end_frame=1)
+    # get first frame
+    frame = vid.get_frame(0, method="rgb")
+    src = gcps["src"]
+    if crs is not None:
+        dst = helpers.xyz_transform(gcps["dst"], crs_from=crs, crs_to=4326)
+    else:
+        dst = gcps["dst"]
+    # setup preliminary cam config
+    cam_config = CameraConfig(height=frame.shape[0], width=frame.shape[1], gcps=gcps, crs=crs)
+    selector = AoiSelect(frame, src, dst, cam_config)
+    # uncomment below to test the interaction, not suitable for automated unit test
+    plt.show(block=True)
+    return selector.src
+
+    # setup a cam_config without
+
+def get_gcps_interactive(fn, dst, crs=None):
+    vid = Video(fn, start_frame=0, end_frame=1)
+    # get first frame
+    frame = vid.get_frame(0, method="rgb")
+    if crs is not None:
+        dst = helpers.xyz_transform(dst, crs_from=crs, crs_to=4326)
+    selector = GcpSelect(frame, dst, crs=crs)
+    # uncomment below to test the interaction, not suitable for automated unit test
+    plt.show(block=True)
+    return selector.src
 
 def parse_json(ctx, param, value):
     if value is None:
@@ -113,17 +149,18 @@ def parse_src(ctx, param, value):
 
 def parse_dst(ctx, param, value):
     value = parse_json(ctx, param, value)
-    if value is not None:
-        if len(value) == 4:
-            # assume [x, y] pairs are provided
-            len_points = 2
-        elif len(value) < 6:
-            raise click.UsageError(f"--dst must contain at least 4 with [x, y] or 6 with [x, y, z] points, contains {len(value)}.")
-        else:
-            len_points = 3
-        for n, val in enumerate(value):
-            assert(isinstance(val, list)), f"--dst value {n} is not a list {val}"
-            assert(len(val) == len_points), f"--src value {n} must contain row, column coordinate but consists of {len(val)} numbers"
+    value = validate_dst(value)
+    # if value is not None:
+    #     if len(value) == 4:
+    #         # assume [x, y] pairs are provided
+    #         len_points = 2
+    #     elif len(value) < 6:
+    #         raise click.UsageError(f"--dst must contain at least 4 with [x, y] or 6 with [x, y, z] points, contains {len(value)}.")
+    #     else:
+    #         len_points = 3
+    #     for n, val in enumerate(value):
+    #         assert(isinstance(val, list)), f"--dst value {n} is not a list {val}"
+    #         assert(len(val) == len_points), f"--src value {n} must contain row, column coordinate but consists of {len(val)} numbers"
     return value
 
 
@@ -137,3 +174,30 @@ def parse_str_num(ctx, param, value):
             return int(value)
         else:
             return float(value)
+
+
+def read_shape(fn):
+    gdf = gpd.read_file(fn)
+    # check if all geometries are points
+    assert(all([isinstance(geom, Point) for geom in gdf.geometry])), f'shapefile may only contain geometries of type ' \
+                                                                     f'"Point"'
+    # use the first point to check if points are 2d or 3d
+    if gdf.geometry[0].has_z:
+        coords = [[p.x, p.y, p.z] for p in gdf.geometry]
+    else:
+        coords = [[p.x, p.y] for p in gdf.geometry]
+    return coords
+
+def validate_dst(value):
+    if value is not None:
+        if len(value) == 4:
+            # assume [x, y] pairs are provided
+            len_points = 2
+        elif len(value) < 6:
+            raise click.UsageError(f"--dst must contain at least 4 with [x, y] or 6 with [x, y, z] points, contains {len(value)}.")
+        else:
+            len_points = 3
+        for n, val in enumerate(value):
+            assert(isinstance(val, list)), f"--dst value {n} is not a list {val}"
+            assert(len(val) == len_points), f"--src value {n} must contain row, column coordinate but consists of {len(val)} numbers"
+    return value

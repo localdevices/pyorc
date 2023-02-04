@@ -21,6 +21,10 @@ def cross_section():
     fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cross_section.csv")
     return pd.read_csv(fn)
 
+@pytest.fixture
+def gcps_fn():
+    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_gcps.geojson")
+    return fn
 
 @pytest.fixture
 def cam_config_fn():

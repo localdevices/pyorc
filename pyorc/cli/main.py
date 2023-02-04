@@ -129,7 +129,7 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
 @click.option(
     "--shapefile",
     type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
-    help="Shapefile containing dst GCP points [x, y] or [x, y, z] in its geometry",
+    help="Shapefile or other GDAL compatible vector file containing dst GCP points [x, y] or [x, y, z] in its geometry",
     callback=cli_utils.validate_file
 )
 @click.option(
@@ -169,7 +169,6 @@ def camera_config(
     logger.info(f"Preparing your cameraconfig file in {output}")
     logger.info(f"Found video file  {videofile}")
 
-
     if src is not None:
         logger.info("Source points found and validated")
     if dst is not None:
@@ -182,16 +181,21 @@ def camera_config(
         resolution: float = click.prompt("--resolution not provided, please enter a number, or Enter for default", default=0.05)
     if window_size is None:
         window_size: int = click.prompt("--window_size not provided, please enter a number, or Enter for default", default=10)
-
+    if shapefile is not None:
+        if dst is None:
+            dst = cli_utils.read_shape(shapefile)
+            # validate if amount of points is logical
+            dst = cli_utils.validate_dst(dst)
+        else:
+            logger.warning(f"Shapefile {shapefile} not used, because --dst was provided explicitly and overrules the use of --shapefile.")
+    if dst is not None:
+        logger.info("Destination points found and validated")
+    else:
+        raise click.UsageError("No destination control points for found, either provide a list of points with --dst or provide a shapefile with --shapefile")
     if not src:
         logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide source points interactively?', default=True):
-            raise click.UsageError("Interactive clicker is not implemented yet.")
-    if not corners:
-        logger.warning("No corner points for projection provided. No problem, you can interactively click them in your objective")
-        if click.confirm('Do you want to continue and provide corners interactively?', default=True):
-            raise click.UsageError("Interactive clicker is not implemented yet.")
-
+            src = cli_utils.get_gcps_interactive(videofile, dst, crs=crs)
 
     if crs is None and crs_gcps is not None:
         raise click.UsageError(f"--crs is None while --crs_gcps is {crs_gcps}, please supply --crs.")
@@ -202,6 +206,11 @@ def camera_config(
         "h_ref": href,
         "crs": crs_gcps
     }
+    if not corners:
+        logger.warning("No corner points for projection provided. No problem, you can interactively click them in your objective")
+        if click.confirm('Do you want to continue and provide corners interactively?', default=True):
+            corners = cli_utils.get_corners_interactive(videofile, gcps, crs=crs)
+
     pyorc.service.camera_config(
         video_file=videofile,
         cam_config_file=output,
