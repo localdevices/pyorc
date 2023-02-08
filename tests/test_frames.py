@@ -31,6 +31,7 @@ def test_project(frames, resolution, dims, shape):
     "frames, samples",
     [
         (pytest.lazy_fixture("frames_grayscale"), 2),
+        (pytest.lazy_fixture("frames_grayscale_shift"), 2),
         (pytest.lazy_fixture("frames_proj"), 2),
     ]
 )
