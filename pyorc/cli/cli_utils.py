@@ -30,12 +30,12 @@ def get_corners_interactive(fn, gcps, crs=None, logger=logging):
 
     # setup a cam_config without
 
-def get_gcps_interactive(fn, dst, crs=None, logger=logging):
+def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, logger=logging):
     vid = Video(fn, start_frame=0, end_frame=1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
-    if crs is not None:
-        dst = helpers.xyz_transform(dst, crs_from=crs, crs_to=4326)
+    if crs_gcps is not None:
+        dst = helpers.xyz_transform(dst, crs_from=crs_gcps, crs_to=4326)
     selector = GcpSelect(frame, dst, crs=crs, logger=logger)
     # uncomment below to test the interaction, not suitable for automated unit test
     plt.show(block=True)

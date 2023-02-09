@@ -3,6 +3,7 @@ import click
 from typing import List, Optional, Union
 from typeguard import typechecked
 import os
+import sys
 import yaml
 
 # import CLI components
@@ -195,7 +196,7 @@ def camera_config(
     if not src:
         logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide source points interactively?', default=True):
-            src = cli_utils.get_gcps_interactive(videofile, dst, crs=crs, logger=logger)
+            src = cli_utils.get_gcps_interactive(videofile, dst, crs=crs, crs_gcps=crs_gcps, logger=logger)
 
     if crs is None and crs_gcps is not None:
         raise click.UsageError(f"--crs is None while --crs_gcps is {crs_gcps}, please supply --crs.")
@@ -275,3 +276,6 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, update, verbose):
     # read yaml
     pass
 
+if __name__ == "__main__":
+#if getattr(sys, 'frozen', False):
+    cli(sys.argv[1:])
