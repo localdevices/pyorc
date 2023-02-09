@@ -72,13 +72,13 @@ class BaseSelect:
             transform = ccrs.PlateCarree()._as_mpl_transform(ax_geo)
             kwargs_text["xycoords"] = transform
         self.p_geo = ax_geo.plot(
-            *list(zip(*dst)), "o",
+            *list(zip(*dst))[0:2], "o",
             **kwargs
         )
         for n, _pt in enumerate(dst):
             pt = ax_geo.annotate(
                 n + 1,
-                xy = _pt,
+                xy = _pt[0:2],
                 **kwargs_text
             )
         self.fig = fig
@@ -199,6 +199,7 @@ class BaseSelect:
                 self.p.set_data([], [])
 
     def switch_to_ax(self, event):
+        self.fig.canvas.manager.toolbar.home()
         plt.sca(self.ax)
         self.ax.set_visible(True)
         self.ax_geo.set_visible(False)
@@ -207,6 +208,7 @@ class BaseSelect:
 
     # Define function for switching to ax2
     def switch_to_ax_geo(self, event):
+        self.fig.canvas.manager.toolbar.home()
         plt.sca(self.ax_geo)
         self.ax.set_visible(False)
         self.ax_geo.set_visible(True)
@@ -376,6 +378,6 @@ class GcpSelect(BaseSelect):
         # update selected dst points
         dst_sel = self.dst[:len(self.src)]
         if len(dst_sel) > 0:
-            self.p_geo_selected.set_data(*list(zip(*dst_sel)))
+            self.p_geo_selected.set_data(*list(zip(*dst_sel))[0:2])
         else:
             self.p_geo_selected.set_data([], [])
