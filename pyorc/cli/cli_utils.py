@@ -187,7 +187,11 @@ def read_shape(fn):
         coords = [[p.x, p.y, p.z] for p in gdf.geometry]
     else:
         coords = [[p.x, p.y] for p in gdf.geometry]
-    return coords
+    if not(hasattr(gdf, "crs")):
+        raise click.FileError(f"{fn} does not contain CRS, use a GIS program to add a valid CRS.")
+    if gdf.crs is None:
+        raise click.FileError(f"{fn} does not contain CRS, use a GIS program to add a valid CRS.")
+    return coords, gdf.crs.to_wkt()
 
 def validate_dst(value):
     if value is not None:

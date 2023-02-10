@@ -1,6 +1,8 @@
 import cartopy.crs as ccrs
 import cartopy.io.img_tiles as cimgt
 import logging
+
+import click
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patheffects
@@ -131,8 +133,9 @@ class BaseSelect:
         self.ax.figure.canvas.mpl_disconnect(self.release_event)
         self.ax.figure.canvas.mpl_disconnect(self.close_event)
         # check if the amount of src points and dst points is equal. If not return error
-        assert len(self.src) == self.required_clicks, f"Discarding result because {len(self.src)} points were " \
-                                                      f"selected, while {self.required_clicks} points are needed."
+        check_length = len(self.src) == self.required_clicks
+        if not(check_length):
+            raise click.UsageError(f"Aborting because you have not supplied all {self.required_clicks} ground control points. Only {len(self.src)} points supplied")
 
     def on_press(self, event):
         self.press = True

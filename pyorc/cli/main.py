@@ -184,7 +184,7 @@ def camera_config(
         window_size: int = click.prompt("--window_size not provided, please enter a number, or Enter for default", default=10)
     if shapefile is not None:
         if dst is None:
-            dst = cli_utils.read_shape(shapefile)
+            dst, crs_gcps = cli_utils.read_shape(shapefile)
             # validate if amount of points is logical
             dst = cli_utils.validate_dst(dst)
         else:
