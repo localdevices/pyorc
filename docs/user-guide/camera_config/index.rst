@@ -157,10 +157,11 @@ know and fix the level of the water (z-coordinate), then we can interpret the re
 give the camera calibration enough information to interpret the perspective. We do this by providing so-called ground
 control points, that are visible in the FOV, and of which we know the real-world coordinates.
 
-ground control point information and abbrevations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ground control point information and abbreviations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The fields have the following meaning:
+Within *pyorc*, both the command-line inteface and API, the different components of your ground control points are
+represented by abbreviated variables. These have the following meaning:
 
 * ``src`` contains [column, row] locations of the control points in the FOV.
 * ``dst``: contains [x, y] locations (in case you use 4 control points on one vertical plane) or [x, y, z] locations (
@@ -177,16 +178,17 @@ Measuring the GCP information
 
 Below we describe how the information needed should be measured in the field during a dedicated survey. This is
 typically done every time when you do an incidental observation, or once during the installation of a fixed camera.
-If you leave the camera in place, you can remove control points after the survey.
+If you leave the camera in place, you can remove recognizeable control points after the survey, as long as you have
+one video with the control points visible, which you can use to setup the camera configuration.
 
 Example of survey situations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You will notice in the next sections that you can typically measure either 4 control points at one vertical plane
-(water surface) or 6 or more points at random elevations. You prepare this situation by spreading easy to recognize
-markers over your Field of View. In the figure below you see two examples, one where 4 sticks were placed in the water
-and the interface of the sticks with the water (red dots) is measured. And one where 6 black-and-whiter markers are
-spread over the field of view.
+(e.g. the water surface) or 6 or more points at random elevations. You prepare this situation by spreading easy to
+recognize markers over your Field of View. In the figure below you see two examples, one where 4 sticks were placed in
+the water and the interface of the sticks with the water (red dots) is measured. And one where 6 black-and-white
+markers are spread over the field of view.
 
 .. table:: Examples of ground control markers and situations
 
@@ -204,7 +206,8 @@ The schematic below shows in a planar view what the situation looks like. It is 
 nicely spread over the Field of View, and this is actually more important than an equal spread of points of left and
 right bank. In the schematic we show this by having only 2 control points at the bank close to the camera, and 4 at
 the opposite side. If you have your camera on a bridge in the middle of the bridge deck, then having 3 (or more) points
-left as well as right makes the most sense.
+left as well as right makes the most sense. The better the spread is, the more accurate the perspective will be
+resolved.
 
 .. figure:: ../../_images/site_schematic_planar.svg
 
@@ -217,11 +220,12 @@ pressure gauge, that has its own vertical zero-level reference. Therefore, to us
 measured and entered:
 
 * measure the water level during the survey with your local device (e.g. staff gauge) and insert this in ``h_ref``
-* also measure the water level with your survey device such as total station or RTK GPS. This has its own vertical zero
-  level. This level must be inserted in ``z_0``. Any other surveyed properties such as the lens position and the
-  river cross section must be measured with the same horizontal and vertical coordinate system as ``z_0``.
+* also measure the water level with your survey device such as total station or RTK GPS, i.e. using the exact same
+  vertical reference as your control points. This has its own vertical zero level. This level must be inserted in
+  ``z_0``. Any other surveyed properties such as the lens position and the river cross section must also be measured
+  with the same horizontal and vertical coordinate system as ``z_0`` and the ground control points.
 
-The overview of these measures is also provided in the schematic below.
+The overview of these measurement requirements is also provided in the schematic below.
 
 .. figure:: ../../_images/site_schematic_cs.svg
 
