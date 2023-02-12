@@ -298,7 +298,6 @@ in downstream direction):
 Masking steps in *pyorc* where unreliable velocities are masked out can then also remove velocities that are in an
 unexpected direction more easily, and without tuning of masking parameters.
 
-
 .. image:: ../../_images/wark_cam_config.jpg
 
 .. tab-set::
@@ -425,12 +424,10 @@ used for processing videos into velocimetry.
             cam_config.plot(ax=ax, camera=True)
 
 
-
-
-
-
 .. |gcps_4| image:: ../../_images/ChuoKikuu_GCPs.jpg
 
 .. |gcps_6| image:: ../../_images/Geul_GCPs.jpg
 
 .. _ardusimple: https://ardusimple.com/
+
+.. _QGIS: https://qgis.org/
