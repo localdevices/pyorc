@@ -284,7 +284,20 @@ Setting the area of interest
 over the Wark River in Luxembourg. The results of reprojection and velocity estimation will all fit in this
 area of interest in the form of raster maps. **pyorc** is also very flexible in the rotation of the grid. River sections
 almost never follow an ideal north-south or east-west direction, and therefore it is much more practical to allow
-for a rotated grid.
+for a rotated grid. This sounds complicated, but the great thing about *pyorc* is that you only have to supply 4 points
+in the camera Field of View and then *pyorc* will interpret for you where these 4 points lie in geographical space
+and which rectangular bounding box fits best around these points. In case there is a very clear dominant flow direction
+then we recommend to supply the corners points in a very specific order namely (see from the perspective looking
+in downstream direction):
+
+* upstream left-bank
+* downstream left-bank
+* downstream right-bank
+* upstream right-bank
+
+Masking steps in *pyorc* where unreliable velocities are masked out can then also remove velocities that are in an
+unexpected direction more easily, and without tuning of masking parameters.
+
 
 .. image:: ../../_images/wark_cam_config.jpg
 
@@ -297,8 +310,6 @@ for a rotated grid.
     .. tab-item:: API
 
         .. include:: ./api_bbox.rst
-
-
 
 
 Result of a camera configuration
