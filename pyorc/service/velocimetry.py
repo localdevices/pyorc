@@ -2,13 +2,18 @@ import copy
 import functools
 import logging
 import os.path
+
+import click
+
 import pyorc
 import xarray as xr
 import yaml
+from pyorc.cli import cli_utils
 
 from dask.diagnostics import ProgressBar
 from matplotlib.colors import Normalize
-from typing import Optional, Dict
+from typing import Dict
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +52,7 @@ def run_func_hash_io(attrs=[], inputs=[], outputs=[], check=False):
         def wrapper_func(ref, *args, **kwargs):
             # default, assume running will take place
             run = True
-            if check:
+            if check and ref.update:
                 for attr, output in zip(attrs, outputs):
                     fn = getattr(ref, output)
                     if os.path.isfile(fn):
@@ -80,7 +85,6 @@ class VelocityFlowProcessor(object):
             cameraconfig: str,
             output: str,
             update: bool=False,
-            stat_fn="stat.yml",
             fn_piv="piv.nc",
             fn_piv_mask="piv_mask.nc",
             logger=logger
@@ -98,6 +102,8 @@ class VelocityFlowProcessor(object):
             path to camera config file
         output : str
             path to output file
+        update : bool, optional
+            if set, only update components with changed inputs and configurations
 
         """
         self.update = update  # set to True when checks are needed if data already exists or not
@@ -110,8 +116,8 @@ class VelocityFlowProcessor(object):
         self.fn_video = videofile
         self.fn_cam_config = cameraconfig
         self.logger = logger
-        self.set_status_fn(stat_fn)
-        self.get_status()
+        # self.set_status_fn(stat_fn)
+        # self.get_status()
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
     @property
@@ -197,6 +203,11 @@ class VelocityFlowProcessor(object):
         else:
             # no masking so use non-masked velocimetry as masked
             self.velocimetry_mask_obj = self.velocimetry_obj
+        if "transect" in self.recipe:
+            self.transect(**self.recipe["transect"])
+        else:
+            # no masking so use non-masked velocimetry as masked
+            self.velocimetry_mask_obj = self.velocimetry_obj
         self.plot(**self.recipe["plot"])
 
         # TODO .get_transect and check if it contains data,
@@ -234,12 +245,6 @@ class VelocityFlowProcessor(object):
             logger=self.logger,
             **kwargs
         )
-        # for m, _kwargs in kwargs.items():
-        #     if not(hasattr(self.da_frames.frames, m)):
-        #         raise ValueError(f'Method "{m}" for frames does not exist, please check your recipe')
-        #     self.logger.debug(f"Applying {m} on frames with parameters {_kwargs}")
-        #     meth = getattr(self.da_frames.frames, m)
-        #     self.da_frames = meth(**_kwargs)
         self.logger.info(f'Frames are preprocessed')
 
 
@@ -281,6 +286,14 @@ class VelocityFlowProcessor(object):
             with ProgressBar():
                 delayed_obj.compute()
 
+
+    def transect(self, write=False, **kwargs):
+        for transect_name, transect_grp in kwargs.items():
+            if not "shapefile" in kwargs:
+                click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile". Please add "shapefile" in the recipe file')
+        # read shapefile
+        coords, crs = cli_utils.read_shape(kwargs["shapefile"])
+        print(coords)
 
     def plot(self, **plot_recipes):
         for name, plot_params in plot_recipes.items():

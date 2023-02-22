@@ -39,6 +39,10 @@ mask:
       tolerance: 0.5
       reduce_time: True
 
+transect:
+  write: True
+  transect_1:
+    shapefile: xxxx
 
 
 plot:
