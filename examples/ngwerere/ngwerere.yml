@@ -1,6 +1,6 @@
 video:
     start_frame: 0
-    end_frame: 20
+    end_frame: 125
 
 frames:
   normalize:
@@ -13,8 +13,31 @@ frames:
 
 velocimetry:
   get_piv:
-      window_size: 10
+      window_size: 25
   write: True
+
+mask:
+  write: True
+  mask_group1:
+    corr:
+  mask_group1_2:
+    minmax:
+  mask_group1_3:
+    rolling:
+  mask_group2:
+    outliers:
+  mask_group3:
+    variance:
+  #mask_group4:
+    #angle:
+      #angle_tolerance: 1.570796
+  mask_group_5:
+      count:
+  mask_group6:
+    window_mean:
+      wdw: 2
+      tolerance: 0.5
+      reduce_time: True
 
 
 
@@ -27,7 +50,7 @@ plot:
       scale: 400
       width: 0.0015
       add_colorbar: True
-      vmax: 1.
+      vmax: 0.6
     mode: camera
     reducer: mean
     write_pars:

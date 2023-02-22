@@ -98,7 +98,7 @@ def parse_recipe(ctx, param, recipe_file):
         body = f.read()
     recipe = yaml.load(body, Loader=yaml.FullLoader)
 
-    valid_classes = ["video", "frames", "velocimetry", "transect", "plot"]  # allowed classes
+    valid_classes = ["video", "frames", "velocimetry", "mask", "transect", "plot"]  # allowed classes
     required_classes = ["video", "frames", "velocimetry"]  # mandatory classes (if not present, these are added)
     check_args = {
         "video": "video",

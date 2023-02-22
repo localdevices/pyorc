@@ -1,3 +1,4 @@
+import copy
 import functools
 import logging
 import os.path
@@ -18,17 +19,28 @@ def apply_methods(obj, subclass, logger=logger, **kwargs):
         cls = getattr(obj, subclass)
         if not(hasattr(cls, m)):
             raise ValueError(f'Method "{m}" for {subclass} does not exist, please check your recipe')
-        logger.debug(f"Applying {m} on frames with parameters {_kwargs}")
+        logger.debug(f"Applying {m} on {subclass} with parameters {_kwargs}")
         meth = getattr(cls, m)
         obj = meth(**_kwargs)
 
     return obj
 
+def get_masks(obj, **mask_methods):
+    masks = []
+    for m, _kwargs in mask_methods.items():
+        if _kwargs is None:
+            # make an empty dict to pass args
+            _kwargs = {}
+        meth = getattr(obj.velocimetry.mask, m)
+        masks.append(meth(**_kwargs))
+    return masks
+
+
 
 def run_func_hash_io(attrs=[], inputs=[], outputs=[], check=False):
     """
     wrapper function that checks if inputs to function have changed and or output is present or not.
-    Runs function if either oujtput is not present or input has changed. If check is False then simply passes everything
+    Runs function if either output is not present or input has changed. If check is False then simply passes everything
     """
     def decorator_func(processor_func):
         @functools.wraps(processor_func)
@@ -92,7 +104,7 @@ class VelocityFlowProcessor(object):
         self.recipe = recipe
         self.output = output
         self.fn_piv = os.path.join(self.output, fn_piv)
-        self.fn_piv_mask = os.path.join(self.output, fn_piv) if "mask" in recipe else self.fn_piv
+        self.fn_piv_mask = os.path.join(self.output, fn_piv_mask) if "mask" in recipe else self.fn_piv
         self.read = True
         self.write = False
         self.fn_video = videofile
@@ -180,9 +192,11 @@ class VelocityFlowProcessor(object):
         self.video(**self.recipe["video"])
         self.frames(**self.recipe["frames"])
         self.velocimetry(**self.recipe["velocimetry"])
-
-        # self.plot()
-
+        if "mask" in self.recipe:
+            self.mask(**self.recipe["mask"])
+        else:
+            # no masking so use non-masked velocimetry as masked
+            self.velocimetry_mask_obj = self.velocimetry_obj
         self.plot(**self.recipe["plot"])
 
         # TODO .get_transect and check if it contains data,
@@ -230,11 +244,11 @@ class VelocityFlowProcessor(object):
 
 
     @run_func_hash_io(attrs=["velocimetry_obj"], check=True, inputs=[], outputs=["fn_piv"])
-    def velocimetry(self, default="get_piv", write=False, **kwargs):
+    def velocimetry(self, method="get_piv", write=False, **kwargs):
         if len(kwargs) > 1:
             raise OverflowError(f"Too many arguments under velocimetry, only one allowed, but {len(kwargs)} given.")
         if len(kwargs) == 0:
-            kwargs[default] = {}
+            kwargs[method] = {}
         # get velocimetry results
         self.velocimetry_obj = apply_methods(self.da_frames, "frames", logger=self.logger, **kwargs)
         m = list(kwargs.keys())[0]
@@ -245,21 +259,25 @@ class VelocityFlowProcessor(object):
             with ProgressBar():
                 delayed_obj.compute()
             self.logger.info(f"Velocimetry written to {self.fn_piv}")
+            # Load the velocimetry into memory to prevent re-writes in next steps
+            self.velocimetry_obj = xr.open_dataset(self.fn_piv)
 
+
+    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=[], outputs=["fn_piv_mask"])
     def mask(self, write=False, **kwargs):
         # TODO go through several masking groups
-        piv_masked = self.piv
-        for mask_group in self.recipe.mask:
-            print("get masks per step")
-            # get masks....
-
-            # piv_masked = piv_masked.mask(masks, inplace=True)
-        # finally ...
-        self.piv_masked = piv_masked
-        self.piv_masked.velocimetry.set_encoding()
+        self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
+        for mask_name, mask_grp in kwargs.items():
+            self.logger.debug(f"Applying {mask_name}")
+            masks = get_masks(self.velocimetry_mask_obj, **mask_grp)
+            # apply found masks on velocimetry object
+            self.velocimetry_mask_obj.velocimetry.mask(masks, inplace=True)
+        self.logger.info(f"Velocimetry masks applied")
+        # set the encoding to a good compression level
+        self.velocimetry_mask_obj.velocimetry.set_encoding()
         # store results to file
         if write:
-            delayed_obj = self.piv_masked.to_netcdf(self.piv_masked_fn, compute=False)
+            delayed_obj = self.velocimetry_mask_obj.to_netcdf(self.fn_piv_mask, compute=False)
             with ProgressBar():
                 delayed_obj.compute()
 
@@ -299,7 +317,7 @@ class VelocityFlowProcessor(object):
                 reducer_params = plot_params["reducer_params"] if "reducer_params" in plot_params else {}
                 # TODO: replace by masked obj
                 velocimetry_reduced = getattr(
-                    self.velocimetry_obj,
+                    self.velocimetry_mask_obj,
                     reducer
                 )(
                     dim="time",

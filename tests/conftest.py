@@ -39,6 +39,8 @@ def recipe_yml():
 @pytest.fixture
 def cli_output_dir():
     dir = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "outputs")
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
     yield dir
     if os.path.isdir(dir):
         shutil.rmtree(dir)

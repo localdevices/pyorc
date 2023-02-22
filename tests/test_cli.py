@@ -67,6 +67,7 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
 
 
 def test_service_video(velocity_flow_processor):
+    velocity_flow_processor.process()
     raise NotImplementedError
 
 
@@ -81,69 +82,8 @@ def test_gcps_interact(gcps_dst, frame_rgb):
         dst = gcps_dst
     selector = GcpSelect(frame_rgb, dst, crs=crs)
     # uncomment below to test the interaction, not suitable for automated unit test
-    plt.show(block=True)
+    # plt.show(block=True)
 
-
-
-def test_gcps_interact_waterdunen(gcps_dst, frame_rgb):
-    import pyorc
-    fn = "/home/hcwinsemius/Media/projects/P013_RWSCIV/Metingen/Drone/DJI_0018.MOV"
-    vid = pyorc.Video(fn)
-    frame_rgb = vid.get_frame(0, method="rgb")
-    gcps_dst = [
-        [
-            24193.95617541109,
-            380966.1278342909,
-            45.455
-        ],
-        [
-            24191.886643009275,
-            380971.87953922385,
-            45.502
-        ],
-        [
-            24189.00241680468,
-            380979.22564477695,
-            45.751
-        ],
-        [
-            24187.163463049525,
-            380984.4158229723,
-            45.733
-        ],
-        [
-            24230.08041334225,
-            380977.349173881,
-            46.103
-        ],
-        [
-            24228.96874076969,
-            380980.82290807355,
-            46.057
-        ],
-        [
-            24226.83237745527,
-            380986.90019010287,
-            46.015
-        ],
-        [
-            24223.755738388892,
-            380994.9752361445,
-            45.818
-        ]
-    ]
-
-    import matplotlib.pyplot as plt
-    # convert dst to
-    crs = 28992
-    # crs = None
-    if crs is not None:
-        dst = xyz_transform(gcps_dst, crs_from=crs, crs_to=4326)
-    else:
-        dst = gcps_dst
-    selector = GcpSelect(frame_rgb, dst, crs=crs)
-    # uncomment below to test the interaction, not suitable for automated unit test
-    plt.show(block=True)
 
 
 def test_aoi_interact(frame_rgb, cam_config_without_aoi):
