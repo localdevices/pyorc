@@ -78,17 +78,18 @@ Camera configuration: {:s}
         self.ms = None
         self.mask = None
         if camera_config is not None:
+            self.camera_config = camera_config
+        # if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
             if h_a is not None:
-                assert(isinstance(camera_config.gcps["z_0"], float)),\
+                assert(isinstance(self.camera_config.gcps["z_0"], float)),\
                     "h_a was supplied, but camera config's gcps do not contain z_0, this is needed for dynamic " \
                     "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
-                assert (isinstance(camera_config.gcps["h_ref"], float)),\
+                assert (isinstance(self.camera_config.gcps["h_ref"], float)),\
                     "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
                     "reprojection. You must supply z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
-        # super().__init__(*args, **kwargs)
         cap = cv2.VideoCapture(fn)
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -133,8 +134,6 @@ Camera configuration: {:s}
         # set other properties
         self.h_a = h_a
         # make camera config part of the vidoe object
-        if camera_config is not None:
-            self.camera_config = camera_config
         self.fn = fn
         self._stills = {}  # here all stills are stored lazily
         # nothing to be done at this stage, release file for now.

@@ -1,7 +1,7 @@
 video:
     start_frame: 0
     end_frame: 125
-
+    h_a: 0.0
 frames:
   normalize:
   edge_detect:
@@ -42,8 +42,24 @@ mask:
 transect:
   write: True
   transect_1:
-    shapefile: xxxx
+    shapefile: ../examples/ngwerere/cross_section1.geojson
+    get_transect:
+      rolling: 4
+      wdw: 2
+    get_q:
+      fill_method: log_interp
+      v_corr: 0.85
+    get_river_flow:
 
+  transect_2:
+    shapefile: ../examples/ngwerere/cross_section2.geojson
+    get_transect:
+      rolling: 4
+      wdw: 2
+    get_q:
+      fill_method: log_interp
+      v_corr: 0.85
+    get_river_flow:
 
 plot:
   plot_quiver:
@@ -53,26 +69,27 @@ plot:
       cmap: rainbow
       scale: 400
       width: 0.0015
-      add_colorbar: True
       vmax: 0.6
+    transect:
+      transect_1:
+        cmap: rainbow
+        add_colorbar: True
+        scale: 100
+        width: 0.003
+        vmin: 0
+        vmax: 0.6
+      transect_2:
+        cmap: rainbow
+        add_colorbar: True
+        scale: 100
+        width: 0.003
+        vmin: 0
+        vmax: 0.6
+
     mode: camera
     reducer: mean
+
     write_pars:
       dpi: 100
       bbox_inches: tight
-#mask:
-
-  #filter_temporal_corr:
-  #filter_temporal_velocity:
-  #filter_temporal_neighbour:
-  #filter_temporal_std:
-  #filter_temporal_angle:
-  #filter_spatial:
-      #filter_nan: False
-      #kwargs_median:
-        #wdw: 2
-
-
-
-
 

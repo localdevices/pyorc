@@ -60,8 +60,6 @@ def parse_corners(ctx, param, value):
     if value is None:
         return None
     # check if list contains lists of 2 values
-    print(value)
-    print(json.loads(value))
     corners = json.loads(value)
     assert(len(corners) == 4), "--corners must contain a list of lists with exactly 4 points"
     for n, val in enumerate(corners):
@@ -134,7 +132,6 @@ def parse_recipe(ctx, param, recipe_file):
         if _c not in recipe:
             # add empties for compulsory recipe components
             recipe[_c] = {}
-    print(recipe)
     return recipe
 
 

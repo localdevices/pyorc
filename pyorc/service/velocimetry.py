@@ -17,6 +17,35 @@ from typing import Dict
 
 logger = logging.getLogger(__name__)
 
+def vmin_vmax_to_norm(opts):
+    """
+    Check if opts contains vmin and/or vmax. If so change that into a norm option which works for all plotting methods
+
+    Parameters
+    ----------
+    opts : dict
+        Dictionary with kwargs to pass to plotting method of pyorc.
+
+    Returns
+    -------
+    opts : dict
+        Dictionary with vmin/vmax replaced by norm if these are provided by user
+
+    """
+    if "vmin" in opts or "vmax" in opts:
+        if "vmin" in opts:
+            vmin = opts["vmin"]
+            del opts["vmin"]
+        else:
+            vmin = None
+        if "vmax" in opts:
+            vmax = opts["vmax"]
+            del opts["vmax"]
+        else:
+            vmax = None
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        opts["norm"] = norm
+    return opts
 
 def apply_methods(obj, subclass, logger=logger, **kwargs):
     for m, _kwargs in kwargs.items():
@@ -61,11 +90,14 @@ def run_func_hash_io(attrs=[], inputs=[], outputs=[], check=False):
                         break
             if run:
                 # apply the wrapped processor function
+                ref.logger.info(
+                    f"Running {processor_func.__name__}")
                 processor_func(ref, *args, **kwargs)
             else:
                 for attr, output in zip(attrs, outputs):
                     if attr is not None:
                         fn = getattr(ref, output)
+                        ref.logger.info(f"Results for {processor_func.__name__} already available, reading from {os.path.abspath(fn)}")
                         setattr(ref, attr, xr.open_dataset(fn))
         return wrapper_func
     return decorator_func
@@ -87,6 +119,7 @@ class VelocityFlowProcessor(object):
             update: bool=False,
             fn_piv="piv.nc",
             fn_piv_mask="piv_mask.nc",
+            fn_transect_template="transect_{:s}.nc",
             logger=logger
     ):
         """
@@ -111,6 +144,7 @@ class VelocityFlowProcessor(object):
         self.output = output
         self.fn_piv = os.path.join(self.output, fn_piv)
         self.fn_piv_mask = os.path.join(self.output, fn_piv_mask) if "mask" in recipe else self.fn_piv
+        self.fn_transect_template = os.path.join(self.output, fn_transect_template).format if "transect" in recipe else None
         self.read = True
         self.write = False
         self.fn_video = videofile
@@ -273,7 +307,7 @@ class VelocityFlowProcessor(object):
         # TODO go through several masking groups
         self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
         for mask_name, mask_grp in kwargs.items():
-            self.logger.debug(f"Applying {mask_name}")
+            self.logger.debug(f"Applying {mask_name} with parameters {mask_grp}")
             masks = get_masks(self.velocimetry_mask_obj, **mask_grp)
             # apply found masks on velocimetry object
             self.velocimetry_mask_obj.velocimetry.mask(masks, inplace=True)
@@ -288,12 +322,56 @@ class VelocityFlowProcessor(object):
 
 
     def transect(self, write=False, **kwargs):
+        self.transects = {}
         for transect_name, transect_grp in kwargs.items():
-            if not "shapefile" in kwargs:
-                click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile". Please add "shapefile" in the recipe file')
-        # read shapefile
-        coords, crs = cli_utils.read_shape(kwargs["shapefile"])
-        print(coords)
+            self.logger.debug(f"Processing {transect_name}")
+            if not "shapefile" in transect_grp:
+                raise click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile". Please add "shapefile" in the recipe file')
+            # read shapefile
+            coords, crs = cli_utils.read_shape(transect_grp["shapefile"])
+            self.logger.debug(f"Coordinates read for transect {transect_name}")
+            # check if coords have z coordinates
+            if len(coords[0]) == 2:
+                raise click.UsageError(
+                    f'Transect in {os.path.jabspath(transect_grp["shapefile"])} only contains x, y, but no z-coordinates.'
+                )
+            x, y, z = zip(*coords)
+            self.logger.debug(f"Sampling transect {transect_name}")
+            # sample the coordinates
+            if not("get_transect" in transect_grp):
+                transect_grp["get_transect"] = {}
+            if transect_grp["get_transect"] is None:
+                transect_grp["get_transect"] = {}
+            self.transects[transect_name] = self.velocimetry_mask_obj.velocimetry.get_transect(
+                x=x,
+                y=y,
+                z=z,
+                crs=crs,
+                **transect_grp["get_transect"]
+            )
+            if "get_q" in transect_grp:
+                if transect_grp["get_q"] is None:
+                    transect_grp["get_q"] = {}
+                # add q
+                self.transects[transect_name] = self.transects[transect_name].transect.get_q(**transect_grp["get_q"])
+            if "get_river_flow" in transect_grp:
+                if not("get_q" in transect_grp):
+                    raise click.UsageError(
+                        f'"get_river_flow" found in {transect_name} but no "get_q" found, which is a requirement for "get_river_flow"'
+                    )
+                if transect_grp["get_river_flow"] is None:
+                    transect_grp["get_river_flow"] = {}
+                # add q
+                self.transects[transect_name].transect.get_river_flow(**transect_grp["get_river_flow"])
+            if write:
+                # output file
+                fn_transect = os.path.abspath(self.fn_transect_template(transect_name))
+                self.logger.debug(f'Writing transect "{transect_name}" to {fn_transect}')
+                delayed_obj = self.transects[transect_name].to_netcdf(fn_transect, compute=False)
+                with ProgressBar():
+                    delayed_obj.compute()
+                self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
+
 
     def plot(self, **plot_recipes):
         for name, plot_params in plot_recipes.items():
@@ -313,22 +391,24 @@ class VelocityFlowProcessor(object):
                 ax = p.axes
             if "velocimetry" in plot_params:
                 opts = plot_params["velocimetry"]
-                if "vmin" in opts or "vmax" in opts:
-                    if "vmin" in opts:
-                        vmin = opts["vmin"]
-                        del opts["vmin"]
-                    else:
-                        vmin = None
-                    if "vmax" in opts:
-                        vmax = opts["vmax"]
-                        del opts["vmax"]
-                    else:
-                        vmax = None
-                    norm = Normalize(vmin=vmin, vmax=vmax)
-                    opts["norm"] = norm
+                opts = vmin_vmax_to_norm(opts)
+                # if "vmin" in opts or "vmax" in opts:
+                #     if "vmin" in opts:
+                #         vmin = opts["vmin"]
+                #         del opts["vmin"]
+                #     else:
+                #         vmin = None
+                #     if "vmax" in opts:
+                #         vmax = opts["vmax"]
+                #         del opts["vmax"]
+                #     else:
+                #         vmax = None
+                #     norm = Normalize(vmin=vmin, vmax=vmax)
+                #     opts["norm"] = norm
+                # select the time reducer. If not defined, choose mean
                 reducer = plot_params["reducer"] if "reducer" in plot_params else "mean"
                 reducer_params = plot_params["reducer_params"] if "reducer_params" in plot_params else {}
-                # TODO: replace by masked obj
+                # reduce the velocimetry over time for plotting purposes
                 velocimetry_reduced = getattr(
                     self.velocimetry_mask_obj,
                     reducer
@@ -340,8 +420,17 @@ class VelocityFlowProcessor(object):
                 p = velocimetry_reduced.velocimetry.plot(ax=ax, mode=mode, **opts)
                 ax = p.axes
             if "transect" in plot_params:
-                # TODO add transect plot
-                pass
+                for transect_name, opts in plot_params["transect"].items():
+                    opts = vmin_vmax_to_norm(opts)
+                    # read file
+                    fn_transect = self.fn_transect_template(transect_name)
+                    ds_trans = xr.open_dataset(fn_transect)
+                    # default quantile is 2 (50%), otherwise choose from list
+                    quantile = 2 if not("quantile") in opts else opts["quantile"]
+                    ds_trans_q = ds_trans.isel(quantile=quantile)
+                    # add to plot
+                    p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
+                    ax = p.axes
             write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
             ax.figure.savefig(fn_jpg, **write_pars)
 
