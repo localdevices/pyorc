@@ -255,7 +255,6 @@ class VelocityFlowProcessor(object):
     # -y is provided, do with user intervention if stale file is present or -y is not provided
 
     def video(self, **kwargs):
-        # TODO prepare reader
         self.video_obj = pyorc.Video(
             self.fn_video,
             camera_config=self.fn_cam_config,
@@ -385,7 +384,11 @@ class VelocityFlowProcessor(object):
                 else:
                     n = 0
                 opts = plot_params["frames"] if plot_params["frames"] is not None else {}
-                f = self.video_obj.get_frames(method="rgb")[n]
+                f = self.video_obj.get_frames(method="rgb")
+                if mode != "camera":
+                    f = f.frames.project()[n]
+                else:
+                    f = f[n]
                 p = f.frames.plot(ax=ax, mode=mode, **opts)
                 # continue with axes of p
                 ax = p.axes
@@ -431,6 +434,8 @@ class VelocityFlowProcessor(object):
                     # add to plot
                     p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
                     ax = p.axes
+            if mode == "camera":
+                ax.axis("equal")
             write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
             ax.figure.savefig(fn_jpg, **write_pars)
 

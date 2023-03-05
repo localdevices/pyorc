@@ -12,8 +12,8 @@ from pyorc import Video, helpers, CameraConfig
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect
 
 
-def get_corners_interactive(fn, gcps, crs=None, logger=logging):
-    vid = Video(fn, start_frame=0, end_frame=1)
+def get_corners_interactive(fn, gcps, crs=None, frame_sample=0., logger=logging):
+    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     src = gcps["src"]
@@ -30,8 +30,8 @@ def get_corners_interactive(fn, gcps, crs=None, logger=logging):
 
     # setup a cam_config without
 
-def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, logger=logging):
-    vid = Video(fn, start_frame=0, end_frame=1)
+def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0., logger=logging):
+    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     if crs_gcps is not None:

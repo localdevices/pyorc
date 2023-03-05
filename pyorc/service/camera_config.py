@@ -2,7 +2,14 @@ import os.path
 from pyorc import CameraConfig, Video
 import matplotlib.pyplot as plt
 
-def camera_config(video_file, cam_config_file, lens_position=None, corners=None, **kwargs):
+def camera_config(
+        video_file,
+        cam_config_file,
+        lens_position=None,
+        corners=None,
+        frame_sample=0.,
+        **kwargs
+):
     """
     Recipe for preparing a configuration file
 
@@ -24,10 +31,10 @@ def camera_config(video_file, cam_config_file, lens_position=None, corners=None,
     fn_geo = f"{os.path.splitext(cam_config_file)[0]}_geo.jpg"
     fn_cam = f"{os.path.splitext(cam_config_file)[0]}_cam.jpg"
     # open video for dimensions
-    video = Video(video_file)
+    video = Video(video_file, start_frame=frame_sample, end_frame=frame_sample + 1)
     # extract first frame
-    img = video.get_frame(0)
-    img_rgb = video.get_frame(0, method="rgb")
+    img = video.get_frame(frame_sample)
+    img_rgb = video.get_frame(frame_sample, method="rgb")
     kwargs["height"], kwargs["width"] = img.shape
     # prepare camera config
     cam_config = CameraConfig(**kwargs)

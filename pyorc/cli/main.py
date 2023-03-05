@@ -90,6 +90,13 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     help="Coordinate reference system to be used for camera configuration"
 )
 @click.option(
+    "-f",
+    "--frame-sample",
+    type=int,
+    default=0,
+    help="Frame number to use for camera configuration background"
+)
+@click.option(
     "--src",
     type=str,
     callback=cli_utils.parse_src,
@@ -102,12 +109,12 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     help='Destination control points as list of 4 [x, y] pairs, or at least 6 [x, y, z]. If --crs_gcps is provided, --dst is assumed to be in this CRS."'
 )
 @click.option(
-    "--z0",
+    "--z_0",
     type=float,
     help="Water level [m] +CRS (e.g. geoid or ellipsoid of GPS)"
 )
 @click.option(
-    "--href",
+    "--h_ref",
     type=float,
     help="Water level [m] +local datum (e.g. staff or pressure gauge)"
 )
@@ -153,10 +160,11 @@ def camera_config(
         output: str,
         videofile: str,
         crs: Optional[Union[str, int]],
+        frame_sample: Optional[int],
         src: Optional[List[List[float]]],
         dst: Optional[List[List[float]]],
-        z0: Optional[float],
-        href: Optional[float],
+        z_0: Optional[float],
+        h_ref: Optional[float],
         crs_gcps: Optional[Union[str, int]],
         resolution: Optional[float],
         window_size: Optional[int],
@@ -174,10 +182,10 @@ def camera_config(
         logger.info("Source points found and validated")
     if dst is not None:
         logger.info("Destination points found and validated")
-    if z0 is None:
-        z0: float = click.prompt("--z0 not provided, please enter a number, or Enter for default", default=0.0)
-    if href is None:
-        href: float = click.prompt("--href not provided, please enter a number, or Enter for default", default=0.0)
+    if z_0 is None:
+        z_0: float = click.prompt("--z_0 not provided, please enter a number, or Enter for default", default=0.0)
+    if h_ref is None:
+        href: float = click.prompt("--h_ref not provided, please enter a number, or Enter for default", default=0.0)
     if resolution is None:
         resolution: float = click.prompt("--resolution not provided, please enter a number, or Enter for default", default=0.05)
     if window_size is None:
@@ -196,27 +204,41 @@ def camera_config(
     if not src:
         logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide source points interactively?', default=True):
-            src = cli_utils.get_gcps_interactive(videofile, dst, crs=crs, crs_gcps=crs_gcps, logger=logger)
-
+            src = cli_utils.get_gcps_interactive(
+                videofile,
+                dst,
+                crs=crs,
+                crs_gcps=crs_gcps,
+                frame_sample=frame_sample,
+                logger=logger
+            )
+            if len(src) != len(dst):
+                raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
     if crs is None and crs_gcps is not None:
         raise click.UsageError(f"--crs is None while --crs_gcps is {crs_gcps}, please supply --crs.")
     gcps = {
         "src": src,
         "dst": dst,
-        "z_0": z0,
-        "h_ref": href,
+        "z_0": z_0,
+        "h_ref": h_ref,
         "crs": crs_gcps
     }
     if not corners:
         logger.warning("No corner points for projection provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide corners interactively?', default=True):
-            corners = cli_utils.get_corners_interactive(videofile, gcps, crs=crs, logger=logger)
-
+            corners = cli_utils.get_corners_interactive(
+                videofile,
+                gcps,
+                crs=crs,
+                frame_sample=frame_sample,
+                logger=logger
+            )
     pyorc.service.camera_config(
         video_file=videofile,
         cam_config_file=output,
         gcps=gcps,
         crs=crs,
+        frame_sample=frame_sample,
         resolution=resolution,
         window_size=window_size,
         lens_position=lens_position,

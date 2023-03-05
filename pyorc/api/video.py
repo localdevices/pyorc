@@ -274,7 +274,7 @@ Camera configuration: {:s}
         :return: np.ndarray containing frame
         """
         assert(n >= 0), "frame number cannot be negative"
-        assert(n <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
+        assert(n - self.start_frame <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
         assert(method in ["grayscale", "rgb", "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
