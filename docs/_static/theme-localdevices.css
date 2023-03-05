@@ -1,0 +1,31 @@
+/* Override the default color set in the original theme */
+
+html[data-theme="light"] {
+    /* NOTE: added after pydata v0.9 */
+    --pst-color-primary: #183e4b !important;
+    
+    /* hyperlinks */
+    --pst-color-link: #183e4b;
+
+    /* panels */
+    --pst-color-preformatted-border: #183e4b !important;
+    --pst-color-panel-background: #f0f0f075;
+    
+    /* navbar */
+    /* NOTE: does not work since v0.9 */
+    --pst-color-navbar-link: #183e4b;
+    --pst-color-navbar-link-hover: #fff;
+    --pst-color-navbar-link-active: #fff;
+    
+    /* sphinx design */
+    /* NOTE: does not work since v0.9 */
+    --sd-color-card-border-hover: #183e4b;
+    --sd-color-tabs-label-active: #183e4b;
+    --sd-color-tabs-label-hover: #183e4b;
+    --sd-color-tabs-underline-active: #183e4b;
+}
+
+/* enlarge deltares & github icon size; only works with local/url svg files; not with fa icons */
+img.icon-link-image {
+    height: 2.5em !important;
+}
