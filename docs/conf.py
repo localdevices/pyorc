@@ -94,18 +94,21 @@ html_theme = 'pydata_sphinx_theme'
 autodoc_member_order = "bysource"
 autoclass_content = "both"
 
+html_static_path = ['_static']
+html_css_files = ["theme-localdevices.css"]
+
 html_theme_options = {
     "show_nav_level": 2,
     "navbar_align": "content",
     # "use_edit_page_button": True,
-    # "icon_links": [
-    #     {
-    #         "name": "Rainbow Sensing",
-    #         "url": "https://...",
-    #         "icon": "_static/....svg",
-    #         "type": "local",
-    #     },
-    # ],
+    "icon_links": [
+        {
+            "name": "Local Devices",
+            "url": "https://localdevices.org",
+            "icon": "_static/logo.svg",
+            "type": "local",
+        },
+    ],
 }
 
 html_context = {
@@ -122,5 +125,4 @@ remove_from_toctrees = ["_generated/*", "_build/doctrees/*"]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_images']
 print(sys.path)

@@ -1,4 +1,4 @@
-.. _frames_man:
+.. _frames_ug:
 
 Frames
 ======
