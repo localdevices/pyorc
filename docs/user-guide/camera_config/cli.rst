@@ -3,7 +3,7 @@
 The command-line interface supports setting up a camera configuration through a subcommand. To see the options
 simply call the subcommand on a command prompt with ``--help`` as follows:
 
-.. code-block:: cmd
+.. code-block:: shell
 
     $ pyorc camera-config --help
 

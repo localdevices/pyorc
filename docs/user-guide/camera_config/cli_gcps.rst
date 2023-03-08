@@ -21,7 +21,7 @@ in a "Well-known Text" (wkt) form, which is a string.
 
 For our example video, supplying the gcps in a full command-line option manner would be done as follows:
 
-.. code-block:: cmd
+.. code-block:: shell
 
     $ pyorc camera-config --crs_gcps 32735 --src "[[1421, 1001], [1251, 460], [421, 432], [470, 607]]" --dst "[[642735.8076, 8304292.1190], [642737.5823, 8304295.593], [642732.7864, 8304298.4250], [642732.6705, 8304296.8580]]" --z_0 1182.2 --h_ref 0.0 ......
 

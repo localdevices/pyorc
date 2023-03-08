@@ -9,7 +9,7 @@ is round, a suitable projection system must be chosen, that belongs to the area 
 interest. Visit https://epsg.io/ to find a good projection system for your area of
 interest.
 
-.. code-block:: cmd
+.. code-block:: shell
 
     $ pyorc camera-config --crs 32737 ........
 

@@ -259,7 +259,7 @@ Setting the lens position
         will also be applied on the lens position. An example of how to supply the lens position with a pseudo-command
         is provided below.
 
-        .. code-block:: cmd
+        .. code-block:: shell
 
             pyorc camera-config ... --lens_position "[642732.6705, 8304289.010, 1188.5]" ... OUTPUT.json
 

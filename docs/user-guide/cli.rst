@@ -15,7 +15,7 @@ tasks required for performing a surface velocity and discharge analysis being:
 The two tasks are available as so-called "subcommands". You can see the available subcommands by passing
 the ``--help`` option.
 
-.. code-block:: cmd
+.. code-block:: shell
 
     $ pyorc --help
 
@@ -25,7 +25,7 @@ The meaning and way to use of these subcommands are explained through the rest o
 available subcommands are ``camera-config`` and ``velocimetry`` for the two tasks mentioned.
 To find out more about them, you can request specific help on them on the command-line as well.
 
-.. code-block:: cmd
+.. code-block:: shell
 
     $ pyorc camera-config --help
 
@@ -36,7 +36,7 @@ configuration details how the camera's perspective relates to real-world coordin
 within the objective should be processed, what the characteristics of the used lens are. All details can be
 found in the section :ref:`camera_config_ug`.
 
-.. code-block:: cmd
+.. code-block:: shell
 
     $ pyorc velocimetry --help
 
