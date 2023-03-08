@@ -223,6 +223,8 @@ Data infilling
 
     Velocimetry.replace_outliers
 
+.. _transects:
+
 Getting data over transects
 ---------------------------
 
@@ -272,6 +274,8 @@ Derivatives
 
     Transect.vector_to_scalar
     Transect.get_xyz_perspective
+
+.. _river_flow:
 
 River flow methods
 ------------------

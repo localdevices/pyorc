@@ -393,7 +393,7 @@ reduce any time variable results over time, for instance with:
     x, y projection to the original camera perspective for instance.
 
 After reducing, we can use a set of methods to make plots, in a very similar manner as used for plotting
-:ref:`frames_man`. In fact, you can smartly combine plots from a frame, with plots of your velocimetry results and by
+:ref:`frames_ug`. In fact, you can smartly combine plots from a frame, with plots of your velocimetry results and by
 doing so create beautiful augmented reality views, or geospatial views. The different plotting method all use an
 underlying ``matplotlib.pyplot`` function and are also named accordingly. Hence they can receive keyword arguments
 specific to these underlying functions. In addition, a few additional important keywords can be added:

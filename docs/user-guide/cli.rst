@@ -65,6 +65,13 @@ instance, the preprocessing steps can be done with different techniques, and the
 The same is true for the masking step. Several masking strategies can be performed, and this can even be done in parallel
 or in series, to improve the results. The Yaml file is referred to as the *recipe* in the remainder of the User Guide.
 
+.. note::
+
+    A recipe file seems a lot of work to write, however, as you get used to *pyorc* you will notice that for many
+    use cases, you can simply use exactly the same or almost the same recipe throughout. For instance, for a fixed
+    camera, one only needs to supply a new value for ``h_a`` (water level during video) and keep all the rest exactly
+    the same.
+
 To give a first sense of a recipe, an example recipe file (also used in our examples) is displayed below.
 
     .. literalinclude:: ../../examples/ngwerere/ngwerere.yml
