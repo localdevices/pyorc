@@ -37,6 +37,7 @@ method can be applied.
 
         Thresholding is performed with the ``minmax`` method, described in the :ref:`frames API section <frames>`:
 
+.. _contrast:
 
 Improving contrast
 ------------------

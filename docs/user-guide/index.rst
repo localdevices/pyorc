@@ -91,7 +91,7 @@ river flow over a transect.
     Application Programming Interface <api>
     Camera configurations <camera_config/index>
     Videos <video>
-    Frames <frames/frames.ipynb>
-    Velocimetry <velocimetry>
+    Frames <frames/index>
+    Velocimetry <velocimetry/index>
     Transects <transect>
     Plotting <plot>

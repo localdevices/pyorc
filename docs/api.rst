@@ -180,10 +180,12 @@ Class and properties
     Velocimetry.camera_shape
     Velocimetry.h_a
 
+.. _masks:
+
 Temporal masking methods
 ------------------------
 
-The mask methods below either require or may have a dimension "time" in the data. Therefore they are most logically
+The mask methods below either require or may have a dimension ``time`` in the data. Therefore they are most logically
 applied before doing any reducing over time.
 
 .. autosummary::
@@ -198,11 +200,13 @@ applied before doing any reducing over time.
     Velocimetry.mask.variance
     Velocimetry.mask.count
 
+.. _spatial_mask:
+
 Spatial masking methods
 -----------------------
 
-The spatial masking methods below only work on time reduced grid. First apply a time reducer so that there is no
-time axis in the data anymore, before applying these. Not doing so will return a clear error message.
+The spatial masking methods look at a time reduced representation of the grid results. The resulting mask can be applied
+on a full time series and will then mask out grid cells over its full time span if these do not pass the mask.
 
 .. autosummary::
     :toctree: _generated
