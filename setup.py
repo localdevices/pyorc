@@ -44,6 +44,7 @@ setup(
         "tqdm",
         "typeguard",
         "xarray",
+        "yaml"
     ],
     extras_require={
         "dev": ["pytest", "pytest-cov"],

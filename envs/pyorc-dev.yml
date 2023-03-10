@@ -27,6 +27,7 @@ dependencies:
   - shapely
   - tqdm
   - xarray
+  - yaml
   - pip:
     - openpiv
 
