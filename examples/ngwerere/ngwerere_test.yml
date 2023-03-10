@@ -1,0 +1,35 @@
+video:
+    start_frame: 0
+    end_frame: 20
+    h_a: 0.0
+frames:
+  normalize:
+  edge_detect:
+    wdw_1: 1
+    wdw_2: 2
+  minmax:
+    min: -5
+    max: 5
+velocimetry:
+  get_piv:
+    window_size: 25
+  write: True
+mask:
+  write: True
+  mask_group1:
+    corr:
+  mask_group1_2:
+    minmax:
+  mask_group1_3:
+    rolling:
+  mask_group2:
+    outliers:
+  mask_group3:
+    variance:
+  mask_group_4:
+      count:
+  mask_group5:
+    window_mean:
+      wdw: 2
+      tolerance: 0.5
+      reduce_time: True

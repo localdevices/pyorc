@@ -36,7 +36,7 @@ def cam_config_fn():
 
 @pytest.fixture
 def recipe_yml():
-    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.yml")
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_test.yml")
 
 
 @pytest.fixture

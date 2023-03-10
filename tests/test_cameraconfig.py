@@ -162,7 +162,7 @@ def test_plot(cam_config, vid, camera):
     ax = cam_config.plot(camera=camera)
     if camera:
         assert(
-            isinstance(ax, matplotlib.axes._subplots.Subplot)
+            isinstance(ax, matplotlib.axes.Axes)
         )
     else:
         assert(
