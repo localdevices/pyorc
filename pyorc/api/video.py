@@ -318,15 +318,11 @@ Camera configuration: {:s}
         :return: xr.DataArray, containing all requested frames
         """
         assert(hasattr(self, "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
-        # assert(hasattr(self, "_h_a")), 'Water level with this video has not been set, please set it with the .h_a method'
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
         get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
-        # if not("lens_corr" in kwargs):
-        #     # if not explicitly set by user, check if lens pars are available, and if so, add lens_corr to kwargs
-        #     if hasattr(self.camera_config, "lens_pars"):
-        #         kwargs["lens_corr"] = True
-        frames = [get_frame(n=n, **kwargs) for n in self.frame_number] #range(self.end_frame - self.start_frame)
+        # get all listed frames
+        frames = [get_frame(n=n, **kwargs) for n, f_number in enumerate(self.frame_number)]
         sample = frames[0].compute()
         data_array = [da.from_delayed(
             frame,
