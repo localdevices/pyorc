@@ -12,7 +12,7 @@ with open("README.md") as readme_file:
 setup(
     name="pyopenrivercam",
     description="pyopenrivercam (pyorc) is a front and backend to control river camera observation locations",
-    version="0.4.0",
+    version="0.4.1",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
     url="https://github.com/localdevices/pyorc",
@@ -37,14 +37,14 @@ setup(
         "pip",
         "pyproj",
         "pythran; platform_machine == 'armv7l'",
+        "pyyaml",
         "rasterio",
         "scikit-image",
         "scipy",
         "shapely",
         "tqdm",
         "typeguard",
-        "xarray",
-        "yaml"
+        "xarray"
     ],
     extras_require={
         "dev": ["pytest", "pytest-cov"],
