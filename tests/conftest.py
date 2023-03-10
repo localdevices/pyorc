@@ -54,7 +54,7 @@ def cli_prefix():
 
 @pytest.fixture
 def cli_recipe_fn():
-    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.yml")
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_test.yml")
 
 
 @pytest.fixture

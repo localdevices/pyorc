@@ -303,7 +303,8 @@ class VelocityFlowProcessor(object):
         else:
             # no masking so use non-masked velocimetry as masked
             self.velocimetry_mask_obj = self.velocimetry_obj
-        self.plot(**self.recipe["plot"])
+        if "plot" in self.recipe:
+            self.plot(**self.recipe["plot"])
 
         # TODO .get_transect and check if it contains data,
 
