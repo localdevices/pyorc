@@ -1,0 +1,756 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Command line interface &#8212; pyorc 0.4.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/cli';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Application Programming Interface" href="api.html" />
+    <link rel="prev" title="User Guide" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">pyorc 0.4.1 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
+                        Quick start for programmers
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../installation.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickstart.html">
+                        Quick start for programmers
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Command-line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Application Programming Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera_config/index.html">Camera configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video/index.html">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frames/index.html">Frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="velocimetry/index.html">Velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transect/index.html">Transects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot/index.html">Plotting</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Command line interface</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="command-line-interface">
+<span id="cli-ug"></span><h1>Command line interface<a class="headerlink" href="#command-line-interface" title="Permalink to this heading">#</a></h1>
+<p>The command line interface is meant to provide an easy, reproducible and streamlined approach to perform the two main
+tasks required for performing a surface velocity and discharge analysis being:</p>
+<ul class="simple">
+<li><p>Camera configuration: establishing the relationship between the field of view of the camera and the real world
+coordinates and defining the bounding box of the area of interest within the field of view.</p></li>
+<li><p>Velocity and discharge processing: using the camera configuration with one or several (of different moments in time)
+videos of the same field of view (e.g. taken at different times) to estimate surface velocity on the area of interest
+and river flow over bathymetric transects.</p></li>
+</ul>
+<p>The two tasks are available as so-called “subcommands”. You can see the available subcommands by passing
+the <code class="docutils literal notranslate"><span class="pre">--help</span></code> option.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>--help
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: pyorc [OPTIONS] COMMAND [ARGS]...
+
+  Command line interface for hydromt models.
+
+Options:
+  --version             Show the version and exit.
+  --info                Print information and version of PyOpenRiverCam
+  --license             Print license information for PyOpenRiverCam
+  --debug / --no-debug
+  --help                Show this message and exit.
+
+Commands:
+  camera-config  Prepare Camera Configuration file
+  velocimetry    Estimate velocimetry
+</pre></div>
+</div>
+<p>The meaning and way to use of these subcommands are explained through the rest of this user guide. Currently the
+available subcommands are <code class="docutils literal notranslate"><span class="pre">camera-config</span></code> and <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code> for the two tasks mentioned.
+To find out more about them, you can request specific help on them on the command-line as well.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>--help
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: pyorc camera-config [OPTIONS] OUTPUT
+
+Options:
+  -V, --videofile FILE        video file with required objective and
+                              resolution and control points in view
+                              [required]
+  --crs TEXT                  Coordinate reference system to be used for
+                              camera configuration
+  -f, --frame-sample INTEGER  Frame number to use for camera configuration
+                              background
+  --src TEXT                  Source control points as list of [column, row]
+                              pairs.
+  --dst TEXT                  Destination control points as list of 4 [x, y]
+                              pairs, or at least 6 [x, y, z]. If --crs_gcps is
+                              provided, --dst is assumed to be in this CRS.&quot;
+  --z_0 FLOAT                 Water level [m] +CRS (e.g. geoid or ellipsoid of
+                              GPS)
+  --h_ref FLOAT               Water level [m] +local datum (e.g. staff or
+                              pressure gauge)
+  --crs_gcps TEXT             Coordinate reference system in which destination
+                              GCP points (--dst) are measured
+  --resolution FLOAT          Target resolution [m] for ortho-projection.
+  --window_size INTEGER       Target window size [px] for interrogation window
+                              for Particle Image Velocimetry
+  --shapefile FILE            Shapefile or other GDAL compatible vector file
+                              containing dst GCP points [x, y] or [x, y, z] in
+                              its geometry
+  --lens_position TEXT        Lens position as [x, y, z]. If --crs_gcps is
+                              provided, --lens_position is assumed to be in
+                              this CRS.
+  --corners TEXT              Video ojective corner points as list of 4
+                              [column, row] points
+  -v, --verbose               Increase verbosity.
+  --help                      Show this message and exit.
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">camera-config</span></code> command is meant to create a camera configuration, stored in a file. The camera
+configuration details how the camera’s perspective relates to real-world coordinates and distances, which area
+within the objective should be processed, what the characteristics of the used lens are. All details can be
+found in the section <a class="reference internal" href="camera_config/index.html#camera-config-ug"><span class="std std-ref">Camera configurations</span></a>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>velocimetry<span class="w"> </span>--help
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: pyorc velocimetry [OPTIONS] OUTPUT
+
+Options:
+  -V, --videofile FILE     video file with required objective and resolution
+                           and control points in view  [required]
+  -r, --recipe FILE        Options file (*.yml)  [required]
+  -c, --cameraconfig FILE  Camera config file (*.json)  [required]
+  -p, --prefix TEXT        Prefix for produced output files
+  -u, --update             Only update requested output files with changed
+                           inputs or if not present on file system
+  -v, --verbose            Increase verbosity.
+  --help                   Show this message and exit.
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code> command does all the processing of videos into all end products you may want. The inputs
+<code class="docutils literal notranslate"><span class="pre">-V</span></code> (videofile), <code class="docutils literal notranslate"><span class="pre">-c</span></code> (camera configuration file) and <code class="docutils literal notranslate"><span class="pre">-r</span></code> (recipe file) are all required and in turn contain a
+video file compatible with the provided camera configuration, and a recipe-file containing the recipe for the
+processing steps. These steps may differ from location to location, or dependent on what details you wish to capture in
+your video.</p>
+<p>The processing steps that this command goes through are:</p>
+<ul class="simple">
+<li><p>Preprocessing frames to e.g. enhance or sharpen patterns on the water that may be traceable.</p></li>
+<li><p>Reproject the frames to a coordinate system (i.e. as if you are looking at the stream from above with known distances
+between pixels).</p></li>
+<li><p>estimate surface velocity between groups of pixels.</p></li>
+<li><p>mask out spurious velocities (can also be left out, if tracers are very prominent).</p></li>
+<li><p>extract velocities over one or more transects and estimate river flow (only if you are interested in this).</p></li>
+<li><p>make plots of frames, velocities and transects in the camera perspective, geographical perspective or local
+projection.</p></li>
+</ul>
+<p>With the <code class="docutils literal notranslate"><span class="pre">-u</span></code> or <code class="docutils literal notranslate"><span class="pre">--update</span></code> flag, you can indicate that you only want to process those parts of your recipe that
+you have modified. With this option <em>pyorc</em> will check if <em>any</em> of your inputs and outputs (including the recipe
+components, the input files and output files) have changed or require reprocessing because they were (re)moved. If this
+is not the case then that step will be skipped. This is ideal for instance in case you only changed a plot setup or
+masking step. The velocimetry part (which is time consuming) will then be skipped entirely.</p>
+<p>The recipe file provided with <code class="docutils literal notranslate"><span class="pre">-r</span></code> is a so-called Yaml formatted file (extension .yml). This is a text file with
+a specific format that defines exactly what steps are being performed, and how the steps are to be performed. For
+instance, the preprocessing steps can be done with different techniques, and these can be combined in substeps.
+The same is true for the masking step. Several masking strategies can be performed, and this can even be done in parallel
+or in series, to improve the results. The Yaml file is referred to as the <em>recipe</em> in the remainder of the User Guide.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A recipe file seems a lot of work to write, however, as you get used to <em>pyorc</em> you will notice that for many
+use cases, you can simply use exactly the same or almost the same recipe throughout. For instance, for a fixed
+camera, one only needs to supply a new value for <code class="docutils literal notranslate"><span class="pre">h_a</span></code> (water level during video) and keep all the rest exactly
+the same.</p>
+</div>
+<p>To give a first sense of a recipe, an example recipe file (also used in our examples) is displayed below.</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">    </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="nt">frames</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">normalize</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">edge_detect</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">wdw_1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">wdw_2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">minmax</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5</span>
+<span class="w">    </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+
+<span class="nt">velocimetry</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">get_piv</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">window_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">  </span><span class="nt">write</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">mask</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">write</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">mask_group1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">corr</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mask_group1_2</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">minmax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mask_group1_3</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">rolling</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mask_group2</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">outliers</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mask_group3</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">variance</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mask_group_4</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">count</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mask_group5</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">window_mean</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">wdw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">      </span><span class="nt">tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">      </span><span class="nt">reduce_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">transect</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">write</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">transect_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../examples/ngwerere/cross_section1.geojson</span>
+<span class="w">    </span><span class="nt">get_transect</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rolling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">wdw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">get_q</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">fill_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log_interp</span>
+<span class="w">      </span><span class="nt">v_corr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.85</span>
+<span class="w">    </span><span class="nt">get_river_flow</span><span class="p">:</span>
+
+<span class="w">  </span><span class="nt">transect_2</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../examples/ngwerere/cross_section2.geojson</span>
+<span class="w">    </span><span class="nt">get_transect</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rolling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">wdw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">get_q</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">fill_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log_interp</span>
+<span class="w">      </span><span class="nt">v_corr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.85</span>
+<span class="w">    </span><span class="nt">get_river_flow</span><span class="p">:</span>
+
+<span class="nt">plot</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">plot_quiver</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">frames</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">velocimetry</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
+<span class="w">      </span><span class="nt">cmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rainbow</span>
+<span class="w">      </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">400</span>
+<span class="w">      </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0015</span>
+<span class="w">      </span><span class="nt">vmax</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">    </span><span class="nt">transect</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">transect_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">cmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rainbow</span>
+<span class="w">        </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="w">        </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.003</span>
+<span class="w">        </span><span class="nt">vmin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">vmax</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">      </span><span class="nt">transect_2</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">cmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rainbow</span>
+<span class="w">        </span><span class="nt">add_colorbar</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="w">        </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.003</span>
+<span class="w">        </span><span class="nt">vmin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">vmax</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">    </span><span class="nt">reducer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span>
+
+<span class="w">    </span><span class="nt">write_pars</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dpi</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="nt">bbox_inches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tight</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If you are not used to .yml files, this may seem a little bit abstract. A few rules and hints are explained below.</p>
+<ul class="simple">
+<li><p>A Yaml file is a text file without any formatting. Hence you may not edit it in Word or other word processors. You
+need to use a raw text editor to modify these. A recommended text editor for windows is notepad++_ which you can
+freely download and install. Set it up as default editor for files with the extension <code class="docutils literal notranslate"><span class="pre">.yml</span></code> in Windows Explorer
+by right clicking on a <code class="docutils literal notranslate"><span class="pre">.yml</span></code> file in Windows Explorer and</p></li>
+<li><p>A .yaml file consists of sections. Each section can have one or multiple sub-sections. And below each subsection
+you may define another set of sub-sections below that. This is very similar to numbering of report or book chapters
+with headings and subheadings, like Chapter 1, section 1.1, subsection 1.1.1, 1.1.2, 1.1.3. A section that has
+subsections is defined with a name and double colon <code class="docutils literal notranslate"><span class="pre">:</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">video:`</span></code>. Subsections are defined by providing
+indented text below the section. You can also end these with <code class="docutils literal notranslate"><span class="pre">:</span></code> and then define subsections under that with a
+deeper indentation level.</p></li>
+<li><p>For indentation, you can either use the &lt;TAB&gt; button on your keyboard, or for instance two spaces to
+indent. Both is ok, but ensure you are very consistent with the indentation level. For instance, first indenting
+with two spaces and then with a &lt;TAB&gt; will give an error.</p></li>
+<li><p>Anywhere in the file, you can add comments, by typing <code class="docutils literal notranslate"><span class="pre">#</span></code>. Any text right of the <code class="docutils literal notranslate"><span class="pre">#</span></code> will be interpreted as a
+comment. This is very useful to annotate the files and explain choices made in the file, either for yourself for
+later reference, to distinguish different experiments or make a colleague aware of your choices and reasoning.</p></li>
+<li><p>In <em>pyorc</em> each main section has a specific name that relates to a larger processing steps. The steps that you can
+go through are <code class="docutils literal notranslate"><span class="pre">video</span></code>, <code class="docutils literal notranslate"><span class="pre">frames</span></code>, <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code>, <code class="docutils literal notranslate"><span class="pre">transect</span></code> and <code class="docutils literal notranslate"><span class="pre">plot</span></code>. Any other sections you
+would provide would simply be skipped, so carefully check your spelling if anything seems to be not working.</p></li>
+<li><p>The options you may provide under each section, are (of course) different per section.</p></li>
+</ul>
+<p>The details on the different steps and what you may configure are described in all other chapters of this User Guide.
+For quick reference you can use the links below:</p>
+<ul class="simple">
+<li><p>How to select start and end frame of the video to work with: <a class="reference internal" href="video/index.html#video-ug"><span class="std std-ref">Videos</span></a></p></li>
+<li><p>Working with frames, preprocessing and reprojection: <a class="reference internal" href="frames/index.html#frames-ug"><span class="std std-ref">Frames</span></a></p></li>
+<li><p>Estimate surface velocity and masking: <a class="reference internal" href="velocimetry/index.html#velocimetry-ug"><span class="std std-ref">Velocimetry</span></a></p></li>
+<li><p>Extract velocities over transects: <a class="reference internal" href="transect/index.html#transect-ug"><span class="std std-ref">Transects</span></a></p></li>
+<li><p>Plotting frames, velocities and transects: <a class="reference internal" href="plot/index.html#plot-ug"><span class="std std-ref">Plotting</span></a></p></li>
+</ul>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">User Guide</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Application Programming Interface</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/cli.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner"></div>
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Rainbow Sensing.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

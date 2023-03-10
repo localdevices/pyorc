@@ -1,12 +1,15 @@
 
+
 <!DOCTYPE html>
 
-<html lang="en">
+
+<html lang="en" >
+
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Camera configurations &#8212; pyorc 0.3.3 documentation</title>
+    <title>Camera configurations &#8212; pyorc 0.4.1 documentation</title>
   
   
   
@@ -16,21 +19,23 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
-<link href="../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link href="../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -38,84 +43,94 @@
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/camera_config/index';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Frames" href="../frames/frames.html" />
-    <link rel="prev" title="Videos" href="../video.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="docsearch:language" content="en">
+    <link rel="next" title="Videos" href="../video/index.html" />
+    <link rel="prev" title="Application Programming Interface" href="../api.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
   </head>
   
   
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
 
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
-
   
-  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
   <label class="overlay overlay-primary" for="__primary"></label>
-
   
-  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
   <label class="overlay overlay-secondary" for="__secondary"></label>
-
   
   <div class="search-button__wrapper">
     <div class="search-button__overlay"></div>
     <div class="search-button__search-container">
-      
-<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
   <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-    </div>
+</form></div>
   </div>
-
   
-  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fa-solid fa-bars"></span>
+    <span class="fa-solid fa-bars"></span>
   </label>
-  <div id="navbar-start">
-    
-    
   
-
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
 
 <a class="navbar-brand logo" href="../../index.html">
-
   
   
   
   
   
+    <p class="title logo__title">pyorc 0.4.1 documentation</p>
   
-  
-
-  
-  
-    <p class="title logo__title">pyorc 0.3.3 documentation</p>
-  
-</a>
+</a></div>
     
   </div>
-
+  
   
   <div class="col-lg-9 navbar-header-items">
-    <div id="navbar-center" class="mr-auto">
+    
+    <div class="me-auto navbar-header-items__center">
       
-      <div class="navbar-center-item">
-        <nav class="navbar-nav">
-    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
-        Site Navigation
-    </p>
-    <ul id="navbar-main-elements" class="navbar-nav">
-        
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../intro.html">
                         Introduction
@@ -130,16 +145,16 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../quickstart.html">
-                        Quick start
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        User Guide
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../index.html">
-                        User Guide
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../quickstart.html">
+                        Quick start for programmers
                       </a>
                     </li>
                 
@@ -150,76 +165,98 @@
                       </a>
                     </li>
                 
-    </ul>
-</nav>
-      </div>
+  </ul>
+</nav></div>
       
     </div>
-
-    <div id="navbar-end">
+    
+    
+    <div class="navbar-header-items__end">
       
-        <div class="navbar-end-item navbar-persistent--container">
+        <div class="navbar-item navbar-persistent--container">
           
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
-  <i class="fa-solid fa-magnifying-glass"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
         </div>
       
       
-      <div class="navbar-end-item">
-        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
     <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
     <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
-</button>
-      </div>
+  </button>
+`);
+</script></div>
       
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
       
     </div>
+    
   </div>
-
-
   
   
     <div class="navbar-persistent--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
-  <i class="fa-solid fa-magnifying-glass"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
     </div>
   
 
   
-  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
       <span class="fa-solid fa-outdent"></span>
-  </label>
+    </label>
   
-
 </div>
-  </nav>
-  
 
+    </nav>
+  
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
       <div class="bd-sidebar-primary bd-sidebar">
         
+
   
   <div class="sidebar-header-items sidebar-primary__section">
     
     
       <div class="sidebar-header-items__center">
-      
-      <div class="navbar-center-item">
-        <nav class="navbar-nav">
-    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
-        Site Navigation
-    </p>
-    <ul id="navbar-main-elements" class="navbar-nav">
         
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../intro.html">
                         Introduction
@@ -234,16 +271,16 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../quickstart.html">
-                        Quick start
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        User Guide
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../index.html">
-                        User Guide
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../quickstart.html">
+                        Quick start for programmers
                       </a>
                     </li>
                 
@@ -254,79 +291,116 @@
                       </a>
                     </li>
                 
-    </ul>
-</nav>
+  </ul>
+</nav></div>
+        
       </div>
-      
-      </div>
-    
-
     
     
-    <div class="sidebar-header-items__end">
-      
-      <div class="navbar-end-item">
-        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
     <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
     <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
-</button>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+        
       </div>
-      
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
-      
-    </div>
     
   </div>
-
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../video.html">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command-line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Application Programming Interface</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Camera configurations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../frames/frames.html">Frames</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../velocimetry.html">Velocimetry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../transect.html">Transects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../video/index.html">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frames/index.html">Frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../velocimetry/index.html">Velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transect/index.html">Transects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plot/index.html">Plotting</a></li>
 </ul>
-
-  </div>
-</nav>
+</div>
+</nav></div>
     </div>
-  </div>
   
-
   
-  <div class="sidebar-end-items sidebar-primary__section">
-    <div class="sidebar-end-items__item">
-    </div>
+  <div class="sidebar-primary-items__end sidebar-primary__section">
   </div>
-
   
   <div id="rtd-footer-container"></div>
 
+
       </div>
+      
       <main id="main-content" class="bd-main">
         
         
-        <div class="bd-content">
-          <div class="bd-article-container">
-            
-            <div class="bd-header-article">
-                
-            </div>
-            
-            
-            <article class="bd-article" role="main">
+          <div class="bd-content">
+            <div class="bd-article-container">
               
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Camera configurations</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <section id="camera-configurations">
 <span id="camera-config-ug"></span><h1>Camera configurations<a class="headerlink" href="#camera-configurations" title="Permalink to this heading">#</a></h1>
 <div class="admonition note">
@@ -341,13 +415,78 @@ image coordinates) is located in the real world (3-dimensional, a.k.a. geographi
 The camera configuration methods of <strong>pyorc</strong> are meant for this purpose.</p>
 <section id="setting-up-a-camera-configuration">
 <h2>Setting up a camera configuration<a class="headerlink" href="#setting-up-a-camera-configuration" title="Permalink to this heading">#</a></h2>
-<p>In <strong>pyorc</strong> all camera configuration is collected into one single class called <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code>. It can be imported
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-0">
+Command-line</label><div class="sd-tab-content docutils">
+<p id="camera-config-cli">The command-line interface supports setting up a camera configuration through a subcommand. To see the options
+simply call the subcommand on a command prompt with <code class="docutils literal notranslate"><span class="pre">--help</span></code> as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>--help
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: pyorc camera-config [OPTIONS] OUTPUT
+
+Options:
+  -V, --videofile FILE        video file with required objective and
+                              resolution and control points in view
+                              [required]
+  --crs TEXT                  Coordinate reference system to be used for
+                              camera configuration
+  -f, --frame-sample INTEGER  Frame number to use for camera configuration
+                              background
+  --src TEXT                  Source control points as list of [column, row]
+                              pairs.
+  --dst TEXT                  Destination control points as list of 4 [x, y]
+                              pairs, or at least 6 [x, y, z]. If --crs_gcps is
+                              provided, --dst is assumed to be in this CRS.&quot;
+  --z_0 FLOAT                 Water level [m] +CRS (e.g. geoid or ellipsoid of
+                              GPS)
+  --h_ref FLOAT               Water level [m] +local datum (e.g. staff or
+                              pressure gauge)
+  --crs_gcps TEXT             Coordinate reference system in which destination
+                              GCP points (--dst) are measured
+  --resolution FLOAT          Target resolution [m] for ortho-projection.
+  --window_size INTEGER       Target window size [px] for interrogation window
+                              for Particle Image Velocimetry
+  --shapefile FILE            Shapefile or other GDAL compatible vector file
+                              containing dst GCP points [x, y] or [x, y, z] in
+                              its geometry
+  --lens_position TEXT        Lens position as [x, y, z]. If --crs_gcps is
+                              provided, --lens_position is assumed to be in
+                              this CRS.
+  --corners TEXT              Video ojective corner points as list of 4
+                              [column, row] points
+  -v, --verbose               Increase verbosity.
+  --help                      Show this message and exit.
+</pre></div>
+</div>
+<p>To setup a camera configuration, you will at minimum need to provide the following:</p>
+<ul class="simple">
+<li><p>A video, made with a specific camera, oriented to a fixed point of view, using known and fixed settings. With “fixed”
+we mean here that any additional video supplied to <em>pyorc</em> should be taken with the same settings and the same exact
+field of view.</p></li>
+<li><p>Ground control points. These are combinations of real-world coordinates (possibly in a geographical coordinate
+reference system) and column, row coordinates in the frames of the video. By assigning where in the world a column,
+row coordinate is, and do this for several locations, the field of view of the camera can be projected into a real-world
+view.</p></li>
+<li><p>4 corner points that approximately indicate the bounding box of your area of interest. These must be provided in
+the order <em>upstream-left</em>, <em>downstream-left</em>, <em>downstream-right</em>, <em>upstream-right</em>, where left is the left-bank
+as seen while looking in downstream direction.</p></li>
+</ul>
+<p>There are several ways to assign this information, further explained below.</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-1">
+API</label><div class="sd-tab-content docutils">
+<p id="camera-config-api">In <strong>pyorc</strong> all camera configuration is collected into one single class called <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code>. It can be imported
 from the main library and then be used to add information about the lens characteristics and the relation between
 real-world and row-column coordinates. Once completed, the camera configuration can be added to a video to make it lens
 and geographically aware. You can also add a camera configuration, stored in a JSON-formatted file to a video.
 Once this is done, the video has added intelligence about the real-world, and you can orthorectify its frames.
 Below a simple example is shown, where only the expected size of the objective in <code class="docutils literal notranslate"><span class="pre">height</span></code> and <code class="docutils literal notranslate"><span class="pre">width</span></code> is provided.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">1080</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1920</span><span class="p">)</span>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">1080</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1920</span><span class="p">)</span>
 <span class="n">cam_config</span>
 
 <span class="p">{</span>
@@ -389,6 +528,7 @@ Below a simple example is shown, where only the expected size of the objective i
 <span class="p">}</span>
 </pre></div>
 </div>
+</div></blockquote>
 <p>You can see that the inline representation of the <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code> object is basically a dictionary with pieces of
 information in it. In this example we can already see a few components that are estimated from default values. These
 can all be modified, or updated with several methods after the object has been established. The different parts we can
@@ -416,13 +556,15 @@ e.g. on <a class="reference external" href="https://towardsdatascience.com/what-
 </ul>
 <p>As you can see, the camera configuration does not yet have any real-world information and therefore is not sufficient
 to perform orthorectification. Below we describe how you can establish a full camera configuration.</p>
+</div>
+</div>
 </section>
 <section id="making-the-camera-configuration-geographically-aware">
 <h2>Making the camera configuration geographically aware<a class="headerlink" href="#making-the-camera-configuration-geographically-aware" title="Permalink to this heading">#</a></h2>
 <p>In case you are able to perform your field measurements with a RTK GNSS device, then your camera configuration
 can be made entirely geographically aware. You can then export or visualize your results in a geographical map later
-on, or use your results in GIS software such as QGIS. You do this simply by passing the keyword <code class="docutils literal notranslate"><span class="pre">crs</span></code> to the camera
-configuration and enter a projection. Several ways to pass a projection are possible such as:</p>
+on, or use your results in GIS software such as QGIS. You do this simply by passing the keyword <code class="docutils literal notranslate"><span class="pre">crs</span></code> (or <code class="docutils literal notranslate"><span class="pre">--crs</span></code>
+on command line) to the camera configuration and enter a projection. Several ways to pass a projection are possible such as:</p>
 <ul class="simple">
 <li><p>EPSG codes (see EPSG.io)</p></li>
 <li><p>proj4 strings</p></li>
@@ -442,10 +584,31 @@ our ground control points (GCPs, see later in this manual) with an RTK GNSS set,
 points, then we do not have to go through the trouble of converting these points into the system we chose for our camera
 configuration. Instead we just pass the CRS of the WGS84 lat-lon (e.g. using the EPSG code 4326) while we add the GCPs
 to our configuration. We will see this later in this manual.</p>
-<p>Below, we show what the configuration would look like if we would add the Rijksdriehoek projection to our camera
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-2">
+Command-line</label><div class="sd-tab-content docutils">
+<p id="camera-config-cli-geo">To provide a geographical coordinate reference system to your camera configuration,
+you may simply add the option <code class="docutils literal notranslate"><span class="pre">--crs</span></code> to the earlier command. Below an example
+is given where as local projection, the UTM37S projection is provided. This projection
+has EPSG code 32737 and is for instance applicable over Tanzania. A projection is meant
+to provide a mostly undistorted real distance map for a given area. Because the globe
+is round, a suitable projection system must be chosen, that belongs to the area of
+interest. Visit <a class="reference external" href="https://epsg.io/">https://epsg.io/</a> to find a good projection system for your area of
+interest.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>--crs<span class="w"> </span><span class="m">32737</span><span class="w"> </span>........
+</pre></div>
+</div>
+<p>The dots represent additional required to make a full camera configuration.</p>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-3">
+API</label><div class="sd-tab-content docutils">
+<p id="camera-config-api-geo">Below, we show what the configuration would look like if we would add the Rijksdriehoek projection to our camera
 configuration. You can see that the code is converted into a Well-Known-Text format, so that it can also easily be
 stored in a generic text (json) format.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">1080</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1920</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32631</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">1080</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1920</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32631</span><span class="p">)</span>
 <span class="n">cam_config</span>
 
 <span class="p">{</span>
@@ -488,16 +651,15 @@ stored in a generic text (json) format.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A smart phone also has a GNSS chipset, however, this is by far not accurate enough to provide the measurements needed
 for <strong>pyorc</strong>. We recommend using a (ideal!) RTK GNSS device with a base station setup close enough to warrant
-accurate results, or otherwise a total station or spirit level.</p>
+accurate results, or otherwise a total station or spirit level. Highly affordable GNSS kits with base and rover
+stations are available through e.g. <a class="reference external" href="https://ardusimple.com/">ardusimple</a>.</p>
 </div>
-</section>
-<section id="storing-and-loading-a-camera-configuration">
-<h2>Storing and loading a camera configuration<a class="headerlink" href="#storing-and-loading-a-camera-configuration" title="Permalink to this heading">#</a></h2>
-<p>TODO</p>
 </section>
 <section id="camera-intrinsic-matrix-and-distortion-coefficients">
 <h2>Camera intrinsic matrix and distortion coefficients<a class="headerlink" href="#camera-intrinsic-matrix-and-distortion-coefficients" title="Permalink to this heading">#</a></h2>
@@ -554,7 +716,20 @@ the camera at a larger distance.</p>
 </section>
 <section id="lens-calibration-method">
 <h3>Lens calibration method<a class="headerlink" href="#lens-calibration-method" title="Permalink to this heading">#</a></h3>
-<p>Once you have your video, the camera calibration is very simple. After creating your camera configuration you can
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-4">
+Command-line</label><div class="sd-tab-content docutils">
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At the moment, lens calibration is only available at API level. If you require a command-line option
+for lens calibration, then please contact us at <a class="reference external" href="mailto:info&#37;&#52;&#48;rainbowsensing&#46;com">info<span>&#64;</span>rainbowsensing<span>&#46;</span>com</a></p>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-5">
+API</label><div class="sd-tab-content docutils">
+<p id="camera-config-api-lc">Once you have your video, the camera calibration is very simple. After creating your camera configuration you can
 supply the video in the following manner:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">calib_video</span> <span class="o">=</span> <span class="s2">&quot;calib_video.mp4&quot;</span>
 <span class="n">cam_config</span><span class="o">.</span><span class="n">set_lens_calibration</span><span class="p">(</span><span class="n">calib_video</span><span class="p">)</span>
@@ -571,6 +746,8 @@ on or off.</p>
 <p>the camera calibration is still experimental. If you have comments or issues kindly let us know by making a github
 issue.</p>
 </div>
+</div>
+</div>
 </section>
 </section>
 <section id="ground-control-points">
@@ -582,9 +759,146 @@ has 3 dimensions. However, our problem is such that we can always fix one dimens
 know and fix the level of the water (z-coordinate), then we can interpret the remaining x-, and y-coordinates if we
 give the camera calibration enough information to interpret the perspective. We do this by providing so-called ground
 control points, that are visible in the FOV, and of which we know the real-world coordinates.</p>
-<section id="structure-of-ground-control-points">
-<h3>Structure of ground control points<a class="headerlink" href="#structure-of-ground-control-points" title="Permalink to this heading">#</a></h3>
-<p>The ground control points are a simple python dictionary that should follow a certain schema. The schema looks as
+<section id="ground-control-point-information-and-abbreviations">
+<h3>ground control point information and abbreviations<a class="headerlink" href="#ground-control-point-information-and-abbreviations" title="Permalink to this heading">#</a></h3>
+<p>Within <em>pyorc</em>, both the command-line inteface and API, the different components of your ground control points are
+represented by abbreviated variables. These have the following meaning:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">src</span></code> contains [column, row] locations of the control points in the FOV.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dst</span></code>: contains [x, y] locations (in case you use 4 control points on one vertical plane) or [x, y, z] locations (
+in case you use 6 control points with arbitrary elevation).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">z_0</span></code>: water level measured in the vertical reference of your measuring device (e.g. RTK GNSS)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">h_ref</span></code>: water level as measured by a local measurement device such as a staff gauge</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">crs</span></code>: the CRS in which the control points are measured. This can be different from the CRS of the camera
+configuration itself in which case the control points are automatically transformed to the CRS of the camera
+configuration. If left empty, then it is assumed the CRS of the measured points and the camera configuration is the
+same.</p></li>
+</ul>
+</section>
+</section>
+<section id="measuring-the-gcp-information">
+<h2>Measuring the GCP information<a class="headerlink" href="#measuring-the-gcp-information" title="Permalink to this heading">#</a></h2>
+<p>Below we describe how the information needed should be measured in the field during a dedicated survey. This is
+typically done every time when you do an incidental observation, or once during the installation of a fixed camera.
+If you leave the camera in place, you can remove recognizeable control points after the survey, as long as you have
+one video with the control points visible, which you can use to setup the camera configuration.</p>
+<section id="example-of-survey-situations">
+<h3>Example of survey situations<a class="headerlink" href="#example-of-survey-situations" title="Permalink to this heading">#</a></h3>
+<p>You will notice in the next sections that you can typically measure either 4 control points at one vertical plane
+(e.g. the water surface) or 6 or more points at random elevations. You prepare this situation by spreading easy to
+recognize markers over your Field of View. In the figure below you see two examples, one where 4 sticks were placed in
+the water and the interface of the sticks with the water (red dots) is measured. And one where 6 black-and-white
+markers are spread over the field of view.</p>
+<table class="table" id="id1">
+<caption><span class="caption-text">Examples of ground control markers and situations</span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
+<tbody>
+<tr class="row-odd"><td><p>4 GCPt at water surface - Chuo Kikuu River, Dar es Salaam, Tanzania</p></td>
+</tr>
+<tr class="row-even"><td><p><img alt="gcps_4" src="../../_images/ChuoKikuu_GCPs.jpg" /></p></td>
+</tr>
+<tr class="row-odd"><td><p>6 (+) GCPs spread over banks and FOV - Geul River, Limburg, The Netherlands</p></td>
+</tr>
+<tr class="row-even"><td><p><img alt="gcps_6" src="../../_images/Geul_GCPs.jpg" /></p></td>
+</tr>
+</tbody>
+</table>
+<p>The schematic below shows in a planar view what the situation looks like. It is important that the control points are
+nicely spread over the Field of View, and this is actually more important than an equal spread of points of left and
+right bank. In the schematic we show this by having only 2 control points at the bank close to the camera, and 4 at
+the opposite side. If you have your camera on a bridge in the middle of the bridge deck, then having 3 (or more) points
+left as well as right makes the most sense. The better the spread is, the more accurate the perspective will be
+resolved.</p>
+<figure class="align-default" id="id2">
+<img alt="../../_images/site_schematic_planar.svg" src="../../_images/site_schematic_planar.svg" /><figcaption>
+<p><span class="caption-text">Planar schematic view of site survey situation.</span><a class="headerlink" href="#id2" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Ensuring that the vertical plane is fully understood is also important.
+The <code class="docutils literal notranslate"><span class="pre">z_0</span></code> and <code class="docutils literal notranslate"><span class="pre">h_ref</span></code> optional keys are meant to allow a user to provide multiple videos with different water
+levels. If you intend to do this, you may install a water level measuring device on-site such as a staff gauge or
+pressure gauge, that has its own vertical zero-level reference. Therefore, to use this option the following should be
+measured and entered:</p>
+<ul class="simple">
+<li><p>measure the water level during the survey with your local device (e.g. staff gauge) and insert this in <code class="docutils literal notranslate"><span class="pre">h_ref</span></code></p></li>
+<li><p>also measure the water level with your survey device such as total station or RTK GPS, i.e. using the exact same
+vertical reference as your control points. This has its own vertical zero level. This level must be inserted in
+<code class="docutils literal notranslate"><span class="pre">z_0</span></code>. Any other surveyed properties such as the lens position and the river cross section must also be measured
+with the same horizontal and vertical coordinate system as <code class="docutils literal notranslate"><span class="pre">z_0</span></code> and the ground control points.</p></li>
+</ul>
+<p>The overview of these measurement requirements is also provided in the schematic below.</p>
+<figure class="align-default" id="id3">
+<img alt="../../_images/site_schematic_cs.svg" src="../../_images/site_schematic_cs.svg" /><figcaption>
+<p><span class="caption-text">Cross-section schematic view of site survey situation.</span><a class="headerlink" href="#id3" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="entering-control-points-in-the-camera-configuration">
+<h3>Entering control points in the camera configuration<a class="headerlink" href="#entering-control-points-in-the-camera-configuration" title="Permalink to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-6">
+Command-line</label><div class="sd-tab-content docutils">
+<p id="camera-config-cli-gcps">There are several approaches to provide ground control point information to the camera configuration through the
+command-line interface:</p>
+<ul class="simple">
+<li><p>supply information with optional arguments as strings</p></li>
+<li><p>supply information embedded in vector GIS files such as shapefiles</p></li>
+<li><p>supply information interactively through (dependent on which information) a user-prompt or a visual interactive
+view.</p></li>
+</ul>
+<p>For the first option, JSON-formatted strings are used. JSON is a standard format to provide information in string format
+such as simple text, floating point numbers, integer numbers, but also more complex dictionaries, or lists. In our case
+we only need floating point numbers to provide <code class="docutils literal notranslate"><span class="pre">z_0</span></code> and <code class="docutils literal notranslate"><span class="pre">h_ref</span></code>, list of lists for <code class="docutils literal notranslate"><span class="pre">src</span></code> and <code class="docutils literal notranslate"><span class="pre">dst</span></code> and an
+integer or string for <code class="docutils literal notranslate"><span class="pre">--crs_gcps</span></code> (i.e. the crs in which the destination locations of ground control points are
+measured). Remember that <code class="docutils literal notranslate"><span class="pre">--crs_gcps</span></code> can be supplied through e.g. an EPSG code, which is an integer number, but also
+in a “Well-known Text” (wkt) form, which is a string.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In JSON format, a list can be supplied using comma separated numbers, encapsulated by square brackets “[” and “]”.</p>
+</div>
+<p>For our example video, supplying the gcps in a full command-line option manner would be done as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>--crs_gcps<span class="w"> </span><span class="m">32735</span><span class="w"> </span>--src<span class="w"> </span><span class="s2">&quot;[[1421, 1001], [1251, 460], [421, 432], [470, 607]]&quot;</span><span class="w"> </span>--dst<span class="w"> </span><span class="s2">&quot;[[642735.8076, 8304292.1190], [642737.5823, 8304295.593], [642732.7864, 8304298.4250], [642732.6705, 8304296.8580]]&quot;</span><span class="w"> </span>--z_0<span class="w"> </span><span class="m">1182</span>.2<span class="w"> </span>--h_ref<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span>......
+</pre></div>
+</div>
+<p>After the ….. more inputs such as the video with control points, the CRS of the camera configuration, and the output
+filename must be presented. With this input, no further interaction with the user to complete the control points is
+required.</p>
+<p>In many cases though, the information under <code class="docutils literal notranslate"><span class="pre">-dst</span></code> may be cumbersome to insert. Hence a more convenient option is to
+leave out <code class="docutils literal notranslate"><span class="pre">-dst</span></code> and replace it for <code class="docutils literal notranslate"><span class="pre">--shapefile</span></code> and provide a path to a shapefile or other vector formatted
+GIS file containing your control points. <em>pyorc</em> assumes that the shapefile contains exactly those points you wish to
+use, no more and no less, that all information is in the geometries (i.e. x, y and if +6-points are used, also z) and
+that the file contains a CRS that allows for automated reprojection to the CRS of the camera configuration (i.e.
+supplied with <code class="docutils literal notranslate"><span class="pre">--crs</span></code>). The geometries MUST be of the type POINT only! <em>pyorc</em> will attempt to indicate any
+problems with shapefiles that contain wrong or incomplete information so that you can resolve that if needed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you use a RTK GNSS, a typical output is a shapefile containing points, a CRS and geometries with x, y and z
+coordinates. If your output file contains more points than your control points, then first edit the file in a
+GIS program such as <a href="https://qgis.org/" target="_blank">QGIS</a> and delete any points that do not belong to ground control points.</p>
+</div>
+<p>Similarly, the information contained in <code class="docutils literal notranslate"><span class="pre">--src</span></code> may also be very cumbersome to collect. In fact, you need to open up
+a frame in a photo editor and note down rows and columns to do so. Therefore a much more and highly recommended
+approach is to simply leave out <code class="docutils literal notranslate"><span class="pre">-src</span></code> at all. You will then be asked if you want to interactively select these
+points. Simply select <cite>Y</cite> and use our convenient point and click approach to select the control points. To make sure you
+click them in the right order, you can click on the <em>Map</em> button to display a map overview of the situation. Here, your
+<code class="docutils literal notranslate"><span class="pre">--dst</span></code> points (or points collected from the shapefile) will be displayed in a map view, with numbers indicating
+which point should be selected first, which second and so on. You can go back to the camera view with the <em>camera</em>
+button. Then you simply click on the first, second, third, … and so on control point to collect all control points.
+Did you make an accidental click on a random point? No problem: just right-click and the last point you clicked
+will be removed. Right-click again and the point before that is removed so that you can click again. Once all point are
+collected, the <em>Done</em> button will become clickable. Click <em>Done</em> to close the view and store the points in the camera
+configuration.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Especially with large objectives and high resolution footage (e.g. 4K), it may be hard to accurately click or even
+see the control points. In this case, we highly recommend to use the zoom and pan functionality on the top bar of
+the interactive view. The Home button will bring you back to the original view.</p>
+</div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-7">
+API</label><div class="sd-tab-content docutils">
+<p id="camera-config-api-gcps">The ground control points are a simple python dictionary that should follow a certain schema. The schema looks as
 follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;src&quot;</span><span class="p">:</span> <span class="p">[</span>
@@ -604,78 +918,6 @@ follows:</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The fields have the following meaning:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">src</span></code> contains [column, row] locations of the control points in the FOV.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dst</span></code>: contains [x, y] locations (in case you use 4 control points on one vertical plane) or [x, y, z] locations (
-in case you use 6 control points with arbitrary elevation).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">z_0</span></code>: water level measured in the vertical reference of your measuring device (e.g. RTK GNSS)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">h_ref</span></code>: water level as measured by a local measurement device such as a staff gauge</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">crs</span></code>: the CRS in which the control points are measured. This can be different from the CRS of the camera
-configuration itself in which case the control points are automatically transformed to the CRS of the camera
-configuration. If left empty, then it is assumed the CRS of the measured points and the camera configuration is the
-same.</p></li>
-</ul>
-</section>
-</section>
-<section id="measuring-the-gcp-information">
-<h2>Measuring the GCP information<a class="headerlink" href="#measuring-the-gcp-information" title="Permalink to this heading">#</a></h2>
-<p>Below we describe how the information needed should be measured in the field during a dedicated survey. This is
-typically done every time when you do an incidental observation, or once during the installation of a fixed camera.
-If you leave the camera in place, you can remove control points after the survey.</p>
-<section id="example-of-survey-situations">
-<h3>Example of survey situations<a class="headerlink" href="#example-of-survey-situations" title="Permalink to this heading">#</a></h3>
-<p>You will notice in the next sections that you can typically measure either 4 control points at one vertical plane
-(water surface) or 6 or more points at random elevations. You prepare this situation by spreading easy to recognize
-markers over your Field of View. In the figure below you see two examples, one where 4 sticks were placed in the water
-and the interface of the sticks with the water (red dots) is measured. And one where 6 black-and-whiter markers are
-spread over the field of view.</p>
-<table class="table" id="id1">
-<caption><span class="caption-text">Examples of ground control markers and situations</span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
-<colgroup>
-<col style="width: 100%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>4 GCPt at water surface - Chuo Kikuu River, Dar es Salaam, Tanzania</p></td>
-</tr>
-<tr class="row-even"><td><p><img alt="gcps_4" src="../../_images/ChuoKikuu_GCPs.jpg" /></p></td>
-</tr>
-<tr class="row-odd"><td><p>6 (+) GCPs spread over banks and FOV - Geul River, Limburg, The Netherlands</p></td>
-</tr>
-<tr class="row-even"><td><p><img alt="gcps_6" src="../../_images/Geul_GCPs.jpg" /></p></td>
-</tr>
-</tbody>
-</table>
-<p>The schematic below shows in a planar view what the situation looks like. It is important that the control points are
-nicely spread over the Field of View, and this is actually more important than an equal spread of points of left and
-right bank. In the schematic we show this by having only 2 control points at the bank close to the camera, and 4 at
-the opposite side. If you have your camera on a bridge in the middle of the bridge deck, then having 3 (or more) points
-left as well as right makes the most sense.</p>
-<figure class="align-default" id="id2">
-<img alt="../../_images/site_schematic_planar.svg" src="../../_images/site_schematic_planar.svg" /><figcaption>
-<p><span class="caption-text">Planar schematic view of site survey situation.</span><a class="headerlink" href="#id2" title="Permalink to this image">#</a></p>
-</figcaption>
-</figure>
-<p>Ensuring that the vertical plane is fully understood is also important.
-The <code class="docutils literal notranslate"><span class="pre">z_0</span></code> and <code class="docutils literal notranslate"><span class="pre">h_ref</span></code> optional keys are meant to allow a user to provide multiple videos with different water
-levels. If you intend to do this, you may install a water level measuring device on-site such as a staff gauge or
-pressure gauge, that has its own vertical zero-level reference. Therefore, to use this option the following should be
-measured and entered:</p>
-<ul class="simple">
-<li><p>measure the water level during the survey with your local device (e.g. staff gauge) and insert this in <code class="docutils literal notranslate"><span class="pre">h_ref</span></code></p></li>
-<li><p>also measure the water level with your survey device such as total station or RTK GPS. This has its own vertical zero
-level. This level must be inserted in <code class="docutils literal notranslate"><span class="pre">z_0</span></code>. Any other surveyed properties such as the lens position and the
-river cross section must be measured with the same horizontal and vertical coordinate system as <code class="docutils literal notranslate"><span class="pre">z_0</span></code>.</p></li>
-</ul>
-<p>The overview of these measures is also provided in the schematic below.</p>
-<figure class="align-default" id="id3">
-<img alt="../../_images/site_schematic_cs.svg" src="../../_images/site_schematic_cs.svg" /><figcaption>
-<p><span class="caption-text">Cross-section schematic view of site survey situation.</span><a class="headerlink" href="#id3" title="Permalink to this image">#</a></p>
-</figcaption>
-</figure>
-</section>
-<section id="entering-control-points-in-the-camera-configuration">
-<h3>Entering control points in the camera configuration<a class="headerlink" href="#entering-control-points-in-the-camera-configuration" title="Permalink to this heading">#</a></h3>
 <p>The coordinates in the <code class="docutils literal notranslate"><span class="pre">src</span></code> field are simply the pixel coordinates in your video, where the GCPS are located.
 You can look these up by plotting the first frame with <code class="docutils literal notranslate"><span class="pre">plt.imshow</span></code> or storing
 the first frame to a file and open that in your favorite photo editor and count the pixels there.</p>
@@ -716,28 +958,89 @@ will be automatically transformed to the local CRS used for your camera configur
 <span class="n">cam_config</span><span class="o">.</span><span class="n">set_gcps</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="o">=</span><span class="n">z_0</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+</div>
 </section>
 </section>
 <section id="setting-the-lens-position">
 <h2>Setting the lens position<a class="headerlink" href="#setting-the-lens-position" title="Permalink to this heading">#</a></h2>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-8">
+Command-line</label><div class="sd-tab-content docutils">
+<p>The position of the lens can be supplied with a simple list of [x, y, z] coordinate, provided within
+quotes (“). It will be assumed that these coordinates share the same CRS as the ground control points. Hence if
+you provide <code class="docutils literal notranslate"><span class="pre">--crs_gcps</span></code> or provide a shapefile with <code class="docutils literal notranslate"><span class="pre">--shapefile</span></code> that has a CRS embedded, then this CRS
+will also be applied on the lens position. An example of how to supply the lens position with a pseudo-command
+is provided below.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>...<span class="w"> </span>--lens_position<span class="w"> </span><span class="s2">&quot;[642732.6705, 8304289.010, 1188.5]&quot;</span><span class="w"> </span>...<span class="w"> </span>OUTPUT.json
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-9">
+API</label><div class="sd-tab-content docutils">
 <p>For treatment of multiple videos, the water surface must also be reprojected to a new water level. This requires the
 position of the x, y, z of the lens position. This can be provided using a simple method <code class="docutils literal notranslate"><span class="pre">set_lens_position</span></code>. You only
 need to provide x, y, z and the CRS (if this is different from the CRS of the camera configuration itself.</p>
 <p>A full example supplying the lens position to the existing <code class="docutils literal notranslate"><span class="pre">cam_config</span></code> is shown below:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lens_position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.0478872</span><span class="p">,</span> <span class="mf">49.8830221</span><span class="p">,</span> <span class="mf">309.8</span><span class="p">]</span>  <span class="c1"># lon, lat, elevation position of the camera</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># cam_config object is already defined in earlier code blocks</span>
+<span class="n">lens_position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.0478872</span><span class="p">,</span> <span class="mf">49.8830221</span><span class="p">,</span> <span class="mf">309.8</span><span class="p">]</span>  <span class="c1"># lon, lat, elevation position of the camera</span>
 <span class="n">cam_config</span><span class="o">.</span><span class="n">set_lens_position</span><span class="p">(</span><span class="o">*</span><span class="n">lens_position</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="setting-the-area-of-interest">
 <h2>Setting the area of interest<a class="headerlink" href="#setting-the-area-of-interest" title="Permalink to this heading">#</a></h2>
 <p><strong>pyorc</strong> is organized such that it processes a planar rectangular shaped area as shown in the example below
-over the Wark River in Luxemburg. The results of reprojection and velocity estimation will all fit in this
+over the Wark River in Luxembourg. The results of reprojection and velocity estimation will all fit in this
 area of interest in the form of raster maps. <strong>pyorc</strong> is also very flexible in the rotation of the grid. River sections
 almost never follow an ideal north-south or east-west direction, and therefore it is much more practical to allow
-for a rotated grid.</p>
+for a rotated grid. This sounds complicated, but the great thing about <em>pyorc</em> is that you only have to supply 4 points
+in the camera Field of View and then <em>pyorc</em> will interpret for you where these 4 points lie in geographical space
+and which rectangular bounding box fits best around these points. In case there is a very clear dominant flow direction
+then we recommend to supply the corners points in a very specific order namely (see from the perspective looking
+in downstream direction):</p>
+<ul class="simple">
+<li><p>upstream left-bank</p></li>
+<li><p>downstream left-bank</p></li>
+<li><p>downstream right-bank</p></li>
+<li><p>upstream right-bank</p></li>
+</ul>
+<p>Masking steps in <em>pyorc</em> where unreliable velocities are masked out can then also remove velocities that are in an
+unexpected direction more easily, and without tuning of masking parameters.</p>
 <img alt="../../_images/wark_cam_config.jpg" src="../../_images/wark_cam_config.jpg" />
-<p>The area of interest can theoretically be provided directly, simply by providing
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-10">
+Command-line</label><div class="sd-tab-content docutils">
+<p id="camera-config-cli-bbox">In the command-line interface there are two options to establish a bounding box to the camera configuration:</p>
+<ul class="simple">
+<li><p>use the option <code class="docutils literal notranslate"><span class="pre">--corners</span></code> and supply a JSON-formatted list of 4 column, row pairs, similar to the approach
+used for supplying <code class="docutils literal notranslate"><span class="pre">--src</span></code>.</p></li>
+<li><p>use an interactive point-and-click view to click the points into your camera objective.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">--corners</span></code> options works in exactly the same way as <code class="docutils literal notranslate"><span class="pre">--src</span></code>. <em>pyorc</em> uses the 4 corners to draw a geographical
+best-fitting rectangular box automatically and add this to the camera configuration.</p>
+<p>As said before, choosing these corner points may be something you wish to try out a few times to get it right.
+Moreover, selecting them would also require a photo editor, and cumbersome noting down of coordinates and this can also
+easily be prone to errors where you accidentally swap row or column, or accidentally supply data in the wrong order.
+Similar to the <code class="docutils literal notranslate"><span class="pre">--src</span></code> case, you can also simply leave out <code class="docutils literal notranslate"><span class="pre">--corners</span></code> and then <em>pyorc</em> will ask if you wish to
+interactively supply the corner points. Simply choose <code class="docutils literal notranslate"><span class="pre">Y</span></code> for yes, and you will again get an interactive view.
+This view will show the earlier chosen <code class="docutils literal notranslate"><span class="pre">--src</span></code> points in the <em>Camera</em> view, and (if you click on <em>Map</em>) the <code class="docutils literal notranslate"><span class="pre">-dst</span></code>
+points in the <em>Map</em> view. Once you start selecting corners points in the <em>Camera</em> view, the view will show you which
+of the 4 points you have selected (e.g. the first point would read as “upstream left-bank”. COntinue until you have
+clicked 4 points, and then you will see the allocated bounding box around the 4 points. If you then click on <em>Map</em>
+you will see the same bounding box in geographical space. If you wish to improve your corner point selection, then
+simply use right-click to remove points and select new locations for them to change the bounding box. Once you are
+satisfied, click on <em>Done</em> and the bounding box will be stored in the camera configuration.</p>
+</div>
+<input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-11">
+API</label><div class="sd-tab-content docutils">
+<p id="camera-config-api-bbox">The area of interest can theoretically be provided directly, simply by providing
 a <code class="docutils literal notranslate"><span class="pre">shapely.geometry.Polygon</span></code> with 5 bounding points as follows (pseudo-code):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </pre></div>
@@ -782,21 +1085,58 @@ to make the area of interest flow direction aware, ensure to provide the points 
 You can see that the rectangular area is chosen such that the chosen corner points at least fit in the bounding box,
 and the orientation is chosen such that it follows the middle line between the chosen points as closely as possible.</p>
 <img alt="../../_images/wark_cam_config_persp.jpg" src="../../_images/wark_cam_config_persp.jpg" />
+</div>
+</div>
 </section>
-<section id="cameraconfig-properties-and-other-methods">
-<h2>CameraConfig properties and other methods<a class="headerlink" href="#cameraconfig-properties-and-other-methods" title="Permalink to this heading">#</a></h2>
+<section id="result-of-a-camera-configuration">
+<h2>Result of a camera configuration<a class="headerlink" href="#result-of-a-camera-configuration" title="Permalink to this heading">#</a></h2>
+<p>Once you have all your settings and details complete, the camera configuration can be stored, plotted and later
+used for processing videos into velocimetry.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-6" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-12">
+Command-line</label><div class="sd-tab-content docutils">
+<p>When all required parameters are provided, the resulting camera configuration will be stored in a file
+set as &lt;OUTPUT&gt; on the command line. If you have our code base and the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder, then you can for
+instance try the following to get a camera configuration without any interactive user inputs required:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>examples/ngwerere
+<span class="gp">$ </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>-V<span class="w"> </span>ngwerere_20191103.mp4<span class="w"> </span>--crs<span class="w"> </span><span class="m">32735</span><span class="w"> </span>--z_0<span class="w"> </span><span class="m">1182</span>.2<span class="w"> </span>--h_ref<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span>--lens_position<span class="w"> </span><span class="s2">&quot;[642732.6705, 8304289.010, 1188.5]&quot;</span><span class="w"> </span>--resolution<span class="w"> </span><span class="m">0</span>.03<span class="w"> </span>--window_size<span class="w"> </span><span class="m">15</span><span class="w"> </span>--shapefile<span class="w"> </span>ngwerere_gcps.geojson<span class="w"> </span>--src<span class="w"> </span><span class="s2">&quot;[[1421, 1001], [1251, 460], [421, 432], [470, 607]]&quot;</span><span class="w"> </span>-vvv<span class="w"> </span>ngwerere_cam_config.json
+</pre></div>
+</div>
+<p>This will use the video file <code class="docutils literal notranslate"><span class="pre">ngwerere_20191103.mp4</span></code>, make a camera configuration in the CRS with EPSG number
+32735 (UTM Zone 35 South), with measured water level at 1182.2, and reference water level at 0.0 meter (i.e.
+we only treat one video). The lens position, set as coordinates in UTM35S is set as an [x, y, z] coordinate,
+resolution used for reprojection is set at 0.03 meter, with a window size for cross-correlation set at 15 pixels.
+The destination control points are provided in a file <code class="docutils literal notranslate"><span class="pre">ngwerere_gcps.geojson</span></code> and the source coordinates
+are provided as a list with [column, row] coordinates in the frame object. Finally, corner points to set the
+bounding box are provided as a list of [column, row] coordinates as well. The configuration is stored in
+<code class="docutils literal notranslate"><span class="pre">ngwerere_cam_config.json</span></code>. If you leave out the <code class="docutils literal notranslate"><span class="pre">--src</span></code> and <code class="docutils literal notranslate"><span class="pre">--corners</span></code> components, you will be able to
+select these interactively as shown before. Also the <code class="docutils literal notranslate"><span class="pre">--h_ref</span></code> and <code class="docutils literal notranslate"><span class="pre">--z_0</span></code> values can be supplied
+interactively.</p>
+<p>The command-line interface will also automatically store visualizations of the resulting camera configuration
+in both planar view (with a satellite background if a CRS has been used) and in the camera perspective. The file
+names for this have the same name as &lt;OUTPUT&gt; but with the suffixes <code class="docutils literal notranslate"><span class="pre">_geo.jpg</span></code> for the planar view and
+<code class="docutils literal notranslate"><span class="pre">_cam.jpg</span></code> for the camera FOV perspective.</p>
+</div>
+<input id="sd-tab-item-13" name="sd-tab-set-6" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-13">
+API</label><div class="sd-tab-content docutils">
+<p>Storing a camera configuration within the API is as simple as calling <code class="docutils literal notranslate"><span class="pre">to_file</span></code>. Camera configurations can
+also be loaded back in memory using <code class="docutils literal notranslate"><span class="pre">pyorc.load_camera_config</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># cam_config was generated before from our examples/ngwerere folder</span>
+<span class="kn">import</span> <span class="nn">pyorc</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">&quot;ngwerere_cam_config.json&quot;</span><span class="p">)</span>
+<span class="c1"># load the configuration back in memory</span>
+<span class="n">cam_config2</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">load_camera_config</span><span class="p">(</span><span class="s2">&quot;ngwerere_cam_config.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>When a full camera configuration is available, you can access and inspect several properties and access a few other
 methods that may be useful if you wish to program around the API. We refer to the <a class="reference internal" href="../../api.html#cameraconfig"><span class="std std-ref">API documentation</span></a>.</p>
-</section>
-<section id="cameraconfig-plots">
-<h2>CameraConfig plots<a class="headerlink" href="#cameraconfig-plots" title="Permalink to this heading">#</a></h2>
 <p>We highly recommend to first inspect your camera configuration graphically, before doing any further work with it.
 Examples have already been shown throughout this manual, but you can also plot your own camera configurations, either
 in planar view, or in the original camera FOV. For this the <code class="docutils literal notranslate"><span class="pre">plot</span></code> method has been developed. This method can
 always be applied on an existing matplotlib axes object, by supplying the <code class="docutils literal notranslate"><span class="pre">ax</span></code> keyword and referring the the axes
 object you wish to use.</p>
-<section id="planar-plotting">
-<h3>Planar plotting<a class="headerlink" href="#planar-plotting" title="Permalink to this heading">#</a></h3>
 <p>Planar plotting is done by default. The most simple approach is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
@@ -812,9 +1152,6 @@ displayed as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tiles</span><span class="o">=</span><span class="s2">&quot;GoogleTiles&quot;</span><span class="p">,</span> <span class="n">tiles_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;satellite&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
-</section>
-<section id="plotting-in-camera-fov">
-<h3>Plotting in camera FOV<a class="headerlink" href="#plotting-in-camera-fov" title="Permalink to this heading">#</a></h3>
 <p>To plot in the camera FOV, simply set <code class="docutils literal notranslate"><span class="pre">camera=True</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -834,216 +1171,132 @@ the camera configuration is based, extract one frame, and plot it within one axe
 <span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
+</div>
+</div>
 </section>
 </section>
 
 
-            </article>
-            
-            
-            
-            <footer class="bd-footer-article">
-                <!-- Previous / next buttons -->
-<div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../video.html" title="previous page">
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../api.html"
+       title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Videos</p>
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Application Programming Interface</p>
       </div>
-  </a>
-  <a class='right-next' id="next-link" href="../frames/frames.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Frames</p>
-  </div>
-  <i class="fa-solid fa-angle-right"></i>
-  </a>
+    </a>
+    <a class="right-next"
+       href="../video/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Videos</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
-            </footer>
-            
-          </div>
-          
-          
-          
-            <div class="bd-sidebar-secondary bd-toc">
+                </footer>
               
-<div class="toc-item">
-  
-<div class="tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-</div>
-<nav id="bd-toc-nav" class="page-toc">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#setting-up-a-camera-configuration">
-   Setting up a camera configuration
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#making-the-camera-configuration-geographically-aware">
-   Making the camera configuration geographically aware
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#storing-and-loading-a-camera-configuration">
-   Storing and loading a camera configuration
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#camera-intrinsic-matrix-and-distortion-coefficients">
-   Camera intrinsic matrix and distortion coefficients
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#preparing-a-video-for-camera-calibration">
-     Preparing a video for camera calibration
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#lens-calibration-method">
-     Lens calibration method
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#ground-control-points">
-   Ground control points
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#structure-of-ground-control-points">
-     Structure of ground control points
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#measuring-the-gcp-information">
-   Measuring the GCP information
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#example-of-survey-situations">
-     Example of survey situations
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#entering-control-points-in-the-camera-configuration">
-     Entering control points in the camera configuration
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#setting-the-lens-position">
-   Setting the lens position
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#setting-the-area-of-interest">
-   Setting the area of interest
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#cameraconfig-properties-and-other-methods">
-   CameraConfig properties and other methods
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#cameraconfig-plots">
-   CameraConfig plots
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#planar-plotting">
-     Planar plotting
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#plotting-in-camera-fov">
-     Plotting in camera FOV
-    </a>
-   </li>
-  </ul>
- </li>
-</ul>
-
-</nav>
-</div>
-
-<div class="toc-item">
-  
-<div id="searchbox"></div>
-</div>
-
-<div class="toc-item">
-  
-</div>
-
-<div class="toc-item">
-  
-<div class="tocsection sourcelink">
-    <a href="../../_sources/user-guide/camera_config/index.rst.txt">
-        <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-</div>
-
-</div>
-
             </div>
-          
-          
-        </div>
-        <footer class="bd-footer-content">
-          <div class="bd-footer-content__inner">
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-a-camera-configuration">Setting up a camera configuration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#making-the-camera-configuration-geographically-aware">Making the camera configuration geographically aware</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#camera-intrinsic-matrix-and-distortion-coefficients">Camera intrinsic matrix and distortion coefficients</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#preparing-a-video-for-camera-calibration">Preparing a video for camera calibration</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lens-calibration-method">Lens calibration method</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ground-control-points">Ground control points</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ground-control-point-information-and-abbreviations">ground control point information and abbreviations</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#measuring-the-gcp-information">Measuring the GCP information</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-of-survey-situations">Example of survey situations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#entering-control-points-in-the-camera-configuration">Entering control points in the camera configuration</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-the-lens-position">Setting the lens position</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-the-area-of-interest">Setting the area of interest</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#result-of-a-camera-configuration">Result of a camera configuration</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user-guide/camera_config/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
             
           </div>
-        </footer>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner"></div>
+          </footer>
         
       </main>
     </div>
   </div>
-
   
-    
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
 
-  <footer class="bd-footer"><div class="bd-footer__inner container">
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
   
-  <div class="footer-item">
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
     
-<p class="copyright">
-
-    &copy; Copyright 2022, Rainbow Sensing.<br>
-
-</p>
-
-  </div>
-  
-  <div class="footer-item">
-    <p class="theme-version">
-    Built with the
-    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
-        PyData Sphinx Theme
-    </a>
-    0.12.0.
-</p>
-  </div>
-  
-  <div class="footer-item">
+      © Copyright 2023, Rainbow Sensing.
+      <br/>
     
-<p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
-</p>
-
-  </div>
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+</p></div>
+      
+    </div>
   
 </div>
+
   </footer>
   </body>
 </html>

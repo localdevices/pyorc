@@ -1,12 +1,15 @@
 
+
 <!DOCTYPE html>
 
-<html lang="en">
+
+<html lang="en" >
+
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>API reference &#8212; pyorc 0.3.3 documentation</title>
+    <title>API reference &#8212; pyorc 0.4.1 documentation</title>
   
   
   
@@ -16,21 +19,23 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
-<link href="_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
-<link href="_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link href="_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
 
   
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
@@ -38,84 +43,94 @@
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyorc.CameraConfig" href="_generated/pyorc.CameraConfig.html" />
-    <link rel="prev" title="Transect" href="user-guide/transect.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="docsearch:language" content="en">
+    <link rel="prev" title="Camera calibration" href="_examples/05_Camera_calibration.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
   </head>
   
   
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
 
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
-
   
-  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
   <label class="overlay overlay-primary" for="__primary"></label>
-
   
-  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
   <label class="overlay overlay-secondary" for="__secondary"></label>
-
   
   <div class="search-button__wrapper">
     <div class="search-button__overlay"></div>
     <div class="search-button__search-container">
-      
-<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
   <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-    </div>
+</form></div>
   </div>
-
   
-  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fa-solid fa-bars"></span>
+    <span class="fa-solid fa-bars"></span>
   </label>
-  <div id="navbar-start">
-    
-    
   
-
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
 
 <a class="navbar-brand logo" href="index.html">
-
   
   
   
   
   
+    <p class="title logo__title">pyorc 0.4.1 documentation</p>
   
-  
-
-  
-  
-    <p class="title logo__title">pyorc 0.3.3 documentation</p>
-  
-</a>
+</a></div>
     
   </div>
-
+  
   
   <div class="col-lg-9 navbar-header-items">
-    <div id="navbar-center" class="mr-auto">
+    
+    <div class="me-auto navbar-header-items__center">
       
-      <div class="navbar-center-item">
-        <nav class="navbar-nav">
-    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
-        Site Navigation
-    </p>
-    <ul id="navbar-main-elements" class="navbar-nav">
-        
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="intro.html">
                         Introduction
@@ -131,15 +146,15 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="quickstart.html">
-                        Quick start
+                      <a class="nav-link nav-internal" href="user-guide/index.html">
+                        User Guide
                       </a>
                     </li>
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user-guide/index.html">
-                        User Guide
+                      <a class="nav-link nav-internal" href="quickstart.html">
+                        Quick start for programmers
                       </a>
                     </li>
                 
@@ -150,76 +165,98 @@
                       </a>
                     </li>
                 
-    </ul>
-</nav>
-      </div>
+  </ul>
+</nav></div>
       
     </div>
-
-    <div id="navbar-end">
+    
+    
+    <div class="navbar-header-items__end">
       
-        <div class="navbar-end-item navbar-persistent--container">
+        <div class="navbar-item navbar-persistent--container">
           
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
-  <i class="fa-solid fa-magnifying-glass"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
         </div>
       
       
-      <div class="navbar-end-item">
-        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
     <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
     <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
-</button>
-      </div>
+  </button>
+`);
+</script></div>
       
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
       
     </div>
+    
   </div>
-
-
   
   
     <div class="navbar-persistent--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
-  <i class="fa-solid fa-magnifying-glass"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
     </div>
   
 
   
-  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
       <span class="fa-solid fa-outdent"></span>
-  </label>
+    </label>
   
-
 </div>
-  </nav>
-  
 
+    </nav>
+  
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
       <div class="bd-sidebar-primary bd-sidebar">
         
+
   
   <div class="sidebar-header-items sidebar-primary__section">
     
     
       <div class="sidebar-header-items__center">
-      
-      <div class="navbar-center-item">
-        <nav class="navbar-nav">
-    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
-        Site Navigation
-    </p>
-    <ul id="navbar-main-elements" class="navbar-nav">
         
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="intro.html">
                         Introduction
@@ -235,15 +272,15 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="quickstart.html">
-                        Quick start
+                      <a class="nav-link nav-internal" href="user-guide/index.html">
+                        User Guide
                       </a>
                     </li>
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user-guide/index.html">
-                        User Guide
+                      <a class="nav-link nav-internal" href="quickstart.html">
+                        Quick start for programmers
                       </a>
                     </li>
                 
@@ -254,42 +291,50 @@
                       </a>
                     </li>
                 
-    </ul>
-</nav>
+  </ul>
+</nav></div>
+        
       </div>
-      
-      </div>
-    
-
     
     
-    <div class="sidebar-header-items__end">
-      
-      <div class="navbar-end-item">
-        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
     <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
     <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
-</button>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+        
       </div>
-      
-      <div class="navbar-end-item">
-        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
-      </ul>
-      </div>
-      
-    </div>
     
   </div>
-
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.html">pyorc.CameraConfig</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.bbox.html">pyorc.CameraConfig.bbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.shape.html">pyorc.CameraConfig.shape</a></li>
@@ -350,6 +395,7 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.plot.html">pyorc.Frames.plot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.to_ani.html">pyorc.Frames.to_ani</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.to_video.html">pyorc.Frames.to_video</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Velocimetry.html">pyorc.Velocimetry</a></li>
@@ -403,39 +449,62 @@
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.plot.quiver.html">pyorc.Transect.plot.quiver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.plot.scatter.html">pyorc.Transect.plot.scatter</a></li>
 </ul>
-
-  </div>
-</nav>
+</div>
+</nav></div>
     </div>
-  </div>
   
-
   
-  <div class="sidebar-end-items sidebar-primary__section">
-    <div class="sidebar-end-items__item">
-    </div>
+  <div class="sidebar-primary-items__end sidebar-primary__section">
   </div>
-
   
   <div id="rtd-footer-container"></div>
 
+
       </div>
+      
       <main id="main-content" class="bd-main">
         
         
-        <div class="bd-content">
-          <div class="bd-article-container">
-            
-            <div class="bd-header-article">
-                
-            </div>
-            
-            
-            <article class="bd-article" role="main">
+          <div class="bd-content">
+            <div class="bd-article-container">
               
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">API reference</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <section id="api-reference">
 <span id="api"></span><h1>API reference<a class="headerlink" href="#api-reference" title="Permalink to this heading">#</a></h1>
-<p><strong>pyorc</strong>’s consists of several subclasses of the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> data models.
+<p><strong>pyorc</strong>’s API consists of several subclasses of the <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> data models.
 In a nutshell, <a class="reference external" href="https://docs.xarray.dev/">xarray</a>’s data models are meant to store and analyze scientific datasets with multiple
 dimensions. A <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> contains one variable with possibly several dimensions and coordinates
 within those dimensions. A <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> may contain multiple <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> objects, with shared
@@ -454,10 +523,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="class-and-properties">
 <h3>Class and properties<a class="headerlink" href="#class-and-properties" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.html#pyorc.CameraConfig" title="pyorc.CameraConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig</span></code></a>(height, width[, crs, ...])</p></td>
 <td><p>Camera configuration containing information about the perspective of the camera with respect to real world coordinates</p></td>
@@ -477,10 +542,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="setting-of-properties-and-attributes">
 <h3>Setting of properties and attributes<a class="headerlink" href="#setting-of-properties-and-attributes" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners" title="pyorc.CameraConfig.set_bbox_from_corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_bbox_from_corners</span></code></a>(corners)</p></td>
 <td><p>Establish bbox based on a set of camera perspective corner points Assign corner coordinates to camera configuration</p></td>
@@ -503,10 +564,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="exporting">
 <h3>Exporting<a class="headerlink" href="#exporting" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict" title="pyorc.CameraConfig.to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.to_dict</span></code></a>()</p></td>
 <td><p>Return the CameraConfig object as dictionary</p></td>
@@ -523,10 +580,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="retrieve-geometrical-information">
 <h3>Retrieve geometrical information<a class="headerlink" href="#retrieve-geometrical-information" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M" title="pyorc.CameraConfig.get_M"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.get_M</span></code></a>([h_a, to_bbox_grid, reverse])</p></td>
 <td><p>Establish a transformation matrix for a certain actual water level <cite>h_a</cite>.</p></td>
@@ -543,10 +596,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="plotting-methods">
 <h3>Plotting methods<a class="headerlink" href="#plotting-methods" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.plot.html#pyorc.CameraConfig.plot" title="pyorc.CameraConfig.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.plot</span></code></a>([figsize, ax, tiles, ...])</p></td>
 <td><p>Plot the geographical situation of the CameraConfig.</p></td>
@@ -563,10 +612,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="id1">
 <h3>Class and properties<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.html#pyorc.Video" title="pyorc.Video"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video</span></code></a>(fn[, camera_config, h_a, start_frame, ...])</p></td>
 <td><p>Video class, inheriting parts from cv2.VideoCapture.</p></td>
@@ -595,10 +640,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="getting-frames-from-video-objects">
 <h3>Getting frames from video objects<a class="headerlink" href="#getting-frames-from-video-objects" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.get_frame.html#pyorc.Video.get_frame" title="pyorc.Video.get_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.get_frame</span></code></a>(n[, method, lens_corr])</p></td>
 <td><p>Retrieve one frame.</p></td>
@@ -616,10 +657,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="id2">
 <h3>Class and properties<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.html#pyorc.Frames" title="pyorc.Frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames</span></code></a>(xarray_obj)</p></td>
 <td><p>Frames functionalities that can be applied on xr.DataArray</p></td>
@@ -639,10 +676,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="enhancing-frames">
 <h3>Enhancing frames<a class="headerlink" href="#enhancing-frames" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect" title="pyorc.Frames.edge_detect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.edge_detect</span></code></a>([wdw_1, wdw_2])</p></td>
 <td><p>Convert frames in edges, using a band convolution filter.</p></td>
@@ -662,10 +695,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="projecting-frames-to-planar-views">
 <h3>Projecting frames to planar views<a class="headerlink" href="#projecting-frames-to-planar-views" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.project.html#pyorc.Frames.project" title="pyorc.Frames.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.project</span></code></a>([resolution])</p></td>
 <td><p>Project frames into a projected frames object, with information from the camera_config attr.</p></td>
@@ -676,10 +705,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="retrieving-surface-velocities-from-frames">
 <h3>Retrieving surface velocities from frames<a class="headerlink" href="#retrieving-surface-velocities-from-frames" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.get_piv.html#pyorc.Frames.get_piv" title="pyorc.Frames.get_piv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.get_piv</span></code></a>(**kwargs)</p></td>
 <td><p>Perform PIV computation on projected frames.</p></td>
@@ -690,16 +715,15 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="visualizing-frames">
 <h3>Visualizing frames<a class="headerlink" href="#visualizing-frames" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.plot.html#pyorc.Frames.plot" title="pyorc.Frames.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.plot</span></code></a>([ax, mode])</p></td>
 <td><p>Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani" title="pyorc.Frames.to_ani"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.to_ani</span></code></a>(fn[, figure_kwargs, ...])</p></td>
 <td><p>Store an animation of the frames in the object</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.to_video.html#pyorc.Frames.to_video" title="pyorc.Frames.to_video"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.to_video</span></code></a>(fn[, video_format, fps])</p></td>
+<td><p>Write frames to a video file without any layout</p></td>
 </tr>
 </tbody>
 </table>
@@ -711,10 +735,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="id3">
 <h3>Class and properties<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.html#pyorc.Velocimetry" title="pyorc.Velocimetry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry</span></code></a>(xarray_obj)</p></td>
 <td><p>Velocimetry functionalities that can be applied on <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p></td>
@@ -732,14 +752,10 @@ how to effectively work with the <a class="reference external" href="https://doc
 </table>
 </section>
 <section id="temporal-masking-methods">
-<h3>Temporal masking methods<a class="headerlink" href="#temporal-masking-methods" title="Permalink to this heading">#</a></h3>
-<p>The mask methods below either require or may have a dimension “time” in the data. Therefore they are most logically
+<span id="masks"></span><h3>Temporal masking methods<a class="headerlink" href="#temporal-masking-methods" title="Permalink to this heading">#</a></h3>
+<p>The mask methods below either require or may have a dimension <code class="docutils literal notranslate"><span class="pre">time</span></code> in the data. Therefore they are most logically
 applied before doing any reducing over time.</p>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.mask.minmax.html#pyorc.Velocimetry.mask.minmax" title="pyorc.Velocimetry.mask.minmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.mask.minmax</span></code></a>([s_min, s_max])</p></td>
 <td><p>Masks values if the velocity scalar lies outside a user-defined valid range.</p></td>
@@ -766,14 +782,10 @@ applied before doing any reducing over time.</p>
 </table>
 </section>
 <section id="spatial-masking-methods">
-<h3>Spatial masking methods<a class="headerlink" href="#spatial-masking-methods" title="Permalink to this heading">#</a></h3>
-<p>The spatial masking methods below only work on time reduced grid. First apply a time reducer so that there is no
-time axis in the data anymore, before applying these. Not doing so will return a clear error message.</p>
+<span id="spatial-mask"></span><h3>Spatial masking methods<a class="headerlink" href="#spatial-masking-methods" title="Permalink to this heading">#</a></h3>
+<p>The spatial masking methods look at a time reduced representation of the grid results. The resulting mask can be applied
+on a full time series and will then mask out grid cells over its full time span if these do not pass the mask.</p>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.mask.window_mean.html#pyorc.Velocimetry.mask.window_mean" title="pyorc.Velocimetry.mask.window_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.mask.window_mean</span></code></a>([tolerance, ...])</p></td>
 <td><p>Masks values when their value deviates more than tolerance (measured as relative fraction) from the mean of its neighbours (inc.</p></td>
@@ -787,10 +799,6 @@ time axis in the data anymore, before applying these. Not doing so will return a
 <section id="data-infilling">
 <h3>Data infilling<a class="headerlink" href="#data-infilling" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.replace_outliers</span></code></a>([v_x, v_y, ...])</p></td>
 <td><p>Replace missing values using neighbourhood operators.</p></td>
@@ -799,12 +807,8 @@ time axis in the data anymore, before applying these. Not doing so will return a
 </table>
 </section>
 <section id="getting-data-over-transects">
-<h3>Getting data over transects<a class="headerlink" href="#getting-data-over-transects" title="Permalink to this heading">#</a></h3>
+<span id="transects"></span><h3>Getting data over transects<a class="headerlink" href="#getting-data-over-transects" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.get_transect</span></code></a>(x, y[, z, s, crs, ...])</p></td>
 <td><p>Interpolate all variables to supplied x and y coordinates of a cross section.</p></td>
@@ -818,10 +822,6 @@ time axis in the data anymore, before applying these. Not doing so will return a
 <section id="id4">
 <h3>Plotting methods<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.plot.html#pyorc.Velocimetry.plot" title="pyorc.Velocimetry.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.plot</span></code></a></p></td>
 <td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_Velocimetry_PlotMethods</span></code></p></td>
@@ -848,10 +848,6 @@ time axis in the data anymore, before applying these. Not doing so will return a
 <section id="id5">
 <h3>Class and properties<a class="headerlink" href="#id5" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.html#pyorc.Transect" title="pyorc.Transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect</span></code></a>(xarray_obj)</p></td>
 <td><p>Transect functionalities that can be applied on <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p></td>
@@ -871,10 +867,6 @@ time axis in the data anymore, before applying these. Not doing so will return a
 <section id="derivatives">
 <h3>Derivatives<a class="headerlink" href="#derivatives" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar" title="pyorc.Transect.vector_to_scalar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.vector_to_scalar</span></code></a>([v_x, v_y])</p></td>
 <td><p>Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle</p></td>
@@ -886,12 +878,8 @@ time axis in the data anymore, before applying these. Not doing so will return a
 </table>
 </section>
 <section id="river-flow-methods">
-<h3>River flow methods<a class="headerlink" href="#river-flow-methods" title="Permalink to this heading">#</a></h3>
+<span id="river-flow"></span><h3>River flow methods<a class="headerlink" href="#river-flow-methods" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_river_flow.html#pyorc.Transect.get_river_flow" title="pyorc.Transect.get_river_flow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_river_flow</span></code></a>([q_name, Q_name])</p></td>
 <td><p>Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1] estimating one or several quantiles over the time dimension.</p></td>
@@ -905,10 +893,6 @@ time axis in the data anymore, before applying these. Not doing so will return a
 <section id="id6">
 <h3>Plotting methods<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.plot.html#pyorc.Transect.plot" title="pyorc.Transect.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.plot</span></code></a></p></td>
 <td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_Transect_PlotMethods</span></code></p></td>
@@ -926,263 +910,144 @@ time axis in the data anymore, before applying these. Not doing so will return a
 </section>
 
 
-            </article>
-            
-            
-            
-            <footer class="bd-footer-article">
-                <!-- Previous / next buttons -->
-<div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="user-guide/transect.html" title="previous page">
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="_examples/05_Camera_calibration.html"
+       title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Transect</p>
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Camera calibration</p>
       </div>
-  </a>
-  <a class='right-next' id="next-link" href="_generated/pyorc.CameraConfig.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">pyorc.CameraConfig</p>
-  </div>
-  <i class="fa-solid fa-angle-right"></i>
-  </a>
+    </a>
+    <a class="right-next"
+       href="_generated/pyorc.CameraConfig.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">pyorc.CameraConfig</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
-            </footer>
-            
-          </div>
-          
-          
-          
-            <div class="bd-sidebar-secondary bd-toc">
+                </footer>
               
-<div class="toc-item">
-  
-<div class="tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-</div>
-<nav id="bd-toc-nav" class="page-toc">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#cameraconfig-class">
-   CameraConfig class
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#class-and-properties">
-     Class and properties
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#setting-of-properties-and-attributes">
-     Setting of properties and attributes
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#exporting">
-     Exporting
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#retrieve-geometrical-information">
-     Retrieve geometrical information
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#plotting-methods">
-     Plotting methods
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#video-class">
-   Video class
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id1">
-     Class and properties
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#getting-frames-from-video-objects">
-     Getting frames from video objects
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#frames-subclass">
-   Frames subclass
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id2">
-     Class and properties
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#enhancing-frames">
-     Enhancing frames
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#projecting-frames-to-planar-views">
-     Projecting frames to planar views
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#retrieving-surface-velocities-from-frames">
-     Retrieving surface velocities from frames
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#visualizing-frames">
-     Visualizing frames
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#velocimetry-subclass">
-   Velocimetry subclass
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id3">
-     Class and properties
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#temporal-masking-methods">
-     Temporal masking methods
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#spatial-masking-methods">
-     Spatial masking methods
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#data-infilling">
-     Data infilling
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#getting-data-over-transects">
-     Getting data over transects
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id4">
-     Plotting methods
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#transect-subclass">
-   Transect subclass
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id5">
-     Class and properties
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#derivatives">
-     Derivatives
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#river-flow-methods">
-     River flow methods
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id6">
-     Plotting methods
-    </a>
-   </li>
-  </ul>
- </li>
-</ul>
-
-</nav>
-</div>
-
-<div class="toc-item">
-  
-<div id="searchbox"></div>
-</div>
-
-<div class="toc-item">
-  
-</div>
-
-<div class="toc-item">
-  
-<div class="tocsection sourcelink">
-    <a href="_sources/api.rst.txt">
-        <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-</div>
-
-</div>
-
             </div>
-          
-          
-        </div>
-        <footer class="bd-footer-content">
-          <div class="bd-footer-content__inner">
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cameraconfig-class">CameraConfig class</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#class-and-properties">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-of-properties-and-attributes">Setting of properties and attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exporting">Exporting</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieve-geometrical-information">Retrieve geometrical information</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-methods">Plotting methods</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#video-class">Video class</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-frames-from-video-objects">Getting frames from video objects</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#frames-subclass">Frames subclass</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#enhancing-frames">Enhancing frames</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#projecting-frames-to-planar-views">Projecting frames to planar views</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieving-surface-velocities-from-frames">Retrieving surface velocities from frames</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visualizing-frames">Visualizing frames</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#velocimetry-subclass">Velocimetry subclass</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#temporal-masking-methods">Temporal masking methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#spatial-masking-methods">Spatial masking methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-infilling">Data infilling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-data-over-transects">Getting data over transects</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Plotting methods</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transect-subclass">Transect subclass</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#derivatives">Derivatives</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#river-flow-methods">River flow methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Plotting methods</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/api.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
             
           </div>
-        </footer>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner"></div>
+          </footer>
         
       </main>
     </div>
   </div>
-
   
-    
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+  <script src="_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
 
-  <footer class="bd-footer"><div class="bd-footer__inner container">
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
   
-  <div class="footer-item">
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
     
-<p class="copyright">
-
-    &copy; Copyright 2022, Rainbow Sensing.<br>
-
-</p>
-
-  </div>
-  
-  <div class="footer-item">
-    <p class="theme-version">
-    Built with the
-    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
-        PyData Sphinx Theme
-    </a>
-    0.12.0.
-</p>
-  </div>
-  
-  <div class="footer-item">
+      © Copyright 2023, Rainbow Sensing.
+      <br/>
     
-<p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
-</p>
-
-  </div>
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+</p></div>
+      
+    </div>
   
 </div>
+
   </footer>
   </body>
 </html>

@@ -1,0 +1,759 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Plotting &#8212; pyorc 0.4.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/plot/index';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Quick start for programmers" href="../../quickstart.html" />
+    <link rel="prev" title="Transects" href="../transect/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">pyorc 0.4.1 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../installation.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../quickstart.html">
+                        Quick start for programmers
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../installation.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../quickstart.html">
+                        Quick start for programmers
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command-line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Application Programming Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../camera_config/index.html">Camera configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../video/index.html">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frames/index.html">Frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../velocimetry/index.html">Velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transect/index.html">Transects</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Plotting</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Plotting</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="plotting">
+<span id="plot-ug"></span><h1>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading">#</a></h1>
+<p><em>pyorc</em> offers a number of convenient plotting functions that allow you to summarize the output data into figures.
+The plotting functionality is built such, that it can combine a view of a frame, with a view on your surface velocity
+estimates, and transect velocities into one figure that displays all the steps of your processing in one single view.
+The views can be made either in a <code class="docutils literal notranslate"><span class="pre">camera</span></code> perspective, providing an augmented reality view, a <code class="docutils literal notranslate"><span class="pre">local</span></code> perspective,
+meaning the perspective after orthorectification, or a geographical perspectives, plotting on a geographical map if
+the coordinate reference system is known. There may be use cases for all three perspectives. A full example of how to
+establish a plot from our example dataset is shown below, with more information below that.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-0">
+Command-line</label><div class="sd-tab-content docutils">
+<p>To generate a plot through a recipe, you may include a <code class="docutils literal notranslate"><span class="pre">plot</span></code> section. In this section you can configure as
+many plots as you like in subsections. In the example, we only make one, called <code class="docutils literal notranslate"><span class="pre">plot_quiver</span></code>.
+Under the <code class="docutils literal notranslate"><span class="pre">plot_quiver</span></code> examples, we specify 3 subsections <code class="docutils literal notranslate"><span class="pre">frames</span></code>, <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code> and
+<code class="docutils literal notranslate"><span class="pre">transect</span></code> to plot the respective components. Besides these subsections, you can specify a few other things:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code>: select in what projection mode the plot should be made. This can be <code class="docutils literal notranslate"><span class="pre">camera</span></code>, <code class="docutils literal notranslate"><span class="pre">local</span></code> or
+<code class="docutils literal notranslate"><span class="pre">geographical</span></code> as explained above. Try it out to see what this gives you.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reducer</span></code>: because plotting is only 2-dimensional, somehow you have to reduce the velocimetry results over
+the time dimension so that you only have the spatial dimensions left. This is done with a so-called <code class="docutils literal notranslate"><span class="pre">reducer</span></code>
+operation. The available ones are <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">write_pars</span></code>: here you pass several parameters that may be used whilst writing to file. Please note that
+the available parameters are described in the <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> documentation, more specifically
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.savefig.html" target="_blank">this page</a>. Only the parameter <code class="docutils literal notranslate"><span class="pre">fname</span></code> cannot be supplied as this is the filename for the output. This
+filename will be constructed by <em>pyorc</em> and has the naming convention <code class="docutils literal notranslate"><span class="pre">&lt;figure-name&gt;.jpg</span></code>.</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">...</span>
+<span class="nn">...</span>
+
+<span class="nt">plot</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">plot_quiver</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">frames</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">velocimetry</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
+<span class="w">      </span><span class="nt">cmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rainbow</span>
+<span class="w">      </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">400</span>
+<span class="w">      </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0015</span>
+<span class="w">      </span><span class="nt">vmax</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">    </span><span class="nt">transect</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">transect_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">cmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rainbow</span>
+<span class="w">        </span><span class="nt">add_colorbar</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">        </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.003</span>
+<span class="w">        </span><span class="nt">vmin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">vmax</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">    </span><span class="nt">reducer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span>
+<span class="w">    </span><span class="nt">write_pars</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dpi</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="nt">bbox_inches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tight</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-1">
+API</label><div class="sd-tab-content docutils">
+<p>To generate a plot with all three components, you therefore need access to at minimum one frame from a
+<code class="docutils literal notranslate"><span class="pre">pyorc.Frames</span></code> object, a <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry</span></code> object that is somehow reduced over time (e.g. a mean or median)
+and a <code class="docutils literal notranslate"><span class="pre">pyorc.Transect</span></code> object that has an effective velocity, perpendicular on the stream direction. Let’s
+do a full example, starting with an already processed video. Below we re-open the video, also open the
+velocimetry results, retrieve a transect from it, and plot everything together in one figure. The
+specifics are explained after that.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pyorc</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">Normalize</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;examples/ngwerere/ngwerere_masked.nc&quot;</span><span class="p">)</span>
+
+<span class="c1"># also open the original video file, only one frame needed</span>
+<span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;examples/ngwerere/ngwerere_20191103.mp4&quot;</span>
+
+<span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">video_file</span><span class="p">,</span> <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_frame</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># borrow the camera config from the velocimetry results</span>
+<span class="n">video</span><span class="o">.</span><span class="n">camera_config</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">camera_config</span>
+
+<span class="c1"># get the frame as rgb</span>
+<span class="n">da_rgb</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get_frames</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;rgb&quot;</span><span class="p">)</span>
+
+<span class="c1"># read a cross section</span>
+<span class="n">cross_section</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;examples/ngwerere/ngwerere_cross_section.csv&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span>
+
+<span class="c1"># get data over the cross section</span>
+<span class="n">ds_points</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">get_transect</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32735</span><span class="p">,</span> <span class="n">rolling</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># get vertically integrated velocities</span>
+<span class="n">ds_points_q</span> <span class="o">=</span> <span class="n">ds_points</span><span class="o">.</span><span class="n">transect</span><span class="o">.</span><span class="n">get_q</span><span class="p">(</span><span class="n">fill_method</span><span class="o">=</span><span class="s2">&quot;log_interp&quot;</span><span class="p">)</span>
+
+<span class="c1"># plot the rgb frame first. We use the &quot;camera&quot; mode to plot the camera perspective.</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># plot the first frame and return the mappable</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">da_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">)</span>
+
+<span class="c1"># extract mean velocity and plot in camera projection</span>
+<span class="n">ds</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>  <span class="c1"># use the axes already created with the first mappable</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">,</span>  <span class="c1"># show camera perspective</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>  <span class="c1"># choose a colormap</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>  <span class="c1"># quiver scale (larger means smaller arrow lengths)</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>  <span class="c1"># width of quiver arrows</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>  <span class="c1"># transparency (smaller is more transparent)</span>
+    <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>  <span class="c1"># color scale</span>
+<span class="p">)</span>
+
+<span class="c1"># plot velocimetry point results in camera projection</span>
+<span class="n">ds_points_q</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">quantile</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">transect</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>  <span class="c1"># refer to the axes already created</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">,</span>  <span class="c1"># show camera perspective</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>  <span class="c1"># choose a colormap</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># quiver scale (larger means smaller arrow lengths)</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">0.003</span><span class="p">,</span>  <span class="c1"># width of quiver arrows</span>
+    <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>  <span class="c1"># color scale</span>
+    <span class="n">add_colorbar</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># as final touch, add a colorbar</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The resulting figure is shown below. Let’s dive a little more into the details of the three different components.</p>
+<img alt="../../_images/plot_example.jpg" src="../../_images/plot_example.jpg" />
+<section id="frames">
+<h2>Frames<a class="headerlink" href="#frames" title="Permalink to this heading">#</a></h2>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-2">
+Command-line</label><div class="sd-tab-content docutils">
+<p>To plot a frame you only have to specify <code class="docutils literal notranslate"><span class="pre">frames:</span></code> without any further argument. Automatically, the first
+frame in the video will then be added to the figure.</p>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-3">
+API</label><div class="sd-tab-content docutils">
+<p>The steps to get a frame plotted on your figure canvas, are the following:</p>
+<ul class="simple">
+<li><p>get the frames from the video with <code class="docutils literal notranslate"><span class="pre">get_frames</span></code>.</p></li>
+<li><p>If you want to plot in <code class="docutils literal notranslate"><span class="pre">local</span></code> or <code class="docutils literal notranslate"><span class="pre">geographical</span></code> mode, then call <code class="docutils literal notranslate"><span class="pre">frames.project</span></code> on your <code class="docutils literal notranslate"><span class="pre">Frames</span></code>
+object and move on with the result of this.</p></li>
+<li><p>select a (one!) frame</p></li>
+<li><p>call <code class="docutils literal notranslate"><span class="pre">frames.plot</span></code> on the result with your desired projection mode defined in the parameter <code class="docutils literal notranslate"><span class="pre">mode</span></code>.
+By default <code class="docutils literal notranslate"><span class="pre">mode=&quot;local&quot;</span></code>. As you may note</p></li>
+</ul>
+<p>Note that in the example, we do the frame selection (with <code class="docutils literal notranslate"><span class="pre">da_rgb[0]</span></code>) and plotting in one line of code as
+follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">da_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="velocimetry">
+<h2>Velocimetry<a class="headerlink" href="#velocimetry" title="Permalink to this heading">#</a></h2>
+<p>Getting your 2-dimensional velocimetry results in the figure can be done in several ways with for each method
+also other parameters that may be supplied. Below we describe briefly what the options are and we refer to the
+respective web pages where the input parameters may be found (x and y being supplied by <em>pyorc</em> so you should not
+supply these). For all methods, you can supply the parameters <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>, which indicate the minimum and
+maximum value you wish to show on a color scale. Furthermore, you may add an option <code class="docutils literal notranslate"><span class="pre">add_colorbar:</span> <span class="pre">True</span></code> to establish
+a colorbar in the lower left corner. This colorbar will be bounded by the values supplied with <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>.
+If you do not supply <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>, then the lowest and highest velocity value found will be used instead.
+Note that any parameter added is not mandatory! If you leave the parameters out, then default values will be used
+instead.</p>
+<ul class="simple">
+<li><p>quiver (default): “quivers” are arrows pointing into the vector direction, with the length and (possibly) color
+representing the scalar value of the velocity. See <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.quiver.html" target="_blank">this page</a>. Especially the <code class="docutils literal notranslate"><span class="pre">scale</span></code> parameter is a little counter-
+intuitive. A <strong>larger</strong> value results in <strong>smaller</strong> arrows!!</p></li>
+<li><p>pcolormesh: this is a gridded colored mesh that defines the scalar values only. See <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html" target="_blank">this page</a>.</p></li>
+<li><p>scatter: similar to pcolormesh, but then the velocities are represented by dots instead of grid cells. See
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html" target="_blank">this page</a>.</p></li>
+<li><p>streamplot: this only works on local mode and shows lines how particles would move over the surface. See
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.streamplot.html" target="_blank">this page</a>.</p></li>
+</ul>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-4">
+Command-line</label><div class="sd-tab-content docutils">
+<p>Within the recipe, under the selected plot (in the example <code class="docutils literal notranslate"><span class="pre">plot_quiver</span></code>) and the <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code> subsection
+you can define the plot method, and below that define the parameters. Please read the referred pages to see what
+options there are.</p>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-5">
+API</label><div class="sd-tab-content docutils">
+<p>The plot methods are available under a subclass <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.plot</span></code>. Before applying them, you must first
+reduce any time variable results over time, for instance with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># assume that processed and masked results are in piv</span>
+<span class="n">piv_mean</span> <span class="o">=</span> <span class="n">piv</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">keep_attrs=True</span></code> flag is quite important here as we may need the attributes to reproject data from
+the default x, y projection to the original camera perspective for instance.</p>
+</div>
+<p>After reducing, we can use a set of methods to make plots, in a very similar manner as used for plotting
+frames. As shown in the example, you can smartly combine plots from a frame, with plots of your velocimetry results and by
+doing so create beautiful augmented reality views, or geospatial views. The different plotting method all use an
+underlying <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot</span></code> function and are also named accordingly. Hence they can receive keyword arguments
+specific to these underlying functions. In addition, the additional important keywords described above can be
+supplied as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add_colorbar=True</span></code>: this flag will add a default colorbar to the axes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code>: this flag can be set to <code class="docutils literal notranslate"><span class="pre">local</span></code> (default), <code class="docutils literal notranslate"><span class="pre">geographical</span></code> (for plots in a geospatial view) and
+<code class="docutils literal notranslate"><span class="pre">camera</span></code> for augmented reality in the camera’s original perspective.</p></li>
+</ul>
+<p>Each plotting method always returns the mappable so that you can make your own colorbars, and refer to its parent axes
+and in turn the axes parent figure.</p>
+<p>The different plotting methods are summarised below.</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Plot function</p></th>
+<th class="head" colspan="2"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.plot.pcolormesh</span></code></p></td>
+<td colspan="2"><p>computes scalar velocities and plots these as a gridded mesh</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyorc.Velocimtry.plot.scatter</span></code></p></td>
+<td colspan="2"><p>computes scalar velocities and plots as colored dots</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.plot.streamplot</span></code></p></td>
+<td colspan="2"><p>draws a streamplot through the x and y-directional velocities. Only works with
+<code class="docutils literal notranslate"><span class="pre">mode=&quot;local&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.plot.quiver</span></code></p></td>
+<td colspan="2"><p>draws a quiver plot using the x and y-directional velocities. If
+<code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.plot</span></code> is called directly, this method is used</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="transect">
+<h2>Transect<a class="headerlink" href="#transect" title="Permalink to this heading">#</a></h2>
+<p>Plotting a transect is very similar to plotting of 2-dimensional velocimetry. Only the methods <code class="docutils literal notranslate"><span class="pre">quiver</span></code> and
+<code class="docutils literal notranslate"><span class="pre">scatter</span></code> are available, as streamplots and meshes do not apply to 1-dimensional datasets.</p>
+<p>Another nice example of a augmented reality view over the Geul river in The Netherlands is shown below.</p>
+<img alt="../../_images/example_geul_small.jpg" src="../../_images/example_geul_small.jpg" />
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../transect/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Transects</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../../quickstart.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Quick start for programmers</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#frames">Frames</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#velocimetry">Velocimetry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transect">Transect</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user-guide/plot/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner"></div>
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Rainbow Sensing.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
