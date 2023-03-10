@@ -30,7 +30,9 @@ dependencies:
   - scipy
   - shapely
   - tqdm
+  - typeguard
   - xarray
+  - yaml
   - pip:
     - openpiv
 

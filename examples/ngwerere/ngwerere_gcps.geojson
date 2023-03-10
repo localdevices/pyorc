@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "ngwerere_gcps",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::32735" } },
+"features": [
+{ "type": "Feature", "properties": { "_ID": 1, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:36:26.000 CEST" }, "geometry": { "type": "Point", "coordinates": [ 642735.8076, 8304292.119 ] } },
+{ "type": "Feature", "properties": { "_ID": 2, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:38:40.000 CEST" }, "geometry": { "type": "Point", "coordinates": [ 642737.5823, 8304295.593 ] } },
+{ "type": "Feature", "properties": { "_ID": 3, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:39:20.000 CEST" }, "geometry": { "type": "Point", "coordinates": [ 642732.7864, 8304298.425 ] } },
+{ "type": "Feature", "properties": { "_ID": 4, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:40:46.000 CEST" }, "geometry": { "type": "Point", "coordinates": [ 642732.6705, 8304296.858 ] } }
+]
+}

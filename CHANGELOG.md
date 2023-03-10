@@ -1,3 +1,21 @@
+## [0.4.0] - 2023-03-10
+### Added
+The most notable change is that the code now includes an automatically installed command-line interface. This
+will facilitate a much easier use by a large user group. Also the documentation is fully updated to include all 
+functionalities for both command-line users and API users. In detail we have the following additions:
+- First release of a command-line interface for the entire process of camera configuration, processing and preparing
+  outputs and figures.
+- Service layer that makes it easy for developers to connect pyorc to apps such as GUIs or dashboards.
+- Full user guide with description of both the command-line interface and API. 
+### Changed
+- Small modifications and additions in the API to accomodate the command-line interface building.
+### Deprecated
+### Removed
+### Fixed
+- Bug fixes in the video objects causing videos to sometimes not open properly because of missing frames
+### Security
+
+
 ## [0.3.3] - 2023-01-24
 ### Added
 - Documentation for velocimetry and masking

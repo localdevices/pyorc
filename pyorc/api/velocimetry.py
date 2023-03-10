@@ -244,12 +244,10 @@ class Velocimetry(ORCBase):
             name of x-directional velocity (Default: "v_x")
         v_y : str, optional
             name of y-directional velocity (Default: "v_y")
-        tolerance :  float
-            amount of standard deviations tolerance
-        tolerance_sample : float
-            amount of standard deviations tolerance (Default value = 1.0)
-        tolerance_var :
-             (Default value = 5.)
+        tolerance_sample :  float, optional
+            amount of standard deviations tolerance per sample in time (Default value = 1.0)
+        tolerance_var : float, optional
+             locations where the std divided by mean is higher than this value, are filtered out (Default value = 5.)
         mode : str
              can be "and" or "or" (default). If "or" ("and"), then only one (both) of two vector components need(s) to
              be within tolerance.

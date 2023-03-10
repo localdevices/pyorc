@@ -1,28 +1,96 @@
+import functools
+import numpy as np
 import os
 import pytest
 import pandas as pd
+import shutil
 from shapely import wkt
 import pyorc
-import numpy as np
+import sys
+from click.testing import CliRunner
 
 EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples")
 
+# fixtures with input and output files and folders
+@pytest.fixture
+def calib_video():
+    return os.path.join(EXAMPLE_DATA_DIR, "camera_calib", "camera_calib_720p.mkv")
+
+
+@pytest.fixture
+def cross_section():
+    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cross_section.csv")
+    return pd.read_csv(fn)
+
+
+@pytest.fixture
+def gcps_fn():
+    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_gcps.geojson")
+    return fn
+
+
+@pytest.fixture
+def cam_config_fn():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.json")
+
+
+@pytest.fixture
+def recipe_yml():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_test.yml")
+
+
+@pytest.fixture
+def cli_output_dir():
+    dir = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "outputs")
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+    yield dir
+    if os.path.isdir(dir):
+        shutil.rmtree(dir)
+
+@pytest.fixture
+def cli_prefix():
+    return "test_"
+
+@pytest.fixture
+def cli_recipe_fn():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_test.yml")
+
+
+@pytest.fixture
+def cli_cam_config_output():
+    cam_config_fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cli.json")
+    yield cam_config_fn
+    # remove after test
+    os.remove(cam_config_fn)
+
+
+@pytest.fixture
+def gcps_src():
+    return [
+        [1421, 1001],
+        [1251, 460],
+        [421, 432],
+        [470, 607]
+    ]
+
+
+@pytest.fixture
+def gcps_dst():
+    return [
+        [642735.8076, 8304292.1190],  # lowest right coordinate
+        [642737.5823, 8304295.593],  # highest right coordinate
+        [642732.7864, 8304298.4250],  # highest left coordinate
+        [642732.6705, 8304296.8580]  # highest right coordinate
+    ]
+
+
 # sample data, for Ngwerere
 @pytest.fixture
-def gcps():
+def gcps(gcps_src, gcps_dst):
     return dict(
-        src=[
-            [1421, 1001],
-            [1251, 460],
-            [421, 432],
-            [470, 607]
-        ],
-        dst=[
-            [642735.8076, 8304292.1190],  # lowest right coordinate
-            [642737.5823, 8304295.593],  # highest right coordinate
-            [642732.7864, 8304298.4250],  # highest left coordinate
-            [642732.6705, 8304296.8580]  # highest right coordinate
-        ],
+        src=gcps_src,
+        dst=gcps_dst,
         z_0=1182.2,
         h_ref=0.
     )
@@ -34,12 +102,9 @@ def lens_position():
 
 
 @pytest.fixture
-def calib_video():
-    return os.path.join(EXAMPLE_DATA_DIR, "camera_calib", "camera_calib_720p.mkv")
-
-@pytest.fixture
 def bbox():
     return wkt.loads("POLYGON ((642730.3058131004 8304292.867164782, 642731.2767039008 8304302.468199677, 642739.4450455057 8304301.642187919, 642738.4741547054 8304292.041153024, 642730.3058131004 8304292.867164782))")
+
 
 @pytest.fixture
 def corners():
@@ -64,6 +129,7 @@ def lens_pars():
 def camera_matrix():
     return np.array([[1920., 0., 960.], [0., 1920., 540.], [0., 0., 1.]])
 
+
 @pytest.fixture
 def cam_config(gcps, lens_position, lens_pars, corners):
     return pyorc.CameraConfig(
@@ -80,22 +146,24 @@ def cam_config(gcps, lens_position, lens_pars, corners):
 
 
 @pytest.fixture
+def cam_config_without_aoi(lens_position, gcps):
+    return pyorc.CameraConfig(
+        height=1080,
+        width=1920,
+        lens_position=lens_position,
+        gcps=gcps,
+        window_size=25,
+        resolution=0.01,
+        crs=32735
+        )
+
+
+@pytest.fixture
 def cam_config_calib():
     return pyorc.CameraConfig(
         height=720,
         width=1280,
     )
-
-
-@pytest.fixture
-def cross_section():
-    fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cross_section.csv")
-    return pd.read_csv(fn)
-
-
-@pytest.fixture
-def cam_config_fn():
-    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.json")
 
 
 @pytest.fixture
@@ -133,9 +201,14 @@ def cam_config_str():
 
 
 @pytest.fixture
-def vid():
+def vid_file():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4")
+
+
+@pytest.fixture
+def vid(vid_file):
     vid = pyorc.Video(
-        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
+        vid_file,
         start_frame=0,
         end_frame=2,
     )
@@ -181,6 +254,11 @@ def vid_cam_config_stabilize(cam_config):
 
 
 @pytest.fixture
+def frame_rgb(vid_cam_config):
+    return vid_cam_config.get_frame(0, method="rgb")
+
+
+@pytest.fixture
 def frames_grayscale(vid_cam_config):
     return vid_cam_config.get_frames()
 
@@ -199,8 +277,6 @@ def frames_rgb_stabilize(vid_cam_config_stabilize):
 @pytest.fixture
 def frames_rgb(vid_cam_config):
     return vid_cam_config.get_frames(method="rgb")
-
-
 
 
 @pytest.fixture
@@ -227,3 +303,44 @@ def piv_transect(piv, cross_section):
     return piv.velocimetry.get_transect(x, y, z)
 
 
+@pytest.fixture
+def cli_obj():
+    """Yield a click.testing.CliRunner to invoke the CLI."""
+    class_ = CliRunner
+
+    def invoke_wrapper(f):
+        """Augment CliRunner.invoke to emit its output to stdout.
+
+        This enables pytest to show the output in its logs on test
+        failures.
+
+        """
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            echo = kwargs.pop('echo', False)
+            result = f(*args, **kwargs)
+
+            if echo is True:
+                sys.stdout.write(result.output)
+            return result
+        return wrapper
+    class_.invoke = invoke_wrapper(class_.invoke)
+    cli_runner = class_()
+    yield cli_runner
+
+
+@pytest.fixture
+def recipe(recipe_yml):
+    from pyorc.cli import cli_utils
+    return cli_utils.parse_recipe("a", "b", recipe_yml)
+
+
+@pytest.fixture
+def velocity_flow_processor(recipe, vid_file, cam_config_fn, cli_prefix, cli_output_dir):
+    return pyorc.service.VelocityFlowProcessor(
+        recipe,
+        vid_file,
+        cam_config_fn,
+        cli_prefix,
+        cli_output_dir
+    )

@@ -6,7 +6,7 @@
 API reference
 =============
 
-**pyorc**'s consists of several subclasses of the ``xarray.Dataset`` and ``xarray.DataArray`` data models.
+**pyorc**'s API consists of several subclasses of the ``xarray.Dataset`` and ``xarray.DataArray`` data models.
 In a nutshell, xarray_'s data models are meant to store and analyze scientific datasets with multiple
 dimensions. A ``xarray.DataArray`` contains one variable with possibly several dimensions and coordinates
 within those dimensions. A ``xarray.Dataset`` may contain multiple ``xarray.DataArray`` objects, with shared 
@@ -160,6 +160,7 @@ Visualizing frames
 
     Frames.plot
     Frames.to_ani
+    Frames.to_video
 
 .. _velocimetry:
 
@@ -179,10 +180,12 @@ Class and properties
     Velocimetry.camera_shape
     Velocimetry.h_a
 
+.. _masks:
+
 Temporal masking methods
 ------------------------
 
-The mask methods below either require or may have a dimension "time" in the data. Therefore they are most logically
+The mask methods below either require or may have a dimension ``time`` in the data. Therefore they are most logically
 applied before doing any reducing over time.
 
 .. autosummary::
@@ -197,11 +200,13 @@ applied before doing any reducing over time.
     Velocimetry.mask.variance
     Velocimetry.mask.count
 
+.. _spatial_mask:
+
 Spatial masking methods
 -----------------------
 
-The spatial masking methods below only work on time reduced grid. First apply a time reducer so that there is no
-time axis in the data anymore, before applying these. Not doing so will return a clear error message.
+The spatial masking methods look at a time reduced representation of the grid results. The resulting mask can be applied
+on a full time series and will then mask out grid cells over its full time span if these do not pass the mask.
 
 .. autosummary::
     :toctree: _generated
@@ -217,6 +222,8 @@ Data infilling
     :toctree: _generated
 
     Velocimetry.replace_outliers
+
+.. _transects:
 
 Getting data over transects
 ---------------------------
@@ -267,6 +274,8 @@ Derivatives
 
     Transect.vector_to_scalar
     Transect.get_xyz_perspective
+
+.. _river_flow:
 
 River flow methods
 ------------------

@@ -12,7 +12,7 @@ with open("README.md") as readme_file:
 setup(
     name="pyopenrivercam",
     description="pyopenrivercam (pyorc) is a front and backend to control river camera observation locations",
-    version="0.3.4",
+    version="0.4.0",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
     url="https://github.com/localdevices/pyorc",
@@ -21,8 +21,9 @@ setup(
     packages=find_packages(),
     package_dir={"pyorc": "pyorc"},
     test_suite="tests",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
+        "click",
         "cython; platform_machine == 'armv7l'",
         "dask",
         "descartes",
@@ -41,16 +42,21 @@ setup(
         "scipy",
         "shapely",
         "tqdm",
+        "typeguard",
         "xarray",
+        "yaml"
     ],
     extras_require={
         "dev": ["pytest", "pytest-cov"],
         "optional": [],
     },
-    # entry_points="""
-    # """,
+    entry_points={
+        "console_scripts": [
+            "pyorc = pyorc.cli.main:cli"
+        ]
+    },
     include_package_data=True,
-    license="GPLv3",
+    license="AGPLv3",
     zip_safe=False,
     classifiers=[
         # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -59,7 +65,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Hydrology",
         "Topic :: Scientific/Engineering :: Image Processing",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

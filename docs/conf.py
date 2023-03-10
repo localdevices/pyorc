@@ -37,7 +37,7 @@ os.makedirs("_examples/ngwerere")
 copy_tree("../examples/ngwerere", "_examples/ngwerere")
 copy_tree("../examples/camera_calib", "_examples/camera_calib")
 
-# # copy specific notebooks to include in build
+# copy specific notebooks to include in build
 shutil.copy("../examples/01_Camera_Configuration_single_video.ipynb", "_examples")
 #
 # Notebook 02 requires considerable rendering time. Therefore it is not executed unless a final build is done
@@ -49,7 +49,7 @@ shutil.copy("../examples/05_Camera_calibration.ipynb", "_examples")
 # -- Project information -----------------------------------------------------
 
 project = 'pyorc'
-copyright = '2022, Rainbow Sensing'
+copyright = '2023, Rainbow Sensing'
 author = 'Hessel Winsemius'
 
 # The full version, including alpha/beta/rc tags
@@ -70,7 +70,8 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
     "sphinxcontrib.programoutput",
-    "sphinx_autosummary_accessors"
+    "sphinx_autosummary_accessors",
+    "sphinx_design"
 ]
 autosummary_generate = True
 nbsphinx_allow_errors = True
@@ -93,18 +94,21 @@ html_theme = 'pydata_sphinx_theme'
 autodoc_member_order = "bysource"
 autoclass_content = "both"
 
+html_static_path = ['_static']
+html_css_files = ["theme-localdevices.css"]
+
 html_theme_options = {
     "show_nav_level": 2,
     "navbar_align": "content",
     # "use_edit_page_button": True,
-    # "icon_links": [
-    #     {
-    #         "name": "Rainbow Sensing",
-    #         "url": "https://...",
-    #         "icon": "_static/....svg",
-    #         "type": "local",
-    #     },
-    # ],
+    "icon_links": [
+        {
+            "name": "Local Devices",
+            "url": "https://localdevices.org",
+            "icon": "_static/logo.svg",
+            "type": "local",
+        },
+    ],
 }
 
 html_context = {
@@ -121,5 +125,4 @@ remove_from_toctrees = ["_generated/*", "_build/doctrees/*"]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_images']
 print(sys.path)

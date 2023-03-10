@@ -346,6 +346,16 @@ class Frames(ORCBase):
             keep_attrs=True
         )
 
+    def minmax(self, min=-np.Inf, max=np.Inf):
+        return np.maximum(
+            np.minimum(
+                self._obj,
+                max
+            ),
+            min
+        )
+
+
     def reduce_rolling(self, samples=25):
         """Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use
         Frames.normalize).
