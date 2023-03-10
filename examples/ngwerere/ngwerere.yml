@@ -73,15 +73,14 @@ plot:
     transect:
       transect_1:
         cmap: rainbow
-        add_colorbar: True
-        scale: 100
+        scale: 200
         width: 0.003
         vmin: 0
         vmax: 0.6
       transect_2:
         cmap: rainbow
         add_colorbar: True
-        scale: 100
+        scale: 200
         width: 0.003
         vmin: 0
         vmax: 0.6

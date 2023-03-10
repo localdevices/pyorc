@@ -1,15 +1,16 @@
 import click
 import geopandas as gpd
+import hashlib
 import json
 import logging
 import matplotlib.pyplot as plt
 import os
 import pyorc
-from shapely.geometry import Point
 import yaml
 
 from pyorc import Video, helpers, CameraConfig
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect
+from shapely.geometry import Point
 
 
 def get_corners_interactive(fn, gcps, crs=None, frame_sample=0., logger=logging):
@@ -40,6 +41,17 @@ def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0., logg
     # uncomment below to test the interaction, not suitable for automated unit test
     plt.show(block=True)
     return selector.src
+
+
+def get_file_hash(fn):
+    hash256 = hashlib.sha256()
+    with open(fn, "rb") as f:
+        # Read and update hash string value in blocks of 4K
+        for byte_block in iter(lambda: f.read(4096), b""):
+            # print(byte_block)
+            hash256.update(byte_block)
+    return hash256
+
 
 def parse_json(ctx, param, value):
     if value is None:

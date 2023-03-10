@@ -47,15 +47,16 @@ def vmin_vmax_to_norm(opts):
         opts["norm"] = norm
     return opts
 
-def apply_methods(obj, subclass, logger=logger, **kwargs):
+def apply_methods(obj, subclass, logger=logger, skip_args=[], **kwargs):
     for m, _kwargs in kwargs.items():
-        # get the subclass with the expected methods
-        cls = getattr(obj, subclass)
-        if not(hasattr(cls, m)):
-            raise ValueError(f'Method "{m}" for {subclass} does not exist, please check your recipe')
-        logger.debug(f"Applying {m} on {subclass} with parameters {_kwargs}")
-        meth = getattr(cls, m)
-        obj = meth(**_kwargs)
+        if m not in skip_args:
+            # get the subclass with the expected methods
+            cls = getattr(obj, subclass)
+            if not(hasattr(cls, m)):
+                raise ValueError(f'Method "{m}" for {subclass} does not exist, please check your recipe')
+            logger.debug(f"Applying {m} on {subclass} with parameters {_kwargs}")
+            meth = getattr(cls, m)
+            obj = meth(**_kwargs)
 
     return obj
 
@@ -70,8 +71,14 @@ def get_masks(obj, **mask_methods):
     return masks
 
 
-
-def run_func_hash_io(attrs=[], inputs=[], outputs=[], check=False):
+def run_func_hash_io(
+        attrs=[],
+        inputs=[],
+        configs=[],
+        outputs=[],
+        write_path=".pyorc",
+        check=False,
+):
     """
     wrapper function that checks if inputs to function have changed and or output is present or not.
     Runs function if either output is not present or input has changed. If check is False then simply passes everything
@@ -79,29 +86,76 @@ def run_func_hash_io(attrs=[], inputs=[], outputs=[], check=False):
     def decorator_func(processor_func):
         @functools.wraps(processor_func)
         def wrapper_func(ref, *args, **kwargs):
+            func_name = processor_func.__name__
+            # set output path for state files
+            path_out = os.path.join(ref.output, write_path)
+            if not(os.path.isdir(path_out)):
+                os.makedirs(path_out)
             # default, assume running will take place
             run = True
             if check and ref.update:
-                for attr, output in zip(attrs, outputs):
-                    fn = getattr(ref, output)
-                    if os.path.isfile(fn):
-                        # TODO: also check if inputs have changed, and if not, run=False
-                        run = False
-                        break
+                run = False  # assume you don't run unless at least one thing changed
+                # start with config checks
+                fn_recipe = os.path.join(path_out, f"{ref.prefix}{func_name}.yml")
+                if not (os.path.isfile(fn_recipe)):
+                    run = True
+                else:
+                    recipe_part = {c: ref.recipe[c] for c in configs}
+                    with open(fn_recipe, "r") as f:
+                        cfg_ancient = f.read()
+                    cfg = yaml.dump(recipe_part, default_flow_style=False, sort_keys=False)
+                    if cfg != cfg_ancient:
+                        # config has changed
+                        ref.logger.debug(f'Configuration of "{func_name}" has changed, requiring rerun')
+                        run = True
+                if not(run):
+                    # if configs are not changed, then go to the file integrity checks
+                    for i in inputs + outputs:
+                        fn = getattr(ref, i)
+                        fn_hash = os.path.join(path_out, f"{os.path.basename(getattr(ref, i))}.hash")
+                        if not(os.path.isfile(fn)):
+                            run = True
+                            break
+                        else:
+                            # also check if hash file exists
+                            if not(os.path.isfile(fn_hash)):
+                                run = True
+                                break
+                            else:
+                                hash256 = cli_utils.get_file_hash(fn)
+                                with open(fn_hash, "r") as f:
+                                    hash256_ancient = f.read()
+                                if hash256.hexdigest() != hash256_ancient:
+                                    ref.logger.debug(f"File integrity of {fn} has changed, requiring rerun of {func_name}")
+                                    run = True
+                                    break
             if run:
                 # apply the wrapped processor function
                 ref.logger.info(
-                    f"Running {processor_func.__name__}")
+                    f"Running {func_name}")
                 processor_func(ref, *args, **kwargs)
+                # after run, store configuration file and hashes of in- and outputs
+                fn_recipe = os.path.join(path_out, f"{ref.prefix}{func_name}.yml")
+                recipe_part = {c: ref.recipe[c] for c in configs}
+                with open(fn_recipe, "w") as f:
+                    yaml.dump(recipe_part, f, default_flow_style=False, sort_keys=False)
+                # after run, store input and output hashes
+                for i in inputs + outputs:
+                    fn_hash = os.path.join(path_out, f"{os.path.basename(getattr(ref, i))}.hash")
+                    # get hash
+                    hash256 = cli_utils.get_file_hash(getattr(ref, i))
+                    # print(hash256.hexdigest())
+                    with open(fn_hash, "w") as f:
+                        f.write(hash256.hexdigest())
             else:
+                ref.logger.info(f'Configuration, dependencies, input and output files for section "{func_name}" have not changed since last run, skipping...')
                 for attr, output in zip(attrs, outputs):
                     if attr is not None:
                         fn = getattr(ref, output)
-                        ref.logger.info(f"Results for {processor_func.__name__} already available, reading from {os.path.abspath(fn)}")
+                        ref.logger.info(f'Results for section "{func_name}" already available, reading from {os.path.abspath(fn)}')
                         setattr(ref, attr, xr.open_dataset(fn))
         return wrapper_func
     return decorator_func
-
 
 
 class VelocityFlowProcessor(object):
@@ -115,6 +169,7 @@ class VelocityFlowProcessor(object):
             recipe: Dict,
             videofile: str,
             cameraconfig: str,
+            prefix: str,
             output: str,
             update: bool=False,
             fn_piv="piv.nc",
@@ -133,6 +188,8 @@ class VelocityFlowProcessor(object):
             path to video
         cameraconfig : str
             path to camera config file
+        prefix : str
+            prefix of produced output files
         output : str
             path to output file
         update : bool, optional
@@ -142,9 +199,12 @@ class VelocityFlowProcessor(object):
         self.update = update  # set to True when checks are needed if data already exists or not
         self.recipe = recipe
         self.output = output
-        self.fn_piv = os.path.join(self.output, fn_piv)
-        self.fn_piv_mask = os.path.join(self.output, fn_piv_mask) if "mask" in recipe else self.fn_piv
-        self.fn_transect_template = os.path.join(self.output, fn_transect_template).format if "transect" in recipe else None
+        self.prefix = prefix
+        self.fn_piv = os.path.join(self.output, prefix + fn_piv)
+        self.fn_piv_mask = os.path.join(self.output, prefix + fn_piv_mask) if "mask" in recipe else self.fn_piv
+        self.fn_transect_template = os.path.join(self.output, prefix + fn_transect_template).format if "transect" in recipe else None
+        if self.fn_transect_template is not None:
+            self.fn_transects = [self.fn_transect_template(t) for t in recipe["transect"]]
         self.read = True
         self.write = False
         self.fn_video = videofile
@@ -154,6 +214,7 @@ class VelocityFlowProcessor(object):
         # self.get_status()
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
+
     @property
     def output(self):
         return self._output
@@ -276,12 +337,18 @@ class VelocityFlowProcessor(object):
             self.da_frames,
             "frames",
             logger=self.logger,
+            skip_args=["to_video"],
             **kwargs
         )
+        if "to_video" in kwargs:
+            kwargs_video = kwargs["to_video"]
+            self.logger.info(f"Writing video of processed frames to {kwargs_video['fn']}")
+            self.da_frames.frames.to_video(**kwargs_video)
+
         self.logger.info(f'Frames are preprocessed')
 
 
-    @run_func_hash_io(attrs=["velocimetry_obj"], check=True, inputs=[], outputs=["fn_piv"])
+    @run_func_hash_io(attrs=["velocimetry_obj"], check=True, inputs=["fn_video"], configs=["video", "frames", "velocimetry"], outputs=["fn_piv"])
     def velocimetry(self, method="get_piv", write=False, **kwargs):
         if len(kwargs) > 1:
             raise OverflowError(f"Too many arguments under velocimetry, only one allowed, but {len(kwargs)} given.")
@@ -301,12 +368,12 @@ class VelocityFlowProcessor(object):
             self.velocimetry_obj = xr.open_dataset(self.fn_piv)
 
 
-    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=[], outputs=["fn_piv_mask"])
+    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=["fn_piv"], outputs=["fn_piv_mask"])
     def mask(self, write=False, **kwargs):
         # TODO go through several masking groups
         self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
         for mask_name, mask_grp in kwargs.items():
-            self.logger.debug(f"Applying {mask_name} with parameters {mask_grp}")
+            self.logger.debug(f'Applying "{mask_name}" with parameters {mask_grp}')
             masks = get_masks(self.velocimetry_mask_obj, **mask_grp)
             # apply found masks on velocimetry object
             self.velocimetry_mask_obj.velocimetry.mask(masks, inplace=True)
@@ -320,10 +387,13 @@ class VelocityFlowProcessor(object):
                 delayed_obj.compute()
 
 
+    @run_func_hash_io(check=False, configs=["transect"], inputs=["fn_piv_mask"])
     def transect(self, write=False, **kwargs):
         self.transects = {}
-        for transect_name, transect_grp in kwargs.items():
-            self.logger.debug(f"Processing {transect_name}")
+        # keep integrity of original kwargs
+        _kwargs = copy.deepcopy(kwargs)
+        for transect_name, transect_grp in _kwargs.items():
+            self.logger.debug(f'Processing transect "{transect_name}"')
             if not "shapefile" in transect_grp:
                 raise click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile". Please add "shapefile" in the recipe file')
             # read shapefile
@@ -372,9 +442,12 @@ class VelocityFlowProcessor(object):
                 self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
 
 
+    @run_func_hash_io(check=True, configs=["video", "frames", "velocimetry", "transect", "plot"], inputs=["fn_video", "fn_piv_mask"], outputs=[])
     def plot(self, **plot_recipes):
-        for name, plot_params in plot_recipes.items():
-            fn_jpg = os.path.join(self.output, name + ".jpg")
+        _plot_recipes = copy.deepcopy(plot_recipes)
+        for name, plot_params in _plot_recipes.items():
+            self.logger.debug(f'Processing plot "{name}"')
+            fn_jpg = os.path.join(self.output, self.prefix + name + ".jpg")
             mode = plot_params["mode"]
             ax = None
             # look for inputs
@@ -395,19 +468,6 @@ class VelocityFlowProcessor(object):
             if "velocimetry" in plot_params:
                 opts = plot_params["velocimetry"]
                 opts = vmin_vmax_to_norm(opts)
-                # if "vmin" in opts or "vmax" in opts:
-                #     if "vmin" in opts:
-                #         vmin = opts["vmin"]
-                #         del opts["vmin"]
-                #     else:
-                #         vmin = None
-                #     if "vmax" in opts:
-                #         vmax = opts["vmax"]
-                #         del opts["vmax"]
-                #     else:
-                #         vmax = None
-                #     norm = Normalize(vmin=vmin, vmax=vmax)
-                #     opts["norm"] = norm
                 # select the time reducer. If not defined, choose mean
                 reducer = plot_params["reducer"] if "reducer" in plot_params else "mean"
                 reducer_params = plot_params["reducer_params"] if "reducer_params" in plot_params else {}
@@ -434,8 +494,10 @@ class VelocityFlowProcessor(object):
                     # add to plot
                     p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
                     ax = p.axes
-            if mode == "camera":
-                ax.axis("equal")
+            # if mode == "camera":
+            #     ax.axis("equal")
             write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
+            self.logger.debug(f'Writing plot "{name}" to {fn_jpg}')
             ax.figure.savefig(fn_jpg, **write_pars)
+            self.logger.info(f'Plot "{name}" written to {fn_jpg}')
 
