@@ -4,15 +4,11 @@
 User Guide
 ==========
 
-.. note::
-
-   This manual is a work in progress.
-
 *pyorc* processes a video, taken with a smartphone, drone or other camera into surface velocities and river flow
 estimates. It can do so either through a Command Line Interface or an Application Programming Interface (API).
 The entire process, including stabilization, preprocessing, velocity estimation,
 filtering of spurious velocities, deriving transect velocities and river flow estimation is supported. This user guide
-provides a full understanding of the approach to analyze videos into surface velocities, transects and river flow
+aims to provide a full understanding of the approach to analyze videos into surface velocities, transects and river flow
 estimates. It is intended for both command-line users, and programmers that like to use the API.
 The command-line interface can:
 
@@ -37,13 +33,17 @@ Why is *pyorc* attractive to use?
 Solid data model
 ----------------
 We rely on *xarray* for data models. *xarray* provides access and intelligent dimensional computations over
-multi-dimensional datasets with coordinate systems that can relate to time, space or other logical dimensions.
+multi-dimensional datasets with coordinate systems that can relate to time, space or other logical dimensions. If you
+only use the command-line interface, then you don't have to wrory about this at all, it just means that you can expect
+*pyorc* to be easy to maintain for us, easy to extend to exports to other formats you may desire, and therefore used
+for a long and sustainable period of time.
 
 Lazy computations
 -----------------
-The main idea of *pyorc* is that all computations are performed lazily, meaning that as a user, you can first setup and
-investigate the entire pipeline of computations, and only at the moment when you request actual numbers from the
-pipeline, will *pyorc* perform computations. And then only those strictly needed to provide you the number(s) you want.
+The main idea of *pyorc* is that all computations are performed lazily, meaning that as a programmer (again, are you
+using the command-line only, then just don't worry about this at all), you can first setup and investigate the entire
+pipeline of computations, and only at the moment when you request actual numbers from the pipeline, will *pyorc*
+perform computations. And then only those strictly needed to provide you the number(s) you want.
 This makes any intermediate saves of results to files unnecessary and makes it much easier to test if your pipeline
 makes sense before you do any computations.
 
@@ -54,9 +54,9 @@ code is entirely open-source. You can therefore:
 
 * always access our latest code and use it within python
 * make your own application around *pyorc*. Think of a geospatial front end, a time series database management system
-  or other
+  or other app.
 * we can introduce the latest science in our code. As we continuously develop, new methods will appear in our code which
-  you can immediately use. No license costs!
+  you can immediately use. No license costs and full access to the code always!
 
 This user guide
 ---------------
@@ -90,8 +90,8 @@ river flow over a transect.
     Command-line Interface <cli>
     Application Programming Interface <api>
     Camera configurations <camera_config/index>
-    Videos <video>
+    Videos <video/index>
     Frames <frames/index>
     Velocimetry <velocimetry/index>
-    Transects <transect>
-    Plotting <plot>
+    Transects <transect/index>
+    Plotting <plot/index>

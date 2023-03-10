@@ -6,7 +6,7 @@
 API reference
 =============
 
-**pyorc**'s consists of several subclasses of the ``xarray.Dataset`` and ``xarray.DataArray`` data models.
+**pyorc**'s API consists of several subclasses of the ``xarray.Dataset`` and ``xarray.DataArray`` data models.
 In a nutshell, xarray_'s data models are meant to store and analyze scientific datasets with multiple
 dimensions. A ``xarray.DataArray`` contains one variable with possibly several dimensions and coordinates
 within those dimensions. A ``xarray.Dataset`` may contain multiple ``xarray.DataArray`` objects, with shared 

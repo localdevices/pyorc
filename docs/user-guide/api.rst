@@ -21,3 +21,8 @@ accessed as follows (with an example for normalization of frames to reduce backg
 
 You can see that ``da_frames.frames`` directs to the ``.frames`` functionality of *pyorc*. You will see similar
 principles for velocimetry and transect results throughout this manual.
+
+If you are a programmer, then we highly recommend to look at the following pages:
+
+* :ref:`Quick start for programmers <quickstart>` which contains full working examples to start programming
+* :ref:`API reference <api>`

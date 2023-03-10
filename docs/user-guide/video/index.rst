@@ -248,11 +248,11 @@ can be distinguished from much smaller (larger) movements in the fixed (moving) 
                 da_frames = video.get_frames()[0:30]
                 # do the rest of your work
 
-.. |videostab| image:: ../_images/video_stable.gif
+.. |videostab| image:: ../../_images/video_stable.gif
    :scale: 80%
    :align: middle
 
-.. |videounstab| image:: ../_images/video_unstable.gif
+.. |videounstab| image:: ../../_images/video_unstable.gif
    :scale: 80%
    :align: middle
 

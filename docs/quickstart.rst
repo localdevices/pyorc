@@ -1,11 +1,12 @@
 .. _quickstart:
 
-===========
-Quick start
-===========
+===========================
+Quick start for programmers
+===========================
 
 The best start for *pyorc* is to go through a number of examples that demonstrate how to move from a video
-and some field work to estimates of surface velocity and discharge, and insightful plots.
+and some field work to estimates of surface velocity and discharge, and insightful plots. If you are not a programmer
+then please look at the :ref:`User Guide <manual>` for further information.
 
 .. tip::
 
@@ -17,14 +18,12 @@ and some field work to estimates of surface velocity and discharge, and insightf
             <a href="https://mybinder.org/v2/gh/localdevices/pyorc.git/main?labpath=examples{{ docname|e }}" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
         </div>
 
-
 .. _examples:
 
 List of examples
 ================
 
 For a static (non-interactive) view of the examples follow one of the links below:
-
 
 * `Setting up a camera configuration <_examples/01_Camera_Configuration_single_video.ipynb>`_
 * `Analyze surface velocity with Particle Image Velocimetry <_examples/02_Process_velocimetry.ipynb>`_

@@ -1,0 +1,26 @@
+...
+...
+
+plot:
+  plot_quiver:
+    frames:
+    velocimetry:
+      alpha: 0.4
+      cmap: rainbow
+      scale: 400
+      width: 0.0015
+      vmax: 0.6
+    transect:
+      transect_1:
+        cmap: rainbow
+        add_colorbar: True
+        scale: 100
+        width: 0.003
+        vmin: 0
+        vmax: 0.6
+    mode: camera
+    reducer: mean
+    write_pars:
+      dpi: 100
+      bbox_inches: tight
+

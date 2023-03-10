@@ -1,4 +1,4 @@
-.. _camera_config_cli_gcps:
+.. _camera_config_api_gcps:
 
 The ground control points are a simple python dictionary that should follow a certain schema. The schema looks as
 follows:

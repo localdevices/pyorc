@@ -360,22 +360,15 @@ used for processing videos into velocimetry.
             # load the configuration back in memory
             cam_config2 = pyorc.load_camera_config("ngwerere_cam_config.json")
 
-
-        CameraConfig properties and other methods
-        -----------------------------------------
         When a full camera configuration is available, you can access and inspect several properties and access a few other
         methods that may be useful if you wish to program around the API. We refer to the :ref:`API documentation <cameraconfig>`.
 
-        CameraConfig plots
-        ------------------
         We highly recommend to first inspect your camera configuration graphically, before doing any further work with it.
         Examples have already been shown throughout this manual, but you can also plot your own camera configurations, either
         in planar view, or in the original camera FOV. For this the ``plot`` method has been developed. This method can
         always be applied on an existing matplotlib axes object, by supplying the ``ax`` keyword and referring the the axes
         object you wish to use.
 
-        Planar plotting
-        ~~~~~~~~~~~~~~~
         Planar plotting is done by default. The most simple approach is:
 
         .. code-block:: python
@@ -395,10 +388,6 @@ used for processing videos into velocimetry.
         .. code-block:: python
 
             cam_config.plot(tiles="GoogleTiles", tiles_kwargs=dict(style="satellite"))
-
-
-        Plotting in camera FOV
-        ~~~~~~~~~~~~~~~~~~~~~~
 
         To plot in the camera FOV, simply set ``camera=True``.
 

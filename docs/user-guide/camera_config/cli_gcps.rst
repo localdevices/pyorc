@@ -41,7 +41,7 @@ problems with shapefiles that contain wrong or incomplete information so that yo
 
     If you use a RTK GNSS, a typical output is a shapefile containing points, a CRS and geometries with x, y and z
     coordinates. If your output file contains more points than your control points, then first edit the file in a
-    GIS program such as QGIS_ and delete any points that do not belong to ground control points.
+    GIS program such as |qgis| and delete any points that do not belong to ground control points.
 
 Similarly, the information contained in ``--src`` may also be very cumbersome to collect. In fact, you need to open up
 a frame in a photo editor and note down rows and columns to do so. Therefore a much more and highly recommended
@@ -62,4 +62,6 @@ configuration.
     see the control points. In this case, we highly recommend to use the zoom and pan functionality on the top bar of
     the interactive view. The Home button will bring you back to the original view.
 
+.. |qgis| raw:: html
 
+   <a href="https://qgis.org/" target="_blank">QGIS</a>

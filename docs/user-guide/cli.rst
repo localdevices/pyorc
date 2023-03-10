@@ -50,14 +50,20 @@ your video.
 
 The processing steps that this command goes through are:
 
-  * Preprocessing frames to e.g. enhance or sharpen patterns on the water that may be traceable.
-  * Reproject the frames to a coordinate system (i.e. as if you are looking at the stream from above with known distances
-    between pixels).
-  * estimate surface velocity between groups of pixels.
-  * mask out spurious velocities (can also be left out, if tracers are very prominent).
-  * extract velocities over one or more transects and estimate river flow (only if you are interested in this).
-  * make plots of frames, velocities and transects in the camera perspective, geographical perspective or local
-    projection.
+* Preprocessing frames to e.g. enhance or sharpen patterns on the water that may be traceable.
+* Reproject the frames to a coordinate system (i.e. as if you are looking at the stream from above with known distances
+  between pixels).
+* estimate surface velocity between groups of pixels.
+* mask out spurious velocities (can also be left out, if tracers are very prominent).
+* extract velocities over one or more transects and estimate river flow (only if you are interested in this).
+* make plots of frames, velocities and transects in the camera perspective, geographical perspective or local
+  projection.
+
+With the ``-u`` or ``--update`` flag, you can indicate that you only want to process those parts of your recipe that
+you have modified. With this option *pyorc* will check if *any* of your inputs and outputs (including the recipe
+components, the input files and output files) have changed or require reprocessing because they were (re)moved. If this
+is not the case then that step will be skipped. This is ideal for instance in case you only changed a plot setup or
+masking step. The velocimetry part (which is time consuming) will then be skipped entirely.
 
 The recipe file provided with ``-r`` is a so-called Yaml formatted file (extension .yml). This is a text file with
 a specific format that defines exactly what steps are being performed, and how the steps are to be performed. For
@@ -79,35 +85,35 @@ To give a first sense of a recipe, an example recipe file (also used in our exam
 
 If you are not used to .yml files, this may seem a little bit abstract. A few rules and hints are explained below.
 
-  * A Yaml file is a text file without any formatting. Hence you may not edit it in Word or other word processors. You
-    need to use a raw text editor to modify these. A recommended text editor for windows is notepad++_ which you can
-    freely download and install. Set it up as default editor for files with the extension ``.yml`` in Windows Explorer
-    by right clicking on a ``.yml`` file in Windows Explorer and
-  * A .yaml file consists of sections. Each section can have one or multiple sub-sections. And below each subsection
-    you may define another set of sub-sections below that. This is very similar to numbering of report or book chapters
-    with headings and subheadings, like Chapter 1, section 1.1, subsection 1.1.1, 1.1.2, 1.1.3. A section that has
-    subsections is defined with a name and double colon ``:``, e.g. ``video:```. Subsections are defined by providing
-    indented text below the section. You can also end these with ``:`` and then define subsections under that with a
-    deeper indentation level.
-  * For indentation, you can either use the <TAB> button on your keyboard, or for instance two spaces to
-    indent. Both is ok, but ensure you are very consistent with the indentation level. For instance, first indenting
-    with two spaces and then with a <TAB> will give an error.
-  * Anywhere in the file, you can add comments, by typing ``#``. Any text right of the ``#`` will be interpreted as a
-    comment. This is very useful to annotate the files and explain choices made in the file, either for yourself for
-    later reference, to distinguish different experiments or make a colleague aware of your choices and reasoning.
-  * In *pyorc* each main section has a specific name that relates to a larger processing steps. The steps that you can
-    go through are ``video``, ``frames``, ``velocimetry``, ``mask``, ``transect`` and ``plot``. Any other sections you
-    would provide would simply be skipped, so carefully check your spelling if anything seems to be not working.
-  * The options you may provide under each section, are (of course) different per section.
+* A Yaml file is a text file without any formatting. Hence you may not edit it in Word or other word processors. You
+  need to use a raw text editor to modify these. A recommended text editor for windows is notepad++_ which you can
+  freely download and install. Set it up as default editor for files with the extension ``.yml`` in Windows Explorer
+  by right clicking on a ``.yml`` file in Windows Explorer and
+* A .yaml file consists of sections. Each section can have one or multiple sub-sections. And below each subsection
+  you may define another set of sub-sections below that. This is very similar to numbering of report or book chapters
+  with headings and subheadings, like Chapter 1, section 1.1, subsection 1.1.1, 1.1.2, 1.1.3. A section that has
+  subsections is defined with a name and double colon ``:``, e.g. ``video:```. Subsections are defined by providing
+  indented text below the section. You can also end these with ``:`` and then define subsections under that with a
+  deeper indentation level.
+* For indentation, you can either use the <TAB> button on your keyboard, or for instance two spaces to
+  indent. Both is ok, but ensure you are very consistent with the indentation level. For instance, first indenting
+  with two spaces and then with a <TAB> will give an error.
+* Anywhere in the file, you can add comments, by typing ``#``. Any text right of the ``#`` will be interpreted as a
+  comment. This is very useful to annotate the files and explain choices made in the file, either for yourself for
+  later reference, to distinguish different experiments or make a colleague aware of your choices and reasoning.
+* In *pyorc* each main section has a specific name that relates to a larger processing steps. The steps that you can
+  go through are ``video``, ``frames``, ``velocimetry``, ``mask``, ``transect`` and ``plot``. Any other sections you
+  would provide would simply be skipped, so carefully check your spelling if anything seems to be not working.
+* The options you may provide under each section, are (of course) different per section.
 
 The details on the different steps and what you may configure are described in all other chapters of this User Guide.
 For quick reference you can use the links below:
 
- * How to select start and end frame of the video to work with: :ref:`video_ug`
- * Working with frames, preprocessing and reprojection: :ref:`frames_ug`
- * Estimate surface velocity and masking: :ref:`velocimetry_ug`
- * Extract velocities over transects: :ref:`transect_ug`
- * Plotting frames, velocities and transects: :ref:`plot_ug`
+* How to select start and end frame of the video to work with: :ref:`video_ug`
+* Working with frames, preprocessing and reprojection: :ref:`frames_ug`
+* Estimate surface velocity and masking: :ref:`velocimetry_ug`
+* Extract velocities over transects: :ref:`transect_ug`
+* Plotting frames, velocities and transects: :ref:`plot_ug`
 
 .. _yaml: https://yaml.com/
 .. _notepad++: https://notepad++.com/
