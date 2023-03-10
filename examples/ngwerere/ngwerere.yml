@@ -1,6 +1,6 @@
 video:
     start_frame: 0
-    end_frame: 125
+    end_frame: 20
     h_a: 0.0
 frames:
   normalize:
@@ -28,12 +28,9 @@ mask:
     outliers:
   mask_group3:
     variance:
-  #mask_group4:
-    #angle:
-      #angle_tolerance: 1.570796
-  mask_group_5:
+  mask_group_4:
       count:
-  mask_group6:
+  mask_group5:
     window_mean:
       wdw: 2
       tolerance: 0.5

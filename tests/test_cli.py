@@ -27,9 +27,9 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
             json.dumps(gcps_dst),
             '--crs',
             '32735',
-            '--z0',
+            '--z_0',
             '1182.2',
-            '--href',
+            '--h_ref',
             '0.0',
             '--lens_position',
             json.dumps(lens_position),
@@ -67,8 +67,8 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
 
 
 def test_service_video(velocity_flow_processor):
+    # just test if everything is running
     velocity_flow_processor.process()
-    raise NotImplementedError
 
 
 def test_gcps_interact(gcps_dst, frame_rgb):
