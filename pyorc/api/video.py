@@ -91,6 +91,7 @@ Camera configuration: {:s}
                     "reprojection. You must supply z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
         cap = cv2.VideoCapture(fn)
+        cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 180.0)
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         # explicitly open file for reading
@@ -131,6 +132,7 @@ Camera configuration: {:s}
             self._get_ms()
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
+        self.rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
         # set other properties
         self.h_a = h_a
         # make camera config part of the vidoe object
@@ -264,6 +266,24 @@ Camera configuration: {:s}
     def corners(self, corners):
         self._corners = corners
 
+
+    @property
+    def rotation(self):
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, rotation_code):
+        """
+        Solves a likely bug in OpenCV (4.6.0) that straight up videos rotate in the wrong direction. Tested for both
+        90 degree and 270 degrees rotation videos on several smartphone (iPhone and Android)
+        """
+        if rotation_code in [90, 270]:
+            self._rotation = cv2.ROTATE_180
+        else:
+            self._rotation = None
+
+
+
     def get_frame(self, n, method="grayscale", lens_corr=False):
         """
         Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
@@ -280,6 +300,8 @@ Camera configuration: {:s}
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
         try:
             ret, img = cap.read()
+            if self.rotation is not None:
+                img = cv2.rotate(img, self.rotation)
         except:
             raise IOError(f"Cannot read")
         if ret:
