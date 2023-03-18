@@ -100,7 +100,7 @@ def run_func_hash_io(
                 if not (os.path.isfile(fn_recipe)):
                     run = True
                 else:
-                    recipe_part = {c: ref.recipe[c] for c in configs}
+                    recipe_part = {c: ref.recipe[c] for c in configs if c in ref.recipe}
                     with open(fn_recipe, "r") as f:
                         cfg_ancient = f.read()
                     cfg = yaml.dump(recipe_part, default_flow_style=False, sort_keys=False)
@@ -136,7 +136,7 @@ def run_func_hash_io(
                 processor_func(ref, *args, **kwargs)
                 # after run, store configuration file and hashes of in- and outputs
                 fn_recipe = os.path.join(path_out, f"{ref.prefix}{func_name}.yml")
-                recipe_part = {c: ref.recipe[c] for c in configs}
+                recipe_part = {c: ref.recipe[c] for c in configs if c in ref.recipe}
                 with open(fn_recipe, "w") as f:
                     yaml.dump(recipe_part, f, default_flow_style=False, sort_keys=False)
                 # after run, store input and output hashes
@@ -369,7 +369,7 @@ class VelocityFlowProcessor(object):
             self.velocimetry_obj = xr.open_dataset(self.fn_piv)
 
 
-    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=["fn_piv"], outputs=["fn_piv_mask"])
+    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=["fn_piv"], configs=["video", "frames", "velocimetry", "mask"], outputs=["fn_piv_mask"])
     def mask(self, write=False, **kwargs):
         # TODO go through several masking groups
         self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
