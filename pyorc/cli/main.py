@@ -106,7 +106,7 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     "--dst",
     type=str,
     callback=cli_utils.parse_dst,
-    help='Destination control points as list of 4 [x, y] pairs, or at least 6 [x, y, z]. If --crs_gcps is provided, --dst is assumed to be in this CRS."'
+    help='Destination control points as list of 2 or 4 [x, y] pairs, or at least 6 [x, y, z]. If --crs_gcps is provided, --dst is assumed to be in this CRS."'
 )
 @click.option(
     "--z_0",
@@ -230,6 +230,7 @@ def camera_config(
                 videofile,
                 gcps,
                 crs=crs,
+                crs_gcps=crs_gcps,
                 frame_sample=frame_sample,
                 logger=logger
             )

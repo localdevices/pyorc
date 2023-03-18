@@ -566,8 +566,11 @@ class CameraConfig:
         assert (isinstance(src, list)), f"src must be a list of (x, y) or (x, y, z) coordinates"
         assert (isinstance(dst, list)), f"dst must be a list of (x, y) or (x, y, z) coordinates"
         if np.array(dst).shape[1] == 2:
-            assert (len(src) == 4), f"4 source points are expected in src, but {len(src)} were found"
-            assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
+            assert (len(src) in [2, 4]), f"2 or 4 source points are expected in src, but {len(src)} were found"
+            if len(src) == 4:
+                assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
+            else:
+                assert (len(dst) == 2), f"2 destination points are expected in dst, but {len(dst)} were found"
         else:
             assert(len(src) == len(dst)), f"Amount of (x, y, z) coordinates in src ({len(src)}) and dst ({len(dst)} must be equal"
             assert(len(src) >= 6), f"for (x, y, z) points, at least 6 pairs must be available, only {len(src)} provided"
@@ -585,6 +588,9 @@ class CameraConfig:
                     'with a spirit level.')
             dst = helpers.xyz_transform(dst, crs, CRS.from_wkt(self.crs))
         # if there is no h_ref, then no local gauge system, so set h_ref to zero
+        # check if 2 points are available
+        if len(src) == 2:
+            src, dst = cv._get_gcps_2_4(src, dst, self.width, self.height)
         if h_ref is None:
             h_ref = 0.
         self.gcps = {
