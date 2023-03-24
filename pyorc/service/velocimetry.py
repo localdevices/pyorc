@@ -443,7 +443,7 @@ class VelocityFlowProcessor(object):
                 self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
 
 
-    @run_func_hash_io(check=True, configs=["video", "frames", "velocimetry", "transect", "plot"], inputs=["fn_video", "fn_piv_mask"], outputs=[])
+    @run_func_hash_io(check=False, configs=["video", "frames", "velocimetry", "transect", "plot"], inputs=["fn_video", "fn_piv_mask"], outputs=[])
     def plot(self, **plot_recipes):
         _plot_recipes = copy.deepcopy(plot_recipes)
         for name, plot_params in _plot_recipes.items():

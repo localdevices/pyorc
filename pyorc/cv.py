@@ -70,6 +70,23 @@ def _classify_displacements(positions, method="kmeans", q_threshold=0.8, abs_thr
     return op(test_variable, tolerance)
 
 
+def _smooth(img, stride):
+    """
+    Internal function to filter on too large differences from spatial mean
+
+    Parameters
+    ----------
+    img: image
+    stride: window edge size
+
+    Returns
+    -------
+    img
+    """
+    blur = cv2.GaussianBlur(img.astype("float32"), (stride, stride), 0)
+    return blur
+
+
 def _convert_edge(img, stride_1, stride_2):
     """
     internal function to do emphasize gradients with a band filter method, see main method
@@ -270,6 +287,43 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None, split=2, 
         prev_gray = curr_gray
         prev_pts = curr_pts
     return positions, stats, errs
+
+def _get_gcps_2_4(src, dst, img_width, img_height):
+    """
+
+    Parameters
+    ----------
+    src : list or array-like
+        source control points (list of lists)
+    dst : list or array-like
+        destination control points (list of lists)
+    img_width : width of original image frame
+    img_height : height of original image frame
+
+    Returns
+    -------
+    src : list or array-like
+        source control points (list of lists) converted to corner points
+    dst : list or array-like
+        destination control points (list of lists) converted to corner points
+    """
+    # first reverse the coordinate order of the y-axis
+    _src = [[x, img_height - y] for x, y in src]
+    # estimate affine transform (only rotation and translation)
+    M = cv2.estimateAffinePartial2D(np.array(_src), np.array(dst))
+    # complete M with a line indicating no perspective
+    M = np.array(M[0].tolist() + [[0, 0, 1]])
+    # establish corner coordinates
+    corners = [
+        [0, 0],
+        [img_width, 0],
+        [img_width, img_height],
+        [0, img_height]
+    ]
+    dst = cv2.perspectiveTransform(np.float32([corners]), M)[0].tolist()
+    # now get the corners back transformed to the real image coordinates
+    src = [[x, img_height - y] for x, y in corners]
+    return src, dst
 
 
 def _get_shape(bbox, resolution=0.01, round=1):

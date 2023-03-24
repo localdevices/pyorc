@@ -383,6 +383,32 @@ class Frames(ORCBase):
         frames_norm = frames_norm.where(roll_mean != 0, 0)
         return frames_norm
 
+
+    def time_diff(self, thres=2, abs=False):
+        frames_diff = self._obj.astype(np.float32).diff(dim="time")
+        frames_diff = frames_diff.where(np.abs(frames_diff) > thres)
+        frames_diff.attrs = self._obj.attrs
+        # frames_diff -= frames_diff.min(dim=["x", "y"])
+        frames_diff = frames_diff.fillna(0.)
+        if abs:
+            return np.abs(frames_diff)
+        return frames_diff
+
+
+    def smooth(self, wdw=1):
+        stride = wdw * 2 + 1
+        f = xr.apply_ufunc(
+            cv._smooth,
+            self._obj, stride,
+            input_core_dims=[["y", "x"], []],
+            output_core_dims=[["y", "x"]],
+            output_dtypes=[np.float32],
+            vectorize=True,
+            dask="parallelized",
+            keep_attrs=True
+        )
+        return f
+
     def to_ani(
             self,
             fn,

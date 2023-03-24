@@ -77,6 +77,7 @@ Camera configuration: {:s}
         self.feats_errs = None
         self.ms = None
         self.mask = None
+        self.stabilize = stabilize
         if camera_config is not None:
             self.camera_config = camera_config
         # if camera_config is not None:
@@ -125,9 +126,10 @@ Camera configuration: {:s}
         self.time = time
         self.frame_number = frame_number
         self.start_frame = start_frame
-        if stabilize is not None:
+        if self.stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
-            recipe = const.CLASSIFY_CAM[stabilize] if stabilize in const.CLASSIFY_CAM else []
+            print(f"STABILIZE: {self.stabilize}")
+            recipe = const.CLASSIFY_CAM[self.stabilize] if self.stabilize in const.CLASSIFY_CAM else []
             self._get_pos_feats(cap, recipe=recipe)
             self._get_ms()
 
@@ -207,6 +209,19 @@ Camera configuration: {:s}
             self._end_frame = self.frame_count - 1
         else:
             self._end_frame = min(self.frame_count - 1, end_frame)
+
+    @property
+    def stabilize(self):
+        """
+
+        :return: int, last frame considered in analysis
+        """
+        return self._stabilize
+
+    @stabilize.setter
+    def stabilize(self, stabilize=None):
+        # sometimes last frames are not read by OpenCV, hence we skip the last frame always
+        self._stabilize = stabilize
 
 
     @property
