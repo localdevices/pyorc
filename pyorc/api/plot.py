@@ -1,3 +1,4 @@
+import copy
 import functools
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,7 +40,19 @@ def _base_plot(plot_func):
 
     # apply wrapper to allow for partial update of the function, with updated docstring
     @functools.wraps(plot_func)
-    def get_plot_method(ref, mode="local", ax=None, add_colorbar=False, add_cross_section=True, kwargs_line={}, *args, **kwargs):
+    def get_plot_method(
+            ref,
+            mode="local",
+            ax=None,
+            add_colorbar=False,
+            add_cross_section=True,
+            add_text=False,
+            text_prefix="",
+            text_suffix="",
+            kwargs_line={},
+            *args,
+            **kwargs
+    ):
         """Retrieve plot method with all required inputs
 
         Parameters
@@ -56,6 +69,12 @@ def _base_plot(plot_func):
             if True, a colorbar is added to axes (default: False)
         add_cross_section : boolean, optional
             if True, and a transect is plotted, the transect coordinates are plotted (default: True)
+        add_text : boolean, optional
+            if True, add a text label in the axes displaying information about the video's transect
+        text_prefix : str, optional
+            string to add in front of standard text on transect plot. Only used if ``add_text=True``
+        text_suffix : str, optional
+            String to add after standard text on transect plot. Only used if ``add_text=True``
         kwargs_line : dict, optional
             additional keyword arguments passed to matplotlib.pyplot.plot for plotting cross-section.
             (Default value = {})
@@ -149,6 +168,9 @@ def _base_plot(plot_func):
                         ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=3, **kwargs_line)
                         ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=2, **kwargs_line)
                         ax.plot(x_bottom, y_bottom, "#0088FF", alpha=0.3, linewidth=1, **kwargs_line)
+                if add_text:
+                    plot_text(ax, ref._obj, text_prefix, text_suffix)
+
         if mode == "geographical" and not(is_transect):
             ax.set_extent(
                 [
@@ -575,6 +597,38 @@ def cbar(ax, p, size=12, **kwargs):
     cb.set_ticklabels([label_format.format(x) for x in ticks_loc], path_effects=path_effects, fontsize=size)
     cb.set_label(label="velocity [m/s]", size=size, path_effects=path_effects)
     return cb
+
+def plot_text(ax, ds, prefix, suffix):
+    if "q" not in ds:
+        return
+    _ds = copy.deepcopy(ds)
+    path_effects = [
+        patheffects.Stroke(linewidth=3, foreground="w"),
+        patheffects.Normal(),
+    ]
+    xloc = 0.95
+    yloc = 0.95
+    _ds.transect.get_river_flow(q_name="q")
+    Q = np.abs(_ds.river_flow)
+    string = prefix
+    string += "Water level: {:1.2f} m\nDischarge: {:1.2f} m3/s".format(_ds.transect.h_a, Q.values)
+    if "q_nofill" in ds:
+        _ds.transect.get_river_flow(q_name="q_nofill")
+        Q_nofill = np.abs(_ds.river_flow)
+        perc_measured = Q_nofill / Q * 100  # fraction that is truly measured compared to total
+        string += " ({:1.0f}% measured)".format(perc_measured.values)
+    # reset river flow if necessary
+    string += suffix
+    ax.text(
+        xloc,
+        yloc,
+        string,
+        size=24,
+        horizontalalignment="right",
+        verticalalignment="top",
+        path_effects=path_effects,
+        transform=ax.transAxes
+    )
 
 
 def _prepare_axes(ax=None, mode="local"):
