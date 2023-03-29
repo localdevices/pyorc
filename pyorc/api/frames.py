@@ -385,6 +385,25 @@ class Frames(ORCBase):
 
 
     def time_diff(self, thres=2, abs=False):
+        """
+        Apply a difference over time (i.e. subtract frame 1 from frame 2, frame 2 from frame 3, etcetera.
+        This method is very efficient to highlight moving objects when the video is very stable. If the video
+        is very unstable this filter may lead to very bad results.
+
+        Parameters
+        ----------
+        thres : float, optional
+            obsolute value intensity threshold to set values to zero when intensity is lower than this threshold
+            default: 2.
+        abs : boolean, optional
+            if set to True (default: False) apply absolute value on result
+
+        Returns
+        -------
+        da : xr.DataArray
+            filtered frames
+
+        """
         frames_diff = self._obj.astype(np.float32).diff(dim="time")
         frames_diff = frames_diff.where(np.abs(frames_diff) > thres)
         frames_diff.attrs = self._obj.attrs
@@ -396,6 +415,23 @@ class Frames(ORCBase):
 
 
     def smooth(self, wdw=1):
+        """
+        Smooth each frame with a Gaussian kernel.
+
+        Parameters
+        ----------
+        wdw : int, optional
+            window height or width applied. if set to 1 (default) then the total window is 3x3 (i.e. 2 * 1 + 1). When
+            set to 2, the total window is 5x5 (i.e. 2 * 2 + 1). Very effective to apply before ``Frames.time_diff``.
+            The value for ``wdw`` shouild be chosen such that the moving features of interest are not removed from
+            the view. This can be based on a visual interpretation of a result.
+
+        Returns
+        -------
+        da : xr.DataArray
+            filtered frames
+
+        """
         stride = wdw * 2 + 1
         f = xr.apply_ufunc(
             cv._smooth,

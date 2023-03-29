@@ -133,9 +133,9 @@ Enhancing frames
     :toctree: _generated
 
     Frames.edge_detect
-    Frames.landmask
     Frames.normalize
-    Frames.reduce_rolling
+    Frames.time_diff
+    Frames.smooth
 
 Projecting frames to planar views
 ---------------------------------
