@@ -1,6 +1,9 @@
+import os.path
+
 from click.testing import CliRunner
 from pyorc.cli.main import cli
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect
+from pyorc.cli import cli_utils
 from pyorc.helpers import xyz_transform
 import json
 
@@ -67,6 +70,9 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
 
 
 def test_service_video(velocity_flow_processor):
+    # ensure we are in the right folder
+    print(f"current file is: {os.path.dirname(__file__)}")
+    os.chdir(os.path.dirname(__file__))
     # just test if everything is running
     velocity_flow_processor.process()
 
@@ -98,3 +104,10 @@ def test_aoi_interact(frame_rgb, cam_config_without_aoi):
     selector = AoiSelect(frame_rgb, src, dst, cam_config_without_aoi)
     # uncomment below to test the interaction, not suitable for automated unit test
     # plt.show(block=True)
+
+# cli utils
+def test_read_shape(gcps_fn):
+    coords, wkt = cli_utils.read_shape(gcps_fn)
+    assert(isinstance(wkt, str))
+    assert(isinstance(coords, list))
+

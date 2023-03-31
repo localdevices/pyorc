@@ -210,8 +210,6 @@ class VelocityFlowProcessor(object):
         self.fn_video = videofile
         self.fn_cam_config = cameraconfig
         self.logger = logger
-        # self.set_status_fn(stat_fn)
-        # self.get_status()
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
 
@@ -254,30 +252,6 @@ class VelocityFlowProcessor(object):
     @fn_video.setter
     def fn_video(self, fn_video):
         self._fn_video = fn_video
-
-
-    def set_status_fn(self, fn):
-        """
-        Prepare expected status file, containing filenames and hashes of existing files if these are already processed
-
-        """
-        self.status_fn = os.path.join(self.output, fn)
-
-
-    def get_status(self):
-        """
-        sets status of project
-        Returns
-        -------
-
-        """
-        if os.path.isfile(self.status_fn):
-            # read file and return dict
-            with open(self.status_fn, "r") as f:
-                body = f.read()
-            self.status = yaml.load(body, Loader=yaml.FullLoader)
-        else:
-            self.status = {}
 
 
     def process(self):
