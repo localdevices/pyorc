@@ -51,6 +51,9 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
     # assert result.exit_code == 0
 
 def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_output_dir):
+    # ensure we are in the right folder
+    print(f"current file is: {os.path.dirname(__file__)}")
+    os.chdir(os.path.dirname(__file__))
     result = cli_obj.invoke(
         cli, [
             'velocimetry',
