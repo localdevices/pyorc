@@ -33,3 +33,36 @@ mask:
       wdw: 2
       tolerance: 0.5
       reduce_time: True
+transect:
+  write: True
+  transect_1:
+    shapefile: ../examples/ngwerere/cross_section1.geojson
+    get_transect:
+      rolling: 4
+      wdw: 2
+    get_q:
+      fill_method: log_interp
+      v_corr: 0.85
+    get_river_flow:
+plot:
+  plot_quiver:
+    frames:
+    velocimetry:
+      alpha: 0.4
+      cmap: rainbow
+      scale: 400
+      width: 0.0015
+      vmax: 0.6
+    transect:
+      transect_1:
+        cmap: rainbow
+        scale: 200
+        width: 0.003
+        vmin: 0
+        vmax: 0.6
+    mode: camera
+    reducer: mean
+    write_pars:
+      dpi: 100
+      bbox_inches: tight
+

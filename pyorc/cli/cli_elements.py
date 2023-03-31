@@ -318,27 +318,15 @@ class AoiSelect(BaseSelect):
                     )
                 self.p_bbox.set_xy(bbox_cam)
                 self.p_bbox_geo.set_xy(bbox_geo)
-                # self.cam_config_cam = self.camera_config.plot_bbox(ax=self.ax, camera=True, alpha=0.5, zorder=2,
-                #                                                    edgecolor="w")
-                # self.cam_config_geo = self.camera_config.plot(ax=self.ax_geo, camera=False)
                 self.ax.figure.canvas.draw()
 
     def on_click(self, event):
         super(AoiSelect, self).on_click(event)
-        # if len(self.src) == self.required_clicks and self.cam_config_cam is None:
-        #     self.camera_config.set_bbox_from_corners(self.src)
-        #     self.cam_config_cam = self.camera_config.plot_bbox(ax=self.ax, camera=True, alpha=0.5, zorder=2, edgecolor="w")
-        #     self.cam_config_geo = self.camera_config.plot(ax=self.ax_geo, camera=False)
         if not(len(self.src) == self.required_clicks):
             # remove plot if present
             self.p_bbox.set_xy(np.zeros((0, 2)))
             self.p_bbox_geo.set_xy(np.zeros((0, 2)))
-            # self.cam_config_cam.remove()
-                # self.cam_config_geo.remove()
-                # self.cam_config_cam = None
-                # self.cam_config_geo = None
             self.ax.figure.canvas.draw()
-                # self.ax.draw_idle()
 
 
 class GcpSelect(BaseSelect):
@@ -373,7 +361,7 @@ class GcpSelect(BaseSelect):
             path_effects=path_effects
         )
         self.ax_geo.legend()
-        # # TODO: if no crs provided, then provide a normal axes with equal lengths on x and y axis
+        # TODO: if no crs provided, then provide a normal axes with equal lengths on x and y axis
         self.required_clicks = len(self.dst)
 
     def on_click(self, event):

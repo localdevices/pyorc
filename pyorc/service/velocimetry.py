@@ -100,7 +100,7 @@ def run_func_hash_io(
                 if not (os.path.isfile(fn_recipe)):
                     run = True
                 else:
-                    recipe_part = {c: ref.recipe[c] for c in configs}
+                    recipe_part = {c: ref.recipe[c] for c in configs if c in ref.recipe}
                     with open(fn_recipe, "r") as f:
                         cfg_ancient = f.read()
                     cfg = yaml.dump(recipe_part, default_flow_style=False, sort_keys=False)
@@ -136,7 +136,7 @@ def run_func_hash_io(
                 processor_func(ref, *args, **kwargs)
                 # after run, store configuration file and hashes of in- and outputs
                 fn_recipe = os.path.join(path_out, f"{ref.prefix}{func_name}.yml")
-                recipe_part = {c: ref.recipe[c] for c in configs}
+                recipe_part = {c: ref.recipe[c] for c in configs if c in ref.recipe}
                 with open(fn_recipe, "w") as f:
                     yaml.dump(recipe_part, f, default_flow_style=False, sort_keys=False)
                 # after run, store input and output hashes
@@ -210,8 +210,6 @@ class VelocityFlowProcessor(object):
         self.fn_video = videofile
         self.fn_cam_config = cameraconfig
         self.logger = logger
-        # self.set_status_fn(stat_fn)
-        # self.get_status()
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
 
@@ -254,30 +252,6 @@ class VelocityFlowProcessor(object):
     @fn_video.setter
     def fn_video(self, fn_video):
         self._fn_video = fn_video
-
-
-    def set_status_fn(self, fn):
-        """
-        Prepare expected status file, containing filenames and hashes of existing files if these are already processed
-
-        """
-        self.status_fn = os.path.join(self.output, fn)
-
-
-    def get_status(self):
-        """
-        sets status of project
-        Returns
-        -------
-
-        """
-        if os.path.isfile(self.status_fn):
-            # read file and return dict
-            with open(self.status_fn, "r") as f:
-                body = f.read()
-            self.status = yaml.load(body, Loader=yaml.FullLoader)
-        else:
-            self.status = {}
 
 
     def process(self):
@@ -369,7 +343,7 @@ class VelocityFlowProcessor(object):
             self.velocimetry_obj = xr.open_dataset(self.fn_piv)
 
 
-    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=["fn_piv"], outputs=["fn_piv_mask"])
+    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=["fn_piv"], configs=["video", "frames", "velocimetry", "mask"], outputs=["fn_piv_mask"])
     def mask(self, write=False, **kwargs):
         # TODO go through several masking groups
         self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
@@ -443,7 +417,7 @@ class VelocityFlowProcessor(object):
                 self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
 
 
-    @run_func_hash_io(check=True, configs=["video", "frames", "velocimetry", "transect", "plot"], inputs=["fn_video", "fn_piv_mask"], outputs=[])
+    @run_func_hash_io(check=False, configs=["video", "frames", "velocimetry", "transect", "plot"], inputs=["fn_video", "fn_piv_mask"], outputs=[])
     def plot(self, **plot_recipes):
         _plot_recipes = copy.deepcopy(plot_recipes)
         for name, plot_params in _plot_recipes.items():

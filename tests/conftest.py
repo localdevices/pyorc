@@ -62,7 +62,7 @@ def cli_cam_config_output():
     cam_config_fn = os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_cli.json")
     yield cam_config_fn
     # remove after test
-    os.remove(cam_config_fn)
+    # os.remove(cam_config_fn)
 
 
 @pytest.fixture

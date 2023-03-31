@@ -46,6 +46,15 @@ There are a number of ways to improve contrast of moving features. These so far 
 * Normalization: removes the average of a number of frames in time. This then yields a better contrast of moving things
   compared to static things. This is particularly useful to remove visuals of the bottom, when you have very transparent
   water. You can set the amount of frames used for averaging.
+* Smoothing: perform a gaussian kernel average over each frame. This removes very small moise features that may be seen
+  as moving patterns. It is important to keep the smoothing kernel smaller in size than the typical size of a moving
+  feature.
+* Differencing over time: this method is extremely effective for distinguishing moving things on the water. It simply
+  subtracts frame 1 from frame 2, frame 2 from frame 3 etcetera. Things that are very much the same between subsequent
+  frames will disappear. This method only works well when your video is very stable, e.g. taken with a fixed rig.
+  In fact, we have seen deteriorating results when applying this filter on highly unstable videos. It is highly
+  recommended to apply this method in combination with smoothing when you have a fixed rig setup or are able to keep
+  your camera very stable, for instance with a tripod.
 * Edge detection: enhances the visibility of strong spatial gradients in the frame, by applying two kernel filters on
   the individual frames with varying window sizes, and returning the difference between the filtered images.
 
@@ -67,6 +76,49 @@ There are a number of ways to improve contrast of moving features. These so far 
     .. tab-item:: API
 
         Normalization is controlled by the ``normalize`` method and described in the :ref:`frames API section <frames>`.
+
+
+.. tab-set::
+
+    .. tab-item:: Command-line
+
+        The ``time_diff`` method computes the difference between subsequent frames. It is highly recommended to do
+        some smoothing before this step to ensure that very small edges are smudged out. It is possible to take the
+        absolute value after smoothing (add ``abs: True``) or apply a threshold on pixels that have a very low absolute
+        difference in intensity. We have best experience with the default threshold of 2 and no absolute value applied.
+        This can be changed as shown below. Simply leave out the line ``thres: 5`` to use defaults:
+
+        .. code-block:: yaml
+
+            frames:
+                time_diff:
+                    thres: 5
+
+    .. tab-item:: API
+
+        Time differencing is performed with the ``time_diff`` method, described in the :ref:`frames API section <frames>`.
+
+
+.. tab-set::
+
+    .. tab-item:: Command-line
+
+        The ``smooth`` method smooths each frame a small or large (user-defined) amount. The amount can be controlled
+        with the ``wdw`` optional keyword. The default value is 1, which means the smallest kernel possible (3x3) is
+        used. When you set it to 2, 3, 4, etc. the kernel size will go to 5x5, 7x7, 9x9, and so on. This filter
+        is very efficient when performed *before* the ``time_diff`` filter when you have very stable videos, for
+        instance from a fixed rig setup.
+
+        .. code-block:: yaml
+
+            frames:
+                smooth:
+                    wdw: 2
+
+    .. tab-item:: API
+
+        Smoothing is performed with the ``smooth`` method, described in the :ref:`frames API section <frames>`.
+
 
 .. tab-set::
 

@@ -13,13 +13,13 @@ from pyorc.cli.cli_elements import GcpSelect, AoiSelect
 from shapely.geometry import Point
 
 
-def get_corners_interactive(fn, gcps, crs=None, frame_sample=0., logger=logging):
+def get_corners_interactive(fn, gcps, crs=None, crs_gcps=None, frame_sample=0., logger=logging):
     vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     src = gcps["src"]
-    if crs is not None:
-        dst = helpers.xyz_transform(gcps["dst"], crs_from=crs, crs_to=4326)
+    if crs_gcps is not None:
+        dst = helpers.xyz_transform(gcps["dst"], crs_from=crs_gcps, crs_to=4326)
     else:
         dst = gcps["dst"]
     # setup preliminary cam config
@@ -160,17 +160,6 @@ def parse_src(ctx, param, value):
 def parse_dst(ctx, param, value):
     value = parse_json(ctx, param, value)
     value = validate_dst(value)
-    # if value is not None:
-    #     if len(value) == 4:
-    #         # assume [x, y] pairs are provided
-    #         len_points = 2
-    #     elif len(value) < 6:
-    #         raise click.UsageError(f"--dst must contain at least 4 with [x, y] or 6 with [x, y, z] points, contains {len(value)}.")
-    #     else:
-    #         len_points = 3
-    #     for n, val in enumerate(value):
-    #         assert(isinstance(val, list)), f"--dst value {n} is not a list {val}"
-    #         assert(len(val) == len_points), f"--src value {n} must contain row, column coordinate but consists of {len(val)} numbers"
     return value
 
 
@@ -204,11 +193,11 @@ def read_shape(fn):
 
 def validate_dst(value):
     if value is not None:
-        if len(value) == 4:
+        if len(value) in [2, 4]:
             # assume [x, y] pairs are provided
             len_points = 2
         elif len(value) < 6:
-            raise click.UsageError(f"--dst must contain at least 4 with [x, y] or 6 with [x, y, z] points, contains {len(value)}.")
+            raise click.UsageError(f"--dst must contain at least 2 or 4 with [x, y] or 6 with [x, y, z] points, contains {len(value)}.")
         else:
             len_points = 3
         for n, val in enumerate(value):
