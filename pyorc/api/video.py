@@ -39,6 +39,7 @@ Camera configuration: {:s}
             h_a=None,
             start_frame=None,
             end_frame=None,
+            freq=1,
             stabilize=None,
             mask_exterior=None,
     ):
@@ -95,6 +96,7 @@ Camera configuration: {:s}
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 180.0)
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.mask_exterior = mask_exterior
         # explicitly open file for reading
         if mask_exterior is not None:
             # set a mask based on the roi points
@@ -123,15 +125,16 @@ Camera configuration: {:s}
             end_frame = frame_number[-1]
 
         self.end_frame = end_frame
+        self.freq = freq
         self.time = time
         self.frame_number = frame_number
         self.start_frame = start_frame
         if self.stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
-            print(f"STABILIZE: {self.stabilize}")
-            recipe = const.CLASSIFY_CAM[self.stabilize] if self.stabilize in const.CLASSIFY_CAM else []
-            self._get_pos_feats(cap, recipe=recipe)
-            self._get_ms()
+            # recipe = const.CLASSIFY_CAM[self.stabilize] if self.stabilize in const.CLASSIFY_CAM else []
+            # self._get_pos_feats(cap, recipe=recipe)
+            # self._get_ms()
+            self.get_ms(cap)
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         self.rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
@@ -144,6 +147,24 @@ Camera configuration: {:s}
         cap.release()
         del cap
 
+
+    @property
+    def mask_exterior(self):
+        """
+
+        Returns
+        -------
+        np.ndarray
+            Mask of region of interest
+        """
+        return self._mask_exterior
+
+    @mask_exterior.setter
+    def mask_exterior(self, mask_exterior):
+        if mask_exterior is None:
+            self._mask_exterior = None
+        else:
+            self._mask_exterior = mask_exterior
 
     @property
     def mask(self):
@@ -209,6 +230,21 @@ Camera configuration: {:s}
             self._end_frame = self.frame_count - 1
         else:
             self._end_frame = min(self.frame_count - 1, end_frame)
+
+    @property
+    def freq(self):
+        """
+
+        Returns
+        -------
+        int: frequency (1 in nth frames to select)
+
+        """
+        return self._freq
+
+    @freq.setter
+    def freq(self, freq=1):
+        self._freq = freq
 
     @property
     def stabilize(self):
@@ -406,7 +442,7 @@ Camera configuration: {:s}
             dims=dims,
             coords=coords,
             attrs=attrs
-        )
+        )[::self.freq]
         del coords["time"]
         if len(sample.shape) == 3:
             del coords["rgb"]
@@ -419,7 +455,12 @@ Camera configuration: {:s}
     def set_mask_from_exterior(self, exterior):
         mask_coords = np.array([exterior], dtype=np.int32)
         mask = np.zeros((self.height, self.width), np.uint8)
-        self.mask = cv2.fillPoly(mask, [mask_coords], 255)
+        mask = cv2.fillPoly(mask, [mask_coords], 255)
+        mask[mask==0] = 1
+        mask[mask==255] = 0
+        mask[mask==1] = 255
+        self.mask = mask
+
 
     def _get_pos_feats(self, cap, split=2, recipe=const.CLASSIFY_STANDING_CAM):
         # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
@@ -441,9 +482,18 @@ Camera configuration: {:s}
         self.feats_stats = stats
         self.feats_errs = errs
 
-    def _get_ms(self):
-        # retrieve the transformation matrices for stabilization
-        self.ms = cv._ms_from_displacements(self.feats_pos, self.feats_stats)
+
+    def get_ms(self, cap, split=2):
+        self.ms = cv._get_ms_gftt(
+            cap,
+            start_frame=self.start_frame,
+            end_frame=self.end_frame,
+            split=split,
+            mask=self.mask,
+        )
+    # def _get_ms(self):
+    #     # retrieve the transformation matrices for stabilization
+    #     self.ms = cv._ms_from_displacements(self.feats_pos, self.feats_stats)
 
 
     def plot_rigid_pts(self, ax=None, **kwargs):

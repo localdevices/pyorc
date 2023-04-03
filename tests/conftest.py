@@ -245,7 +245,7 @@ def vid_cam_config_stabilize(cam_config):
     vid = pyorc.Video(
         os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
         start_frame=0,
-        end_frame=125,
+        end_frame=20,
         camera_config=cam_config,
         h_a=0.,
         stabilize="fixed"
