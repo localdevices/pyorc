@@ -141,7 +141,7 @@ Lens calibration method
         .. note::
 
             At the moment, lens calibration is only available at API level. If you require a command-line option
-            for lens calibration, then please contact us at info@rainbowsensing.com
+            for lens calibration, then please contact us at info@rainbowsensing.com.
 
     .. tab-item:: API
 

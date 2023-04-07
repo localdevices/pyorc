@@ -274,9 +274,9 @@ class VelocityFlowProcessor(object):
             self.velocimetry_mask_obj = self.velocimetry_obj
         if "transect" in self.recipe:
             self.transect(**self.recipe["transect"])
-        else:
-            # no masking so use non-masked velocimetry as masked
-            self.velocimetry_mask_obj = self.velocimetry_obj
+        # else:
+        #     # no masking so use non-masked velocimetry as masked
+        #     self.velocimetry_mask_obj = self.velocimetry_obj
         if "plot" in self.recipe:
             self.plot(**self.recipe["plot"])
 

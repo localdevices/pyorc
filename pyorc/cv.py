@@ -70,6 +70,14 @@ def _classify_displacements(positions, method="kmeans", q_threshold=0.8, abs_thr
     return op(test_variable, tolerance)
 
 
+def _combine_m(m1, m2):
+    # extend to a 3x3 for matrix multiplication
+    _m1 = np.append(m1, np.array([[0., 0., 1.]]), axis=0)
+    _m2 = np.append(m2, np.array([[0., 0., 1.]]), axis=0)
+    m_combi = _m1.dot(_m2)[0:2]
+    return m_combi
+
+
 def _smooth(img, stride):
     """
     Internal function to filter on too large differences from spatial mean
@@ -133,6 +141,61 @@ def _get_cam_mtx(height, width, c=2.0, f=1.0):
     mtx[1, 1] = width  # define focal length y
     return mtx
 
+
+def _get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None, wdw=4):
+    # set end_frame to last if not defined
+    if end_frame is None:
+        end_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    m = np.eye(3)[0:2]
+    # m2 = np.eye(3)[0:2]
+    ms = []
+    # ms2 = []
+    m_key = copy.deepcopy(m)
+    # get start frame and points
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+    # determine the mount of frames that must be processed
+    n_frames = int(end_frame + 1) - int(start_frame)
+
+    # Read first frame
+    _, img_key = cap.read()
+    # Convert frame to grayscale
+    img1 = cv2.cvtColor(img_key, cv2.COLOR_BGR2GRAY)
+    img_key = img1
+
+    if n_pts is None:
+        # use the square root of nr of pixels in a frame to decide on n_pts
+        n_pts = int(np.sqrt(len(img_key.flatten())))
+
+    # get features from first key frame
+    prev_pts = _gftt_split(img_key, split, n_pts, mask=mask)
+
+    pbar = tqdm(range(n_frames), position=0, leave=True)
+    for i in pbar:
+        ms.append(m)
+        #     ms2.append(m2)
+        _, img2 = cap.read()
+        img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+        curr_pts, status, err = cv2.calcOpticalFlowPyrLK(img_key, img2, prev_pts, None)
+        #     curr_pts = curr_pts[status == 1]
+        #     prev_pts = prev_pts[status == 1]
+        m_part = cv2.estimateAffine2D(curr_pts, prev_pts)[0]
+        m = _combine_m(m_key, m_part)
+        if i % 30 == 0:
+            img_key = img1
+            prev_pts = _gftt_split(img_key, split, n_pts, mask=mask)
+            m_key = copy.deepcopy(m)
+        img1 = img2
+
+    # smooth the affines over time
+    ma = np.array(ms)
+    for m in range(ma.shape[1]):
+        for n in range(ma.shape[2]):
+            ma[wdw:-wdw, m, n] = np.convolve(ma[:, m, n], np.ones(wdw * 2 + 1) / (wdw * 2 + 1), mode="valid")
+    ms_smooth = list(ma)
+    return ms_smooth
+
+
 def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None):
     """
     compute displacements from trackable features found in start frame
@@ -188,29 +251,31 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None, split=2, 
         n_pts = int(np.sqrt(len(prev_gray.flatten())))
 
     # split image in smaller chunks if user wants
-    v = 0
-    h = 0
-    ver_split, hor_split = np.int16(np.ceil(np.array(prev_gray.shape) / split))
-    prev_pts = np.zeros((0, 1, 2), np.float32)
-    while v < prev_gray.shape[0]:
-        while h < prev_gray.shape[1]:
-            sub_img = prev_gray[v:v + ver_split, h:h + hor_split]
-            # get points over several quadrants
-            subimg_pts = cv2.goodFeaturesToTrack(
-                sub_img,
-                maxCorners=int(n_pts/split**2),
-                qualityLevel=0.3,
-                minDistance=10,
-                blockSize=1
-            )
-            # add offsets for quadrants
-            if subimg_pts is not None:
-                subimg_pts[:, :, 0] += h
-                subimg_pts[:, :, 1] += v
-                prev_pts = np.append(prev_pts, subimg_pts, axis=0)
-            h += hor_split
-        h = 0
-        v += ver_split
+    prev_pts = _gftt_split(prev_gray, split, n_pts)
+
+    # v = 0
+    # h = 0
+    # ver_split, hor_split = np.int16(np.ceil(np.array(prev_gray.shape) / split))
+    # prev_pts = np.zeros((0, 1, 2), np.float32)
+    # while v < prev_gray.shape[0]:
+    #     while h < prev_gray.shape[1]:
+    #         sub_img = prev_gray[v:v + ver_split, h:h + hor_split]
+    #         # get points over several quadrants
+    #         subimg_pts = cv2.goodFeaturesToTrack(
+    #             sub_img,
+    #             maxCorners=int(n_pts/split**2),
+    #             qualityLevel=0.3,
+    #             minDistance=10,
+    #             blockSize=1
+    #         )
+    #         # add offsets for quadrants
+    #         if subimg_pts is not None:
+    #             subimg_pts[:, :, 0] += h
+    #             subimg_pts[:, :, 1] += v
+    #             prev_pts = np.append(prev_pts, subimg_pts, axis=0)
+    #         h += hor_split
+    #     h = 0
+    #     v += ver_split
     # # get points over several quadrants
     # prev_pts = cv2.goodFeaturesToTrack(
     #     prev_gray,
@@ -332,7 +397,7 @@ def _get_shape(bbox, resolution=0.01, round=1):
 
     :param bbox: shapely Polygon, bounding box
     :param resolution: resolution of target raster
-    :param round: number of pixels to round intended shape to
+    :param round: number of pixels to round intended sh ape to
     :return: numbers of rows and columns for target raster
     """
     coords = bbox.exterior.coords
@@ -419,6 +484,33 @@ def _get_gcps_a(lensPosition, h_a, coords, z_0=0.0, h_ref=0.0):
     dest_out = list(zip(_dest_x, _dest_y))
     return dest_out
 
+def _gftt_split(img, split, n_pts, mask=None):
+    # split image in smaller chunks if user wants
+    v = 0
+    h = 0
+    ver_split, hor_split = np.int16(np.ceil(np.array(img.shape) / split))
+    pts = np.zeros((0, 1, 2), np.float32)
+    while v < img.shape[0]:
+        while h < img.shape[1]:
+            sub_img = img[v:v + ver_split, h:h + hor_split]
+            # get points over several quadrants
+            subimg_pts = cv2.goodFeaturesToTrack(
+                sub_img,
+                mask=mask[v:v + ver_split, h:h + hor_split] if mask is not None else None,
+                maxCorners=int(n_pts/split**2),
+                qualityLevel=0.3,
+                minDistance=10,
+                blockSize=1
+            )
+            # add offsets for quadrants
+            if subimg_pts is not None:
+                subimg_pts[:, :, 0] += h
+                subimg_pts[:, :, 1] += v
+                pts = np.append(pts, subimg_pts, axis=0)
+            h += hor_split
+        h = 0
+        v += ver_split
+    return pts
 
 def m_from_displacement(p1, p2, status):
     """
@@ -754,9 +846,9 @@ def get_time_frames(cap, start_frame, end_frame):
         if n > end_frame:
             break
         t1 = cap.get(cv2.CAP_PROP_POS_MSEC)
+        time.append(t1)
         ret, img = cap.read()  # read frame 1 + ...
         frame_number.append(n)
-        time.append(t1)
         if ret == False:
             break
         # cv2.imwrite("test_{:04d}.jpg".format(n), img)
@@ -766,6 +858,7 @@ def get_time_frames(cap, start_frame, end_frame):
             break
 
         n += 1
+    time[0] = 0
     return time, frame_number
 
 
