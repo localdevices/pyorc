@@ -496,7 +496,7 @@ def _gftt_split(img, split, n_pts, mask=None):
             # get points over several quadrants
             subimg_pts = cv2.goodFeaturesToTrack(
                 sub_img,
-                mask=mask[v:v + ver_split, h:h + hor_split],
+                mask=mask[v:v + ver_split, h:h + hor_split] if mask is not None else None,
                 maxCorners=int(n_pts/split**2),
                 qualityLevel=0.3,
                 minDistance=10,

@@ -65,14 +65,14 @@ Camera configuration: {:s}
             last frame to use in analysis (if not set, last frame available in video will be used)
         stabilize : optional
             If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with
-            Lukas Kanade optical flow. "fixed" for FOV that is meant to be in one place, "moving" for a moving FOV.
+            Lukas Kanade optical flow. Currently supported is "fixed" for FOV that is meant to be in one place.
         mask_exterior : list of lists,
             set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
             The mask is used to select region (on land) for rigid point search for stabilization.
         """
         assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
-        assert(stabilize in ["fixed", "moving", "all", None]), 'stabilize must be "fixed", "moving" or "all"'
+        assert(stabilize in ["fixed", None]), f'stabilize is only implemented for method "fixed", "{stabilize}" given'
         self.feats_pos = None
         self.feats_stats = None
         self.feats_errs = None
@@ -132,8 +132,6 @@ Camera configuration: {:s}
         if self.stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
             # recipe = const.CLASSIFY_CAM[self.stabilize] if self.stabilize in const.CLASSIFY_CAM else []
-            # self._get_pos_feats(cap, recipe=recipe)
-            # self._get_ms()
             self.get_ms(cap)
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)

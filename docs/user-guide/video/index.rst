@@ -162,13 +162,21 @@ Stabilization
 Videos may be taken in unsteady conditions. This may happen e.g. with slight movements of a smartphone, a
 drone that has varying air pressure conditions or wind gusts to deal with, or even fixed cameras in strong winds. But
 also, someone may have taken an incidental video, that was not originally intended to be used for river flow and velocity
-observations, but may render important information about a flood. For this the ``stabilize`` option can be passed
-with either the value "fixed" for a video without intentional movements, or "moving" for a video with intentional
-movements. With this option, each frame will be stabilized with respect to the start frame chosen by the user
+observations, but may render important information about a flood. For this the ``stabilize`` option can be passed with
+a stabilization strategy as input. Currently only the input "fixed" is supported, which is meant for a video with
+unintentional movements, e.g. due to wind or pressure changes (drone) or because the video was taken by hand.
+With this option, each frame will be stabilized with respect to the start frame chosen by the user
 (through the option ``start_frame``). The method works by first finding well traceable points in the first frame,
 then tracing where these points move to in the next frames. Of course some of these points may actually be moving water.
-That is why you have to define whether the video is taken with or without intentional movements, so that moving water
-can be distinguished from much smaller (larger) movements in the fixed (moving) video.
+Therefore we highly recommend to provide a polygon with the video that identifies the area that contains the entire water
+surface. The polygon must be measured in column, row coordinates in the image frame and can be supplied with the
+keyword ``mask_exterior``.
+
+.. note::
+
+    Currently we don't yet have an interactive functionality to provide the mask exterior. We will establish this
+    in forthcoming updates so that the ``mask_exterior`` can already be defined in the camera configuration with
+    a few mouse clicks.
 
 .. table:: Small part of 4K drone footage in Rio Grande - Brazil, showing left: no stabilization applied; right:
            stabilization applied with ``stabilize="fixed"``. The algorithm automatically detects rigid points on river
@@ -185,7 +193,8 @@ can be distinguished from much smaller (larger) movements in the fixed (moving) 
     .. tab-item:: Command-line
 
         Add the ``stabilize`` option in the recipe with the name of the stabilization strategy as argument. Below, a
-        full example is provided.
+        full example is provided including a set of coordinates that bounds the water surface. These are provides as
+        [column, row] pairs under the ``mask_exterior`` option.
 
         .. code-block:: yaml
 
@@ -194,6 +203,7 @@ can be distinguished from much smaller (larger) movements in the fixed (moving) 
               end_frame: 250
               h_a: 92.23
               stabilize: fixed
+              mask_exterior: [[816, 2160], [744, 0], [3287, 0], [3374, 2160]]
 
 
 
@@ -214,7 +224,8 @@ can be distinguished from much smaller (larger) movements in the fixed (moving) 
                 camera_config=cam_config,
                 start_frame=0,
                 end_frame=125,
-                stabilize="fixed"
+                stabilize="fixed",
+                mask_exterior=[[150, 0], [500, 1080], [1750, 1080], [900, 0]]
             )
             video
 
