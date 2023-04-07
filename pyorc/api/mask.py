@@ -334,3 +334,23 @@ class _Velocimetry_MaskMethods:
             mask = x_condition & y_condition
         return mask
 
+
+    @_base_mask()
+    def window_replace(self, wdw=1, iter=1, **kwargs):
+        """
+    Replaces values in a certain window size with mean of their neighbours. Returns a Dataset instead of a mask.
+    NOTE: This functionality may be moved to a different subclass in later releases.
+
+    Parameters
+    ----------
+    wdw : int, optional
+        window used to determine relevant neighbours
+        """
+        ds = copy.deepcopy(self)
+        for n in range(iter):
+            # collect points within a stride, collate and analyze for median value and deviation
+            ds_wdw = helpers.stack_window(ds, wdw=wdw, **kwargs)
+            ds_mean = ds_wdw.mean(dim="stride")
+            ds = ds.fillna(ds_mean)
+        return ds
+
