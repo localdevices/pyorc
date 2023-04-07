@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Video &#8212; pyorc 0.4.1 documentation</title>
+    <title>pyorc.Video &#8212; pyorc 0.4.3 documentation</title>
   
   
   
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,8 +34,8 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.1 documentation</p>
+    <p class="title logo__title">pyorc 0.4.3 documentation</p>
   
 </a></div>
     
@@ -382,9 +382,9 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.landmask.html">pyorc.Frames.landmask</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.project.html">pyorc.Frames.project</a></li>
@@ -509,7 +509,7 @@ document.write(`
 <h1>pyorc.Video<a class="headerlink" href="#pyorc-video" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyorc.Video">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_exterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyorc.</span></span><span class="sig-name descname"><span class="pre">Video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_exterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video" title="Permalink to this definition">#</a></dt>
 <dd><p>Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
 frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
 These can then be processed with other pyorc API functionalities.</p>
@@ -525,7 +525,7 @@ the camera)</p></li>
 <li><p><strong>start_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – first frame to use in analysis (default: 0)</p></li>
 <li><p><strong>end_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – last frame to use in analysis (if not set, last frame available in video will be used)</p></li>
 <li><p><strong>stabilize</strong> (<em>optional</em>) – If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with
-Lukas Kanade optical flow. “fixed” for FOV that is meant to be in one place, “moving” for a moving FOV.</p></li>
+Lukas Kanade optical flow. Currently supported is “fixed” for FOV that is meant to be in one place.</p></li>
 <li><p><strong>mask_exterior</strong> (<em>list</em><em> of </em><em>lists</em><em>,</em>) – set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
 The mask is used to select region (on land) for rigid point search for stabilization.</p></li>
 </ul>
@@ -533,7 +533,7 @@ The mask is used to select region (on land) for rigid point search for stabiliza
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Video.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_exterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stabilize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_exterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
 frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
 These can then be processed with other pyorc API functionalities.</p>
@@ -549,7 +549,7 @@ the camera)</p></li>
 <li><p><strong>start_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – first frame to use in analysis (default: 0)</p></li>
 <li><p><strong>end_frame</strong> (<em>int</em><em>, </em><em>optional</em>) – last frame to use in analysis (if not set, last frame available in video will be used)</p></li>
 <li><p><strong>stabilize</strong> (<em>optional</em>) – If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with
-Lukas Kanade optical flow. “fixed” for FOV that is meant to be in one place, “moving” for a moving FOV.</p></li>
+Lukas Kanade optical flow. Currently supported is “fixed” for FOV that is meant to be in one place.</p></li>
 <li><p><strong>mask_exterior</strong> (<em>list</em><em> of </em><em>lists</em><em>,</em>) – set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
 The mask is used to select region (on land) for rigid point search for stabilization.</p></li>
 </ul>
@@ -569,10 +569,13 @@ The mask is used to select region (on land) for rigid point search for stabiliza
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Video.get_frames.html#pyorc.Video.get_frames" title="pyorc.Video.get_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frames</span></code></a>(**kwargs)</p></td>
 <td><p>Get a xr.DataArray, containing a dask array of frames, from <cite>start_frame</cite> until <cite>end_frame</cite>, expected to be read lazily.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.plot_rigid_pts.html#pyorc.Video.plot_rigid_pts" title="pyorc.Video.plot_rigid_pts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rigid_pts</span></code></a>([ax])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ms</span></code>(cap[, split])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Video.plot_rigid_pts.html#pyorc.Video.plot_rigid_pts" title="pyorc.Video.plot_rigid_pts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rigid_pts</span></code></a>([ax])</p></td>
 <td><p>Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an axes object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mask_from_exterior</span></code>(exterior)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mask_from_exterior</span></code>(exterior)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -592,11 +595,23 @@ The mask is used to select region (on land) for rigid point search for stabiliza
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Video.fps.html#pyorc.Video.fps" title="pyorc.Video.fps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fps</span></code></a></p></td>
 <td><p>float, frames per second</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_a</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">freq</span></code></p></td>
+<td><p>returns: <strong>int</strong> :rtype: frequency (1 in nth frames to select)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_a</span></code></p></td>
 <td><p>Actual water level [m] during video</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code></p></td>
 <td><p>returns: Mask of region of interest :rtype: np.ndarray</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_exterior</span></code></p></td>
+<td><p>returns: Mask of region of interest :rtype: np.ndarray</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotation</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stabilize</span></code></p></td>
+<td><p>int, last frame considered in analysis</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Video.start_frame.html#pyorc.Video.start_frame" title="pyorc.Video.start_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_frame</span></code></a></p></td>
 <td><p>int, first frame considered in analysis</p></td>
@@ -613,7 +628,10 @@ The mask is used to select region (on land) for rigid point search for stabiliza
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="pyorc.CameraConfig.plot_bbox.html"
@@ -633,7 +651,10 @@ The mask is used to select region (on land) for rigid point search for stabiliza
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -668,7 +689,7 @@ The mask is used to select region (on land) for rigid point search for stabiliza
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -676,8 +697,8 @@ The mask is used to select region (on land) for rigid point search for stabiliza
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -695,7 +716,7 @@ The mask is used to select region (on land) for rigid point search for stabiliza
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     <br/>
   </p>
 </div>
@@ -706,7 +727,7 @@ The mask is used to select region (on land) for rigid point search for stabiliza
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Frames &#8212; pyorc 0.4.1 documentation</title>
+    <title>pyorc.Frames &#8212; pyorc 0.4.3 documentation</title>
   
   
   
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,8 +34,8 @@
     <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.1 documentation</p>
+    <p class="title logo__title">pyorc 0.4.3 documentation</p>
   
 </a></div>
     
@@ -382,9 +382,9 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.landmask.html">pyorc.Frames.landmask</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.project.html">pyorc.Frames.project</a></li>
@@ -540,7 +540,7 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Frames.get_piv.html#pyorc.Frames.get_piv" title="pyorc.Frames.get_piv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_piv</span></code></a>(**kwargs)</p></td>
 <td><p>Perform PIV computation on projected frames.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.landmask.html#pyorc.Frames.landmask" title="pyorc.Frames.landmask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">landmask</span></code></a>([dilate_iter, samples])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">landmask</span></code>([dilate_iter, samples])</p></td>
 <td><p>Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much higher than that of water.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">minmax</span></code>([min, max])</p></td>
@@ -555,8 +555,14 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.project.html#pyorc.Frames.project" title="pyorc.Frames.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project</span></code></a>([resolution])</p></td>
 <td><p>Project frames into a projected frames object, with information from the camera_config attr.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling" title="pyorc.Frames.reduce_rolling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce_rolling</span></code></a>([samples])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce_rolling</span></code>([samples])</p></td>
 <td><p>Remove a rolling mean from the frames (very slow, so in most cases, it is recommended to use Frames.normalize).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.smooth.html#pyorc.Frames.smooth" title="pyorc.Frames.smooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smooth</span></code></a>([wdw])</p></td>
+<td><p>Smooth each frame with a Gaussian kernel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Frames.time_diff.html#pyorc.Frames.time_diff" title="pyorc.Frames.time_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_diff</span></code></a>([thres, abs])</p></td>
+<td><p>Apply a difference over time (i.e.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Frames.to_ani.html#pyorc.Frames.to_ani" title="pyorc.Frames.to_ani"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_ani</span></code></a>(fn[, figure_kwargs, video_kwargs, ...])</p></td>
 <td><p>Store an animation of the frames in the object</p></td>
@@ -590,7 +596,10 @@ document.write(`
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="pyorc.Video.get_frames.html"
@@ -610,7 +619,10 @@ document.write(`
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -645,7 +657,7 @@ document.write(`
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -653,8 +665,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -672,7 +684,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     <br/>
   </p>
 </div>
@@ -683,7 +695,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Frames &#8212; pyorc 0.4.1 documentation</title>
+    <title>Frames &#8212; pyorc 0.4.3 documentation</title>
   
   
   
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,8 +34,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.1 documentation</p>
+    <p class="title logo__title">pyorc 0.4.3 documentation</p>
   
 </a></div>
     
@@ -442,6 +442,15 @@ API</label><div class="sd-tab-content docutils">
 <li><p>Normalization: removes the average of a number of frames in time. This then yields a better contrast of moving things
 compared to static things. This is particularly useful to remove visuals of the bottom, when you have very transparent
 water. You can set the amount of frames used for averaging.</p></li>
+<li><p>Smoothing: perform a gaussian kernel average over each frame. This removes very small moise features that may be seen
+as moving patterns. It is important to keep the smoothing kernel smaller in size than the typical size of a moving
+feature.</p></li>
+<li><p>Differencing over time: this method is extremely effective for distinguishing moving things on the water. It simply
+subtracts frame 1 from frame 2, frame 2 from frame 3 etcetera. Things that are very much the same between subsequent
+frames will disappear. This method only works well when your video is very stable, e.g. taken with a fixed rig.
+In fact, we have seen deteriorating results when applying this filter on highly unstable videos. It is highly
+recommended to apply this method in combination with smoothing when you have a fixed rig setup or are able to keep
+your camera very stable, for instance with a tripod.</p></li>
 <li><p>Edge detection: enhances the visibility of strong spatial gradients in the frame, by applying two kernel filters on
 the individual frames with varying window sizes, and returning the difference between the filtered images.</p></li>
 </ul>
@@ -469,6 +478,48 @@ API</label><div class="sd-tab-content docutils">
 <input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
 </input><label class="sd-tab-label" for="sd-tab-item-4">
 Command-line</label><div class="sd-tab-content docutils">
+<p>The <code class="docutils literal notranslate"><span class="pre">time_diff</span></code> method computes the difference between subsequent frames. It is highly recommended to do
+some smoothing before this step to ensure that very small edges are smudged out. It is possible to take the
+absolute value after smoothing (add <code class="docutils literal notranslate"><span class="pre">abs:</span> <span class="pre">True</span></code>) or apply a threshold on pixels that have a very low absolute
+difference in intensity. We have best experience with the default threshold of 2 and no absolute value applied.
+This can be changed as shown below. Simply leave out the line <code class="docutils literal notranslate"><span class="pre">thres:</span> <span class="pre">5</span></code> to use defaults:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">frames</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">time_diff</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">thres</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-5">
+API</label><div class="sd-tab-content docutils">
+<p>Time differencing is performed with the <code class="docutils literal notranslate"><span class="pre">time_diff</span></code> method, described in the <a class="reference internal" href="../../api.html#frames"><span class="std std-ref">frames API section</span></a>.</p>
+</div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-6">
+Command-line</label><div class="sd-tab-content docutils">
+<p>The <code class="docutils literal notranslate"><span class="pre">smooth</span></code> method smooths each frame a small or large (user-defined) amount. The amount can be controlled
+with the <code class="docutils literal notranslate"><span class="pre">wdw</span></code> optional keyword. The default value is 1, which means the smallest kernel possible (3x3) is
+used. When you set it to 2, 3, 4, etc. the kernel size will go to 5x5, 7x7, 9x9, and so on. This filter
+is very efficient when performed <em>before</em> the <code class="docutils literal notranslate"><span class="pre">time_diff</span></code> filter when you have very stable videos, for
+instance from a fixed rig setup.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">frames</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">smooth</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">wdw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-7">
+API</label><div class="sd-tab-content docutils">
+<p>Smoothing is performed with the <code class="docutils literal notranslate"><span class="pre">smooth</span></code> method, described in the <a class="reference internal" href="../../api.html#frames"><span class="std std-ref">frames API section</span></a>.</p>
+</div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-8">
+Command-line</label><div class="sd-tab-content docutils">
 <p>The <code class="docutils literal notranslate"><span class="pre">edge_detect</span></code> method computes the difference between kernel smoothed frames.
 By default, the kernel window one-sided sizes are 1 (i.e. a 3x3 window) and 2 (a 5x5 window) respectively.
 For very high resolution imagery or very large features to track, these may be enlarged to better encompass the
@@ -481,8 +532,8 @@ instance as follows:</p>
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-5">
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-9">
 API</label><div class="sd-tab-content docutils">
 <p>Edge detection is performed with the <code class="docutils literal notranslate"><span class="pre">edge_detect</span></code> method, described in the <a class="reference internal" href="../../api.html#frames"><span class="std std-ref">frames API section</span></a>.</p>
 </div>
@@ -494,8 +545,8 @@ API</label><div class="sd-tab-content docutils">
 orthorectified image. Typically orthorectification is the last step before estimating surface velocities from the
 frame pairs.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-6">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-10">
 Command-line</label><div class="sd-tab-content docutils">
 <p>In the command-line interface, orthoprojection is performed automatically after all image enhancement steps
 the a user may possible have entered in the recipe. Nonetheless, you can still control the resolution (in meters)
@@ -512,8 +563,8 @@ keys and values (with an example for 0.1 meter resolution):</p>
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-7">
+<input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-11">
 API</label><div class="sd-tab-content docutils">
 <p>Projection is performed with the <code class="docutils literal notranslate"><span class="pre">project</span></code> method, described in the <a class="reference internal" href="../../api.html#frames"><span class="std std-ref">frames API section</span></a>.</p>
 </div>
@@ -525,8 +576,8 @@ API</label><div class="sd-tab-content docutils">
 a new video file. This helps to assess if patterns are indeed clearly visible and projected results good enough in
 resolution to recognize the features on the water surface.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-8">
+<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-6" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-12">
 Command-line</label><div class="sd-tab-content docutils">
 <p>In the recipe, the export to a video can be controlled with the <code class="docutils literal notranslate"><span class="pre">to_video</span></code> method and by supplying a
 filename with extension .mp4 or another recognizable video extension. An example of a frames section in which
@@ -544,8 +595,8 @@ file is given below.</p>
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-9">
+<input id="sd-tab-item-13" name="sd-tab-set-6" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-13">
 API</label><div class="sd-tab-content docutils">
 <p>Exporting frames to a video is performed with the <code class="docutils literal notranslate"><span class="pre">to_video</span></code> method, described in the
 <a class="reference internal" href="../../api.html#frames"><span class="std std-ref">frames API section</span></a>.</p>
@@ -560,7 +611,10 @@ API</label><div class="sd-tab-content docutils">
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="../video/index.html"
@@ -580,7 +634,10 @@ API</label><div class="sd-tab-content docutils">
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -615,7 +672,7 @@ API</label><div class="sd-tab-content docutils">
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -623,8 +680,8 @@ API</label><div class="sd-tab-content docutils">
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -642,7 +699,7 @@ API</label><div class="sd-tab-content docutils">
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     <br/>
   </p>
 </div>
@@ -653,7 +710,7 @@ API</label><div class="sd-tab-content docutils">
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>

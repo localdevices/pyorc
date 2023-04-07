@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Videos &#8212; pyorc 0.4.1 documentation</title>
+    <title>Videos &#8212; pyorc 0.4.3 documentation</title>
   
   
   
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,8 +34,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.1 documentation</p>
+    <p class="title logo__title">pyorc 0.4.3 documentation</p>
   
 </a></div>
     
@@ -573,13 +573,21 @@ issues.</p>
 <p>Videos may be taken in unsteady conditions. This may happen e.g. with slight movements of a smartphone, a
 drone that has varying air pressure conditions or wind gusts to deal with, or even fixed cameras in strong winds. But
 also, someone may have taken an incidental video, that was not originally intended to be used for river flow and velocity
-observations, but may render important information about a flood. For this the <code class="docutils literal notranslate"><span class="pre">stabilize</span></code> option can be passed
-with either the value “fixed” for a video without intentional movements, or “moving” for a video with intentional
-movements. With this option, each frame will be stabilized with respect to the start frame chosen by the user
+observations, but may render important information about a flood. For this the <code class="docutils literal notranslate"><span class="pre">stabilize</span></code> option can be passed with
+a stabilization strategy as input. Currently only the input “fixed” is supported, which is meant for a video with
+unintentional movements, e.g. due to wind or pressure changes (drone) or because the video was taken by hand.
+With this option, each frame will be stabilized with respect to the start frame chosen by the user
 (through the option <code class="docutils literal notranslate"><span class="pre">start_frame</span></code>). The method works by first finding well traceable points in the first frame,
 then tracing where these points move to in the next frames. Of course some of these points may actually be moving water.
-That is why you have to define whether the video is taken with or without intentional movements, so that moving water
-can be distinguished from much smaller (larger) movements in the fixed (moving) video.</p>
+Therefore we highly recommend to provide a polygon with the video that identifies the area that contains the entire water
+surface. The polygon must be measured in column, row coordinates in the image frame and can be supplied with the
+keyword <code class="docutils literal notranslate"><span class="pre">mask_exterior</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Currently we don’t yet have an interactive functionality to provide the mask exterior. We will establish this
+in forthcoming updates so that the <code class="docutils literal notranslate"><span class="pre">mask_exterior</span></code> can already be defined in the camera configuration with
+a few mouse clicks.</p>
+</div>
 <table class="table" id="id1">
 <caption><span class="caption-text">Small part of 4K drone footage in Rio Grande - Brazil, showing left: no stabilization applied; right:
        stabilization applied with <code class="docutils literal notranslate"><span class="pre">stabilize=&quot;fixed&quot;</span></code>. The algorithm automatically detects rigid points on river
@@ -601,12 +609,14 @@ can be distinguished from much smaller (larger) movements in the fixed (moving) 
 </input><label class="sd-tab-label" for="sd-tab-item-8">
 Command-line</label><div class="sd-tab-content docutils">
 <p>Add the <code class="docutils literal notranslate"><span class="pre">stabilize</span></code> option in the recipe with the name of the stabilization strategy as argument. Below, a
-full example is provided.</p>
+full example is provided including a set of coordinates that bounds the water surface. These are provides as
+[column, row] pairs under the <code class="docutils literal notranslate"><span class="pre">mask_exterior</span></code> option.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
 <span class="w">  </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
 <span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
 <span class="w">  </span><span class="nt">stabilize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fixed</span>
+<span class="w">  </span><span class="nt">mask_exterior</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">816</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2160</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">744</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3287</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3374</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2160</span><span class="p p-Indicator">]]</span>
 </pre></div>
 </div>
 </div>
@@ -625,7 +635,8 @@ API</label><div class="sd-tab-content docutils">
     <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span>
     <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">end_frame</span><span class="o">=</span><span class="mi">125</span><span class="p">,</span>
-    <span class="n">stabilize</span><span class="o">=</span><span class="s2">&quot;fixed&quot;</span>
+    <span class="n">stabilize</span><span class="o">=</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+    <span class="n">mask_exterior</span><span class="o">=</span><span class="p">[[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1080</span><span class="p">],</span> <span class="p">[</span><span class="mi">1750</span><span class="p">,</span> <span class="mi">1080</span><span class="p">],</span> <span class="p">[</span><span class="mi">900</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
 <span class="p">)</span>
 <span class="n">video</span>
 </pre></div>
@@ -688,7 +699,10 @@ therefore, methods that work on sets of frames can be applied, as described in t
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="../camera_config/index.html"
@@ -708,7 +722,10 @@ therefore, methods that work on sets of frames can be applied, as described in t
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -744,7 +761,7 @@ therefore, methods that work on sets of frames can be applied, as described in t
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -752,8 +769,8 @@ therefore, methods that work on sets of frames can be applied, as described in t
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -771,7 +788,7 @@ therefore, methods that work on sets of frames can be applied, as described in t
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     <br/>
   </p>
 </div>
@@ -782,7 +799,7 @@ therefore, methods that work on sets of frames can be applied, as described in t
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>

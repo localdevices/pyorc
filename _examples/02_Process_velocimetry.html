@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Analyze surface velocities of a video with velocimetry &#8212; pyorc 0.4.1 documentation</title>
+    <title>Analyze surface velocities of a video with velocimetry &#8212; pyorc 0.4.3 documentation</title>
   
   
   
@@ -19,23 +19,24 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -113,7 +114,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.1 documentation</p>
+    <p class="title logo__title">pyorc 0.4.3 documentation</p>
   
 </a></div>
     
@@ -401,264 +402,7 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-</style>
-<section id="Analyze-surface-velocities-of-a-video-with-velocimetry">
+  <section id="Analyze-surface-velocities-of-a-video-with-velocimetry">
 <h1>Analyze surface velocities of a video with velocimetry<a class="headerlink" href="#Analyze-surface-velocities-of-a-video-with-velocimetry" title="Permalink to this heading">#</a></h1>
 <p>This notebook shows how to use a camera configuration, and a video to estimate velocities at the surface. It also demonstrates the important impact of filtering of spurious or noisy velocities on the end result. We go through the following steps:</p>
 <ul class="simple">
@@ -703,7 +447,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Stabilizing frames: 100%|██████████| 125/125 [00:03&lt;00:00, 32.54it/s]
+100%|██████████| 126/126 [00:03&lt;00:00, 34.01it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1191,7 +935,7 @@ Coordinates:
 Attributes:
     camera_shape:   [1080, 1920]
     camera_config:  {\n    &quot;height&quot;: 1080,\n    &quot;width&quot;: 1920,\n    &quot;crs&quot;: &quot;P...
-    h_a:            0.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-80ab9c64-3c2f-4d92-acfa-e3a7ab736c95' class='xr-array-in' type='checkbox' checked><label for='section-80ab9c64-3c2f-4d92-acfa-e3a7ab736c95' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    h_a:            0.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-c9965e5a-afa3-432d-a57a-afceb3244238' class='xr-array-in' type='checkbox' checked><label for='section-c9965e5a-afa3-432d-a57a-afceb3244238' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1305,7 +1049,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-0434e9ea-dab0-4ad8-bc22-b3f1c43311a8' class='xr-section-summary-in' type='checkbox'  checked><label for='section-0434e9ea-dab0-4ad8-bc22-b3f1c43311a8' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-89e17183-fa23-4e45-bf28-7b6dcff1394b' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-89e17183-fa23-4e45-bf28-7b6dcff1394b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-dbdcc1b7-0036-48eb-a156-96ff34e3e451' class='xr-var-data-in' type='checkbox'><label for='data-dbdcc1b7-0036-48eb-a156-96ff34e3e451' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
+</table></div></div></li><li class='xr-section-item'><input id='section-687449bf-2686-4d95-b9e3-2db2132ff42a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-687449bf-2686-4d95-b9e3-2db2132ff42a' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-90c9e58f-63ca-4a91-b844-e7dfe73d7f36' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-90c9e58f-63ca-4a91-b844-e7dfe73d7f36' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-114d8e04-f403-4f42-8be6-b78524d866c1' class='xr-var-data-in' type='checkbox'><label for='data-114d8e04-f403-4f42-8be6-b78524d866c1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
        0.233333, 0.266667, 0.3     , 0.333333, 0.366667, 0.4     , 0.433333,
        0.466667, 0.5     , 0.533333, 0.566667, 0.6     , 0.633333, 0.666667,
        0.7     , 0.733333, 0.766667, 0.8     , 0.833333, 0.866667, 0.9     ,
@@ -1322,19 +1066,19 @@ Attributes:
        3.266667, 3.3     , 3.333333, 3.366667, 3.4     , 3.433333, 3.466667,
        3.5     , 3.533333, 3.566667, 3.6     , 3.633333, 3.666667, 3.7     ,
        3.733333, 3.766667, 3.8     , 3.833333, 3.866667, 3.9     , 3.933333,
-       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-82e9478f-0615-4fb1-a228-3b87f6272165' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-82e9478f-0615-4fb1-a228-3b87f6272165' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4cf9b385-ccd2-4ef9-a0ad-4edab02c77cd' class='xr-var-data-in' type='checkbox'><label for='data-4cf9b385-ccd2-4ef9-a0ad-4edab02c77cd' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-8d86a460-039c-4583-b010-b7cc889b2abc' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8d86a460-039c-4583-b010-b7cc889b2abc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0cda35de-9671-450f-b1d0-71fce26a1150' class='xr-var-data-in' type='checkbox'><label for='data-0cda35de-9671-450f-b1d0-71fce26a1150' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-b849b6c6-fdf7-4e79-ae0d-65555f07c6e7' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b849b6c6-fdf7-4e79-ae0d-65555f07c6e7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2784c682-3279-49a8-8e70-cedf5a7e8150' class='xr-var-data-in' type='checkbox'><label for='data-2784c682-3279-49a8-8e70-cedf5a7e8150' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
+       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-7ecafa35-bf45-459e-b30b-b51180bfdd59' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-7ecafa35-bf45-459e-b30b-b51180bfdd59' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6aa7ce66-5a37-421d-9f1c-c9ea54f7a203' class='xr-var-data-in' type='checkbox'><label for='data-6aa7ce66-5a37-421d-9f1c-c9ea54f7a203' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-eb36a3e0-d1bd-491e-89b9-56eee03a737c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-eb36a3e0-d1bd-491e-89b9-56eee03a737c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ba9d9614-0b06-467e-b794-e37c512afff3' class='xr-var-data-in' type='checkbox'><label for='data-ba9d9614-0b06-467e-b794-e37c512afff3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-8321cd57-e1f6-4f24-b0a8-d8d3da31a1be' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-8321cd57-e1f6-4f24-b0a8-d8d3da31a1be' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5936b4e1-b54d-4708-a32a-8a90999f34b9' class='xr-var-data-in' type='checkbox'><label for='data-5936b4e1-b54d-4708-a32a-8a90999f34b9' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        ...,
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-09663851-f226-4b30-acaa-d96687ab840d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-09663851-f226-4b30-acaa-d96687ab840d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a8c1348e-8541-4cae-841b-26dce96879ef' class='xr-var-data-in' type='checkbox'><label for='data-a8c1348e-8541-4cae-841b-26dce96879ef' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
+       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-4c9672b9-e68a-4069-97a2-690e936dee51' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4c9672b9-e68a-4069-97a2-690e936dee51' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0bcaead5-1e92-4659-ba80-fc7218c0acc0' class='xr-var-data-in' type='checkbox'><label for='data-0bcaead5-1e92-4659-ba80-fc7218c0acc0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
        [1078, 1078, 1078, ..., 1078, 1078, 1078],
        [1077, 1077, 1077, ..., 1077, 1077, 1077],
        ...,
        [   2,    2,    2, ...,    2,    2,    2],
        [   1,    1,    1, ...,    1,    1,    1],
-       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-1ee1b35a-4ee6-445c-ab59-cc433667641f' class='xr-section-summary-in' type='checkbox'  ><label for='section-1ee1b35a-4ee6-445c-ab59-cc433667641f' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-e6ff56f5-f44b-42ae-ba7e-65634f17897f' class='xr-index-data-in' type='checkbox'/><label for='index-e6ff56f5-f44b-42ae-ba7e-65634f17897f' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333334, 0.06666666666666668,
+       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-bc9b0c4f-3962-4983-af13-0e03db488eb1' class='xr-section-summary-in' type='checkbox'  ><label for='section-bc9b0c4f-3962-4983-af13-0e03db488eb1' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-88604271-b42d-4e93-8ab0-b5bf01433334' class='xr-index-data-in' type='checkbox'/><label for='index-88604271-b42d-4e93-8ab0-b5bf01433334' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333334, 0.06666666666666668,
                               0.1, 0.13333333333333336, 0.16666666666666666,
                               0.2, 0.23333333333333334,  0.2666666666666667,
                               0.3,
@@ -1343,13 +1087,13 @@ Attributes:
                3.9666666666666672,                 4.0,   4.033333333333333,
                 4.066666666666666,                 4.1,   4.133333333333333,
                 4.166666666666667],
-             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-573e0a80-ecd8-46f8-86f3-c3392ac25e81' class='xr-index-data-in' type='checkbox'/><label for='index-573e0a80-ecd8-46f8-86f3-c3392ac25e81' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
+             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-7a2b7039-2c94-4b30-be6d-0ac57372c5f3' class='xr-index-data-in' type='checkbox'/><label for='index-7a2b7039-2c94-4b30-be6d-0ac57372c5f3' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
             ...
                9,    8,    7,    6,    5,    4,    3,    2,    1,    0],
-           dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-de5a5e9b-81a0-4d05-95cf-7c6fd30da76b' class='xr-index-data-in' type='checkbox'/><label for='index-de5a5e9b-81a0-4d05-95cf-7c6fd30da76b' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
+           dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-f13c09aa-a593-4c74-90a0-14755fb7351e' class='xr-index-data-in' type='checkbox'/><label for='index-f13c09aa-a593-4c74-90a0-14755fb7351e' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
             ...
             1910, 1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919],
-           dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-c8e747ba-3fb4-46a7-80dc-57bef3f22cba' class='xr-section-summary-in' type='checkbox'  checked><label for='section-c8e747ba-3fb4-46a7-80dc-57bef3f22cba' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
+           dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-6e47dec9-3b8f-4a21-be83-d20c37625576' class='xr-section-summary-in' type='checkbox'  checked><label for='section-6e47dec9-3b8f-4a21-be83-d20c37625576' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
     &quot;height&quot;: 1080,
     &quot;width&quot;: 1920,
     &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOGCRS[\&quot;WGS 84\&quot;,ENSEMBLE[\&quot;World Geodetic System 1984 ensemble\&quot;,MEMBER[\&quot;World Geodetic System 1984 (Transit)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G730)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G873)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1150)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1674)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1762)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G2139)\&quot;],ELLIPSOID[\&quot;WGS 84\&quot;,6378137,298.257223563,LENGTHUNIT[\&quot;metre\&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&quot;Greenwich\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433]],ID[\&quot;EPSG\&quot;,4326]],CONVERSION[\&quot;UTM zone 35S\&quot;,METHOD[\&quot;Transverse Mercator\&quot;,ID[\&quot;EPSG\&quot;,9807]],PARAMETER[\&quot;Latitude of natural origin\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8801]],PARAMETER[\&quot;Longitude of natural origin\&quot;,27,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8802]],PARAMETER[\&quot;Scale factor at natural origin\&quot;,0.9996,SCALEUNIT[\&quot;unity\&quot;,1],ID[\&quot;EPSG\&quot;,8805]],PARAMETER[\&quot;False easting\&quot;,500000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8806]],PARAMETER[\&quot;False northing\&quot;,10000000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8807]]],CS[Cartesian,2],AXIS[\&quot;(E)\&quot;,east,ORDER[1],LENGTHUNIT[\&quot;metre\&quot;,1]],AXIS[\&quot;(N)\&quot;,north,ORDER[2],LENGTHUNIT[\&quot;metre\&quot;,1]],USAGE[SCOPE[\&quot;Engineering survey, topographic mapping.\&quot;],AREA[\&quot;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&quot;],BBOX[-80,24,0,30]],ID[\&quot;EPSG\&quot;,32735]]&quot;,
@@ -1448,7 +1192,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f338659bf70&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f2d7a9fd6f0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1477,7 +1221,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f332d321ed0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f2d7a9a9cf0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1504,7 +1248,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f332f724d30&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f2d784f2da0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1582,7 +1326,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[########################################] | 100% Completed | 147.41 s
+[########################################] | 100% Completed | 137.88 s
 </pre></div></div>
 </div>
 </section>
@@ -1598,7 +1342,10 @@ for storing, just to see a progress bar. If you are not interested in that, you 
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="01_Camera_Configuration_single_video.html"
@@ -1618,7 +1365,10 @@ for storing, just to see a progress bar. If you are not interested in that, you 
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -1654,7 +1404,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -1662,8 +1412,8 @@ for storing, just to see a progress bar. If you are not interested in that, you 
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1681,7 +1431,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     <br/>
   </p>
 </div>
@@ -1692,7 +1442,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>
