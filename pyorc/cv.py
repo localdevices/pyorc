@@ -8,8 +8,11 @@ from shapely.geometry import Polygon, LineString
 from shapely.affinity import rotate
 from tqdm import tqdm
 from scipy.cluster.vq import vq, kmeans
+from scipy import optimize
 import operator
 
+# default distortion coefficients for no distortion
+DIST_COEFFS = [[0.], [0.], [0.], [0.]]
 
 # criteria for finding subpix corners
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -118,27 +121,26 @@ def _get_dist_coefs(k1):
     return dist
 
 
-def _get_cam_mtx(height, width, c=2.0, f=1.0):
+def _get_cam_mtx(height, width, c=2.0, focal_length=None):
     """
     Get 3x3 camera matrix from lens parameters
 
     :param height: height of image from camera
     :param width: width of image from camera
     :param c: float, optical center (default: 2.)
-    :param f: float, focal length (default: 1.)
+    :param f: float, focal length (optional)
     :return: camera matrix, to be used by cv2.undistort
     """
     # define camera matrix
     mtx = np.eye(3, dtype=np.float32)
-    # mtx[0, 2] = width / c  # define center x
-    # mtx[1, 2] = height / c  # define center y
-    # mtx[0, 0] = f  # define focal length x
-    # mtx[1, 1] = f  # define focal length y
-
     mtx[0, 2] = width / c  # define center x
     mtx[1, 2] = height / c  # define center y
-    mtx[0, 0] = width  # define focal length x
-    mtx[1, 1] = width  # define focal length y
+    if focal_length is None:
+        mtx[0, 0] = width  # define focal length x
+        mtx[1, 1] = width  # define focal length y
+    else:
+        mtx[0, 0] = focal_length  # define focal length x
+        mtx[1, 1] = focal_length  # define focal length y
     return mtx
 
 
@@ -244,83 +246,12 @@ def _get_displacements(cap, start_frame=0, end_frame=None, n_pts=None, split=2, 
     # prepare outputs
     n_frames = int(end_frame + 1) - int(start_frame)
     transforms = np.zeros((n_frames - 1, 3), np.float32)
-
-
     if n_pts is None:
         # use the square root of nr of pixels in a frame to decide on n_pts
         n_pts = int(np.sqrt(len(prev_gray.flatten())))
 
     # split image in smaller chunks if user wants
     prev_pts = _gftt_split(prev_gray, split, n_pts)
-
-    # v = 0
-    # h = 0
-    # ver_split, hor_split = np.int16(np.ceil(np.array(prev_gray.shape) / split))
-    # prev_pts = np.zeros((0, 1, 2), np.float32)
-    # while v < prev_gray.shape[0]:
-    #     while h < prev_gray.shape[1]:
-    #         sub_img = prev_gray[v:v + ver_split, h:h + hor_split]
-    #         # get points over several quadrants
-    #         subimg_pts = cv2.goodFeaturesToTrack(
-    #             sub_img,
-    #             maxCorners=int(n_pts/split**2),
-    #             qualityLevel=0.3,
-    #             minDistance=10,
-    #             blockSize=1
-    #         )
-    #         # add offsets for quadrants
-    #         if subimg_pts is not None:
-    #             subimg_pts[:, :, 0] += h
-    #             subimg_pts[:, :, 1] += v
-    #             prev_pts = np.append(prev_pts, subimg_pts, axis=0)
-    #         h += hor_split
-    #     h = 0
-    #     v += ver_split
-    # # get points over several quadrants
-    # prev_pts = cv2.goodFeaturesToTrack(
-    #     prev_gray,
-    #     maxCorners=n_pts,
-    #     qualityLevel=0.1,
-    #     minDistance=10,
-    #     blockSize=3
-    # )
-    # add start point to matrix
-
-    # get another frame a little bit ahead in time
-    # get start frame and points
-    # cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame + 30)
-    #
-    # success, curr = cap.read()
-    # Convert to grayscale
-    # curr_gray = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
-
-    # # Calculate optical flow
-    # curr_pts, status, err = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, prev_pts, None)
-    # # Calculate optical flow
-    # curr_pts, status, err = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, prev_pts, None)
-
-    # # store curr_pts
-    # positions = np.append(positions, np.swapaxes(curr_pts, 0, 1), axis=0)
-    # stats = np.append(stats, np.swapaxes(status, 0, 1), axis=0)
-    # errs = np.append(errs, np.swapaxes(err, 0, 1), axis=0)
-
-    # import matplotlib.pyplot as plt
-    # import matplotlib
-    # matplotlib.use("Qt5Agg")
-    # plt.imshow(prev_gray, cmap="Greys_r")
-    # x = prev_pts[:, :, 0].flatten()
-    # y = prev_pts[:, :, 1].flatten()
-    # intensity = prev_gray[np.int16(y), np.int16(x)]
-    # # x_curr = prev_pts[intensity<100, :, 0].flatten()
-    # # y_curr = prev_pts[intensity<100, :, 1].flatten()
-    # # x_curr = curr_pts[status.flatten()==1, :, 0].flatten()
-    # # y_curr = curr_pts[status.flatten()==1, :, 1].flatten()
-    # # prev_pts = prev_pts[intensity < 100]
-    #
-    # plt.plot(x, y, ".")
-    # # # plt.plot(x[status.flatten()==0], y[status.flatten()==0], "ro")
-    # # plt.plot(x_curr, y_curr, "r.")
-    # plt.show()
     positions = np.swapaxes(prev_pts, 0, 1)
     # update n_pts to the amount truly found
     n_pts = positions.shape[1]
@@ -511,6 +442,42 @@ def _gftt_split(img, split, n_pts, mask=None):
         h = 0
         v += ver_split
     return pts
+
+def _solvepnp(dst, src, camera_matrix, dist_coeffs):
+    """
+    Short version with preprocessing for cv2.SolvePnP
+
+    Parameters
+    ----------
+    src : list of lists
+        [x, y] with source coordinates, typically cols and rows in image
+    dst : list of lists
+        [x, y, z] with target coordinates after reprojection, can e.g. be in crs [m]
+    camera_matrix : np.ndarray (3x3)
+        Camera intrinsic matrix
+    dist_coeffs : p.ndarray, optional
+        1xN array with distortion coefficients (N = 4, 5 or 8)
+
+    Returns
+    -------
+    succes : int
+        0, 1 for succes or no succes
+    rvec : np.array
+        rotation vector
+    tvec : np.array
+        translation vector
+    """
+    # set points to float32
+    _src = np.float32(src)
+    _dst = np.float32(dst)
+    # import pdb;pdb.set_trace()
+    camera_matrix = np.float32(camera_matrix)
+    dist_coeffs = np.float32(dist_coeffs)
+    # define transformation matrix based on GCPs
+    return cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs)
+
+
+
 
 def m_from_displacement(p1, p2, status):
     """
@@ -791,14 +758,7 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., revers
     https://www.openearth.nl/flamingo/_modules/flamingo/rectification/rectification.html
 
     """
-    # set points to float32
-    _src = np.float32(src)
-    _dst = np.float32(dst)
-    # import pdb;pdb.set_trace()
-    camera_matrix = np.float32(camera_matrix)
-    dist_coeffs = np.float32(dist_coeffs)
-    # define transformation matrix based on GCPs
-    success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs)
+    success, rvec, tvec = _solvepnp(dst, src, camera_matrix, dist_coeffs)
     # convert rotation vector to rotation matrix
     R = cv2.Rodrigues(rvec)[0]
     # assume height of projection plane
@@ -814,6 +774,52 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., revers
         M = np.linalg.inv(np.dot(camera_matrix, R))
     # normalize homography before returning
     return M / M[-1, -1]
+
+def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS):
+    def error_intrinsic(x, src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS):
+        """
+        estimate errors in known points using provided control on camera matrix.
+        returns error in gcps and camera position (if provided)
+        """
+        f = x[0]  # only one parameter to optimize for now, can easily be extended!
+        coord_mean = np.array(dst).mean(axis=0)
+        #     print(coord_mean)
+        _src = np.float32(src)
+        _dst = np.float32(dst) - coord_mean
+        if lens_position is not None:
+            _lens_pos = np.array(lens_position) - coord_mean
+        #         print(_lens_pos)
+
+        camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
+        success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
+
+        # estimate source point location
+        src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
+        src_est = np.array([list(point[0]) for point in src_est])
+
+        dist_xy = _src - src_est
+        dist = (dist_xy ** 2).sum(axis=1) ** 0.5
+        gcp_err = dist.mean()
+        if lens_position is not None:
+            rmat = cv2.Rodrigues(rvec)[0]
+            lens_pos2 = np.array(-np.matrix(rmat).T * np.matrix(tvec))
+            #         import pdb;pdb.set_trace()
+            cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
+        else:
+            cam_err = None
+        err = float(cam_err + 0.05 * gcp_err) if cam_err is not None else gcp_err
+        return err  # assuming gcp pixel distance is about 5 cm
+
+    opt = optimize.minimize(
+        error_intrinsic,
+        x0=[float(width)],
+        args=(src, dst, height, width, c, lens_position),
+        method="Nelder-Mead",
+        bounds=[(float(0.25*width), float(2*width))],tol=1e-6
+    )
+    camera_matrix = _get_cam_mtx(1080, 1920, focal_length=opt.x[0])
+    return camera_matrix, dist_coeffs
+
 
 def get_time_frames(cap, start_frame, end_frame):
     """

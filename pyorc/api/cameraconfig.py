@@ -75,7 +75,7 @@ class CameraConfig:
         lens_pars : dict, optional
             Lens parameters, containing: "k1": float, barrel lens distortion parameter (default: 0.),
             "c": float, optical center (default: 2.),
-            "f": float, focal length (default: 1.)
+            "focal_length": float, focal length (default: width of image frame)
         calibration_video : str, optional
             local path to video file containing a checkerboard pattern. Must be 9x6 if called directly, otherwise use
             ``.calibrate_camera`` explicitly and provide ``chessboard_size`` explicitly. When used, an automated camera
@@ -97,12 +97,14 @@ class CameraConfig:
             self.resolution = resolution
         if lens_position is not None:
             self.set_lens_position(*lens_position)
+        else:
+            self.lens_position = None
         if gcps is not None:
             self.set_gcps(**gcps)
-        if lens_pars is not None:
-            self.set_lens_pars(**lens_pars)
-        else:
-            self.set_lens_pars()
+        self.set_intrinsic(
+            camera_matrix=camera_matrix,
+            lens_pars=lens_pars
+        )
         if calibration_video is not None:
             self.set_lens_calibration(calibration_video, plot=False)
         # camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option
@@ -185,7 +187,7 @@ class CameraConfig:
             amount of dimensions of gcps (can be 2 or 3)
 
         """
-        return len(self.gcps["dst"][0])
+        return len(self.gcps["dst"][0]) if hasattr(self, "gcps") else None
 
     @property
     def shape(self):
@@ -517,7 +519,29 @@ class CameraConfig:
         bbox = Polygon(bbox_xy)
         self.bbox = bbox
 
-    def set_lens_pars(self, k1=0, c=2, f=4):
+
+    def set_intrinsic(self, camera_matrix=None, dist_coeffs=None, lens_pars=None):
+        # first set a default estimate from pose if 3D gcps are available
+        self.set_lens_pars()  # default parameters use width of frame
+
+        if self.gcp_dims == 3:
+            self.camera_matrix, self.dist_coeffs = cv.optimize_intrinsic(
+                self.gcps["src"],
+                self.gcps["dst"],
+                self.height,
+                self.width,
+                lens_position=self.lens_position
+            )
+        if lens_pars is not None:
+            # override with lens parameter set by user
+            self.set_lens_pars(**lens_pars)
+        if camera_matrix is not None and dist_coeffs is not None:
+            # override with
+            self.camera_matrix = camera_matrix
+            self.dist_coeffs = dist_coeffs
+
+
+    def set_lens_pars(self, k1=0., c=2., focal_length=None):
         """Set the lens parameters of the given CameraConfig
 
         Parameters
@@ -533,10 +557,11 @@ class CameraConfig:
 
         """
         assert (isinstance(k1, (int, float))), "k1 must be a float"
-        assert (isinstance(c, (int, float))), "k1 must be a float"
-        assert (isinstance(f, (int, float))), "k1 must be a float"
+        assert (isinstance(c, (int, float))), "c must be a float"
+        if focal_length is not None:
+            assert (isinstance(focal_length, (int, float, None))), "f must be a float"
         self.dist_coeffs = cv._get_dist_coefs(k1)
-        self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, f=f)
+        self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, focal_length=focal_length)
 
     def set_gcps(self, src, dst, z_0, h_ref=None, crs=None):
         """
@@ -674,7 +699,9 @@ class CameraConfig:
             points = [Point(p[0], p[1]) for p in self.gcps["dst"]]
 
         if not camera:
-            if hasattr(self, "lens_position") and not camera:
+            if self.lens_position is not None and not camera:
+            #
+            # if hasattr(self, "lens_position") and not camera:
                 points.append(Point(self.lens_position[0], self.lens_position[1]))
             # transform points in case a crs is provided
             if hasattr(self, "crs"):

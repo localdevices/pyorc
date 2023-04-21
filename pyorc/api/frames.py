@@ -62,8 +62,9 @@ class Frames(ORCBase):
         coords_drop = list(set(self._obj.coords) - set(self._obj.dims))
         obj = self._obj.drop_vars(coords_drop)
         # get frames and shifted frames in time
-        frames1 = obj.shift(time=1)[1:]
-        frames2 = obj[1:]
+        frames1 = obj.shift(time=1)[1:].chunk({"time": 10})
+        frames2 = obj[1:].chunk({"time": 10})
+
         # get the cols and rows coordinates of the expected results
         cols, rows = piv_process.get_piv_size(
             image_size=frames1[0].shape,

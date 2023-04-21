@@ -121,7 +121,7 @@ def lens_pars():
     return {
         "k1": 0,
         "c": 2.0,
-        "f": 1.0
+        "focal_length": 1920.
     }
 
 
