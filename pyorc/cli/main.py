@@ -210,6 +210,7 @@ def camera_config(
                 crs=crs,
                 crs_gcps=crs_gcps,
                 frame_sample=frame_sample,
+                lens_position=lens_position,
                 logger=logger
             )
             if len(src) != len(dst):

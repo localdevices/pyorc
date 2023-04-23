@@ -1,14 +1,16 @@
 import click
+import cv2
 import geopandas as gpd
 import hashlib
 import json
 import logging
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 import pyorc
 import yaml
 
-from pyorc import Video, helpers, CameraConfig
+from pyorc import Video, helpers, CameraConfig, cv
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect
 from shapely.geometry import Point
 
@@ -31,13 +33,13 @@ def get_corners_interactive(fn, gcps, crs=None, crs_gcps=None, frame_sample=0., 
 
     # setup a cam_config without
 
-def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0., logger=logging):
+def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0., lens_position=None, logger=logging):
     vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     if crs_gcps is not None:
         dst = helpers.xyz_transform(dst, crs_from=crs_gcps, crs_to=4326)
-    selector = GcpSelect(frame, dst, crs=crs, logger=logger)
+    selector = GcpSelect(frame, dst, crs=crs, lens_position=lens_position, logger=logger)
     # uncomment below to test the interaction, not suitable for automated unit test
     plt.show(block=True)
     return selector.src
@@ -52,6 +54,27 @@ def get_file_hash(fn):
             hash256.update(byte_block)
     return hash256
 
+def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
+    # optimize cam matrix and dist coeffs with provided control points
+    camera_matrix, dist_coeffs = cv.optimize_intrinsic(
+        src,
+        dst,
+        height,
+        width,
+        c=c,
+        lens_position=lens_position,
+        dist_coeffs=cv.DIST_COEFFS
+    )
+    # once optimized, solve the perspective, and estimate the GCP locations with the perspective rot/trans
+    coord_mean = np.array(dst).mean(axis=0)
+    _src = np.float32(src)
+    _dst = np.float32(dst) - coord_mean
+    success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
+
+    # estimate source point location
+    src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
+    src_est = np.array([list(point[0]) for point in src_est])
+    return src_est
 
 def parse_json(ctx, param, value):
     if value is None:

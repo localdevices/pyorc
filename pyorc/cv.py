@@ -817,7 +817,7 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_c
         method="Nelder-Mead",
         bounds=[(float(0.25*width), float(2*width))],tol=1e-6
     )
-    camera_matrix = _get_cam_mtx(1080, 1920, focal_length=opt.x[0])
+    camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0])
     return camera_matrix, dist_coeffs
 
 

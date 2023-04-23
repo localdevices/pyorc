@@ -11,6 +11,7 @@ from matplotlib.widgets import Button
 from matplotlib.patches import Polygon
 from mpl_toolkits.axes_grid1 import Divider, Size
 from pyorc import helpers
+from pyorc.cli import cli_utils
 
 path_effects = [
     patheffects.Stroke(linewidth=2, foreground="w"),
@@ -26,6 +27,7 @@ corner_labels = [
 class BaseSelect:
     def __init__(self, img, dst, crs=None, buffer=0.0002, zoom_level=19, logger=logging):
         self.logger = logger
+        self.height, self.width = img.shape[0:2]
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
         # fig = plt.figure(figsize=(12, 7))
@@ -232,7 +234,15 @@ class AoiSelect(BaseSelect):
         super(AoiSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
         self.camera_config = camera_config
-        self.p_gcps, = self.ax.plot(*list(zip(*src)), "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
+        self.p_gcps, = self.ax.plot(
+            *list(zip(*src)),
+            "o",
+            color="w",
+            markeredgecolor="k",
+            markersize=10,
+            zorder=3,
+            label="GCPs"
+        )
         self.pts_t_gcps = [
             self.ax.annotate(
                 n + 1,
@@ -334,7 +344,7 @@ class GcpSelect(BaseSelect):
     Selector tool to provide source GCP coordinates to pyOpenRiverCam
     """
 
-    def __init__(self, img, dst, crs=None, logger=logging):
+    def __init__(self, img, dst, crs=None, lens_position=None, logger=logging):
         super(GcpSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
         self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
@@ -351,6 +361,18 @@ class GcpSelect(BaseSelect):
             [], [], "o",
             **kwargs
         )
+        if len(dst[0]) == 3:
+            # plot an empty set of crosses for the fitted gcp row columns after optimization of perspective
+            self.p_fit, = self.ax.plot(
+                [], [], "+",
+                markersize=10,
+                color="r",
+                zorder=4,
+                label="Fitted GCPs"
+           )
+        else:
+            self.p_fit = None
+
         xloc = self.ax.get_xlim()[0] + 50
         yloc = self.ax.get_ylim()[-1] + 50
         self.title = self.ax.text(
@@ -361,8 +383,38 @@ class GcpSelect(BaseSelect):
             path_effects=path_effects
         )
         self.ax_geo.legend()
-        # TODO: if no crs provided, then provide a normal axes with equal lengths on x and y axis
+        self.ax.legend()
+        self.lens_position = lens_position
+        # add dst coords in the intended CRS
+        if crs is not None:
+            self.dst_crs = helpers.xyz_transform(self.dst, 4326, crs)
+        else:
+            self.dst_crs = self.dst
         self.required_clicks = len(self.dst)
+
+    def on_left_click(self, event):
+        super(GcpSelect, self).on_left_click(event)
+        # figure out if the fitted control points must be computed and plotted
+        if self.p_fit is not None:
+            if len(self.src) == self.required_clicks:
+                src_fit = cli_utils.get_gcps_optimized_fit(
+                    self.src,
+                    self.dst_crs,
+                    self.height,
+                    self.width,
+                    c=2.,
+                    lens_position=self.lens_position
+                )
+                self.p_fit.set_data(*list(zip(*src_fit)))
+            else:
+                self.p_fit.set_data([], [])
+
+    def on_right_click(self, event):
+        super(GcpSelect, self).on_right_click(event)
+        print(f"Amount of clicked points: {len(self.src)}")
+        if self.p_fit is not None:
+            if len(self.src) < self.required_clicks:
+                self.p_fit.set_data([], [])
 
     def on_click(self, event):
         super(GcpSelect, self).on_click(event)
