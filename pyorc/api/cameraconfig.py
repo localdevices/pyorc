@@ -524,7 +524,8 @@ class CameraConfig:
         # first set a default estimate from pose if 3D gcps are available
         self.set_lens_pars()  # default parameters use width of frame
 
-        if self.gcp_dims == 3:
+        if len(self.gcps["src"]) >= 4:
+        # if self.gcp_dims == 3:
             self.camera_matrix, self.dist_coeffs = cv.optimize_intrinsic(
                 self.gcps["src"],
                 self.gcps["dst"],

@@ -359,7 +359,6 @@ Camera configuration: {:s}
                 h = img.shape[0]
                 w = img.shape[1]
                 img = cv2.warpAffine(img, self.ms[n], (w, h))
-
             # if lens_corr:
             #     if self.camera_config.lens_pars is not None:
             # apply lens distortion correction

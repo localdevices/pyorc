@@ -776,14 +776,15 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., revers
     return M / M[-1, -1]
 
 def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS):
-    def error_intrinsic(x, src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS):
+    def error_intrinsic(x, src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS, flags=None):
         """
         estimate errors in known points using provided control on camera matrix.
         returns error in gcps and camera position (if provided)
         """
         f = x[0]  # only one parameter to optimize for now, can easily be extended!
+        dist_coeffs[0][0] = float(x[1])
+        dist_coeffs[1][0] = float(x[2])
         coord_mean = np.array(dst).mean(axis=0)
-        #     print(coord_mean)
         _src = np.float32(src)
         _dst = np.float32(dst) - coord_mean
         if lens_position is not None:
@@ -791,8 +792,10 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_c
         #         print(_lens_pos)
 
         camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
-        success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
-
+        if flags is not None:
+            success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs), flags=flags)
+        else:
+            success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
         # estimate source point location
         src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
         src_est = np.array([list(point[0]) for point in src_est])
@@ -800,24 +803,35 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_c
         dist_xy = _src - src_est
         dist = (dist_xy ** 2).sum(axis=1) ** 0.5
         gcp_err = dist.mean()
+        print(f"Error: {gcp_err}")
         if lens_position is not None:
             rmat = cv2.Rodrigues(rvec)[0]
             lens_pos2 = np.array(-np.matrix(rmat).T * np.matrix(tvec))
-            #         import pdb;pdb.set_trace()
             cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
         else:
             cam_err = None
         err = float(cam_err + 0.05 * gcp_err) if cam_err is not None else gcp_err
         return err  # assuming gcp pixel distance is about 5 cm
 
+    if len(dst) == 4:
+        flags=cv2.SOLVEPNP_P3P
+        # add an extra column with zeros for solvepnp
+        dst = np.c_[dst, np.zeros(4)]
+    else:
+        flags = None
     opt = optimize.minimize(
         error_intrinsic,
-        x0=[float(width)],
-        args=(src, dst, height, width, c, lens_position),
+        x0=[float(width), 0, 0],
+        args=(src, dst, height, width, c, lens_position, DIST_COEFFS, flags),
         method="Nelder-Mead",
-        bounds=[(float(0.25*width), float(2*width))],tol=1e-6
+        bounds=[(float(0.25*width), float(2*width)), (-0.5, 0.5), (-0.5, 0.5)],
+        tol=1e-6,
     )
+
     camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0])
+    dist_coeffs = DIST_COEFFS
+    dist_coeffs[0][0] = opt.x[1]
+    dist_coeffs[1][0] = opt.x[2]
     return camera_matrix, dist_coeffs
 
 
