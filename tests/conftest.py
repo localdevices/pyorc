@@ -33,6 +33,10 @@ def gcps_fn():
 def cam_config_fn():
     return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.json")
 
+@pytest.fixture
+def cam_config_6gcps_fn():
+    return os.path.join(EXAMPLE_DATA_DIR, "geul", "dk_cam_config.json")
+
 
 @pytest.fixture
 def recipe_yml():
@@ -98,7 +102,8 @@ def gcps(gcps_src, gcps_dst):
 
 @pytest.fixture
 def lens_position():
-    return [642732.6705, 8304289.010, 1188.5]
+    return None
+    # return [642732.6705, 8304289.010, 1188.5]
 
 
 @pytest.fixture
@@ -157,7 +162,6 @@ def cam_config_without_aoi(lens_position, gcps):
         crs=32735
         )
 
-
 @pytest.fixture
 def cam_config_calib():
     return pyorc.CameraConfig(
@@ -206,11 +210,28 @@ def vid_file():
 
 
 @pytest.fixture
+def vid_file_6gcps():
+    return os.path.join(EXAMPLE_DATA_DIR, "geul", "dk_control.mp4")
+
+
+@pytest.fixture
 def vid(vid_file):
     vid = pyorc.Video(
         vid_file,
         start_frame=0,
         end_frame=2,
+    )
+    yield vid
+
+
+@pytest.fixture
+def vid_6gcps_cam_config(vid_file_6gcps, cam_config_6gcps_fn):
+    vid = pyorc.Video(
+        vid_file_6gcps,
+        start_frame=0,
+        end_frame=2,
+        camera_config=cam_config_6gcps_fn,
+        h_a=92.36
     )
     yield vid
 

@@ -179,6 +179,23 @@ def test_cv_undistort_points(cam_config):
     # check if points are back to originals after back adn forth undistortion and distortion
     assert(np.allclose(src, src_back_dist))
 
+def test_cv_unproject_points(vid_6gcps_cam_config):
+    import cv2
+    cam_config = vid_6gcps_cam_config.camera_config
+
+    src = cam_config.gcps["src"]
+    dst = cam_config.gcps["dst"]
+
+    camera_matrix = cam_config.camera_matrix
+    dist_coeffs = cam_config.dist_coeffs
+    # first get the rvec and tvec
+    success, rvec, tvec = cv._solvepnp(dst, src, camera_matrix, dist_coeffs)
+    zs = [pt[-1] for pt in dst]
+    test = cv.unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
+    # now back project and compare if the results are nearly identical
+    src_est, jacobian = cv2.projectPoints(np.float32(np.array(test)), rvec, tvec, np.array(camera_matrix), np.array(dist_coeffs))
+    src_est = np.array([list(point[0]) for point in src_est])
+    assert(np.allclose(np.float32(np.array(src)), np.float32(src_est), atol=1))
 
 def test_camera_calib(cam_config_calib, calib_video):
     cam_config_calib.set_lens_calibration(calib_video, max_imgs=5, plot=False, progress_bar=False)

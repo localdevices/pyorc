@@ -39,8 +39,7 @@ class CameraConfig:
             corners=None,
             gcps=None,
             lens_pars=None,
-            calibration_video=None
-
+            calibration_video=None,
     ):
         """
 
@@ -64,15 +63,16 @@ class CameraConfig:
         corners : list of lists of floats (2)
             [x, y] coordinates defining corners of area of interest in camera cols/rows, bbox will be computed from this
         gcps : dict
-            Can contain "src": list of 4 lists, with column, row locations in objective of control points,
-            "dst": list of 4 lists, with x, y locations (local or global coordinate reference system) of control points,
+            Can contain "src": list of lists, with column, row locations in objective of control points,
+            "dst": list of lists, with x, y or x, y, z locations (local or global coordinate reference system) of
+                control points,
             "h_ref": float, measured water level [m] in local reference system (e.g. from staff gauge or pressure gauge)
             during gcp survey,
             "z_0": float, water level [m] in global reference system (e.g. from used GPS system CRS). This must be in
             the same vertical reference as the measured bathymetry and other survey points,
             "crs": int, str or CRS object, CRS in which "dst" points are measured. If None, a local coordinate system is
             assumed (e.g. from spirit level).
-        lens_pars : dict, optional
+        lens_pars (deprecated) : dict, optional
             Lens parameters, containing: "k1": float, barrel lens distortion parameter (default: 0.),
             "c": float, optical center (default: 2.),
             "focal_length": float, focal length (default: width of image frame)
@@ -86,12 +86,13 @@ class CameraConfig:
         assert (isinstance(window_size, int)), 'window_size must be of type "int"'
         self.height = height
         self.width = width
+        self.is_nadir = False
         if crs is not None:
             try:
                 crs = CRS.from_user_input(crs)
             except CRSError:
                 raise CRSError(f'crs "{crs}" is not a valid Coordinate Reference System')
-            assert (crs.is_geographic == 0), "Provided crs must be projected with units like [m]"
+            assert (crs.is_geographic == 0), "Prodstvided crs must be projected with units like [m]"
             self.crs = crs.to_wkt()
         if resolution is not None:
             self.resolution = resolution
@@ -101,17 +102,23 @@ class CameraConfig:
             self.lens_position = None
         if gcps is not None:
             self.set_gcps(**gcps)
-        self.set_intrinsic(
-            camera_matrix=camera_matrix,
-            lens_pars=lens_pars
-        )
+        if camera_matrix is None or dist_coeffs is None:
+            if self.is_nadir:
+                # with nadir, no perspective can be constructed, hence, camera matrix and dist coeffs will be set to default values
+                self.camera_matrix = cv._get_cam_mtx(self.height, self.width)
+                self.dist_coeffs = cv.DIST_COEFFS
+            # camera pars are incomplete and need to be derived
+            else:
+                self.set_intrinsic(
+                    camera_matrix=camera_matrix,
+                    lens_pars=lens_pars
+                )
+        else:
+            # camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option
+            self.camera_matrix = camera_matrix
+            self.dist_coeffs = dist_coeffs
         if calibration_video is not None:
             self.set_lens_calibration(calibration_video, plot=False)
-        # camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option
-        if camera_matrix is not None:
-            self.camera_matrix = camera_matrix
-        if dist_coeffs is not None:
-            self.dist_coeffs = dist_coeffs
         if bbox is not None:
             self.bbox = bbox
         if window_size is not None:
@@ -188,6 +195,23 @@ class CameraConfig:
 
         """
         return len(self.gcps["dst"][0]) if hasattr(self, "gcps") else None
+
+    @property
+    def is_nadir(self):
+        """
+        Returns if the camera configuration belongs to nadir video
+
+        Returns
+        -------
+        is_nadir : bool
+            False if not nadir, True if nadir
+
+        """
+        return self._is_nadir
+
+    @is_nadir.setter
+    def is_nadir(self, nadir_prop):
+        self._is_nadir = nadir_prop
 
     @property
     def shape(self):
@@ -526,7 +550,7 @@ class CameraConfig:
 
         if len(self.gcps["src"]) >= 4:
         # if self.gcp_dims == 3:
-            self.camera_matrix, self.dist_coeffs = cv.optimize_intrinsic(
+            self.camera_matrix, self.dist_coeffs, err = cv.optimize_intrinsic(
                 self.gcps["src"],
                 self.gcps["dst"],
                 self.height,
@@ -570,9 +594,9 @@ class CameraConfig:
 
         Parameters
         ----------
-        src : list of lists (4 or 6+)
+        src : list of lists (2, 4 or 6+)
             [x, y] pairs of columns and rows in the frames of the original video
-        dst : list of lists (4 or 6+)
+        dst : list of lists (2, 4 or 6+)
             [x, y] or [x, y, z] pairs of real world coordinates in the given coordinate reference system.
         z_0 : float
             Water level measured in global reference system such as a geoid or ellipsoid used
@@ -616,6 +640,7 @@ class CameraConfig:
         # if there is no h_ref, then no local gauge system, so set h_ref to zero
         # check if 2 points are available
         if len(src) == 2:
+            self.is_nadir = True
             src, dst = cv._get_gcps_2_4(src, dst, self.width, self.height)
         if h_ref is None:
             h_ref = 0.

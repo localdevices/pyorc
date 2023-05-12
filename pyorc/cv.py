@@ -470,7 +470,9 @@ def _solvepnp(dst, src, camera_matrix, dist_coeffs):
     # set points to float32
     _src = np.float32(src)
     _dst = np.float32(dst)
-    # import pdb;pdb.set_trace()
+    if dst.shape == (4, 2):
+        _dst = np.c_[_dst, np.zeros(4)]
+
     camera_matrix = np.float32(camera_matrix)
     dist_coeffs = np.float32(dist_coeffs)
     # define transformation matrix based on GCPs
@@ -726,6 +728,54 @@ def get_M_2D(src, dst, reverse=False):
         M = cv2.getPerspectiveTransform(_src, _dst)
     return M
 
+def _Rt_to_M(rvec, tvec, camera_matrix, z=0., reverse=False):
+    R = cv2.Rodrigues(rvec)[0]
+    # assume height of projection plane
+    R[:, 2] = R[:, 2] * z
+    # add translation vector
+    R[:, 2] = R[:, 2] + tvec.flatten()
+    # compute homography
+    if reverse:
+        # From perspective to objective
+        M = np.dot(camera_matrix, R)
+    else:
+        # from objective to perspective
+        M = np.linalg.inv(np.dot(camera_matrix, R))
+    # normalize homography before returning
+    return M / M[-1, -1]
+
+def unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs):
+    """
+    Reverse projects points from the image to the 3D world. As points on the objective are a ray line in
+    the real world, a x, y, z coordinate can only be reconstructed if the points have one known coordinate (z).
+
+    Parameters
+    ----------
+    src
+    rvec
+    tvec
+    camera_matrix
+    dist_coeffs
+    z
+
+    Returns
+    -------
+
+    """
+    src = np.float32(np.atleast_1d(src))
+    # first undistort points
+    src = np.float32(np.array(undistort_points(src, camera_matrix, dist_coeffs)))
+    zs = np.atleast_1d(zs)
+    dst = []
+    assert(len(zs)==len(src)), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(zs)}"
+    for pt, z in zip(src, zs):
+        M = _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=False)
+        x, y = list(cv2.perspectiveTransform(pt[None, None, ...], M)[0][0])
+        dst.append([x, y, z])
+    return dst
+
+
+
 def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., reverse=False):
     """
     Retrieve homography matrix for between (6+) 2D src and (6+) 3D dst (x, y, z) points
@@ -759,29 +809,30 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., revers
 
     """
     success, rvec, tvec = _solvepnp(dst, src, camera_matrix, dist_coeffs)
-    # convert rotation vector to rotation matrix
-    R = cv2.Rodrigues(rvec)[0]
-    # assume height of projection plane
-    R[:, 2] = R[:, 2] * z
-    # add translation vector
-    R[:, 2] = R[:, 2] + tvec.flatten()
-    # compute homography
-    if reverse:
-        # From perspective to objective
-        M = np.dot(camera_matrix, R)
-    else:
-        # from objective to perspective
-        M = np.linalg.inv(np.dot(camera_matrix, R))
-    # normalize homography before returning
-    return M / M[-1, -1]
+    return _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=reverse)
+    # # convert rotation vector to rotation matrix
+    # R = cv2.Rodrigues(rvec)[0]
+    # # assume height of projection plane
+    # R[:, 2] = R[:, 2] * z
+    # # add translation vector
+    # R[:, 2] = R[:, 2] + tvec.flatten()
+    # # compute homography
+    # if reverse:
+    #     # From perspective to objective
+    #     M = np.dot(camera_matrix, R)
+    # else:
+    #     # from objective to perspective
+    #     M = np.linalg.inv(np.dot(camera_matrix, R))
+    # # normalize homography before returning
+    # return M / M[-1, -1]
 
-def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS):
+def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
     def error_intrinsic(x, src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS, flags=None):
         """
         estimate errors in known points using provided control on camera matrix.
         returns error in gcps and camera position (if provided)
         """
-        f = x[0]  # only one parameter to optimize for now, can easily be extended!
+        f = x[0]*width  # only one parameter to optimize for now, can easily be extended!
         dist_coeffs[0][0] = float(x[1])
         dist_coeffs[1][0] = float(x[2])
         coord_mean = np.array(dst).mean(axis=0)
@@ -797,20 +848,26 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_c
         else:
             success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
         # estimate source point location
-        src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
-        src_est = np.array([list(point[0]) for point in src_est])
-
-        dist_xy = _src - src_est
-        dist = (dist_xy ** 2).sum(axis=1) ** 0.5
-        gcp_err = dist.mean()
-        print(f"Error: {gcp_err}")
-        if lens_position is not None:
-            rmat = cv2.Rodrigues(rvec)[0]
-            lens_pos2 = np.array(-np.matrix(rmat).T * np.matrix(tvec))
-            cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
+        print(x)
+        if success:
+            # src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
+            # estimate destination locations from pose
+            dst_est = unproject_points(_src, _dst[:, -1], rvec, tvec, camera_matrix, dist_coeffs)
+            # src_est = np.array([list(point[0]) for point in src_est])
+            dist_xy = _dst - dst_est
+            dist = (dist_xy ** 2).sum(axis=1) ** 0.5
+            gcp_err = dist.mean()
+            print(f"Error: {gcp_err}")
+            # print(f"Parameters: {x}")
+            if lens_position is not None:
+                rmat = cv2.Rodrigues(rvec)[0]
+                lens_pos2 = np.array(-np.matrix(rmat).T * np.matrix(tvec))
+                cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
+            else:
+                cam_err = None
+            err = float(cam_err + gcp_err) if cam_err is not None else gcp_err
         else:
-            cam_err = None
-        err = float(cam_err + 0.05 * gcp_err) if cam_err is not None else gcp_err
+            err = 100
         return err  # assuming gcp pixel distance is about 5 cm
 
     if len(dst) == 4:
@@ -819,20 +876,19 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None, dist_c
         dst = np.c_[dst, np.zeros(4)]
     else:
         flags = None
-    opt = optimize.minimize(
-        error_intrinsic,
-        x0=[float(width), 0, 0],
-        args=(src, dst, height, width, c, lens_position, DIST_COEFFS, flags),
-        method="Nelder-Mead",
-        bounds=[(float(0.25*width), float(2*width)), (-0.5, 0.5), (-0.5, 0.5)],
-        tol=1e-6,
-    )
 
-    camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0])
+    opt = optimize.differential_evolution(
+        error_intrinsic,
+        bounds=[(float(0.25), float(2)), (-0.5, 0.5), (-0.5, 0.5)],
+        args=(src, dst, height, width, c, lens_position, DIST_COEFFS, flags),
+        atol=0.001 # one mm
+    )
+    camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0]*width)
     dist_coeffs = DIST_COEFFS
     dist_coeffs[0][0] = opt.x[1]
     dist_coeffs[1][0] = opt.x[2]
-    return camera_matrix, dist_coeffs
+    print(opt)
+    return camera_matrix, dist_coeffs, opt.fun
 
 
 def get_time_frames(cap, start_frame, end_frame):

@@ -28,6 +28,7 @@ class BaseSelect:
     def __init__(self, img, dst, crs=None, buffer=0.0002, zoom_level=19, logger=logging):
         self.logger = logger
         self.height, self.width = img.shape[0:2]
+        self.crs = crs
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
         # fig = plt.figure(figsize=(12, 7))
@@ -347,9 +348,9 @@ class GcpSelect(BaseSelect):
     def __init__(self, img, dst, crs=None, lens_position=None, logger=logging):
         super(GcpSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
-        self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
+        self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", markersize=10, zorder=3, label="Clicked control points")
         kwargs = dict(
-            color="r",
+            color="c",
             markeredgecolor="w",
             zorder=4,
             markersize=10,
@@ -361,14 +362,14 @@ class GcpSelect(BaseSelect):
             [], [], "o",
             **kwargs
         )
-        if len(dst[0]) == 3:
+        if len(dst) >= 4:
             # plot an empty set of crosses for the fitted gcp row columns after optimization of perspective
             self.p_fit, = self.ax.plot(
                 [], [], "+",
                 markersize=10,
                 color="r",
                 zorder=4,
-                label="Fitted GCPs"
+                label="Fitted control_points"
            )
         else:
             self.p_fit = None
@@ -391,13 +392,17 @@ class GcpSelect(BaseSelect):
         else:
             self.dst_crs = self.dst
         self.required_clicks = len(self.dst)
+        self.camera_matrix = None
+        self.dist_coeffs = None
 
     def on_left_click(self, event):
         super(GcpSelect, self).on_left_click(event)
         # figure out if the fitted control points must be computed and plotted
         if self.p_fit is not None:
             if len(self.src) == self.required_clicks:
-                src_fit = cli_utils.get_gcps_optimized_fit(
+                self.title.set_text("Fitting pose and camera parameters...")
+                self.ax.figure.canvas.draw()
+                src_fit, dst_fit, camera_matrix, dist_coeffs, err = cli_utils.get_gcps_optimized_fit(
                     self.src,
                     self.dst_crs,
                     self.height,
@@ -406,12 +411,15 @@ class GcpSelect(BaseSelect):
                     lens_position=self.lens_position
                 )
                 self.p_fit.set_data(*list(zip(*src_fit)))
+                self.camera_matrix = camera_matrix
+                self.dist_coeffs = dist_coeffs
+                self.title.set_text('Pose and camera parameters fitted (see "+"), average x, y distance error: {:1.3f} m.'.format(err))
+                self.ax.figure.canvas.draw()
             else:
                 self.p_fit.set_data([], [])
 
     def on_right_click(self, event):
         super(GcpSelect, self).on_right_click(event)
-        print(f"Amount of clicked points: {len(self.src)}")
         if self.p_fit is not None:
             if len(self.src) < self.required_clicks:
                 self.p_fit.set_data([], [])
