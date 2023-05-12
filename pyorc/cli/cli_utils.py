@@ -85,7 +85,8 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
     coord_mean = np.array(dst).mean(axis=0)
     _src = np.float32(src)
     _dst = np.float32(dst) - coord_mean
-    _dst = np.c_[_dst, np.zeros(4)]
+    if np.shape(_dst) == (4, 2):
+        _dst = np.c_[_dst, np.zeros(4)]
     success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
 
     # estimate source point location
