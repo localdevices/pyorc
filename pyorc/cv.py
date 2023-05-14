@@ -470,8 +470,13 @@ def _solvepnp(dst, src, camera_matrix, dist_coeffs):
     # set points to float32
     _src = np.float32(src)
     _dst = np.float32(dst)
-    if dst.shape == (4, 2):
+
+    if _dst.shape == (4, 2):
+        flags = cv2.SOLVEPNP_P3P
+        # if 4 x, y points are provided, add a column with zeros
         _dst = np.c_[_dst, np.zeros(4)]
+    else:
+        flags = cv2.SOLVEPNP_ITERATIVE
 
     camera_matrix = np.float32(camera_matrix)
     dist_coeffs = np.float32(dist_coeffs)
@@ -764,10 +769,18 @@ def unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs):
     """
     src = np.float32(np.atleast_1d(src))
     # first undistort points
-    src = np.float32(np.array(undistort_points(src, camera_matrix, dist_coeffs)))
+    src = np.float32(
+        np.array(
+            undistort_points(
+                src,
+                camera_matrix,
+                dist_coeffs
+            )
+        )
+    )
     zs = np.atleast_1d(zs)
     dst = []
-    assert(len(zs)==len(src)), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(zs)}"
+    assert(len(zs) == len(src)), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(zs)}"
     for pt, z in zip(src, zs):
         M = _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=False)
         x, y = list(cv2.perspectiveTransform(pt[None, None, ...], M)[0][0])
@@ -810,24 +823,9 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., revers
     """
     success, rvec, tvec = _solvepnp(dst, src, camera_matrix, dist_coeffs)
     return _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=reverse)
-    # # convert rotation vector to rotation matrix
-    # R = cv2.Rodrigues(rvec)[0]
-    # # assume height of projection plane
-    # R[:, 2] = R[:, 2] * z
-    # # add translation vector
-    # R[:, 2] = R[:, 2] + tvec.flatten()
-    # # compute homography
-    # if reverse:
-    #     # From perspective to objective
-    #     M = np.dot(camera_matrix, R)
-    # else:
-    #     # from objective to perspective
-    #     M = np.linalg.inv(np.dot(camera_matrix, R))
-    # # normalize homography before returning
-    # return M / M[-1, -1]
 
 def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
-    def error_intrinsic(x, src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS, flags=None):
+    def error_intrinsic(x, src, dst, height, width, c=2., lens_position=None, dist_coeffs=DIST_COEFFS):
         """
         estimate errors in known points using provided control on camera matrix.
         returns error in gcps and camera position (if provided)
@@ -835,26 +833,27 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
         f = x[0]*width  # only one parameter to optimize for now, can easily be extended!
         dist_coeffs[0][0] = float(x[1])
         dist_coeffs[1][0] = float(x[2])
+        zs = np.zeros(4) if len(dst[0]) == 2 else np.array(dst)[:, -1]
         coord_mean = np.array(dst).mean(axis=0)
-        _src = np.float32(src)
+        # _src = np.float32(src)
         _dst = np.float32(dst) - coord_mean
         if lens_position is not None:
             _lens_pos = np.array(lens_position) - coord_mean
-        #         print(_lens_pos)
 
         camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
-        if flags is not None:
-            success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs), flags=flags)
-        else:
-            success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
+        success, rvec, tvec = _solvepnp(_dst, src, camera_matrix, dist_coeffs)
+        # if flags is not None:
+        #     success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs), flags=flags)
+        # else:
+        #     success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
         # estimate source point location
         print(x)
         if success:
             # src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
             # estimate destination locations from pose
-            dst_est = unproject_points(_src, _dst[:, -1], rvec, tvec, camera_matrix, dist_coeffs)
+            dst_est = unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
             # src_est = np.array([list(point[0]) for point in src_est])
-            dist_xy = _dst - dst_est
+            dist_xy = np.array(_dst)[:, 0:2] - np.array(dst_est)[0:2]
             dist = (dist_xy ** 2).sum(axis=1) ** 0.5
             gcp_err = dist.mean()
             print(f"Error: {gcp_err}")
@@ -870,17 +869,17 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
             err = 100
         return err  # assuming gcp pixel distance is about 5 cm
 
-    if len(dst) == 4:
-        flags=cv2.SOLVEPNP_P3P
-        # add an extra column with zeros for solvepnp
-        dst = np.c_[dst, np.zeros(4)]
-    else:
-        flags = None
-
+    # if len(dst) == 4:
+    #     flags = cv2.SOLVEPNP_P3P
+    #     # add an extra column with zeros for solvepnp
+    #     dst = np.c_[dst, np.zeros(4)]
+    # else:
+    #     flags = cv2.SOLVEPNP_ITERATIVE
+    #
     opt = optimize.differential_evolution(
         error_intrinsic,
         bounds=[(float(0.25), float(2)), (-0.5, 0.5), (-0.5, 0.5)],
-        args=(src, dst, height, width, c, lens_position, DIST_COEFFS, flags),
+        args=(src, dst, height, width, c, lens_position, DIST_COEFFS),
         atol=0.001 # one mm
     )
     camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0]*width)
