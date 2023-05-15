@@ -40,6 +40,7 @@ class CameraConfig:
             gcps=None,
             lens_pars=None,
             calibration_video=None,
+            is_nadir=False
     ):
         """
 
@@ -86,7 +87,7 @@ class CameraConfig:
         assert (isinstance(window_size, int)), 'window_size must be of type "int"'
         self.height = height
         self.width = width
-        self.is_nadir = False
+        self.is_nadir = is_nadir
         if crs is not None:
             try:
                 crs = CRS.from_user_input(crs)

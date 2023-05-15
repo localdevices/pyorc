@@ -833,10 +833,10 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
         f = x[0]*width  # only one parameter to optimize for now, can easily be extended!
         dist_coeffs[0][0] = float(x[1])
         dist_coeffs[1][0] = float(x[2])
-        zs = np.zeros(4) if len(dst[0]) == 2 else np.array(dst)[:, -1]
         coord_mean = np.array(dst).mean(axis=0)
         # _src = np.float32(src)
         _dst = np.float32(dst) - coord_mean
+        zs = np.zeros(4) if len(_dst[0]) == 2 else np.array(_dst)[:, -1]
         if lens_position is not None:
             _lens_pos = np.array(lens_position) - coord_mean
 
@@ -853,7 +853,7 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
             # estimate destination locations from pose
             dst_est = unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
             # src_est = np.array([list(point[0]) for point in src_est])
-            dist_xy = np.array(_dst)[:, 0:2] - np.array(dst_est)[0:2]
+            dist_xy = np.array(_dst)[:, 0:2] - np.array(dst_est)[:, 0:2]
             dist = (dist_xy ** 2).sum(axis=1) ** 0.5
             gcp_err = dist.mean()
             print(f"Error: {gcp_err}")
