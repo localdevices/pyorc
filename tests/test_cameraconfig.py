@@ -179,15 +179,20 @@ def test_cv_undistort_points(cam_config):
     # check if points are back to originals after back adn forth undistortion and distortion
     assert(np.allclose(src, src_back_dist))
 
-def test_cv_unproject_points(vid_6gcps_cam_config):
+@pytest.mark.parametrize(
+        "cur_cam_config",
+    [
+        pytest.lazy_fixture("cam_config_6gcps"),
+        pytest.lazy_fixture("cam_config"),
+    ]
+)
+def test_cv_unproject_points(cur_cam_config):
     import cv2
-    cam_config = vid_6gcps_cam_config.camera_config
+    src = cur_cam_config.gcps["src"]
+    dst = cur_cam_config.gcps["dst"]
 
-    src = cam_config.gcps["src"]
-    dst = cam_config.gcps["dst"]
-
-    camera_matrix = cam_config.camera_matrix
-    dist_coeffs = cam_config.dist_coeffs
+    camera_matrix = cur_cam_config.camera_matrix
+    dist_coeffs = cur_cam_config.dist_coeffs
     # first get the rvec and tvec
     success, rvec, tvec = cv._solvepnp(dst, src, camera_matrix, dist_coeffs)
     zs = [pt[-1] for pt in dst]

@@ -149,6 +149,10 @@ def cam_config(gcps, lens_position, lens_pars, corners):
         crs=32735
         )
 
+@pytest.fixture
+def cam_config_6gcps(cam_config_6gcps_fn):
+    # load in memory
+    return pyorc.load_camera_config(cam_config_6gcps_fn)
 
 @pytest.fixture
 def cam_config_without_aoi(lens_position, gcps):
@@ -225,12 +229,12 @@ def vid(vid_file):
 
 
 @pytest.fixture
-def vid_6gcps_cam_config(vid_file_6gcps, cam_config_6gcps_fn):
+def vid_6gcps_cam_config(vid_file_6gcps, cam_config_6gcps):
     vid = pyorc.Video(
         vid_file_6gcps,
         start_frame=0,
         end_frame=2,
-        camera_config=cam_config_6gcps_fn,
+        camera_config=cam_config_6gcps,
         h_a=92.36
     )
     yield vid

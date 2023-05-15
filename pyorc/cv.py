@@ -452,7 +452,8 @@ def _solvepnp(dst, src, camera_matrix, dist_coeffs):
     src : list of lists
         [x, y] with source coordinates, typically cols and rows in image
     dst : list of lists
-        [x, y, z] with target coordinates after reprojection, can e.g. be in crs [m]
+        [x, y] (in case of 4 planar points) or [x, y, z] (in case of 6+ 3D points) with target coordinates after
+        reprojection, can e.g. be in crs [m]
     camera_matrix : np.ndarray (3x3)
         Camera intrinsic matrix
     dist_coeffs : p.ndarray, optional
@@ -481,9 +482,7 @@ def _solvepnp(dst, src, camera_matrix, dist_coeffs):
     camera_matrix = np.float32(camera_matrix)
     dist_coeffs = np.float32(dist_coeffs)
     # define transformation matrix based on GCPs
-    return cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs)
-
-
+    return cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs, flags=flags)
 
 
 def m_from_displacement(p1, p2, status):
