@@ -318,19 +318,21 @@ class AoiSelect(BaseSelect):
             self.pts_t.append(pt)
             # check if all points are complete
             if len(self.src) == self.required_clicks:
-                self.camera_config.set_bbox_from_corners(self.src)
-                bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True).exterior.xy))
-                bbox_geo = list(zip(*self.camera_config.get_bbox().exterior.xy))
-                if hasattr(self.camera_config, "crs"):
-                    bbox_geo = helpers.xyz_transform(
-                        bbox_geo,
-                        crs_from=self.camera_config.crs,
-                        crs_to=4326
-                    )
-                self.p_bbox.set_xy(bbox_cam)
-                self.p_bbox_geo.set_xy(bbox_geo)
-                self.ax.figure.canvas.draw()
-
+                try:
+                    self.camera_config.set_bbox_from_corners(self.src)
+                    bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True).exterior.xy))
+                    bbox_geo = list(zip(*self.camera_config.get_bbox().exterior.xy))
+                    if hasattr(self.camera_config, "crs"):
+                        bbox_geo = helpers.xyz_transform(
+                            bbox_geo,
+                            crs_from=self.camera_config.crs,
+                            crs_to=4326
+                        )
+                    self.p_bbox.set_xy(bbox_cam)
+                    self.p_bbox_geo.set_xy(bbox_geo)
+                    self.ax.figure.canvas.draw()
+                except:
+                    self.title.set_text("Could not resolve bounding box with the set coordinates.\nThe coordinates are likely measured with too low accuracy.\nMeasure with cm accuracy.")
     def on_click(self, event):
         super(AoiSelect, self).on_click(event)
         if not(len(self.src) == self.required_clicks):
@@ -413,7 +415,10 @@ class GcpSelect(BaseSelect):
                 self.p_fit.set_data(*list(zip(*src_fit)))
                 self.camera_matrix = camera_matrix
                 self.dist_coeffs = dist_coeffs
-                self.title.set_text('Pose and camera parameters fitted (see "+"), average x, y distance error: {:1.3f} m.'.format(err))
+                new_text = 'Pose and camera parameters fitted (see "+"), average x, y distance error: {:1.3f} m.'.format(err)
+                if err > 0.1:
+                    new_text += '\nWarning: error is larger than 0.1 meter. Are you sure that the coordinates are measured accurately?'
+                self.title.set_text(new_text)
                 self.ax.figure.canvas.draw()
             else:
                 self.p_fit.set_data([], [])

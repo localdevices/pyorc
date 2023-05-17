@@ -72,9 +72,11 @@ def get_file_hash(fn):
 
 def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
     # optimize cam matrix and dist coeffs with provided control points
+    if np.array(dst).shape == (4, 2):
+        _dst = np.c_[np.array(dst), np.zeros(4)]
     camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
         src,
-        dst,
+        _dst,
         height,
         width,
         c=c,
@@ -82,11 +84,9 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
         # dist_coeffs=cv.DIST_COEFFS
     )
     # once optimized, solve the perspective, and estimate the GCP locations with the perspective rot/trans
-    coord_mean = np.array(dst).mean(axis=0)
+    coord_mean = np.array(_dst).mean(axis=0)
     _src = np.float32(src)
-    _dst = np.float32(dst) - coord_mean
-    if np.shape(_dst) == (4, 2):
-        _dst = np.c_[_dst, np.zeros(4)]
+    _dst = np.float32(_dst) - coord_mean
     success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
 
     # estimate source point location

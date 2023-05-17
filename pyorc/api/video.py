@@ -355,12 +355,7 @@ Camera configuration: {:s}
             raise IOError(f"Cannot read")
         if ret:
             if self.ms is not None:
-                # correct for stabilization
-                h = img.shape[0]
-                w = img.shape[1]
-                img = cv2.warpAffine(img, self.ms[n], (w, h))
-            # if lens_corr:
-            #     if self.camera_config.lens_pars is not None:
+                img = cv.transform(img, self.ms[n])
             # apply lens distortion correction
             if hasattr(self, "camera_config"):
                 img = cv.undistort_img(img, self.camera_config.camera_matrix, self.camera_config.dist_coeffs)
@@ -457,27 +452,6 @@ Camera configuration: {:s}
         mask[mask==255] = 0
         mask[mask==1] = 255
         self.mask = mask
-
-
-    def _get_pos_feats(self, cap, split=2, recipe=const.CLASSIFY_STANDING_CAM):
-        # go through the entire set of frames to gather transformation matrices per frame (except for the first one)
-        # get the displacements of trackable features
-        positions, stats, errs = cv._get_displacements(
-            cap,
-            start_frame=self.start_frame,
-            end_frame=self.end_frame,
-            split=split,
-            mask=self.mask
-        )
-        # filter features that belong to actual camera movement
-        for recipe in recipe:
-            classes = cv._classify_displacements(positions, **recipe)
-            # select positions which are classified as water
-            positions = positions[:, classes, :]
-            stats = stats[:, classes]
-        self.feats_pos = positions
-        self.feats_stats = stats
-        self.feats_errs = errs
 
 
     def get_ms(self, cap, split=2):

@@ -164,6 +164,13 @@ class CameraConfig:
 
     @property
     def gcps_dest(self):
+        """
+
+        Returns
+        -------
+        dst : np.ndarray
+            destination coordinates of ground control point. z-coordinates are parsed from z_0 if necessary
+        """
         if hasattr(self, "gcps"):
             if "dst" in self.gcps:
                 return np.array(self.gcps["dst"] if len(self.gcps["dst"][0]) == 3 else np.c_[self.gcps["dst"], np.ones(4)*self.gcps["z_0"]])
@@ -172,11 +179,26 @@ class CameraConfig:
 
     @property
     def gcps_dest_bbox(self):
+        """
+
+        Returns
+        -------
+        dst : np.ndarray
+            Destination coordinates measured as column, row in the intended bounding box with the intended resolution
+        """
         return np.array(cv.transform_to_bbox(self.gcps_dest, self.bbox, self.resolution))
 
 
     @property
     def gcps_bbox_reduced(self):
+        """
+
+        Returns
+        -------
+        dst : np.ndarray
+            Destination coordinates in col, row in the intended bounding box, reduced with their mean coordinate
+
+        """
         return self.gcps_dest_bbox - self.gcps_dest_bbox.mean(axis=0)
     @property
     def gcps_reduced(self):
@@ -185,11 +207,10 @@ class CameraConfig:
 
         Returns
         -------
-        gcp_reduced : np.ndarray
+        dst : np.ndarray
             Reduced coordinate (x, y) or (x, y, z) of gcp destination points
         """
         return np.array(self.gcps_dest - self.gcps_mean)
-        # return np.array(self.gcps["dst"]) - self.gcps_mean
 
     @property
     def gcps_mean(self):
@@ -198,15 +219,10 @@ class CameraConfig:
 
         Returns
         -------
-        gcp_mean : np.ndarray
+        dst_mean : np.ndarray
             mean coordinate (x, y) or (x, y, z) of gcp destination points
         """
         return np.array(self.gcps_dest).mean(axis=0)
-        # if len(self.gcps["dst"][0]) == 2:
-        #     # add a zero as z-level
-        #     return np.r_[np.array(self.gcps["dst"]).mean(axis=0), 0]
-        # else:
-        #     return np.array(self.gcps["dst"]).mean(axis=0)
 
     @property
     def gcps_dims(self):
@@ -381,32 +397,6 @@ class CameraConfig:
         z_pressure = np.maximum(self.gcps["z_0"] - self.gcps["h_ref"] + h_a, z)
         return z_pressure - z
 
-    def get_dst_a(self, h_a=None):
-        """
-        h_a : float, optional
-            actual water level measured [m], if not set, assumption is that a single video
-            is processed and thus changes in water level are not relevant. (default: None)
-
-        Returns
-        -------
-        Actual locations of control points (in case these are only x, y) given the current set water level and
-        the camera location
-        """
-        # map where the destination points are with the actual water level h_a.
-        if h_a is None or h_a == self.gcps["h_ref"]:
-            # fill in the same value for h_ref and h_a
-            dst_a = self.gcps["dst"]
-        else:
-            h_ref = self.gcps["h_ref"]
-            lens_position = self.lens_position
-            dst_a = cv._get_gcps_a(
-                lens_position,
-                h_a,
-                self.gcps["dst"],
-                self.gcps["z_0"],
-                h_ref,
-            )
-        return dst_a
 
     def get_dist_shore(self, x, y, z, h_a=None):
         """
@@ -451,36 +441,6 @@ class CameraConfig:
         dist_wall = (dist_shore**2 + depth**2)**0.5
         return dist_wall
 
-    # def get_dst_a(self, h_a=None, to_bbox_grid=False):
-    #     """
-    #     Get the destination coordinates (including a zero-based z-coordinate if missing) in x,y,z or column, row
-    #     coordinates, following the bounding box for the intended projection.
-    #
-    #     Parameters
-    #     ----------
-    #     h_a : float, optional
-    #         actual water level for a given video in local vertical reference
-    #     to_bbox_grid: bool, optional
-    #         Set to True to get the column, row coordinates for the intended projection bounding box. Used for
-    #         orthorectification.
-    #
-    #     Returns
-    #     -------
-    #     dst_a : list of lists,
-    #         destination coordinates in intended system
-    #     """
-    #     if to_bbox_grid:
-    #         # lookup where the destination points are in row/column space
-    #         # dst_a is the destination point locations position with the actual water level
-    #         dst_a = cv.transform_to_bbox(
-    #             self.get_dst_a(h_a),
-    #             self.bbox,
-    #             self.resolution
-    #         )
-    #         dst_a = np.array(dst_a)
-    #     else:
-    #         dst_a = self.gcps["dst"]
-
     def z_to_h(self, z):
         """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)
 
@@ -521,28 +481,10 @@ class CameraConfig:
         if to_bbox_grid:
             dst_a = self.gcps_bbox_reduced
         else:
-        # if to_bbox_grid:
-        #     # lookup where the destination points are in row/column space
-        #     # dst_a is the destination point locations position with the actual water level
-        #     dst_a = cv.transform_to_bbox(
-        #         self.get_dst_a(h_a),
-        #         self.bbox,
-        #         self.resolution
-        #     )
-        #     dst_a = np.array(dst_a)
-        # else:
-        #     dst_a = self.gcps["dst"] if len(self.gcps["dst"][0]) == 3 else np.c_[self.gcps["dst"], np.zeros(4)]
-        # in case we are dealing with a 2D 4-point, then reproject points on water surface, else keep 3D points
-        # dst_a = self.get_dst_a(h_a) if self.gcp_dims == 2 else self.gcps["dst"]
-        # reduce dst_a with its mean to get much more accurate projection result in case x and y order of
-        # magnitude is very large
             dst_a = self.gcps_reduced
-        # src_a = self.get_src(**lens_pars)
-        # if dst_a.shape[-1] == 3:
         # compute the water level in the coordinate system reduced with the mean gcp coordinate
         z_a = self.get_z_a(h_a)
         z_a -= self.gcps_mean[-1]
-        # z_a = 0
         # treating 3D homography
         return cv.get_M_3D(
             src=src,
@@ -552,12 +494,6 @@ class CameraConfig:
             z=z_a,
             reverse=reverse
         )
-        # else:
-        #     return cv.get_M_2D(
-        #         src=src,
-        #         dst=dst_a,
-        #         reverse=reverse
-        #     )
 
     def get_z_a(self, h_a=None):
         """
@@ -590,11 +526,8 @@ class CameraConfig:
                                             2)), f"a list of lists of 4 coordinates must be given, resulting in (4, " \
                                                  f"2) shape. Current shape is {corners.shape} "
 
-        # get homography, this is the only place besides self.get_M where cv.get_M is used.
+        # get homography
         M_gcp = self.get_M()
-        # TODO: make derivation dependent on 3D or 2D point availability
-        # if self.gcps["src"].shape == 3:
-        #     # TODO: homography from solvepnp
         bbox = cv.get_aoi(M_gcp, corners, resolution=self.resolution)
         # bbox is offset by self.gcp_mean. Regenerate bbox after adding offset
         bbox_xy = np.array(bbox.exterior.coords)
@@ -608,10 +541,12 @@ class CameraConfig:
         self.set_lens_pars()  # default parameters use width of frame
 
         if len(self.gcps["src"]) >= 4:
+
         # if self.gcp_dims == 3:
             self.camera_matrix, self.dist_coeffs, err = cv.optimize_intrinsic(
                 self.gcps["src"],
-                self.gcps["dst"],
+                self.gcps_dest,
+                # self.gcps["dst"],
                 self.height,
                 self.width,
                 lens_position=self.lens_position
@@ -852,7 +787,7 @@ class CameraConfig:
         ax.legend()
         return ax
 
-    def plot_bbox(self, ax=None, camera=False, transformer=None, h_a=None, **kwargs):
+    def plot_bbox(self, ax=None, camera=False, transformer=None, h_a=None, redistort=True, **kwargs):
         """
         Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera
         Field Of View (``camera=True``).
@@ -875,7 +810,7 @@ class CameraConfig:
         p : matplotlib.patch mappable
         """
         # collect information to plot
-        bbox = self.get_bbox(camera=camera, h_a=h_a)
+        bbox = self.get_bbox(camera=camera, h_a=h_a, redistort=redistort)
         if camera is False and transformer is not None:
             # geographical projection is needed
             bbox = ops.transform(transformer, bbox)
