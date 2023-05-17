@@ -942,7 +942,7 @@ def transform_to_bbox(coords, bbox, resolution):
     Parameters
     ----------
     coords : list of lists
-        [x, y] with coordinates
+        [x, y, z] with coordinates
     bbox : shapely Polygon
         Bounding box. The coordinate order is very important and has to be upstream-left, downstream-left,
         downstream-right, upstream-right, upstream-left
@@ -956,10 +956,14 @@ def transform_to_bbox(coords, bbox, resolution):
 
     """
     # first assemble x and y coordinates
-    xs, ys = zip(*coords)
     transform = _get_transform(bbox, resolution)
+    if len(coords[0]) == 3:
+        xs, ys, zs = zip(*coords)
+    else:
+        xs, ys, zs = zip(*coords)
     rows, cols = rasterio.transform.rowcol(transform, xs, ys, op=float)
-    return list(zip(cols, rows))
+    return list(zip(cols, rows)) if len(coords[0]) == 2 else list(zip(cols, rows, zs))
+
 
 
 def get_ortho(img, M, shape, flags=cv2.INTER_AREA):

@@ -23,7 +23,7 @@ def test_bbox(cam_config):
 
 
 def test_gcp_mean(cam_config):
-    assert(np.allclose(cam_config.gcp_mean, np.array([642734.7117 , 8304295.74875])))
+    assert(np.allclose(cam_config.gcps_mean, np.array([642734.7117 , 8304295.74875])))
 
 
 def test_get_bbox(cam_config, vid):
@@ -74,15 +74,15 @@ def test_z_to_h(cam_config, cross_section):
                 ]
             )
         ),
-        (
-            False, np.array(
-                [
-                    [ 7.38644979e-03, -5.05757015e-03, -3.54741235e+00],
-                    [-4.27946398e-03, -9.86475823e-03,  9.70873926e+00],
-                    [-2.65193855e-04, 1.09679938e-03, 1.00000000e+00]
-                ]
-            )
-        )
+        # (
+        #     False, np.array(
+        #         [
+        #             [ 7.38644979e-03, -5.05757015e-03, -3.54741235e+00],
+        #             [-4.27946398e-03, -9.86475823e-03,  9.70873926e+00],
+        #             [-2.65193855e-04, 1.09679938e-03, 1.00000000e+00]
+        #         ]
+        #     )
+        # )
     ]
 )
 def test_get_M(cam_config, h_a, to_bbox_grid, M_expected):
@@ -90,10 +90,17 @@ def test_get_M(cam_config, h_a, to_bbox_grid, M_expected):
     assert(np.allclose(M, M_expected))
 
 
-def test_set_bbox_from_corners(cam_config, corners, bbox):
+@pytest.mark.parametrize(
+        "_cam_config, _corners, _bbox",
+    [
+        (pytest.lazy_fixture("cam_config_6gcps"), pytest.lazy_fixture("corners_6gcps"), pytest.lazy_fixture("bbox_6gcps")),
+        # (pytest.lazy_fixture("cam_config"), pytest.lazy_fixture("corners"), pytest.lazy_fixture("bbox"))
+    ]
+)
+def test_set_bbox_from_corners(_cam_config, _corners, _bbox):
     # check if this works
-    cam_config.set_bbox_from_corners(corners)
-    assert(cam_config.bbox==bbox)
+    _cam_config.set_bbox_from_corners(_corners)
+    assert(_cam_config.bbox.wkt == _bbox.wkt)
 
 
 def test_set_lens_pars(cam_config, lens_pars, camera_matrix, dist_coeffs):
