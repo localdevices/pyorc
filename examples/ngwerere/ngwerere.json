@@ -3,6 +3,7 @@
     "width": 1920,
     "crs": "PROJCRS[\"WGS 84 / UTM zone 35S\",BASEGEOGCRS[\"WGS 84\",ENSEMBLE[\"World Geodetic System 1984 ensemble\",MEMBER[\"World Geodetic System 1984 (Transit)\"],MEMBER[\"World Geodetic System 1984 (G730)\"],MEMBER[\"World Geodetic System 1984 (G873)\"],MEMBER[\"World Geodetic System 1984 (G1150)\"],MEMBER[\"World Geodetic System 1984 (G1674)\"],MEMBER[\"World Geodetic System 1984 (G1762)\"],MEMBER[\"World Geodetic System 1984 (G2139)\"],ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]],CONVERSION[\"UTM zone 35S\",METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]],PARAMETER[\"Latitude of natural origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",27,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Scale factor at natural origin\",0.9996,SCALEUNIT[\"unity\",1],ID[\"EPSG\",8805]],PARAMETER[\"False easting\",500000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",10000000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],USAGE[SCOPE[\"Engineering survey, topographic mapping.\"],AREA[\"Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\"],BBOX[-80,24,0,30]],ID[\"EPSG\",32735]]",
     "resolution": 0.01,
+    "lens_position": null,
     "gcps": {
         "src": [
             [
@@ -44,7 +45,11 @@
         "z_0": 1182.2
     },
     "window_size": 25,
+    "is_nadir": false,
     "dist_coeffs": [
+        [
+            0.0
+        ],
         [
             0.0
         ],
@@ -60,13 +65,13 @@
     ],
     "camera_matrix": [
         [
-            1920.0,
+            1552.16064453125,
             0.0,
             960.0
         ],
         [
             0.0,
-            1920.0,
+            1552.16064453125,
             540.0
         ],
         [
@@ -75,5 +80,5 @@
             1.0
         ]
     ],
-    "bbox": "POLYGON ((642730.3267177228 8304292.875101833, 642731.297608523 8304302.476136727, 642739.456000869 8304301.651131073, 642738.4851100688 8304292.050096178, 642730.3267177228 8304292.875101833))"
+    "bbox": "POLYGON ((642730.2341900971 8304293.357399672, 642731.5015509361 8304302.01513012, 642739.268771966 8304300.878126396, 642738.0014111269 8304292.220395949, 642730.2341900971 8304293.357399672))"
 }
