@@ -572,7 +572,6 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
         camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
         success, rvec, tvec = solvepnp(_dst, src, camera_matrix, dist_coeffs)
         if success:
-            # src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
             # estimate destination locations from pose
             dst_est = unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
             # src_est = np.array([list(point[0]) for point in src_est])
@@ -587,6 +586,7 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
                 cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
             else:
                 cam_err = None
+                # TODO: for now camera errors are weighted with 10% needs further investigation
             err = float(0.1*cam_err + gcp_err) if cam_err is not None else gcp_err
         else:
             err = 100
