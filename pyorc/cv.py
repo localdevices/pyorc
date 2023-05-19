@@ -583,7 +583,7 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
             # print(f"Parameters: {x}")
             if lens_position is not None:
                 rmat = cv2.Rodrigues(rvec)[0]
-                lens_pos2 = np.array(-np.matrix(rmat).T * np.matrix(tvec))
+                lens_pos2 = np.array(-rmat).T @ tvec
                 cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
             else:
                 cam_err = None
