@@ -1,0 +1,104 @@
+{
+    "height": 1080,
+    "width": 1920,
+    "crs": "PROJCRS[\"Amersfoort / RD New\",BASEGEOGCRS[\"Amersfoort\",DATUM[\"Amersfoort\",ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4289]],CONVERSION[\"RD New\",METHOD[\"Oblique Stereographic\",ID[\"EPSG\",9809]],PARAMETER[\"Latitude of natural origin\",52.1561605555556,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",5.38763888888889,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Scale factor at natural origin\",0.9999079,SCALEUNIT[\"unity\",1],ID[\"EPSG\",8805]],PARAMETER[\"False easting\",155000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",463000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting (X)\",east,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing (Y)\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],USAGE[SCOPE[\"Engineering survey, topographic mapping.\"],AREA[\"Netherlands - onshore, including Waddenzee, Dutch Wadden Islands and 12-mile offshore coastal zone.\"],BBOX[50.75,3.2,53.7,7.22]],ID[\"EPSG\",28992]]",
+    "resolution": 0.03,
+    "lens_position": null,
+    "gcps": {
+        "src": [
+            [
+                1779,
+                774
+            ],
+            [
+                436,
+                372
+            ],
+            [
+                385,
+                147
+            ],
+            [
+                922,
+                186
+            ],
+            [
+                1041,
+                139
+            ],
+            [
+                1785,
+                337
+            ]
+        ],
+        "dst": [
+            [
+                192111.36369042983,
+                313157.71636298846,
+                138.9234814814815
+            ],
+            [
+                192102.85935356488,
+                313152.9800096405,
+                138.526
+            ],
+            [
+                192100.1640354367,
+                313153.16390758357,
+                139.68307692307692
+            ],
+            [
+                192099.9702815698,
+                313158.9153213168,
+                138.45433333333332
+            ],
+            [
+                192098.38713148457,
+                313161.31339320523,
+                138.51090909090908
+            ],
+            [
+                192106.66182086038,
+                313165.6410030764,
+                138.5616
+            ]
+        ],
+        "h_ref": 92.36,
+        "z_0": 138.27
+    },
+    "window_size": 15,
+    "is_nadir": false,
+    "dist_coeffs": [
+        [
+            -0.3561752174471545
+        ],
+        [
+            0.048219847845775377
+        ],
+        [
+            0.0
+        ],
+        [
+            0.0
+        ]
+    ],
+
+    "camera_matrix": [
+        [
+            1551.263916015625,
+            0.0,
+            960.0
+        ],
+        [
+            0.0,
+            1551.263916015625,
+            540.0
+        ],
+        [
+            0.0,
+            0.0,
+            1.0
+        ]
+    ],
+    "bbox": "POLYGON ((192102.9675507127 313152.20933008497, 192097.53263109023 313163.3436800299, 192105.75533504476 313167.3573615913, 192111.19025466722 313156.2230116463, 192102.9675507127 313152.20933008497))"
+}

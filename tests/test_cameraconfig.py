@@ -23,7 +23,7 @@ def test_bbox(cam_config):
 
 
 def test_gcp_mean(cam_config):
-    assert(np.allclose(cam_config.gcps_mean, np.array([642734.7117 , 8304295.74875])))
+    assert(np.allclose(cam_config.gcps_mean, np.array([642734.7117, 8304295.74875, 1182.2])))
 
 
 def test_get_bbox(cam_config, vid):
@@ -32,13 +32,13 @@ def test_get_bbox(cam_config, vid):
 
 
 def test_shape(cam_config):
-    assert(cam_config.shape == (821, 965))
+    assert(cam_config.shape == (786, 879))
 
 
 def test_transform(cam_config):
     assert(np.allclose(cam_config.transform, Affine(
-        0.0010061044563599466, 0.009949258958479906, 642730.3058131004,
-        0.009949258958479906, -0.0010061044563599508, 8304292.867164782
+        0.0014443784253907177, 0.009895138754169435, 642730.233168765,
+        0.009895138754169435, -0.0014443784253907175, 8304293.351276383
     )))
 
 
@@ -68,21 +68,21 @@ def test_z_to_h(cam_config, cross_section):
         (
             True, np.array(
                 [
-                    [-4.39245097e-01, -6.69287523e-01, 1.26128097e+03],
-                    [6.69392774e-01, 4.50461138e-02, -4.12599188e+01],
-                    [-2.65193791e-04, 1.09679892e-03, 1.00000000e+00]
+                    [-2.83249013e-01, -8.93908572e-01, 7.95238051e+02],
+                    [7.44402125e-01, -4.02349005e-01, -4.19808711e+02],
+                    [-1.21275429e-04, 6.33985134e-04, 1.00000000e+00]
                 ]
             )
         ),
-        # (
-        #     False, np.array(
-        #         [
-        #             [ 7.38644979e-03, -5.05757015e-03, -3.54741235e+00],
-        #             [-4.27946398e-03, -9.86475823e-03,  9.70873926e+00],
-        #             [-2.65193855e-04, 1.09679938e-03, 1.00000000e+00]
-        #         ]
-        #     )
-        # )
+        (
+            False, np.array(
+                [
+                    [6.95684503e-03, -5.27244231e-03, -3.00544137e+00],
+                    [-3.87798711e-03, -8.26420874e-03, 8.47535569e+00],
+                    [-1.21275338e-04, 6.33985524e-04, 1.00000000e+00]
+                ]
+            )
+        )
     ]
 )
 def test_get_M(cam_config, h_a, to_bbox_grid, M_expected):
@@ -94,7 +94,7 @@ def test_get_M(cam_config, h_a, to_bbox_grid, M_expected):
         "_cam_config, _corners, _bbox",
     [
         (pytest.lazy_fixture("cam_config_6gcps"), pytest.lazy_fixture("corners_6gcps"), pytest.lazy_fixture("bbox_6gcps")),
-        # (pytest.lazy_fixture("cam_config"), pytest.lazy_fixture("corners"), pytest.lazy_fixture("bbox"))
+        (pytest.lazy_fixture("cam_config"), pytest.lazy_fixture("corners"), pytest.lazy_fixture("bbox"))
     ]
 )
 def test_set_bbox_from_corners(_cam_config, _corners, _bbox):
@@ -193,21 +193,15 @@ def test_cv_undistort_points(cam_config):
         pytest.lazy_fixture("cam_config"),
     ]
 )
-def test_cv_unproject_points(cur_cam_config):
-    import cv2
+def test_unproject_points(cur_cam_config):
     src = cur_cam_config.gcps["src"]
-    dst = cur_cam_config.gcps["dst"]
-
-    camera_matrix = cur_cam_config.camera_matrix
-    dist_coeffs = cur_cam_config.dist_coeffs
-    # first get the rvec and tvec
-    success, rvec, tvec = cv._solvepnp(dst, src, camera_matrix, dist_coeffs)
-    zs = [pt[-1] for pt in dst]
-    test = cv.unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
+    dst = cur_cam_config.gcps_dest
+    # project x, y, z point to camera objective
+    src_est = cur_cam_config.project_points(dst)
     # now back project and compare if the results are nearly identical
-    src_est, jacobian = cv2.projectPoints(np.float32(np.array(test)), rvec, tvec, np.array(camera_matrix), np.array(dist_coeffs))
-    src_est = np.array([list(point[0]) for point in src_est])
-    assert(np.allclose(np.float32(np.array(src)), np.float32(src_est), atol=1))
+    zs = [pt[-1] for pt in dst]
+    dst_est = cur_cam_config.unproject_points(src_est, zs)
+    assert(np.allclose(dst, dst_est))
 
 def test_camera_calib(cam_config_calib, calib_video):
     cam_config_calib.set_lens_calibration(calib_video, max_imgs=5, plot=False, progress_bar=False)

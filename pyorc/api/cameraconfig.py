@@ -549,25 +549,24 @@ class CameraConfig:
     def set_intrinsic(self, camera_matrix=None, dist_coeffs=None, lens_pars=None):
         # first set a default estimate from pose if 3D gcps are available
         self.set_lens_pars()  # default parameters use width of frame
-
-        if len(self.gcps["src"]) >= 4:
-
-        # if self.gcp_dims == 3:
-            self.camera_matrix, self.dist_coeffs, err = cv.optimize_intrinsic(
-                self.gcps["src"],
-                self.gcps_dest,
-                # self.gcps["dst"],
-                self.height,
-                self.width,
-                lens_position=self.lens_position
-            )
-        if lens_pars is not None:
-            # override with lens parameter set by user
-            self.set_lens_pars(**lens_pars)
-        if camera_matrix is not None and dist_coeffs is not None:
-            # override with
-            self.camera_matrix = camera_matrix
-            self.dist_coeffs = dist_coeffs
+        if hasattr(self, "gcps"):
+            if len(self.gcps["src"]) >= 4:
+            # if self.gcp_dims == 3:
+                self.camera_matrix, self.dist_coeffs, err = cv.optimize_intrinsic(
+                    self.gcps["src"],
+                    self.gcps_dest,
+                    # self.gcps["dst"],
+                    self.height,
+                    self.width,
+                    lens_position=self.lens_position
+                )
+            if lens_pars is not None:
+                # override with lens parameter set by user
+                self.set_lens_pars(**lens_pars)
+            if camera_matrix is not None and dist_coeffs is not None:
+                # override with
+                self.camera_matrix = camera_matrix
+                self.dist_coeffs = dist_coeffs
 
 
     def set_lens_pars(self, k1=0., c=2., focal_length=None):
