@@ -42,5 +42,3 @@ def test_get_q(piv_transect, fill_method):
 def test_plot(piv_transect, mode, method):
     piv_transect.transect.get_q()
     piv_transect.isel(quantile=2).transect.plot(method=method, mode=mode, add_text=True)
-    plt.show()
-    # plt.close("all")
