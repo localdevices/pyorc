@@ -74,6 +74,8 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
     # optimize cam matrix and dist coeffs with provided control points
     if np.array(dst).shape == (4, 2):
         _dst = np.c_[np.array(dst), np.zeros(4)]
+    else:
+        _dst = np.array(dst)
     camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
         src,
         _dst,

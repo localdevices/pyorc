@@ -254,6 +254,16 @@ class CameraConfig:
         self._is_nadir = nadir_prop
 
     @property
+    def pnp(self):
+        return cv.solvepnp(
+            self.gcps_reduced,
+            self.gcps["src"],
+            self.camera_matrix,
+            self.dist_coeffs
+        )
+
+
+    @property
     def shape(self):
         """
         Returns rows and columns in projected frames from ``Frames.project``
@@ -346,7 +356,7 @@ class CameraConfig:
         redistort : bool, optional
             If set in combination with ``camera``, the bbox will be redistorted in the camera objective using the
             distortion coefficients and camera matrix. Not used in orthorectification because this occurs by default
-            on already undistorted images.
+            on already undistorted images. Typically only used for plotting purposes on original frames.
 
         Returns
         -------
@@ -360,17 +370,16 @@ class CameraConfig:
         bbox = self.bbox
         if camera:
             coords = np.array(bbox.exterior.coords)
-            # convert to perspective rowcol coordinates
-            M = self.get_M(reverse=True, h_a=h_a)
-            # reduce coords by control point mean
-            coords -= self.gcps_mean[0:2]
-            # TODO: re-distort if needed
-            corners = cv2.perspectiveTransform(np.float32([coords]), M)[0]
+            z_a = self.get_z_a(h_a)
             if redistort:
-                # for visualization on still distorted frames this can be done. DO NOT do this if used for
-                # orthorectification, as this typically occurs on undistorted images.
-                corners = cv.undistort_points(corners, self.camera_matrix, self.dist_coeffs, reverse=True)
-
+                # typically only done for plotting on original frame, expand number of points to be able to see distortion
+                coords_expand = np.zeros((0, 2))
+                for n in range(0, len(coords)-1):
+                    new_coords = np.linspace(coords[n], coords[n + 1], 100)
+                    coords_expand = np.r_[coords_expand, new_coords]
+                coords = coords_expand
+            coords = np.c_[coords, np.ones(len(coords))*z_a]
+            corners = self.project_points(coords)
             bbox = Polygon(corners)
         return bbox
 
@@ -486,6 +495,8 @@ class CameraConfig:
         z_a = self.get_z_a(h_a)
         z_a -= self.gcps_mean[-1]
         # treating 3D homography
+        print(dst_a)
+        # print(z_a)
         return cv.get_M_3D(
             src=src,
             dst=dst_a,
@@ -519,7 +530,7 @@ class CameraConfig:
         Parameters
         ----------
         corners : list of lists (4)
-            [columns, row] coordinates in camera perspective
+            [columns, row] coordinates in original camera perspective without any undistortion applied
 
         """
         assert (np.array(corners).shape == (4,
@@ -527,12 +538,11 @@ class CameraConfig:
                                                  f"2) shape. Current shape is {corners.shape} "
 
         # get homography
-        M_gcp = self.get_M()
-        bbox = cv.get_aoi(M_gcp, corners, resolution=self.resolution)
-        # bbox is offset by self.gcp_mean. Regenerate bbox after adding offset
-        bbox_xy = np.array(bbox.exterior.coords)
-        bbox_xy += self.gcps_mean[0:2]
-        bbox = Polygon(bbox_xy)
+        corners_xyz = self.unproject_points(corners, np.ones(4)*self.gcps["z_0"])
+        bbox = cv.get_aoi(
+            corners_xyz,
+            resolution=self.resolution
+        )
         self.bbox = bbox
 
 
@@ -667,6 +677,61 @@ class CameraConfig:
                 raise ValueError("CameraConfig does not contain a crs, ")
             x, y = helpers.xyz_transform([[x, y]], crs, self.crs)[0]
         self.lens_position = [x, y, z]
+
+    def project_points(self, points):
+        """
+        Project real world x, y, z coordinates into col, row coordinates on image
+
+        Parameters
+        ----------
+        points : list or array-like
+            list of points [x, y, z] in real world coordinates
+
+        Returns
+        -------
+        points_project : list or array-like
+            list of points (equal in length as points) with [col, row] coordinates
+        """
+        _, rvec, tvec = self.pnp
+        # normalize points wrt mean of gcps
+        points = np.float32(np.array(points) - self.gcps_mean)
+        points_proj, jacobian = cv2.projectPoints(
+            points,
+            rvec,
+            tvec,
+            np.array(self.camera_matrix),
+            np.array(self.dist_coeffs)
+        )
+        points_proj = np.array([list(point[0]) for point in points_proj])
+        return points_proj
+
+
+    def unproject_points(self, points, zs):
+        """
+        Reverse projects points in [column, row] space to [x, y, z] real world
+        Parameters
+        ----------
+        points
+        zs
+
+        Returns
+        -------
+
+        """
+        _, rvec, tvec = self.pnp
+        # reduce zs by the mean of the gcps
+        _zs = np.atleast_1d(zs) - self.gcps_mean[-1]
+        dst = cv.unproject_points(
+            np.array(points),
+            _zs,
+            rvec=rvec,
+            tvec=tvec,
+            camera_matrix=self.camera_matrix,
+            dist_coeffs=self.dist_coeffs
+        )
+        dst = np.array(dst) + self.gcps_mean
+        return dst
+
 
     def plot(
             self,
@@ -823,6 +888,7 @@ class CameraConfig:
         )
         p = ax.add_patch(patch)
         return p
+
 
     def to_dict(self):
         """Return the CameraConfig object as dictionary

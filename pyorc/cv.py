@@ -263,7 +263,7 @@ def _gftt_split(img, split, n_pts, mask=None):
         v += ver_split
     return pts
 
-def _solvepnp(dst, src, camera_matrix, dist_coeffs):
+def solvepnp(dst, src, camera_matrix, dist_coeffs):
     """
     Short version with preprocessing for cv2.SolvePnP
 
@@ -489,6 +489,34 @@ def unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs):
     return dst
 
 
+def get_M_2D(src, dst, reverse=False):
+    """
+    Retrieve homography matrix for between (4) src and (4) dst points with only x, y coordinates (no z)
+
+    Parameters
+    ----------
+    src : list of lists
+        [x, y] with source coordinates, typically cols and rows in image
+    dst : list of lists
+        [x, y] with target coordinates after reprojection, can e.g. be in crs [m]
+    reverse : bool, optional
+        If set, the reverse homography to back-project to camera objective will be retrieved
+
+    Returns
+    -------
+    M : np.ndarray
+        homography matrix (3x3), used in cv2.warpPerspective
+    """
+    # set points to float32
+    _src = np.float32(src)
+    _dst = np.float32(dst)
+    # define transformation matrix based on GCPs
+    if reverse:
+        M = cv2.getPerspectiveTransform(_dst, _src)
+    else:
+        M = cv2.getPerspectiveTransform(_src, _dst)
+    return M
+
 
 def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., reverse=False):
     """
@@ -522,7 +550,7 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=np.zeros((1, 4)), z=0., revers
     https://www.openearth.nl/flamingo/_modules/flamingo/rectification/rectification.html
 
     """
-    success, rvec, tvec = _solvepnp(dst, src, camera_matrix, dist_coeffs)
+    success, rvec, tvec = solvepnp(dst, src, camera_matrix, dist_coeffs)
     return _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=reverse)
 
 def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
@@ -542,7 +570,7 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
             _lens_pos = np.array(lens_position) - coord_mean
 
         camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
-        success, rvec, tvec = _solvepnp(_dst, src, camera_matrix, dist_coeffs)
+        success, rvec, tvec = solvepnp(_dst, src, camera_matrix, dist_coeffs)
         if success:
             # src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
             # estimate destination locations from pose
@@ -559,13 +587,13 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
                 cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
             else:
                 cam_err = None
-            err = float(cam_err + gcp_err) if cam_err is not None else gcp_err
+            err = float(0.1*cam_err + gcp_err) if cam_err is not None else gcp_err
         else:
             err = 100
         return err  # assuming gcp pixel distance is about 5 cm
 
     if len(dst) == 4:
-        bnds_k1 = (0., 0.)
+        bnds_k1 = (-0.0, 0.0)
     else:
         bnds_k1 = (-0.5, 0.5)
     opt = optimize.differential_evolution(
@@ -681,32 +709,27 @@ def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
     return cv2.warpPerspective(img, M, shape, flags=flags)
 
 
-def get_aoi(M, src_corners, resolution=None):
+def get_aoi(dst_corners, resolution=None):
     """Get rectangular AOI from 4 user defined points within frames.
 
     Parameters
     ----------
-    src : list of tuples
-        (col, row) pairs of ground control points
-    dst : list of tuples
-        projected (x, y) coordinates of ground control points
+    M : np.ndarray
+        Homography matrix
     src_corners : dict with 4 (x,y) tuples
         names "up_left", "down_left", "up_right", "down_right", source corners
+    resolution : float
+        resolution of intended reprojection, used to round the bbox to a whole number of intended pixels
 
     Returns
     -------
-    aoi : shapely.geometry.Polygon
-        bounding box of aoi (rotated)
+    bbox : shapely.geometry.Polygon
+        bounding box of aoi (with rotated affine)
     """
-    # retrieve the M transformation matrix for the conditions during GCP. These are used to define the AOI so that
-    # dst AOI remains the same for any movie
     # prepare a simple temporary np.array of the src_corners
-    _src_corners = np.array(src_corners)
-    assert(_src_corners.shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. " \
-                                        f"Current shape is {src_corners.shape} "
-    # reproject corner points to the actual space in coordinates
-    _dst_corners = cv2.perspectiveTransform(np.float32([_src_corners]), M)[0]
-    polygon = Polygon(_dst_corners)
+    # assert(_src_corners.shape==(4, 2)), f"a list of lists of 4 coordinates must be given, resulting in (4, 2) shape. " \
+    #                                     f"Current shape is {src_corners.shape} "
+    polygon = Polygon(dst_corners)
     coords = np.array(polygon.exterior.coords)
     # estimate the angle of the bounding box
     # retrieve average line across AOI
@@ -716,7 +739,7 @@ def get_aoi(M, src_corners, resolution=None):
     angle = np.arctan2(diff[1], diff[0])
     # rotate the polygon over this angle to get a proper bounding box
     polygon_rotate = rotate(
-        polygon, -angle, origin=tuple(_dst_corners[0]), use_radians=True
+        polygon, -angle, origin=tuple(dst_corners[0]), use_radians=True
     )
     xmin, ymin, xmax, ymax = polygon_rotate.bounds
     if resolution is not None:
@@ -728,7 +751,7 @@ def get_aoi(M, src_corners, resolution=None):
     bbox_coords = [(xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax)]
     bbox = Polygon(bbox_coords)
     # now rotate back
-    bbox = rotate(bbox, angle, origin=tuple(_dst_corners[0]), use_radians=True)
+    bbox = rotate(bbox, angle, origin=tuple(dst_corners[0]), use_radians=True)
     return bbox
 
 

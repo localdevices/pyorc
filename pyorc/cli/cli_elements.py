@@ -320,7 +320,7 @@ class AoiSelect(BaseSelect):
             if len(self.src) == self.required_clicks:
                 try:
                     self.camera_config.set_bbox_from_corners(self.src)
-                    bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True).exterior.xy))
+                    bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True, redistort=True).exterior.xy))
                     bbox_geo = list(zip(*self.camera_config.get_bbox().exterior.xy))
                     if hasattr(self.camera_config, "crs"):
                         bbox_geo = helpers.xyz_transform(

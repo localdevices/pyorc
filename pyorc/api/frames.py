@@ -175,12 +175,14 @@ class Frames(ORCBase):
         # convert bounding box coords into row/column space
         shape = camera_config.shape
         # get camera perspective bbox corners
-        src = camera_config.get_bbox(camera=True, h_a=self.h_a).exterior.coords[0:4]
+        src = camera_config.get_bbox(
+            camera=True,
+            h_a=self.h_a
+        ).exterior.coords[0:4]
         dst_xy = camera_config.get_bbox().exterior.coords[0:4]
         # get geographic coordinates bbox corners
         dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
         M = cv.get_M_2D(src, dst)
-
         # prepare all coordinates
         y = np.flipud(np.linspace(
             camera_config.resolution / 2,
