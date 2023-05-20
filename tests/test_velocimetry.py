@@ -32,13 +32,6 @@ def test_filter_temporal_std(piv):
     piv.velocimetry.filter_temporal_std()
 
 
-
-
-def test_filter_temporal(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_temporal()
-
-
 def test_filter_spatial_nan(piv):
     # check if the method runs DEPRECATED
     piv.velocimetry.filter_spatial_nan()

@@ -32,7 +32,7 @@ def test_get_bbox(cam_config, vid):
 
 
 def test_shape(cam_config):
-    assert(cam_config.shape == (786, 879))
+    assert(cam_config.shape == (786, 878))
 
 
 def test_transform(cam_config):

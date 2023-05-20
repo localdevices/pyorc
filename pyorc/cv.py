@@ -193,8 +193,8 @@ def _get_shape(bbox, resolution=0.01, round=1):
     coords = bbox.exterior.coords
     box_length = LineString(coords[0:2]).length
     box_width = LineString(coords[1:3]).length
-    cols = int(np.ceil((box_length / resolution) / round)) * round
-    rows = int(np.ceil((box_width / resolution) / round)) * round
+    cols = int(np.round((box_length / resolution) / round)) * round
+    rows = int(np.round((box_width / resolution) / round)) * round
     return cols, rows
 
 
