@@ -32,13 +32,6 @@ def test_filter_temporal_std(piv):
     piv.velocimetry.filter_temporal_std()
 
 
-
-
-def test_filter_temporal(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_temporal()
-
-
 def test_filter_spatial_nan(piv):
     # check if the method runs DEPRECATED
     piv.velocimetry.filter_spatial_nan()
@@ -73,7 +66,7 @@ def test_get_transect(piv, cross_section, distance, nr_points):
     x, y, z = cross_section["x"], cross_section["y"], cross_section["z"]
     ds_points = piv.velocimetry.get_transect(x, y, z, crs=32735, rolling=4, distance=distance)
     # check if the angle is computed correctly
-    assert(np.isclose(ds_points["v_dir"][0].values, -4.63115779))
+    assert(np.isclose(ds_points["v_dir"][0].values, -4.67532165))
     assert(len(ds_points.points)) == nr_points
 
 

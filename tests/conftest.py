@@ -33,6 +33,10 @@ def gcps_fn():
 def cam_config_fn():
     return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere.json")
 
+@pytest.fixture
+def cam_config_6gcps_fn():
+    return os.path.join(EXAMPLE_DATA_DIR, "geul", "dk_cam_config.json")
+
 
 @pytest.fixture
 def recipe_yml():
@@ -103,7 +107,11 @@ def lens_position():
 
 @pytest.fixture
 def bbox():
-    return wkt.loads("POLYGON ((642730.3058131004 8304292.867164782, 642731.2767039008 8304302.468199677, 642739.4450455057 8304301.642187919, 642738.4741547054 8304292.041153024, 642730.3058131004 8304292.867164782))")
+    return wkt.loads("POLYGON ((642730.233168765 8304293.351276383, 642731.5013330225 8304302.039208209, 642739.2789120832 8304300.903926767, 642738.0107478257 8304292.215994941, 642730.233168765 8304293.351276383))")
+
+@pytest.fixture
+def bbox_6gcps():
+    return wkt.loads("POLYGON ((192103.06271249574 313152.336519752, 192096.59215064772 313165.9688317118, 192104.64144816675 313169.78942190844, 192111.11201001477 313156.1571099486, 192103.06271249574 313152.336519752))")
 
 
 @pytest.fixture
@@ -115,19 +123,28 @@ def corners():
         [1600, 834]
     ]
 
+@pytest.fixture
+def corners_6gcps():
+    return [
+        [390, 440],
+        [1060, 160],
+        [1800, 270],
+        [1500, 880]
+    ]
+
 
 @pytest.fixture
 def lens_pars():
     return {
         "k1": 0,
         "c": 2.0,
-        "f": 1.0
+        "focal_length": 1550.
     }
 
 
 @pytest.fixture
 def camera_matrix():
-    return np.array([[1920., 0., 960.], [0., 1920., 540.], [0., 0., 1.]])
+    return np.array([[1550., 0., 960.], [0., 1550., 540.], [0., 0., 1.]])
 
 
 @pytest.fixture
@@ -144,6 +161,10 @@ def cam_config(gcps, lens_position, lens_pars, corners):
         crs=32735
         )
 
+@pytest.fixture
+def cam_config_6gcps(cam_config_6gcps_fn):
+    # load in memory
+    return pyorc.load_camera_config(cam_config_6gcps_fn)
 
 @pytest.fixture
 def cam_config_without_aoi(lens_position, gcps):
@@ -156,7 +177,6 @@ def cam_config_without_aoi(lens_position, gcps):
         resolution=0.01,
         crs=32735
         )
-
 
 @pytest.fixture
 def cam_config_calib():
@@ -190,6 +210,7 @@ def cam_config_dict():
                 'z_0': 1182.2
             },
             'window_size': 25,
+            'is_nadir': False
 
     }
 
@@ -206,11 +227,28 @@ def vid_file():
 
 
 @pytest.fixture
+def vid_file_6gcps():
+    return os.path.join(EXAMPLE_DATA_DIR, "geul", "dk_control.mp4")
+
+
+@pytest.fixture
 def vid(vid_file):
     vid = pyorc.Video(
         vid_file,
         start_frame=0,
         end_frame=2,
+    )
+    yield vid
+
+
+@pytest.fixture
+def vid_6gcps_cam_config(vid_file_6gcps, cam_config_6gcps):
+    vid = pyorc.Video(
+        vid_file_6gcps,
+        start_frame=0,
+        end_frame=2,
+        camera_config=cam_config_6gcps,
+        h_a=92.36
     )
     yield vid
 

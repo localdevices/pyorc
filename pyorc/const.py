@@ -6,6 +6,8 @@ v_y = "v_y"
 s2n = "s2n"
 corr = "corr"
 
+DIST_COEFFS = [[0.], [0.], [0.], [0.]]
+
 PIV_ATTRS = {
     v_x: {
         "standard_name": "sea_water_x_velocity",

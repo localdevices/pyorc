@@ -204,12 +204,13 @@ def camera_config(
     if not src:
         logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
         if click.confirm('Do you want to continue and provide source points interactively?', default=True):
-            src = cli_utils.get_gcps_interactive(
+            src, camera_matrix, dist_coeffs = cli_utils.get_gcps_interactive(
                 videofile,
                 dst,
                 crs=crs,
                 crs_gcps=crs_gcps,
                 frame_sample=frame_sample,
+                lens_position=lens_position,
                 logger=logger
             )
             if len(src) != len(dst):
@@ -232,6 +233,8 @@ def camera_config(
                 crs=crs,
                 crs_gcps=crs_gcps,
                 frame_sample=frame_sample,
+                camera_matrix=camera_matrix,
+                dist_coeffs=dist_coeffs,
                 logger=logger
             )
     pyorc.service.camera_config(
@@ -243,7 +246,9 @@ def camera_config(
         resolution=resolution,
         window_size=window_size,
         lens_position=lens_position,
-        corners=corners
+        corners=corners,
+        camera_matrix=camera_matrix,
+        dist_coeffs=dist_coeffs
     )
     logger.info(f"Camera configuration created and stored in {output}")
 

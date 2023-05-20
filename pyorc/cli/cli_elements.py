@@ -11,6 +11,7 @@ from matplotlib.widgets import Button
 from matplotlib.patches import Polygon
 from mpl_toolkits.axes_grid1 import Divider, Size
 from pyorc import helpers
+from pyorc.cli import cli_utils
 
 path_effects = [
     patheffects.Stroke(linewidth=2, foreground="w"),
@@ -26,6 +27,8 @@ corner_labels = [
 class BaseSelect:
     def __init__(self, img, dst, crs=None, buffer=0.0002, zoom_level=19, logger=logging):
         self.logger = logger
+        self.height, self.width = img.shape[0:2]
+        self.crs = crs
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
         # fig = plt.figure(figsize=(12, 7))
@@ -232,7 +235,15 @@ class AoiSelect(BaseSelect):
         super(AoiSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
         self.camera_config = camera_config
-        self.p_gcps, = self.ax.plot(*list(zip(*src)), "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
+        self.p_gcps, = self.ax.plot(
+            *list(zip(*src)),
+            "o",
+            color="w",
+            markeredgecolor="k",
+            markersize=10,
+            zorder=3,
+            label="GCPs"
+        )
         self.pts_t_gcps = [
             self.ax.annotate(
                 n + 1,
@@ -307,19 +318,21 @@ class AoiSelect(BaseSelect):
             self.pts_t.append(pt)
             # check if all points are complete
             if len(self.src) == self.required_clicks:
-                self.camera_config.set_bbox_from_corners(self.src)
-                bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True).exterior.xy))
-                bbox_geo = list(zip(*self.camera_config.get_bbox().exterior.xy))
-                if hasattr(self.camera_config, "crs"):
-                    bbox_geo = helpers.xyz_transform(
-                        bbox_geo,
-                        crs_from=self.camera_config.crs,
-                        crs_to=4326
-                    )
-                self.p_bbox.set_xy(bbox_cam)
-                self.p_bbox_geo.set_xy(bbox_geo)
-                self.ax.figure.canvas.draw()
-
+                try:
+                    self.camera_config.set_bbox_from_corners(self.src)
+                    bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True, redistort=True).exterior.xy))
+                    bbox_geo = list(zip(*self.camera_config.get_bbox().exterior.xy))
+                    if hasattr(self.camera_config, "crs"):
+                        bbox_geo = helpers.xyz_transform(
+                            bbox_geo,
+                            crs_from=self.camera_config.crs,
+                            crs_to=4326
+                        )
+                    self.p_bbox.set_xy(bbox_cam)
+                    self.p_bbox_geo.set_xy(bbox_geo)
+                    self.ax.figure.canvas.draw()
+                except:
+                    self.title.set_text("Could not resolve bounding box with the set coordinates.\nThe coordinates are likely measured with too low accuracy.\nMeasure with cm accuracy.")
     def on_click(self, event):
         super(AoiSelect, self).on_click(event)
         if not(len(self.src) == self.required_clicks):
@@ -334,12 +347,12 @@ class GcpSelect(BaseSelect):
     Selector tool to provide source GCP coordinates to pyOpenRiverCam
     """
 
-    def __init__(self, img, dst, crs=None, logger=logging):
+    def __init__(self, img, dst, crs=None, lens_position=None, logger=logging):
         super(GcpSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
-        self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", markersize=10, zorder=3)
+        self.p, = self.ax.plot([], [], "o", color="w", markeredgecolor="k", markersize=10, zorder=3, label="Clicked control points")
         kwargs = dict(
-            color="r",
+            color="c",
             markeredgecolor="w",
             zorder=4,
             markersize=10,
@@ -351,6 +364,18 @@ class GcpSelect(BaseSelect):
             [], [], "o",
             **kwargs
         )
+        if len(dst) >= 4:
+            # plot an empty set of crosses for the fitted gcp row columns after optimization of perspective
+            self.p_fit, = self.ax.plot(
+                [], [], "+",
+                markersize=10,
+                color="r",
+                zorder=4,
+                label="Fitted control_points"
+           )
+        else:
+            self.p_fit = None
+
         xloc = self.ax.get_xlim()[0] + 50
         yloc = self.ax.get_ylim()[-1] + 50
         self.title = self.ax.text(
@@ -361,8 +386,48 @@ class GcpSelect(BaseSelect):
             path_effects=path_effects
         )
         self.ax_geo.legend()
-        # TODO: if no crs provided, then provide a normal axes with equal lengths on x and y axis
+        self.ax.legend()
+        self.lens_position = lens_position
+        # add dst coords in the intended CRS
+        if crs is not None:
+            self.dst_crs = helpers.xyz_transform(self.dst, 4326, crs)
+        else:
+            self.dst_crs = self.dst
         self.required_clicks = len(self.dst)
+        self.camera_matrix = None
+        self.dist_coeffs = None
+
+    def on_left_click(self, event):
+        super(GcpSelect, self).on_left_click(event)
+        # figure out if the fitted control points must be computed and plotted
+        if self.p_fit is not None:
+            if len(self.src) == self.required_clicks:
+                self.title.set_text("Fitting pose and camera parameters...")
+                self.ax.figure.canvas.draw()
+                src_fit, dst_fit, camera_matrix, dist_coeffs, err = cli_utils.get_gcps_optimized_fit(
+                    self.src,
+                    self.dst_crs,
+                    self.height,
+                    self.width,
+                    c=2.,
+                    lens_position=self.lens_position
+                )
+                self.p_fit.set_data(*list(zip(*src_fit)))
+                self.camera_matrix = camera_matrix
+                self.dist_coeffs = dist_coeffs
+                new_text = 'Pose and camera parameters fitted (see "+"), average x, y distance error: {:1.3f} m.'.format(err)
+                if err > 0.1:
+                    new_text += '\nWarning: error is larger than 0.1 meter. Are you sure that the coordinates are measured accurately?'
+                self.title.set_text(new_text)
+                self.ax.figure.canvas.draw()
+            else:
+                self.p_fit.set_data([], [])
+
+    def on_right_click(self, event):
+        super(GcpSelect, self).on_right_click(event)
+        if self.p_fit is not None:
+            if len(self.src) < self.required_clicks:
+                self.p_fit.set_data([], [])
 
     def on_click(self, event):
         super(GcpSelect, self).on_click(event)

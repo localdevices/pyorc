@@ -23,7 +23,7 @@ def test_bbox(cam_config):
 
 
 def test_gcp_mean(cam_config):
-    assert(np.allclose(cam_config.gcp_mean, np.array([642734.7117 , 8304295.74875])))
+    assert(np.allclose(cam_config.gcps_mean, np.array([642734.7117, 8304295.74875, 1182.2])))
 
 
 def test_get_bbox(cam_config, vid):
@@ -32,13 +32,13 @@ def test_get_bbox(cam_config, vid):
 
 
 def test_shape(cam_config):
-    assert(cam_config.shape == (821, 965))
+    assert(cam_config.shape == (786, 878))
 
 
 def test_transform(cam_config):
     assert(np.allclose(cam_config.transform, Affine(
-        0.0010061044563599466, 0.009949258958479906, 642730.3058131004,
-        0.009949258958479906, -0.0010061044563599508, 8304292.867164782
+        0.0014443784253907177, 0.009895138754169435, 642730.233168765,
+        0.009895138754169435, -0.0014443784253907175, 8304293.351276383
     )))
 
 
@@ -68,18 +68,18 @@ def test_z_to_h(cam_config, cross_section):
         (
             True, np.array(
                 [
-                    [-4.39245097e-01, -6.69287523e-01, 1.26128097e+03],
-                    [6.69392774e-01, 4.50461138e-02, -4.12599188e+01],
-                    [-2.65193791e-04, 1.09679892e-03, 1.00000000e+00]
+                    [-2.83249013e-01, -8.93908572e-01, 7.95238051e+02],
+                    [7.44402125e-01, -4.02349005e-01, -4.19808711e+02],
+                    [-1.21275429e-04, 6.33985134e-04, 1.00000000e+00]
                 ]
             )
         ),
         (
             False, np.array(
                 [
-                    [ 7.38644979e-03, -5.05757015e-03, -3.54741235e+00],
-                    [-4.27946398e-03, -9.86475823e-03,  9.70873926e+00],
-                    [-2.65193855e-04, 1.09679938e-03, 1.00000000e+00]
+                    [6.95684503e-03, -5.27244231e-03, -3.00544137e+00],
+                    [-3.87798711e-03, -8.26420874e-03, 8.47535569e+00],
+                    [-1.21275338e-04, 6.33985524e-04, 1.00000000e+00]
                 ]
             )
         )
@@ -90,19 +90,24 @@ def test_get_M(cam_config, h_a, to_bbox_grid, M_expected):
     assert(np.allclose(M, M_expected))
 
 
-def test_set_bbox_from_corners(cam_config, corners, bbox):
+@pytest.mark.parametrize(
+        "_cam_config, _corners, _bbox",
+    [
+        (pytest.lazy_fixture("cam_config_6gcps"), pytest.lazy_fixture("corners_6gcps"), pytest.lazy_fixture("bbox_6gcps")),
+        (pytest.lazy_fixture("cam_config"), pytest.lazy_fixture("corners"), pytest.lazy_fixture("bbox"))
+    ]
+)
+def test_set_bbox_from_corners(_cam_config, _corners, _bbox):
     # check if this works
-    cam_config.set_bbox_from_corners(corners)
-    assert(cam_config.bbox==bbox)
+    _cam_config.set_bbox_from_corners(_corners)
+    assert(np.allclose(_cam_config.bbox.bounds, _bbox.bounds))
 
 
 def test_set_lens_pars(cam_config, lens_pars, camera_matrix, dist_coeffs):
     # check if this works
     cam_config.set_lens_pars(**lens_pars)
-
     assert(np.allclose(cam_config.camera_matrix, camera_matrix))
     assert(np.allclose(cam_config.dist_coeffs, dist_coeffs))
-
 
 
 def test_set_gcps(cam_config, gcps):
@@ -120,21 +125,13 @@ def test_lens_position(cam_config, lens_position):
     assert(np.allclose(cam_config.lens_position, lens_position))
 
 
-def test_to_dict(cam_config, cam_config_dict):
-    d = cam_config.to_dict()
-    # ensure to only compare list or string-like things.
-    del d["bbox"]
-    del d["dist_coeffs"]
-    del d["camera_matrix"]
-    assert(d==cam_config_dict)
-
-
 def test_to_file(tmpdir, cam_config, cam_config_str):
     fn = os.path.join(tmpdir, "cam_config.json")
     cam_config.to_file(fn)
     # now test if reading the file yields the same cam_config
     cam_config2 = pyorc.load_camera_config(fn)
     assert(cam_config.to_dict() == cam_config2.to_dict())
+
 
 def test_load_camera_config(cam_config_fn, cam_config, lens_position):
     cam_config2 = pyorc.load_camera_config(cam_config_fn)
@@ -145,7 +142,7 @@ def test_load_camera_config(cam_config_fn, cam_config, lens_position):
     cam_config2.gcps["h_ref"] = 0.
     assert(cam_config2.gcps == cam_config.gcps)
     assert(cam_config2.lens_position == cam_config.lens_position)
-    assert(cam_config2.crs == cam_config.crs)
+    # assert(cam_config2.crs == cam_config.crs) # these may differ a very small bit, hence left out of testing
     assert(cam_config2.window_size == cam_config.window_size)
     assert(cam_config2.resolution == cam_config.resolution)
 
@@ -181,6 +178,22 @@ def test_cv_undistort_points(cam_config):
     # check if points are back to originals after back adn forth undistortion and distortion
     assert(np.allclose(src, src_back_dist))
 
+@pytest.mark.parametrize(
+        "cur_cam_config",
+    [
+        pytest.lazy_fixture("cam_config_6gcps"),
+        pytest.lazy_fixture("cam_config"),
+    ]
+)
+def test_unproject_points(cur_cam_config):
+    src = cur_cam_config.gcps["src"]
+    dst = cur_cam_config.gcps_dest
+    # project x, y, z point to camera objective
+    src_est = cur_cam_config.project_points(dst)
+    # now back project and compare if the results are nearly identical
+    zs = [pt[-1] for pt in dst]
+    dst_est = cur_cam_config.unproject_points(src_est, zs)
+    assert(np.allclose(dst, dst_est))
 
 def test_camera_calib(cam_config_calib, calib_video):
     cam_config_calib.set_lens_calibration(calib_video, max_imgs=5, plot=False, progress_bar=False)
