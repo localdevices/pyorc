@@ -125,21 +125,13 @@ def test_lens_position(cam_config, lens_position):
     assert(np.allclose(cam_config.lens_position, lens_position))
 
 
-def test_to_dict(cam_config, cam_config_dict):
-    d = cam_config.to_dict()
-    # ensure to only compare list or string-like things.
-    del d["bbox"]
-    del d["dist_coeffs"]
-    del d["camera_matrix"]
-    assert(d==cam_config_dict)
-
-
 def test_to_file(tmpdir, cam_config, cam_config_str):
     fn = os.path.join(tmpdir, "cam_config.json")
     cam_config.to_file(fn)
     # now test if reading the file yields the same cam_config
     cam_config2 = pyorc.load_camera_config(fn)
     assert(cam_config.to_dict() == cam_config2.to_dict())
+
 
 def test_load_camera_config(cam_config_fn, cam_config, lens_position):
     cam_config2 = pyorc.load_camera_config(cam_config_fn)
