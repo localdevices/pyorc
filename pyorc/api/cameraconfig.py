@@ -4,12 +4,15 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import shapely.geometry
 from shapely import ops, wkt
 from shapely.geometry import Polygon, LineString, Point
 
 from matplotlib import patches
 from pyproj import CRS, Transformer
 from pyproj.exceptions import CRSError
+
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .. import cv, helpers
 
@@ -27,20 +30,22 @@ class CameraConfig:
 
     def __init__(
             self,
-            height,
-            width,
-            crs=None,
-            window_size=10,
-            resolution=0.05,
-            bbox=None,
-            camera_matrix=None,
-            dist_coeffs=None,
-            lens_position=None,
-            corners=None,
-            gcps=None,
-            lens_pars=None,
-            calibration_video=None,
-            is_nadir=False
+            height: int,
+            width: int,
+            crs: Optional[Any] = None,
+            window_size: int = 10,
+            resolution: float = 0.05,
+            bbox: Optional[shapely.geometry.Polygon] = None,
+            camera_matrix: Optional[List[List[float]]] = None,
+            dist_coeffs: Optional[List[List[float]]] = None,
+            lens_position: Optional[List[float]] = None,
+            corners: Optional[List[List[float]]] = None,
+            gcps: Optional[Dict[str, Union[List, float]]] = None,
+            lens_pars: Optional[Dict[str, float]] = None,
+            calibration_video: Optional[str] = None,
+            is_nadir: Optional[bool] = False,
+            stabilize: Optional[List[List]] = None
+
     ):
         """
 
@@ -127,6 +132,8 @@ class CameraConfig:
         # override the transform and bbox with the set corners
         if corners is not None:
             self.set_bbox_from_corners(corners)
+        if stabilize is not None:
+            self.stabilize = stabilize
 
     @property
     def bbox(self):
@@ -250,7 +257,10 @@ class CameraConfig:
         return self._is_nadir
 
     @is_nadir.setter
-    def is_nadir(self, nadir_prop):
+    def is_nadir(
+            self,
+            nadir_prop: bool
+    ):
         self._is_nadir = nadir_prop
 
     @property
@@ -283,6 +293,25 @@ class CameraConfig:
         return rows, cols
 
     @property
+    def stabilize(self):
+        """
+        Return stabilization polygon (anything outside is used for stabilization
+
+        Returns
+        -------
+        coords : list of lists
+            coordinates in original image frame comprising the polygon for use in stabilization
+        """
+        return self._stabilize
+
+    @stabilize.setter
+    def stabilize(
+            self,
+            coords: List[List[float]]
+    ):
+        self._stabilize = coords
+
+    @property
     def transform(self):
         """
         Returns Affine transform of projected frames from ``Frames.project``
@@ -296,11 +325,11 @@ class CameraConfig:
 
     def set_lens_calibration(
         self,
-        fn,
-        chessboard_size=(9, 6),
-        max_imgs=30,
-        plot=True,
-        progress_bar=True,
+        fn: str,
+        chessboard_size: Optional[Tuple] = (9, 6),
+        max_imgs: Optional[int] = 30,
+        plot: Optional[bool] = True,
+        progress_bar: Optional[bool] = True,
         **kwargs
     ):
         """
@@ -341,7 +370,12 @@ class CameraConfig:
         self.camera_matrix = camera_matrix
         self.dist_coeffs = dist_coeffs
 
-    def get_bbox(self, camera=False, h_a=None, redistort=False):
+    def get_bbox(
+            self,
+            camera: Optional[bool] = False,
+            h_a: Optional[float] = None,
+            redistort: Optional[bool] = False
+    ) -> Polygon:
         """
 
         Parameters
@@ -383,7 +417,11 @@ class CameraConfig:
             bbox = Polygon(corners)
         return bbox
 
-    def get_depth(self, z, h_a=None):
+    def get_depth(
+            self,
+            z: List[float],
+            h_a: Optional[float] = None
+    ) -> List[float]:
         """
         Retrieve depth for measured bathymetry points using the camera configuration and an actual water level,
         measured in local reference (e.g. staff gauge).
@@ -407,7 +445,13 @@ class CameraConfig:
         return z_pressure - z
 
 
-    def get_dist_shore(self, x, y, z, h_a=None):
+    def get_dist_shore(
+            self,
+            x: List[float],
+            y: List[float],
+            z: List[float],
+            h_a: Optional[float] = None
+    ) -> List[float]:
         """
         Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
         in local reference (e.g. staff gauge).
@@ -444,13 +488,43 @@ class CameraConfig:
         dist_shore = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
         return dist_shore
 
-    def get_dist_wall(self, x, y, z, h_a=None):
+    def get_dist_wall(
+            self,
+            x: List[float],
+            y: List[float],
+            z: List[float],
+            h_a: Optional[float] = None
+    ) -> List[float]:
+        """
+        Retrieve distance to wall for measured bathymetry points using the camera configuration and an actual water
+        level, measured in local reference (e.g. staff gauge).
+
+        Parameters
+        ----------
+        x : list of floats
+            measured bathymetry point x-coordinates
+        y : list of floats
+            measured bathymetry point y-coordinates
+        z : list of floats
+            measured bathymetry point depths
+        h_a : float, optional
+            actual water level measured [m], if not set, assumption is that a single video
+            is processed and thus changes in water level are not relevant. (default: None)
+
+        Returns
+        -------
+        distance : list of floats
+
+        """
         depth = self.get_depth(z, h_a=h_a)
         dist_shore = self.get_dist_shore(x, y, z, h_a=h_a)
         dist_wall = (dist_shore**2 + depth**2)**0.5
         return dist_wall
 
-    def z_to_h(self, z):
+    def z_to_h(
+            self,
+            z: float
+    ) -> float:
         """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)
 
         Parameters
@@ -466,7 +540,12 @@ class CameraConfig:
         h = z + h_ref - self.gcps["z_0"]
         return h
 
-    def get_M(self, h_a=None, to_bbox_grid=False, reverse=False):
+    def get_M(
+            self,
+            h_a: Optional[float] = None,
+            to_bbox_grid: Optional[bool] = False,
+            reverse: Optional[bool] = False
+    ) -> np.ndarray:
         """Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
         ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.
 
@@ -506,7 +585,10 @@ class CameraConfig:
             reverse=reverse
         )
 
-    def get_z_a(self, h_a=None):
+    def get_z_a(
+            self,
+            h_a: Optional[float] = None
+    ) -> float:
         """
         h_a : float, optional
             actual water level measured [m], if not set, assumption is that a single video
@@ -522,7 +604,10 @@ class CameraConfig:
         else:
             return self.gcps["z_0"] + (h_a - self.gcps["h_ref"])
 
-    def set_bbox_from_corners(self, corners):
+    def set_bbox_from_corners(
+            self,
+            corners: List[List[float]]
+    ):
         """
         Establish bbox based on a set of camera perspective corner points Assign corner coordinates to camera
         configuration
@@ -546,7 +631,12 @@ class CameraConfig:
         self.bbox = bbox
 
 
-    def set_intrinsic(self, camera_matrix=None, dist_coeffs=None, lens_pars=None):
+    def set_intrinsic(
+            self,
+            camera_matrix: Optional[List[List]] = None,
+            dist_coeffs: Optional[List[List]] = None,
+            lens_pars: Optional[Dict[str, float]] = None
+    ):
         # first set a default estimate from pose if 3D gcps are available
         self.set_lens_pars()  # default parameters use width of frame
         if hasattr(self, "gcps"):
@@ -569,7 +659,12 @@ class CameraConfig:
                 self.dist_coeffs = dist_coeffs
 
 
-    def set_lens_pars(self, k1=0., c=2., focal_length=None):
+    def set_lens_pars(
+            self,
+            k1: Optional[float] = 0.,
+            c: Optional[float] = 2.,
+            focal_length: Optional[float] = None
+    ):
         """Set the lens parameters of the given CameraConfig
 
         Parameters
@@ -591,7 +686,14 @@ class CameraConfig:
         self.dist_coeffs = cv._get_dist_coefs(k1)
         self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, focal_length=focal_length)
 
-    def set_gcps(self, src, dst, z_0, h_ref=None, crs=None):
+    def set_gcps(
+            self,
+            src: List[List],
+            dst: List[List],
+            z_0: float,
+            h_ref: Optional[float] = None,
+            crs: Optional[Any] = None
+    ):
         """
         Set ground control points for the given CameraConfig
 
@@ -654,7 +756,13 @@ class CameraConfig:
             "z_0": z_0,
         }
 
-    def set_lens_position(self, x, y, z, crs=None):
+    def set_lens_position(
+            self,
+            x: float,
+            y: float,
+            z: float,
+            crs: Optional[Any] = None
+    ):
         """Set the geographical position of the lens of current CameraConfig.
 
         Parameters
@@ -677,13 +785,16 @@ class CameraConfig:
             x, y = helpers.xyz_transform([[x, y]], crs, self.crs)[0]
         self.lens_position = [x, y, z]
 
-    def project_points(self, points):
+    def project_points(
+            self,
+            points: List[List]
+    ) -> np.ndarray:
         """
         Project real world x, y, z coordinates into col, row coordinates on image
 
         Parameters
         ----------
-        points : list or array-like
+        points : list of lists or array-like
             list of points [x, y, z] in real world coordinates
 
         Returns
@@ -705,17 +816,23 @@ class CameraConfig:
         return points_proj
 
 
-    def unproject_points(self, points, zs):
+    def unproject_points(
+            self,
+            points: List[List],
+            zs: List[float]
+    ) -> np.ndarray:
         """
         Reverse projects points in [column, row] space to [x, y, z] real world
         Parameters
         ----------
-        points
-        zs
+        points : List of lists or array-like
+            Points in [col, row] to unproject
+        zs : float or list of floats : z-coordinate on which to unproject points
 
         Returns
         -------
-
+        points_unproject : List of lists or array-like
+            unprojected points as list of [x, y, z] coordinates
         """
         _, rvec, tvec = self.pnp
         # reduce zs by the mean of the gcps
@@ -734,14 +851,14 @@ class CameraConfig:
 
     def plot(
             self,
-            figsize=(13, 8),
-            ax=None,
-            tiles=None,
-            buffer=0.0005,
-            zoom_level=19,
-            camera=False,
-            tiles_kwargs={}
-    ):
+            figsize: Optional[Tuple] = (13, 8),
+            ax: Optional[plt.Axes] = None,
+            tiles: Optional[Any] = None,
+            buffer: Optional[float] = 0.0005,
+            zoom_level: Optional[int] = 19,
+            camera: Optional[bool] = False,
+            tiles_kwargs: Optional[Dict] = {}
+    ) -> plt.Axes:
         """
         Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
         to be in the right location. Requires cartopy to be installed.
@@ -851,7 +968,15 @@ class CameraConfig:
         ax.legend()
         return ax
 
-    def plot_bbox(self, ax=None, camera=False, transformer=None, h_a=None, redistort=True, **kwargs):
+    def plot_bbox(
+            self,
+            ax: Optional[plt.Axes] = None,
+            camera: Optional[bool] = False,
+            transformer: Optional[Any] = None,
+            h_a: Optional[float] = None,
+            redistort: Optional[bool] = True,
+            **kwargs
+    ):
         """
         Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera
         Field Of View (``camera=True``).
@@ -889,7 +1014,7 @@ class CameraConfig:
         return p
 
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """Return the CameraConfig object as dictionary
 
         Returns
@@ -907,13 +1032,16 @@ class CameraConfig:
 
         return d
 
-    def to_dict_str(self):
+    def to_dict_str(self) -> Dict:
         d = self.to_dict()
         # convert anything that is not string in string
         dict_str = {k: v if not(isinstance(v, Polygon)) else v.__str__() for k, v in d.items()}
         return dict_str
 
-    def to_file(self, fn):
+    def to_file(
+            self,
+            fn: str
+    ):
         """Write the CameraConfig object to json structure
         
         Parameters
@@ -926,7 +1054,7 @@ class CameraConfig:
         with open(fn, "w") as f:
             f.write(self.to_json())
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Convert CameraConfig object to string
         
         Returns
@@ -950,7 +1078,9 @@ look as follows for a HD video:
 """
 
 
-def get_camera_config(s):
+def get_camera_config(
+        s: str
+) -> CameraConfig:
     """Read camera config from string
 
     Parameters
@@ -973,7 +1103,9 @@ def get_camera_config(s):
     return CameraConfig(**d)
 
 
-def load_camera_config(fn):
+def load_camera_config(
+        fn: str
+) -> CameraConfig:
     """Load a CameraConfig from a geojson file.
 
     Parameters
