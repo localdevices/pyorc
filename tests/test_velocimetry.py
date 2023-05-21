@@ -5,55 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def test_filter_temporal_angle(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_temporal_angle()
-
-
-
-def test_filter_temporal_velocity(piv):
-    # check if the method runs
-    piv.velocimetry.filter_temporal_velocity()
-
-
-def test_filter_temporal_corr(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_temporal_corr()
-
-
-def test_filter_temporal_neighbour(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_temporal_neighbour()
-
-
-
-def test_filter_temporal_std(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_temporal_std()
-
-
-def test_filter_spatial_nan(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_spatial_nan()
-
-
-
-def test_filter_spatial_median(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_spatial_median()
-
-
-
-def test_filter_spatial(piv):
-    # check if the method runs DEPRECATED
-    piv.velocimetry.filter_spatial()
-
-
-def test_replace_outliers(piv):
-    # currently only works time-reduced
-    piv.mean(dim="time").velocimetry.replace_outliers()
-
-
 @pytest.mark.parametrize(
     "distance, nr_points",
     [
