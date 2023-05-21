@@ -47,5 +47,3 @@ def test_plot(piv, mode, method):
     if plot:
         piv.mean(dim="time", keep_attrs=True).velocimetry.plot(method=method, mode=mode)
     plt.close("all")
-
-

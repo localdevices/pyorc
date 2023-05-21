@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 import rasterio
 import xarray as xr
@@ -57,6 +56,8 @@ class Velocimetry(ORCBase):
             print("camera_config metadata is missing")
             return False
         return True
+
+    mask = utils.UncachedAccessor(_Velocimetry_MaskMethods)
 
     def get_transect(
             self, x, y, z=None, s=None,
@@ -132,7 +133,7 @@ class Velocimetry(ORCBase):
         """
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
         if crs is not None:
-            # transform coordinates of cross section
+            # transform coordinates of cross-section
             x, y = zip(*helpers.xyz_transform(
                 list(zip(*(x, y))),
                 crs_from=crs,
@@ -158,11 +159,6 @@ class Velocimetry(ORCBase):
         )  # ensure we get rows and columns in fractions instead of whole numbers
         rows, cols = np.array(rows), np.array(cols)
 
-        # select x and y coordinates from axes
-        idx = np.all(
-            np.array([cols >= 0, cols < len(self._obj["x"]), rows >= 0, rows < len(self._obj["y"])]),
-            axis=0,
-        )
         # compute transect coordinates in the local grid coordinate system (can be outside the grid)
         f_x = interp1d(np.arange(0, len(self._obj["x"])), self._obj["x"], fill_value="extrapolate")
         f_y = interp1d(np.arange(0, len(self._obj["y"])), self._obj["y"], fill_value="extrapolate")
@@ -187,8 +183,6 @@ class Velocimetry(ORCBase):
                 wdw_y_max=wdw_y_max
 
             )
-            # ds_wdw = xr.concat([self._obj.shift(x=x_stride, y=y_stride) for x_stride in range(wdw_x_min, wdw_x_max + 1) for y_stride in
-            #                     range(wdw_y_min, wdw_y_max + 1)], dim="stride")
             # use the median (not mean) to prevent a large influence of serious outliers
             missing_tolerance = ds_wdw.mean(dim="time").count(dim="stride") > tolerance * len(ds_wdw.stride)
             # missing_tolerance = ds_wdw.count(dim="stride") > tolerance*len(ds_wdw.stride)
@@ -204,10 +198,11 @@ class Velocimetry(ORCBase):
             ds_points = ds_effective.interp(x=_x, y=_y)
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
             warnings.warn(
-                "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera objective or anything is visible in objective."
+                "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera "
+                "objective or anything is visible in objective. "
             )
-        # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the grid covered by ds can be
-        # found back from this dataset
+        # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the
+        # grid covered by ds can be found back from this dataset
         ds_points = ds_points.assign_coords(xcoords=("points", list(x)))
         ds_points = ds_points.assign_coords(ycoords=("points", list(y)))
         ds_points = ds_points.assign_coords(scoords=("points", list(s)))
