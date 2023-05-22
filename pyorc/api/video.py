@@ -10,11 +10,13 @@ import os
 import warnings
 import xarray as xr
 
+from typing import, List, Optional, Union
+
 from .. import cv, const
 from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
 
 
-class Video:  #(cv2.VideoCapture)
+class Video:  # (cv2.VideoCapture)
     def __repr__(self):
         template = """
 Filename: {:s}
@@ -34,14 +36,13 @@ Camera configuration: {:s}
 
     def __init__(
             self,
-            fn,
-            camera_config=None,
-            h_a=None,
-            start_frame=None,
-            end_frame=None,
-            freq=1,
-            stabilize=None,
-            mask_exterior=None,
+            fn: str,
+            camera_config: Optional[Union[str, CameraConfig]] = None,
+            h_a: Optional[float] = None,
+            start_frame: Optional[int] = None,
+            end_frame: Optional[int] = None,
+            freq: Optional[int] = 1,
+            stabilize: Optional[List[List]] = None,
     ):
         """
         Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
@@ -63,16 +64,14 @@ Camera configuration: {:s}
             first frame to use in analysis (default: 0)
         end_frame : int, optional
             last frame to use in analysis (if not set, last frame available in video will be used)
-        stabilize : optional
-            If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with
-            Lukas Kanade optical flow. Currently supported is "fixed" for FOV that is meant to be in one place.
-        mask_exterior : list of lists,
+        stabilize : list of lists, optional
             set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
-            The mask is used to select region (on land) for rigid point search for stabilization.
+            The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no
+            stabilization will be performed
         """
-        assert(isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
-        assert(isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
-        assert(stabilize in ["fixed", None]), f'stabilize is only implemented for method "fixed", "{stabilize}" given'
+        assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
+        assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
+        assert (stabilize in ["fixed", None]), f'stabilize is only implemented for method "fixed", "{stabilize}" given'
         self.feats_pos = None
         self.feats_stats = None
         self.feats_errs = None
@@ -81,14 +80,14 @@ Camera configuration: {:s}
         self.stabilize = stabilize
         if camera_config is not None:
             self.camera_config = camera_config
-        # if camera_config is not None:
+            # if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
             if h_a is not None:
-                assert(isinstance(self.camera_config.gcps["z_0"], float)),\
+                assert (isinstance(self.camera_config.gcps["z_0"], float)), \
                     "h_a was supplied, but camera config's gcps do not contain z_0, this is needed for dynamic " \
                     "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
-                assert (isinstance(self.camera_config.gcps["h_ref"], float)),\
+                assert (isinstance(self.camera_config.gcps["h_ref"], float)), \
                     "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
                     "reprojection. You must supply z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
@@ -96,11 +95,10 @@ Camera configuration: {:s}
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 180.0)
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.mask_exterior = mask_exterior
         # explicitly open file for reading
-        if mask_exterior is not None:
-            # set a mask based on the roi points
-            self.set_mask_from_exterior(mask_exterior)
+        if self.stabilize is not None:
+            # set a gridded mask based on the roi points
+            self.set_mask_from_exterior(self.stabilize)
         # set end and start frame
         self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if start_frame is not None:
@@ -145,24 +143,20 @@ Camera configuration: {:s}
         cap.release()
         del cap
 
-
     @property
-    def mask_exterior(self):
-        """
+    def stabilize(self):
+        if self._stabilize is not None:
+            return self._stabilize
+        elif hasattr(self, "camera_config"):
+            if hasattr(self.camera_config, "stabilize"):
+                return self.camera_config.stabilize
 
-        Returns
-        -------
-        np.ndarray
-            Mask of region of interest
-        """
-        return self._mask_exterior
-
-    @mask_exterior.setter
-    def mask_exterior(self, mask_exterior):
-        if mask_exterior is None:
-            self._mask_exterior = None
-        else:
-            self._mask_exterior = mask_exterior
+    @stabilize.setter
+    def stabilize(
+            self,
+            coords: Optional[List[List]] = None
+    ):
+        self._stabilize = coords
 
     @property
     def mask(self):
@@ -211,7 +205,8 @@ Camera configuration: {:s}
                 # Create CameraConfig from dict
                 self._camera_config = CameraConfig(**camera_config_input)
         except:
-            raise IOError("Could not recognise input as a CameraConfig file, string, dictionary or CameraConfig object.")
+            raise IOError(
+                "Could not recognise input as a CameraConfig file, string, dictionary or CameraConfig object.")
 
     @property
     def end_frame(self):
@@ -253,10 +248,11 @@ Camera configuration: {:s}
         return self._stabilize
 
     @stabilize.setter
-    def stabilize(self, stabilize=None):
-        # sometimes last frames are not read by OpenCV, hence we skip the last frame always
+    def stabilize(
+            self,
+            stabilize: Optional[List[List]] = None
+    ):
         self._stabilize = stabilize
-
 
     @property
     def h_a(self):
@@ -267,11 +263,15 @@ Camera configuration: {:s}
         return self._h_a
 
     @h_a.setter
-    def h_a(self, h_a):
+    def h_a(
+            self,
+            h_a: float
+    ):
         if h_a is not None:
-            assert(isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
+            assert (isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
             if h_a < 0:
-                warnings.warn("Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.")
+                warnings.warn(
+                    "Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.")
         self._h_a = h_a
 
     @property
@@ -283,7 +283,10 @@ Camera configuration: {:s}
         return self._start_frame
 
     @start_frame.setter
-    def start_frame(self, start_frame=None):
+    def start_frame(
+            self,
+            start_frame: Optional[int] = None
+    ):
         if start_frame is None:
             self._start_frame = 0
         else:
@@ -298,7 +301,10 @@ Camera configuration: {:s}
         return self._fps
 
     @fps.setter
-    def fps(self, fps):
+    def fps(
+            self,
+            fps: float
+    ):
         if (np.isinf(fps)) or (fps <= 0):
             raise ValueError(f"FPS in video is {fps} which is not a valid value. Repair the video file before use")
         self._fps = fps
@@ -312,16 +318,21 @@ Camera configuration: {:s}
         return self._corners
 
     @corners.setter
-    def corners(self, corners):
+    def corners(
+            self,
+            corners: List[List]
+    ):
         self._corners = corners
-
 
     @property
     def rotation(self):
         return self._rotation
 
     @rotation.setter
-    def rotation(self, rotation_code):
+    def rotation(
+            self,
+            rotation_code: int
+    ):
         """
         Solves a likely bug in OpenCV (4.6.0) that straight up videos rotate in the wrong direction. Tested for both
         90 degree and 270 degrees rotation videos on several smartphone (iPhone and Android)
@@ -331,20 +342,34 @@ Camera configuration: {:s}
         else:
             self._rotation = None
 
-
-
-    def get_frame(self, n, method="grayscale", lens_corr=False):
+    def get_frame(
+            self,
+            n: int,
+            method: Optional[str] = "grayscale",
+            lens_corr: Optional[bool] = False
+    ) -> np.ndarray:
         """
         Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
 
-        :param n: int, frame number to retrieve
-        :param method: str, can be "rgb", "grayscale", or "hsv", default: "grayscale"
-        :param lens_corr: bool, optional, if set to True, lens parameters will be used to undistort image
-        :return: np.ndarray containing frame
+        Parameters:
+        -----------
+        n : int
+            frame number to retrieve
+        method : str
+            can be "rgb", "grayscale", or "hsv", default: "grayscale"
+        lens_corr: bool, optional
+            if set to True, lens parameters will be used to undistort image
+
+        Returns
+        -------
+        frame : np.ndarray
+            2d array (grayscale) or 3d (rgb/hsv) with frame
         """
-        assert(n >= 0), "frame number cannot be negative"
-        assert(n - self.start_frame <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
-        assert(method in ["grayscale", "rgb", "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
+        assert (n >= 0), "frame number cannot be negative"
+        assert (
+                n - self.start_frame <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
+        assert (method in ["grayscale", "rgb",
+                           "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
         try:
@@ -362,7 +387,7 @@ Camera configuration: {:s}
             if method == "grayscale":
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #  mean(axis=2)
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # mean(axis=2)
             elif method == "rgb":
                 # turn bgr to rgb for plotting purposes
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -373,16 +398,27 @@ Camera configuration: {:s}
         cap.release()
         return img
 
-    def get_frames(self, **kwargs):
+    def get_frames(
+            self,
+            **kwargs
+    ) -> xr.DataArray:
         """
         Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`, expected to be read
         lazily. The xr.DataArray will contain all coordinate variables and attributes, needed for further processing
         steps.
 
-        :param kwargs: dict, keyword arguments to pass to `get_frame`. Currently only `grayscale` is supported.
-        :return: xr.DataArray, containing all requested frames
+        Parameters
+        ----------
+        **kwargs: dict, optional
+            keyword arguments to pass to `get_frame`. Currently only `grayscale` is supported.
+
+        Returns
+        -------
+        frames : xr.DataArray
+            containing all requested frames
         """
-        assert(hasattr(self, "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
+        assert (hasattr(self,
+                        "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
         get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
@@ -394,22 +430,15 @@ Camera configuration: {:s}
             dtype=sample.dtype,
             shape=sample.shape
         ) for frame in frames]
-        # if "lens_corr" in kwargs:
-        #     if kwargs["lens_corr"]:
-                # also correct the control point src
+        # undistort source control points
         if hasattr(camera_config, "gcps"):
             camera_config.gcps["src"] = cv.undistort_points(
                 camera_config.gcps["src"],
                 camera_config.camera_matrix,
                 camera_config.dist_coeffs,
             )
-                # camera_config.corners = cv.undistort_points(
-                #     camera_config.corners,
-                #     sample.shape[0],
-                #     sample.shape[1],
-                #     **self.camera_config.lens_pars
-                # )
-        time = np.array(self.time) * 0.001 # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
+        time = np.array(
+            self.time) * 0.001  # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)
         y = np.flipud(np.arange(data_array[0].shape[0]))
         x = np.arange(data_array[0].shape[1])
@@ -443,18 +472,37 @@ Camera configuration: {:s}
         frames.name = "frames"
         return frames
 
+    def set_mask_from_exterior(
+            self,
+            exterior
+    ):
+        """
+        Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside
 
-    def set_mask_from_exterior(self, exterior):
+        Parameters
+        ----------
+        exterior : list of lists
+            coordinates defining the polygon for masking
+
+        Returns
+        -------
+        self.mask : np.ndarray
+            mask for stabilization region
+
+        """
         mask_coords = np.array([exterior], dtype=np.int32)
         mask = np.zeros((self.height, self.width), np.uint8)
         mask = cv2.fillPoly(mask, [mask_coords], 255)
-        mask[mask==0] = 1
-        mask[mask==255] = 0
-        mask[mask==1] = 255
+        mask[mask == 0] = 1
+        mask[mask == 255] = 0
+        mask[mask == 1] = 255
         self.mask = mask
 
-
-    def get_ms(self, cap, split=2):
+    def get_ms(
+            self,
+            cap: cv2.VideoCapture,
+            split: Optional[int] = 2
+    ):
         self.ms = cv._get_ms_gftt(
             cap,
             start_frame=self.start_frame,
@@ -462,12 +510,12 @@ Camera configuration: {:s}
             split=split,
             mask=self.mask,
         )
-    # def _get_ms(self):
-    #     # retrieve the transformation matrices for stabilization
-    #     self.ms = cv._ms_from_displacements(self.feats_pos, self.feats_stats)
 
-
-    def plot_rigid_pts(self, ax=None, **kwargs):
+    def plot_rigid_pts(
+            self,
+            ax: plt.Axes = None,
+            **kwargs
+    ):
         """
         Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an
         axes object.
