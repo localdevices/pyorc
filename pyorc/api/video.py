@@ -10,7 +10,7 @@ import os
 import warnings
 import xarray as xr
 
-from typing import, List, Optional, Union
+from typing import List, Optional, Union
 
 from .. import cv, const
 from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
@@ -71,7 +71,7 @@ Camera configuration: {:s}
         """
         assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
-        assert (stabilize in ["fixed", None]), f'stabilize is only implemented for method "fixed", "{stabilize}" given'
+        # assert (isinstance(stabilize, (list, type(None)))), f'stabilize must contain a list of points, but is {stabilize}'
         self.feats_pos = None
         self.feats_stats = None
         self.feats_errs = None

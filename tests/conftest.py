@@ -286,7 +286,12 @@ def vid_cam_config_stabilize(cam_config):
         end_frame=20,
         camera_config=cam_config,
         h_a=0.,
-        stabilize="fixed"
+        stabilize=[
+            [400, 1080],
+            [170, 0],
+            [1000, 0],
+            [1750, 1080]
+        ]  # coordinates for which outside area is meant for stabilization
     )
     yield vid
 
