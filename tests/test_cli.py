@@ -2,7 +2,7 @@ import os.path
 
 from click.testing import CliRunner
 from pyorc.cli.main import cli
-from pyorc.cli.cli_elements import GcpSelect, AoiSelect
+from pyorc.cli.cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 from pyorc.cli import cli_utils
 from pyorc.helpers import xyz_transform
 import json
@@ -69,6 +69,8 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
         ],
         echo=True
     )
+    import time
+    time.sleep(1)
     assert result.exit_code == 0
 
 
@@ -107,6 +109,12 @@ def test_aoi_interact(frame_rgb, cam_config_without_aoi):
     selector = AoiSelect(frame_rgb, src, dst, cam_config_without_aoi)
     # uncomment below to test the interaction, not suitable for automated unit test
     # plt.show(block=True)
+
+def test_stabilize_interact(frame_rgb):
+    import matplotlib.pyplot as plt
+    selector = StabilizeSelect(frame_rgb)
+    # uncomment below to test the interaction, not suitable for automated unit test
+    plt.show(block=True)
 
 # cli utils
 def test_read_shape(gcps_fn):
