@@ -470,3 +470,34 @@ class StabilizeSelect(BaseSelect):
         # add dst coords in the intended CRS
         self.required_clicks = 4  # minimum 4 points needed for a satisfactory ROI
 
+    def on_right_click(self, event):
+        if len(self.pts_t) > 0:
+            self.pts_t[-1].remove()
+            del self.pts_t[-1]
+        if len(self.src) > 0:
+            del self.src[-1]
+            if len(self.src) > 0:
+                self.p.set_xy(self.src)
+            else:
+                self.p.set_xy(np.zeros((0, 2)))
+        self.ax.figure.canvas.draw()
+
+    def on_left_click(self, event):
+        if event.xdata is not None:
+            self.logger.debug(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
+            self.src.append([int(np.round(event.xdata)), int(np.round(event.ydata))])
+            # self.p.set_data(*list(zip(*self.src)))
+            self.p.set_xy(self.src)
+            pt = self.ax.annotate(
+                len(self.src),
+                xytext=(6, 6),
+                xy=(event.xdata, event.ydata),
+                textcoords="offset points",
+                zorder=4,
+                path_effects=[
+                    patheffects.Stroke(linewidth=3, foreground="w"),
+                    patheffects.Normal(),
+                ],
+            )
+            self.pts_t.append(pt)
+            self.ax.figure.canvas.draw()
