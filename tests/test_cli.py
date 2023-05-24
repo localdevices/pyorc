@@ -93,7 +93,7 @@ def test_gcps_interact(gcps_dst, frame_rgb):
         dst = gcps_dst
     selector = GcpSelect(frame_rgb, dst, crs=crs)
     # uncomment below to test the interaction, not suitable for automated unit test
-    # plt.show(block=True)
+    plt.show(block=True)
 
 
 
@@ -114,7 +114,7 @@ def test_stabilize_interact(frame_rgb):
     import matplotlib.pyplot as plt
     selector = StabilizeSelect(frame_rgb)
     # uncomment below to test the interaction, not suitable for automated unit test
-    plt.show(block=True)
+    # plt.show(block=True)
 
 # cli utils
 def test_read_shape(gcps_fn):

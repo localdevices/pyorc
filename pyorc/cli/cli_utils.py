@@ -11,7 +11,7 @@ import pyorc
 import yaml
 
 from pyorc import Video, helpers, CameraConfig, cv
-from pyorc.cli.cli_elements import GcpSelect, AoiSelect
+from pyorc.cli.cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 from shapely.geometry import Point
 
 
@@ -49,16 +49,29 @@ def get_corners_interactive(
 
     # setup a cam_config without
 
-def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0., lens_position=None, logger=logging):
+
+def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0, lens_position=None, logger=logging):
     vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     if crs_gcps is not None:
         dst = helpers.xyz_transform(dst, crs_from=crs_gcps, crs_to=4326)
     selector = GcpSelect(frame, dst, crs=crs, lens_position=lens_position, logger=logger)
-    # uncomment below to test the interaction, not suitable for automated unit test
     plt.show(block=True)
     return selector.src, selector.camera_matrix, selector.dist_coeffs
+
+
+def get_stabilize_pol(
+        fn,
+        frame_sample=0,
+        logger=logging
+):
+    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
+    frame = vid.get_frame(0, method="rgb")
+    selector = StabilizeSelect(frame, logger=logger)
+    plt.show(block=True)
+    return selector.src
+
 
 
 def get_file_hash(fn):

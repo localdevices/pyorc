@@ -144,21 +144,6 @@ Camera configuration: {:s}
         del cap
 
     @property
-    def stabilize(self):
-        if self._stabilize is not None:
-            return self._stabilize
-        elif hasattr(self, "camera_config"):
-            if hasattr(self.camera_config, "stabilize"):
-                return self.camera_config.stabilize
-
-    @stabilize.setter
-    def stabilize(
-            self,
-            coords: Optional[List[List]] = None
-    ):
-        self._stabilize = coords
-
-    @property
     def mask(self):
         """
 
@@ -241,18 +226,18 @@ Camera configuration: {:s}
 
     @property
     def stabilize(self):
-        """
-
-        :return: int, last frame considered in analysis
-        """
-        return self._stabilize
+        if self._stabilize is not None:
+            return self._stabilize
+        elif hasattr(self, "camera_config"):
+            if hasattr(self.camera_config, "stabilize"):
+                return self.camera_config.stabilize
 
     @stabilize.setter
     def stabilize(
             self,
-            stabilize: Optional[List[List]] = None
+            coords: Optional[List[List]] = None
     ):
-        self._stabilize = stabilize
+        self._stabilize = coords
 
     @property
     def h_a(self):

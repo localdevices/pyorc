@@ -110,20 +110,26 @@ class BaseSelect:
         v2 = [Size.Fixed(1.45), Size.Fixed(0.3)]
         v3 = [Size.Fixed(1.95), Size.Fixed(0.3)]
 
-        divider1 = Divider(self.fig, (0, 0, 1, 1), h, v, aspect=False)
+        divider3 = Divider(self.fig, (0, 0, 1, 1), h, v, aspect=False)
         divider2 = Divider(self.fig, (0, 0, 1, 1), h, v2, aspect=False)
-        divider3 = Divider(self.fig, (0, 0, 1, 1), h, v3, aspect=False)
-        self.ax_button1 = self.fig.add_axes(divider1.get_position(),
-                                  axes_locator=divider1.new_locator(nx=1, ny=1))
-        self.button1 = Button(self.ax_button1, 'Camera')
-        self.button1.on_clicked(self.switch_to_ax)
+        divider1 = Divider(self.fig, (0, 0, 1, 1), h, v3, aspect=False)
         if self.ax_geo is not None:
-            self.ax_button2 = self.fig.add_axes(divider2.get_position(),
-                                      axes_locator=divider2.new_locator(nx=1, ny=1))
+            self.ax_button1 = self.fig.add_axes(
+                divider1.get_position(),
+                axes_locator=divider1.new_locator(nx=1, ny=1)
+            )
+            self.button1 = Button(self.ax_button1, 'Camera')
+            self.button1.on_clicked(self.switch_to_ax)
+            self.ax_button2 = self.fig.add_axes(
+                divider2.get_position(),
+                axes_locator=divider2.new_locator(nx=1, ny=1)
+            )
             self.button2 = Button(self.ax_button2, 'Map')
             self.button2.on_clicked(self.switch_to_ax_geo)
-        self.ax_button3 = self.fig.add_axes(divider3.get_position(),
-                                  axes_locator=divider3.new_locator(nx=1, ny=1))
+        self.ax_button3 = self.fig.add_axes(
+            divider3.get_position(),
+            axes_locator=divider3.new_locator(nx=1, ny=1)
+        )
         self.button3 = Button(self.ax_button3, 'Done')
         self.button3.on_clicked(self.close_window)
         self.button3.set_active(False)
@@ -461,14 +467,33 @@ class StabilizeSelect(BaseSelect):
         self.title = self.ax.text(
             xloc,
             yloc,
-            "Select a region that encompasses at least the water surface. Areas outside will be treated as stable "
-            "points for stabilization",
+            "Select a polygon of at least 4 points that encompasses at least the water surface. Areas outside will be "
+            "treated as stable areas for stabilization.",
             size=12,
             path_effects=path_effects
         )
         self.ax.legend()
         # add dst coords in the intended CRS
         self.required_clicks = 4  # minimum 4 points needed for a satisfactory ROI
+
+
+    def on_click(self, event):
+        # only if ax is visible and click was within the window
+        if self.ax.get_visible() and event.inaxes == self.ax:
+            if event.button is MouseButton.RIGHT:
+                self.on_right_click(event)
+            elif event.button is MouseButton.LEFT:
+                self.on_left_click(event)
+                # check if enough points are collected to enable the Done button
+            if len(self.src) >= self.required_clicks:
+                self.button3.set_active(True)
+                self.button3.label.set_color("k")
+            else:
+                self.button3.set_active(False)
+                self.button3.label.set_color("grey")
+
+        self.ax.figure.canvas.draw()
+
 
     def on_right_click(self, event):
         if len(self.pts_t) > 0:
@@ -501,3 +526,8 @@ class StabilizeSelect(BaseSelect):
             )
             self.pts_t.append(pt)
             self.ax.figure.canvas.draw()
+
+    def on_close(self, event):
+        # overrule the amount of required clicks
+        self.required_clicks = len(self.src)
+        super(StabilizeSelect, self).on_close(event)
