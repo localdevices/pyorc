@@ -38,8 +38,7 @@ from different platforms, with suggestions given in the table below.
         recipe you can define several inputs to define further what should be done with the video. The example below
         demonstrates all inputs that currently can be supplied. The inputs define the start and end frame
         (``start_frame`` and ``end_frame``), the actual water level (``h_a``) in meters during the video, which will
-        be compared against the water level taken with the video used for camera calibration. Finally you may supply
-        ``stabilize`` without any further arguments to stabilize the video in case it has some movements.
+        be compared against the water level taken with the video used for camera calibration.
 
         .. code-block:: yaml
 
@@ -47,7 +46,6 @@ from different platforms, with suggestions given in the table below.
               start_frame: 150
               end_frame: 250
               h_a: 92.23
-              stabilize:
 
     .. tab-item:: API
 
@@ -71,7 +69,9 @@ image or frame, with control point information in view.
     .. tab-item:: Command-line
 
         When processing for velocimetry, a camera configuration must be supplied through the
-        option ``-c``, followed by the path to the file containing the camera configuration.
+        option ``-c``, followed by the path to the file containing the camera configuration. If you do not yet have
+        a camera configuration, then first go to the section on :ref:`camera configuration <camera_config_ug>` and
+        construct a camera configuration with these guidelines.
 
     .. tab-item:: API
 
@@ -96,9 +96,12 @@ and will be related to the water level, as read during the survey, used to const
 
     .. tab-item:: Command-line
 
-        You can supply the "current" water level by providing a water level in the recipe as follows. If you do not
-        supply it, ``pyorc`` will assume the water level is the same as in the control video. The example below will
-        process a video with a water level reading of 92.23 meters.
+        You can supply the "current" water level with the ``-h`` (short) or ``--h_a`` (long) option. You can also insert the
+        water level in the recipe yaml (although this is less practical mostly). The example below will process a video
+        with a water level reading of 92.23 meters. If you do not supply it, ``pyorc`` will assume the water level is
+        the same as in the control video. With incidental observations (e.g. with a drone survey), the video used to
+        setup the camera configuration and video processed here will be the same, and in this case you can simply leave
+        out the current water level.
 
         .. code-block:: yaml
 
@@ -120,7 +123,7 @@ and will be related to the water level, as read during the survey, used to const
 
    To guarantee that the perspective does not change, the following conditions MUST be met:
 
-       * The same lens must be used as used for the control image of the camera configuration. Note that smnartphone often
+       * The same lens must be used as used for the control image of the camera configuration. Note that smartphones often
          have multiple lenses e.g. for wide angle versus close-ups. Ensure you have zoom level at the same level as used
          for the control image and do not use digital zoom! It generally only reduces image quality.
        * The camera must be placed at exactly the same location and oriented to exactly the same objective
@@ -163,14 +166,10 @@ Videos may be taken in unsteady conditions. This may happen e.g. with slight mov
 drone that has varying air pressure conditions or wind gusts to deal with, or even fixed cameras in strong winds. But
 also, someone may have taken an incidental video, that was not originally intended to be used for river flow and velocity
 observations, but may render important information about a flood. For this the ``stabilize`` option can be passed with
-a stabilization strategy as input. Currently only the input "fixed" is supported, which is meant for a video with
-unintentional movements, e.g. due to wind or pressure changes (drone) or because the video was taken by hand.
-With this option, each frame will be stabilized with respect to the start frame chosen by the user
-(through the option ``start_frame``). The method works by first finding well traceable points in the first frame,
-then tracing where these points move to in the next frames. Of course some of these points may actually be moving water.
-Therefore we highly recommend to provide a polygon with the video that identifies the area that contains the entire water
-surface. The polygon must be measured in column, row coordinates in the image frame and can be supplied with the
-keyword ``mask_exterior``.
+a stabilization strategy as input. The stabilization may already be set during the camera configuration and this is
+in most cases the recommended approach. You may also arrange stabilization per video, and then supply a list of
+[column, row] coordinates in the recipe. With this option, each frame will be stabilized with respect to the start frame chosen by the user
+(through the option ``start_frame``).
 
 .. note::
 
@@ -202,9 +201,7 @@ keyword ``mask_exterior``.
               start_frame: 150
               end_frame: 250
               h_a: 92.23
-              stabilize: fixed
-              mask_exterior: [[816, 2160], [744, 0], [3287, 0], [3374, 2160]]
-
+              stabilize: [[816, 2160], [744, 0], [3287, 0], [3374, 2160]]
 
 
     .. tab-item:: API
@@ -224,24 +221,9 @@ keyword ``mask_exterior``.
                 camera_config=cam_config,
                 start_frame=0,
                 end_frame=125,
-                stabilize="fixed",
-                mask_exterior=[[150, 0], [500, 1080], [1750, 1080], [900, 0]]
+                stabilize=[[150, 0], [500, 1080], [1750, 1080], [900, 0]]
             )
             video
-
-        If you wish to plot which points were found in the stabilization process, then you can use the method ``video.plot_rigid_pts``.
-        This makes a scatter plot of the found assumed rigid points on the image frame. Of course it is adviced to also plot
-        the first image frame on the axes, so that you understand where these points are in the objective. This can be done for example
-        as follows:
-
-        .. code::
-
-            import matplotlib.pyplot as plt
-            img = video.get_frame(0, method="rgb")
-            ax = plt.axes()
-            ax.imshow(img)
-            video.plot_rigid_pts(ax=ax)
-
 
         .. note::
 

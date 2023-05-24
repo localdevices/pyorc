@@ -152,6 +152,14 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     callback=cli_utils.parse_corners,
     help="Video ojective corner points as list of 4 [column, row] points"
 )
+@click.option(
+    "--stabilize",
+    "-s",
+    is_flag=True,
+    default=False,
+    help="Stabilize the videos using this camera configuration (you can provide a stable area in an interactive view)."
+
+)
 @verbose_opt
 @click.pass_context
 @typechecked
@@ -171,9 +179,10 @@ def camera_config(
         lens_position: Optional[List[float]],
         shapefile: Optional[str],
         corners: Optional[List[List]],
+        stabilize: Optional[bool],
         verbose: int
 ):
-    log_level = max(10, 30 - 10 * verbose)
+    log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("cameraconfig", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your cameraconfig file in {output}")
     logger.info(f"Found video file  {videofile}")
@@ -237,6 +246,14 @@ def camera_config(
                 dist_coeffs=dist_coeffs,
                 logger=logger
             )
+    if stabilize:
+        stabilize = cli_utils.get_stabilize_pol(
+            videofile,
+            frame_sample=frame_sample,
+            logger=logger
+        )
+    else:
+        stabilize=None
     pyorc.service.camera_config(
         video_file=videofile,
         cam_config_file=output,
@@ -248,12 +265,13 @@ def camera_config(
         lens_position=lens_position,
         corners=corners,
         camera_matrix=camera_matrix,
-        dist_coeffs=dist_coeffs
+        dist_coeffs=dist_coeffs,
+        stabilize=stabilize
     )
     logger.info(f"Camera configuration created and stored in {output}")
 
 
-## VELOCIMETRY
+# VELOCIMETRY
 @cli.command(short_help="Estimate velocimetry")
 @click.argument(
     'OUTPUT',
@@ -286,6 +304,13 @@ def camera_config(
     help="Prefix for produced output files"
 )
 @click.option(
+    "-h",
+    "--h_a",
+    type=float,
+    required=False,
+    help="Water level in local vertical datum (e.g. staff or pressure gauge) belonging to video."
+)
+@click.option(
     "-u",
     "--update",
     is_flag=True,
@@ -295,10 +320,12 @@ def camera_config(
 
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, update, verbose):
-    log_level = max(10, 30 - 10 * verbose)
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, verbose):
+    log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
+    if h_a is not None:
+        recipe["video"]["h_a"] = h_a
     processor = pyorc.service.VelocityFlowProcessor(
         recipe,
         videofile,
@@ -310,7 +337,6 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, update, ve
     )
     # process video following the settings
     processor.process()
-    # read yaml
     pass
 
 if __name__ == "__main__":

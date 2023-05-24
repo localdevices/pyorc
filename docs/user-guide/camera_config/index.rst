@@ -3,10 +3,6 @@
 Camera configurations
 =====================
 
-.. note::
-
-   This manual is a work in progress.
-
 An essential element in doing optical velocity estimates is understanding how the Field Of View (FOV) of a camera
 relates to the real-world coordinates. This is needed so that a camera's FOV can be "orthorectified", meaning it can
 be transposed to real-world coordinates with equal pixel distances in meters. For this we need understanding of the
@@ -89,45 +85,50 @@ then your geographical referencing can easily be very wrong (even in the order o
 if you do not properly account for these. If for example your real-world coordinates are measured somewhere in the
 middle of the FOV, then velocities at the edges are likely to be overestimated.
 
-The default parameters (i.e. no distortion and an ideal world camera intrinsic matrix) may therefore be insufficient
-and can lead to unnecessary error in the interpretation of the real world distances in the FOV. To
-establish a more sound camera intrinsic matrix and distortion coefficients, we recommend to take a video of
-a checkerboard pattern using the exact settings you will use in the field and perform camera calibration with this.
-Below you can see an animated .gif of such a video. Basically, you print a checkerboard pattern, hold it in front of
-your camera, ensure that you run video at the exact settings at which you intend to record in the field,
-and capture the printed checkerboard pattern from as many angles as possible. Include rotation and movements in all
-directions.
+.. note::
+
+    In *pyorc* the focal distance is automatically optimized based on your real-world coordinates, provided as ground
+    control points. This is done already if you provide 4 control points in one vertical plane (e.g. at the water level).
+    In case you provide 6 or more ground control points with varying vertical levels, then *pyorc* will also attempt to
+    optimize the radial distortion. Therefore we strongly recommend that you measure 6 or more control points in case
+    you use a lens with significant radial distortion.
+
+You can also provide a camera intrinsic matrix and distortion coefficients in the API if you have these, or optimize
+the intrinsic matrix and distortion coefficients using a checkerboard pattern. More on this is described below.
 
 Preparing a video for camera calibration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We have a method available to establish an intrinsic matrix and distortion coefficients. It reads in a video in which
-a user shows a chessboard pattern and holds it in front of the camera in many different poses and at as many different
-locations in the field of view as possible. It then strips frames in a staggered manner starting with the first and
-last frame, and then the middle frame, and then the two frames in between the first, last and middle, and so on, until
-a satisfactroy number of frames have been found in which the chessboard pattern was found. The intrinsic matrix and
-distortion coefficients are then calculated based on the results, and added to the camera configuration.
+We have a method available to manually establish an intrinsic matrix and distortion coefficients. It reads in a video in
+which a user shows a chessboard pattern and holds it in front of the camera in many different poses and at as many
+different locations in the field of view as possible. It then strips frames in a staggered manner starting with the
+first and last frame, and then the middle frame, and then the two frames in between the first, last and middle, and so
+on, until a satisfactory number of frames have been found in which the chessboard pattern was found. The intrinsic
+matrix and distortion coefficients are then calculated based on the results, and added to the camera configuration.
 
 .. note::
 
-   Making a video of a chessboard pattern and calibrating on it is only uyseful if you do it the right way. Take care
+   Making a video of a chessboard pattern and calibrating on it is only useful if you do it the right way. Take care
    of the following guidelines:
 
    * ensure that the printed chessboard is carefully fixed or glued to a hard object, like a strong straight piece of
      cardboard or a piece of wood. Otherwise, the pattern may look wobbly and cause incorrect calibration
    * a larger chessboard pattern (e.g. A0 printed) shown at a larger distance may give better results because the
-     focal length is more similar to field conditions.
+     focal length is more similar to field conditions. An A4 printed pattern is too small. Using *pyorc*'s built-in
+     calibration is then more trustworthy.
    * make sure that while navigating you cover all degrees of freedom. This means you should move the checkerboard
      from top to bottom and left to right; in all positions, rotate the board around its horizontal and vertical
      middle line; and rotate it clockwise.
-   * make sure you record the video in exactly the same resolution as you intend to use during the taking of the videos
-     in the field.
+   * make sure you record the video in exactly the same resolution and zoom level as you intend to use during the
+     taking of the videos in the field.
 
-  If the calibration process is not carefully followed it may do more harm than good!!!
+  If the calibration process is not carefully followed it may do more harm than good!!! Therefore, if you are unsure
+  then we strongly recommend simply relying on the built-in automated calibration.
 
-An example of extracts from a calibration video with found corner points is shown below. It gives an impression of how
-you can move the chessboard pattern around. As said above, it is better to print a larger chessboard and show that to
-the camera at a larger distance.
+An example of extracts from a calibration video with found corner points is shown below (with A4 printed chessboard so
+not reliable for a field deployment, this is only an example). It gives an impression of how you can move the chessboard
+pattern around. As said above, it is better to print a (much!) larger chessboard and show that to the camera at a larger
+distance.
 
 .. image:: ../../_images/camera_calib.gif
 
@@ -140,7 +141,7 @@ Lens calibration method
 
         .. note::
 
-            At the moment, lens calibration is only available at API level. If you require a command-line option
+            At the moment, manual lens calibration is only available at API level. If you require a command-line option
             for lens calibration, then please contact us at info@rainbowsensing.com.
 
     .. tab-item:: API
@@ -249,6 +250,11 @@ Entering control points in the camera configuration
 Setting the lens position
 -------------------------
 
+If you also provide a lens position, then this position will be used along-side the ground control points to better
+optimize the pose estimation and to better estimate the focal length. Similar to the control points, we advise to
+measure the location as accurately as possible, and naturally in exactly the same horizontal and vertical datum as the
+control points.
+
 .. tab-set::
 
     .. tab-item:: Command-line
@@ -265,8 +271,7 @@ Setting the lens position
 
     .. tab-item:: API
 
-        For treatment of multiple videos, the water surface must also be reprojected to a new water level. This requires the
-        position of the x, y, z of the lens position. This can be provided using a simple method ``set_lens_position``. You only
+        The lens position can be provided using a simple method ``set_lens_position``. You only
         need to provide x, y, z and the CRS (if this is different from the CRS of the camera configuration itself.
 
         A full example supplying the lens position to the existing ``cam_config`` is shown below:
@@ -310,6 +315,36 @@ unexpected direction more easily, and without tuning of masking parameters.
 
         .. include:: ./api_bbox.rst
 
+Stabilization
+-------------
+You can decide whether videos must be stabilized. *pyorc* needs to be able to find so-called "rigid points" to do this.
+Rigid points are points that do not move during the video. *pyorc* can automatically detect easy stable points to track
+and then follow how these move from frame to frame. As the points should not move, *pyorc* will then transform each
+frame so that the resulting movements are minimized. To ensure the transformation are really rigid, such regid points
+must be found on all edges of the video. Hence it is important that when you take an unstable video, that there is
+enough visibility of surrounding banks, or infrastructure or other stable elements around the video to perform the
+stabilization. If such objects are only found in e.g. one half or (worse) one quadrant of the video, then the
+stabilization may give very strange results in the areas where no rigid points are found. Therefore, only use this
+if you know quite certainly that stable points will be found in many regions around the water.
+
+For stabilization, *pyorc* requires a polygon that defines the area where no rigid points are expected. This is
+essentially the moving water and possibly also strongly moving vegetation if this is present in the frame. So select
+the polygon such that it encompasses both water and other strongly moving elements as much as possible.
+
+.. tab-set::
+
+    .. tab-item:: Command-line
+
+        On the command line, simply provide ``--stabilize`` or ``-s`` as additional argument and you will be provided
+        with a interactive point and click view on your selected frame. You may click as many points as you wih to
+        create a polygon that encompasses moving things. To ensure that you include all edges, you can also pan
+        the frame so that areas outside of the frame become visible. Select the 4th button from the left (two crossed
+        double-arrows) to select panning. Click on the most left (Home) button to return to the original view.
+
+    .. tab-item:: API
+
+        For stabilization, provide ``stabilize`` as additional argument to ``CameraConfig`` and provide as value
+        a list of lists of coordinates in [column, row] format, similar to ``gcps["src"]``.
 
 Result of a camera configuration
 --------------------------------
@@ -322,7 +357,7 @@ used for processing videos into velocimetry.
     .. tab-item:: Command-line
 
         When all required parameters are provided, the resulting camera configuration will be stored in a file
-        set as <OUTPUT> on the command line. If you have our code base and the ``examples`` folder, then you can for
+        set as ``<OUTPUT>`` on the command line. If you have our code base and the ``examples`` folder, then you can for
         instance try the following to get a camera configuration without any interactive user inputs required:
 
         .. code-block:: console
@@ -338,14 +373,14 @@ used for processing videos into velocimetry.
         are provided as a list with [column, row] coordinates in the frame object. Finally, corner points to set the
         bounding box are provided as a list of [column, row] coordinates as well. The configuration is stored in
         ``ngwerere_cam_config.json``. If you leave out the ``--src`` and ``--corners`` components, you will be able to
-        select these interactively as shown before. Also the ``--h_ref`` and ``--z_0`` values can be supplied
-        interactively.
+        select these interactively as shown before. You can also add ``--stabilize`` to also provide a region for
+        stabilization as described before. Also the ``--h_ref`` and ``--z_0`` values can be supplied
+        interactively on the command line.
 
         The command-line interface will also automatically store visualizations of the resulting camera configuration
         in both planar view (with a satellite background if a CRS has been used) and in the camera perspective. The file
         names for this have the same name as <OUTPUT> but with the suffixes ``_geo.jpg`` for the planar view and
         ``_cam.jpg`` for the camera FOV perspective.
-
 
     .. tab-item:: API
 

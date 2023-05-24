@@ -25,29 +25,31 @@ corner_labels = [
     "upstream-right"
 ]
 class BaseSelect:
-    def __init__(self, img, dst, crs=None, buffer=0.0002, zoom_level=19, logger=logging):
+    def __init__(self, img, dst=None, crs=None, buffer=0.0002, zoom_level=19, logger=logging):
         self.logger = logger
         self.height, self.width = img.shape[0:2]
         self.crs = crs
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
-        # fig = plt.figure(figsize=(12, 7))
-        xmin = np.array(dst)[:, 0].min()
-        xmax = np.array(dst)[:, 0].max()
-        ymin = np.array(dst)[:, 1].min()
-        ymax = np.array(dst)[:, 1].max()
-        extent = [xmin - buffer, xmax + buffer, ymin-buffer, ymax + buffer]
+        ax_geo = None
         # extent = [4.5, 4.51, 51.2, 51.21]
-        if crs is not None:
-            tiler = getattr(cimgt, "GoogleTiles")(style="satellite")
-            ax_geo = fig.add_axes([0., 0., 1, 1], projection=tiler.crs)
-            ax_geo.set_extent(extent, crs=ccrs.PlateCarree())
-            ax_geo.add_image(tiler, zoom_level, zorder=1)
-        else:
-            ax_geo = fig.add_axes([0., 0., 1, 1])
-            ax_geo.set_aspect("equal")
-        plt.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
-        ax_geo.set_visible(False)
+        if dst is not None:
+            # fig = plt.figure(figsize=(12, 7))
+            xmin = np.array(dst)[:, 0].min()
+            xmax = np.array(dst)[:, 0].max()
+            ymin = np.array(dst)[:, 1].min()
+            ymax = np.array(dst)[:, 1].max()
+            extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
+            if crs is not None:
+                tiler = getattr(cimgt, "GoogleTiles")(style="satellite")
+                ax_geo = fig.add_axes([0., 0., 1, 1], projection=tiler.crs)
+                ax_geo.set_extent(extent, crs=ccrs.PlateCarree())
+                ax_geo.add_image(tiler, zoom_level, zorder=1)
+            else:
+                ax_geo = fig.add_axes([0., 0., 1, 1])
+                ax_geo.set_aspect("equal")
+            plt.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
+            ax_geo.set_visible(False)
         ax = fig.add_axes([0.2, 0.1, 0.7, 0.8])
         ax.set_facecolor("k")
         ax.set_position([0, 0, 1, 1])
@@ -72,20 +74,21 @@ class BaseSelect:
                 patheffects.Normal(),
             ],
         )
-        if crs is not None:
-            kwargs["transform"] = ccrs.PlateCarree()
-            transform = ccrs.PlateCarree()._as_mpl_transform(ax_geo)
-            kwargs_text["xycoords"] = transform
-        self.p_geo = ax_geo.plot(
-            *list(zip(*dst))[0:2], "o",
-            **kwargs
-        )
-        for n, _pt in enumerate(dst):
-            pt = ax_geo.annotate(
-                n + 1,
-                xy = _pt[0:2],
-                **kwargs_text
+        if dst is not None:
+            if crs is not None:
+                kwargs["transform"] = ccrs.PlateCarree()
+                transform = ccrs.PlateCarree()._as_mpl_transform(ax_geo)
+                kwargs_text["xycoords"] = transform
+            self.p_geo = ax_geo.plot(
+                *list(zip(*dst))[0:2], "o",
+                **kwargs
             )
+            for n, _pt in enumerate(dst):
+                pt = ax_geo.annotate(
+                    n + 1,
+                    xy = _pt[0:2],
+                    **kwargs_text
+                )
         self.fig = fig
         self.ax_geo = ax_geo
         self.ax = ax  # add axes
@@ -107,20 +110,27 @@ class BaseSelect:
         v2 = [Size.Fixed(1.45), Size.Fixed(0.3)]
         v3 = [Size.Fixed(1.95), Size.Fixed(0.3)]
 
-        divider1 = Divider(self.fig, (0, 0, 1, 1), h, v, aspect=False)
+        divider3 = Divider(self.fig, (0, 0, 1, 1), h, v, aspect=False)
         divider2 = Divider(self.fig, (0, 0, 1, 1), h, v2, aspect=False)
-        divider3 = Divider(self.fig, (0, 0, 1, 1), h, v3, aspect=False)
-        self.ax_button1 = self.fig.add_axes(divider1.get_position(),
-                                  axes_locator=divider1.new_locator(nx=1, ny=1))
-        self.ax_button2 = self.fig.add_axes(divider2.get_position(),
-                                  axes_locator=divider2.new_locator(nx=1, ny=1))
-        self.ax_button3 = self.fig.add_axes(divider3.get_position(),
-                                  axes_locator=divider3.new_locator(nx=1, ny=1))
-        self.button1 = Button(self.ax_button1, 'Camera')
-        self.button2 = Button(self.ax_button2, 'Map')
+        divider1 = Divider(self.fig, (0, 0, 1, 1), h, v3, aspect=False)
+        if self.ax_geo is not None:
+            self.ax_button1 = self.fig.add_axes(
+                divider1.get_position(),
+                axes_locator=divider1.new_locator(nx=1, ny=1)
+            )
+            self.button1 = Button(self.ax_button1, 'Camera')
+            self.button1.on_clicked(self.switch_to_ax)
+            self.ax_button2 = self.fig.add_axes(
+                divider2.get_position(),
+                axes_locator=divider2.new_locator(nx=1, ny=1)
+            )
+            self.button2 = Button(self.ax_button2, 'Map')
+            self.button2.on_clicked(self.switch_to_ax_geo)
+        self.ax_button3 = self.fig.add_axes(
+            divider3.get_position(),
+            axes_locator=divider3.new_locator(nx=1, ny=1)
+        )
         self.button3 = Button(self.ax_button3, 'Done')
-        self.button1.on_clicked(self.switch_to_ax)
-        self.button2.on_clicked(self.switch_to_ax_geo)
         self.button3.on_clicked(self.close_window)
         self.button3.set_active(False)
         self.button3.label.set_color("gray")
@@ -437,3 +447,87 @@ class GcpSelect(BaseSelect):
             self.p_geo_selected.set_data(*list(zip(*dst_sel))[0:2])
         else:
             self.p_geo_selected.set_data([], [])
+
+
+class StabilizeSelect(BaseSelect):
+    def __init__(self, img, logger=logging):
+        super(StabilizeSelect, self).__init__(img, logger=logger)
+        # make empty plot
+        pol = Polygon(np.zeros((0, 2)), edgecolor="w", alpha=0.5, linewidth=2)
+        self.p = self.ax.add_patch(pol)
+        kwargs = dict(
+            color="c",
+            markeredgecolor="w",
+            zorder=4,
+            markersize=10,
+            label="Selected control points"
+        )
+        xloc = self.ax.get_xlim()[0] + 50
+        yloc = self.ax.get_ylim()[-1] + 50
+        self.title = self.ax.text(
+            xloc,
+            yloc,
+            "Select a polygon of at least 4 points that encompasses at least the water surface. Areas outside will be "
+            "treated as stable areas for stabilization.",
+            size=12,
+            path_effects=path_effects
+        )
+        self.ax.legend()
+        # add dst coords in the intended CRS
+        self.required_clicks = 4  # minimum 4 points needed for a satisfactory ROI
+
+
+    def on_click(self, event):
+        # only if ax is visible and click was within the window
+        if self.ax.get_visible() and event.inaxes == self.ax:
+            if event.button is MouseButton.RIGHT:
+                self.on_right_click(event)
+            elif event.button is MouseButton.LEFT:
+                self.on_left_click(event)
+                # check if enough points are collected to enable the Done button
+            if len(self.src) >= self.required_clicks:
+                self.button3.set_active(True)
+                self.button3.label.set_color("k")
+            else:
+                self.button3.set_active(False)
+                self.button3.label.set_color("grey")
+
+        self.ax.figure.canvas.draw()
+
+
+    def on_right_click(self, event):
+        if len(self.pts_t) > 0:
+            self.pts_t[-1].remove()
+            del self.pts_t[-1]
+        if len(self.src) > 0:
+            del self.src[-1]
+            if len(self.src) > 0:
+                self.p.set_xy(self.src)
+            else:
+                self.p.set_xy(np.zeros((0, 2)))
+        self.ax.figure.canvas.draw()
+
+    def on_left_click(self, event):
+        if event.xdata is not None:
+            self.logger.debug(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
+            self.src.append([int(np.round(event.xdata)), int(np.round(event.ydata))])
+            # self.p.set_data(*list(zip(*self.src)))
+            self.p.set_xy(self.src)
+            pt = self.ax.annotate(
+                len(self.src),
+                xytext=(6, 6),
+                xy=(event.xdata, event.ydata),
+                textcoords="offset points",
+                zorder=4,
+                path_effects=[
+                    patheffects.Stroke(linewidth=3, foreground="w"),
+                    patheffects.Normal(),
+                ],
+            )
+            self.pts_t.append(pt)
+            self.ax.figure.canvas.draw()
+
+    def on_close(self, event):
+        # overrule the amount of required clicks
+        self.required_clicks = len(self.src)
+        super(StabilizeSelect, self).on_close(event)

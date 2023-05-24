@@ -163,11 +163,12 @@ class Transect(ORCBase):
         ----------
         v_corr : float, optional
             correction factor (default: 0.9)
-        fill_method : method to fill missing values. "zeros" fills NaNS with zeros, "interpolate" interpolates values
+        fill_method : str, optional
+            method to fill missing values. "zeros" fills NaNS with zeros, "interpolate" interpolates values
             from nearest neighbour, "log_interp" interpolates values linearly with velocities scaled by the log of
-             depth over a roughness length, "log_fit" fits a 4-parameter logarithmic profile with depth and with
-             changing velocities towards banks on known velocities, and fills missing with the fitted relationship
-             (experimental) (Default value = "zeros").
+            depth over a roughness length, "log_fit" fits a 4-parameter logarithmic profile with depth and with
+            changing velocities towards banks on known velocities, and fills missing with the fitted relationship
+            (experimental) (Default value = "zeros").
 
         Returns
         -------

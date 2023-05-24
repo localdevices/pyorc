@@ -25,14 +25,14 @@ For our example video, supplying the gcps in a full command-line option manner w
 
     $ pyorc camera-config --crs_gcps 32735 --src "[[1421, 1001], [1251, 460], [421, 432], [470, 607]]" --dst "[[642735.8076, 8304292.1190], [642737.5823, 8304295.593], [642732.7864, 8304298.4250], [642732.6705, 8304296.8580]]" --z_0 1182.2 --h_ref 0.0 ......
 
-After the ..... more inputs such as the video with control points, the CRS of the camera configuration, and the output
-filename must be presented. With this input, no further interaction with the user to complete the control points is
-required.
+At the end of this command, after the ``.....`` more inputs such as the video with control points, the CRS of the camera
+configuration, and the output filename must be presented. With this input, no further interaction with the user to
+complete the control points is required.
 
 In many cases though, the information under ``-dst`` may be cumbersome to insert. Hence a more convenient option is to
 leave out ``-dst`` and replace it for ``--shapefile`` and provide a path to a shapefile or other vector formatted
-GIS file containing your control points. *pyorc* assumes that the shapefile contains exactly those points you wish to
-use, no more and no less, that all information is in the geometries (i.e. x, y and if +6-points are used, also z) and
+GIS file containing your real-world control points. *pyorc* assumes that the shapefile contains exactly those points you
+wish to use, no more and no less, that all information is in the geometries (i.e. x, y and if +6-points are used, also z) and
 that the file contains a CRS that allows for automated reprojection to the CRS of the camera configuration (i.e.
 supplied with ``--crs``). The geometries MUST be of the type POINT only! *pyorc* will attempt to indicate any
 problems with shapefiles that contain wrong or incomplete information so that you can resolve that if needed.
@@ -45,16 +45,28 @@ problems with shapefiles that contain wrong or incomplete information so that yo
 
 Similarly, the information contained in ``--src`` may also be very cumbersome to collect. In fact, you need to open up
 a frame in a photo editor and note down rows and columns to do so. Therefore a much more and highly recommended
-approach is to simply leave out ``-src`` at all. You will then be asked if you want to interactively select these
+approach is to simply leave out ``-src`` entirely. You will then be asked if you want to interactively select these
 points. Simply select `Y` and use our convenient point and click approach to select the control points. To make sure you
 click them in the right order, you can click on the *Map* button to display a map overview of the situation. Here, your
 ``--dst`` points (or points collected from the shapefile) will be displayed in a map view, with numbers indicating
 which point should be selected first, which second and so on. You can go back to the camera view with the *camera*
 button. Then you simply click on the first, second, third, ... and so on control point to collect all control points.
 Did you make an accidental click on a random point? No problem: just right-click and the last point you clicked
-will be removed. Right-click again and the point before that is removed so that you can click again. Once all point are
-collected, the *Done* button will become clickable. Click *Done* to close the view and store the points in the camera
-configuration.
+will be removed. Right-click again and the point before that is removed so that you can click again.
+
+Once all point are clicked, *pyorc* will optimize both the perspective and the camera's lens characteristics
+simultaneously, and display the points you clicked, but then projected using the camera matrix, distortion coefficients
+and the estimated perspective pose of the camera. You will see the result as red "+" signs on the screen and an average
+error in meters displayed on the top of the frame. If the average error is larger than 0.1 meter you will get a warning.
+Large errors are likely due to poorly measured control points, or because you clicked the points in the wrong order.
+
+Once the optimization is performed, the *Done* button will become clickable. Click *Done* to close the view and store
+the points in the camera configuration. If you made a mistake and want to rectify poorly clicked points, simply right
+click as many times as needed to remove points, and add them again with left clicks. The optimization will be repeated
+again once you have reached the total amount of control points. The view after the optimization is shown in the example
+below.
+
+.. figure:: ../../_images/GCPs_interactive.jpg
 
 .. note::
 

@@ -31,7 +31,7 @@ def test_fps(vid):
     "video, method, result",
     [
         (pytest.lazy_fixture("vid_cam_config"), "grayscale", [85, 71, 65, 80]),
-        (pytest.lazy_fixture("vid_cam_config_stabilize"), "grayscale", [8, 87, 76, 72]),
+        (pytest.lazy_fixture("vid_cam_config_stabilize"), "grayscale", [5, 88, 78, 73]),
         (pytest.lazy_fixture("vid_cam_config"), "rgb", [84, 91, 57, 70]),
         (pytest.lazy_fixture("vid_cam_config"), "hsv", [36, 95, 91, 36])
     ]
