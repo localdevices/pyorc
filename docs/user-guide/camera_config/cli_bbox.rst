@@ -21,3 +21,7 @@ clicked 4 points, and then you will see the allocated bounding box around the 4 
 you will see the same bounding box in geographical space. If you wish to improve your corner point selection, then
 simply use right-click to remove points and select new locations for them to change the bounding box. Once you are
 satisfied, click on *Done* and the bounding box will be stored in the camera configuration.
+
+Below an example of the bounding box as it appears in the interactive interface is shown.
+
+.. figure:: ../../_images/bbox_interactive.jpg

@@ -97,7 +97,6 @@ Class and properties
     Video.end_frame
     Video.start_frame
     Video.corners
-    Video.plot_rigid_pts
 
 Getting frames from video objects
 ---------------------------------
@@ -220,8 +219,9 @@ Data infilling
 
 .. autosummary::
     :toctree: _generated
+    :template: accessor_method.rst
 
-    Velocimetry.replace_outliers
+    Velocimetry.mask.window_replace
 
 .. _transects:
 

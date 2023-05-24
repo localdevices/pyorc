@@ -45,7 +45,6 @@ class CameraConfig:
             calibration_video: Optional[str] = None,
             is_nadir: Optional[bool] = False,
             stabilize: Optional[List[List]] = None
-
     ):
         """
 
@@ -71,7 +70,7 @@ class CameraConfig:
         gcps : dict
             Can contain "src": list of lists, with column, row locations in objective of control points,
             "dst": list of lists, with x, y or x, y, z locations (local or global coordinate reference system) of
-                control points,
+            control points,
             "h_ref": float, measured water level [m] in local reference system (e.g. from staff gauge or pressure gauge)
             during gcp survey,
             "z_0": float, water level [m] in global reference system (e.g. from used GPS system CRS). This must be in

@@ -21,5 +21,10 @@ To setup a camera configuration, you will at minimum need to provide the followi
 * 4 corner points that approximately indicate the bounding box of your area of interest. These must be provided in
   the order *upstream-left*, *downstream-left*, *downstream-right*, *upstream-right*, where left is the left-bank
   as seen while looking in downstream direction.
+* If you wish to use the video only from a selected frame (for instance if the first frames/seconds are bad quality, or
+  moving) then you must also provide the frame number from which you would like to start the analysis and provide the
+  camera configuration information. This is done with the ``-f`` or ``--frame-sample`` option. In the interactive
+  views that will support you, this frame will be displayed. If you do not provide ``-f`` then the first frame (index 0)
+  will be displayed.
 
 There are several ways to assign this information, further explained below.

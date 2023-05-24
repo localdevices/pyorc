@@ -69,3 +69,10 @@ A full example that supplies GCPs to the existing camera configuration in variab
 
     cam_config.set_gcps(src=src, dst=dst, z_0=z_0, crs=crs)
 
+If you have not supplied ``camera_matrix`` and ``dist_coeffs`` to the camera configuration, then these can be optimized
+using the provided GCPs after these have been set using the following without any arguments.
+
+.. code-block:: python
+
+    cam_config.set_intrinsic()
+

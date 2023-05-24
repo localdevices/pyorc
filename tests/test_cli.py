@@ -63,7 +63,7 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
             cam_config_fn,
             '-r',
             cli_recipe_fn,
-            '-vvv',
+            '-v',
             cli_output_dir,
             '-u'
         ],

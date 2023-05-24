@@ -72,7 +72,6 @@ Camera configuration: {:s}
         assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
         # assert (isinstance(stabilize, (list, type(None)))), f'stabilize must contain a list of points, but is {stabilize}'
-        self.feats_pos = None
         self.feats_stats = None
         self.feats_errs = None
         self.ms = None
@@ -496,30 +495,3 @@ Camera configuration: {:s}
             mask=self.mask,
         )
 
-    def plot_rigid_pts(
-            self,
-            ax: plt.Axes = None,
-            **kwargs
-    ):
-        """
-        Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an
-        axes object.
-
-
-        Parameters
-        ----------
-        ax : plt.axes object, optional
-            If None (default), use the current axes.
-        **kwargs : additional keyword arguments to `matplotlib.pyplot.scatter` wrapped Matplotlib function.
-
-
-        Returns
-        -------
-
-        """
-        assert self.feats_pos is not None, "No stabilization applied hence no rigid points available to plot"
-        if ax is None:
-            ax = plt.axes()
-        for t_p in np.swapaxes(self.feats_pos, 0, 1):
-            p = ax.scatter(t_p[:, 0], t_p[:, 1], c=np.linspace(0, 1, len(t_p)), **kwargs)
-        return p

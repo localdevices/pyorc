@@ -304,6 +304,13 @@ def camera_config(
     help="Prefix for produced output files"
 )
 @click.option(
+    "-h",
+    "--h_a",
+    type=float,
+    required=False,
+    help="Water level in local vertical datum (e.g. staff or pressure gauge) belonging to video."
+)
+@click.option(
     "-u",
     "--update",
     is_flag=True,
@@ -313,10 +320,12 @@ def camera_config(
 
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, update, verbose):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, verbose):
     log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
+    if h_a is not None:
+        recipe["video"]["h_a"] = h_a
     processor = pyorc.service.VelocityFlowProcessor(
         recipe,
         videofile,
