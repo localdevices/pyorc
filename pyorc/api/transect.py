@@ -186,6 +186,8 @@ class Transect(ORCBase):
         z = ds["zcoords"].values
         # add filled surface velocities with a logarithmic profile curve fit
         depth = self.camera_config.get_depth(z, self.h_a)
+        # make velocities zero where depth is zero
+        ds["v_eff_nofill"][:, depth<=0] = 0.
         if fill_method == "zeros":
             ds["v_eff"] = ds["v_eff_nofill"].fillna(0.)
         elif fill_method == "log_fit":
