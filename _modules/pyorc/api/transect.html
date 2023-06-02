@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.transect &#8212; pyorc 0.4.3 documentation</title>
+    <title>pyorc.api.transect &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -108,7 +108,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -541,11 +541,12 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        v_corr : float, optional</span>
 <span class="sd">            correction factor (default: 0.9)</span>
-<span class="sd">        fill_method : method to fill missing values. &quot;zeros&quot; fills NaNS with zeros, &quot;interpolate&quot; interpolates values</span>
+<span class="sd">        fill_method : str, optional</span>
+<span class="sd">            method to fill missing values. &quot;zeros&quot; fills NaNS with zeros, &quot;interpolate&quot; interpolates values</span>
 <span class="sd">            from nearest neighbour, &quot;log_interp&quot; interpolates values linearly with velocities scaled by the log of</span>
-<span class="sd">             depth over a roughness length, &quot;log_fit&quot; fits a 4-parameter logarithmic profile with depth and with</span>
-<span class="sd">             changing velocities towards banks on known velocities, and fills missing with the fitted relationship</span>
-<span class="sd">             (experimental) (Default value = &quot;zeros&quot;).</span>
+<span class="sd">            depth over a roughness length, &quot;log_fit&quot; fits a 4-parameter logarithmic profile with depth and with</span>
+<span class="sd">            changing velocities towards banks on known velocities, and fills missing with the fitted relationship</span>
+<span class="sd">            (experimental) (Default value = &quot;zeros&quot;).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>

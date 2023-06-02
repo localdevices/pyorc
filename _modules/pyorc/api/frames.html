@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.frames &#8212; pyorc 0.4.3 documentation</title>
+    <title>pyorc.api.frames &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -108,7 +108,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -440,8 +440,9 @@ document.write(`
         <span class="n">coords_drop</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dims</span><span class="p">))</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">coords_drop</span><span class="p">)</span>
         <span class="c1"># get frames and shifted frames in time</span>
-        <span class="n">frames1</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="n">frames2</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">frames1</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">chunk</span><span class="p">({</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">})</span>
+        <span class="n">frames2</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">chunk</span><span class="p">({</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">})</span>
+
         <span class="c1"># get the cols and rows coordinates of the expected results</span>
         <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="n">piv_process</span><span class="o">.</span><span class="n">get_piv_size</span><span class="p">(</span>
             <span class="n">image_size</span><span class="o">=</span><span class="n">frames1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
@@ -552,12 +553,14 @@ document.write(`
         <span class="c1"># convert bounding box coords into row/column space</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">shape</span>
         <span class="c1"># get camera perspective bbox corners</span>
-        <span class="n">src</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">(</span>
+            <span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">h_a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
         <span class="n">dst_xy</span> <span class="o">=</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">()</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
         <span class="c1"># get geographic coordinates bbox corners</span>
         <span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">transform_to_bbox</span><span class="p">(</span><span class="n">dst_xy</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
         <span class="n">M</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M_2D</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
-
         <span class="c1"># prepare all coordinates</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
             <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>

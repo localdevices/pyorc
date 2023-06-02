@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Camera configurations &#8212; pyorc 0.4.3 documentation</title>
+    <title>Camera configurations &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -403,10 +403,6 @@ document.write(`
                   
   <section id="camera-configurations">
 <span id="camera-config-ug"></span><h1>Camera configurations<a class="headerlink" href="#camera-configurations" title="Permalink to this heading">#</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This manual is a work in progress.</p>
-</div>
 <p>An essential element in doing optical velocity estimates is understanding how the Field Of View (FOV) of a camera
 relates to the real-world coordinates. This is needed so that a camera’s FOV can be “orthorectified”, meaning it can
 be transposed to real-world coordinates with equal pixel distances in meters. For this we need understanding of the
@@ -457,6 +453,9 @@ Options:
                               this CRS.
   --corners TEXT              Video ojective corner points as list of 4
                               [column, row] points
+  -s, --stabilize             Stabilize the videos using this camera
+                              configuration (you can provide a stable area in
+                              an interactive view).
   -v, --verbose               Increase verbosity.
   --help                      Show this message and exit.
 </pre></div>
@@ -473,6 +472,11 @@ view.</p></li>
 <li><p>4 corner points that approximately indicate the bounding box of your area of interest. These must be provided in
 the order <em>upstream-left</em>, <em>downstream-left</em>, <em>downstream-right</em>, <em>upstream-right</em>, where left is the left-bank
 as seen while looking in downstream direction.</p></li>
+<li><p>If you wish to use the video only from a selected frame (for instance if the first frames/seconds are bad quality, or
+moving) then you must also provide the frame number from which you would like to start the analysis and provide the
+camera configuration information. This is done with the <code class="docutils literal notranslate"><span class="pre">-f</span></code> or <code class="docutils literal notranslate"><span class="pre">--frame-sample</span></code> option. In the interactive
+views that will support you, this frame will be displayed. If you do not provide <code class="docutils literal notranslate"><span class="pre">-f</span></code> then the first frame (index 0)
+will be displayed.</p></li>
 </ul>
 <p>There are several ways to assign this information, further explained below.</p>
 </div>
@@ -675,44 +679,49 @@ distorted into bend lines in your objective. Imagine that this happens with a vi
 then your geographical referencing can easily be very wrong (even in the order of meters with wide enough streams)
 if you do not properly account for these. If for example your real-world coordinates are measured somewhere in the
 middle of the FOV, then velocities at the edges are likely to be overestimated.</p>
-<p>The default parameters (i.e. no distortion and an ideal world camera intrinsic matrix) may therefore be insufficient
-and can lead to unnecessary error in the interpretation of the real world distances in the FOV. To
-establish a more sound camera intrinsic matrix and distortion coefficients, we recommend to take a video of
-a checkerboard pattern using the exact settings you will use in the field and perform camera calibration with this.
-Below you can see an animated .gif of such a video. Basically, you print a checkerboard pattern, hold it in front of
-your camera, ensure that you run video at the exact settings at which you intend to record in the field,
-and capture the printed checkerboard pattern from as many angles as possible. Include rotation and movements in all
-directions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In <em>pyorc</em> the focal distance is automatically optimized based on your real-world coordinates, provided as ground
+control points. This is done already if you provide 4 control points in one vertical plane (e.g. at the water level).
+In case you provide 6 or more ground control points with varying vertical levels, then <em>pyorc</em> will also attempt to
+optimize the radial distortion. Therefore we strongly recommend that you measure 6 or more control points in case
+you use a lens with significant radial distortion.</p>
+</div>
+<p>You can also provide a camera intrinsic matrix and distortion coefficients in the API if you have these, or optimize
+the intrinsic matrix and distortion coefficients using a checkerboard pattern. More on this is described below.</p>
 <section id="preparing-a-video-for-camera-calibration">
 <h3>Preparing a video for camera calibration<a class="headerlink" href="#preparing-a-video-for-camera-calibration" title="Permalink to this heading">#</a></h3>
-<p>We have a method available to establish an intrinsic matrix and distortion coefficients. It reads in a video in which
-a user shows a chessboard pattern and holds it in front of the camera in many different poses and at as many different
-locations in the field of view as possible. It then strips frames in a staggered manner starting with the first and
-last frame, and then the middle frame, and then the two frames in between the first, last and middle, and so on, until
-a satisfactroy number of frames have been found in which the chessboard pattern was found. The intrinsic matrix and
-distortion coefficients are then calculated based on the results, and added to the camera configuration.</p>
+<p>We have a method available to manually establish an intrinsic matrix and distortion coefficients. It reads in a video in
+which a user shows a chessboard pattern and holds it in front of the camera in many different poses and at as many
+different locations in the field of view as possible. It then strips frames in a staggered manner starting with the
+first and last frame, and then the middle frame, and then the two frames in between the first, last and middle, and so
+on, until a satisfactory number of frames have been found in which the chessboard pattern was found. The intrinsic
+matrix and distortion coefficients are then calculated based on the results, and added to the camera configuration.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <blockquote>
-<div><p>Making a video of a chessboard pattern and calibrating on it is only uyseful if you do it the right way. Take care
+<div><p>Making a video of a chessboard pattern and calibrating on it is only useful if you do it the right way. Take care
 of the following guidelines:</p>
 <ul class="simple">
 <li><p>ensure that the printed chessboard is carefully fixed or glued to a hard object, like a strong straight piece of
 cardboard or a piece of wood. Otherwise, the pattern may look wobbly and cause incorrect calibration</p></li>
 <li><p>a larger chessboard pattern (e.g. A0 printed) shown at a larger distance may give better results because the
-focal length is more similar to field conditions.</p></li>
+focal length is more similar to field conditions. An A4 printed pattern is too small. Using <em>pyorc</em>’s built-in
+calibration is then more trustworthy.</p></li>
 <li><p>make sure that while navigating you cover all degrees of freedom. This means you should move the checkerboard
 from top to bottom and left to right; in all positions, rotate the board around its horizontal and vertical
 middle line; and rotate it clockwise.</p></li>
-<li><p>make sure you record the video in exactly the same resolution as you intend to use during the taking of the videos
-in the field.</p></li>
+<li><p>make sure you record the video in exactly the same resolution and zoom level as you intend to use during the
+taking of the videos in the field.</p></li>
 </ul>
 </div></blockquote>
-<p>If the calibration process is not carefully followed it may do more harm than good!!!</p>
+<p>If the calibration process is not carefully followed it may do more harm than good!!! Therefore, if you are unsure
+then we strongly recommend simply relying on the built-in automated calibration.</p>
 </div>
-<p>An example of extracts from a calibration video with found corner points is shown below. It gives an impression of how
-you can move the chessboard pattern around. As said above, it is better to print a larger chessboard and show that to
-the camera at a larger distance.</p>
+<p>An example of extracts from a calibration video with found corner points is shown below (with A4 printed chessboard so
+not reliable for a field deployment, this is only an example). It gives an impression of how you can move the chessboard
+pattern around. As said above, it is better to print a (much!) larger chessboard and show that to the camera at a larger
+distance.</p>
 <img alt="../../_images/camera_calib.gif" src="../../_images/camera_calib.gif" />
 </section>
 <section id="lens-calibration-method">
@@ -723,7 +732,7 @@ the camera at a larger distance.</p>
 Command-line</label><div class="sd-tab-content docutils">
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>At the moment, lens calibration is only available at API level. If you require a command-line option
+<p>At the moment, manual lens calibration is only available at API level. If you require a command-line option
 for lens calibration, then please contact us at <a class="reference external" href="mailto:info&#37;&#52;&#48;rainbowsensing&#46;com">info<span>&#64;</span>rainbowsensing<span>&#46;</span>com</a>.</p>
 </div>
 </div>
@@ -861,13 +870,13 @@ in a “Well-known Text” (wkt) form, which is a string.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>--crs_gcps<span class="w"> </span><span class="m">32735</span><span class="w"> </span>--src<span class="w"> </span><span class="s2">&quot;[[1421, 1001], [1251, 460], [421, 432], [470, 607]]&quot;</span><span class="w"> </span>--dst<span class="w"> </span><span class="s2">&quot;[[642735.8076, 8304292.1190], [642737.5823, 8304295.593], [642732.7864, 8304298.4250], [642732.6705, 8304296.8580]]&quot;</span><span class="w"> </span>--z_0<span class="w"> </span><span class="m">1182</span>.2<span class="w"> </span>--h_ref<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span>......
 </pre></div>
 </div>
-<p>After the ….. more inputs such as the video with control points, the CRS of the camera configuration, and the output
-filename must be presented. With this input, no further interaction with the user to complete the control points is
-required.</p>
+<p>At the end of this command, after the <code class="docutils literal notranslate"><span class="pre">.....</span></code> more inputs such as the video with control points, the CRS of the camera
+configuration, and the output filename must be presented. With this input, no further interaction with the user to
+complete the control points is required.</p>
 <p>In many cases though, the information under <code class="docutils literal notranslate"><span class="pre">-dst</span></code> may be cumbersome to insert. Hence a more convenient option is to
 leave out <code class="docutils literal notranslate"><span class="pre">-dst</span></code> and replace it for <code class="docutils literal notranslate"><span class="pre">--shapefile</span></code> and provide a path to a shapefile or other vector formatted
-GIS file containing your control points. <em>pyorc</em> assumes that the shapefile contains exactly those points you wish to
-use, no more and no less, that all information is in the geometries (i.e. x, y and if +6-points are used, also z) and
+GIS file containing your real-world control points. <em>pyorc</em> assumes that the shapefile contains exactly those points you
+wish to use, no more and no less, that all information is in the geometries (i.e. x, y and if +6-points are used, also z) and
 that the file contains a CRS that allows for automated reprojection to the CRS of the camera configuration (i.e.
 supplied with <code class="docutils literal notranslate"><span class="pre">--crs</span></code>). The geometries MUST be of the type POINT only! <em>pyorc</em> will attempt to indicate any
 problems with shapefiles that contain wrong or incomplete information so that you can resolve that if needed.</p>
@@ -879,16 +888,27 @@ GIS program such as <a href="https://qgis.org/" target="_blank">QGIS</a> and del
 </div>
 <p>Similarly, the information contained in <code class="docutils literal notranslate"><span class="pre">--src</span></code> may also be very cumbersome to collect. In fact, you need to open up
 a frame in a photo editor and note down rows and columns to do so. Therefore a much more and highly recommended
-approach is to simply leave out <code class="docutils literal notranslate"><span class="pre">-src</span></code> at all. You will then be asked if you want to interactively select these
+approach is to simply leave out <code class="docutils literal notranslate"><span class="pre">-src</span></code> entirely. You will then be asked if you want to interactively select these
 points. Simply select <cite>Y</cite> and use our convenient point and click approach to select the control points. To make sure you
 click them in the right order, you can click on the <em>Map</em> button to display a map overview of the situation. Here, your
 <code class="docutils literal notranslate"><span class="pre">--dst</span></code> points (or points collected from the shapefile) will be displayed in a map view, with numbers indicating
 which point should be selected first, which second and so on. You can go back to the camera view with the <em>camera</em>
 button. Then you simply click on the first, second, third, … and so on control point to collect all control points.
 Did you make an accidental click on a random point? No problem: just right-click and the last point you clicked
-will be removed. Right-click again and the point before that is removed so that you can click again. Once all point are
-collected, the <em>Done</em> button will become clickable. Click <em>Done</em> to close the view and store the points in the camera
-configuration.</p>
+will be removed. Right-click again and the point before that is removed so that you can click again.</p>
+<p>Once all point are clicked, <em>pyorc</em> will optimize both the perspective and the camera’s lens characteristics
+simultaneously, and display the points you clicked, but then projected using the camera matrix, distortion coefficients
+and the estimated perspective pose of the camera. You will see the result as red “+” signs on the screen and an average
+error in meters displayed on the top of the frame. If the average error is larger than 0.1 meter you will get a warning.
+Large errors are likely due to poorly measured control points, or because you clicked the points in the wrong order.</p>
+<p>Once the optimization is performed, the <em>Done</em> button will become clickable. Click <em>Done</em> to close the view and store
+the points in the camera configuration. If you made a mistake and want to rectify poorly clicked points, simply right
+click as many times as needed to remove points, and add them again with left clicks. The optimization will be repeated
+again once you have reached the total amount of control points. The view after the optimization is shown in the example
+below.</p>
+<figure class="align-default">
+<img alt="_images/GCPs_interactive.jpg" src="_images/GCPs_interactive.jpg" />
+</figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Especially with large objectives and high resolution footage (e.g. 4K), it may be hard to accurately click or even
@@ -959,12 +979,21 @@ will be automatically transformed to the local CRS used for your camera configur
 <span class="n">cam_config</span><span class="o">.</span><span class="n">set_gcps</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="o">=</span><span class="n">z_0</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>If you have not supplied <code class="docutils literal notranslate"><span class="pre">camera_matrix</span></code> and <code class="docutils literal notranslate"><span class="pre">dist_coeffs</span></code> to the camera configuration, then these can be optimized
+using the provided GCPs after these have been set using the following without any arguments.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span><span class="o">.</span><span class="n">set_intrinsic</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 </div>
 </section>
 </section>
 <section id="setting-the-lens-position">
 <h2>Setting the lens position<a class="headerlink" href="#setting-the-lens-position" title="Permalink to this heading">#</a></h2>
+<p>If you also provide a lens position, then this position will be used along-side the ground control points to better
+optimize the pose estimation and to better estimate the focal length. Similar to the control points, we advise to
+measure the location as accurately as possible, and naturally in exactly the same horizontal and vertical datum as the
+control points.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
 </input><label class="sd-tab-label" for="sd-tab-item-8">
@@ -981,8 +1010,7 @@ is provided below.</p>
 <input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
 </input><label class="sd-tab-label" for="sd-tab-item-9">
 API</label><div class="sd-tab-content docutils">
-<p>For treatment of multiple videos, the water surface must also be reprojected to a new water level. This requires the
-position of the x, y, z of the lens position. This can be provided using a simple method <code class="docutils literal notranslate"><span class="pre">set_lens_position</span></code>. You only
+<p>The lens position can be provided using a simple method <code class="docutils literal notranslate"><span class="pre">set_lens_position</span></code>. You only
 need to provide x, y, z and the CRS (if this is different from the CRS of the camera configuration itself.</p>
 <p>A full example supplying the lens position to the existing <code class="docutils literal notranslate"><span class="pre">cam_config</span></code> is shown below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># cam_config object is already defined in earlier code blocks</span>
@@ -1037,6 +1065,10 @@ clicked 4 points, and then you will see the allocated bounding box around the 4 
 you will see the same bounding box in geographical space. If you wish to improve your corner point selection, then
 simply use right-click to remove points and select new locations for them to change the bounding box. Once you are
 satisfied, click on <em>Done</em> and the bounding box will be stored in the camera configuration.</p>
+<p>Below an example of the bounding box as it appears in the interactive interface is shown.</p>
+<figure class="align-default">
+<img alt="_images/bbox_interactive.jpg" src="_images/bbox_interactive.jpg" />
+</figure>
 </div>
 <input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
 </input><label class="sd-tab-label" for="sd-tab-item-11">
@@ -1089,16 +1121,48 @@ and the orientation is chosen such that it follows the middle line between the c
 </div>
 </div>
 </section>
+<section id="stabilization">
+<h2>Stabilization<a class="headerlink" href="#stabilization" title="Permalink to this heading">#</a></h2>
+<p>You can decide whether videos must be stabilized. <em>pyorc</em> needs to be able to find so-called “rigid points” to do this.
+Rigid points are points that do not move during the video. <em>pyorc</em> can automatically detect easy stable points to track
+and then follow how these move from frame to frame. As the points should not move, <em>pyorc</em> will then transform each
+frame so that the resulting movements are minimized. To ensure the transformation are really rigid, such regid points
+must be found on all edges of the video. Hence it is important that when you take an unstable video, that there is
+enough visibility of surrounding banks, or infrastructure or other stable elements around the video to perform the
+stabilization. If such objects are only found in e.g. one half or (worse) one quadrant of the video, then the
+stabilization may give very strange results in the areas where no rigid points are found. Therefore, only use this
+if you know quite certainly that stable points will be found in many regions around the water.</p>
+<p>For stabilization, <em>pyorc</em> requires a polygon that defines the area where no rigid points are expected. This is
+essentially the moving water and possibly also strongly moving vegetation if this is present in the frame. So select
+the polygon such that it encompasses both water and other strongly moving elements as much as possible.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-6" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-12">
+Command-line</label><div class="sd-tab-content docutils">
+<p>On the command line, simply provide <code class="docutils literal notranslate"><span class="pre">--stabilize</span></code> or <code class="docutils literal notranslate"><span class="pre">-s</span></code> as additional argument and you will be provided
+with a interactive point and click view on your selected frame. You may click as many points as you wih to
+create a polygon that encompasses moving things. To ensure that you include all edges, you can also pan
+the frame so that areas outside of the frame become visible. Select the 4th button from the left (two crossed
+double-arrows) to select panning. Click on the most left (Home) button to return to the original view.</p>
+</div>
+<input id="sd-tab-item-13" name="sd-tab-set-6" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-13">
+API</label><div class="sd-tab-content docutils">
+<p>For stabilization, provide <code class="docutils literal notranslate"><span class="pre">stabilize</span></code> as additional argument to <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code> and provide as value
+a list of lists of coordinates in [column, row] format, similar to <code class="docutils literal notranslate"><span class="pre">gcps[&quot;src&quot;]</span></code>.</p>
+</div>
+</div>
+</section>
 <section id="result-of-a-camera-configuration">
 <h2>Result of a camera configuration<a class="headerlink" href="#result-of-a-camera-configuration" title="Permalink to this heading">#</a></h2>
 <p>Once you have all your settings and details complete, the camera configuration can be stored, plotted and later
 used for processing videos into velocimetry.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-6" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-12">
+<input checked="checked" id="sd-tab-item-14" name="sd-tab-set-7" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-14">
 Command-line</label><div class="sd-tab-content docutils">
 <p>When all required parameters are provided, the resulting camera configuration will be stored in a file
-set as &lt;OUTPUT&gt; on the command line. If you have our code base and the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder, then you can for
+set as <code class="docutils literal notranslate"><span class="pre">&lt;OUTPUT&gt;</span></code> on the command line. If you have our code base and the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder, then you can for
 instance try the following to get a camera configuration without any interactive user inputs required:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>examples/ngwerere
 <span class="gp">$ </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>-V<span class="w"> </span>ngwerere_20191103.mp4<span class="w"> </span>--crs<span class="w"> </span><span class="m">32735</span><span class="w"> </span>--z_0<span class="w"> </span><span class="m">1182</span>.2<span class="w"> </span>--h_ref<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span>--lens_position<span class="w"> </span><span class="s2">&quot;[642732.6705, 8304289.010, 1188.5]&quot;</span><span class="w"> </span>--resolution<span class="w"> </span><span class="m">0</span>.03<span class="w"> </span>--window_size<span class="w"> </span><span class="m">15</span><span class="w"> </span>--shapefile<span class="w"> </span>ngwerere_gcps.geojson<span class="w"> </span>--src<span class="w"> </span><span class="s2">&quot;[[1421, 1001], [1251, 460], [421, 432], [470, 607]]&quot;</span><span class="w"> </span>-vvv<span class="w"> </span>ngwerere_cam_config.json
@@ -1112,15 +1176,16 @@ The destination control points are provided in a file <code class="docutils lite
 are provided as a list with [column, row] coordinates in the frame object. Finally, corner points to set the
 bounding box are provided as a list of [column, row] coordinates as well. The configuration is stored in
 <code class="docutils literal notranslate"><span class="pre">ngwerere_cam_config.json</span></code>. If you leave out the <code class="docutils literal notranslate"><span class="pre">--src</span></code> and <code class="docutils literal notranslate"><span class="pre">--corners</span></code> components, you will be able to
-select these interactively as shown before. Also the <code class="docutils literal notranslate"><span class="pre">--h_ref</span></code> and <code class="docutils literal notranslate"><span class="pre">--z_0</span></code> values can be supplied
-interactively.</p>
+select these interactively as shown before. You can also add <code class="docutils literal notranslate"><span class="pre">--stabilize</span></code> to also provide a region for
+stabilization as described before. Also the <code class="docutils literal notranslate"><span class="pre">--h_ref</span></code> and <code class="docutils literal notranslate"><span class="pre">--z_0</span></code> values can be supplied
+interactively on the command line.</p>
 <p>The command-line interface will also automatically store visualizations of the resulting camera configuration
 in both planar view (with a satellite background if a CRS has been used) and in the camera perspective. The file
 names for this have the same name as &lt;OUTPUT&gt; but with the suffixes <code class="docutils literal notranslate"><span class="pre">_geo.jpg</span></code> for the planar view and
 <code class="docutils literal notranslate"><span class="pre">_cam.jpg</span></code> for the camera FOV perspective.</p>
 </div>
-<input id="sd-tab-item-13" name="sd-tab-set-6" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-13">
+<input id="sd-tab-item-15" name="sd-tab-set-7" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-15">
 API</label><div class="sd-tab-content docutils">
 <p>Storing a camera configuration within the API is as simple as calling <code class="docutils literal notranslate"><span class="pre">to_file</span></code>. Camera configurations can
 also be loaded back in memory using <code class="docutils literal notranslate"><span class="pre">pyorc.load_camera_config</span></code>.</p>
@@ -1242,6 +1307,7 @@ the camera configuration is based, extract one frame, and plot it within one axe
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-the-lens-position">Setting the lens position</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-the-area-of-interest">Setting the area of interest</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stabilization">Stabilization</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#result-of-a-camera-configuration">Result of a camera configuration</a></li>
 </ul>
   </nav></div>

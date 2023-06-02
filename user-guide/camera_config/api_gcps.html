@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>&lt;no title&gt; &#8212; pyorc 0.4.3 documentation</title>
+    <title>&lt;no title&gt; &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -435,6 +435,11 @@ will be automatically transformed to the local CRS used for your camera configur
 <span class="n">crs</span> <span class="o">=</span> <span class="mi">4326</span>  <span class="c1"># coordinate reference system of the GPS device, EPSG code 4326 is WGS84 longitude/latitude.</span>
 
 <span class="n">cam_config</span><span class="o">.</span><span class="n">set_gcps</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="o">=</span><span class="n">z_0</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you have not supplied <code class="docutils literal notranslate"><span class="pre">camera_matrix</span></code> and <code class="docutils literal notranslate"><span class="pre">dist_coeffs</span></code> to the camera configuration, then these can be optimized
+using the provided GCPs after these have been set using the following without any arguments.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span><span class="o">.</span><span class="n">set_intrinsic</span><span class="p">()</span>
 </pre></div>
 </div>
 

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Frames &#8212; pyorc 0.4.3 documentation</title>
+    <title>Frames &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -406,642 +406,51 @@ document.write(`
 <br/></pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-100%|██████████| 126/126 [00:03&lt;00:00, 36.43it/s]
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">ValueError</span>                                Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[1], line 7</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span style="color: rgb(95,135,135)"># point to a file containing the camera configuration</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> cam_config <span style="color: rgb(98,98,98)">=</span> pyorc<span style="color: rgb(98,98,98)">.</span>load_camera_config(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">../../../examples/ngwerere/ngwerere.json</span><span style="color: rgb(175,0,0)">&#34;</span>)
+<span class="ansi-green-fg">----&gt; 7</span> video <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">pyorc</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">Video</span><span class="ansi-yellow-bg">(</span>
+<span class="ansi-green-intense-fg ansi-bold">      8</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">video_file</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">      9</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">camera_config</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">cam_config</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">     10</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">start_frame</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">0</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">     11</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">end_frame</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">125</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">     12</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">fixed</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">     13</span> <span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     14</span> da_frames <span style="color: rgb(98,98,98)">=</span> video<span style="color: rgb(98,98,98)">.</span>get_frames(method<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">rgb</span><span style="color: rgb(175,0,0)">&#34;</span>)
+<span class="ansi-green-intense-fg ansi-bold">     15</span> da_frames
+
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:100</span>, in <span class="ansi-cyan-fg">Video.__init__</span><span class="ansi-blue-fg">(self, fn, camera_config, h_a, start_frame, end_frame, freq, stabilize)</span>
+<span class="ansi-green-intense-fg ansi-bold">     97</span> <span style="color: rgb(95,135,135)"># explicitly open file for reading</span>
+<span class="ansi-green-intense-fg ansi-bold">     98</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>stabilize <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-intense-fg ansi-bold">     99</span>     <span style="color: rgb(95,135,135)"># set a gridded mask based on the roi points</span>
+<span class="ansi-green-fg">--&gt; 100</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">set_mask_from_exterior</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    101</span> <span style="color: rgb(95,135,135)"># set end and start frame</span>
+<span class="ansi-green-intense-fg ansi-bold">    102</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>frame_count <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">int</span>(cap<span style="color: rgb(98,98,98)">.</span>get(cv2<span style="color: rgb(98,98,98)">.</span>CAP_PROP_FRAME_COUNT))
+
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:477</span>, in <span class="ansi-cyan-fg">Video.set_mask_from_exterior</span><span class="ansi-blue-fg">(self, exterior)</span>
+<span class="ansi-green-intense-fg ansi-bold">    459</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">set_mask_from_exterior</span>(
+<span class="ansi-green-intense-fg ansi-bold">    460</span>         <span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-intense-fg ansi-bold">    461</span>         exterior
+<span class="ansi-green-intense-fg ansi-bold">    462</span> ):
+<span class="ansi-green-intense-fg ansi-bold">    463</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    464</span> <span style="color: rgb(175,0,0)">    Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside</span>
+<span class="ansi-green-intense-fg ansi-bold">    465</span>
+<span class="ansi-green-fg">   (...)</span>
+<span class="ansi-green-intense-fg ansi-bold">    475</span>
+<span class="ansi-green-intense-fg ansi-bold">    476</span> <span style="color: rgb(175,0,0)">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; 477</span>     mask_coords <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">array</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">exterior</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dtype</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">int32</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    478</span>     mask <span style="color: rgb(98,98,98)">=</span> np<span style="color: rgb(98,98,98)">.</span>zeros((<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>height, <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>width), np<span style="color: rgb(98,98,98)">.</span>uint8)
+<span class="ansi-green-intense-fg ansi-bold">    479</span>     mask <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>fillPoly(mask, [mask_coords], <span style="color: rgb(98,98,98)">255</span>)
+
+<span class="ansi-red-fg">ValueError</span>: invalid literal for int() with base 10: &#39;fixed&#39;
 </pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
-<defs>
-<symbol id="icon-database" viewBox="0 0 32 32">
-<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
-<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-</symbol>
-<symbol id="icon-file-text2" viewBox="0 0 32 32">
-<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
-<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-</symbol>
-</defs>
-</svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
-
-:root {
-  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
-  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
-  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
-  --xr-border-color: var(--jp-border-color2, #e0e0e0);
-  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
-  --xr-background-color: var(--jp-layout-color0, white);
-  --xr-background-color-row-even: var(--jp-layout-color1, white);
-  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
-}
-
-html[theme=dark],
-body[data-theme=dark],
-body.vscode-dark {
-  --xr-font-color0: rgba(255, 255, 255, 1);
-  --xr-font-color2: rgba(255, 255, 255, 0.54);
-  --xr-font-color3: rgba(255, 255, 255, 0.38);
-  --xr-border-color: #1F1F1F;
-  --xr-disabled-color: #515151;
-  --xr-background-color: #111111;
-  --xr-background-color-row-even: #111111;
-  --xr-background-color-row-odd: #313131;
-}
-
-.xr-wrap {
-  display: block !important;
-  min-width: 300px;
-  max-width: 700px;
-}
-
-.xr-text-repr-fallback {
-  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
-  display: none;
-}
-
-.xr-header {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  margin-bottom: 4px;
-  border-bottom: solid 1px var(--xr-border-color);
-}
-
-.xr-header > div,
-.xr-header > ul {
-  display: inline;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.xr-obj-type,
-.xr-array-name {
-  margin-left: 2px;
-  margin-right: 10px;
-}
-
-.xr-obj-type {
-  color: var(--xr-font-color2);
-}
-
-.xr-sections {
-  padding-left: 0 !important;
-  display: grid;
-  grid-template-columns: 150px auto auto 1fr 20px 20px;
-}
-
-.xr-section-item {
-  display: contents;
-}
-
-.xr-section-item input {
-  display: none;
-}
-
-.xr-section-item input + label {
-  color: var(--xr-disabled-color);
-}
-
-.xr-section-item input:enabled + label {
-  cursor: pointer;
-  color: var(--xr-font-color2);
-}
-
-.xr-section-item input:enabled + label:hover {
-  color: var(--xr-font-color0);
-}
-
-.xr-section-summary {
-  grid-column: 1;
-  color: var(--xr-font-color2);
-  font-weight: 500;
-}
-
-.xr-section-summary > span {
-  display: inline-block;
-  padding-left: 0.5em;
-}
-
-.xr-section-summary-in:disabled + label {
-  color: var(--xr-font-color2);
-}
-
-.xr-section-summary-in + label:before {
-  display: inline-block;
-  content: '►';
-  font-size: 11px;
-  width: 15px;
-  text-align: center;
-}
-
-.xr-section-summary-in:disabled + label:before {
-  color: var(--xr-disabled-color);
-}
-
-.xr-section-summary-in:checked + label:before {
-  content: '▼';
-}
-
-.xr-section-summary-in:checked + label > span {
-  display: none;
-}
-
-.xr-section-summary,
-.xr-section-inline-details {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-.xr-section-inline-details {
-  grid-column: 2 / -1;
-}
-
-.xr-section-details {
-  display: none;
-  grid-column: 1 / -1;
-  margin-bottom: 5px;
-}
-
-.xr-section-summary-in:checked ~ .xr-section-details {
-  display: contents;
-}
-
-.xr-array-wrap {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 20px auto;
-}
-
-.xr-array-wrap > label {
-  grid-column: 1;
-  vertical-align: top;
-}
-
-.xr-preview {
-  color: var(--xr-font-color3);
-}
-
-.xr-array-preview,
-.xr-array-data {
-  padding: 0 5px !important;
-  grid-column: 2;
-}
-
-.xr-array-data,
-.xr-array-in:checked ~ .xr-array-preview {
-  display: none;
-}
-
-.xr-array-in:checked ~ .xr-array-data,
-.xr-array-preview {
-  display: inline-block;
-}
-
-.xr-dim-list {
-  display: inline-block !important;
-  list-style: none;
-  padding: 0 !important;
-  margin: 0;
-}
-
-.xr-dim-list li {
-  display: inline-block;
-  padding: 0;
-  margin: 0;
-}
-
-.xr-dim-list:before {
-  content: '(';
-}
-
-.xr-dim-list:after {
-  content: ')';
-}
-
-.xr-dim-list li:not(:last-child):after {
-  content: ',';
-  padding-right: 5px;
-}
-
-.xr-has-index {
-  font-weight: bold;
-}
-
-.xr-var-list,
-.xr-var-item {
-  display: contents;
-}
-
-.xr-var-item > div,
-.xr-var-item label,
-.xr-var-item > .xr-var-name span {
-  background-color: var(--xr-background-color-row-even);
-  margin-bottom: 0;
-}
-
-.xr-var-item > .xr-var-name:hover span {
-  padding-right: 5px;
-}
-
-.xr-var-list > li:nth-child(odd) > div,
-.xr-var-list > li:nth-child(odd) > label,
-.xr-var-list > li:nth-child(odd) > .xr-var-name span {
-  background-color: var(--xr-background-color-row-odd);
-}
-
-.xr-var-name {
-  grid-column: 1;
-}
-
-.xr-var-dims {
-  grid-column: 2;
-}
-
-.xr-var-dtype {
-  grid-column: 3;
-  text-align: right;
-  color: var(--xr-font-color2);
-}
-
-.xr-var-preview {
-  grid-column: 4;
-}
-
-.xr-index-preview {
-  grid-column: 2 / 5;
-  color: var(--xr-font-color2);
-}
-
-.xr-var-name,
-.xr-var-dims,
-.xr-var-dtype,
-.xr-preview,
-.xr-attrs dt {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-right: 10px;
-}
-
-.xr-var-name:hover,
-.xr-var-dims:hover,
-.xr-var-dtype:hover,
-.xr-attrs dt:hover {
-  overflow: visible;
-  width: auto;
-  z-index: 1;
-}
-
-.xr-var-attrs,
-.xr-var-data,
-.xr-index-data {
-  display: none;
-  background-color: var(--xr-background-color) !important;
-  padding-bottom: 5px !important;
-}
-
-.xr-var-attrs-in:checked ~ .xr-var-attrs,
-.xr-var-data-in:checked ~ .xr-var-data,
-.xr-index-data-in:checked ~ .xr-index-data {
-  display: block;
-}
-
-.xr-var-data > table {
-  float: right;
-}
-
-.xr-var-name span,
-.xr-var-data,
-.xr-index-name div,
-.xr-index-data,
-.xr-attrs {
-  padding-left: 25px !important;
-}
-
-.xr-attrs,
-.xr-var-attrs,
-.xr-var-data,
-.xr-index-data {
-  grid-column: 1 / -1;
-}
-
-dl.xr-attrs {
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 125px auto;
-}
-
-.xr-attrs dt,
-.xr-attrs dd {
-  padding: 0;
-  margin: 0;
-  float: left;
-  padding-right: 10px;
-  width: auto;
-}
-
-.xr-attrs dt {
-  font-weight: normal;
-  grid-column: 1;
-}
-
-.xr-attrs dt:hover span {
-  display: inline-block;
-  background: var(--xr-background-color);
-  padding-right: 10px;
-}
-
-.xr-attrs dd {
-  grid-column: 2;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.xr-icon-database,
-.xr-icon-file-text2,
-.xr-no-icon {
-  display: inline-block;
-  vertical-align: middle;
-  width: 1em;
-  height: 1.5em !important;
-  stroke-width: 0;
-  stroke: currentColor;
-  fill: currentColor;
-}
-</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;frames&#x27; (time: 126, y: 1080, x: 1920, rgb: 3)&gt;
-dask.array&lt;stack, shape=(126, 1080, 1920, 3), dtype=uint8, chunksize=(1, 1080, 1920, 3), chunktype=numpy.ndarray&gt;
-Coordinates:
-  * time     (time) float64 0.0 0.03333 0.06667 0.1 ... 4.067 4.1 4.133 4.167
-  * y        (y) int64 1079 1078 1077 1076 1075 1074 1073 1072 ... 6 5 4 3 2 1 0
-  * x        (x) int64 0 1 2 3 4 5 6 7 ... 1913 1914 1915 1916 1917 1918 1919
-  * rgb      (rgb) int64 0 1 2
-    xp       (y, x) int64 0 1 2 3 4 5 6 7 ... 1913 1914 1915 1916 1917 1918 1919
-    yp       (y, x) int64 1079 1079 1079 1079 1079 1079 1079 ... 0 0 0 0 0 0 0
-Attributes:
-    camera_shape:   [1080, 1920]
-    camera_config:  {\n    &quot;height&quot;: 1080,\n    &quot;width&quot;: 1920,\n    &quot;crs&quot;: &quot;P...
-    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li><li><span class='xr-has-index'>rgb</span>: 3</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-58d8c028-cd17-4deb-8df6-85d7322c9ab9' class='xr-array-in' type='checkbox' checked><label for='section-58d8c028-cd17-4deb-8df6-85d7322c9ab9' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920, 3), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
-    <tr>
-        <td>
-            <table style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <td> </td>
-                        <th> Array </th>
-                        <th> Chunk </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <th> Bytes </th>
-                        <td> 747.51 MiB </td>
-                        <td> 5.93 MiB </td>
-                    </tr>
-
-                    <tr>
-                        <th> Shape </th>
-                        <td> (126, 1080, 1920, 3) </td>
-                        <td> (1, 1080, 1920, 3) </td>
-                    </tr>
-                    <tr>
-                        <th> Dask graph </th>
-                        <td colspan="2"> 126 chunks in 253 graph layers </td>
-                    </tr>
-                    <tr>
-                        <th> Data type </th>
-                        <td colspan="2"> uint8 numpy.ndarray </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-        <td>
-        <svg width="327" height="209" style="stroke:rgb(0,0,0);stroke-width:1" >
-
-  <!-- Horizontal lines -->
-  <line x1="0" y1="0" x2="36" y2="0" style="stroke-width:2" />
-  <line x1="0" y1="25" x2="36" y2="25" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="0" y1="0" x2="0" y2="25" style="stroke-width:2" />
-  <line x1="0" y1="0" x2="0" y2="25" />
-  <line x1="2" y1="0" x2="2" y2="25" />
-  <line x1="3" y1="0" x2="3" y2="25" />
-  <line x1="4" y1="0" x2="4" y2="25" />
-  <line x1="5" y1="0" x2="5" y2="25" />
-  <line x1="6" y1="0" x2="6" y2="25" />
-  <line x1="7" y1="0" x2="7" y2="25" />
-  <line x1="8" y1="0" x2="8" y2="25" />
-  <line x1="10" y1="0" x2="10" y2="25" />
-  <line x1="11" y1="0" x2="11" y2="25" />
-  <line x1="12" y1="0" x2="12" y2="25" />
-  <line x1="13" y1="0" x2="13" y2="25" />
-  <line x1="14" y1="0" x2="14" y2="25" />
-  <line x1="15" y1="0" x2="15" y2="25" />
-  <line x1="16" y1="0" x2="16" y2="25" />
-  <line x1="18" y1="0" x2="18" y2="25" />
-  <line x1="18" y1="0" x2="18" y2="25" />
-  <line x1="20" y1="0" x2="20" y2="25" />
-  <line x1="21" y1="0" x2="21" y2="25" />
-  <line x1="22" y1="0" x2="22" y2="25" />
-  <line x1="23" y1="0" x2="23" y2="25" />
-  <line x1="24" y1="0" x2="24" y2="25" />
-  <line x1="25" y1="0" x2="25" y2="25" />
-  <line x1="26" y1="0" x2="26" y2="25" />
-  <line x1="28" y1="0" x2="28" y2="25" />
-  <line x1="29" y1="0" x2="29" y2="25" />
-  <line x1="30" y1="0" x2="30" y2="25" />
-  <line x1="31" y1="0" x2="31" y2="25" />
-  <line x1="32" y1="0" x2="32" y2="25" />
-  <line x1="33" y1="0" x2="33" y2="25" />
-  <line x1="35" y1="0" x2="35" y2="25" />
-  <line x1="36" y1="0" x2="36" y2="25" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="0.0,0.0 36.153343503141755,0.0 36.153343503141755,25.412616514582485 0.0,25.412616514582485" style="fill:#8B4903A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="18.076672" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle" >126</text>
-  <text x="56.153344" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,56.153344,12.706308)">1</text>
-
-
-  <!-- Horizontal lines -->
-  <line x1="106" y1="0" x2="145" y2="39" style="stroke-width:2" />
-  <line x1="106" y1="120" x2="145" y2="159" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="106" y1="0" x2="106" y2="120" style="stroke-width:2" />
-  <line x1="145" y1="39" x2="145" y2="159" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="106.0,0.0 145.70588235294116,39.705882352941174 145.70588235294116,159.70588235294116 106.0,120.0" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Horizontal lines -->
-  <line x1="106" y1="0" x2="131" y2="0" style="stroke-width:2" />
-  <line x1="145" y1="39" x2="171" y2="39" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="106" y1="0" x2="145" y2="39" style="stroke-width:2" />
-  <line x1="131" y1="0" x2="171" y2="39" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="106.0,0.0 131.41261651458248,0.0 171.11849886752367,39.705882352941174 145.70588235294116,39.705882352941174" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Horizontal lines -->
-  <line x1="145" y1="39" x2="171" y2="39" style="stroke-width:2" />
-  <line x1="145" y1="159" x2="171" y2="159" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="145" y1="39" x2="145" y2="159" style="stroke-width:2" />
-  <line x1="171" y1="39" x2="171" y2="159" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="145.70588235294116,39.705882352941174 171.11849886752364,39.705882352941174 171.11849886752364,159.70588235294116 145.70588235294116,159.70588235294116" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="158.412191" y="179.705882" font-size="1.0rem" font-weight="100" text-anchor="middle" >3</text>
-  <text x="191.118499" y="99.705882" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,191.118499,99.705882)">1920</text>
-  <text x="115.852941" y="159.852941" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,115.852941,159.852941)">1080</text>
-</svg>
-        </td>
-    </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-19c62425-15a4-458e-8a53-c915ae793b0a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-19c62425-15a4-458e-8a53-c915ae793b0a' class='xr-section-summary' >Coordinates: <span>(6)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-c97f8bb0-68cf-44a0-babd-817f71c77dbc' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c97f8bb0-68cf-44a0-babd-817f71c77dbc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e94af853-61d0-4a82-be12-a85f1f8c4ea8' class='xr-var-data-in' type='checkbox'><label for='data-e94af853-61d0-4a82-be12-a85f1f8c4ea8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
-       0.233333, 0.266667, 0.3     , 0.333333, 0.366667, 0.4     , 0.433333,
-       0.466667, 0.5     , 0.533333, 0.566667, 0.6     , 0.633333, 0.666667,
-       0.7     , 0.733333, 0.766667, 0.8     , 0.833333, 0.866667, 0.9     ,
-       0.933333, 0.966667, 1.      , 1.033333, 1.066667, 1.1     , 1.133333,
-       1.166667, 1.2     , 1.233333, 1.266667, 1.3     , 1.333333, 1.366667,
-       1.4     , 1.433333, 1.466667, 1.5     , 1.533333, 1.566667, 1.6     ,
-       1.633333, 1.666667, 1.7     , 1.733333, 1.766667, 1.8     , 1.833333,
-       1.866667, 1.9     , 1.933333, 1.966667, 2.      , 2.033333, 2.066667,
-       2.1     , 2.133333, 2.166667, 2.2     , 2.233333, 2.266667, 2.3     ,
-       2.333333, 2.366667, 2.4     , 2.433333, 2.466667, 2.5     , 2.533333,
-       2.566667, 2.6     , 2.633333, 2.666667, 2.7     , 2.733333, 2.766667,
-       2.8     , 2.833333, 2.866667, 2.9     , 2.933333, 2.966667, 3.      ,
-       3.033333, 3.066667, 3.1     , 3.133333, 3.166667, 3.2     , 3.233333,
-       3.266667, 3.3     , 3.333333, 3.366667, 3.4     , 3.433333, 3.466667,
-       3.5     , 3.533333, 3.566667, 3.6     , 3.633333, 3.666667, 3.7     ,
-       3.733333, 3.766667, 3.8     , 3.833333, 3.866667, 3.9     , 3.933333,
-       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-55e410e4-f223-4964-8844-1d83bf09e4c8' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-55e410e4-f223-4964-8844-1d83bf09e4c8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-33e218fc-deac-43dd-a82f-c04be69fb6ef' class='xr-var-data-in' type='checkbox'><label for='data-33e218fc-deac-43dd-a82f-c04be69fb6ef' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-2814cdfa-658c-4851-b8db-bffb06150fb3' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-2814cdfa-658c-4851-b8db-bffb06150fb3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4dbfcda7-6b91-4013-8852-d3cbd9d4d335' class='xr-var-data-in' type='checkbox'><label for='data-4dbfcda7-6b91-4013-8852-d3cbd9d4d335' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>rgb</span></div><div class='xr-var-dims'>(rgb)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2</div><input id='attrs-61b871ba-6645-4a07-b51a-b8e1dc5bc47f' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-61b871ba-6645-4a07-b51a-b8e1dc5bc47f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-23c93f73-e95e-4532-ab0c-a2e04fca48f6' class='xr-var-data-in' type='checkbox'><label for='data-23c93f73-e95e-4532-ab0c-a2e04fca48f6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0, 1, 2])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-3fdd4065-c768-4533-92c8-d0dec114c406' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3fdd4065-c768-4533-92c8-d0dec114c406' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0c6bc494-4f44-4a24-9cbd-d50f32437dd0' class='xr-var-data-in' type='checkbox'><label for='data-0c6bc494-4f44-4a24-9cbd-d50f32437dd0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919],
-       ...,
-       [   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-867262bc-4382-402c-b44c-2d92a5836acb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-867262bc-4382-402c-b44c-2d92a5836acb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-41df5ae8-980e-4678-923a-3ab8a2fe24cf' class='xr-var-data-in' type='checkbox'><label for='data-41df5ae8-980e-4678-923a-3ab8a2fe24cf' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
-       [1078, 1078, 1078, ..., 1078, 1078, 1078],
-       [1077, 1077, 1077, ..., 1077, 1077, 1077],
-       ...,
-       [   2,    2,    2, ...,    2,    2,    2],
-       [   1,    1,    1, ...,    1,    1,    1],
-       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-0f405b95-7bee-4393-86d9-9668c2e24122' class='xr-section-summary-in' type='checkbox'  ><label for='section-0f405b95-7bee-4393-86d9-9668c2e24122' class='xr-section-summary' >Indexes: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-4a2f6213-6490-428d-b5ff-b8b1eb5ec7da' class='xr-index-data-in' type='checkbox'/><label for='index-4a2f6213-6490-428d-b5ff-b8b1eb5ec7da' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333334, 0.06666666666666668,
-                              0.1, 0.13333333333333336, 0.16666666666666666,
-                              0.2, 0.23333333333333334,  0.2666666666666667,
-                              0.3,
-              ...
-               3.8666666666666667,                 3.9,   3.933333333333333,
-               3.9666666666666672,                 4.0,   4.033333333333333,
-                4.066666666666666,                 4.1,   4.133333333333333,
-                4.166666666666667],
-             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-34f5e74f-f4fc-4587-95c8-c862ac7355ab' class='xr-index-data-in' type='checkbox'/><label for='index-34f5e74f-f4fc-4587-95c8-c862ac7355ab' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
-            ...
-               9,    8,    7,    6,    5,    4,    3,    2,    1,    0],
-           dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-ade60a76-8678-4e18-a2c9-484c49bf4f15' class='xr-index-data-in' type='checkbox'/><label for='index-ade60a76-8678-4e18-a2c9-484c49bf4f15' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
-            ...
-            1910, 1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919],
-           dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>rgb</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-bfd6fe35-8fc9-48ad-8dbc-b746a2c7d89a' class='xr-index-data-in' type='checkbox'/><label for='index-bfd6fe35-8fc9-48ad-8dbc-b746a2c7d89a' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([0, 1, 2], dtype=&#x27;int64&#x27;, name=&#x27;rgb&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-a80b44a5-3d6d-483d-9478-8674a31a9b94' class='xr-section-summary-in' type='checkbox'  checked><label for='section-a80b44a5-3d6d-483d-9478-8674a31a9b94' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
-    &quot;height&quot;: 1080,
-    &quot;width&quot;: 1920,
-    &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOGCRS[\&quot;WGS 84\&quot;,ENSEMBLE[\&quot;World Geodetic System 1984 ensemble\&quot;,MEMBER[\&quot;World Geodetic System 1984 (Transit)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G730)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G873)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1150)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1674)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1762)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G2139)\&quot;],ELLIPSOID[\&quot;WGS 84\&quot;,6378137,298.257223563,LENGTHUNIT[\&quot;metre\&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&quot;Greenwich\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433]],ID[\&quot;EPSG\&quot;,4326]],CONVERSION[\&quot;UTM zone 35S\&quot;,METHOD[\&quot;Transverse Mercator\&quot;,ID[\&quot;EPSG\&quot;,9807]],PARAMETER[\&quot;Latitude of natural origin\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8801]],PARAMETER[\&quot;Longitude of natural origin\&quot;,27,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8802]],PARAMETER[\&quot;Scale factor at natural origin\&quot;,0.9996,SCALEUNIT[\&quot;unity\&quot;,1],ID[\&quot;EPSG\&quot;,8805]],PARAMETER[\&quot;False easting\&quot;,500000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8806]],PARAMETER[\&quot;False northing\&quot;,10000000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8807]]],CS[Cartesian,2],AXIS[\&quot;(E)\&quot;,east,ORDER[1],LENGTHUNIT[\&quot;metre\&quot;,1]],AXIS[\&quot;(N)\&quot;,north,ORDER[2],LENGTHUNIT[\&quot;metre\&quot;,1]],USAGE[SCOPE[\&quot;Engineering survey, topographic mapping.\&quot;],AREA[\&quot;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&quot;],BBOX[-80,24,0,30]],ID[\&quot;EPSG\&quot;,32735]]&quot;,
-    &quot;resolution&quot;: 0.01,
-    &quot;gcps&quot;: {
-        &quot;src&quot;: [
-            [
-                1421.0,
-                1001.0
-            ],
-            [
-                1251.0,
-                460.0
-            ],
-            [
-                421.0,
-                432.0
-            ],
-            [
-                470.0,
-                607.0
-            ]
-        ],
-        &quot;dst&quot;: [
-            [
-                642735.8076,
-                8304292.119
-            ],
-            [
-                642737.5823,
-                8304295.593
-            ],
-            [
-                642732.7864,
-                8304298.425
-            ],
-            [
-                642732.6705,
-                8304296.858
-            ]
-        ],
-        &quot;h_ref&quot;: 0.0,
-        &quot;z_0&quot;: 1182.2
-    },
-    &quot;window_size&quot;: 25,
-    &quot;dist_coeffs&quot;: [
-        [
-            0.0
-        ],
-        [
-            0.0
-        ],
-        [
-            0.0
-        ],
-        [
-            0.0
-        ]
-    ],
-    &quot;camera_matrix&quot;: [
-        [
-            1920.0,
-            0.0,
-            960.0
-        ],
-        [
-            0.0,
-            1920.0,
-            540.0
-        ],
-        [
-            0.0,
-            0.0,
-            1.0
-        ]
-    ],
-    &quot;bbox&quot;: &quot;POLYGON ((642730.3267177228 8304292.875101833, 642731.297608523 8304302.476136727, 642739.456000869 8304301.651131073, 642738.4851100688 8304292.050096178, 642730.3267177228 8304292.875101833))&quot;
-}</dd><dt><span>h_a :</span></dt><dd>null</dd></dl></div></li></ul></div></div></div>
 </div>
 <p>It can be seen that this <code class="docutils literal notranslate"><span class="pre">xr.DataArray</span></code> contains a data blob with all the frames (i.e. <code class="docutils literal notranslate"><span class="pre">time:</span> <span class="pre">125</span></code> meaning we have 125 frames at our disposal for the further analysis) and a <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> coordinate system, which simply is a column and row count for the pixels in the image objective. We are looking an HD video here, and so this column and row count is 1920x1080. We also have a dimension <code class="docutils literal notranslate"><span class="pre">rgb</span></code> because we hold 3 channels for each image. If you would call <code class="docutils literal notranslate"><span class="pre">get_frames</span></code> without any
 arguments, you would not get this. A few things are noteworthy to further explain about some of the coordinates and attributes.</p>
@@ -1067,18 +476,11 @@ arguments, you would not get this. A few things are noteworthy to further explai
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">AttributeError</span>                            Traceback (most recent call last)
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
 Cell <span class="ansi-green-fg">In[2], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">da_frames</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">frames</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">plot</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">da_frames</span><span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>plot()
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/plot.py:212</span>, in <span class="ansi-cyan-fg">_frames_plot</span><span class="ansi-blue-fg">(ref, ax, mode, *args, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    210</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">time</span><span style="color: rgb(175,0,0)">&#34;</span> <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>coords:
-<span class="ansi-green-intense-fg ansi-bold">    211</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>time<span style="color: rgb(98,98,98)">.</span>size <span style="color: rgb(98,98,98)">&gt;</span> <span style="color: rgb(98,98,98)">1</span>:
-<span class="ansi-green-fg">--&gt; 212</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">AttributeError</span>(<span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">Object contains dimension </span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">time</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)"> with length </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">len</span>(ref<span style="color: rgb(98,98,98)">.</span>_obj<span style="color: rgb(98,98,98)">.</span>time)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">. Reduce dataset by selecting one time step or taking a median, mean or other statistic.</span><span style="color: rgb(175,0,0)">&#39;</span>)
-<span class="ansi-green-intense-fg ansi-bold">    213</span> ax <span style="color: rgb(98,98,98)">=</span> _prepare_axes(ax<span style="color: rgb(98,98,98)">=</span>ax, mode<span style="color: rgb(98,98,98)">=</span>mode)
-<span class="ansi-green-intense-fg ansi-bold">    214</span> f <span style="color: rgb(98,98,98)">=</span> ax<span style="color: rgb(98,98,98)">.</span>figure  <span style="color: rgb(95,135,135)"># handle to figure</span>
-
-<span class="ansi-red-fg">AttributeError</span>: Object contains dimension &#34;time&#34; with length 126. Reduce dataset by selecting one time step or taking a median, mean or other statistic.
+<span class="ansi-red-fg">NameError</span>: name &#39;da_frames&#39; is not defined
 </pre></div></div>
 </div>
 <p>That gave an error. You can see that the API gives specific feedback that the <code class="docutils literal notranslate"><span class="pre">.frames.plot</span></code> method does not work on a frames array with several time steps. This is simply because you can only plot one step at the time. You can select a step, with normal <code class="docutils literal notranslate"><span class="pre">xarray</span></code> methods, which are very similar to <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, and then try it again.</p>
@@ -1091,21 +493,19 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f9c44ad2740&gt;
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/user-guide_frames_frames_7_1.png" src="../../_images/user-guide_frames_frames_7_1.png" />
-</div>
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[3], line 2</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># only plot time index 0</span>
+<span class="ansi-green-fg">----&gt; 2</span> <span class="ansi-yellow-bg">da_frames</span>[<span style="color: rgb(98,98,98)">0</span>]<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>plot()
+
+<span class="ansi-red-fg">NameError</span>: name &#39;da_frames&#39; is not defined
+</pre></div></div>
 </div>
 </section>
 <section id="Improving-contrast">
@@ -1128,21 +528,20 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 <br/></pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f9c44933b50&gt;
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/user-guide_frames_frames_9_1.png" src="../../_images/user-guide_frames_frames_9_1.png" />
-</div>
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[4], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> da_grey <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">video</span><span style="color: rgb(98,98,98)">.</span>get_frames()
+<span class="ansi-green-intense-fg ansi-bold">      2</span> da_norm <span style="color: rgb(98,98,98)">=</span> da_grey<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>normalize()
+<span class="ansi-green-intense-fg ansi-bold">      3</span> da_edge <span style="color: rgb(98,98,98)">=</span> da_norm<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>edge_detect(wdw_1<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">6</span>, wdw_2<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>)
+
+<span class="ansi-red-fg">NameError</span>: name &#39;video&#39; is not defined
+</pre></div></div>
 </div>
 </section>
 <section id="Projection">
@@ -1162,21 +561,21 @@ expertise usually sufficient, but dependent on the scale of structure that you m
 <br/></pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f9c4484bb80&gt;
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/user-guide_frames_frames_11_1.png" src="../../_images/user-guide_frames_frames_11_1.png" />
-</div>
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[5], line 2</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># let&#39;s retrieve rgb frames</span>
+<span class="ansi-green-fg">----&gt; 2</span> da_rgb <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">video</span><span style="color: rgb(98,98,98)">.</span>get_frames(method<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">rgb</span><span style="color: rgb(175,0,0)">&#34;</span>)
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span style="color: rgb(95,135,135)"># now reproject</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> da_proj <span style="color: rgb(98,98,98)">=</span> da_rgb<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>project()
+
+<span class="ansi-red-fg">NameError</span>: name &#39;video&#39; is not defined
+</pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">edge_detection</span></code> filter can better be applied on already projected images, in order to ensure that the window sizes set for the filters are in the real spatial domain. The reprojection above is 0.01 meter in resolution, hence if you wish to reveal edges of structure of a few centimeters in size, the filter sizes should be in that range as well. An example with window sizes of 2 and 4 pixels (i.e. 2 and 4 centimeter) on projected grayscale images is given below.</p>
 <div class="nbinput docutils container">
@@ -1197,21 +596,22 @@ expertise usually sufficient, but dependent on the scale of structure that you m
 <br/><br/></pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f9c1665e5c0&gt;
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/user-guide_frames_frames_13_1.png" src="../../_images/user-guide_frames_frames_13_1.png" />
-</div>
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[6], line 3</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># repeat the reprojection, but now with normalizes images, and with greyscale.</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span style="color: rgb(95,135,135)"># let&#39;s retrieve rgb frames</span>
+<span class="ansi-green-fg">----&gt; 3</span> da_grey <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">video</span><span style="color: rgb(98,98,98)">.</span>get_frames()
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span style="color: rgb(95,135,135)"># normalize first. This can be done in the original objective</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> da_norm <span style="color: rgb(98,98,98)">=</span> da_grey<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>normalize()
+
+<span class="ansi-red-fg">NameError</span>: name &#39;video&#39; is not defined
+</pre></div></div>
 </div>
 </section>
 <section id="Plotting">
@@ -1227,671 +627,17 @@ value <code class="docutils literal notranslate"><span class="pre">geographical<
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
-<div class="output_area rendered_html docutils container">
-<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
-<defs>
-<symbol id="icon-database" viewBox="0 0 32 32">
-<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
-<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-</symbol>
-<symbol id="icon-file-text2" viewBox="0 0 32 32">
-<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
-<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-</symbol>
-</defs>
-</svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
-
-:root {
-  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
-  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
-  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
-  --xr-border-color: var(--jp-border-color2, #e0e0e0);
-  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
-  --xr-background-color: var(--jp-layout-color0, white);
-  --xr-background-color-row-even: var(--jp-layout-color1, white);
-  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
-}
-
-html[theme=dark],
-body[data-theme=dark],
-body.vscode-dark {
-  --xr-font-color0: rgba(255, 255, 255, 1);
-  --xr-font-color2: rgba(255, 255, 255, 0.54);
-  --xr-font-color3: rgba(255, 255, 255, 0.38);
-  --xr-border-color: #1F1F1F;
-  --xr-disabled-color: #515151;
-  --xr-background-color: #111111;
-  --xr-background-color-row-even: #111111;
-  --xr-background-color-row-odd: #313131;
-}
-
-.xr-wrap {
-  display: block !important;
-  min-width: 300px;
-  max-width: 700px;
-}
-
-.xr-text-repr-fallback {
-  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
-  display: none;
-}
-
-.xr-header {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  margin-bottom: 4px;
-  border-bottom: solid 1px var(--xr-border-color);
-}
-
-.xr-header > div,
-.xr-header > ul {
-  display: inline;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.xr-obj-type,
-.xr-array-name {
-  margin-left: 2px;
-  margin-right: 10px;
-}
-
-.xr-obj-type {
-  color: var(--xr-font-color2);
-}
-
-.xr-sections {
-  padding-left: 0 !important;
-  display: grid;
-  grid-template-columns: 150px auto auto 1fr 20px 20px;
-}
-
-.xr-section-item {
-  display: contents;
-}
-
-.xr-section-item input {
-  display: none;
-}
-
-.xr-section-item input + label {
-  color: var(--xr-disabled-color);
-}
-
-.xr-section-item input:enabled + label {
-  cursor: pointer;
-  color: var(--xr-font-color2);
-}
-
-.xr-section-item input:enabled + label:hover {
-  color: var(--xr-font-color0);
-}
-
-.xr-section-summary {
-  grid-column: 1;
-  color: var(--xr-font-color2);
-  font-weight: 500;
-}
-
-.xr-section-summary > span {
-  display: inline-block;
-  padding-left: 0.5em;
-}
-
-.xr-section-summary-in:disabled + label {
-  color: var(--xr-font-color2);
-}
-
-.xr-section-summary-in + label:before {
-  display: inline-block;
-  content: '►';
-  font-size: 11px;
-  width: 15px;
-  text-align: center;
-}
-
-.xr-section-summary-in:disabled + label:before {
-  color: var(--xr-disabled-color);
-}
-
-.xr-section-summary-in:checked + label:before {
-  content: '▼';
-}
-
-.xr-section-summary-in:checked + label > span {
-  display: none;
-}
-
-.xr-section-summary,
-.xr-section-inline-details {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-.xr-section-inline-details {
-  grid-column: 2 / -1;
-}
-
-.xr-section-details {
-  display: none;
-  grid-column: 1 / -1;
-  margin-bottom: 5px;
-}
-
-.xr-section-summary-in:checked ~ .xr-section-details {
-  display: contents;
-}
-
-.xr-array-wrap {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 20px auto;
-}
-
-.xr-array-wrap > label {
-  grid-column: 1;
-  vertical-align: top;
-}
-
-.xr-preview {
-  color: var(--xr-font-color3);
-}
-
-.xr-array-preview,
-.xr-array-data {
-  padding: 0 5px !important;
-  grid-column: 2;
-}
-
-.xr-array-data,
-.xr-array-in:checked ~ .xr-array-preview {
-  display: none;
-}
-
-.xr-array-in:checked ~ .xr-array-data,
-.xr-array-preview {
-  display: inline-block;
-}
-
-.xr-dim-list {
-  display: inline-block !important;
-  list-style: none;
-  padding: 0 !important;
-  margin: 0;
-}
-
-.xr-dim-list li {
-  display: inline-block;
-  padding: 0;
-  margin: 0;
-}
-
-.xr-dim-list:before {
-  content: '(';
-}
-
-.xr-dim-list:after {
-  content: ')';
-}
-
-.xr-dim-list li:not(:last-child):after {
-  content: ',';
-  padding-right: 5px;
-}
-
-.xr-has-index {
-  font-weight: bold;
-}
-
-.xr-var-list,
-.xr-var-item {
-  display: contents;
-}
-
-.xr-var-item > div,
-.xr-var-item label,
-.xr-var-item > .xr-var-name span {
-  background-color: var(--xr-background-color-row-even);
-  margin-bottom: 0;
-}
-
-.xr-var-item > .xr-var-name:hover span {
-  padding-right: 5px;
-}
-
-.xr-var-list > li:nth-child(odd) > div,
-.xr-var-list > li:nth-child(odd) > label,
-.xr-var-list > li:nth-child(odd) > .xr-var-name span {
-  background-color: var(--xr-background-color-row-odd);
-}
-
-.xr-var-name {
-  grid-column: 1;
-}
-
-.xr-var-dims {
-  grid-column: 2;
-}
-
-.xr-var-dtype {
-  grid-column: 3;
-  text-align: right;
-  color: var(--xr-font-color2);
-}
-
-.xr-var-preview {
-  grid-column: 4;
-}
-
-.xr-index-preview {
-  grid-column: 2 / 5;
-  color: var(--xr-font-color2);
-}
-
-.xr-var-name,
-.xr-var-dims,
-.xr-var-dtype,
-.xr-preview,
-.xr-attrs dt {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-right: 10px;
-}
-
-.xr-var-name:hover,
-.xr-var-dims:hover,
-.xr-var-dtype:hover,
-.xr-attrs dt:hover {
-  overflow: visible;
-  width: auto;
-  z-index: 1;
-}
-
-.xr-var-attrs,
-.xr-var-data,
-.xr-index-data {
-  display: none;
-  background-color: var(--xr-background-color) !important;
-  padding-bottom: 5px !important;
-}
-
-.xr-var-attrs-in:checked ~ .xr-var-attrs,
-.xr-var-data-in:checked ~ .xr-var-data,
-.xr-index-data-in:checked ~ .xr-index-data {
-  display: block;
-}
-
-.xr-var-data > table {
-  float: right;
-}
-
-.xr-var-name span,
-.xr-var-data,
-.xr-index-name div,
-.xr-index-data,
-.xr-attrs {
-  padding-left: 25px !important;
-}
-
-.xr-attrs,
-.xr-var-attrs,
-.xr-var-data,
-.xr-index-data {
-  grid-column: 1 / -1;
-}
-
-dl.xr-attrs {
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 125px auto;
-}
-
-.xr-attrs dt,
-.xr-attrs dd {
-  padding: 0;
-  margin: 0;
-  float: left;
-  padding-right: 10px;
-  width: auto;
-}
-
-.xr-attrs dt {
-  font-weight: normal;
-  grid-column: 1;
-}
-
-.xr-attrs dt:hover span {
-  display: inline-block;
-  background: var(--xr-background-color);
-  padding-right: 10px;
-}
-
-.xr-attrs dd {
-  grid-column: 2;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.xr-icon-database,
-.xr-icon-file-text2,
-.xr-no-icon {
-  display: inline-block;
-  vertical-align: middle;
-  width: 1em;
-  height: 1.5em !important;
-  stroke-width: 0;
-  stroke: currentColor;
-  fill: currentColor;
-}
-</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;frames&#x27; (time: 126, y: 821, x: 965)&gt;
-dask.array&lt;transpose, shape=(126, 821, 965), dtype=float32, chunksize=(1, 821, 965), chunktype=numpy.ndarray&gt;
-Coordinates:
-  * time     (time) float64 0.0 0.03333 0.06667 0.1 ... 4.067 4.1 4.133 4.167
-  * y        (y) float64 8.205 8.195 8.185 8.175 ... 0.035 0.025 0.015 0.005
-  * x        (x) float64 0.005 0.015 0.025 0.035 ... 9.615 9.625 9.635 9.645
-    xs       (y, x) float64 6.427e+05 6.427e+05 ... 6.427e+05 6.427e+05
-    ys       (y, x) float64 8.304e+06 8.304e+06 ... 8.304e+06 8.304e+06
-    lon      (y, x) float64 28.33 28.33 28.33 28.33 ... 28.33 28.33 28.33 28.33
-    lat      (y, x) float64 -15.33 -15.33 -15.33 -15.33 ... -15.33 -15.33 -15.33
-Attributes:
-    camera_shape:   [1080, 1920]
-    camera_config:  {\n    &quot;height&quot;: 1080,\n    &quot;width&quot;: 1920,\n    &quot;crs&quot;: &quot;P...
-    h_a:            null</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 821</li><li><span class='xr-has-index'>x</span>: 965</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-9347d443-5eb6-4020-b0fb-9184d85819bc' class='xr-array-in' type='checkbox' checked><label for='section-9347d443-5eb6-4020-b0fb-9184d85819bc' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 821, 965), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
-    <tr>
-        <td>
-            <table style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <td> </td>
-                        <th> Array </th>
-                        <th> Chunk </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <th> Bytes </th>
-                        <td> 380.80 MiB </td>
-                        <td> 3.02 MiB </td>
-                    </tr>
-
-                    <tr>
-                        <th> Shape </th>
-                        <td> (126, 821, 965) </td>
-                        <td> (1, 821, 965) </td>
-                    </tr>
-                    <tr>
-                        <th> Dask graph </th>
-                        <td colspan="2"> 126 chunks in 281 graph layers </td>
-                    </tr>
-                    <tr>
-                        <th> Data type </th>
-                        <td colspan="2"> float32 numpy.ndarray </td>
-                    </tr>
-                </tbody>
-            </table>
-        </td>
-        <td>
-        <svg width="203" height="175" style="stroke:rgb(0,0,0);stroke-width:1" >
-
-  <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="33" y2="23" style="stroke-width:2" />
-  <line x1="10" y1="102" x2="33" y2="125" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="102" style="stroke-width:2" />
-  <line x1="11" y1="1" x2="11" y2="103" />
-  <line x1="12" y1="2" x2="12" y2="104" />
-  <line x1="13" y1="3" x2="13" y2="105" />
-  <line x1="14" y1="4" x2="14" y2="106" />
-  <line x1="16" y1="6" x2="16" y2="108" />
-  <line x1="17" y1="7" x2="17" y2="109" />
-  <line x1="18" y1="8" x2="18" y2="110" />
-  <line x1="19" y1="9" x2="19" y2="111" />
-  <line x1="21" y1="11" x2="21" y2="113" />
-  <line x1="22" y1="12" x2="22" y2="114" />
-  <line x1="23" y1="13" x2="23" y2="115" />
-  <line x1="24" y1="14" x2="24" y2="116" />
-  <line x1="26" y1="16" x2="26" y2="118" />
-  <line x1="27" y1="17" x2="27" y2="119" />
-  <line x1="28" y1="18" x2="28" y2="120" />
-  <line x1="29" y1="19" x2="29" y2="121" />
-  <line x1="30" y1="20" x2="30" y2="123" />
-  <line x1="32" y1="22" x2="32" y2="124" />
-  <line x1="33" y1="23" x2="33" y2="125" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 33.53989110926297,23.539891109262964 33.53989110926297,125.63315535796764 10.0,102.09326424870467" style="fill:#8B4903A0;stroke-width:0"/>
-
-  <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="130" y2="0" style="stroke-width:2" />
-  <line x1="11" y1="1" x2="131" y2="1" />
-  <line x1="12" y1="2" x2="132" y2="2" />
-  <line x1="13" y1="3" x2="133" y2="3" />
-  <line x1="14" y1="4" x2="134" y2="4" />
-  <line x1="16" y1="6" x2="136" y2="6" />
-  <line x1="17" y1="7" x2="137" y2="7" />
-  <line x1="18" y1="8" x2="138" y2="8" />
-  <line x1="19" y1="9" x2="139" y2="9" />
-  <line x1="21" y1="11" x2="141" y2="11" />
-  <line x1="22" y1="12" x2="142" y2="12" />
-  <line x1="23" y1="13" x2="143" y2="13" />
-  <line x1="24" y1="14" x2="144" y2="14" />
-  <line x1="26" y1="16" x2="146" y2="16" />
-  <line x1="27" y1="17" x2="147" y2="17" />
-  <line x1="28" y1="18" x2="148" y2="18" />
-  <line x1="29" y1="19" x2="149" y2="19" />
-  <line x1="30" y1="20" x2="150" y2="20" />
-  <line x1="32" y1="22" x2="152" y2="22" />
-  <line x1="33" y1="23" x2="153" y2="23" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="33" y2="23" style="stroke-width:2" />
-  <line x1="130" y1="0" x2="153" y2="23" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 130.0,0.0 153.53989110926295,23.539891109262964 33.53989110926297,23.539891109262964" style="fill:#8B4903A0;stroke-width:0"/>
-
-  <!-- Horizontal lines -->
-  <line x1="33" y1="23" x2="153" y2="23" style="stroke-width:2" />
-  <line x1="33" y1="125" x2="153" y2="125" style="stroke-width:2" />
-
-  <!-- Vertical lines -->
-  <line x1="33" y1="23" x2="33" y2="125" style="stroke-width:2" />
-  <line x1="153" y1="23" x2="153" y2="125" style="stroke-width:2" />
-
-  <!-- Colored Rectangle -->
-  <polygon points="33.53989110926297,23.539891109262964 153.53989110926295,23.539891109262964 153.53989110926295,125.63315535796764 33.53989110926297,125.63315535796764" style="fill:#ECB172A0;stroke-width:0"/>
-
-  <!-- Text -->
-  <text x="93.539891" y="145.633155" font-size="1.0rem" font-weight="100" text-anchor="middle" >965</text>
-  <text x="173.539891" y="74.586523" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,173.539891,74.586523)">821</text>
-  <text x="11.769946" y="133.863210" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,11.769946,133.863210)">126</text>
-</svg>
-        </td>
-    </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-e671529f-deab-421c-9ecf-98e65448c264' class='xr-section-summary-in' type='checkbox'  checked><label for='section-e671529f-deab-421c-9ecf-98e65448c264' class='xr-section-summary' >Coordinates: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-a7e38342-2f90-435c-9a54-dc3c33644bc8' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a7e38342-2f90-435c-9a54-dc3c33644bc8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5d1e97d0-1803-4061-968b-7bd2f1b0918e' class='xr-var-data-in' type='checkbox'><label for='data-5d1e97d0-1803-4061-968b-7bd2f1b0918e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
-       0.233333, 0.266667, 0.3     , 0.333333, 0.366667, 0.4     , 0.433333,
-       0.466667, 0.5     , 0.533333, 0.566667, 0.6     , 0.633333, 0.666667,
-       0.7     , 0.733333, 0.766667, 0.8     , 0.833333, 0.866667, 0.9     ,
-       0.933333, 0.966667, 1.      , 1.033333, 1.066667, 1.1     , 1.133333,
-       1.166667, 1.2     , 1.233333, 1.266667, 1.3     , 1.333333, 1.366667,
-       1.4     , 1.433333, 1.466667, 1.5     , 1.533333, 1.566667, 1.6     ,
-       1.633333, 1.666667, 1.7     , 1.733333, 1.766667, 1.8     , 1.833333,
-       1.866667, 1.9     , 1.933333, 1.966667, 2.      , 2.033333, 2.066667,
-       2.1     , 2.133333, 2.166667, 2.2     , 2.233333, 2.266667, 2.3     ,
-       2.333333, 2.366667, 2.4     , 2.433333, 2.466667, 2.5     , 2.533333,
-       2.566667, 2.6     , 2.633333, 2.666667, 2.7     , 2.733333, 2.766667,
-       2.8     , 2.833333, 2.866667, 2.9     , 2.933333, 2.966667, 3.      ,
-       3.033333, 3.066667, 3.1     , 3.133333, 3.166667, 3.2     , 3.233333,
-       3.266667, 3.3     , 3.333333, 3.366667, 3.4     , 3.433333, 3.466667,
-       3.5     , 3.533333, 3.566667, 3.6     , 3.633333, 3.666667, 3.7     ,
-       3.733333, 3.766667, 3.8     , 3.833333, 3.866667, 3.9     , 3.933333,
-       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>8.205 8.195 8.185 ... 0.015 0.005</div><input id='attrs-9bf03c9d-bd5a-4d98-bfe8-46db90577af8' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-9bf03c9d-bd5a-4d98-bfe8-46db90577af8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-12003437-f9bb-41af-8cfd-fff466925dc2' class='xr-var-data-in' type='checkbox'><label for='data-12003437-f9bb-41af-8cfd-fff466925dc2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([8.205e+00, 8.195e+00, 8.185e+00, ..., 2.500e-02, 1.500e-02, 5.000e-03])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.005 0.015 0.025 ... 9.635 9.645</div><input id='attrs-641b5e0f-2a81-47de-8f55-3c2749fe4be9' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-641b5e0f-2a81-47de-8f55-3c2749fe4be9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-41ef247f-9c85-4d20-ae46-e3069717d4ec' class='xr-var-data-in' type='checkbox'><label for='data-41ef247f-9c85-4d20-ae46-e3069717d4ec' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([5.000e-03, 1.500e-02, 2.500e-02, ..., 9.625e+00, 9.635e+00, 9.645e+00])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xs</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>6.427e+05 6.427e+05 ... 6.427e+05</div><input id='attrs-1b12246b-8741-458c-a289-d2462003f8e9' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1b12246b-8741-458c-a289-d2462003f8e9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-57133437-a033-4d27-8c66-e79be0f347ac' class='xr-var-data-in' type='checkbox'><label for='data-57133437-a033-4d27-8c66-e79be0f347ac' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>x-coordinate in Cartesian system</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><pre>array([[642730.3321954 , 642730.33320151, 642730.33420761, ...,
-        642731.30006789, 642731.301074  , 642731.3020801 ],
-       [642730.34214466, 642730.34315077, 642730.34415687, ...,
-        642731.31001715, 642731.31102325, 642731.31202936],
-       [642730.35209392, 642730.35310003, 642730.35410613, ...,
-        642731.31996641, 642731.32097251, 642731.32197862],
-       ...,
-       [642738.47068923, 642738.47169534, 642738.47270144, ...,
-        642739.43856172, 642739.43956782, 642739.44057393],
-       [642738.48063849, 642738.4816446 , 642738.4826507 , ...,
-        642739.44851098, 642739.44951708, 642739.45052319],
-       [642738.49058775, 642738.49159385, 642738.49259996, ...,
-        642739.45846024, 642739.45946634, 642739.46047245]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>ys</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>8.304e+06 8.304e+06 ... 8.304e+06</div><input id='attrs-852bc562-e233-400d-b412-c7b398adb2b2' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-852bc562-e233-400d-b412-c7b398adb2b2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-446c8246-5525-43c4-b612-eb95daa9fb08' class='xr-var-data-in' type='checkbox'><label for='data-446c8246-5525-43c4-b612-eb95daa9fb08' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>y-coordinate in Cartesian system</dd><dt><span>units :</span></dt><dd>m</dd></dl></div><div class='xr-var-data'><pre>array([[8304292.87957341, 8304292.88952267, 8304292.89947193, ...,
-        8304302.45076053, 8304302.46070979, 8304302.47065905],
-       [8304292.87856731, 8304292.88851656, 8304292.89846582, ...,
-        8304302.44975442, 8304302.45970368, 8304302.46965294],
-       [8304292.8775612 , 8304292.88751046, 8304292.89745972, ...,
-        8304302.44874832, 8304302.45869758, 8304302.46864684],
-       ...,
-       [8304292.05657997, 8304292.06652922, 8304292.07647848, ...,
-        8304301.62776708, 8304301.63771634, 8304301.6476656 ],
-       [8304292.05557386, 8304292.06552312, 8304292.07547238, ...,
-        8304301.62676098, 8304301.63671024, 8304301.6466595 ],
-       [8304292.05456776, 8304292.06451701, 8304292.07446627, ...,
-        8304301.62575487, 8304301.63570413, 8304301.64565339]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>28.33 28.33 28.33 ... 28.33 28.33</div><input id='attrs-cdacb5ce-d264-4cb2-94dc-d2a978319e5d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-cdacb5ce-d264-4cb2-94dc-d2a978319e5d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5bfe666a-1079-4d26-ac17-be0dc5e30cec' class='xr-var-data-in' type='checkbox'><label for='data-5bfe666a-1079-4d26-ac17-be0dc5e30cec' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd></dl></div><div class='xr-var-data'><pre>array([[28.32961496, 28.32961497, 28.32961498, ..., 28.32962343,
-        28.32962344, 28.32962344],
-       [28.32961505, 28.32961506, 28.32961507, ..., 28.32962352,
-        28.32962353, 28.32962354],
-       [28.32961514, 28.32961515, 28.32961516, ..., 28.32962361,
-        28.32962362, 28.32962363],
-       ...,
-       [28.32969081, 28.32969082, 28.32969082, ..., 28.32969927,
-        28.32969928, 28.32969929],
-       [28.3296909 , 28.32969091, 28.32969092, ..., 28.32969937,
-        28.32969938, 28.32969938],
-       [28.32969099, 28.329691  , 28.32969101, ..., 28.32969946,
-        28.32969947, 28.32969948]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>-15.33 -15.33 ... -15.33 -15.33</div><input id='attrs-acaf0dd5-1ed4-40d3-9139-e5eead910483' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-acaf0dd5-1ed4-40d3-9139-e5eead910483' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-21bf5293-7f17-446b-99ba-22ee15a1eea8' class='xr-var-data-in' type='checkbox'><label for='data-21bf5293-7f17-446b-99ba-22ee15a1eea8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd></dl></div><div class='xr-var-data'><pre>array([[-15.33400626, -15.33400617, -15.33400608, ..., -15.3339197 ,
-        -15.33391961, -15.33391952],
-       [-15.33400627, -15.33400618, -15.33400609, ..., -15.3339197 ,
-        -15.33391961, -15.33391952],
-       [-15.33400628, -15.33400619, -15.3340061 , ..., -15.33391971,
-        -15.33391962, -15.33391953],
-       ...,
-       [-15.33401325, -15.33401316, -15.33401307, ..., -15.33392668,
-        -15.33392659, -15.3339265 ],
-       [-15.33401325, -15.33401316, -15.33401307, ..., -15.33392669,
-        -15.3339266 , -15.33392651],
-       [-15.33401326, -15.33401317, -15.33401308, ..., -15.3339267 ,
-        -15.33392661, -15.33392652]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-bb6238fb-ba6a-4819-a5c6-99e2135f87fe' class='xr-section-summary-in' type='checkbox'  ><label for='section-bb6238fb-ba6a-4819-a5c6-99e2135f87fe' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-6e02418c-cae2-4f81-af61-f8239a34d300' class='xr-index-data-in' type='checkbox'/><label for='index-6e02418c-cae2-4f81-af61-f8239a34d300' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([                0.0, 0.03333333333333334, 0.06666666666666668,
-                              0.1, 0.13333333333333336, 0.16666666666666666,
-                              0.2, 0.23333333333333334,  0.2666666666666667,
-                              0.3,
-              ...
-               3.8666666666666667,                 3.9,   3.933333333333333,
-               3.9666666666666672,                 4.0,   4.033333333333333,
-                4.066666666666666,                 4.1,   4.133333333333333,
-                4.166666666666667],
-             dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-5f3fa13e-6b08-4e3a-81ee-ee6c8d10e252' class='xr-index-data-in' type='checkbox'/><label for='index-5f3fa13e-6b08-4e3a-81ee-ee6c8d10e252' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([               8.205,                8.195,    8.184999999999999,
-                 8.174999999999999,                8.165,                8.155,
-                             8.145,                8.135,                8.125,
-                             8.115,
-              ...
-               0.09499999999999999,  0.08499999999999999,                0.075,
-               0.06499999999999999, 0.054999999999999986,  0.04499999999999999,
-              0.034999999999999996, 0.024999999999999998,                0.015,
-                             0.005],
-             dtype=&#x27;float64&#x27;, name=&#x27;y&#x27;, length=821))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-93e1a020-0a7d-4d30-8ce9-57aad3ecb049' class='xr-index-data-in' type='checkbox'/><label for='index-93e1a020-0a7d-4d30-8ce9-57aad3ecb049' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Float64Index([               0.005,                0.015, 0.024999999999999998,
-              0.034999999999999996,  0.04499999999999999, 0.054999999999999986,
-               0.06499999999999999,                0.075,  0.08499999999999999,
-               0.09499999999999999,
-              ...
-                             9.555,                9.565,                9.575,
-                 9.584999999999999,    9.594999999999999,    9.604999999999999,
-                 9.614999999999998,                9.625,                9.635,
-                             9.645],
-             dtype=&#x27;float64&#x27;, name=&#x27;x&#x27;, length=965))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-0d21bc30-6d69-43e0-9e95-6e118f5f2e65' class='xr-section-summary-in' type='checkbox'  checked><label for='section-0d21bc30-6d69-43e0-9e95-6e118f5f2e65' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
-    &quot;height&quot;: 1080,
-    &quot;width&quot;: 1920,
-    &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOGCRS[\&quot;WGS 84\&quot;,ENSEMBLE[\&quot;World Geodetic System 1984 ensemble\&quot;,MEMBER[\&quot;World Geodetic System 1984 (Transit)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G730)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G873)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1150)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1674)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1762)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G2139)\&quot;],ELLIPSOID[\&quot;WGS 84\&quot;,6378137,298.257223563,LENGTHUNIT[\&quot;metre\&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&quot;Greenwich\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433]],ID[\&quot;EPSG\&quot;,4326]],CONVERSION[\&quot;UTM zone 35S\&quot;,METHOD[\&quot;Transverse Mercator\&quot;,ID[\&quot;EPSG\&quot;,9807]],PARAMETER[\&quot;Latitude of natural origin\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8801]],PARAMETER[\&quot;Longitude of natural origin\&quot;,27,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8802]],PARAMETER[\&quot;Scale factor at natural origin\&quot;,0.9996,SCALEUNIT[\&quot;unity\&quot;,1],ID[\&quot;EPSG\&quot;,8805]],PARAMETER[\&quot;False easting\&quot;,500000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8806]],PARAMETER[\&quot;False northing\&quot;,10000000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8807]]],CS[Cartesian,2],AXIS[\&quot;(E)\&quot;,east,ORDER[1],LENGTHUNIT[\&quot;metre\&quot;,1]],AXIS[\&quot;(N)\&quot;,north,ORDER[2],LENGTHUNIT[\&quot;metre\&quot;,1]],USAGE[SCOPE[\&quot;Engineering survey, topographic mapping.\&quot;],AREA[\&quot;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&quot;],BBOX[-80,24,0,30]],ID[\&quot;EPSG\&quot;,32735]]&quot;,
-    &quot;resolution&quot;: 0.01,
-    &quot;gcps&quot;: {
-        &quot;src&quot;: [
-            [
-                1421.0,
-                1001.0
-            ],
-            [
-                1251.0,
-                460.0
-            ],
-            [
-                421.0,
-                432.0
-            ],
-            [
-                470.0,
-                607.0
-            ]
-        ],
-        &quot;dst&quot;: [
-            [
-                642735.8076,
-                8304292.119
-            ],
-            [
-                642737.5823,
-                8304295.593
-            ],
-            [
-                642732.7864,
-                8304298.425
-            ],
-            [
-                642732.6705,
-                8304296.858
-            ]
-        ],
-        &quot;h_ref&quot;: 0.0,
-        &quot;z_0&quot;: 1182.2
-    },
-    &quot;window_size&quot;: 25,
-    &quot;dist_coeffs&quot;: [
-        [
-            0.0
-        ],
-        [
-            0.0
-        ],
-        [
-            0.0
-        ],
-        [
-            0.0
-        ]
-    ],
-    &quot;camera_matrix&quot;: [
-        [
-            1920.0,
-            0.0,
-            960.0
-        ],
-        [
-            0.0,
-            1920.0,
-            540.0
-        ],
-        [
-            0.0,
-            0.0,
-            1.0
-        ]
-    ],
-    &quot;bbox&quot;: &quot;POLYGON ((642730.3267177228 8304292.875101833, 642731.297608523 8304302.476136727, 642739.456000869 8304301.651131073, 642738.4851100688 8304292.050096178, 642730.3267177228 8304292.875101833))&quot;
-}</dd><dt><span>h_a :</span></dt><dd>null</dd></dl></div></li></ul></div></div></div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[7], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">da_edge</span>
+
+<span class="ansi-red-fg">NameError</span>: name &#39;da_edge&#39; is not defined
+</pre></div></div>
 </div>
 <p>These new coordinate variables can be interpreted by the <code class="docutils literal notranslate"><span class="pre">.frames.plot</span></code> functionality to also make a geographical plot, which can be combined with other geographical data you may have,m such as background maps, OpenStreetMap, satellite background and so on. The <code class="docutils literal notranslate"><span class="pre">cartopy</span></code> package is used to provide this geographical awareness to your plots. We refer to <a class="reference external" href="https://scitools.org.uk/cartopy/docs/latest/">cartopy’s documentation</a> for more information. An example of geographical plots and the
 camera’s objective plot are provided below. Note that the <code class="docutils literal notranslate"><span class="pre">.frames.plot</span></code> function always returns the mappable. This can then be used to retrieve the axes of the mappable for instance to add other things to that axes, or to add a legend or colorbar.</p>
@@ -1923,8 +669,19 @@ camera’s objective plot are provided below. Note that the <code class="docutil
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/user-guide_frames_frames_17_0.png" src="../../_images/user-guide_frames_frames_17_0.png" />
-</div>
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[8], line 5</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> <span class="ansi-bold" style="color: rgb(0,0,255)">cartopy</span><span class="ansi-bold" style="color: rgb(0,0,255)">.</span><span class="ansi-bold" style="color: rgb(0,0,255)">crs</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> <span class="ansi-bold" style="color: rgb(0,0,255)">ccrs</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span style="color: rgb(95,135,135)"># when using mode=&#34;geographical&#34; and not supplying an axes, the plot function will make a geogrpahical aware axes</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span style="color: rgb(95,135,135)"># for you.</span>
+<span class="ansi-green-fg">----&gt; 5</span> p <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">da_edge</span>[<span style="color: rgb(98,98,98)">0</span>]<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>plot(mode<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">geographical</span><span style="color: rgb(175,0,0)">&#34;</span>, vmin<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">10</span>, vmax<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>, cmap<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">RdBu_r</span><span style="color: rgb(175,0,0)">&#34;</span>)
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span style="color: rgb(95,135,135)"># tiles = cimgt.OSM()</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span> tiles <span style="color: rgb(98,98,98)">=</span> cimgt<span style="color: rgb(98,98,98)">.</span>GoogleTiles(style<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">satellite</span><span style="color: rgb(175,0,0)">&#34;</span>)
+
+<span class="ansi-red-fg">NameError</span>: name &#39;da_edge&#39; is not defined
+</pre></div></div>
 </div>
 </section>
 <section id="Animations">
@@ -1952,20 +709,21 @@ camera’s objective plot are provided below. Note that the <code class="docutil
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-Writing frames: 100%|██████████| 30/30 [00:12&lt;00:00,  2.46it/s]
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../_images/user-guide_frames_frames_19_1.png" src="../../_images/user-guide_frames_frames_19_1.png" />
-</div>
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[9], line 2</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># we will only store the first 30 frames</span>
+<span class="ansi-green-fg">----&gt; 2</span> da_sel <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">da_edge</span>[<span style="color: rgb(98,98,98)">0</span>:<span style="color: rgb(98,98,98)">30</span>]
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span style="color: rgb(95,135,135)"># first with all color control</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> da_sel<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>to_ani(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">edge_ani.mp4</span><span style="color: rgb(175,0,0)">&#34;</span>, vmin<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">10</span>, vmax<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>, cmap<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">RdBu_r</span><span style="color: rgb(175,0,0)">&#34;</span>)
+
+<span class="ansi-red-fg">NameError</span>: name &#39;da_edge&#39; is not defined
+</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:

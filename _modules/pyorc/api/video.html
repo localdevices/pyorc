@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.video &#8212; pyorc 0.4.3 documentation</title>
+    <title>pyorc.api.video &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -108,7 +108,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -388,11 +388,13 @@ document.write(`
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">cv</span><span class="p">,</span> <span class="n">const</span>
 <span class="kn">from</span> <span class="nn">.cameraconfig</span> <span class="kn">import</span> <span class="n">load_camera_config</span><span class="p">,</span> <span class="n">get_camera_config</span><span class="p">,</span> <span class="n">CameraConfig</span>
 
 
-<div class="viewcode-block" id="Video"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video">[docs]</a><span class="k">class</span> <span class="nc">Video</span><span class="p">:</span>  <span class="c1">#(cv2.VideoCapture)</span>
+<div class="viewcode-block" id="Video"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video">[docs]</a><span class="k">class</span> <span class="nc">Video</span><span class="p">:</span>  <span class="c1"># (cv2.VideoCapture)</span>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">Filename: </span><span class="si">{:s}</span>
@@ -412,14 +414,13 @@ document.write(`
 
 <div class="viewcode-block" id="Video.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">fn</span><span class="p">,</span>
-            <span class="n">camera_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">start_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">end_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">stabilize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">mask_exterior</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">camera_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CameraConfig</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">start_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">end_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">stabilize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end</span>
@@ -441,17 +442,14 @@ document.write(`
 <span class="sd">            first frame to use in analysis (default: 0)</span>
 <span class="sd">        end_frame : int, optional</span>
 <span class="sd">            last frame to use in analysis (if not set, last frame available in video will be used)</span>
-<span class="sd">        stabilize : optional</span>
-<span class="sd">            If set to a recipe name, the video will be stabilized by attempting to find rigid points and track these with</span>
-<span class="sd">            Lukas Kanade optical flow. Currently supported is &quot;fixed&quot; for FOV that is meant to be in one place.</span>
-<span class="sd">        mask_exterior : list of lists,</span>
+<span class="sd">        stabilize : list of lists, optional</span>
 <span class="sd">            set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.</span>
-<span class="sd">            The mask is used to select region (on land) for rigid point search for stabilization.</span>
+<span class="sd">            The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no</span>
+<span class="sd">            stabilization will be performed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">start_frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))),</span> <span class="s1">&#39;start_frame must be of type &quot;int&quot;&#39;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">end_frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))),</span> <span class="s1">&#39;end_frame must be of type &quot;int&quot;&#39;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">stabilize</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]),</span> <span class="sa">f</span><span class="s1">&#39;stabilize is only implemented for method &quot;fixed&quot;, &quot;</span><span class="si">{</span><span class="n">stabilize</span><span class="si">}</span><span class="s1">&quot; given&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feats_pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">start_frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))),</span> <span class="s1">&#39;start_frame must be of type &quot;int&quot;&#39;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">end_frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))),</span> <span class="s1">&#39;end_frame must be of type &quot;int&quot;&#39;</span>
+        <span class="c1"># assert (isinstance(stabilize, (list, type(None)))), f&#39;stabilize must contain a list of points, but is {stabilize}&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feats_stats</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feats_errs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ms</span> <span class="o">=</span> <span class="kc">None</span>
@@ -459,14 +457,14 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">stabilize</span> <span class="o">=</span> <span class="n">stabilize</span>
         <span class="k">if</span> <span class="n">camera_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span> <span class="o">=</span> <span class="n">camera_config</span>
-        <span class="c1"># if camera_config is not None:</span>
+            <span class="c1"># if camera_config is not None:</span>
             <span class="c1"># check if h_a is supplied, if so, then also z_0 and h_ref must be available</span>
             <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">)),</span>\
+                <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">)),</span> \
                     <span class="s2">&quot;h_a was supplied, but camera config&#39;s gcps do not contain z_0, this is needed for dynamic &quot;</span> \
                     <span class="s2">&quot;reprojection. You can supplying z_0 and h_ref in the camera_config&#39;s gcps upon making a camera &quot;</span> \
                     <span class="s2">&quot;configuration. &quot;</span>
-                <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">)),</span>\
+                <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">)),</span> \
                     <span class="s2">&quot;h_a was supplied, but camera config&#39;s gcps do not contain h_ref, this is needed for dynamic &quot;</span> \
                     <span class="s2">&quot;reprojection. You must supply z_0 and h_ref in the camera_config&#39;s gcps upon making a camera &quot;</span> \
                     <span class="s2">&quot;configuration. &quot;</span>
@@ -474,11 +472,10 @@ document.write(`
         <span class="n">cap</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_ORIENTATION_AUTO</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mask_exterior</span> <span class="o">=</span> <span class="n">mask_exterior</span>
         <span class="c1"># explicitly open file for reading</span>
-        <span class="k">if</span> <span class="n">mask_exterior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># set a mask based on the roi points</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_mask_from_exterior</span><span class="p">(</span><span class="n">mask_exterior</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stabilize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># set a gridded mask based on the roi points</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_mask_from_exterior</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stabilize</span><span class="p">)</span>
         <span class="c1"># set end and start frame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_COUNT</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">start_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -522,25 +519,6 @@ document.write(`
         <span class="c1"># nothing to be done at this stage, release file for now.</span>
         <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="k">del</span> <span class="n">cap</span></div>
-
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask_exterior</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        np.ndarray</span>
-<span class="sd">            Mask of region of interest</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_exterior</span>
-
-    <span class="nd">@mask_exterior</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">mask_exterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_exterior</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">mask_exterior</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_mask_exterior</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_mask_exterior</span> <span class="o">=</span> <span class="n">mask_exterior</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -589,7 +567,8 @@ document.write(`
                 <span class="c1"># Create CameraConfig from dict</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_camera_config</span> <span class="o">=</span> <span class="n">CameraConfig</span><span class="p">(</span><span class="o">**</span><span class="n">camera_config_input</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Could not recognise input as a CameraConfig file, string, dictionary or CameraConfig object.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                <span class="s2">&quot;Could not recognise input as a CameraConfig file, string, dictionary or CameraConfig object.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -624,17 +603,18 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">stabilize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :return: int, last frame considered in analysis</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;camera_config&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">,</span> <span class="s2">&quot;stabilize&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">stabilize</span>
 
     <span class="nd">@stabilize</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">stabilize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stabilize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># sometimes last frames are not read by OpenCV, hence we skip the last frame always</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span> <span class="o">=</span> <span class="n">stabilize</span>
-
+    <span class="k">def</span> <span class="nf">stabilize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span> <span class="o">=</span> <span class="n">coords</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -645,11 +625,15 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h_a</span>
 
     <span class="nd">@h_a</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">h_a</span><span class="p">,</span> <span class="nb">float</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;The actual water level must be a float, you supplied a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">h_a</span><span class="p">,</span> <span class="nb">float</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;The actual water level must be a float, you supplied a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">if</span> <span class="n">h_a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.&quot;</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_h_a</span> <span class="o">=</span> <span class="n">h_a</span>
 
     <span class="nd">@property</span>
@@ -661,7 +645,10 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_frame</span>
 
     <span class="nd">@start_frame</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">start_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">start_frame</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">start_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">start_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_start_frame</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
@@ -676,7 +663,10 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span>
 
     <span class="nd">@fps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">fps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fps</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">fps</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">fps</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">fps</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FPS in video is </span><span class="si">{</span><span class="n">fps</span><span class="si">}</span><span class="s2"> which is not a valid value. Repair the video file before use&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="n">fps</span>
@@ -690,16 +680,21 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span>
 
     <span class="nd">@corners</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">corners</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">corners</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span> <span class="o">=</span> <span class="n">corners</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span>
 
     <span class="nd">@rotation</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotation_code</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">rotation_code</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Solves a likely bug in OpenCV (4.6.0) that straight up videos rotate in the wrong direction. Tested for both</span>
 <span class="sd">        90 degree and 270 degrees rotation videos on several smartphone (iPhone and Android)</span>
@@ -709,20 +704,34 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="kc">None</span>
 
-
-
-<div class="viewcode-block" id="Video.get_frame"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frame.html#pyorc.Video.get_frame">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="n">lens_corr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Video.get_frame"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frame.html#pyorc.Video.get_frame">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;grayscale&quot;</span><span class="p">,</span>
+            <span class="n">lens_corr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.</span>
 
-<span class="sd">        :param n: int, frame number to retrieve</span>
-<span class="sd">        :param method: str, can be &quot;rgb&quot;, &quot;grayscale&quot;, or &quot;hsv&quot;, default: &quot;grayscale&quot;</span>
-<span class="sd">        :param lens_corr: bool, optional, if set to True, lens parameters will be used to undistort image</span>
-<span class="sd">        :return: np.ndarray containing frame</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">            frame number to retrieve</span>
+<span class="sd">        method : str</span>
+<span class="sd">            can be &quot;rgb&quot;, &quot;grayscale&quot;, or &quot;hsv&quot;, default: &quot;grayscale&quot;</span>
+<span class="sd">        lens_corr: bool, optional</span>
+<span class="sd">            if set to True, lens parameters will be used to undistort image</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        frame : np.ndarray</span>
+<span class="sd">            2d array (grayscale) or 3d (rgb/hsv) with frame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;frame number cannot be negative&quot;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span><span class="p">),</span> <span class="s2">&quot;frame number is larger than the different between the start and end frame&quot;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb&quot;</span><span class="p">,</span> <span class="s2">&quot;hsv&quot;</span><span class="p">]),</span> <span class="sa">f</span><span class="s1">&#39;method must be &quot;grayscale&quot;, &quot;rgb&quot; or &quot;hsv&quot;, method is &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;frame number cannot be negative&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span><span class="p">),</span> <span class="s2">&quot;frame number is larger than the different between the start and end frame&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;hsv&quot;</span><span class="p">]),</span> <span class="sa">f</span><span class="s1">&#39;method must be &quot;grayscale&quot;, &quot;rgb&quot; or &quot;hsv&quot;, method is &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
         <span class="n">cap</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
         <span class="n">cap</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_POS_FRAMES</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -733,20 +742,14 @@ document.write(`
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot read&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ret</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># correct for stabilization</span>
-                <span class="n">h</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">w</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">warpAffine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
-
-            <span class="c1"># if lens_corr:</span>
-            <span class="c1">#     if self.camera_config.lens_pars is not None:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ms</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
             <span class="c1"># apply lens distortion correction</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;camera_config&quot;</span><span class="p">):</span>
                 <span class="n">img</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_img</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;grayscale&quot;</span><span class="p">:</span>
                 <span class="c1"># apply gray scaling, contrast- and gamma correction</span>
                 <span class="c1"># img = _corr_color(img, alpha=None, beta=None, gamma=0.4)</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span> <span class="c1">#  mean(axis=2)</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>  <span class="c1"># mean(axis=2)</span>
             <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;rgb&quot;</span><span class="p">:</span>
                 <span class="c1"># turn bgr to rgb for plotting purposes</span>
                 <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">)</span>
@@ -757,16 +760,27 @@ document.write(`
         <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">img</span></div>
 
-<div class="viewcode-block" id="Video.get_frames"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frames.html#pyorc.Video.get_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Video.get_frames"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frames.html#pyorc.Video.get_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_frames</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`, expected to be read</span>
 <span class="sd">        lazily. The xr.DataArray will contain all coordinate variables and attributes, needed for further processing</span>
 <span class="sd">        steps.</span>
 
-<span class="sd">        :param kwargs: dict, keyword arguments to pass to `get_frame`. Currently only `grayscale` is supported.</span>
-<span class="sd">        :return: xr.DataArray, containing all requested frames</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs: dict, optional</span>
+<span class="sd">            keyword arguments to pass to `get_frame`. Currently only `grayscale` is supported.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        frames : xr.DataArray</span>
+<span class="sd">            containing all requested frames</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_camera_config&quot;</span><span class="p">)),</span> <span class="s2">&quot;No camera configuration is set, add it to the video using the .camera_config method&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="s2">&quot;_camera_config&quot;</span><span class="p">)),</span> <span class="s2">&quot;No camera configuration is set, add it to the video using the .camera_config method&quot;</span>
         <span class="c1"># camera_config may be altered for the frames object, so copy below</span>
         <span class="n">camera_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">)</span>
         <span class="n">get_frame</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_frame</span><span class="p">,</span> <span class="n">pure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Lazy version of get_frame</span>
@@ -778,22 +792,15 @@ document.write(`
             <span class="n">dtype</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">shape</span>
         <span class="p">)</span> <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">]</span>
-        <span class="c1"># if &quot;lens_corr&quot; in kwargs:</span>
-        <span class="c1">#     if kwargs[&quot;lens_corr&quot;]:</span>
-                <span class="c1"># also correct the control point src</span>
+        <span class="c1"># undistort source control points</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">camera_config</span><span class="p">,</span> <span class="s2">&quot;gcps&quot;</span><span class="p">):</span>
             <span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_points</span><span class="p">(</span>
                 <span class="n">camera_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span>
                 <span class="n">camera_config</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
                 <span class="n">camera_config</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span>
             <span class="p">)</span>
-                <span class="c1"># camera_config.corners = cv.undistort_points(</span>
-                <span class="c1">#     camera_config.corners,</span>
-                <span class="c1">#     sample.shape[0],</span>
-                <span class="c1">#     sample.shape[1],</span>
-                <span class="c1">#     **self.camera_config.lens_pars</span>
-                <span class="c1"># )</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="c1"># measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.001</span>  <span class="c1"># measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps</span>
         <span class="c1"># y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -827,74 +834,45 @@ document.write(`
         <span class="n">frames</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;frames&quot;</span>
         <span class="k">return</span> <span class="n">frames</span></div>
 
+    <span class="k">def</span> <span class="nf">set_mask_from_exterior</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">exterior</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside</span>
 
-    <span class="k">def</span> <span class="nf">set_mask_from_exterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exterior</span><span class="p">):</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        exterior : list of lists</span>
+<span class="sd">            coordinates defining the polygon for masking</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self.mask : np.ndarray</span>
+<span class="sd">            mask for stabilization region</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mask_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">exterior</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">fillPoly</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="n">mask_coords</span><span class="p">],</span> <span class="mi">255</span><span class="p">)</span>
-        <span class="n">mask</span><span class="p">[</span><span class="n">mask</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">mask</span><span class="p">[</span><span class="n">mask</span><span class="o">==</span><span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">mask</span><span class="p">[</span><span class="n">mask</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
+        <span class="n">mask</span><span class="p">[</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mask</span><span class="p">[</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mask</span><span class="p">[</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
 
-
-    <span class="k">def</span> <span class="nf">_get_pos_feats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cap</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">recipe</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">CLASSIFY_STANDING_CAM</span><span class="p">):</span>
-        <span class="c1"># go through the entire set of frames to gather transformation matrices per frame (except for the first one)</span>
-        <span class="c1"># get the displacements of trackable features</span>
-        <span class="n">positions</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">errs</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_displacements</span><span class="p">(</span>
-            <span class="n">cap</span><span class="p">,</span>
-            <span class="n">start_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span><span class="p">,</span>
-            <span class="n">end_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span><span class="p">,</span>
-            <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span>
-        <span class="p">)</span>
-        <span class="c1"># filter features that belong to actual camera movement</span>
-        <span class="k">for</span> <span class="n">recipe</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">:</span>
-            <span class="n">classes</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_classify_displacements</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="o">**</span><span class="n">recipe</span><span class="p">)</span>
-            <span class="c1"># select positions which are classified as water</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[:,</span> <span class="n">classes</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[:,</span> <span class="n">classes</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feats_pos</span> <span class="o">=</span> <span class="n">positions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feats_stats</span> <span class="o">=</span> <span class="n">stats</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feats_errs</span> <span class="o">=</span> <span class="n">errs</span>
-
-
-    <span class="k">def</span> <span class="nf">get_ms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cap</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_ms</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">cap</span><span class="p">:</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">,</span>
+            <span class="n">split</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ms</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_ms_gftt</span><span class="p">(</span>
             <span class="n">cap</span><span class="p">,</span>
             <span class="n">start_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span><span class="p">,</span>
             <span class="n">end_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span><span class="p">,</span>
             <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
             <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="c1"># def _get_ms(self):</span>
-    <span class="c1">#     # retrieve the transformation matrices for stabilization</span>
-    <span class="c1">#     self.ms = cv._ms_from_displacements(self.feats_pos, self.feats_stats)</span>
+        <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Video.plot_rigid_pts"><a class="viewcode-back" href="../../../_generated/pyorc.Video.plot_rigid_pts.html#pyorc.Video.plot_rigid_pts">[docs]</a>    <span class="k">def</span> <span class="nf">plot_rigid_pts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an</span>
-<span class="sd">        axes object.</span>
-
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        ax : plt.axes object, optional</span>
-<span class="sd">            If None (default), use the current axes.</span>
-<span class="sd">        **kwargs : additional keyword arguments to `matplotlib.pyplot.scatter` wrapped Matplotlib function.</span>
-
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">feats_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No stabilization applied hence no rigid points available to plot&quot;</span>
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">t_p</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feats_pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">t_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">t_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_p</span><span class="p">)),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">p</span></div></div>
 </pre></div>
 
                 </article>

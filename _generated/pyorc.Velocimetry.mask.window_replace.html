@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Video.plot_rigid_pts &#8212; pyorc 0.4.3 documentation</title>
+    <title>pyorc.Velocimetry.mask.window_replace &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -45,11 +45,11 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Video.plot_rigid_pts';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Velocimetry.mask.window_replace';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyorc.Video.get_frame" href="pyorc.Video.get_frame.html" />
-    <link rel="prev" title="pyorc.Video.corners" href="pyorc.Video.corners.html" />
+    <link rel="next" title="pyorc.Velocimetry.get_transect" href="pyorc.Velocimetry.get_transect.html" />
+    <link rel="prev" title="pyorc.Velocimetry.mask.window_nan" href="pyorc.Velocimetry.mask.window_nan.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -361,14 +361,13 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot.html">pyorc.CameraConfig.plot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot_bbox.html">pyorc.CameraConfig.plot_bbox</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.camera_config.html">pyorc.Video.camera_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.fps.html">pyorc.Video.fps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.corners.html">pyorc.Video.corners</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Video.plot_rigid_pts</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
@@ -416,8 +415,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_mean.html">pyorc.Velocimetry.mask.window_mean</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_nan.html">pyorc.Velocimetry.mask.window_nan</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Velocimetry.mask.window_replace</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
@@ -488,7 +487,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">pyorc.Video.plot_rigid_pts</li>
+    <li class="breadcrumb-item active" aria-current="page">pyorc.Velocimetry.mask.window_replace</li>
   </ul>
 </nav>
 </div>
@@ -505,19 +504,23 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="pyorc-video-plot-rigid-pts">
-<h1>pyorc.Video.plot_rigid_pts<a class="headerlink" href="#pyorc-video-plot-rigid-pts" title="Permalink to this heading">#</a></h1>
+  <section id="pyorc-velocimetry-mask-window-replace">
+<h1>pyorc.Velocimetry.mask.window_replace<a class="headerlink" href="#pyorc-velocimetry-mask-window-replace" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
-<dt class="sig sig-object py" id="pyorc.Video.plot_rigid_pts">
-<span class="sig-prename descclassname"><span class="pre">Video.</span></span><span class="sig-name descname"><span class="pre">plot_rigid_pts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/video.html#Video.plot_rigid_pts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Video.plot_rigid_pts" title="Permalink to this definition">#</a></dt>
-<dd><p>Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an
-axes object.</p>
+<dt class="sig sig-object py" id="pyorc.Velocimetry.mask.window_replace">
+<span class="sig-prename descclassname"><span class="pre">Velocimetry.mask.</span></span><span class="sig-name descname"><span class="pre">window_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wdw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Velocimetry.mask.window_replace" title="Permalink to this definition">#</a></dt>
+<dd><p>Replaces values in a certain window size with mean of their neighbours. Returns a Dataset instead of a mask.
+NOTE: This functionality may be moved to a different subclass in later releases.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<em>plt.axes object</em><em>, </em><em>optional</em>) – If None (default), use the current axes.</p></li>
-<li><p><strong>**kwargs</strong> (additional keyword arguments to <cite>matplotlib.pyplot.scatter</cite> wrapped Matplotlib function.) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>wdw</strong> (<em>int</em><em>, </em><em>optional</em>) – window used to determine relevant neighbours</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mask</strong> – mask applicable to input dataset with <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.filter(mask)</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">inplace=True</span></code>, the dataset will be returned masked with <code class="docutils literal notranslate"><span class="pre">mask</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -536,20 +539,20 @@ axes object.</p>
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pyorc.Video.corners.html"
+       href="pyorc.Velocimetry.mask.window_nan.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pyorc.Video.corners</p>
+        <p class="prev-next-title">pyorc.Velocimetry.mask.window_nan</p>
       </div>
     </a>
     <a class="right-next"
-       href="pyorc.Video.get_frame.html"
+       href="pyorc.Velocimetry.get_transect.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyorc.Video.get_frame</p>
+        <p class="prev-next-title">pyorc.Velocimetry.get_transect</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -571,13 +574,13 @@ axes object.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.Video.plot_rigid_pts"><code class="docutils literal notranslate"><span class="pre">Video.plot_rigid_pts()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.Velocimetry.mask.window_replace"><code class="docutils literal notranslate"><span class="pre">Velocimetry.mask.window_replace()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
-    <a href="../_sources/_generated/pyorc.Video.plot_rigid_pts.rst.txt">
+    <a href="../_sources/_generated/pyorc.Velocimetry.mask.window_replace.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Transect.get_q &#8212; pyorc 0.4.3 documentation</title>
+    <title>pyorc.Transect.get_q &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -368,7 +368,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.corners.html">pyorc.Video.corners</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.plot_rigid_pts.html">pyorc.Video.plot_rigid_pts</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
@@ -417,7 +416,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_nan.html">pyorc.Velocimetry.mask.window_nan</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_replace.html">pyorc.Velocimetry.mask.window_replace</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
@@ -516,13 +515,11 @@ depth-average velocity.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>v_corr</strong> (<em>float</em><em>, </em><em>optional</em>) – correction factor (default: 0.9)</p></li>
-<li><p><strong>fill_method</strong> (<em>method to fill missing values. &quot;zeros&quot; fills NaNS with zeros</em><em>, </em><em>&quot;interpolate&quot; interpolates values</em>) – <dl class="simple">
-<dt>from nearest neighbour, “log_interp” interpolates values linearly with velocities scaled by the log of</dt><dd><p>depth over a roughness length, “log_fit” fits a 4-parameter logarithmic profile with depth and with
+<li><p><strong>fill_method</strong> (<em>str</em><em>, </em><em>optional</em>) – method to fill missing values. “zeros” fills NaNS with zeros, “interpolate” interpolates values
+from nearest neighbour, “log_interp” interpolates values linearly with velocities scaled by the log of
+depth over a roughness length, “log_fit” fits a 4-parameter logarithmic profile with depth and with
 changing velocities towards banks on known velocities, and fills missing with the fitted relationship
-(experimental) (Default value = “zeros”).</p>
-</dd>
-</dl>
-</p></li>
+(experimental) (Default value = “zeros”).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.cameraconfig &#8212; pyorc 0.4.3 documentation</title>
+    <title>pyorc.api.cameraconfig &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -108,7 +108,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -382,12 +382,15 @@ document.write(`
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shapely.geometry</span>
 <span class="kn">from</span> <span class="nn">shapely</span> <span class="kn">import</span> <span class="n">ops</span><span class="p">,</span> <span class="n">wkt</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
 
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">patches</span>
 <span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span><span class="p">,</span> <span class="n">Transformer</span>
 <span class="kn">from</span> <span class="nn">pyproj.exceptions</span> <span class="kn">import</span> <span class="n">CRSError</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span>
 
@@ -405,20 +408,21 @@ document.write(`
 
 <div class="viewcode-block" id="CameraConfig.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.html#pyorc.CameraConfig.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">height</span><span class="p">,</span>
-            <span class="n">width</span><span class="p">,</span>
-            <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-            <span class="n">resolution</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-            <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">camera_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">dist_coeffs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">lens_position</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">corners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">gcps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">lens_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">calibration_video</span><span class="o">=</span><span class="kc">None</span>
-
+            <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">camera_matrix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">dist_coeffs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">lens_position</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">corners</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">gcps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">lens_pars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">calibration_video</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">is_nadir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">stabilize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -442,18 +446,19 @@ document.write(`
 <span class="sd">        corners : list of lists of floats (2)</span>
 <span class="sd">            [x, y] coordinates defining corners of area of interest in camera cols/rows, bbox will be computed from this</span>
 <span class="sd">        gcps : dict</span>
-<span class="sd">            Can contain &quot;src&quot;: list of 4 lists, with column, row locations in objective of control points,</span>
-<span class="sd">            &quot;dst&quot;: list of 4 lists, with x, y locations (local or global coordinate reference system) of control points,</span>
+<span class="sd">            Can contain &quot;src&quot;: list of lists, with column, row locations in objective of control points,</span>
+<span class="sd">            &quot;dst&quot;: list of lists, with x, y or x, y, z locations (local or global coordinate reference system) of</span>
+<span class="sd">            control points,</span>
 <span class="sd">            &quot;h_ref&quot;: float, measured water level [m] in local reference system (e.g. from staff gauge or pressure gauge)</span>
 <span class="sd">            during gcp survey,</span>
 <span class="sd">            &quot;z_0&quot;: float, water level [m] in global reference system (e.g. from used GPS system CRS). This must be in</span>
 <span class="sd">            the same vertical reference as the measured bathymetry and other survey points,</span>
 <span class="sd">            &quot;crs&quot;: int, str or CRS object, CRS in which &quot;dst&quot; points are measured. If None, a local coordinate system is</span>
 <span class="sd">            assumed (e.g. from spirit level).</span>
-<span class="sd">        lens_pars : dict, optional</span>
+<span class="sd">        lens_pars (deprecated) : dict, optional</span>
 <span class="sd">            Lens parameters, containing: &quot;k1&quot;: float, barrel lens distortion parameter (default: 0.),</span>
 <span class="sd">            &quot;c&quot;: float, optical center (default: 2.),</span>
-<span class="sd">            &quot;f&quot;: float, focal length (default: 1.)</span>
+<span class="sd">            &quot;focal_length&quot;: float, focal length (default: width of image frame)</span>
 <span class="sd">        calibration_video : str, optional</span>
 <span class="sd">            local path to video file containing a checkerboard pattern. Must be 9x6 if called directly, otherwise use</span>
 <span class="sd">            ``.calibrate_camera`` explicitly and provide ``chessboard_size`` explicitly. When used, an automated camera</span>
@@ -464,37 +469,48 @@ document.write(`
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">window_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">)),</span> <span class="s1">&#39;window_size must be of type &quot;int&quot;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_nadir</span> <span class="o">=</span> <span class="n">is_nadir</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">CRSError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">CRSError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;crs &quot;</span><span class="si">{</span><span class="n">crs</span><span class="si">}</span><span class="s1">&quot; is not a valid Coordinate Reference System&#39;</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;Provided crs must be projected with units like [m]&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;Prodstvided crs must be projected with units like [m]&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
         <span class="k">if</span> <span class="n">lens_position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_position</span><span class="p">(</span><span class="o">*</span><span class="n">lens_position</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">gcps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_gcps</span><span class="p">(</span><span class="o">**</span><span class="n">gcps</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">lens_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_pars</span><span class="p">(</span><span class="o">**</span><span class="n">lens_pars</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">camera_matrix</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dist_coeffs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nadir</span><span class="p">:</span>
+                <span class="c1"># with nadir, no perspective can be constructed, hence, camera matrix and dist coeffs will be set to default values</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_cam_mtx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">DIST_COEFFS</span>
+            <span class="c1"># camera pars are incomplete and need to be derived</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_intrinsic</span><span class="p">(</span>
+                    <span class="n">camera_matrix</span><span class="o">=</span><span class="n">camera_matrix</span><span class="p">,</span>
+                    <span class="n">lens_pars</span><span class="o">=</span><span class="n">lens_pars</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_pars</span><span class="p">()</span>
+            <span class="c1"># camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span>
         <span class="k">if</span> <span class="n">calibration_video</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_calibration</span><span class="p">(</span><span class="n">calibration_video</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="c1"># camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option</span>
-        <span class="k">if</span> <span class="n">camera_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span>
-        <span class="k">if</span> <span class="n">dist_coeffs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span>
         <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span>
         <span class="k">if</span> <span class="n">window_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="n">window_size</span>
         <span class="c1"># override the transform and bbox with the set corners</span>
         <span class="k">if</span> <span class="n">corners</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_bbox_from_corners</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_bbox_from_corners</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stabilize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stabilize</span> <span class="o">=</span> <span class="n">stabilize</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -529,32 +545,71 @@ document.write(`
     <span class="k">def</span> <span class="nf">dist_coeffs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_coeffs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_coeffs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">dist_coeffs</span>
 
+
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">gcp_reduced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">gcps_dest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dst : np.ndarray</span>
+<span class="sd">            destination coordinates of ground control point. z-coordinates are parsed from z_0 if necessary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;gcps&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;dst&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]])</span>
+        <span class="c1"># if conditions are not yet met, then return None</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gcps_dest_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dst : np.ndarray</span>
+<span class="sd">            Destination coordinates measured as column, row in the intended bounding box with the intended resolution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">transform_to_bbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps_dest</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">))</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gcps_bbox_reduced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dst : np.ndarray</span>
+<span class="sd">            Destination coordinates in col, row in the intended bounding box, reduced with their mean coordinate</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_dest_bbox</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_dest_bbox</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gcps_reduced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the location of gcp destination points, reduced with their mean for better local projection</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        gcp_reduced : np.ndarray</span>
+<span class="sd">        dst : np.ndarray</span>
 <span class="sd">            Reduced coordinate (x, y) or (x, y, z) of gcp destination points</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps_dest</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_mean</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">gcp_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">gcps_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the mean location of gcp destination points</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        gcp_mean : np.ndarray</span>
+<span class="sd">        dst_mean : np.ndarray</span>
 <span class="sd">            mean coordinate (x, y) or (x, y, z) of gcp destination points</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps_dest</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">gcp_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">gcps_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Returns</span>
@@ -563,7 +618,37 @@ document.write(`
 <span class="sd">            amount of dimensions of gcps (can be 2 or 3)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;gcps&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_nadir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns if the camera configuration belongs to nadir video</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        is_nadir : bool</span>
+<span class="sd">            False if not nadir, True if nadir</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_nadir</span>
+
+    <span class="nd">@is_nadir</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">is_nadir</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">nadir_prop</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_nadir</span> <span class="o">=</span> <span class="n">nadir_prop</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pnp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">solvepnp</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gcps_reduced</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span>
+        <span class="p">)</span>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -585,6 +670,25 @@ document.write(`
         <span class="k">return</span> <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stabilize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return stabilization polygon (anything outside is used for stabilization</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coords : list of lists</span>
+<span class="sd">            coordinates in original image frame comprising the polygon for use in stabilization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span>
+
+    <span class="nd">@stabilize</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stabilize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">coords</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span> <span class="o">=</span> <span class="n">coords</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns Affine transform of projected frames from ``Frames.project``</span>
@@ -598,11 +702,11 @@ document.write(`
 
 <div class="viewcode-block" id="CameraConfig.set_lens_calibration"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_calibration.html#pyorc.CameraConfig.set_lens_calibration">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_calibration</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">fn</span><span class="p">,</span>
-        <span class="n">chessboard_size</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
-        <span class="n">max_imgs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">chessboard_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">max_imgs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">plot</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">progress_bar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -643,7 +747,12 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span></div>
 
-    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">redistort</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_bbox</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">redistort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
@@ -658,7 +767,7 @@ document.write(`
 <span class="sd">        redistort : bool, optional</span>
 <span class="sd">            If set in combination with ``camera``, the bbox will be redistorted in the camera objective using the</span>
 <span class="sd">            distortion coefficients and camera matrix. Not used in orthorectification because this occurs by default</span>
-<span class="sd">            on already undistorted images.</span>
+<span class="sd">            on already undistorted images. Typically only used for plotting purposes on original frames.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -672,21 +781,24 @@ document.write(`
         <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span>
         <span class="k">if</span> <span class="n">camera</span><span class="p">:</span>
             <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-            <span class="c1"># convert to perspective rowcol coordinates</span>
-            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
-            <span class="c1"># reduce coords by control point mean</span>
-            <span class="n">coords</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-            <span class="c1"># TODO: re-distort if needed</span>
-            <span class="n">corners</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">perspectiveTransform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">([</span><span class="n">coords</span><span class="p">]),</span> <span class="n">M</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">z_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_z_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">redistort</span><span class="p">:</span>
-                <span class="c1"># for visualization on still distorted frames this can be done. DO NOT do this if used for</span>
-                <span class="c1"># orthorectification, as this typically occurs on undistorted images.</span>
-                <span class="n">corners</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_points</span><span class="p">(</span><span class="n">corners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
+                <span class="c1"># typically only done for plotting on original frame, expand number of points to be able to see distortion</span>
+                <span class="n">coords_expand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">100</span><span class="p">)</span>
+                    <span class="n">coords_expand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">coords_expand</span><span class="p">,</span> <span class="n">new_coords</span><span class="p">]</span>
+                <span class="n">coords</span> <span class="o">=</span> <span class="n">coords_expand</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">coords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span><span class="o">*</span><span class="n">z_a</span><span class="p">]</span>
+            <span class="n">corners</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_points</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">bbox</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">bbox</span>
 
-<div class="viewcode-block" id="CameraConfig.get_depth"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_depth.html#pyorc.CameraConfig.get_depth">[docs]</a>    <span class="k">def</span> <span class="nf">get_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.get_depth"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_depth.html#pyorc.CameraConfig.get_depth">[docs]</a>    <span class="k">def</span> <span class="nf">get_depth</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">z</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level,</span>
 <span class="sd">        measured in local reference (e.g. staff gauge).</span>
@@ -709,34 +821,14 @@ document.write(`
         <span class="n">z_pressure</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">h_a</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">z_pressure</span> <span class="o">-</span> <span class="n">z</span></div>
 
-    <span class="k">def</span> <span class="nf">get_dst_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        h_a : float, optional</span>
-<span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
-<span class="sd">            is processed and thus changes in water level are not relevant. (default: None)</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Actual locations of control points (in case these are only x, y) given the current set water level and</span>
-<span class="sd">        the camera location</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># map where the destination points are with the actual water level h_a.</span>
-        <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">h_a</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]:</span>
-            <span class="c1"># fill in the same value for h_ref and h_a</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">h_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">]</span>
-            <span class="n">lens_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_gcps_a</span><span class="p">(</span>
-                <span class="n">lens_position</span><span class="p">,</span>
-                <span class="n">h_a</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">],</span>
-                <span class="n">h_ref</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">dst_a</span>
-
-    <span class="k">def</span> <span class="nf">get_dist_shore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_dist_shore</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">z</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured</span>
 <span class="sd">        in local reference (e.g. staff gauge).</span>
@@ -773,13 +865,43 @@ document.write(`
         <span class="n">dist_shore</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(((</span><span class="n">x</span><span class="p">[</span><span class="n">z_dry</span><span class="p">]</span> <span class="o">-</span> <span class="n">_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">z_dry</span><span class="p">]</span> <span class="o">-</span> <span class="n">_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">for</span> <span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)])</span>
         <span class="k">return</span> <span class="n">dist_shore</span>
 
-    <span class="k">def</span> <span class="nf">get_dist_wall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_dist_wall</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">z</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve distance to wall for measured bathymetry points using the camera configuration and an actual water</span>
+<span class="sd">        level, measured in local reference (e.g. staff gauge).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : list of floats</span>
+<span class="sd">            measured bathymetry point x-coordinates</span>
+<span class="sd">        y : list of floats</span>
+<span class="sd">            measured bathymetry point y-coordinates</span>
+<span class="sd">        z : list of floats</span>
+<span class="sd">            measured bathymetry point depths</span>
+<span class="sd">        h_a : float, optional</span>
+<span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
+<span class="sd">            is processed and thus changes in water level are not relevant. (default: None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        distance : list of floats</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_depth</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
         <span class="n">dist_shore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dist_shore</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
         <span class="n">dist_wall</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist_shore</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">depth</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
         <span class="k">return</span> <span class="n">dist_wall</span>
 
-<div class="viewcode-block" id="CameraConfig.z_to_h"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.z_to_h.html#pyorc.CameraConfig.z_to_h">[docs]</a>    <span class="k">def</span> <span class="nf">z_to_h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.z_to_h"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.z_to_h.html#pyorc.CameraConfig.z_to_h">[docs]</a>    <span class="k">def</span> <span class="nf">z_to_h</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">z</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)</span>
 
 <span class="sd">        Parameters</span>
@@ -795,7 +917,12 @@ document.write(`
         <span class="n">h</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="n">h_ref</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">h</span></div>
 
-<div class="viewcode-block" id="CameraConfig.get_M"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M">[docs]</a>    <span class="k">def</span> <span class="nf">get_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_bbox_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.get_M"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M">[docs]</a>    <span class="k">def</span> <span class="nf">get_M</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">to_bbox_grid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">reverse</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the</span>
 <span class="sd">        ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.</span>
 
@@ -817,42 +944,28 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">src</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">undistort_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">to_bbox_grid</span><span class="p">:</span>
-            <span class="c1"># lookup where the destination points are in row/column space</span>
-            <span class="c1"># dst_a is the destination point locations position with the actual water level</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">transform_to_bbox</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">get_dst_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span>
-            <span class="p">)</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dst_a</span><span class="p">)</span>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_bbox_reduced</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># in case we are dealing with a 2D 4-point, then reproject points on water surface, else keep 3D points</span>
-            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dst_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_dims</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span>
-            <span class="c1"># reduce dst_a with its mean to get much more accurate projection result in case x and y order of</span>
-            <span class="c1"># magnitude is very large</span>
-            <span class="n">dst_a</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span>
-        <span class="c1"># src_a = self.get_src(**lens_pars)</span>
-        <span class="k">if</span> <span class="n">dst_a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="c1"># compute the water level in the coordinate system reduced with the mean gcp coordinate</span>
-            <span class="n">z_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_z_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span>
-            <span class="n">z_a</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="c1"># treating 3D homography</span>
-            <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M_3D</span><span class="p">(</span>
-                <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
-                <span class="n">dst</span><span class="o">=</span><span class="n">dst_a</span><span class="p">,</span>
-                <span class="n">camera_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
-                <span class="n">dist_coeffs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span>
-                <span class="n">z</span><span class="o">=</span><span class="n">z_a</span><span class="p">,</span>
-                <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M_2D</span><span class="p">(</span>
-                <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
-                <span class="n">dst</span><span class="o">=</span><span class="n">dst_a</span><span class="p">,</span>
-                <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span>
-            <span class="p">)</span></div>
+            <span class="n">dst_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_reduced</span>
+        <span class="c1"># compute the water level in the coordinate system reduced with the mean gcp coordinate</span>
+        <span class="n">z_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_z_a</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span>
+        <span class="n">z_a</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># treating 3D homography</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dst_a</span><span class="p">)</span>
+        <span class="c1"># print(z_a)</span>
+        <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_M_3D</span><span class="p">(</span>
+            <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
+            <span class="n">dst</span><span class="o">=</span><span class="n">dst_a</span><span class="p">,</span>
+            <span class="n">camera_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
+            <span class="n">dist_coeffs</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">DIST_COEFFS</span><span class="p">,</span> <span class="c1"># self.dist_coeffs,</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">z_a</span><span class="p">,</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get_z_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_z_a</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        h_a : float, optional</span>
 <span class="sd">            actual water level measured [m], if not set, assumption is that a single video</span>
@@ -868,7 +981,10 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">h_a</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;h_ref&quot;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CameraConfig.set_bbox_from_corners"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners">[docs]</a>    <span class="k">def</span> <span class="nf">set_bbox_from_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.set_bbox_from_corners"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners">[docs]</a>    <span class="k">def</span> <span class="nf">set_bbox_from_corners</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">corners</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Establish bbox based on a set of camera perspective corner points Assign corner coordinates to camera</span>
 <span class="sd">        configuration</span>
@@ -876,26 +992,56 @@ document.write(`
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        corners : list of lists (4)</span>
-<span class="sd">            [columns, row] coordinates in camera perspective</span>
+<span class="sd">            [columns, row] coordinates in original camera perspective without any undistortion applied</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span>
                                             <span class="mi">2</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;a list of lists of 4 coordinates must be given, resulting in (4, &quot;</span> \
                                                  <span class="sa">f</span><span class="s2">&quot;2) shape. Current shape is </span><span class="si">{</span><span class="n">corners</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> &quot;</span>
 
-        <span class="c1"># get homography, this is the only place besides self.get_M where cv.get_M is used.</span>
-        <span class="n">M_gcp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_M</span><span class="p">()</span>
-        <span class="c1"># TODO: make derivation dependent on 3D or 2D point availability</span>
-        <span class="c1"># if self.gcps[&quot;src&quot;].shape == 3:</span>
-        <span class="c1">#     # TODO: homography from solvepnp</span>
-        <span class="n">bbox</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_aoi</span><span class="p">(</span><span class="n">M_gcp</span><span class="p">,</span> <span class="n">corners</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-        <span class="c1"># bbox is offset by self.gcp_mean. Regenerate bbox after adding offset</span>
-        <span class="n">bbox_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-        <span class="n">bbox_xy</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcp_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">bbox</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">bbox_xy</span><span class="p">)</span>
+        <span class="c1"># get homography</span>
+        <span class="n">corners_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unproject_points</span><span class="p">(</span><span class="n">corners</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">])</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_aoi</span><span class="p">(</span>
+            <span class="n">corners_xyz</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span></div>
 
-<div class="viewcode-block" id="CameraConfig.set_lens_pars"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">set_intrinsic</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">camera_matrix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">dist_coeffs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">lens_pars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="c1"># first set a default estimate from pose if 3D gcps are available</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_pars</span><span class="p">()</span>  <span class="c1"># default parameters use width of frame</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;gcps&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># if self.gcp_dims == 3:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">optimize_intrinsic</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">gcps_dest</span><span class="p">,</span>
+                    <span class="c1"># self.gcps[&quot;dst&quot;],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                    <span class="n">lens_position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">lens_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># override with lens parameter set by user</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_lens_pars</span><span class="p">(</span><span class="o">**</span><span class="n">lens_pars</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">camera_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dist_coeffs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># override with</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">camera_matrix</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">dist_coeffs</span>
+
+
+<div class="viewcode-block" id="CameraConfig.set_lens_pars"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_pars</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">k1</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+            <span class="n">c</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.</span><span class="p">,</span>
+            <span class="n">focal_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the lens parameters of the given CameraConfig</span>
 
 <span class="sd">        Parameters</span>
@@ -911,20 +1057,28 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;k1 must be a float&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))),</span> <span class="s2">&quot;c must be a float&quot;</span>
+        <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">))),</span> <span class="s2">&quot;f must be a float&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_dist_coefs</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_cam_mtx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_cam_mtx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CameraConfig.set_gcps"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">set_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">z_0</span><span class="p">,</span> <span class="n">h_ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.set_gcps"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">set_gcps</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">src</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">],</span>
+            <span class="n">dst</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">],</span>
+            <span class="n">z_0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">h_ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set ground control points for the given CameraConfig</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        src : list of lists (4 or 6+)</span>
+<span class="sd">        src : list of lists (2, 4 or 6+)</span>
 <span class="sd">            [x, y] pairs of columns and rows in the frames of the original video</span>
-<span class="sd">        dst : list of lists (4 or 6+)</span>
+<span class="sd">        dst : list of lists (2, 4 or 6+)</span>
 <span class="sd">            [x, y] or [x, y, z] pairs of real world coordinates in the given coordinate reference system.</span>
 <span class="sd">        z_0 : float</span>
 <span class="sd">            Water level measured in global reference system such as a geoid or ellipsoid used</span>
@@ -968,6 +1122,7 @@ document.write(`
         <span class="c1"># if there is no h_ref, then no local gauge system, so set h_ref to zero</span>
         <span class="c1"># check if 2 points are available</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_nadir</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">src</span><span class="p">,</span> <span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_gcps_2_4</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">h_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">h_ref</span> <span class="o">=</span> <span class="mf">0.</span>
@@ -978,7 +1133,13 @@ document.write(`
             <span class="s2">&quot;z_0&quot;</span><span class="p">:</span> <span class="n">z_0</span><span class="p">,</span>
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="CameraConfig.set_lens_position"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_position.html#pyorc.CameraConfig.set_lens_position">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.set_lens_position"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.set_lens_position.html#pyorc.CameraConfig.set_lens_position">[docs]</a>    <span class="k">def</span> <span class="nf">set_lens_position</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the geographical position of the lens of current CameraConfig.</span>
 
 <span class="sd">        Parameters</span>
@@ -1001,16 +1162,80 @@ document.write(`
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">xyz_transform</span><span class="p">([[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]],</span> <span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span></div>
 
+    <span class="k">def</span> <span class="nf">project_points</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project real world x, y, z coordinates into col, row coordinates on image</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        points : list of lists or array-like</span>
+<span class="sd">            list of points [x, y, z] in real world coordinates</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        points_project : list or array-like</span>
+<span class="sd">            list of points (equal in length as points) with [col, row] coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">rvec</span><span class="p">,</span> <span class="n">tvec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pnp</span>
+        <span class="c1"># normalize points wrt mean of gcps</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_mean</span><span class="p">)</span>
+        <span class="n">points_proj</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">projectPoints</span><span class="p">(</span>
+            <span class="n">points</span><span class="p">,</span>
+            <span class="n">rvec</span><span class="p">,</span>
+            <span class="n">tvec</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">points_proj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points_proj</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">points_proj</span>
+
+
+    <span class="k">def</span> <span class="nf">unproject_points</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">],</span>
+            <span class="n">zs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reverse projects points in [column, row] space to [x, y, z] real world</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        points : List of lists or array-like</span>
+<span class="sd">            Points in [col, row] to unproject</span>
+<span class="sd">        zs : float or list of floats : z-coordinate on which to unproject points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        points_unproject : List of lists or array-like</span>
+<span class="sd">            unprojected points as list of [x, y, z] coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">rvec</span><span class="p">,</span> <span class="n">tvec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pnp</span>
+        <span class="c1"># reduce zs by the mean of the gcps</span>
+        <span class="n">_zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">unproject_points</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">),</span>
+            <span class="n">_zs</span><span class="p">,</span>
+            <span class="n">rvec</span><span class="o">=</span><span class="n">rvec</span><span class="p">,</span>
+            <span class="n">tvec</span><span class="o">=</span><span class="n">tvec</span><span class="p">,</span>
+            <span class="n">camera_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span>
+            <span class="n">dist_coeffs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span>
+        <span class="p">)</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps_mean</span>
+        <span class="k">return</span> <span class="n">dst</span>
+
+
 <div class="viewcode-block" id="CameraConfig.plot"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot.html#pyorc.CameraConfig.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-            <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">tiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">buffer</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span>
-            <span class="n">zoom_level</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span>
-            <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">tiles_kwargs</span><span class="o">=</span><span class="p">{}</span>
-    <span class="p">):</span>
+            <span class="n">figsize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+            <span class="n">ax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">tiles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0005</span><span class="p">,</span>
+            <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">19</span><span class="p">,</span>
+            <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">tiles_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems</span>
 <span class="sd">        to be in the right location. Requires cartopy to be installed.</span>
@@ -1052,7 +1277,9 @@ document.write(`
             <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">camera</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;lens_position&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">camera</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">camera</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="c1"># if hasattr(self, &quot;lens_position&quot;) and not camera:</span>
                 <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lens_position</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
             <span class="c1"># transform points in case a crs is provided</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">):</span>
@@ -1118,7 +1345,15 @@ document.write(`
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="CameraConfig.plot_bbox"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot_bbox.html#pyorc.CameraConfig.plot_bbox">[docs]</a>    <span class="k">def</span> <span class="nf">plot_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transformer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.plot_bbox"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.plot_bbox.html#pyorc.CameraConfig.plot_bbox">[docs]</a>    <span class="k">def</span> <span class="nf">plot_bbox</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">transformer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">redistort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera</span>
 <span class="sd">        Field Of View (``camera=True``).</span>
@@ -1141,7 +1376,7 @@ document.write(`
 <span class="sd">        p : matplotlib.patch mappable</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># collect information to plot</span>
-        <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="n">camera</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">)</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="n">camera</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="n">h_a</span><span class="p">,</span> <span class="n">redistort</span><span class="o">=</span><span class="n">redistort</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">camera</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">transformer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># geographical projection is needed</span>
             <span class="n">bbox</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">transformer</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
@@ -1155,7 +1390,8 @@ document.write(`
         <span class="n">p</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span></div>
 
-<div class="viewcode-block" id="CameraConfig.to_dict"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CameraConfig.to_dict"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CameraConfig object as dictionary</span>
 
 <span class="sd">        Returns</span>
@@ -1173,13 +1409,16 @@ document.write(`
 
         <span class="k">return</span> <span class="n">d</span></div>
 
-    <span class="k">def</span> <span class="nf">to_dict_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_dict_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="c1"># convert anything that is not string in string</span>
         <span class="n">dict_str</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">))</span> <span class="k">else</span> <span class="n">v</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">return</span> <span class="n">dict_str</span>
 
-<div class="viewcode-block" id="CameraConfig.to_file"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_file.html#pyorc.CameraConfig.to_file">[docs]</a>    <span class="k">def</span> <span class="nf">to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.to_file"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_file.html#pyorc.CameraConfig.to_file">[docs]</a>    <span class="k">def</span> <span class="nf">to_file</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the CameraConfig object to json structure</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -1192,7 +1431,7 @@ document.write(`
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="CameraConfig.to_json"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_json.html#pyorc.CameraConfig.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CameraConfig.to_json"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.to_json.html#pyorc.CameraConfig.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert CameraConfig object to string</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
@@ -1216,7 +1455,9 @@ document.write(`
 <span class="s2">&quot;&quot;&quot;</span>
 
 
-<span class="k">def</span> <span class="nf">get_camera_config</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_camera_config</span><span class="p">(</span>
+        <span class="n">s</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CameraConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read camera config from string</span>
 
 <span class="sd">    Parameters</span>
@@ -1239,7 +1480,9 @@ document.write(`
     <span class="k">return</span> <span class="n">CameraConfig</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">load_camera_config</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">load_camera_config</span><span class="p">(</span>
+        <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CameraConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a CameraConfig from a geojson file.</span>
 
 <span class="sd">    Parameters</span>

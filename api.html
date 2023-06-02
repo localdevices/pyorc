@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>API reference &#8212; pyorc 0.4.3 documentation</title>
+    <title>API reference &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -368,7 +368,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Video.corners.html">pyorc.Video.corners</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Video.plot_rigid_pts.html">pyorc.Video.plot_rigid_pts</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
@@ -417,7 +416,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Velocimetry.mask.window_nan.html">pyorc.Velocimetry.mask.window_nan</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Velocimetry.mask.window_replace.html">pyorc.Velocimetry.mask.window_replace</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
@@ -549,7 +548,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps" title="pyorc.CameraConfig.set_gcps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_gcps</span></code></a>(src, dst, z_0[, ...])</p></td>
 <td><p>Set ground control points for the given CameraConfig</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars" title="pyorc.CameraConfig.set_lens_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_lens_pars</span></code></a>([k1, c, f])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars" title="pyorc.CameraConfig.set_lens_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_lens_pars</span></code></a>([k1, c, focal_length])</p></td>
 <td><p>Set the lens parameters of the given CameraConfig</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_calibration.html#pyorc.CameraConfig.set_lens_calibration" title="pyorc.CameraConfig.set_lens_calibration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_lens_calibration</span></code></a>(fn[, ...])</p></td>
@@ -630,9 +629,6 @@ how to effectively work with the <a class="reference external" href="https://doc
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Video.corners.html#pyorc.Video.corners" title="pyorc.Video.corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.corners</span></code></a></p></td>
 <td><p>list of 4 lists (int) with [column, row] locations of area of interest in video objective</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.plot_rigid_pts.html#pyorc.Video.plot_rigid_pts" title="pyorc.Video.plot_rigid_pts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video.plot_rigid_pts</span></code></a>([ax])</p></td>
-<td><p>Plots found rigid points (column, row) for stabilization and their path throughout the frames in time on an axes object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -800,8 +796,8 @@ on a full time series and will then mask out grid cells over its full time span 
 <h3>Data infilling<a class="headerlink" href="#data-infilling" title="Permalink to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.replace_outliers</span></code></a>([v_x, v_y, ...])</p></td>
-<td><p>Replace missing values using neighbourhood operators.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.mask.window_replace.html#pyorc.Velocimetry.mask.window_replace" title="pyorc.Velocimetry.mask.window_replace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.mask.window_replace</span></code></a>([wdw, iter])</p></td>
+<td><p>Replaces values in a certain window size with mean of their neighbours.</p></td>
 </tr>
 </tbody>
 </table>

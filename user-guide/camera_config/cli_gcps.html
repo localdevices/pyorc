@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>&lt;no title&gt; &#8212; pyorc 0.4.3 documentation</title>
+    <title>&lt;no title&gt; &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -399,13 +399,13 @@ in a “Well-known Text” (wkt) form, which is a string.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pyorc<span class="w"> </span>camera-config<span class="w"> </span>--crs_gcps<span class="w"> </span><span class="m">32735</span><span class="w"> </span>--src<span class="w"> </span><span class="s2">&quot;[[1421, 1001], [1251, 460], [421, 432], [470, 607]]&quot;</span><span class="w"> </span>--dst<span class="w"> </span><span class="s2">&quot;[[642735.8076, 8304292.1190], [642737.5823, 8304295.593], [642732.7864, 8304298.4250], [642732.6705, 8304296.8580]]&quot;</span><span class="w"> </span>--z_0<span class="w"> </span><span class="m">1182</span>.2<span class="w"> </span>--h_ref<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span>......
 </pre></div>
 </div>
-<p>After the ….. more inputs such as the video with control points, the CRS of the camera configuration, and the output
-filename must be presented. With this input, no further interaction with the user to complete the control points is
-required.</p>
+<p>At the end of this command, after the <code class="docutils literal notranslate"><span class="pre">.....</span></code> more inputs such as the video with control points, the CRS of the camera
+configuration, and the output filename must be presented. With this input, no further interaction with the user to
+complete the control points is required.</p>
 <p>In many cases though, the information under <code class="docutils literal notranslate"><span class="pre">-dst</span></code> may be cumbersome to insert. Hence a more convenient option is to
 leave out <code class="docutils literal notranslate"><span class="pre">-dst</span></code> and replace it for <code class="docutils literal notranslate"><span class="pre">--shapefile</span></code> and provide a path to a shapefile or other vector formatted
-GIS file containing your control points. <em>pyorc</em> assumes that the shapefile contains exactly those points you wish to
-use, no more and no less, that all information is in the geometries (i.e. x, y and if +6-points are used, also z) and
+GIS file containing your real-world control points. <em>pyorc</em> assumes that the shapefile contains exactly those points you
+wish to use, no more and no less, that all information is in the geometries (i.e. x, y and if +6-points are used, also z) and
 that the file contains a CRS that allows for automated reprojection to the CRS of the camera configuration (i.e.
 supplied with <code class="docutils literal notranslate"><span class="pre">--crs</span></code>). The geometries MUST be of the type POINT only! <em>pyorc</em> will attempt to indicate any
 problems with shapefiles that contain wrong or incomplete information so that you can resolve that if needed.</p>
@@ -417,16 +417,27 @@ GIS program such as <a href="https://qgis.org/" target="_blank">QGIS</a> and del
 </div>
 <p>Similarly, the information contained in <code class="docutils literal notranslate"><span class="pre">--src</span></code> may also be very cumbersome to collect. In fact, you need to open up
 a frame in a photo editor and note down rows and columns to do so. Therefore a much more and highly recommended
-approach is to simply leave out <code class="docutils literal notranslate"><span class="pre">-src</span></code> at all. You will then be asked if you want to interactively select these
+approach is to simply leave out <code class="docutils literal notranslate"><span class="pre">-src</span></code> entirely. You will then be asked if you want to interactively select these
 points. Simply select <cite>Y</cite> and use our convenient point and click approach to select the control points. To make sure you
 click them in the right order, you can click on the <em>Map</em> button to display a map overview of the situation. Here, your
 <code class="docutils literal notranslate"><span class="pre">--dst</span></code> points (or points collected from the shapefile) will be displayed in a map view, with numbers indicating
 which point should be selected first, which second and so on. You can go back to the camera view with the <em>camera</em>
 button. Then you simply click on the first, second, third, … and so on control point to collect all control points.
 Did you make an accidental click on a random point? No problem: just right-click and the last point you clicked
-will be removed. Right-click again and the point before that is removed so that you can click again. Once all point are
-collected, the <em>Done</em> button will become clickable. Click <em>Done</em> to close the view and store the points in the camera
-configuration.</p>
+will be removed. Right-click again and the point before that is removed so that you can click again.</p>
+<p>Once all point are clicked, <em>pyorc</em> will optimize both the perspective and the camera’s lens characteristics
+simultaneously, and display the points you clicked, but then projected using the camera matrix, distortion coefficients
+and the estimated perspective pose of the camera. You will see the result as red “+” signs on the screen and an average
+error in meters displayed on the top of the frame. If the average error is larger than 0.1 meter you will get a warning.
+Large errors are likely due to poorly measured control points, or because you clicked the points in the wrong order.</p>
+<p>Once the optimization is performed, the <em>Done</em> button will become clickable. Click <em>Done</em> to close the view and store
+the points in the camera configuration. If you made a mistake and want to rectify poorly clicked points, simply right
+click as many times as needed to remove points, and add them again with left clicks. The optimization will be repeated
+again once you have reached the total amount of control points. The view after the optimization is shown in the example
+below.</p>
+<figure class="align-default">
+<img alt="_images/GCPs_interactive.jpg" src="_images/GCPs_interactive.jpg" />
+</figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Especially with large objectives and high resolution footage (e.g. 4K), it may be hard to accurately click or even

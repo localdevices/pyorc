@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Videos &#8212; pyorc 0.4.3 documentation</title>
+    <title>Videos &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -445,13 +445,11 @@ a video must always be supplied using the option argument <code class="docutils 
 recipe you can define several inputs to define further what should be done with the video. The example below
 demonstrates all inputs that currently can be supplied. The inputs define the start and end frame
 (<code class="docutils literal notranslate"><span class="pre">start_frame</span></code> and <code class="docutils literal notranslate"><span class="pre">end_frame</span></code>), the actual water level (<code class="docutils literal notranslate"><span class="pre">h_a</span></code>) in meters during the video, which will
-be compared against the water level taken with the video used for camera calibration. Finally you may supply
-<code class="docutils literal notranslate"><span class="pre">stabilize</span></code> without any further arguments to stabilize the video in case it has some movements.</p>
+be compared against the water level taken with the video used for camera calibration.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
 <span class="w">  </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
 <span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
-<span class="w">  </span><span class="nt">stabilize</span><span class="p">:</span>
 </pre></div>
 </div>
 </div>
@@ -476,7 +474,9 @@ image or frame, with control point information in view.</p>
 </input><label class="sd-tab-label" for="sd-tab-item-2">
 Command-line</label><div class="sd-tab-content docutils">
 <p>When processing for velocimetry, a camera configuration must be supplied through the
-option <code class="docutils literal notranslate"><span class="pre">-c</span></code>, followed by the path to the file containing the camera configuration.</p>
+option <code class="docutils literal notranslate"><span class="pre">-c</span></code>, followed by the path to the file containing the camera configuration. If you do not yet have
+a camera configuration, then first go to the section on <a class="reference internal" href="../camera_config/index.html#camera-config-ug"><span class="std std-ref">camera configuration</span></a> and
+construct a camera configuration with these guidelines.</p>
 </div>
 <input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
 </input><label class="sd-tab-label" for="sd-tab-item-3">
@@ -503,9 +503,12 @@ and will be related to the water level, as read during the survey, used to const
 <input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
 </input><label class="sd-tab-label" for="sd-tab-item-4">
 Command-line</label><div class="sd-tab-content docutils">
-<p>You can supply the “current” water level by providing a water level in the recipe as follows. If you do not
-supply it, <code class="docutils literal notranslate"><span class="pre">pyorc</span></code> will assume the water level is the same as in the control video. The example below will
-process a video with a water level reading of 92.23 meters.</p>
+<p>You can supply the “current” water level with the <code class="docutils literal notranslate"><span class="pre">-h</span></code> (short) or <code class="docutils literal notranslate"><span class="pre">--h_a</span></code> (long) option. You can also insert the
+water level in the recipe yaml (although this is less practical mostly). The example below will process a video
+with a water level reading of 92.23 meters. If you do not supply it, <code class="docutils literal notranslate"><span class="pre">pyorc</span></code> will assume the water level is
+the same as in the control video. With incidental observations (e.g. with a drone survey), the video used to
+setup the camera configuration and video processed here will be the same, and in this case you can simply leave
+out the current water level.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
 </pre></div>
@@ -528,7 +531,7 @@ be set by passing the argument <code class="docutils literal notranslate"><span 
 <p>To guarantee that the perspective does not change, the following conditions MUST be met:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>The same lens must be used as used for the control image of the camera configuration. Note that smnartphone often
+<li><p>The same lens must be used as used for the control image of the camera configuration. Note that smartphones often
 have multiple lenses e.g. for wide angle versus close-ups. Ensure you have zoom level at the same level as used
 for the control image and do not use digital zoom! It generally only reduces image quality.</p></li>
 <li><p>The camera must be placed at exactly the same location and oriented to exactly the same objective</p></li>
@@ -574,14 +577,10 @@ issues.</p>
 drone that has varying air pressure conditions or wind gusts to deal with, or even fixed cameras in strong winds. But
 also, someone may have taken an incidental video, that was not originally intended to be used for river flow and velocity
 observations, but may render important information about a flood. For this the <code class="docutils literal notranslate"><span class="pre">stabilize</span></code> option can be passed with
-a stabilization strategy as input. Currently only the input “fixed” is supported, which is meant for a video with
-unintentional movements, e.g. due to wind or pressure changes (drone) or because the video was taken by hand.
-With this option, each frame will be stabilized with respect to the start frame chosen by the user
-(through the option <code class="docutils literal notranslate"><span class="pre">start_frame</span></code>). The method works by first finding well traceable points in the first frame,
-then tracing where these points move to in the next frames. Of course some of these points may actually be moving water.
-Therefore we highly recommend to provide a polygon with the video that identifies the area that contains the entire water
-surface. The polygon must be measured in column, row coordinates in the image frame and can be supplied with the
-keyword <code class="docutils literal notranslate"><span class="pre">mask_exterior</span></code>.</p>
+a stabilization strategy as input. The stabilization may already be set during the camera configuration and this is
+in most cases the recommended approach. You may also arrange stabilization per video, and then supply a list of
+[column, row] coordinates in the recipe. With this option, each frame will be stabilized with respect to the start frame chosen by the user
+(through the option <code class="docutils literal notranslate"><span class="pre">start_frame</span></code>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Currently we don’t yet have an interactive functionality to provide the mask exterior. We will establish this
@@ -615,8 +614,7 @@ full example is provided including a set of coordinates that bounds the water su
 <span class="w">  </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
 <span class="w">  </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
 <span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
-<span class="w">  </span><span class="nt">stabilize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fixed</span>
-<span class="w">  </span><span class="nt">mask_exterior</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">816</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2160</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">744</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3287</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3374</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2160</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">stabilize</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">816</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2160</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">744</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3287</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3374</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2160</span><span class="p p-Indicator">]]</span>
 </pre></div>
 </div>
 </div>
@@ -635,21 +633,9 @@ API</label><div class="sd-tab-content docutils">
     <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span>
     <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">end_frame</span><span class="o">=</span><span class="mi">125</span><span class="p">,</span>
-    <span class="n">stabilize</span><span class="o">=</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
-    <span class="n">mask_exterior</span><span class="o">=</span><span class="p">[[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1080</span><span class="p">],</span> <span class="p">[</span><span class="mi">1750</span><span class="p">,</span> <span class="mi">1080</span><span class="p">],</span> <span class="p">[</span><span class="mi">900</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+    <span class="n">stabilize</span><span class="o">=</span><span class="p">[[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1080</span><span class="p">],</span> <span class="p">[</span><span class="mi">1750</span><span class="p">,</span> <span class="mi">1080</span><span class="p">],</span> <span class="p">[</span><span class="mi">900</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
 <span class="p">)</span>
 <span class="n">video</span>
-</pre></div>
-</div>
-<p>If you wish to plot which points were found in the stabilization process, then you can use the method <code class="docutils literal notranslate"><span class="pre">video.plot_rigid_pts</span></code>.
-This makes a scatter plot of the found assumed rigid points on the image frame. Of course it is adviced to also plot
-the first image frame on the axes, so that you understand where these points are in the objective. This can be done for example
-as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="n">img</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get_frame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;rgb&quot;</span><span class="p">)</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-<span class="n">video</span><span class="o">.</span><span class="n">plot_rigid_pts</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>pyorc.Velocimetry &#8212; pyorc 0.4.3 documentation</title>
+    <title>pyorc.Velocimetry &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -368,7 +368,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.corners.html">pyorc.Video.corners</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.plot_rigid_pts.html">pyorc.Video.plot_rigid_pts</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
@@ -417,7 +416,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_nan.html">pyorc.Velocimetry.mask.window_nan</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html">pyorc.Velocimetry.replace_outliers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_replace.html">pyorc.Velocimetry.mask.window_replace</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
@@ -534,43 +533,10 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyorc.Velocimetry.__init__" title="pyorc.Velocimetry.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(xarray_obj)</p></td>
 <td><p>Initialize a velocimetry <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial</span></code>([v_x, v_y, filter_nan, ...])</p></td>
-<td><p>Masks velocity values on a number of spatial filters.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_median</span></code>([v_x, v_y, tolerance, ...])</p></td>
-<td><p>Masks values when their value deviates more than x standard deviations from the median of its neighbours (inc.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_spatial_nan</span></code>([v_x, v_y, tolerance, ...])</p></td>
-<td><p>Masks values if their surrounding neighbours (inc.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal</span></code>([v_x, v_y, filter_std, ...])</p></td>
-<td><p>Masks values using several filters that use temporal variations or comparison as basis.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_angle</span></code>([v_x, v_y, ...])</p></td>
-<td><p>filters on the expected angle.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_corr</span></code>([v_x, v_y, corr, tolerance])</p></td>
-<td><p>Masks values with a too low correlation.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_count</span></code>([tolerance])</p></td>
-<td><p>Masks locations with a too low amount of valid velocities in time, measured by fraction with <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_neighbour</span></code>([v_x, v_y, roll, ...])</p></td>
-<td><p>Masks values if neighbours over a certain rolling length before and after, have a significantly higher velocity than value under consideration, measured by tolerance.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_std</span></code>([v_x, v_y, ...])</p></td>
-<td><p>Masks values if they deviate more than x standard deviations from the mean.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_temporal_velocity</span></code>([v_x, v_y, s_min, ...])</p></td>
-<td><p>Masks values if the velocity scalar lies outside a user-defined valid range.</p></td>
-</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transect</span></code></a>(x, y[, z, s, crs, v_eff, xs, ...])</p></td>
 <td><p>Interpolate all variables to supplied x and y coordinates of a cross section.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.replace_outliers.html#pyorc.Velocimetry.replace_outliers" title="pyorc.Velocimetry.replace_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_outliers</span></code></a>([v_x, v_y, wdw, max_iter, ...])</p></td>
-<td><p>Replace missing values using neighbourhood operators.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_encoding</span></code></a>([enc_pars])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_encoding</span></code></a>([enc_pars])</p></td>
 <td><p>Set encoding parameters for all typical variables in a velocimetry dataset.</p></td>
 </tr>
 </tbody>

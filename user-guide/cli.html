@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Command line interface &#8212; pyorc 0.4.3 documentation</title>
+    <title>Command line interface &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -111,7 +111,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -472,6 +472,9 @@ Options:
                               this CRS.
   --corners TEXT              Video ojective corner points as list of 4
                               [column, row] points
+  -s, --stabilize             Stabilize the videos using this camera
+                              configuration (you can provide a stable area in
+                              an interactive view).
   -v, --verbose               Increase verbosity.
   --help                      Show this message and exit.
 </pre></div>
@@ -491,6 +494,8 @@ Options:
   -r, --recipe FILE        Options file (*.yml)  [required]
   -c, --cameraconfig FILE  Camera config file (*.json)  [required]
   -p, --prefix TEXT        Prefix for produced output files
+  -h, --h_a FLOAT          Water level in local vertical datum (e.g. staff or
+                           pressure gauge) belonging to video.
   -u, --update             Only update requested output files with changed
                            inputs or if not present on file system
   -v, --verbose            Increase verbosity.

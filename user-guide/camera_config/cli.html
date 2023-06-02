@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>&lt;no title&gt; &#8212; pyorc 0.4.3 documentation</title>
+    <title>&lt;no title&gt; &#8212; pyorc 0.5.0 documentation</title>
   
   
   
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">pyorc 0.4.3 documentation</p>
+    <p class="title logo__title">pyorc 0.5.0 documentation</p>
   
 </a></div>
     
@@ -415,6 +415,9 @@ Options:
                               this CRS.
   --corners TEXT              Video ojective corner points as list of 4
                               [column, row] points
+  -s, --stabilize             Stabilize the videos using this camera
+                              configuration (you can provide a stable area in
+                              an interactive view).
   -v, --verbose               Increase verbosity.
   --help                      Show this message and exit.
 </pre></div>
@@ -431,6 +434,11 @@ view.</p></li>
 <li><p>4 corner points that approximately indicate the bounding box of your area of interest. These must be provided in
 the order <em>upstream-left</em>, <em>downstream-left</em>, <em>downstream-right</em>, <em>upstream-right</em>, where left is the left-bank
 as seen while looking in downstream direction.</p></li>
+<li><p>If you wish to use the video only from a selected frame (for instance if the first frames/seconds are bad quality, or
+moving) then you must also provide the frame number from which you would like to start the analysis and provide the
+camera configuration information. This is done with the <code class="docutils literal notranslate"><span class="pre">-f</span></code> or <code class="docutils literal notranslate"><span class="pre">--frame-sample</span></code> option. In the interactive
+views that will support you, this frame will be displayed. If you do not provide <code class="docutils literal notranslate"><span class="pre">-f</span></code> then the first frame (index 0)
+will be displayed.</p></li>
 </ul>
 <p>There are several ways to assign this information, further explained below.</p>
 
