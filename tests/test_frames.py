@@ -75,8 +75,16 @@ def test_plot(frames, idx):
 )
 def test_plot_proj(frames_proj, idx):
     frames_proj[idx].frames.plot()
-    frames_proj[idx].frames.plot(mode="geographical")
+    plt.show(block=False)
     plt.close("all")
+    try:
+        import cartopy
+        frames_proj[idx].frames.plot(mode="geographical")
+        plt.show(block=False)
+        plt.close("all")
+    except:
+        print("Cartopy is missing, skipping cartopy dependent test")
+
 
 
 @pytest.mark.parametrize(

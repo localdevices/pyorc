@@ -88,6 +88,11 @@ def _base_plot(plot_func):
 
         """
         # in case persistent transform is in kwargs_line, remove this
+        if mode == "geographical":
+            try:
+                import cartopy
+            except:
+                raise ImportError("Cartopy not found, please install with 'mamba install -c conda-forge cartopy")
         if "transform" in kwargs_line:
             del kwargs_line["transform"]
         ax = _prepare_axes(ax=ax, mode=mode)
@@ -185,6 +190,7 @@ def _base_plot(plot_func):
     return get_plot_method
 
 
+
 def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
     """Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes
     
@@ -207,6 +213,11 @@ def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
 
     """
     # prepare axes
+    if mode == "geographical":
+        try:
+            import cartopy
+        except:
+            raise ImportError("Cartopy not found, please install with 'mamba install -c conda-forge cartopy")
     if "time" in ref._obj.coords:
         if ref._obj.time.size > 1:
             raise AttributeError(f'Object contains dimension "time" with length {len(ref._obj.time)}. Reduce dataset by selecting one time step or taking a median, mean or other statistic.')

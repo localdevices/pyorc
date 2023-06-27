@@ -28,6 +28,7 @@ setup(
         "dask",
         "descartes",
         "geojson",
+        "geopandas",
         "matplotlib",
         "netCDF4",
         "numpy",
