@@ -66,7 +66,7 @@ video_opt = click.option(
 )
 @click.pass_context
 def cli(ctx, info, license, debug):  # , quiet, verbose):
-    """Command line interface for hydromt models."""
+    """Command line interface for pyOpenRiverCam."""
     if ctx.obj is None:
         ctx.obj = {}
 
