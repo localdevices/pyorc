@@ -41,9 +41,7 @@ class BaseSelect:
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
         ax_geo = None
-        # extent = [4.5, 4.51, 51.2, 51.21]
         if dst is not None:
-            # fig = plt.figure(figsize=(12, 7))
             xmin = np.array(dst)[:, 0].min()
             xmax = np.array(dst)[:, 0].max()
             ymin = np.array(dst)[:, 1].min()
