@@ -6,6 +6,8 @@
 ### Fixed
 - removed the strict cartopy dependency. This enables pip installation for users that are not interested in 
   geographical plotting. Enables also installation on raspi platforms (only 64-bit!)
+- Transects sometimes gave infinite discharge when areas with zero depth received a small velocity. This has now
+  been resolved.
 ### Security
 
 
