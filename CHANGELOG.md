@@ -1,3 +1,36 @@
+## [0.5.1] - 2023-06-27
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- removed the strict cartopy dependency. This enables pip installation for users that are not interested in 
+  geographical plotting. Enables also installation on raspi platforms (only 64-bit!)
+- Transects sometimes gave infinite discharge when areas with zero depth received a small velocity. This has now
+  been resolved.
+### Security
+
+
+## [0.5.0] - 2023-05-24
+### Added
+- make it a lot easier to get well-calibrated ground control and lens parameters at the same time. we now do this 
+  by optimizing the lens'  focal length and (if enough ground control is provided) barrel distortion whilst fitting 
+  the perspective to the user-provided ground control points.
+- provide the fitted ground control points in the interface so that the user can immediately see if the ground control 
+  points are well fitted or if anything seems to be wrong with one or more control points.
+- feature stabilization on command line which consequently provided user-interfacing to select non-moving areas by 
+  pointing and clicking.
+### Changed
+- Much-improved stabilization for non-stable videos
+- stabilization can also be configured in CameraConfig level to accomodate slightly moving fixed rigs
+- h_a can be provided on command-line instead of in recipe
+### Deprecated
+### Removed
+- old velocimetry.filter_... methods are now entirely removed
+### Fixed
+### Security
+
+
 ## [0.4.0] - 2023-03-10
 ### Added
 The most notable change is that the code now includes an automatically installed command-line interface. This

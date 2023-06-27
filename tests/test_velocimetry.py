@@ -40,10 +40,17 @@ def test_get_transect(piv, cross_section, distance, nr_points):
 )
 def test_plot(piv, mode, method):
     plot = True
+    if mode == "geographical":
+        try:
+            import cartopy
+        except:
+            print("Cartopy is missing, skipping cartopy dependent test")
+            plot = False
     if method == "streamplot":
         if mode != "local":
             # skipping the test, because streamplot only works local
             plot = False
     if plot:
         piv.mean(dim="time", keep_attrs=True).velocimetry.plot(method=method, mode=mode)
+        plt.show(block=False)
     plt.close("all")

@@ -1,6 +1,12 @@
-import cartopy.crs as ccrs
-import cartopy.io.img_tiles as cimgt
+try:
+    import cartopy.crs as ccrs
+    import cartopy.io.img_tiles as cimgt
+    use_cartopy = True
+except:
+    use_cartopy = False
+
 import logging
+
 
 import click
 import matplotlib.pyplot as plt
@@ -28,19 +34,20 @@ class BaseSelect:
     def __init__(self, img, dst=None, crs=None, buffer=0.0002, zoom_level=19, logger=logging):
         self.logger = logger
         self.height, self.width = img.shape[0:2]
-        self.crs = crs
+        if use_cartopy:
+            self.crs = crs
+        else:
+            self.crs = None
         fig = plt.figure(figsize=(16, 9), frameon=False, facecolor="black")
         fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
         ax_geo = None
-        # extent = [4.5, 4.51, 51.2, 51.21]
         if dst is not None:
-            # fig = plt.figure(figsize=(12, 7))
             xmin = np.array(dst)[:, 0].min()
             xmax = np.array(dst)[:, 0].max()
             ymin = np.array(dst)[:, 1].min()
             ymax = np.array(dst)[:, 1].max()
             extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
-            if crs is not None:
+            if self.crs is not None:
                 tiler = getattr(cimgt, "GoogleTiles")(style="satellite")
                 ax_geo = fig.add_axes([0., 0., 1, 1], projection=tiler.crs)
                 ax_geo.set_extent(extent, crs=ccrs.PlateCarree())
@@ -75,7 +82,7 @@ class BaseSelect:
             ],
         )
         if dst is not None:
-            if crs is not None:
+            if self.crs is not None:
                 kwargs["transform"] = ccrs.PlateCarree()
                 transform = ccrs.PlateCarree()._as_mpl_transform(ax_geo)
                 kwargs_text["xycoords"] = transform
@@ -276,7 +283,7 @@ class AoiSelect(BaseSelect):
             markeredgecolor="w",
             zorder=3,
         )
-        if hasattr(self.camera_config, "crs"):
+        if hasattr(self.camera_config, "crs") and use_cartopy:
             kwargs["transform"] = ccrs.PlateCarree()
         self.p_geo, = self.ax_geo.plot(
             [], [], "o",
@@ -284,7 +291,7 @@ class AoiSelect(BaseSelect):
         )
         # plot an empty polygon
         pol = Polygon(np.zeros((0, 2)), edgecolor="w", alpha=0.5, linewidth=2)
-        if hasattr(self.camera_config, "crs"):
+        if hasattr(self.camera_config, "crs") and use_cartopy:
             pol_geo = Polygon(np.zeros((0, 2)), edgecolor="w", alpha=0.5, linewidth=2, transform=ccrs.PlateCarree(),
                               zorder=3)
         else:
@@ -332,7 +339,7 @@ class AoiSelect(BaseSelect):
                     self.camera_config.set_bbox_from_corners(self.src)
                     bbox_cam = list(zip(*self.camera_config.get_bbox(camera=True, redistort=True).exterior.xy))
                     bbox_geo = list(zip(*self.camera_config.get_bbox().exterior.xy))
-                    if hasattr(self.camera_config, "crs"):
+                    if hasattr(self.camera_config, "crs") and use_cartopy:
                         bbox_geo = helpers.xyz_transform(
                             bbox_geo,
                             crs_from=self.camera_config.crs,
@@ -368,7 +375,7 @@ class GcpSelect(BaseSelect):
             markersize=10,
             label="Selected control points"
         )
-        if crs is not None:
+        if crs is not None and use_cartopy:
             kwargs["transform"] = ccrs.PlateCarree()
         self.p_geo_selected, = self.ax_geo.plot(
             [], [], "o",
@@ -399,7 +406,7 @@ class GcpSelect(BaseSelect):
         self.ax.legend()
         self.lens_position = lens_position
         # add dst coords in the intended CRS
-        if crs is not None:
+        if crs is not None and use_cartopy:
             self.dst_crs = helpers.xyz_transform(self.dst, 4326, crs)
         else:
             self.dst_crs = self.dst
