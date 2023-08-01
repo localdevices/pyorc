@@ -317,10 +317,16 @@ def camera_config(
     default=False,
     help="Only update requested output files with changed inputs or if not present on file system",
 )
+@click.option(
+    "--lowmem",
+    is_flag=True,
+    default=False,
+    help="Reduce memory consumption. Computation will be slower",
+)
 
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, verbose):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, lowmem, verbose):
     log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
@@ -333,6 +339,7 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, updat
         prefix,
         output,
         update=update,
+        concurrency=not(lowmem),
         logger=logger
     )
     # process video following the settings
