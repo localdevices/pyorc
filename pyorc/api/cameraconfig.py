@@ -35,7 +35,7 @@ class CameraConfig:
             crs: Optional[Any] = None,
             window_size: int = 10,
             resolution: float = 0.05,
-            bbox: Optional[shapely.geometry.Polygon] = None,
+            bbox: Optional[Union[shapely.geometry.Polygon, str]] = None,
             camera_matrix: Optional[List[List[float]]] = None,
             dist_coeffs: Optional[List[List[float]]] = None,
             lens_position: Optional[List[float]] = None,
@@ -149,7 +149,10 @@ class CameraConfig:
 
     @bbox.setter
     def bbox(self, pol):
-        self._bbox = pol
+        if isinstance(pol, str):
+            self._bbox = wkt.loads(pol)
+        else:
+            self._bbox = pol
 
     @property
     def camera_matrix(self):
@@ -1100,6 +1103,7 @@ def get_camera_config(
         if isinstance(d["bbox"], str):
             d["bbox"] = wkt.loads(d["bbox"])
     return CameraConfig(**d)
+
 
 
 def load_camera_config(

@@ -14,6 +14,7 @@ from dask.diagnostics import ProgressBar
 from matplotlib.colors import Normalize
 from typing import Dict
 
+__all__ = ["velocity_flow"]
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +169,7 @@ class VelocityFlowProcessor(object):
             self,
             recipe: Dict,
             videofile: str,
-            cameraconfig: str,
+            cameraconfig: Dict,
             prefix: str,
             output: str,
             update: bool=False,
@@ -187,8 +188,8 @@ class VelocityFlowProcessor(object):
             YAML recipe, parsed from CLI
         videofile : str
             path to video
-        cameraconfig : str
-            path to camera config file
+        cameraconfig : dict
+            camera config as dict (not yet loaded as CamerConfig object)
         prefix : str
             prefix of produced output files
         output : str
@@ -212,7 +213,7 @@ class VelocityFlowProcessor(object):
         self.read = True
         self.write = False
         self.fn_video = videofile
-        self.fn_cam_config = cameraconfig
+        self.cam_config = pyorc.CameraConfig(**cameraconfig)
         self.logger = logger
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
@@ -302,7 +303,7 @@ class VelocityFlowProcessor(object):
     def video(self, **kwargs):
         self.video_obj = pyorc.Video(
             self.fn_video,
-            camera_config=self.fn_cam_config,
+            camera_config=self.cam_config,
             **kwargs
         )
         # some checks ...
@@ -485,3 +486,8 @@ class VelocityFlowProcessor(object):
             ax.figure.savefig(fn_jpg, **write_pars)
             self.logger.info(f'Plot "{name}" written to {fn_jpg}')
 
+def velocity_flow(**kwargs):
+    # simply execute the entire process
+    processor = VelocityFlowProcessor(**kwargs)
+    # process video following the settings
+    processor.process()
