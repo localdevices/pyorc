@@ -9,6 +9,7 @@ import pyorc
 import sys
 from click.testing import CliRunner
 
+
 EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples")
 
 # fixtures with input and output files and folders
@@ -378,12 +379,12 @@ def recipe(recipe_yml):
     return cli_utils.parse_recipe("a", "b", recipe_yml)
 
 
-@pytest.fixture
-def velocity_flow_processor(recipe, vid_file, cam_config_fn, cli_prefix, cli_output_dir):
-    return pyorc.service.VelocityFlowProcessor(
-        recipe,
-        vid_file,
-        cam_config_fn,
-        cli_prefix,
-        cli_output_dir
-    )
+# @pytest.fixture
+# def velocity_flow_processor(recipe, vid_file, cam_config_fn, cli_prefix, cli_output_dir):
+#     return pyorc.service.VelocityFlowProcessor(
+#         recipe,
+#         vid_file,
+#         cam_config_fn,
+#         cli_prefix,
+#         cli_output_dir
+#     )
