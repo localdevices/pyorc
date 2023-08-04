@@ -293,7 +293,7 @@ def camera_config(
     "--cameraconfig",
     type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="Camera config file (*.json)",
-    callback=cli_utils.validate_file,
+    callback=cli_utils.parse_camconfig,
     required=True
 )
 @click.option(
@@ -317,26 +317,44 @@ def camera_config(
     default=False,
     help="Only update requested output files with changed inputs or if not present on file system",
 )
+@click.option(
+    "--lowmem",
+    is_flag=True,
+    default=False,
+    help="Reduce memory consumption. Computation will be slower",
+)
 
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, verbose):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, lowmem, verbose):
     log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
+    # load in recipe and camera config
     if h_a is not None:
         recipe["video"]["h_a"] = h_a
-    processor = pyorc.service.VelocityFlowProcessor(
-        recipe,
-        videofile,
-        cameraconfig,
-        prefix,
-        output,
+    pyorc.service.velocity_flow(
+        recipe=recipe,
+        videofile=videofile,
+        cameraconfig=cameraconfig,
+        prefix=prefix,
+        output=output,
         update=update,
+        concurrency=not(lowmem),
         logger=logger
     )
-    # process video following the settings
-    processor.process()
+    # processor = pyorc.service.VelocityFlowProcessor(
+    #     recipe,
+    #     videofile,
+    #     cameraconfig,
+    #     prefix,
+    #     output,
+    #     update=update,
+    #     concurrency=not(lowmem),
+    #     logger=logger
+    # )
+    # # process video following the settings
+    # processor.process()
     pass
 
 if __name__ == "__main__":

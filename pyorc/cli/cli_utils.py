@@ -10,7 +10,7 @@ import os
 import pyorc
 import yaml
 
-from pyorc import Video, helpers, CameraConfig, cv
+from pyorc import Video, helpers, CameraConfig, cv, load_camera_config
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 from shapely.geometry import Point
 
@@ -148,6 +148,28 @@ def validate_dir(ctx, param, value):
     if not(os.path.isdir(value)):
         os.makedirs(value)
     return value
+
+def parse_camconfig(ctx, param, camconfig_file):
+    """
+    Read and validate cam config file
+
+    Parameters
+    ----------
+    camconfig_file : str,
+       file containing camera configuration
+
+    Returns
+    -------
+    cam_config: dict
+        configuration as dictionary
+
+    """
+    # validate if file can be read as camera config object
+    camconfig = load_camera_config(camconfig_file)
+
+    # return dict formatted
+    return camconfig.to_dict_str()
+
 def parse_recipe(ctx, param, recipe_file):
     """
     Read and validate entire recipe from top to bottom, add compulsory classes where needed
@@ -165,43 +187,7 @@ def parse_recipe(ctx, param, recipe_file):
     with open(recipe_file, "r") as f:
         body = f.read()
     recipe = yaml.load(body, Loader=yaml.FullLoader)
-
-    valid_classes = ["video", "frames", "velocimetry", "mask", "transect", "plot"]  # allowed classes
-    required_classes = ["video", "frames", "velocimetry"]  # mandatory classes (if not present, these are added)
-    check_args = {
-        "video": "video",
-        "frames": "frames",
-        # "velocimetry": "frames"
-    } # check if arguments to underlying methods called by recipe section are available and get valid arguments
-    skip_checks = ["plot"]  # these sections are not checked for valid inputs
-    process_methods = ["write"]  # methods that are specifically needed within process steps and not part of pyorc class methods
-    for k in recipe:  # main section
-        if k not in valid_classes:
-            raise ValueError(f"key '{k}' is not allowed, must be one of {valid_classes}")
-        # if k in check_args:
-        # loop through all methods and check if their inputs are valid
-        for m in recipe[k]:  # method in section
-            if recipe[k][m] is None:
-                # replace for empty dict
-                recipe[k][m] = {}
-            if m not in process_methods and k in check_args:
-                # get the subclass that is called within the section of interest
-                cls = getattr(pyorc, check_args[k].capitalize())
-                if (not hasattr(cls, m)):
-                    raise ValueError(f"Class '{check_args[k].capitalize()}' does not have a method or property '{m}'")
-                method = getattr(cls, m)
-                # find valid args to method
-                if hasattr(method, "__call__"):
-                    if k in check_args:
-                        valid_args = method.__code__.co_varnames[:method.__code__.co_argcount]  # get input args to method
-                        for arg in recipe[k][m]:
-                            if not(arg in valid_args):
-                                raise ValueError(f"Method '{check_args[k].capitalize()}.{m}' does not have input argument '{arg}', must be one of {valid_args}")
-    # add empty dicts for missing but compulsory classes
-    for _c in required_classes:
-        if _c not in recipe:
-            # add empties for compulsory recipe components
-            recipe[_c] = {}
+    recipe = validate_recipe(recipe)
     return recipe
 
 
@@ -262,3 +248,43 @@ def validate_dst(value):
             assert(isinstance(val, list)), f"--dst value {n} is not a list {val}"
             assert(len(val) == len_points), f"--src value {n} must contain row, column coordinate but consists of {len(val)} numbers"
     return value
+
+def validate_recipe(recipe):
+    valid_classes = ["video", "frames", "velocimetry", "mask", "transect", "plot"]  # allowed classes
+    required_classes = ["video", "frames", "velocimetry"]  # mandatory classes (if not present, these are added)
+    check_args = {
+        "video": "video",
+        "frames": "frames",
+        # "velocimetry": "frames"
+    } # check if arguments to underlying methods called by recipe section are available and get valid arguments
+    skip_checks = ["plot"]  # these sections are not checked for valid inputs
+    process_methods = ["write"]  # methods that are specifically needed within process steps and not part of pyorc class methods
+    for k in recipe:  # main section
+        if k not in valid_classes:
+            raise ValueError(f"key '{k}' is not allowed, must be one of {valid_classes}")
+        # if k in check_args:
+        # loop through all methods and check if their inputs are valid
+        for m in recipe[k]:  # method in section
+            if recipe[k][m] is None:
+                # replace for empty dict
+                recipe[k][m] = {}
+            if m not in process_methods and k in check_args:
+                # get the subclass that is called within the section of interest
+                cls = getattr(pyorc, check_args[k].capitalize())
+                if (not hasattr(cls, m)):
+                    raise ValueError(f"Class '{check_args[k].capitalize()}' does not have a method or property '{m}'")
+                method = getattr(cls, m)
+                # find valid args to method
+                if hasattr(method, "__call__"):
+                    if k in check_args:
+                        valid_args = method.__code__.co_varnames[:method.__code__.co_argcount]  # get input args to method
+                        for arg in recipe[k][m]:
+                            if not(arg in valid_args):
+                                raise ValueError(f"Method '{check_args[k].capitalize()}.{m}' does not have input argument '{arg}', must be one of {valid_args}")
+    # add empty dicts for missing but compulsory classes
+    for _c in required_classes:
+        if _c not in recipe:
+            # add empties for compulsory recipe components
+            recipe[_c] = {}
+    return recipe
+

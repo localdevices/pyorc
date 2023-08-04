@@ -1,6 +1,8 @@
 import os.path
 
 from click.testing import CliRunner
+
+import pyorc.service
 from pyorc.cli.main import cli
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 from pyorc.cli import cli_utils
@@ -74,12 +76,24 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
     assert result.exit_code == 0
 
 
-def test_service_video(velocity_flow_processor):
+# def test_service_video(velocity_flow_processor):
+#     # ensure we are in the right folder
+#     print(f"current file is: {os.path.dirname(__file__)}")
+#     os.chdir(os.path.dirname(__file__))
+#     # just test if everything is running
+#     velocity_flow_processor.process()
+
+def test_service_video(recipe, vid_file, cam_config, cli_prefix, cli_output_dir):
     # ensure we are in the right folder
     print(f"current file is: {os.path.dirname(__file__)}")
     os.chdir(os.path.dirname(__file__))
-    # just test if everything is running
-    velocity_flow_processor.process()
+    pyorc.service.velocity_flow(
+        recipe=recipe,
+        videofile=vid_file,
+        cameraconfig=cam_config.to_dict(),
+        prefix=cli_prefix,
+        output=cli_output_dir
+    )
 
 
 def test_gcps_interact(gcps_dst, frame_rgb):

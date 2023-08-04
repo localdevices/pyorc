@@ -14,6 +14,7 @@ from dask.diagnostics import ProgressBar
 from matplotlib.colors import Normalize
 from typing import Dict
 
+__all__ = ["velocity_flow"]
 
 logger = logging.getLogger(__name__)
 
@@ -168,10 +169,11 @@ class VelocityFlowProcessor(object):
             self,
             recipe: Dict,
             videofile: str,
-            cameraconfig: str,
+            cameraconfig: Dict,
             prefix: str,
             output: str,
             update: bool=False,
+            concurrency=True,
             fn_piv="piv.nc",
             fn_piv_mask="piv_mask.nc",
             fn_transect_template="transect_{:s}.nc",
@@ -186,19 +188,22 @@ class VelocityFlowProcessor(object):
             YAML recipe, parsed from CLI
         videofile : str
             path to video
-        cameraconfig : str
-            path to camera config file
+        cameraconfig : dict
+            camera config as dict (not yet loaded as CamerConfig object)
         prefix : str
             prefix of produced output files
         output : str
             path to output file
         update : bool, optional
             if set, only update components with changed inputs and configurations
+        concurrency : bool, optional
+            if set to False, then dask will only run synchronous preventing overuse of memory. This will be slower
 
         """
         self.update = update  # set to True when checks are needed if data already exists or not
         self.recipe = recipe
         self.output = output
+        self.concurrency = concurrency
         self.prefix = prefix
         self.fn_piv = os.path.join(self.output, prefix + fn_piv)
         self.fn_piv_mask = os.path.join(self.output, prefix + fn_piv_mask) if "mask" in recipe else self.fn_piv
@@ -208,7 +213,7 @@ class VelocityFlowProcessor(object):
         self.read = True
         self.write = False
         self.fn_video = videofile
-        self.fn_cam_config = cameraconfig
+        self.cam_config = pyorc.CameraConfig(**cameraconfig)
         self.logger = logger
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
@@ -263,7 +268,12 @@ class VelocityFlowProcessor(object):
         -------
 
         """
-
+        if not(self.concurrency):
+            import dask
+            # run only synchronous
+            dask.config.set(scheduler='synchronous')
+        # dask.config.set(pool=Pool(4))
+        # dask.config.set(scheduler='processes')
         self.video(**self.recipe["video"])
         self.frames(**self.recipe["frames"])
         self.velocimetry(**self.recipe["velocimetry"])
@@ -293,7 +303,7 @@ class VelocityFlowProcessor(object):
     def video(self, **kwargs):
         self.video_obj = pyorc.Video(
             self.fn_video,
-            camera_config=self.fn_cam_config,
+            camera_config=self.cam_config,
             **kwargs
         )
         # some checks ...
@@ -476,3 +486,8 @@ class VelocityFlowProcessor(object):
             ax.figure.savefig(fn_jpg, **write_pars)
             self.logger.info(f'Plot "{name}" written to {fn_jpg}')
 
+def velocity_flow(**kwargs):
+    # simply execute the entire process
+    processor = VelocityFlowProcessor(**kwargs)
+    # process video following the settings
+    processor.process()
