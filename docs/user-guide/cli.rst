@@ -65,6 +65,13 @@ components, the input files and output files) have changed or require reprocessi
 is not the case then that step will be skipped. This is ideal for instance in case you only changed a plot setup or
 masking step. The velocimetry part (which is time consuming) will then be skipped entirely.
 
+.. note::
+
+    You can also supply an option ``--lowmem`` which may be useful if you work with a low memory device or very large.
+    With this setting, only small portions of data are processed at the same time. This therefore increases processing time,
+    while decreasing (sometimes severely!) the amount memory required. If *pyorc* crashes then this is likely due
+    to low memory resources. Please then try this option
+
 The recipe file provided with ``-r`` is a so-called Yaml formatted file (extension .yml). This is a text file with
 a specific format that defines exactly what steps are being performed, and how the steps are to be performed. For
 instance, the preprocessing steps can be done with different techniques, and these can be combined in substeps.
