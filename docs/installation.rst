@@ -70,6 +70,12 @@ Then get the pyorc library from pypi using
 
 .. _install_code:
 
+.. note::
+
+    Since version 0.5.1 we also support installation under the Raspberry Pi platform. Please follow the instructions
+    for installation from pypi with pip. *pyorc* only works on Raspberry Pi OS 64-bit Operating System. On 32-bit
+    the package will not be found in the pypi repositories.
+
 Installation from latest code base
 ==================================
 To install the latest (unreleased) version from github, replace the last command shown in the previous section by:
