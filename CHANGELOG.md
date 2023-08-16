@@ -1,3 +1,18 @@
+## [0.5.2] - 2023-08-16
+### Added
+`--lowmem` option added in the CLI for very large videos and/or low resource devices.
+### Changed
+Calling of the service level now works through one function call that executes all actions within the service.
+All inputs to these functions MUST be in deserialized form. This generalizes the approach by which a service is
+executed which was necessary for getting ready for nodeOpenRiverCam (not released yet), which will be a shell around
+pyopenrivercam for scalable computation across a cloud. API / CLI users do not notice a difference.
+### Deprecated
+### Removed
+### Fixed
+Notebook 02 in the examples folder contained a deprecation error with the stabilize option for opening videos. This
+has been corrected and functionality description improved. 
+### Security
+
 ## [0.5.1] - 2023-06-27
 ### Added
 ### Changed
