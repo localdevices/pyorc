@@ -1,4 +1,5 @@
 import functools
+import json
 import numpy as np
 import os
 import pytest
@@ -377,6 +378,21 @@ def cli_obj():
 def recipe(recipe_yml):
     from pyorc.cli import cli_utils
     return cli_utils.parse_recipe("a", "b", recipe_yml)
+
+
+@pytest.fixture
+def recipe_geojson(recipe_yml):
+    from pyorc.cli import cli_utils
+    recipe = cli_utils.parse_recipe("a", "b", recipe_yml)
+    for t in recipe["transect"]:
+        if t != "write":
+            with open(recipe["transect"][t]["shapefile"]) as f:
+                data = json.load(f)
+                recipe["transect"][t]["geojson"] = data
+                del recipe["transect"][t]["shapefile"]
+    # remove the file reference to transects and replace by already read json
+    return recipe
+
 
 
 # @pytest.fixture

@@ -379,10 +379,17 @@ class VelocityFlowProcessor(object):
         _kwargs = copy.deepcopy(kwargs)
         for transect_name, transect_grp in _kwargs.items():
             self.logger.debug(f'Processing transect "{transect_name}"')
-            if not "shapefile" in transect_grp:
-                raise click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile". Please add "shapefile" in the recipe file')
-            # read shapefile
-            coords, crs = cli_utils.read_shape(transect_grp["shapefile"])
+            # check if there are coordinates provided
+
+            if not ("shapefile" in transect_grp or "geojson" in transect_grp):
+                raise click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile" or '
+                                       f'"geojson". Please add "shapefile" in the recipe file')
+            # read geojson or shapefile (as alternative
+            if "geojson" in transect_grp:
+                # read directly from geojson
+                coords, crs = cli_utils.read_shape(geojson=transect_grp["geojson"])
+            elif "shapefile" in transect_grp:
+                coords, crs = cli_utils.read_shape(fn=transect_grp["shapefile"])
             self.logger.debug(f"Coordinates read for transect {transect_name}")
             # check if coords have z coordinates
             if len(coords[0]) == 2:

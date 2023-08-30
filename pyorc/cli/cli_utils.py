@@ -144,10 +144,12 @@ def validate_file(ctx, param, value):
             raise click.FileError(f"{value}")
         return value
 
+
 def validate_dir(ctx, param, value):
     if not(os.path.isdir(value)):
         os.makedirs(value)
     return value
+
 
 def parse_camconfig(ctx, param, camconfig_file):
     """
@@ -169,6 +171,7 @@ def parse_camconfig(ctx, param, camconfig_file):
 
     # return dict formatted
     return camconfig.to_dict_str()
+
 
 def parse_recipe(ctx, param, recipe_file):
     """
@@ -219,8 +222,17 @@ def parse_str_num(ctx, param, value):
             return float(value)
 
 
-def read_shape(fn):
-    gdf = gpd.read_file(fn)
+def read_shape(fn=None, geojson=None):
+    if fn is None and geojson is None:
+        raise click.UsageError(f"Either fn or geojson must be provided")
+    if geojson:
+        if "crs" in geojson:
+            crs = geojson["crs"]["properties"]["name"]
+        else:
+            crs = None
+        gdf = gpd.GeoDataFrame().from_features(geojson, crs=crs)
+    else:
+        gdf = gpd.read_file(fn)
     # check if all geometries are points
     assert(all([isinstance(geom, Point) for geom in gdf.geometry])), f'shapefile may only contain geometries of type ' \
                                                                      f'"Point"'
@@ -230,10 +242,14 @@ def read_shape(fn):
     else:
         coords = [[p.x, p.y] for p in gdf.geometry]
     if not(hasattr(gdf, "crs")):
-        raise click.FileError(f"{fn} does not contain CRS, use a GIS program to add a valid CRS.")
-    if gdf.crs is None:
-        raise click.FileError(f"{fn} does not contain CRS, use a GIS program to add a valid CRS.")
-    return coords, gdf.crs.to_wkt()
+        click.echo(f"shapefile or geojson does not contain CRS, assuming CRS is the same as camera config CRS")
+        crs = None
+    elif gdf.crs is None:
+        click.echo(f"shapefile or geojson does not contain CRS, assuming CRS is the same as camera config CRS")
+        crs = None
+    else:
+        crs = gdf.crs.to_wkt()
+    return coords, crs
 
 def validate_dst(value):
     if value is not None:
