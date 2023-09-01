@@ -331,12 +331,11 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, updat
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
     # load in recipe and camera config
-    if h_a is not None:
-        recipe["video"]["h_a"] = h_a
     pyorc.service.velocity_flow(
         recipe=recipe,
         videofile=videofile,
         cameraconfig=cameraconfig,
+        h_a=h_a,
         prefix=prefix,
         output=output,
         update=update,

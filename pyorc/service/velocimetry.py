@@ -172,6 +172,7 @@ class VelocityFlowProcessor(object):
             cameraconfig: Dict,
             prefix: str,
             output: str,
+            h_a: float=None,
             update: bool=False,
             concurrency=True,
             fn_piv="piv.nc",
@@ -200,6 +201,8 @@ class VelocityFlowProcessor(object):
             if set to False, then dask will only run synchronous preventing overuse of memory. This will be slower
 
         """
+        if h_a is not None:
+            recipe["video"]["h_a"] = h_a
         self.update = update  # set to True when checks are needed if data already exists or not
         self.recipe = recipe
         self.output = output
