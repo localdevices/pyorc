@@ -88,14 +88,14 @@ def test_plot_proj(frames_proj, idx):
 
 
 @pytest.mark.parametrize(
-    "window_size, s_max, result",
+    "window_size, result",
     [
         # (5, [np.nan, np.nan, np.nan, 0.06877007]),
-        # (10, 2, [0.13262428, 0.1469308 , 0.24223496, 0.14565821]),
-        (15, 2, [0.21774408, 0.21398547, 0.25068682, 0.26456946])
+        (10, [0.1623803 , 0.127019  , 0.26826966, 0.13940813]),
+        # (15, [0.21774408, 0.21398547, 0.25068682, 0.26456946])
     ]
 )
-def test_get_piv(frames_proj, window_size, s_max, result):
+def test_get_piv(frames_proj, window_size, result):
     piv = frames_proj.frames.get_piv(window_size=window_size)
     piv_mean = piv.mean(dim="time", keep_attrs=True)
     # check if results are stable
