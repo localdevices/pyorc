@@ -266,6 +266,18 @@ def vid_cam_config(cam_config):
     )
     yield vid
 
+@pytest.fixture
+def vid_cam_config_nonlazy(cam_config):
+    vid = pyorc.Video(
+        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
+        start_frame=0,
+        end_frame=2,
+        camera_config=cam_config,
+        h_a=0.,
+        lazy=False
+    )
+    yield vid
+
 
 @pytest.fixture
 def vid_cam_config_shift(cam_config):

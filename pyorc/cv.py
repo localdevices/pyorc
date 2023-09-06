@@ -609,7 +609,63 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
     return camera_matrix, dist_coeffs, opt.fun
 
 
-def get_time_frames(cap, start_frame, end_frame):
+def get_frame(
+        cap,
+        rotation=None,
+        ms=None,
+        camera_matrix=None,
+        dist_coeffs=DIST_COEFFS,
+        method="grayscale"
+):
+    try:
+        ret, img = cap.read()
+        if rotation:
+            img = cv2.rotate(img, rotation)
+    except:
+        raise IOError(f"Cannot read")
+    if ret:
+        if ms is not None:
+            img = transform(img, ms)
+        # apply lens distortion correction
+        if camera_matrix:
+            img = undistort_img(
+                img,
+                camera_matrix,
+                dist_coeffs
+            )
+        if method == "grayscale":
+            # apply gray scaling, contrast- and gamma correction
+            # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # mean(axis=2)
+        elif method == "rgb":
+            # turn bgr to rgb for plotting purposes
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        elif method == "hsv":
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    return ret, img
+
+def get_frames(cap, start_frame, end_frame):
+    """
+    Get a set of frames from start_frame to end frame from a cap object
+
+    Parameters
+    ----------
+    cap : cv.VideoCapture
+        Opened VideoCapture object
+    start_frame : int
+        first frame to consider for reading
+    end_frame : int
+        last frame to consider for reading
+
+    Returns
+    -------
+    frames : list
+        list with 2D or 3D (in case of RGB) numpy arrays with image intensity values
+    """
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+
+
+def get_time_frames(cap, start_frame, end_frame, lazy=True, **kwargs):
     """
     Gets a list of valid time stamps and frame numbers for the provided video capture object, starting from start_frame
     ending at end_frame
@@ -632,16 +688,24 @@ def get_time_frames(cap, start_frame, end_frame):
 
     """
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-    ret, img = cap.read()  # read first frame
+    ret, img = get_frame(cap, **kwargs)
     n = start_frame
     time = []
     frame_number = []
+    if lazy:
+        frames = None
+    else:
+        # already collect the frames
+        frames = []
     while ret:
         if n > end_frame:
             break
+        if not(lazy):
+            frames.append(img)
         t1 = cap.get(cv2.CAP_PROP_POS_MSEC)
         time.append(t1)
-        ret, img = cap.read()  # read frame 1 + ...
+        # ret, img = cap.read()  # read frame 1 + ...
+        ret, img = get_frame(cap, **kwargs)    # read frame 1 + ...
         frame_number.append(n)
         if ret == False:
             break
@@ -653,7 +717,7 @@ def get_time_frames(cap, start_frame, end_frame):
 
         n += 1
     time[0] = 0
-    return time, frame_number
+    return time, frame_number, frames
 
 
 def transform_to_bbox(coords, bbox, resolution):
