@@ -489,6 +489,8 @@ class VelocityFlowProcessor(object):
                     # add to plot
                     p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
                     ax = p.axes
+                    # done with transect, remove from memory
+                    ds_trans.close()
             # if mode == "camera":
             #     ax.axis("equal")
             write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
@@ -501,3 +503,9 @@ def velocity_flow(**kwargs):
     processor = VelocityFlowProcessor(**kwargs)
     # process video following the settings
     processor.process()
+    # close all file objects
+    processor.velocimetry_obj.close()
+    if hasattr(processor, "velocimetry_mask_obj"):
+        processor.velocimetry_mask_obj.close()
+
+
