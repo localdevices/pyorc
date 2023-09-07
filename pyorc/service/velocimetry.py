@@ -292,6 +292,14 @@ class VelocityFlowProcessor(object):
         #     self.velocimetry_mask_obj = self.velocimetry_obj
         if "plot" in self.recipe:
             self.plot(**self.recipe["plot"])
+        # remove all potentially memory consumptive attributes
+        self.da_frames.close()
+        self.velocimetry_mask_obj.close()
+        self.velocimetry_obj.close()
+        delattr(self, "velocimetry_obj")
+        delattr(self, "velocimetry_mask_obj")
+        delattr(self, "da_frames")
+
 
         # TODO .get_transect and check if it contains data,
 
@@ -353,6 +361,7 @@ class VelocityFlowProcessor(object):
                 delayed_obj.compute()
             self.logger.info(f"Velocimetry written to {self.fn_piv}")
             # Load the velocimetry into memory to prevent re-writes in next steps
+            delattr(self, "velocimetry_obj")
             self.velocimetry_obj = xr.open_dataset(self.fn_piv)
 
 
@@ -477,6 +486,7 @@ class VelocityFlowProcessor(object):
                 )
                 p = velocimetry_reduced.velocimetry.plot(ax=ax, mode=mode, **opts)
                 ax = p.axes
+                del velocimetry_reduced
             if "transect" in plot_params:
                 for transect_name, opts in plot_params["transect"].items():
                     opts = vmin_vmax_to_norm(opts)
@@ -491,6 +501,7 @@ class VelocityFlowProcessor(object):
                     ax = p.axes
                     # done with transect, remove from memory
                     ds_trans.close()
+                    del ds_trans
             # if mode == "camera":
             #     ax.axis("equal")
             write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
@@ -503,9 +514,7 @@ def velocity_flow(**kwargs):
     processor = VelocityFlowProcessor(**kwargs)
     # process video following the settings
     processor.process()
-    # close all file objects
-    processor.velocimetry_obj.close()
-    if hasattr(processor, "velocimetry_mask_obj"):
-        processor.velocimetry_mask_obj.close()
+    # flush the processor itself once done
+    del processor
 
 
