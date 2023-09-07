@@ -296,6 +296,7 @@ class VelocityFlowProcessor(object):
         self.da_frames.close()
         self.velocimetry_mask_obj.close()
         self.velocimetry_obj.close()
+        delattr(self, "video_obj")
         delattr(self, "velocimetry_obj")
         delattr(self, "velocimetry_mask_obj")
         delattr(self, "da_frames")
