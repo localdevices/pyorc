@@ -82,6 +82,7 @@ Camera configuration: {:s}
         self.feats_errs = None
         self.ms = None
         self.mask = None
+        self.lazy = lazy
         self.stabilize = stabilize
         if camera_config is not None:
             self.camera_config = camera_config
@@ -156,6 +157,22 @@ Camera configuration: {:s}
         # nothing to be done at this stage, release file for now.
         cap.release()
         del cap
+
+    @property
+    def lazy(self):
+        """
+
+        Returns
+        -------
+        np.ndarray
+            Mask of region of interest
+        """
+        return self._lazy
+
+    @lazy.setter
+    def lazy(self, lazy):
+        self._lazy = lazy
+
 
     @property
     def mask(self):
