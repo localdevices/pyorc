@@ -12,7 +12,7 @@ import xarray as xr
 
 from typing import List, Optional, Union
 
-from .. import cv, const
+from .. import cv, const, helpers
 from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
 
 
@@ -43,6 +43,7 @@ Camera configuration: {:s}
             end_frame: Optional[int] = None,
             freq: Optional[int] = 1,
             stabilize: Optional[List[List]] = None,
+            rotation: Optional[int] = None,
     ):
         """
         Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
@@ -68,6 +69,8 @@ Camera configuration: {:s}
             set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
             The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no
             stabilization will be performed
+        rotation : int, optional
+            can be 0, 90, 180, 270. If provided, images will be forced to rotate along the provided angle.
         """
         assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
@@ -132,10 +135,15 @@ Camera configuration: {:s}
             self.get_ms(cap)
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
-        self.rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
+        if rotation is None:
+            rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
+            if rotation in [90, 270]:
+                # fix a bug in the cv2 code, that rotates portrait videos in the wrong direction
+                rotation = 180
+        self.rotation = rotation
         # set other properties
         self.h_a = h_a
-        # make camera config part of the vidoe object
+        # make camera config part of the video object
         self.fn = fn
         self._stills = {}  # here all stills are stored lazily
         # nothing to be done at this stage, release file for now.
@@ -308,9 +316,15 @@ Camera configuration: {:s}
     ):
         self._corners = corners
 
+
     @property
     def rotation(self):
-        return self._rotation
+        if self._rotation is not None:
+            return self._rotation
+        elif hasattr(self, "camera_config"):
+            if hasattr(self.camera_config, "rotation"):
+                return helpers.get_rotation_code(self.camera_config.rotation)
+
 
     @rotation.setter
     def rotation(
@@ -318,13 +332,10 @@ Camera configuration: {:s}
             rotation_code: int
     ):
         """
-        Solves a likely bug in OpenCV (4.6.0) that straight up videos rotate in the wrong direction. Tested for both
-        90 degree and 270 degrees rotation videos on several smartphone (iPhone and Android)
+        Set rotation from integer in the form of OpenCV rotation codes
         """
-        if rotation_code in [90, 270]:
-            self._rotation = cv2.ROTATE_180
-        else:
-            self._rotation = None
+        self._rotation = helpers.get_rotation_code(rotation_code)
+
 
     def get_frame(
             self,

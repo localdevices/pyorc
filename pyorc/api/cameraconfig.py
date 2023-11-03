@@ -44,7 +44,8 @@ class CameraConfig:
             lens_pars: Optional[Dict[str, float]] = None,
             calibration_video: Optional[str] = None,
             is_nadir: Optional[bool] = False,
-            stabilize: Optional[List[List]] = None
+            stabilize: Optional[List[List]] = None,
+            rotation: Optional[int] = None,
     ):
         """
 
@@ -133,6 +134,8 @@ class CameraConfig:
             self.set_bbox_from_corners(corners)
         if stabilize is not None:
             self.stabilize = stabilize
+        if rotation is not None:
+            self.rotation = rotation
 
     @property
     def bbox(self):
@@ -312,6 +315,26 @@ class CameraConfig:
             coords: List[List[float]]
     ):
         self._stabilize = coords
+
+
+    @property
+    def rotation(self):
+        """
+        Return rotation OpenCV code
+
+        Returns
+        -------
+        code : int
+            integer code belonging to rotation, 0 for 90 deg, 1 for 180 deg and 2 for 270 deg
+        """
+
+    @rotation.setter
+    def rotation(
+            self,
+            rotation_code: int
+    ):
+        self._rotation = rotation_code
+
 
     @property
     def transform(self):
