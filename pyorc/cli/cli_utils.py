@@ -163,7 +163,7 @@ def validate_dir(ctx, param, value):
 
 def validate_rotation(ctx, param, value):
     if value is not None:
-        if not(value in [90, 180, 270]):
+        if not(value in [90, 180, 270, None]):
             raise click.UsageError(f"Rotation value must be either 90, 180 or 270")
         return value
 

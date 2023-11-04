@@ -159,7 +159,7 @@ def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
 
 
 def get_rotation_code(rotation_code):
-    if not (rotation_code in [0, 90, 180, 270]):
+    if not (rotation_code in [0, 90, 180, 270, None]):
         raise ValueError(f"Rotation code must be in allowed codes 0, 90, 180 or 270. Provided code is {rotation_code}")
     if rotation_code == 90:
         return cv2.ROTATE_90_CLOCKWISE
