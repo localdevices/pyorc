@@ -561,10 +561,12 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
         """
         f = x[0]*width  # only one parameter to optimize for now, can easily be extended!
         dist_coeffs[0][0] = float(x[1])
-        # dist_coeffs[1][0] = float(x[2])
+        dist_coeffs[1][0] = float(x[2])
+        # dist_coeffs[4][0] = float(x[3])
+        # dist_coeffs[3][0] = float(x[4])
         coord_mean = np.array(dst).mean(axis=0)
         # _src = np.float32(src)
-        _dst = np.float32(dst) - coord_mean
+        _dst = np.float32(np.array(dst) - coord_mean)
         zs = np.zeros(4) if len(_dst[0]) == 2 else np.array(_dst)[:, -1]
         if lens_position is not None:
             _lens_pos = np.array(lens_position) - coord_mean
@@ -594,18 +596,25 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
 
     if len(dst) == 4:
         bnds_k1 = (-0.0, 0.0)
+        bnds_k2 = (-0.0, 0.0)
     else:
         bnds_k1 = (-0.5, 0.5)
+        bnds_k2 = (-0.5, 0.5)
     opt = optimize.differential_evolution(
         error_intrinsic,
-        bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
+        # bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
+        bounds=[(float(0.25), float(2)), bnds_k1, bnds_k2],
         args=(src, dst, height, width, c, lens_position, DIST_COEFFS),
         atol=0.001 # one mm
     )
     camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0]*width)
     dist_coeffs = DIST_COEFFS
     dist_coeffs[0][0] = opt.x[1]
-    # dist_coeffs[2][0] = opt.x[2]
+    dist_coeffs[1][0] = opt.x[2]
+    # dist_coeffs[4][0] = opt.x[3]
+    # dist_coeffs[3][0] = opt.x[4]
+    print(f"CAMERA MATRIX: {camera_matrix}")
+    print(f"DIST COEFFS: {dist_coeffs}")
     return camera_matrix, dist_coeffs, opt.fun
 
 
