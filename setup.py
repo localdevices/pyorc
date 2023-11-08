@@ -27,6 +27,7 @@ setup(
         "cython; platform_machine == 'armv7l'",
         "dask",
         "descartes",
+        "flox",
         "geojson",
         "geopandas",
         "matplotlib",

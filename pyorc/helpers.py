@@ -191,8 +191,8 @@ def get_enclosed_mask(data, stride=2):
     mask_edge_fill = binary_fill_holes(mask_edge)
 
     mask_fill = np.int8(mask_edge_fill[stride:-stride, stride:-stride])
-    mask_fill[mask_fill == 1 & np.isnan(data)] = 0
     mask_fill[mask_fill == 0] = -1
+    mask_fill[mask_fill == 1 & np.isnan(data)] = 0
     return mask_fill
 
 def get_rotation_code(rotation_code):
