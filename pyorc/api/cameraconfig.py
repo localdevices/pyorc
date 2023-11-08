@@ -86,6 +86,14 @@ class CameraConfig:
             local path to video file containing a checkerboard pattern. Must be 9x6 if called directly, otherwise use
             ``.calibrate_camera`` explicitly and provide ``chessboard_size`` explicitly. When used, an automated camera
             calibration on the video file will be attempted.
+        is_nadir : bool, optional
+            If set, the video is assumed to be taken at sub-drone position and only two control points are needed
+            for camera configuration
+        stabilize : list (of lists), optional
+            contains [x, y] pixels defining a polygon enclosing moving (water) areas. Areas outside of the polygon
+            are used for stabilization of the video, if this polygon is defined.
+        rotation : int [90, 180, 270]
+            enforces a rotation of the video of 90, 180 or 2780 degrees clock-wise.
         """
         assert(isinstance(height, int)), 'height must be provided as type "int"'
         assert(isinstance(width, int)), 'width must be provided as type "int"'
@@ -327,6 +335,7 @@ class CameraConfig:
         code : int
             integer code belonging to rotation, 0 for 90 deg, 1 for 180 deg and 2 for 270 deg
         """
+        return self._rotation
 
     @rotation.setter
     def rotation(
