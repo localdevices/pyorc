@@ -50,8 +50,8 @@ def cli_output_dir():
     if not os.path.isdir(dir):
         os.makedirs(dir)
     yield dir
-    if os.path.isdir(dir):
-        shutil.rmtree(dir)
+    # if os.path.isdir(dir):
+    #     shutil.rmtree(dir)
 
 @pytest.fixture
 def cli_prefix():
@@ -282,7 +282,11 @@ def vid_cam_config_shift(cam_config):
 @pytest.fixture
 def vid_cam_config_stabilize(cam_config):
     vid = pyorc.Video(
-        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
+        os.path.join(
+            EXAMPLE_DATA_DIR,
+            "ngwerere",
+            "ngwerere_20191103.mp4"
+        ),
         start_frame=0,
         end_frame=20,
         camera_config=cam_config,
@@ -291,7 +295,7 @@ def vid_cam_config_stabilize(cam_config):
             [400, 1080],
             [170, 0],
             [1000, 0],
-            [1750, 1080]
+            [1750, 1080],
         ]  # coordinates for which outside area is meant for stabilization
     )
     yield vid

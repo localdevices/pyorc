@@ -158,6 +158,19 @@ def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
     return ax
 
 
+def get_rotation_code(rotation_code):
+    if not (rotation_code in [0, 90, 180, 270, None]):
+        raise ValueError(f"Rotation code must be in allowed codes 0, 90, 180 or 270. Provided code is {rotation_code}")
+    if rotation_code == 90:
+        return cv2.ROTATE_90_CLOCKWISE
+    elif rotation_code == 180:
+        return cv2.ROTATE_180
+    elif rotation_code == 270:
+        return cv2.ROTATE_90_COUNTERCLOCKWISE
+    else:
+        return None
+
+
 def get_xs_ys(cols, rows, transform):
     """Computes rasters of x and y coordinates, based on row and column counts and a defined transform.
 
