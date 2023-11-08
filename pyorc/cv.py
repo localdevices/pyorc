@@ -450,19 +450,25 @@ def _Rt_to_M(rvec, tvec, camera_matrix, z=0., reverse=False):
     # normalize homography before returning
     return M / M[-1, -1]
 
-def unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs):
+def unproject_points(src, z, rvec, tvec, camera_matrix, dist_coeffs):
     """
     Reverse projects points from the image to the 3D world. As points on the objective are a ray line in
     the real world, a x, y, z coordinate can only be reconstructed if the points have one known coordinate (z).
 
     Parameters
     ----------
-    src
-    rvec
-    tvec
-    camera_matrix
-    dist_coeffs
-    z
+    src : list (of lists)
+        pixel coordinates
+    z : float or list of floats
+        z-level belonging to src points (if list, then the length should be equal to the number of src points)
+    rvec : array-like
+        rotation vector
+    tvec : array-like
+        translation vector
+    camera_matrix : array-like
+        camera matrix
+    dist_coeffs : array_like
+        distortion coefficients
 
     Returns
     -------
@@ -479,13 +485,26 @@ def unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs):
             )
         )
     )
-    zs = np.atleast_1d(zs)
-    dst = []
-    assert(len(zs) == len(src)), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(zs)}"
-    for pt, z in zip(src, zs):
+    if isinstance(z, (list, np.ndarray)):
+        #         zs = np.atleast_1d(zs)
+        z = np.float64(z)
+        dst = []
+        assert (len(z) == len(
+            src)), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(z)}"
+        for pt, _z in zip(src, z):
+            M = _Rt_to_M(rvec, tvec, camera_matrix, z=_z, reverse=False)
+            x, y = list(cv2.perspectiveTransform(pt[None, None, ...], M)[0][0])
+            dst.append([x, y, _z])
+    else:
+        # z is only one value, so there is no change in M. We can do this faster in one go
         M = _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=False)
-        x, y = list(cv2.perspectiveTransform(pt[None, None, ...], M)[0][0])
-        dst.append([x, y, z])
+        dst = cv2.perspectiveTransform(src[None, ...], M)[0]
+        dst = np.hstack(
+            (
+                dst,
+                np.ones((len(dst), 1)) * z,
+            )
+        )
     return dst
 
 

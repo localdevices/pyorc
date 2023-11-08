@@ -853,7 +853,7 @@ class CameraConfig:
     def unproject_points(
             self,
             points: List[List],
-            zs: List[float]
+            zs: Union[float, List[float]]
     ) -> np.ndarray:
         """
         Reverse projects points in [column, row] space to [x, y, z] real world
@@ -870,7 +870,7 @@ class CameraConfig:
         """
         _, rvec, tvec = self.pnp
         # reduce zs by the mean of the gcps
-        _zs = np.atleast_1d(zs) - self.gcps_mean[-1]
+        _zs = zs - self.gcps_mean[-1]
         dst = cv.unproject_points(
             np.array(points),
             _zs,
