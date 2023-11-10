@@ -389,10 +389,9 @@ Camera configuration: {:s}
             self,
             n: int,
             method: Optional[str] = "grayscale",
-            lens_corr: Optional[bool] = False
     ) -> np.ndarray:
         """
-        Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
+        Retrieve one frame.
 
         Parameters:
         -----------
@@ -400,8 +399,6 @@ Camera configuration: {:s}
             frame number to retrieve
         method : str
             can be "rgb", "grayscale", or "hsv", default: "grayscale"
-        lens_corr: bool, optional
-            if set to True, lens parameters will be used to undistort image
 
         Returns
         -------
