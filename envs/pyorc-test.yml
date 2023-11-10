@@ -10,6 +10,7 @@ dependencies:
   - cartopy
   - dask
   - descartes
+  - flox
   - geojson
   - geopandas
   - geos
@@ -17,6 +18,7 @@ dependencies:
   - matplotlib
   - netCDF4
   - numpy
+  - numba
   - opencv
   - pip
   - pytest

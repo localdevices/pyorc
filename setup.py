@@ -32,6 +32,7 @@ setup(
         "geopandas",
         "matplotlib",
         "netCDF4",
+        "numba",
         "numpy",
         "opencv-python",
         "openpiv",
