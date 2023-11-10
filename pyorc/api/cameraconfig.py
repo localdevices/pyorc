@@ -408,7 +408,6 @@ class CameraConfig:
             self,
             camera: Optional[bool] = False,
             h_a: Optional[float] = None,
-            redistort: Optional[bool] = False,
             within_image: Optional[bool] = False,
     ) -> Polygon:
         """
@@ -437,24 +436,28 @@ class CameraConfig:
         This can then be used to reconstruct the grid for velocimetry calculations.
         """
         bbox = self.bbox
-        if within_image:
-            coords = np.array(bbox.exterior.coords)
-            z_a = self.get_z_a(h_a)
-            if redistort:
-                # typically only done for plotting on original frame, expand number of points to be able to see distortion
-                coords_expand = np.zeros((0, 2))
-                for n in range(0, len(coords)-1):
-                    new_coords = np.linspace(coords[n], coords[n + 1], 100)
-                    coords_expand = np.r_[coords_expand, new_coords]
-                coords = coords_expand
-            coords = np.c_[coords, np.ones(len(coords))*z_a]
-            corners = self.project_points(coords, within_image=within_image)
-            corners = corners[np.isfinite(corners[:, 0])]
-            if not(camera):
-                corners = self.unproject_points(np.array(np.array(list(zip(*corners))).T), z_a)
-                # corners = self.unproject_points(list(zip(coords[:, 0], coords[:, 1])), z_a)
-                # project points (after cutting on image edges) to geographical space
-            bbox = Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
+        coords = np.array(bbox.exterior.coords)
+        if within_image or camera:
+            # make a new set of bbox coordinates with a higher density. This is meant to enable plotting of distortion on
+            # image frame, and to plot partial coverage in the real-world coordinates
+            coords_expand = np.zeros((0, 2))
+            for n in range(0, len(coords)-1):
+                new_coords = np.linspace(coords[n], coords[n + 1], 100)
+                coords_expand = np.r_[coords_expand, new_coords]
+            coords = coords_expand
+        z_a = self.get_z_a(h_a)
+        # add vertical coordinates to the set
+        coords = np.c_[coords, np.ones(len(coords))*z_a]
+        # project points to pixel image coordinates
+        corners = self.project_points(coords, within_image=within_image)
+        corners = corners[np.isfinite(corners[:, 0])]
+        if not(camera):
+            # project back to real-world coordinates after possibly cutting at edges of visibility
+            corners = self.unproject_points(np.array(np.array(list(zip(*corners))).T), z_a)
+            # corners = self.unproject_points(list(zip(coords[:, 0], coords[:, 1])), z_a)
+            # project points (after cutting on image edges) to geographical space
+        bbox = Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
+
         return bbox
 
     def get_camera_coords(
