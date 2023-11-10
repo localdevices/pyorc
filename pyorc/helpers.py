@@ -385,7 +385,7 @@ def mask_fill(data, mask):
     """
     mask[np.isfinite(data)] = 1
     data_fill = copy.deepcopy(fill.fillnodata(data, mask=mask == 1, max_search_distance=5))
-    data_fill[mask == -1] = np.nan
+    data_fill[mask == -1] = 0
     return data_fill
 
 

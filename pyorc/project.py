@@ -36,9 +36,10 @@ def project_cv(da, cc, x, y, z):
     h_a = cc.z_to_h(z)
     src = cc.get_bbox(
         camera=True,
-        h_a=h_a
+        h_a=h_a,
+        expand_exterior=False
     ).exterior.coords[0:4]
-    dst_xy = cc.get_bbox().exterior.coords[0:4]
+    dst_xy = cc.get_bbox(expand_exterior=False).exterior.coords[0:4]
     # get geographic coordinates bbox corners
     dst = cv.transform_to_bbox(
         dst_xy,
@@ -153,13 +154,14 @@ def project_numpy(da, cc, x, y, z, stride=10):
     # So we make a lazy array of the new interpolated shape. But now we stack this array over y and x, so that we can paste the
     # interpolated values onto the new array. All to be kept lazy (chunk 1 time step) to prevent memory issues.
     da_new = xr.DataArray(
-        dask.array.zeros((len(da), len(y), len(x)), chunks=(1, None, None)) * np.nan,
+        dask.array.zeros((len(da), len(y), len(x)), chunks=(1, None, None), dtype=da.dtype) * np.nan,
         coords={
             "time": da.time,
             "y": y,
             "x": x
         },
-        name="project_frames"
+        name="project_frames",
+        attrs=da.attrs
     ).stack(group=("y", "x"))
     idxs = da_new.group.isel(group=np.unique(da_idx))
 
@@ -177,7 +179,7 @@ def project_numpy(da, cc, x, y, z, stride=10):
         da_new,
         input_core_dims=[["y", "x"]],
         output_core_dims=[["y", "x"]],
-        output_dtypes=da_new.dtype,
+        output_dtypes=da.dtype,
         kwargs={'mask': mask},
         dask='parallelized',
         keep_attrs=True,

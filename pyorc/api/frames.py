@@ -89,8 +89,8 @@ class Frames(ORCBase):
             lats = None
 
         # new approach to getting M (from bbox coordinates)
-        src = camera_config.get_bbox(camera=True, h_a=self.h_a).exterior.coords[0:4]
-        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
+        src = camera_config.get_bbox(camera=True, h_a=self.h_a, expand_exterior=False).exterior.coords[0:4]
+        dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
         # get geographic coordinates bbox corners
         dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
         M = cv.get_M_2D(src, dst, reverse=True)
@@ -208,172 +208,17 @@ class Frames(ORCBase):
         ## PROJECTION PREPARATIONS
         # ========================
         z = cc.get_z_a(self.h_a)
-        # da_proj = pyorc.project.project_numpy(
-        #     self._obj,
-        #     cc,
-        #     x,
-        #     y,
-        #     z,
-        #     **kwargs
-        # )
-        da_proj = pyorc.project.project_cv(
+        if not(hasattr(pyorc.project, f"project_{method}")):
+            raise ValueError(f"Selected projection method {method} does not exist.")
+        proj_method = getattr(pyorc.project, f"project_{method}")
+        da_proj = proj_method(
             self._obj,
             cc,
             x,
             y,
             z,
+            **kwargs
         )
-        # retrieve all real-world coordinates of the image frame
-        # try to unproject points in the image to a water level plain surface
-        # coli, rowi = np.meshgrid(
-        #     np.arange(cc.width),
-        #     np.arange(cc.height)
-        # )
-        # from scipy.interpolate import RegularGridInterpolator
-        # stride = 10
-        # src_pix = list(zip(coli[::stride, ::stride].flatten(), rowi[::stride, ::stride].flatten()))
-        # dst_pix = cc.unproject_points(
-        #     src_pix,
-        #     cc.get_z_a(self.h_a)
-        # )
-        # # x_pix, y_pix, z_pix = list(zip(*dst_pix))
-        # x_pix, y_pix, z_pix = dst_pix.T
-        # # reorganise to 2D grid
-        # x_pix = x_pix.reshape(*coli[::stride, ::stride].shape)
-        # y_pix = y_pix.reshape(*coli[::stride, ::stride].shape)
-        #
-        # # upscale
-        # interp_x = RegularGridInterpolator((rowi[::stride, 0], coli[0, ::stride]), x_pix, bounds_error=False, fill_value=None)
-        # interp_y = RegularGridInterpolator((rowi[::stride, 0], coli[0, ::stride]), y_pix, bounds_error=False, fill_value=None)
-        # x_pix_up = interp_x((rowi, coli))
-        # y_pix_up = interp_y((rowi, coli))
-        # idx_y_up, idx_x_up = helpers.map_to_pixel(x_pix_up, y_pix_up, cc.transform)
-        #
-        # # any location outside of the target grid should become a miss
-        # miss = np.any([idx_x_up >= shape[1], idx_x_up < 0, idx_y_up >= shape[0], idx_y_up < 0], axis=0)
-        #
-        # # flatten to 1D-indexes
-        # idx = np.array(idx_y_up) * shape[1] + np.array(idx_x_up)
-        #
-        # # ensure that indexes outside of area of interest are set to -1.
-        # idx[miss] = -1
-        #
-        # # reshape indexes to the source grid. Now we know of each pixel in source, where it belongs in target
-        # # idx = idx.reshape(*coli.shape)
-        #
-        # # turn idx grid into a DataArray
-        # da_idx = xr.DataArray(
-        #     idx,
-        #     dims=("y", "x"),
-        #     name="group",
-        #     coords={
-        #         "y": self._obj.y.values,
-        #         "x": self._obj.x.values
-        #     },
-        # )
-        # # retrieve unique values from this
-        # classes = np.unique(da_idx)
-        # # now we simply group the frames by all the indexes and then take the mean of all identified points per index
-        # da_point = xarray_reduce(self._obj, da_idx, func="mean", expected_groups=classes, engine="numba")
-        # # remaining problem is that the above indexes may be limited to only a few, and cannot be coerced to the grid that we would like.
-        # # So we make a lazy array of the new interpolated shape. But now we stack this array over y and x, so that we can paste the
-        # # interpolated values onto the new array. All to be kept lazy (chunk 1 time step) to prevent memory issues.
-        # da_new = xr.DataArray(
-        #     dask.array.zeros((len(self._obj), *shape), chunks=(1, None, None)) * np.nan,
-        #     coords={
-        #         "time": self._obj.time,
-        #         "y": y,
-        #         "x": x
-        #     },
-        #     name="project_frames"
-        # ).stack(group=("y", "x"))
-        # idxs = da_new.group.isel(group=np.unique(da_idx))
-        #
-        # # assign the values to the relevant ids
-        # da_point["group"] = idxs
-        # # da_new
-        # da_new[:, np.unique(da_idx)] = da_point
-        # da_new = da_new.unstack()
-        #
-        # # get one sample, and create a mask
-        # mask = np.int8(helpers.get_enclosed_mask(da_new[0].values))
-        # # da_fill = da_new
-        # da_fill = xr.apply_ufunc(
-        #     helpers.mask_fill,
-        #     da_new,
-        #     input_core_dims=[["y", "x"]],
-        #     output_core_dims=[["y", "x"]],
-        #     output_dtypes=da_new.dtype,
-        #     kwargs={'mask': mask},
-        #     dask='parallelized',
-        #     keep_attrs=True,
-        #     vectorize=True
-        # )  # .rename({
-
-        # get camera perspective bbox corners
-        # src = camera_config.get_bbox(
-        #     camera=True,
-        #     h_a=self.h_a
-        # ).exterior.coords[0:4]
-        # dst_xy = camera_config.get_bbox().exterior.coords[0:4]
-        # # get geographic coordinates bbox corners
-        # dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
-        # M = cv.get_M_2D(src, dst)
-        # # prepare all coordinates
-        # y = np.flipud(np.linspace(
-        #     camera_config.resolution / 2,
-        #     camera_config.resolution * (shape[0] - 0.5),
-        #     shape[0])
-        # )
-        # x = np.linspace(
-        #     camera_config.resolution / 2,
-        #     camera_config.resolution * (shape[1] - 0.5), shape[1]
-        # )
-        # cols, rows = np.meshgrid(
-        #     np.arange(len(x)),
-        #     np.arange(len(y))
-        # )
-        # # retrieve all coordinates we may ever need for further analysis or plotting
-        # xs, ys = helpers.get_xs_ys(
-        #     cols,
-        #     rows,
-        #     camera_config.transform,
-        # )
-        # if hasattr(camera_config, "crs"):
-        #     lons, lats = helpers.get_lons_lats(xs, ys, camera_config.crs)
-        # else:
-        #     lons = None
-        #     lats = None
-        # coords = {
-        #     "y": y,
-        #     "x": x,
-        # }
-        # f = xr.apply_ufunc(
-        #     cv.get_ortho, self._obj,
-        #     kwargs={
-        #         "M": M,
-        #         "shape": tuple(np.flipud(shape)),
-        #         "flags": cv2.INTER_AREA
-        #     },
-        #     input_core_dims=[["y", "x"]],
-        #     output_core_dims=[["new_y", "new_x"]],
-        #     dask_gufunc_kwargs={
-        #         "output_sizes": {
-        #             "new_y": len(y),
-        #             "new_x": len(x)
-        #         },
-        #     },
-        #     output_dtypes=[self._obj.dtype],
-        #     vectorize=True,
-        #     exclude_dims=set(("y", "x")),
-        #     dask="parallelized",
-        #     keep_attrs=True
-        # ).rename({
-        #     "new_y": "y",
-        #     "new_x": "x"
-        # })
-        # f["y"] = y
-        # f["x"] = x
         # assign coordinates
         da_proj = da_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:

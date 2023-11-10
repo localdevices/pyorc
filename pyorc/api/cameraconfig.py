@@ -409,6 +409,7 @@ class CameraConfig:
             camera: Optional[bool] = False,
             h_a: Optional[float] = None,
             within_image: Optional[bool] = False,
+            expand_exterior=True,
     ) -> Polygon:
         """
 
@@ -421,10 +422,10 @@ class CameraConfig:
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level. In case a video with higher (lower) water levels is used, this
             will result in a different perspective plane than the control video.
-        redistort : bool, optional
-            If set in combination with ``camera``, the bbox will be redistorted in the camera objective using the
-            distortion coefficients and camera matrix. Not used in orthorectification because this occurs by default
-            on already undistorted images. Typically only used for plotting purposes on original frames.
+        within_image : bool, optional (default False)
+            Set to True to make an attempt to remove parts of the polygon that lie outside of the image field of view
+        expand_exterior : bool, optional
+            Set to True to expand the corner points to more points. This is particularly useful for plotting purposes.
 
         Returns
         -------
@@ -437,7 +438,10 @@ class CameraConfig:
         """
         bbox = self.bbox
         coords = np.array(bbox.exterior.coords)
-        if within_image or camera:
+        if within_image:
+            # in this case, always more points than just corners are needed, so expand_exterior is forced to True
+            expand_exterior = True
+        if expand_exterior:
             # make a new set of bbox coordinates with a higher density. This is meant to enable plotting of distortion on
             # image frame, and to plot partial coverage in the real-world coordinates
             coords_expand = np.zeros((0, 2))
@@ -1065,7 +1069,6 @@ class CameraConfig:
             camera: Optional[bool] = False,
             transformer: Optional[Any] = None,
             h_a: Optional[float] = None,
-            redistort: Optional[bool] = True,
             within_image: Optional[bool] = True,
             **kwargs
     ):
@@ -1091,7 +1094,7 @@ class CameraConfig:
         p : matplotlib.patch mappable
         """
         # collect information to plot
-        bbox = self.get_bbox(camera=camera, h_a=h_a, redistort=redistort, within_image=within_image)
+        bbox = self.get_bbox(camera=camera, h_a=h_a, within_image=within_image)
         if camera is False and transformer is not None:
             # geographical projection is needed
             bbox = ops.transform(transformer, bbox)
