@@ -419,8 +419,6 @@ Camera configuration: {:s}
             cap,
             rotation=self.rotation,
             ms=self.ms[n] if self.ms else None,
-            camera_matrix=self.camera_config.camera_matrix if self.camera_config else None,
-            dist_coeffs=self.camera_config.dist_coeffs if self.camera_config else None,
             method=method
         )
         self.frame_count = n + 1
