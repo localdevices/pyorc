@@ -160,6 +160,13 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     help="Stabilize the videos using this camera configuration (you can provide a stable area in an interactive view)."
 
 )
+@click.option(
+    "--rotation",
+    type=int,
+    required=False,
+    callback=cli_utils.validate_rotation,
+    help="Provide a rotation of either 90, 180 or 170 degrees if needed to correctly rotate the video",
+)
 @verbose_opt
 @click.pass_context
 @typechecked
@@ -180,6 +187,7 @@ def camera_config(
         shapefile: Optional[str],
         corners: Optional[List[List]],
         stabilize: Optional[bool],
+        rotation: Optional[int],
         verbose: int
 ):
     log_level = max(10, 20 - 10 * verbose)
@@ -220,6 +228,7 @@ def camera_config(
                 crs_gcps=crs_gcps,
                 frame_sample=frame_sample,
                 lens_position=lens_position,
+                rotation=rotation,
                 logger=logger
             )
             if len(src) != len(dst):
@@ -244,13 +253,15 @@ def camera_config(
                 frame_sample=frame_sample,
                 camera_matrix=camera_matrix,
                 dist_coeffs=dist_coeffs,
+                rotation=rotation,
                 logger=logger
             )
     if stabilize:
         stabilize = cli_utils.get_stabilize_pol(
             videofile,
             frame_sample=frame_sample,
-            logger=logger
+            rotation=rotation,
+            logger=logger,
         )
     else:
         stabilize=None
@@ -266,7 +277,9 @@ def camera_config(
         corners=corners,
         camera_matrix=camera_matrix,
         dist_coeffs=dist_coeffs,
-        stabilize=stabilize
+        stabilize=stabilize,
+        rotation=rotation,
+
     )
     logger.info(f"Camera configuration created and stored in {output}")
 
@@ -326,9 +339,25 @@ def camera_config(
 
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, lowmem, verbose):
+def velocimetry(
+        ctx,
+        output,
+        videofile,
+        recipe,
+        cameraconfig,
+        prefix,
+        h_a,
+        update,
+        lowmem,
+        verbose
+):
     log_level = max(10, 20 - 10 * verbose)
-    logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
+    logger = log.setuplog(
+        "velocimetry",
+        os.path.abspath("pyorc.log"),
+        append=False,
+        log_level=log_level
+    )
     logger.info(f"Preparing your velocimetry result in {output}")
     # load in recipe and camera config
     pyorc.service.velocity_flow(

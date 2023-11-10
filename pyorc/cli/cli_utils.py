@@ -23,9 +23,10 @@ def get_corners_interactive(
         frame_sample=0.,
         camera_matrix=None,
         dist_coeffs=None,
+        rotation=None,
         logger=logging,
 ):
-    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
+    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1, rotation=rotation)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     src = gcps["src"]
@@ -40,7 +41,8 @@ def get_corners_interactive(
         gcps=gcps,
         crs=crs,
         camera_matrix=camera_matrix,
-        dist_coeffs=dist_coeffs
+        dist_coeffs=dist_coeffs,
+        rotation=rotation,
     )
     selector = AoiSelect(frame, src, dst, cam_config, logger=logger)
     # uncomment below to test the interaction, not suitable for automated unit test
@@ -50,8 +52,17 @@ def get_corners_interactive(
     # setup a cam_config without
 
 
-def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0, lens_position=None, logger=logging):
-    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
+def get_gcps_interactive(
+        fn,
+        dst,
+        crs=None,
+        crs_gcps=None,
+        frame_sample=0,
+        lens_position=None,
+        rotation=None,
+        logger=logging
+):
+    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1, rotation=rotation)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
     if crs_gcps is not None:
@@ -64,9 +75,10 @@ def get_gcps_interactive(fn, dst, crs=None, crs_gcps=None, frame_sample=0, lens_
 def get_stabilize_pol(
         fn,
         frame_sample=0,
+        rotation=None,
         logger=logging
 ):
-    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1)
+    vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1, rotation=rotation)
     frame = vid.get_frame(0, method="rgb")
     selector = StabilizeSelect(frame, logger=logger)
     plt.show(block=True)
@@ -101,7 +113,7 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
     # once optimized, solve the perspective, and estimate the GCP locations with the perspective rot/trans
     coord_mean = np.array(_dst).mean(axis=0)
     _src = np.float32(src)
-    _dst = np.float32(_dst) - coord_mean
+    _dst = np.float32(np.array(_dst) - coord_mean)
     success, rvec, tvec = cv2.solvePnP(_dst, _src, camera_matrix, np.array(dist_coeffs))
 
     # estimate source point location
@@ -150,6 +162,11 @@ def validate_dir(ctx, param, value):
         os.makedirs(value)
     return value
 
+def validate_rotation(ctx, param, value):
+    if value is not None:
+        if not(value in [90, 180, 270, None]):
+            raise click.UsageError(f"Rotation value must be either 90, 180 or 270")
+        return value
 
 def parse_camconfig(ctx, param, camconfig_file):
     """

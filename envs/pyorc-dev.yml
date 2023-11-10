@@ -10,12 +10,14 @@ dependencies:
   - cartopy
   - dask
   - descartes
+  - flox
   - geojson
   - geopandas
   - geos
   - jupyter
   - matplotlib
   - netCDF4
+  - numba
   - numpy
   - opencv
   - pip

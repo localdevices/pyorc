@@ -12,7 +12,7 @@ import xarray as xr
 
 from typing import List, Optional, Union
 
-from .. import cv, const
+from .. import cv, const, helpers
 from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
 
 
@@ -44,7 +44,7 @@ Camera configuration: {:s}
             freq: Optional[int] = 1,
             stabilize: Optional[List[List]] = None,
             lazy: bool = True
-
+            rotation: Optional[int] = None,
     ):
         """
         Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
@@ -74,6 +74,8 @@ Camera configuration: {:s}
             If set, frames are read lazily. This slows down the processing, but makes interaction with large videos
             easier and consuming less memory. For operational processing with short videos, it is recommended to set
             this explicitly to False.
+        rotation : int, optional
+            can be 0, 90, 180, 270. If provided, images will be forced to rotate along the provided angle.
         """
         assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
@@ -149,9 +151,16 @@ Camera configuration: {:s}
             # select the right recipe dependent on the movie being fixed or moving
             self.get_ms(cap)
 
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        if rotation is None:
+            rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
+            if rotation in [90, 270]:
+                # fix a bug in the cv2 code, that rotates portrait videos in the wrong direction
+                rotation = 180
+        self.rotation = rotation
         # set other properties
         self.h_a = h_a
-        # make camera config part of the vidoe object
+        # make camera config part of the video object
         self.fn = fn
         self._stills = {}  # here all stills are stored lazily
         # nothing to be done at this stage, release file for now.
@@ -355,9 +364,15 @@ Camera configuration: {:s}
     ):
         self._corners = corners
 
+
     @property
     def rotation(self):
-        return self._rotation
+        if self._rotation is not None:
+            return self._rotation
+        elif hasattr(self, "camera_config"):
+            if hasattr(self.camera_config, "rotation"):
+                return helpers.get_rotation_code(self.camera_config.rotation)
+
 
     @rotation.setter
     def rotation(
@@ -365,13 +380,10 @@ Camera configuration: {:s}
             rotation_code: int
     ):
         """
-        Solves a likely bug in OpenCV (4.6.0) that straight up videos rotate in the wrong direction. Tested for both
-        90 degree and 270 degrees rotation videos on several smartphone (iPhone and Android)
+        Set rotation from integer in the form of OpenCV rotation codes
         """
-        if rotation_code in [90, 270]:
-            self._rotation = cv2.ROTATE_180
-        else:
-            self._rotation = None
+        self._rotation = helpers.get_rotation_code(rotation_code)
+
 
     def get_frame(
             self,
@@ -411,31 +423,6 @@ Camera configuration: {:s}
             dist_coeffs=self.camera_config.dist_coeffs if self.camera_config else None,
             method=method
         )
-        # try:
-        #     ret, img = cap.read()
-        #     if self.rotation is not None:
-        #         img = cv2.rotate(img, self.rotation)
-        # except:
-        #     raise IOError(f"Cannot read")
-        # if ret:
-        #     if self.ms is not None:
-        #         img = cv.transform(img, self.ms[n])
-        #     # apply lens distortion correction
-        #     if hasattr(self, "camera_config"):
-        #         img = cv.undistort_img(
-        #             img,
-        #             self.camera_config.camera_matrix,
-        #             self.camera_config.dist_coeffs
-        #         )
-        #     if method == "grayscale":
-        #         # apply gray scaling, contrast- and gamma correction
-        #         # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
-        #         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # mean(axis=2)
-        #     elif method == "rgb":
-        #         # turn bgr to rgb for plotting purposes
-        #         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        #     elif method == "hsv":
-        #         img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         self.frame_count = n + 1
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         cap.release()
@@ -482,12 +469,12 @@ Camera configuration: {:s}
             da_stack = self.frames
 
         # undistort source control points
-        if hasattr(camera_config, "gcps"):
-            camera_config.gcps["src"] = cv.undistort_points(
-                camera_config.gcps["src"],
-                camera_config.camera_matrix,
-                camera_config.dist_coeffs,
-            )
+        # if hasattr(camera_config, "gcps"):
+        #     camera_config.gcps["src"] = cv.undistort_points(
+        #         camera_config.gcps["src"],
+        #         camera_config.camera_matrix,
+        #         camera_config.dist_coeffs,
+        #     )
         time = np.array(
             self.time) * 0.001  # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)

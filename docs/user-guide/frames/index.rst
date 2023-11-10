@@ -145,7 +145,10 @@ Orthoprojection
 ---------------
 As you supply a camera configuration to the video, *pyorc* is aware how frames must be reprojected to provide an
 orthorectified image. Typically orthorectification is the last step before estimating surface velocities from the
-frame pairs.
+frame pairs. Currently we have two approaches for orthoprojection. The first method ``method="cv"`` uses solely OpenCV
+functionality. Our new method ``method="numpy"`` relies on numpy and xarray functionalities and is likely to provide
+much more stable results in cases where the camera lens has a strong distortion and/or a part of the area of interest
+lies outside of the field of view. In these cases we strongly recommend using ``method="numpy"``.
 
 .. tab-set::
 
@@ -156,7 +159,8 @@ frame pairs.
         of the projected end result at this stage. If you leave any specifics about the projection out of your recipe,
         then *pyorc* will assume that you want to use the resolution specified in the camera configuration file. If
         however you wish to manipulate the resolution in the recipe then you can do this by using the following
-        keys and values (with an example for 0.1 meter resolution):
+        keys and values (with an example for 0.1 meter resolution). We here also show how to change the resampling
+        method to numpy (instead of the default cv):
 
         .. code-block:: yaml
 
@@ -166,10 +170,13 @@ frame pairs.
                 ...
                 project:
                     resolution: 0.1
+                    method: numpy
 
     .. tab-item:: API
 
         Projection is performed with the ``project`` method, described in the :ref:`frames API section <frames>`.
+
+.. note:: we will likely change our default projection method to numpy in a future release of *pyorc*.
 
 Exporting results to video
 --------------------------

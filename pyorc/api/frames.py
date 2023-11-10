@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
 import xarray as xr
+from flox.xarray import xarray_reduce
 
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 from tqdm import tqdm
+
+import pyorc.project
 from .orcbase import ORCBase
 from .plot import _frames_plot
 from .. import cv, helpers, const, piv_process
@@ -86,8 +89,8 @@ class Frames(ORCBase):
             lats = None
 
         # new approach to getting M (from bbox coordinates)
-        src = camera_config.get_bbox(camera=True, h_a=self.h_a).exterior.coords[0:4]
-        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
+        src = camera_config.get_bbox(camera=True, h_a=self.h_a, expand_exterior=False).exterior.coords[0:4]
+        dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
         # get geographic coordinates bbox corners
         dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
         M = cv.get_M_2D(src, dst, reverse=True)
@@ -152,16 +155,30 @@ class Frames(ORCBase):
         ds.velocimetry.set_encoding()
         return ds
 
-    def project(self, resolution=None):
+    def project(self, method="cv", resolution=None, **kwargs):
         """Project frames into a projected frames object, with information from the camera_config attr.
         This requires that the CameraConfig contains full gcp information. If a CRS is provided, also "lat" and "lon"
         variables will be added to the output, containing geographical latitude and longitude coordinates.
 
         Parameters
         ----------
+        method : str, optional
+            can be `numpy` or `cv`. Currently `cv` is still default but this may change in a future release.
+            With `cv` (opencv) resampling is performed by first undistorting images, and then by resampling to the
+            desired grid. With heavily distorted images and part of the area of interest outside of the field
+            of view, the orthoprojection of the corners may end up in the wrong space. With `numpy` each individual
+            image coordinate is mapped to the orthoprojected space, making the projection much more robust.
+            We recommend switching to `numpy` if you experience strange results with `cv`.
         resolution : float, optional
             resolution to project to. If not provided, this will be taken from the camera config in the metadata
              (Default value = None)
+        **kwargs: dict, optional
+            keyword arguments that can be passed to the different projection methods. Currently only used when
+            `method="numpy"`. kwargs in this case can be `stride` (sampling space used to estimate the real-world
+            location of each pixel) and `radius` (maximum search radius in pixels to use to fill in missing values
+            in areas with undersampling after interpolation. `stride` defaults to 10 anbd normally should not be changed.
+            `radius` defaults to 5. If a larger radius is needed, you are likely undersampling too much. Under normal
+            situations, these values should not be altered.
 
         Returns
         -------
@@ -169,42 +186,32 @@ class Frames(ORCBase):
              projected frames and x and y in local coordinate system (origin: top-left), lat and lon if a crs was
              provided.
         """
-        camera_config = copy.deepcopy(self.camera_config)
+        cc = copy.deepcopy(self.camera_config)
         if resolution is not None:
-            camera_config.resolution = resolution
+            cc.resolution = resolution
         # convert bounding box coords into row/column space
-        shape = camera_config.shape
-        # get camera perspective bbox corners
-        src = camera_config.get_bbox(
-            camera=True,
-            h_a=self.h_a
-        ).exterior.coords[0:4]
-        dst_xy = camera_config.get_bbox().exterior.coords[0:4]
-        # get geographic coordinates bbox corners
-        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
-        M = cv.get_M_2D(src, dst)
-        # prepare all coordinates
+        shape = cc.shape
+        # prepare y and x axis of targfet
         y = np.flipud(np.linspace(
-            camera_config.resolution / 2,
-            camera_config.resolution * (shape[0] - 0.5),
+            cc.resolution / 2,
+            cc.resolution * (shape[0] - 0.5),
             shape[0])
         )
         x = np.linspace(
-            camera_config.resolution / 2,
-            camera_config.resolution * (shape[1] - 0.5), shape[1]
+            cc.resolution / 2,
+            cc.resolution * (shape[1] - 0.5), shape[1]
         )
         cols, rows = np.meshgrid(
             np.arange(len(x)),
             np.arange(len(y))
         )
-        # retrieve all coordinates we may ever need for further analysis or plotting
         xs, ys = helpers.get_xs_ys(
             cols,
             rows,
-            camera_config.transform,
+            cc.transform,
         )
-        if hasattr(camera_config, "crs"):
-            lons, lats = helpers.get_lons_lats(xs, ys, camera_config.crs)
+        if hasattr(cc, "crs"):
+            lons, lats = helpers.get_lons_lats(xs, ys, cc.crs)
         else:
             lons = None
             lats = None
@@ -212,41 +219,28 @@ class Frames(ORCBase):
             "y": y,
             "x": x,
         }
-        f = xr.apply_ufunc(
-            cv.get_ortho, self._obj,
-            kwargs={
-                "M": M,
-                "shape": tuple(np.flipud(shape)),
-                "flags": cv2.INTER_AREA
-            },
-            input_core_dims=[["y", "x"]],
-            output_core_dims=[["new_y", "new_x"]],
-            dask_gufunc_kwargs={
-                "output_sizes": {
-                    "new_y": len(y),
-                    "new_x": len(x)
-                },
-            },
-            output_dtypes=[self._obj.dtype],
-            vectorize=True,
-            exclude_dims=set(("y", "x")),
-            dask="parallelized",
-            keep_attrs=True
-        ).rename({
-            "new_y": "y",
-            "new_x": "x"
-        })
-        f["y"] = y
-        f["x"] = x
+        ## PROJECTION PREPARATIONS
+        # ========================
+        z = cc.get_z_a(self.h_a)
+        if not(hasattr(pyorc.project, f"project_{method}")):
+            raise ValueError(f"Selected projection method {method} does not exist.")
+        proj_method = getattr(pyorc.project, f"project_{method}")
+        da_proj = proj_method(
+            self._obj,
+            cc,
+            x,
+            y,
+            z,
+            **kwargs
+        )
         # assign coordinates
-        f = f.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
-        if "rgb" in f.dims and len(f.dims) == 4:
+        da_proj = da_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
             # ensure that "rgb" is the last dimension
-            f = f.transpose("time", "y", "x", "rgb")
+            da_proj = da_proj.transpose("time", "y", "x", "rgb")
         # in case resolution was changed, overrule the camera_config attribute
-        f.attrs.update(camera_config=camera_config.to_json())
-
-        return f
+        da_proj.attrs.update(camera_config=cc.to_json())
+        return da_proj
 
     def landmask(self, dilate_iter=10, samples=15):
         """Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much

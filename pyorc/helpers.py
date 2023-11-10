@@ -8,9 +8,11 @@ import xarray as xr
 from pyproj import Transformer
 from rasterio.transform import Affine, xy
 from rasterio.crs import CRS
-from rasterio import warp
+from rasterio import warp, fill
+
 from scipy.optimize import differential_evolution
-from scipy.signal import convolve2d
+from scipy.signal import convolve2d, fftconvolve
+from scipy.ndimage import binary_fill_holes
 from scipy.interpolate import interp1d
 
 
@@ -158,6 +160,56 @@ def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
     return ax
 
 
+def get_enclosed_mask(data, stride=2):
+    """
+    Creates a zero/one binary mask that can be used to fill holes.
+    The function fills holes in yes/no finite data in a numpy array with data and nans and
+    only fills where NaN areas are entirely enclosed by finite values.
+
+    Parameters
+    ----------
+    data : 2D numpy array
+        dataset for which mask should be created
+    stride : int, optional
+        amount of cells that will be parsed at the edges to ensure holes at edges are also filled.
+
+    Returns
+    -------
+    mask : 2D numpy array
+        zero/one array containing which areas are expected to contain data after filling procedures
+
+
+    """
+    mask = np.zeros(data.shape)
+    mask[np.isfinite(data)] = 1
+
+    # explode mask by one pixel in all directions
+    mask_edge = np.minimum(fftconvolve(mask,  np.ones((stride*2 + 1, stride*2 + 1))), 1)
+
+    # mask_edge = np.minimum(convolve2d(np.ones((stride*2 + 1, stride*2 + 1)), mask), 1)
+    mask_edge[stride:-stride, stride:-stride] = mask
+
+    # fill holes of areas that are entirely enclosed
+    mask_edge_fill = binary_fill_holes(mask_edge)
+
+    mask_fill = np.int8(mask_edge_fill[stride:-stride, stride:-stride])
+    mask_fill[mask_fill == 0] = -1
+    mask_fill[mask_fill == 1 & np.isnan(data)] = 0
+    return mask_fill
+
+def get_rotation_code(rotation_code):
+    if not (rotation_code in [0, 90, 180, 270, None]):
+        raise ValueError(f"Rotation code must be in allowed codes 0, 90, 180 or 270. Provided code is {rotation_code}")
+    if rotation_code == 90:
+        return cv2.ROTATE_90_CLOCKWISE
+    elif rotation_code == 180:
+        return cv2.ROTATE_180
+    elif rotation_code == 270:
+        return cv2.ROTATE_90_COUNTERCLOCKWISE
+    else:
+        return None
+
+
 def get_xs_ys(cols, rows, transform):
     """Computes rasters of x and y coordinates, based on row and column counts and a defined transform.
 
@@ -241,6 +293,100 @@ def log_profile(X, z0, k_max, s0=0., s1=0.):
     k = k_max * np.minimum(np.maximum((s - s0) / (s1 - s0), 0), 1)
     v = k * np.maximum(np.log(np.maximum(z, 1e-6) / z0), 0)
     return v
+
+
+def pixel_to_map(cols, rows, transform):
+    """
+
+    transform.xy replacement in numpy using rasterio.transform order. This is much faster than rasterio
+
+    Parameters
+    ----------
+    cols : columns set
+    rows : rows set
+    transform : array-like or transform object
+        transform of raster
+
+    Returns
+    -------
+    xs : array-like
+        x-coordinates
+    ys : array-like
+        y-coordinates
+
+    """
+    # Affine transformation (assuming transform is the raster's transform)
+    x_map = transform[2] + rows * transform[1] + cols * transform[0]
+    y_map = transform[5] + rows * transform[4] + cols * transform[3]
+
+    return x_map, y_map
+
+
+def map_to_pixel(xs, ys, transform):
+    """
+    transform.rowcol replacement in numpy using rasterio.transform order. This is much faster than rasterio
+
+    Parameters
+    ----------
+    xs : x-coordinates
+    ys : y-coordinates
+    transform : array-like or transform object
+        transform of raster
+
+    Returns
+    -------
+    rows : array-like
+        row coordinates
+    cols : array-like
+        column coordinates
+
+    """
+
+    # Calculate the determinant of the upper-left 2x2 submatrix
+    det = transform[1] * transform[3] - transform[0] * transform[4]
+
+    # Calculate the inverse of the upper-left 2x2 submatrix
+    inv_det = 1.0 / det
+    inv_transform = [
+        transform[3] * inv_det,
+        -transform[0] * inv_det,
+        -transform[4] * inv_det,
+        transform[1] * inv_det
+    ]
+
+    # Calculate the offsets
+    dx = xs - transform[2]
+    dy = ys - transform[5]
+
+    # Calculate the pixel coordinates
+    row = np.int64(np.round(inv_transform[0] * dx + inv_transform[1] * dy))
+    col = np.int64(np.round(inv_transform[2] * dx + inv_transform[3] * dy))
+
+    return row, col
+
+
+def mask_fill(data, mask, radius=5):
+    """
+    Fills data where np.nan is found, if mask at those location is zero. Areas where mask is one are used
+    to fill up these areas. Areas where mask is -1 are not filled and kept np.nan
+
+    Parameters
+    ----------
+    data : np.ndarray (2D)
+        data values with possibly np.nan values to fill
+    mask : np.ndarray (2D, type int8)
+        mask values to apply, either -1, 0 or 1
+
+    Returns
+    -------
+    data_fill : np.ndarray (2D)
+        data filled
+
+    """
+    mask[np.isfinite(data)] = 1
+    data_fill = copy.deepcopy(fill.fillnodata(data, mask=mask == 1, max_search_distance=radius))
+    data_fill[mask == -1] = 0
+    return data_fill
 
 
 def mse(pars, func, X, Y):
