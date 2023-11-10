@@ -365,7 +365,7 @@ def map_to_pixel(xs, ys, transform):
     return row, col
 
 
-def mask_fill(data, mask):
+def mask_fill(data, mask, radius=5):
     """
     Fills data where np.nan is found, if mask at those location is zero. Areas where mask is one are used
     to fill up these areas. Areas where mask is -1 are not filled and kept np.nan
@@ -384,7 +384,7 @@ def mask_fill(data, mask):
 
     """
     mask[np.isfinite(data)] = 1
-    data_fill = copy.deepcopy(fill.fillnodata(data, mask=mask == 1, max_search_distance=5))
+    data_fill = copy.deepcopy(fill.fillnodata(data, mask=mask == 1, max_search_distance=radius))
     data_fill[mask == -1] = 0
     return data_fill
 

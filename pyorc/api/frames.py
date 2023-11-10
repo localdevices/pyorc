@@ -162,9 +162,23 @@ class Frames(ORCBase):
 
         Parameters
         ----------
+        method : str, optional
+            can be `numpy` or `cv`. Currently `cv` is still default but this may change in a future release.
+            With `cv` (opencv) resampling is performed by first undistorting images, and then by resampling to the
+            desired grid. With heavily distorted images and part of the area of interest outside of the field
+            of view, the orthoprojection of the corners may end up in the wrong space. With `numpy` each individual
+            image coordinate is mapped to the orthoprojected space, making the projection much more robust.
+            We recommend switching to `numpy` if you experience strange results with `cv`.
         resolution : float, optional
             resolution to project to. If not provided, this will be taken from the camera config in the metadata
              (Default value = None)
+        **kwargs: dict, optional
+            keyword arguments that can be passed to the different projection methods. Currently only used when
+            `method="numpy"`. kwargs in this case can be `stride` (sampling space used to estimate the real-world
+            location of each pixel) and `radius` (maximum search radius in pixels to use to fill in missing values
+            in areas with undersampling after interpolation. `stride` defaults to 10 anbd normally should not be changed.
+            `radius` defaults to 5. If a larger radius is needed, you are likely undersampling too much. Under normal
+            situations, these values should not be altered.
 
         Returns
         -------

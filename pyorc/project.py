@@ -33,6 +33,26 @@ def project_cv(da, cc, x, y, z):
         Reprojected Frames
 
     """
+    da_undistort = xr.apply_ufunc(
+        cv.undistort_img,
+        da,
+        input_core_dims=[["y", "x"]],
+        output_core_dims=[["y", "x"]],
+        output_dtypes=da.dtype,
+        kwargs={
+            "camera_matrix": cc.camera_matrix,
+            "dist_coeffs": cc.dist_coeffs
+        },
+        dask='parallelized',
+        keep_attrs=True,
+        vectorize=True
+    )  # .rename({
+    # also undistort the src control points
+    cc.gcps["src"] = cv.undistort_points(
+        cc.gcps["src"],
+        cc.camera_matrix,
+        cc.dist_coeffs
+    )
     h_a = cc.z_to_h(z)
     src = cc.get_bbox(
         camera=True,
@@ -48,7 +68,7 @@ def project_cv(da, cc, x, y, z):
     )
     M = cv.get_M_2D(src, dst)
     da_proj = xr.apply_ufunc(
-        cv.get_ortho, da,
+        cv.get_ortho, da_undistort,
         kwargs={
             "M": M,
             "shape": tuple(np.flipud(cc.shape)),
@@ -76,7 +96,7 @@ def project_cv(da, cc, x, y, z):
     return da_proj
 
 
-def project_numpy(da, cc, x, y, z, stride=10):
+def project_numpy(da, cc, x, y, z, stride=10, radius=5):
     """
     Projection method that goes from pixels directly to target grid, including undistortion and projection
     using a lookup method across the grid.
@@ -153,13 +173,34 @@ def project_numpy(da, cc, x, y, z, stride=10):
     # remaining problem is that the above indexes may be limited to only a few, and cannot be coerced to the grid that we would like.
     # So we make a lazy array of the new interpolated shape. But now we stack this array over y and x, so that we can paste the
     # interpolated values onto the new array. All to be kept lazy (chunk 1 time step) to prevent memory issues.
+    coords = {
+        "time": da.time,
+        "y": y,
+        "x": x
+    }
+    if "rgb" in da.coords:
+        chunks = (1, None, None, None)
+        coords["rgb"] = da.rgb
+        shape = (
+            len(da),
+            len(y),
+            len(x),
+            3
+        )
+    else:
+        chunks = (1, None, None)
+        shape = (
+            len(da),
+            len(y),
+            len(x),
+        )
     da_new = xr.DataArray(
-        dask.array.zeros((len(da), len(y), len(x)), chunks=(1, None, None), dtype=da.dtype) * np.nan,
-        coords={
-            "time": da.time,
-            "y": y,
-            "x": x
-        },
+        dask.array.zeros(
+            shape,
+            chunks=chunks,
+            dtype=da.dtype
+        ) * np.nan,
+        coords=coords,
         name="project_frames",
         attrs=da.attrs
     ).stack(group=("y", "x"))
@@ -168,11 +209,16 @@ def project_numpy(da, cc, x, y, z, stride=10):
     # assign the values to the relevant ids
     da_point["group"] = idxs
     # da_new
-    da_new[:, np.unique(da_idx)] = da_point
+    if "rgb" in da_new.coords:
+        da_new[:, :, np.unique(da_idx)] = da_point
+        # get one sample, and create a mask
+        mask = np.int8(helpers.get_enclosed_mask(da_new[0][0].unstack().values))
+    else:
+        da_new[:, np.unique(da_idx)] = da_point
+        # get one sample, and create a mask
+        mask = np.int8(helpers.get_enclosed_mask(da_new[0].unstack().values))
     da_new = da_new.unstack()
 
-    # get one sample, and create a mask
-    mask = np.int8(helpers.get_enclosed_mask(da_new[0].values))
     # da_fill = da_new
     da_fill = xr.apply_ufunc(
         helpers.mask_fill,
@@ -180,9 +226,12 @@ def project_numpy(da, cc, x, y, z, stride=10):
         input_core_dims=[["y", "x"]],
         output_core_dims=[["y", "x"]],
         output_dtypes=da.dtype,
-        kwargs={'mask': mask},
+        kwargs={
+            "mask": mask,
+            "radius": radius
+        },
         dask='parallelized',
         keep_attrs=True,
         vectorize=True
-    )  # .rename({
+    )
     return da_fill
