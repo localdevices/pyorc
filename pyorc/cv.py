@@ -641,8 +641,6 @@ def get_frame(
         cap,
         rotation=None,
         ms=None,
-        camera_matrix=None,
-        dist_coeffs=DIST_COEFFS,
         method="grayscale"
 ):
     try:
@@ -655,12 +653,6 @@ def get_frame(
         if ms is not None:
             img = transform(img, ms)
         # apply lens distortion correction
-        if camera_matrix:
-            img = undistort_img(
-                img,
-                camera_matrix,
-                dist_coeffs
-            )
         if method == "grayscale":
             # apply gray scaling, contrast- and gamma correction
             # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
