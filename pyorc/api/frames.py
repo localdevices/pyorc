@@ -10,6 +10,8 @@ from flox.xarray import xarray_reduce
 
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 from tqdm import tqdm
+
+import pyorc.project
 from .orcbase import ORCBase
 from .plot import _frames_plot
 from .. import cv, helpers, const, piv_process
@@ -153,7 +155,7 @@ class Frames(ORCBase):
         ds.velocimetry.set_encoding()
         return ds
 
-    def project(self, resolution=None):
+    def project(self, method="cv", resolution=None, **kwargs):
         """Project frames into a projected frames object, with information from the camera_config attr.
         This requires that the CameraConfig contains full gcp information. If a CRS is provided, also "lat" and "lon"
         variables will be added to the output, containing geographical latitude and longitude coordinates.
@@ -203,91 +205,110 @@ class Frames(ORCBase):
             "y": y,
             "x": x,
         }
-
         ## PROJECTION PREPARATIONS
         # ========================
+        z = cc.get_z_a(self.h_a)
+        # da_proj = pyorc.project.project_numpy(
+        #     self._obj,
+        #     cc,
+        #     x,
+        #     y,
+        #     z,
+        #     **kwargs
+        # )
+        da_proj = pyorc.project.project_cv(
+            self._obj,
+            cc,
+            x,
+            y,
+            z,
+        )
         # retrieve all real-world coordinates of the image frame
         # try to unproject points in the image to a water level plain surface
-        coli, rowi = np.meshgrid(
-            np.arange(cc.width),
-            np.arange(cc.height)
-        )
-
-        src_pix = list(zip(coli.flatten(), rowi.flatten()))
-        z = cc.gcps["z_0"]
-        dst_pix = cc.unproject_points(
-            src_pix,
-            cc.get_z_a(self.h_a)
-        )
-        x_pix, y_pix, z_pix = list(zip(*dst_pix))
-
-        # translate the real-world coordinates to row and columns in target grid
-        idx_y, idx_x = rasterio.transform.rowcol(cc.transform, x_pix, y_pix)
-        idx_y = np.array(idx_y)
-        idx_x = np.array(idx_x)
-
-        # any location outside of the target grid should become a miss
-        miss = np.any([idx_x >= shape[1], idx_x < 0, idx_y >= shape[0], idx_y < 0], axis=0)
-
-        # flatten to 1D-indexes
-        idx = np.array(idx_y) * shape[1] + np.array(idx_x)
-
-        # ensure that indexes outside of area of interest are set to -1.
-        idx[miss] = -1
-
-        # reshape indexes to the source grid. Now we know of each pixel in source, where it belongs in target
-        idx = idx.reshape(*coli.shape)
-
-        # turn idx grid into a DataArray
-        da_idx = xr.DataArray(
-            idx,
-            dims=("y", "x"),
-            name="group",
-            coords={
-                "y": self._obj.y.values,
-                "x": self._obj.x.values
-            },
-        )
-        # retrieve unique values from this
-        classes = np.unique(da_idx)
-        # now we simply group the frames by all the indexes and then take the mean of all identified points per index
-        da_point = xarray_reduce(
-            self._obj, da_idx, func="mean", expected_groups=classes,
-        )
-        # remaining problem is that the above indexes may be limited to only a few, and cannot be coerced to the grid that we would like.
-        # So we make a lazy array of the new interpolated shape. But now we stack this array over y and x, so that we can paste the
-        # interpolated values onto the new array. All to be kept lazy (chunk 1 time step) to prevent memory issues.
-        da_new = xr.DataArray(
-            dask.array.zeros((len(self._obj), *shape), chunks=(1, None, None)) * np.nan,
-            coords={
-                "time": self._obj.time,
-                "y": y,
-                "x": x
-            },
-            name="project_frames"
-        ).stack(group=("y", "x"))
-        idxs = da_new.group.isel(group=np.unique(da_idx))
-
-        # assign the values to the relevant ids
-        da_point["group"] = idxs
-        # da_new
-        da_new[:, np.unique(da_idx)] = da_point
-        da_new = da_new.unstack()
-
-        # get one sample, and create a mask
-        mask = np.int8(helpers.get_enclosed_mask(da_new[0].values))
-
-        da_fill = xr.apply_ufunc(
-            helpers.mask_fill,
-            da_new,
-            input_core_dims=[["y", "x"]],
-            output_core_dims=[["y", "x"]],
-            output_dtypes=da_new.dtype,
-            kwargs={'mask': mask},
-            dask='parallelized',
-            keep_attrs=True,
-            vectorize=True
-        )  # .rename({
+        # coli, rowi = np.meshgrid(
+        #     np.arange(cc.width),
+        #     np.arange(cc.height)
+        # )
+        # from scipy.interpolate import RegularGridInterpolator
+        # stride = 10
+        # src_pix = list(zip(coli[::stride, ::stride].flatten(), rowi[::stride, ::stride].flatten()))
+        # dst_pix = cc.unproject_points(
+        #     src_pix,
+        #     cc.get_z_a(self.h_a)
+        # )
+        # # x_pix, y_pix, z_pix = list(zip(*dst_pix))
+        # x_pix, y_pix, z_pix = dst_pix.T
+        # # reorganise to 2D grid
+        # x_pix = x_pix.reshape(*coli[::stride, ::stride].shape)
+        # y_pix = y_pix.reshape(*coli[::stride, ::stride].shape)
+        #
+        # # upscale
+        # interp_x = RegularGridInterpolator((rowi[::stride, 0], coli[0, ::stride]), x_pix, bounds_error=False, fill_value=None)
+        # interp_y = RegularGridInterpolator((rowi[::stride, 0], coli[0, ::stride]), y_pix, bounds_error=False, fill_value=None)
+        # x_pix_up = interp_x((rowi, coli))
+        # y_pix_up = interp_y((rowi, coli))
+        # idx_y_up, idx_x_up = helpers.map_to_pixel(x_pix_up, y_pix_up, cc.transform)
+        #
+        # # any location outside of the target grid should become a miss
+        # miss = np.any([idx_x_up >= shape[1], idx_x_up < 0, idx_y_up >= shape[0], idx_y_up < 0], axis=0)
+        #
+        # # flatten to 1D-indexes
+        # idx = np.array(idx_y_up) * shape[1] + np.array(idx_x_up)
+        #
+        # # ensure that indexes outside of area of interest are set to -1.
+        # idx[miss] = -1
+        #
+        # # reshape indexes to the source grid. Now we know of each pixel in source, where it belongs in target
+        # # idx = idx.reshape(*coli.shape)
+        #
+        # # turn idx grid into a DataArray
+        # da_idx = xr.DataArray(
+        #     idx,
+        #     dims=("y", "x"),
+        #     name="group",
+        #     coords={
+        #         "y": self._obj.y.values,
+        #         "x": self._obj.x.values
+        #     },
+        # )
+        # # retrieve unique values from this
+        # classes = np.unique(da_idx)
+        # # now we simply group the frames by all the indexes and then take the mean of all identified points per index
+        # da_point = xarray_reduce(self._obj, da_idx, func="mean", expected_groups=classes, engine="numba")
+        # # remaining problem is that the above indexes may be limited to only a few, and cannot be coerced to the grid that we would like.
+        # # So we make a lazy array of the new interpolated shape. But now we stack this array over y and x, so that we can paste the
+        # # interpolated values onto the new array. All to be kept lazy (chunk 1 time step) to prevent memory issues.
+        # da_new = xr.DataArray(
+        #     dask.array.zeros((len(self._obj), *shape), chunks=(1, None, None)) * np.nan,
+        #     coords={
+        #         "time": self._obj.time,
+        #         "y": y,
+        #         "x": x
+        #     },
+        #     name="project_frames"
+        # ).stack(group=("y", "x"))
+        # idxs = da_new.group.isel(group=np.unique(da_idx))
+        #
+        # # assign the values to the relevant ids
+        # da_point["group"] = idxs
+        # # da_new
+        # da_new[:, np.unique(da_idx)] = da_point
+        # da_new = da_new.unstack()
+        #
+        # # get one sample, and create a mask
+        # mask = np.int8(helpers.get_enclosed_mask(da_new[0].values))
+        # # da_fill = da_new
+        # da_fill = xr.apply_ufunc(
+        #     helpers.mask_fill,
+        #     da_new,
+        #     input_core_dims=[["y", "x"]],
+        #     output_core_dims=[["y", "x"]],
+        #     output_dtypes=da_new.dtype,
+        #     kwargs={'mask': mask},
+        #     dask='parallelized',
+        #     keep_attrs=True,
+        #     vectorize=True
+        # )  # .rename({
 
         # get camera perspective bbox corners
         # src = camera_config.get_bbox(
@@ -354,13 +375,13 @@ class Frames(ORCBase):
         # f["y"] = y
         # f["x"] = x
         # assign coordinates
-        da_fill = da_fill.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
-        if "rgb" in da_fill.dims and len(da_fill.dims) == 4:
+        da_proj = da_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
             # ensure that "rgb" is the last dimension
-            da_fill = da_fill.transpose("time", "y", "x", "rgb")
+            da_proj = da_proj.transpose("time", "y", "x", "rgb")
         # in case resolution was changed, overrule the camera_config attribute
-        da_fill.attrs.update(camera_config=cc.to_json())
-        return da_fill
+        da_proj.attrs.update(camera_config=cc.to_json())
+        return da_proj
 
     def landmask(self, dilate_iter=10, samples=15):
         """Attempt to mask out land from water, by assuming that the time standard deviation over mean of land is much

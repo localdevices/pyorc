@@ -6,3 +6,4 @@ from .api.velocimetry import Velocimetry
 from .api.transect import Transect
 from . import service
 from . import cli
+from .project import *
