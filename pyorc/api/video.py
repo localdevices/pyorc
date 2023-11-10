@@ -43,7 +43,7 @@ Camera configuration: {:s}
             end_frame: Optional[int] = None,
             freq: Optional[int] = 1,
             stabilize: Optional[List[List]] = None,
-            lazy: bool = True
+            lazy: bool = True,
             rotation: Optional[int] = None,
     ):
         """
@@ -133,8 +133,6 @@ Camera configuration: {:s}
             lazy=lazy,
             rotation=self.rotation,
             method="grayscale",
-            camera_matrix=self.camera_config.camera_matrix if self.camera_config else None,
-            dist_coeffs=self.camera_config.dist_coeffs if self.camera_config else None,
         )
         self.frames = frames
         # check if end_frame changed
@@ -493,9 +491,6 @@ Camera configuration: {:s}
             "camera_config": camera_config.to_json(),
             "h_a": json.dumps(self.h_a)
         }
-
-
-
         frames = xr.DataArray(
             da_stack,
             dims=dims,
