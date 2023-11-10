@@ -377,8 +377,8 @@ Camera configuration: {:s}
             if self.ms is not None:
                 img = cv.transform(img, self.ms[n])
             # apply lens distortion correction
-            if hasattr(self, "camera_config"):
-                img = cv.undistort_img(img, self.camera_config.camera_matrix, self.camera_config.dist_coeffs)
+            # if hasattr(self, "camera_config"):
+            #     img = cv.undistort_img(img, self.camera_config.camera_matrix, self.camera_config.dist_coeffs)
             if method == "grayscale":
                 # apply gray scaling, contrast- and gamma correction
                 # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
@@ -426,12 +426,12 @@ Camera configuration: {:s}
             shape=sample.shape
         ) for frame in frames]
         # undistort source control points
-        if hasattr(camera_config, "gcps"):
-            camera_config.gcps["src"] = cv.undistort_points(
-                camera_config.gcps["src"],
-                camera_config.camera_matrix,
-                camera_config.dist_coeffs,
-            )
+        # if hasattr(camera_config, "gcps"):
+        #     camera_config.gcps["src"] = cv.undistort_points(
+        #         camera_config.gcps["src"],
+        #         camera_config.camera_matrix,
+        #         camera_config.dist_coeffs,
+        #     )
         time = np.array(
             self.time) * 0.001  # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)

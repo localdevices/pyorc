@@ -3,25 +3,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 @pytest.mark.parametrize(
-    "frames, resolution, dims, shape",
+    "frames, resolution, method, dims, shape",
     [
-        (pytest.lazy_fixture("frames_grayscale"), 0.1, 3, (79, 88)),
-        (pytest.lazy_fixture("frames_grayscale"), 0.01, 3, (786, 878)),
-        (pytest.lazy_fixture("frames_grayscale"), 0.005, 3, (1572, 1756)),
-        (pytest.lazy_fixture("frames_rgb"), 0.1, 4, (79, 88, 3)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.1, "numpy", 3, (79, 88)),
+        (pytest.lazy_fixture("frames_rgb"), 0.1, "numpy", 4, (79, 88, 3)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.1, "cv", 3, (79, 88)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.01, "cv", 3, (786, 878)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.05, "cv", 3, (157, 176)),
+        (pytest.lazy_fixture("frames_rgb"), 0.1, "cv", 4, (79, 88, 3)),
     ]
 )
-def test_project(frames, resolution, dims, shape):
+def test_project(frames, resolution, method, dims, shape):
 # def test_project(frames_grayscale, resolution=0.01, dims=3, shape=(840, 1100)):
-    frames_proj = frames.frames.project(resolution=resolution)
+#     import matplotlib
+#     matplotlib.use('Qt5Agg')
+    frames_proj = frames.frames.project(resolution=resolution, method=method)
     # check amount of time steps is equal
     assert(len(frames_proj.time) == len(frames.time))
     # check if the amount of dims is as expected (different for rgb)
     assert(len(frames_proj.dims) == dims), f"Expected nr of dims is {dims}, but {len(frames_proj.dims)} found"
     # check shape of x, y grids
     assert(frames_proj.isel(time=0).shape == shape), f"Projected frames shape {frames_proj.isel(time=0).shape} do not have expected shape {shape}"
-    # import matplotlib
-    # matplotlib.use('Qt5Agg')
+
     # import matplotlib.pyplot as plt
     # plt.imshow(frames_proj[0])
     # plt.show()

@@ -1,3 +1,20 @@
+## [0.5.3] - 2023-11-10
+### Added
+`frames.project` now has a `method` option which allows for choosing projection using opencv-methods (`method="cv"`)
+which is currently still the default, or numpy-like operations (`method="numpy"`). `method="numpy"` is new and we 
+may change the default behaviour to this option in a later release as it is much more robust in cases with a lot
+of lens distortion and where part of the area of interest is outside of the field of view..
+### Changed
+Some default values for estimating the intrinsic lens parameters from control points are changed. We now estimate the 
+first two barrel distortion coefficients if enough information for constraining them is available. 
+### Deprecated
+### Removed
+### Fixed
+In some cases, ground control points were not correctly projected from real-world to camera coordinates. This seemed
+to be an issue only on windows machines. This is now fixed.
+### Security
+
+
 ## [0.5.2] - 2023-08-16
 ### Added
 `--lowmem` option added in the CLI for very large videos and/or low resource devices.

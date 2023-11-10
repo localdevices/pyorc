@@ -408,7 +408,8 @@ class CameraConfig:
             self,
             camera: Optional[bool] = False,
             h_a: Optional[float] = None,
-            redistort: Optional[bool] = False
+            within_image: Optional[bool] = False,
+            expand_exterior=True,
     ) -> Polygon:
         """
 
@@ -421,10 +422,10 @@ class CameraConfig:
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level. In case a video with higher (lower) water levels is used, this
             will result in a different perspective plane than the control video.
-        redistort : bool, optional
-            If set in combination with ``camera``, the bbox will be redistorted in the camera objective using the
-            distortion coefficients and camera matrix. Not used in orthorectification because this occurs by default
-            on already undistorted images. Typically only used for plotting purposes on original frames.
+        within_image : bool, optional (default False)
+            Set to True to make an attempt to remove parts of the polygon that lie outside of the image field of view
+        expand_exterior : bool, optional
+            Set to True to expand the corner points to more points. This is particularly useful for plotting purposes.
 
         Returns
         -------
@@ -436,20 +437,57 @@ class CameraConfig:
         This can then be used to reconstruct the grid for velocimetry calculations.
         """
         bbox = self.bbox
-        if camera:
-            coords = np.array(bbox.exterior.coords)
-            z_a = self.get_z_a(h_a)
-            if redistort:
-                # typically only done for plotting on original frame, expand number of points to be able to see distortion
-                coords_expand = np.zeros((0, 2))
-                for n in range(0, len(coords)-1):
-                    new_coords = np.linspace(coords[n], coords[n + 1], 100)
-                    coords_expand = np.r_[coords_expand, new_coords]
-                coords = coords_expand
-            coords = np.c_[coords, np.ones(len(coords))*z_a]
-            corners = self.project_points(coords)
-            bbox = Polygon(corners)
+        coords = np.array(bbox.exterior.coords)
+        if within_image:
+            # in this case, always more points than just corners are needed, so expand_exterior is forced to True
+            expand_exterior = True
+        if expand_exterior:
+            # make a new set of bbox coordinates with a higher density. This is meant to enable plotting of distortion on
+            # image frame, and to plot partial coverage in the real-world coordinates
+            coords_expand = np.zeros((0, 2))
+            for n in range(0, len(coords)-1):
+                new_coords = np.linspace(coords[n], coords[n + 1], 100)
+                coords_expand = np.r_[coords_expand, new_coords]
+            coords = coords_expand
+        z_a = self.get_z_a(h_a)
+        # add vertical coordinates to the set
+        coords = np.c_[coords, np.ones(len(coords))*z_a]
+        # project points to pixel image coordinates
+        corners = self.project_points(coords, within_image=within_image)
+        corners = corners[np.isfinite(corners[:, 0])]
+        if not(camera):
+            # project back to real-world coordinates after possibly cutting at edges of visibility
+            corners = self.unproject_points(np.array(np.array(list(zip(*corners))).T), z_a)
+            # corners = self.unproject_points(list(zip(coords[:, 0], coords[:, 1])), z_a)
+            # project points (after cutting on image edges) to geographical space
+        bbox = Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
+
         return bbox
+
+    def get_camera_coords(
+            self,
+            points: List[List],
+    ):
+        """
+        Convert real-world coordinates into camera coordinates using
+        Parameters
+        ----------
+        points : array-like list (of lists)
+            [x, y, z] real-world coordinates
+
+        Returns
+        -------
+        cam_points : np.ndarray (of points)
+            [x, y, z] camera coordinates
+        """
+        _, rvec, tvec = self.pnp
+        # get rotation matrix
+        R, _ = cv2.Rodrigues(rvec)
+
+        # convert points into array
+        points = np.array(points)
+        cam_points = np.einsum('ij,kj->ki', R, np.array(points)) + tvec.flatten()
+        return cam_points
 
     def get_depth(
             self,
@@ -821,10 +859,12 @@ class CameraConfig:
 
     def project_points(
             self,
-            points: List[List]
+            points: List[List],
+            within_image=False
     ) -> np.ndarray:
         """
-        Project real world x, y, z coordinates into col, row coordinates on image
+        Project real world x, y, z coordinates into col, row coordinates on image. If
+        col, row coordinates are not allowed to go outside of the image frame, then set within_image = True
 
         Parameters
         ----------
@@ -847,13 +887,34 @@ class CameraConfig:
             np.array(self.dist_coeffs)
         )
         points_proj = np.array([list(point[0]) for point in points_proj])
+
+        # points_back = cv.unproject_points(src=points_proj, z=points[:, -1], )
+        if within_image:
+            # back project, the ones that do not get close to the original will be removed
+            points_back = cv.unproject_points(
+                points_proj,
+                z=points[:, -1],
+                rvec=rvec,
+                tvec=tvec,
+                camera_matrix=self.camera_matrix,
+                dist_coeffs=self.dist_coeffs
+            )
+            # TODO: figure out how to filter out points that bend into the image frame according to the
+            # distortion parameters, but are in fact outside. This is not yet working the way it should
+            filter = np.all(np.isclose(np.array(points_back), np.array(points), atol=1e-2), axis=1)
+            points_proj[~filter] = np.nan
+            # also filter points outside edges of image
+            points_proj[points_proj[:, 0] < 0, 0] = 0.
+            points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width - 1
+            points_proj[points_proj[:, 1] < 0, 1] = 0.
+            points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height - 1
         return points_proj
 
 
     def unproject_points(
             self,
             points: List[List],
-            zs: List[float]
+            zs: Union[float, List[float]]
     ) -> np.ndarray:
         """
         Reverse projects points in [column, row] space to [x, y, z] real world
@@ -870,7 +931,7 @@ class CameraConfig:
         """
         _, rvec, tvec = self.pnp
         # reduce zs by the mean of the gcps
-        _zs = np.atleast_1d(zs) - self.gcps_mean[-1]
+        _zs = zs - self.gcps_mean[-1]
         dst = cv.unproject_points(
             np.array(points),
             _zs,
@@ -992,7 +1053,7 @@ class CameraConfig:
             **plot_kwargs
         }
         if hasattr(self, "bbox"):
-            self.plot_bbox(ax=ax, camera=camera, transformer=transformer, **patch_kwargs)
+            self.plot_bbox(ax=ax, camera=camera, transformer=transformer, within_image=True, **patch_kwargs)
         if camera:
             # make sure that zero is on the top
             ax.set_aspect("equal")
@@ -1008,7 +1069,7 @@ class CameraConfig:
             camera: Optional[bool] = False,
             transformer: Optional[Any] = None,
             h_a: Optional[float] = None,
-            redistort: Optional[bool] = True,
+            within_image: Optional[bool] = True,
             **kwargs
     ):
         """
@@ -1033,7 +1094,7 @@ class CameraConfig:
         p : matplotlib.patch mappable
         """
         # collect information to plot
-        bbox = self.get_bbox(camera=camera, h_a=h_a, redistort=redistort)
+        bbox = self.get_bbox(camera=camera, h_a=h_a, within_image=within_image)
         if camera is False and transformer is not None:
             # geographical projection is needed
             bbox = ops.transform(transformer, bbox)
