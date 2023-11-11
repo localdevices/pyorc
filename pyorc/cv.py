@@ -645,7 +645,7 @@ def get_frame(
 ):
     try:
         ret, img = cap.read()
-        if rotation:
+        if rotation is not None:
             img = cv2.rotate(img, rotation)
     except:
         raise IOError(f"Cannot read")
