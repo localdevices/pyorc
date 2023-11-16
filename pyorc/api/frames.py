@@ -74,8 +74,10 @@ class Frames(ORCBase):
             search_area_size=kwargs["search_area_size"],
             overlap=kwargs["overlap"]
         )
+        cols_vector = cols[0].astype(np.int64)
+        rows_vector = rows[:, 0].astype(np.int64)
         # retrieve the x and y-axis belonging to the results
-        x, y = helpers.get_axes(cols, rows, self.camera_config.resolution)
+        x, y = helpers.get_axes(cols_vector, rows_vector, frames1.x.values, frames1.y.values)
         # convert in projected and latlon coordinates
         xs, ys = helpers.get_xs_ys(
             cols,

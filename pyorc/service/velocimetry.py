@@ -1,20 +1,19 @@
 import copy
+import click
 import functools
 import logging
 import os.path
-
-import click
-
 import pyorc
+import subprocess
 import xarray as xr
 import yaml
-from pyorc.cli import cli_utils
 
+from pyorc.cli import cli_utils
 from dask.diagnostics import ProgressBar
 from matplotlib.colors import Normalize
 from typing import Dict
 
-__all__ = ["velocity_flow"]
+__all__ = ["velocity_flow", "velocity_flow_subprocess"]
 
 logger = logging.getLogger(__name__)
 
@@ -172,6 +171,7 @@ class VelocityFlowProcessor(object):
             cameraconfig: Dict,
             prefix: str,
             output: str,
+            h_a: float=None,
             update: bool=False,
             concurrency=True,
             fn_piv="piv.nc",
@@ -200,6 +200,8 @@ class VelocityFlowProcessor(object):
             if set to False, then dask will only run synchronous preventing overuse of memory. This will be slower
 
         """
+        if h_a is not None:
+            recipe["video"]["h_a"] = h_a
         self.update = update  # set to True when checks are needed if data already exists or not
         self.recipe = recipe
         self.output = output
@@ -289,7 +291,15 @@ class VelocityFlowProcessor(object):
         #     self.velocimetry_mask_obj = self.velocimetry_obj
         if "plot" in self.recipe:
             self.plot(**self.recipe["plot"])
-
+        # remove all potentially memory consumptive attributes
+        self.da_frames.close()
+        self.velocimetry_mask_obj.close()
+        self.velocimetry_obj.close()
+        delattr(self, "video_obj")
+        delattr(self, "velocimetry_obj")
+        delattr(self, "velocimetry_mask_obj")
+        delattr(self, "da_frames")
+        return None
         # TODO .get_transect and check if it contains data,
 
         #  perform any post processing such as plotting or possibly later other analyses
@@ -348,8 +358,10 @@ class VelocityFlowProcessor(object):
             delayed_obj = self.velocimetry_obj.to_netcdf(self.fn_piv, compute=False)
             with ProgressBar():
                 delayed_obj.compute()
+            del delayed_obj
             self.logger.info(f"Velocimetry written to {self.fn_piv}")
             # Load the velocimetry into memory to prevent re-writes in next steps
+            delattr(self, "velocimetry_obj")
             self.velocimetry_obj = xr.open_dataset(self.fn_piv)
 
 
@@ -370,6 +382,7 @@ class VelocityFlowProcessor(object):
             delayed_obj = self.velocimetry_mask_obj.to_netcdf(self.fn_piv_mask, compute=False)
             with ProgressBar():
                 delayed_obj.compute()
+            del delayed_obj
 
 
     @run_func_hash_io(check=False, configs=["transect"], inputs=["fn_piv_mask"])
@@ -379,10 +392,17 @@ class VelocityFlowProcessor(object):
         _kwargs = copy.deepcopy(kwargs)
         for transect_name, transect_grp in _kwargs.items():
             self.logger.debug(f'Processing transect "{transect_name}"')
-            if not "shapefile" in transect_grp:
-                raise click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile". Please add "shapefile" in the recipe file')
-            # read shapefile
-            coords, crs = cli_utils.read_shape(transect_grp["shapefile"])
+            # check if there are coordinates provided
+
+            if not ("shapefile" in transect_grp or "geojson" in transect_grp):
+                raise click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile" or '
+                                       f'"geojson". Please add "shapefile" in the recipe file')
+            # read geojson or shapefile (as alternative
+            if "geojson" in transect_grp:
+                # read directly from geojson
+                coords, crs = cli_utils.read_shape(geojson=transect_grp["geojson"])
+            elif "shapefile" in transect_grp:
+                coords, crs = cli_utils.read_shape(fn=transect_grp["shapefile"])
             self.logger.debug(f"Coordinates read for transect {transect_name}")
             # check if coords have z coordinates
             if len(coords[0]) == 2:
@@ -467,6 +487,7 @@ class VelocityFlowProcessor(object):
                 )
                 p = velocimetry_reduced.velocimetry.plot(ax=ax, mode=mode, **opts)
                 ax = p.axes
+                del velocimetry_reduced
             if "transect" in plot_params:
                 for transect_name, opts in plot_params["transect"].items():
                     opts = vmin_vmax_to_norm(opts)
@@ -479,6 +500,9 @@ class VelocityFlowProcessor(object):
                     # add to plot
                     p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
                     ax = p.axes
+                    # done with transect, remove from memory
+                    ds_trans.close()
+                    del ds_trans
             # if mode == "camera":
             #     ax.axis("equal")
             write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
@@ -491,3 +515,82 @@ def velocity_flow(**kwargs):
     processor = VelocityFlowProcessor(**kwargs)
     # process video following the settings
     processor.process()
+    # flush the processor itself once done
+    del processor
+
+
+def velocity_flow_subprocess(
+    videofile,
+    recipe,
+    cameraconfig,
+    output,
+    prefix=None,
+    h_a: float = None,
+    update: bool = False,
+    concurrency=True,
+    logger=logging
+):
+    """
+    Writes the requirements to temporary files and runs velocimetry from a separate CLI instance
+
+    Parameters
+    ----------
+    recipe : dict
+        YAML recipe, parsed from CLI
+    videofile : str
+        path to video
+    cameraconfig : dict
+        camera config as dict (not yet loaded as CamerConfig object)
+    prefix : str
+        prefix of produced output files
+    output : str
+        path to output file
+    update : bool, optional
+        if set, only update components with changed inputs and configurations
+    concurrency : bool, optional
+        if set to False, then dask will only run synchronous preventing overuse of memory. This will be slower
+
+
+    Returns
+    -------
+
+    """
+    # store recipe in file
+    logger.info(f"Launching separate pyorc instance for videofile {videofile}")
+    if not(os.path.isdir(output)):
+        os.makedirs(output)
+    fn_recipe = os.path.join(output, "recipe.yml")
+    fn_cam_config = os.path.join(output, "camera_config.json")
+    with open(fn_recipe, "w") as f:
+        yaml.dump(recipe, f, default_flow_style=False, sort_keys=False)
+    pyorc.CameraConfig(**cameraconfig).to_file(fn_cam_config)
+    cmd = [
+        "pyorc",
+        "velocimetry",
+        "-V",
+        videofile,
+        "-c",
+        fn_cam_config,
+        "-r",
+        fn_recipe
+    ]
+    # add components where needed
+    if h_a is not None:
+        cmd.append("-h")
+        cmd.append(str(h_a))
+    if concurrency == False:
+        cmd.append("--lowmem")
+    if update:
+        cmd.append("-u")
+    if prefix:
+        cmd.append("-p")
+        cmd.append(prefix)
+    cmd_suffix = [
+        "-u",
+        "-vvv",
+        output
+    ]
+    cmd = cmd + cmd_suffix
+    # call subprocess
+    result = subprocess.run(cmd)
+    return result

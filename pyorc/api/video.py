@@ -43,6 +43,7 @@ Camera configuration: {:s}
             end_frame: Optional[int] = None,
             freq: Optional[int] = 1,
             stabilize: Optional[List[List]] = None,
+            lazy: bool = True,
             rotation: Optional[int] = None,
     ):
         """
@@ -69,6 +70,10 @@ Camera configuration: {:s}
             set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
             The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no
             stabilization will be performed
+        lazy : bool, optional
+            If set, frames are read lazily. This slows down the processing, but makes interaction with large videos
+            easier and consuming less memory. For operational processing with short videos, it is recommended to set
+            this explicitly to False.
         rotation : int, optional
             can be 0, 90, 180, 270. If provided, images will be forced to rotate along the provided angle.
         """
@@ -79,6 +84,7 @@ Camera configuration: {:s}
         self.feats_errs = None
         self.ms = None
         self.mask = None
+        self.lazy = lazy
         self.stabilize = stabilize
         if camera_config is not None:
             self.camera_config = camera_config
@@ -117,8 +123,18 @@ Camera configuration: {:s}
             end_frame = np.minimum(end_frame, self.frame_count)
         else:
             end_frame = self.frame_count
-        # extract times and frame numbers as far as available
-        time, frame_number = cv.get_time_frames(cap, start_frame, end_frame)
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        self.rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
+        # extract times, frame numbers and frames as far as available
+        time, frame_number, frames = cv.get_time_frames(
+            cap,
+            start_frame,
+            end_frame,
+            lazy=lazy,
+            rotation=self.rotation,
+            method="grayscale",
+        )
+        self.frames = frames
         # check if end_frame changed
         if frame_number[-1] != end_frame:
             warnings.warn(f"End frame {end_frame} cannot be read from file. End frame is adapted to {frame_number[-1]}")
@@ -131,7 +147,6 @@ Camera configuration: {:s}
         self.start_frame = start_frame
         if self.stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
-            # recipe = const.CLASSIFY_CAM[self.stabilize] if self.stabilize in const.CLASSIFY_CAM else []
             self.get_ms(cap)
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
@@ -149,6 +164,22 @@ Camera configuration: {:s}
         # nothing to be done at this stage, release file for now.
         cap.release()
         del cap
+
+    @property
+    def lazy(self):
+        """
+
+        Returns
+        -------
+        np.ndarray
+            Mask of region of interest
+        """
+        return self._lazy
+
+    @lazy.setter
+    def lazy(self, lazy):
+        self._lazy = lazy
+
 
     @property
     def mask(self):
@@ -174,7 +205,10 @@ Camera configuration: {:s}
 
         :return: CameraConfig object
         """
-        return self._camera_config
+        if hasattr(self, "_camera_config"):
+            return self._camera_config
+        else:
+            return None
 
     @camera_config.setter
     def camera_config(self, camera_config_input):
@@ -284,6 +318,18 @@ Camera configuration: {:s}
         else:
             self._start_frame = start_frame
 
+
+    @property
+    def frames(self):
+        return self._frames
+
+    @frames.setter
+    def frames(
+            self,
+            frames: Optional[List] = None
+    ):
+        self._frames = frames
+
     @property
     def fps(self):
         """
@@ -341,10 +387,9 @@ Camera configuration: {:s}
             self,
             n: int,
             method: Optional[str] = "grayscale",
-            lens_corr: Optional[bool] = False
     ) -> np.ndarray:
         """
-        Retrieve one frame. Frame will be corrected for lens distortion if lens parameters are given.
+        Retrieve one frame.
 
         Parameters:
         -----------
@@ -352,8 +397,6 @@ Camera configuration: {:s}
             frame number to retrieve
         method : str
             can be "rgb", "grayscale", or "hsv", default: "grayscale"
-        lens_corr: bool, optional
-            if set to True, lens parameters will be used to undistort image
 
         Returns
         -------
@@ -367,27 +410,12 @@ Camera configuration: {:s}
                            "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
-        try:
-            ret, img = cap.read()
-            if self.rotation is not None:
-                img = cv2.rotate(img, self.rotation)
-        except:
-            raise IOError(f"Cannot read")
-        if ret:
-            if self.ms is not None:
-                img = cv.transform(img, self.ms[n])
-            # apply lens distortion correction
-            # if hasattr(self, "camera_config"):
-            #     img = cv.undistort_img(img, self.camera_config.camera_matrix, self.camera_config.dist_coeffs)
-            if method == "grayscale":
-                # apply gray scaling, contrast- and gamma correction
-                # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # mean(axis=2)
-            elif method == "rgb":
-                # turn bgr to rgb for plotting purposes
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            elif method == "hsv":
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        ret, img = cv.get_frame(
+            cap,
+            rotation=self.rotation,
+            ms=self.ms[n] if self.ms else None,
+            method=method
+        )
         self.frame_count = n + 1
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         cap.release()
@@ -416,15 +444,23 @@ Camera configuration: {:s}
                         "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
-        get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
-        # get all listed frames
-        frames = [get_frame(n=n, **kwargs) for n, f_number in enumerate(self.frame_number)]
-        sample = frames[0].compute()
-        data_array = [da.from_delayed(
-            frame,
-            dtype=sample.dtype,
-            shape=sample.shape
-        ) for frame in frames]
+
+        if self.frames is None or len(kwargs) > 0:
+            # a specific method for collecting frames is requested or lazy access is requested.
+            get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
+            # get all listed frames
+            frames = [get_frame(n=n, **kwargs) for n, f_number in enumerate(self.frame_number)]
+            sample = frames[0].compute()
+            data_array = [da.from_delayed(
+                frame,
+                dtype=sample.dtype,
+                shape=sample.shape
+            ) for frame in frames]
+            da_stack = da.stack(data_array, axis=0)
+        else:
+            sample = self.frames[0]
+            da_stack = self.frames
+
         # undistort source control points
         # if hasattr(camera_config, "gcps"):
         #     camera_config.gcps["src"] = cv.undistort_points(
@@ -435,8 +471,10 @@ Camera configuration: {:s}
         time = np.array(
             self.time) * 0.001  # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)
-        y = np.flipud(np.arange(data_array[0].shape[0]))
-        x = np.arange(data_array[0].shape[1])
+        # y = np.flipud(np.arange(data_array[0].shape[0]))
+        # x = np.arange(data_array[0].shape[1])
+        y = np.flipud(np.arange(sample.shape[0]))
+        x = np.arange(sample.shape[1])
         # perspective column and row coordinate grids
         xp, yp = np.meshgrid(x, y)
         coords = {
@@ -454,11 +492,12 @@ Camera configuration: {:s}
             "h_a": json.dumps(self.h_a)
         }
         frames = xr.DataArray(
-            da.stack(data_array, axis=0),
+            da_stack,
             dims=dims,
             coords=coords,
-            attrs=attrs
+            attrs=attrs,
         )[::self.freq]
+        frames = frames.chunk({"time": 1})  # set chunks over time dimension
         del coords["time"]
         if len(sample.shape) == 3:
             del coords["rgb"]

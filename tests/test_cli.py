@@ -7,6 +7,7 @@ from pyorc.cli.main import cli
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 from pyorc.cli import cli_utils
 from pyorc.helpers import xyz_transform
+import pytest
 import json
 
 def test_cli_cam_config(cli_obj):
@@ -83,12 +84,19 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
 #     # just test if everything is running
 #     velocity_flow_processor.process()
 
-def test_service_video(recipe, vid_file, cam_config, cli_prefix, cli_output_dir):
+@pytest.mark.parametrize(
+    "recipe_",
+    [
+        pytest.lazy_fixture("recipe"),
+        pytest.lazy_fixture("recipe_geojson"),
+    ]
+)
+def test_service_video(recipe_, vid_file, cam_config, cli_prefix, cli_output_dir):
     # ensure we are in the right folder
     print(f"current file is: {os.path.dirname(__file__)}")
     os.chdir(os.path.dirname(__file__))
     pyorc.service.velocity_flow(
-        recipe=recipe,
+        recipe=recipe_,
         videofile=vid_file,
         cameraconfig=cam_config.to_dict(),
         prefix=cli_prefix,

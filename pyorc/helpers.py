@@ -100,7 +100,7 @@ def deserialize_attr(data_array, attr, dtype=np.array, args_parse=False):
     return dtype(eval(attr_obj))
 
 
-def get_axes(cols, rows, resolution):
+def get_axes(cols, rows, x, y):
     """Retrieve a locally spaced axes for surface velocimetry results on the basis of resolution and row and
     col distances from the original frames
 
@@ -110,32 +110,22 @@ def get_axes(cols, rows, resolution):
         ints, columns, sampled from the original projected frames
     rows: list
         ints, rows, sampled from the original projected frames
-    resolution: float
-        resolution of original frames
+    x: array-like
+        frames x-axis
+    y: array-like
+        frames y-axis
 
     Returns
     -------
-    obj : np.ndarray
-        x-axis with origin at the left
-    obj2 : np.ndarray
-        y-axis with origin on the top
+    xax : np.ndarray
+        x-axis sampled from columns
+    yax : np.ndarray
+        y-axis sampled from columns
 
     """
-    spacing_x = np.diff(cols[0])[0]
-    spacing_y = np.diff(rows[:, 0])[0]
-    x = np.linspace(
-        resolution / 2 * spacing_x,
-        (len(cols[0]) - 0.5) * resolution * spacing_x,
-        len(cols[0]),
-    )
-    y = np.flipud(
-        np.linspace(
-            resolution / 2 * spacing_y,
-            (len(rows[:, 0]) - 0.5) * resolution * spacing_y,
-            len(rows[:, 0]),
-        )
-    )
-    return x, y
+    xax = x[cols]
+    yax = y[rows]
+    return xax, yax
 
 
 def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):

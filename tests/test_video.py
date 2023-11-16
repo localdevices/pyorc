@@ -44,6 +44,7 @@ def test_get_frame(video, method, result):
 @pytest.mark.parametrize(
     "video, method",
     [
+        (pytest.lazy_fixture("vid_cam_config_nonlazy"), None),
         (pytest.lazy_fixture("vid_cam_config"), "grayscale"),
         (pytest.lazy_fixture("vid_cam_config"), "rgb"),
         (pytest.lazy_fixture("vid_cam_config"), "hsv")
@@ -51,7 +52,11 @@ def test_get_frame(video, method, result):
 )
 def test_get_frames(video, method):
     # check if the right amount of frames is extracted
-    frames = video.get_frames()
+    if method:
+        frames = video.get_frames(method=method)
+    else:
+        frames = video.get_frames()
     assert(len(frames) == video.end_frame - video.start_frame + 1)
     # check if the time difference is well taken from the fps of the video
     assert(np.allclose(np.diff(frames.time.values), [1./video.fps]))
+

@@ -8,6 +8,7 @@ def camera_config(
         lens_position=None,
         corners=None,
         frame_sample=0.,
+        rotation=None,
         **kwargs
 ):
     """
@@ -31,7 +32,7 @@ def camera_config(
     fn_geo = f"{os.path.splitext(cam_config_file)[0]}_geo.jpg"
     fn_cam = f"{os.path.splitext(cam_config_file)[0]}_cam.jpg"
     # open video for dimensions
-    video = Video(video_file, start_frame=frame_sample, end_frame=frame_sample + 1)
+    video = Video(video_file, start_frame=frame_sample, end_frame=frame_sample + 1, rotation=rotation)
     # extract first frame
     img = video.get_frame(frame_sample)
     img_rgb = video.get_frame(frame_sample, method="rgb")

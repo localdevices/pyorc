@@ -1,4 +1,5 @@
 import functools
+import json
 import numpy as np
 import os
 import pytest
@@ -265,6 +266,18 @@ def vid_cam_config(cam_config):
     )
     yield vid
 
+@pytest.fixture
+def vid_cam_config_nonlazy(cam_config):
+    vid = pyorc.Video(
+        os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "ngwerere_20191103.mp4"),
+        start_frame=0,
+        end_frame=2,
+        camera_config=cam_config,
+        h_a=0.,
+        lazy=False
+    )
+    yield vid
+
 
 @pytest.fixture
 def vid_cam_config_shift(cam_config):
@@ -381,6 +394,21 @@ def cli_obj():
 def recipe(recipe_yml):
     from pyorc.cli import cli_utils
     return cli_utils.parse_recipe("a", "b", recipe_yml)
+
+
+@pytest.fixture
+def recipe_geojson(recipe_yml):
+    from pyorc.cli import cli_utils
+    recipe = cli_utils.parse_recipe("a", "b", recipe_yml)
+    for t in recipe["transect"]:
+        if t != "write":
+            with open(recipe["transect"][t]["shapefile"]) as f:
+                data = json.load(f)
+                recipe["transect"][t]["geojson"] = data
+                del recipe["transect"][t]["shapefile"]
+    # remove the file reference to transects and replace by already read json
+    return recipe
+
 
 
 # @pytest.fixture
