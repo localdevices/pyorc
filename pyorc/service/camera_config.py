@@ -38,7 +38,7 @@ def camera_config(
     img_rgb = video.get_frame(frame_sample, method="rgb")
     kwargs["height"], kwargs["width"] = img.shape
     # prepare camera config
-    cam_config = CameraConfig(**kwargs)
+    cam_config = CameraConfig(rotation=rotation, **kwargs)
     # write to output file
     if lens_position is not None:
         # set lens position assuming the same crs as the gcps

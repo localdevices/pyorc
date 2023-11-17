@@ -339,7 +339,6 @@ class VelocityFlowProcessor(object):
             kwargs_video = kwargs["to_video"]
             self.logger.info(f"Writing video of processed frames to {kwargs_video['fn']}")
             self.da_frames.frames.to_video(**kwargs_video)
-
         self.logger.info(f'Frames are preprocessed')
 
 

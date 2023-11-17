@@ -617,12 +617,14 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
         bnds_k1 = (-0.0, 0.0)
         bnds_k2 = (-0.0, 0.0)
     else:
-        bnds_k1 = (-0.5, 0.5)
+        # bnds_k1 = (-0.2501, -0.25)
+        bnds_k1 = (-0.9, 0.9)
         bnds_k2 = (-0.5, 0.5)
     opt = optimize.differential_evolution(
         error_intrinsic,
         # bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
         bounds=[(float(0.25), float(2)), bnds_k1, bnds_k2],
+        # bounds=[(1710./width, 1714./width), bnds_k1, bnds_k2],
         args=(src, dst, height, width, c, lens_position, DIST_COEFFS),
         atol=0.001 # one mm
     )
@@ -646,7 +648,7 @@ def get_frame(
     try:
         ret, img = cap.read()
         if rotation is not None:
-            img = cv2.rotate(img, rotation)
+           img = cv2.rotate(img, rotation)
     except:
         raise IOError(f"Cannot read")
     if ret:
@@ -685,7 +687,7 @@ def get_frames(cap, start_frame, end_frame):
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
 
-def get_time_frames(cap, start_frame, end_frame, lazy=True, **kwargs):
+def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
     """
     Gets a list of valid time stamps and frame numbers for the provided video capture object, starting from start_frame
     ending at end_frame
@@ -698,6 +700,8 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, **kwargs):
             first frame to consider for reading
         end_frame : int
             last frame to consider for reading
+        fps : float
+            hard enforced frames per second number (used when metadata of video is incorrect)
 
         Returns
         -------
@@ -723,7 +727,10 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, **kwargs):
         if not(lazy):
             frames.append(img)
         t1 = cap.get(cv2.CAP_PROP_POS_MSEC)
-        time.append(t1)
+        if fps is not None:
+            time.append(n*1000./fps)
+        else:
+            time.append(t1)
         # ret, img = cap.read()  # read frame 1 + ...
         ret, img = get_frame(cap, **kwargs)    # read frame 1 + ...
         frame_number.append(n)
@@ -736,7 +743,7 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, **kwargs):
             break
 
         n += 1
-    time[0] = 0
+    # time[0] = 0
     return time, frame_number, frames
 
 

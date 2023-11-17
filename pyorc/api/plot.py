@@ -221,7 +221,11 @@ def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
     if "time" in ref._obj.coords:
         if ref._obj.time.size > 1:
             raise AttributeError(f'Object contains dimension "time" with length {len(ref._obj.time)}. Reduce dataset by selecting one time step or taking a median, mean or other statistic.')
-    ax = _prepare_axes(ax=ax, mode=mode)
+    if mode == "camera":
+        rotation = ref.camera_config.rotation
+    else:
+        rotation = None
+    ax = _prepare_axes(ax=ax, mode=mode, rotation=rotation)
     f = ax.figure  # handle to figure
     if mode == "local":
         x = "x"
@@ -643,11 +647,13 @@ def plot_text(ax, ds, prefix, suffix):
     )
 
 
-def _prepare_axes(ax=None, mode="local"):
+def _prepare_axes(ax=None, mode="local", rotation=None):
     """Prepares the axes, needed to plot results, called from `pyorc.PIV.plot`.
 
     Parameters
     ----------
+    ref : Frames, Transect or Velocimetry
+        object to derive plot from
     ax : plt.axes, optional
         if not provided (default), a new axes is prepared (default: None)
     mode : str, optional
@@ -666,8 +672,13 @@ def _prepare_axes(ax=None, mode="local"):
         return ax
 
     # make a screen filling figure with black edges and faces
-    f = plt.figure(figsize=(16, 9), frameon=False, facecolor="k")
-    f.set_size_inches(16, 9, True)
+    if rotation in [90, 270]:
+        f = plt.figure(figsize=(9, 16), frameon=False, facecolor="k")
+        f.set_size_inches(9, 16, True)
+    else:
+        f = plt.figure(figsize=(16, 9), frameon=False, facecolor="k")
+        f.set_size_inches(16, 9, True)
+
     f.patch.set_facecolor("k")
     f.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
     if mode == "geographical":
