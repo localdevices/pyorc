@@ -335,7 +335,10 @@ class CameraConfig:
         code : int
             integer code belonging to rotation, 0 for 90 deg, 1 for 180 deg and 2 for 270 deg
         """
-        return self._rotation
+        if hasattr(self, "_rotation"):
+            return self._rotation
+        else:
+            return None
 
     @rotation.setter
     def rotation(

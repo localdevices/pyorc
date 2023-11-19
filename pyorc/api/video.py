@@ -45,6 +45,7 @@ Camera configuration: {:s}
             stabilize: Optional[List[List]] = None,
             lazy: bool = True,
             rotation: Optional[int] = None,
+            fps: Optional[float] = None,
     ):
         """
         Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
@@ -76,6 +77,9 @@ Camera configuration: {:s}
             this explicitly to False.
         rotation : int, optional
             can be 0, 90, 180, 270. If provided, images will be forced to rotate along the provided angle.
+        fps : float, optional
+            hard set for frames per second. Use this with utmost caution and only when you are confident that the video
+            metadata is incorrect.
         """
         assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
@@ -133,6 +137,7 @@ Camera configuration: {:s}
             lazy=lazy,
             rotation=self.rotation,
             method="grayscale",
+            fps=fps
         )
         self.frames = frames
         # check if end_frame changed
@@ -148,8 +153,10 @@ Camera configuration: {:s}
         if self.stabilize is not None:
             # select the right recipe dependent on the movie being fixed or moving
             self.get_ms(cap)
-
-        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        if fps is None:
+            self.fps = cap.get(cv2.CAP_PROP_FPS)
+        else:
+            self.fps = fps
         if rotation is None:
             rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
             if rotation in [90, 270]:
