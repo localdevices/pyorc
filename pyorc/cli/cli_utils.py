@@ -274,12 +274,12 @@ def validate_dst(value):
             # assume [x, y] pairs are provided
             len_points = 2
         elif len(value) < 6:
-            raise click.UsageError(f"--dst must contain at least 2 or 4 with [x, y] or 6 with [x, y, z] points, contains {len(value)}.")
+            raise click.UsageError(f"--dst must contain exactly 2 or 4 with [x, y], or at least 6 with [x, y, z] points, contains {len(value)}.")
         else:
             len_points = 3
         for n, val in enumerate(value):
             assert(isinstance(val, list)), f"--dst value {n} is not a list {val}"
-            assert(len(val) == len_points), f"--src value {n} must contain row, column coordinate but consists of {len(val)} numbers"
+            assert(len(val) == len_points), f"--dst value {n} must contain 3 coordinates (x, y, z) but consists of {len(val)} numbers, value is {val}"
     return value
 
 def validate_recipe(recipe):

@@ -34,7 +34,11 @@ jobs:
         run: |
          conda info
          conda list
-
+      - name: OpenCV dependencies
+        run: |
+          sudo apt update
+          sudo apt install libegl1 libopengl0 -y
+        
       - name: Test
         run: python -m pytest --verbose --cov=pyorc --cov-report xml
 
