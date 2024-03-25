@@ -70,6 +70,22 @@ def cli_cam_config_output():
     # remove after test
     # os.remove(cam_config_fn)
 
+@pytest.fixture
+def cli_click_event(mocker):
+    event_props = {
+        "xdata": 5,
+        "ydata": 5,
+
+    }
+    event = backend_bases.MouseEvent(
+        name="click", canvas=pyplot.axes(), x=5, y=5,
+    )
+
+    # mocker.patch(
+    #     "matplotlib.backend_bases.MouseEvent",
+    #     return_value=event_props
+    # )
+    return event
 
 @pytest.fixture
 def gcps_src():

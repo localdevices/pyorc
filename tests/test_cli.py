@@ -1,6 +1,7 @@
 import os.path
 
 from click.testing import CliRunner
+from matplotlib import backend_bases
 
 import pyorc.service
 from pyorc.cli.main import cli
@@ -27,8 +28,8 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
             'camera-config',
             '-V',
             vid_file,
-            '--src',
-            json.dumps(gcps_src),
+            # '--src',
+            # json.dumps(gcps_src),
             '--dst',
             json.dumps(gcps_dst),
             '--crs',
@@ -115,8 +116,19 @@ def test_gcps_interact(gcps_dst, frame_rgb):
         dst = gcps_dst
     selector = GcpSelect(frame_rgb, dst, crs=crs)
     # uncomment below to test the interaction, not suitable for automated unit test
-    plt.show(block=True)
-
+    # plt.show(block=True)
+    # make a click event for testing callbacks
+    event = backend_bases.MouseEvent(
+        name="click", canvas=selector.fig.canvas, x=5, y=5,
+    )
+    selector.on_press(event)
+    selector.on_move(event)
+    selector.on_click(event)
+    selector.on_left_click(event)
+    selector.on_right_click(event)
+    selector.on_release(event)
+    selector.switch_to_ax(event)
+    selector.switch_to_ax_geo(event)
 
 
 def test_aoi_interact(frame_rgb, cam_config_without_aoi):
@@ -131,14 +143,36 @@ def test_aoi_interact(frame_rgb, cam_config_without_aoi):
     selector = AoiSelect(frame_rgb, src, dst, cam_config_without_aoi)
     # uncomment below to test the interaction, not suitable for automated unit test
     # plt.show(block=True)
+    # make a click event for testing callbacks
+    event = backend_bases.MouseEvent(
+        name="click", canvas=selector.fig.canvas, x=5, y=5,
+    )
+    selector.on_press(event)
+    selector.on_move(event)
+    selector.on_click(event)
+    selector.on_left_click(event)
+    selector.on_right_click(event)
+    selector.on_release(event)
+
 
 def test_stabilize_interact(frame_rgb):
-    import matplotlib.pyplot as plt
     selector = StabilizeSelect(frame_rgb)
+    event = backend_bases.MouseEvent(
+        name="click", canvas=selector.fig.canvas, x=5, y=5,
+    )
+
+    selector.on_press(event)
+    selector.on_move(event)
+    selector.on_click(event)
+    selector.on_left_click(event)
+    selector.on_right_click(event)
+    selector.on_release(event)
+    selector.on_close(event)
+    selector.close_window(event)
     # uncomment below to test the interaction, not suitable for automated unit test
     # plt.show(block=True)
 
-# cli utils
+
 def test_read_shape(gcps_fn):
     coords, wkt = cli_utils.read_shape(gcps_fn)
     assert(isinstance(wkt, str))
