@@ -12,7 +12,7 @@ with open("README.md") as readme_file:
 setup(
     name="pyopenrivercam",
     description="pyopenrivercam (pyorc) is a front and backend to control river camera observation locations",
-    version="0.5.3",
+    version="0.5.4",
     long_description=readme + "\n\n",
     long_description_content_type="text/markdown",
     url="https://github.com/localdevices/pyorc",
@@ -70,8 +70,9 @@ setup(
         "Topic :: Scientific/Engineering :: Image Processing",
         "License :: OSI Approved :: GNU Affero General Public License v3",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     keywords="hydrology, hydrometry, river-flow, pyorc",
 )
