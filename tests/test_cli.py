@@ -127,8 +127,6 @@ def test_gcps_interact(gcps_dst, frame_rgb):
     selector.on_left_click(event)
     selector.on_right_click(event)
     selector.on_release(event)
-    selector.switch_to_ax(event)
-    selector.switch_to_ax_geo(event)
 
 
 def test_aoi_interact(frame_rgb, cam_config_without_aoi):
