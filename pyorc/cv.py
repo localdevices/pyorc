@@ -639,6 +639,19 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
     return camera_matrix, dist_coeffs, opt.fun
 
 
+def color_scale(img, method):
+    if method == "grayscale":
+        # apply gray scaling, contrast- and gamma correction
+        # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # mean(axis=2)
+    elif method == "rgb":
+        # turn bgr to rgb for plotting purposes
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    elif method == "hsv":
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    return img
+
+
 def get_frame(
         cap,
         rotation=None,
@@ -655,16 +668,9 @@ def get_frame(
         if ms is not None:
             img = transform(img, ms)
         # apply lens distortion correction
-        if method == "grayscale":
-            # apply gray scaling, contrast- and gamma correction
-            # img = _corr_color(img, alpha=None, beta=None, gamma=0.4)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # mean(axis=2)
-        elif method == "rgb":
-            # turn bgr to rgb for plotting purposes
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        elif method == "hsv":
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        img = color_scale(img, method)
     return ret, img
+
 
 def get_frames(cap, start_frame, end_frame):
     """
