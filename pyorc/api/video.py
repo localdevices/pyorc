@@ -10,7 +10,7 @@ import os
 import warnings
 import xarray as xr
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Literal
 
 from .. import cv, const, helpers
 from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
@@ -136,7 +136,7 @@ Camera configuration: {:s}
             end_frame,
             lazy=lazy,
             rotation=self.rotation,
-            method="grayscale",
+            method="rgb",
             fps=fps
         )
         self.frames = frames
@@ -393,7 +393,7 @@ Camera configuration: {:s}
     def get_frame(
             self,
             n: int,
-            method: Optional[str] = "grayscale",
+            method: Optional[Literal["grayscale", "rgb", "hsv"]] = "grayscale"
     ) -> np.ndarray:
         """
         Retrieve one frame.
@@ -413,8 +413,8 @@ Camera configuration: {:s}
         assert (n >= 0), "frame number cannot be negative"
         assert (
                 n - self.start_frame <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
-        assert (method in ["grayscale", "rgb",
-                           "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
+        # assert (method in ["grayscale", "rgb",
+        #                    "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
         ret, img = cv.get_frame(
@@ -430,7 +430,7 @@ Camera configuration: {:s}
 
     def get_frames(
             self,
-            **kwargs
+            method: Optional[Literal["grayscale", "rgb", "hsv"]] = "grayscale"
     ) -> xr.DataArray:
         """
         Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`, expected to be read
@@ -439,8 +439,8 @@ Camera configuration: {:s}
 
         Parameters
         ----------
-        **kwargs: dict, optional
-            keyword arguments to pass to `get_frame`. Currently only `grayscale` is supported.
+        method: str, optional
+            method for color scaling, can be "
 
         Returns
         -------
@@ -452,11 +452,11 @@ Camera configuration: {:s}
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
 
-        if self.frames is None or len(kwargs) > 0:
+        if self.frames is None:
             # a specific method for collecting frames is requested or lazy access is requested.
             get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
             # get all listed frames
-            frames = [get_frame(n=n, **kwargs) for n, f_number in enumerate(self.frame_number)]
+            frames = [get_frame(n=n, method=method) for n, f_number in enumerate(self.frame_number)]
             sample = frames[0].compute()
             data_array = [da.from_delayed(
                 frame,
@@ -465,8 +465,14 @@ Camera configuration: {:s}
             ) for frame in frames]
             da_stack = da.stack(data_array, axis=0)
         else:
-            sample = self.frames[0]
             da_stack = self.frames
+            # ensure stabilisation and color scaling is applied
+            if self.ms is not None:
+                da_stack = np.array([cv.transform(cv.color_scale(img, method), m) for img, m in zip(da_stack, self.ms)])
+            else:
+                # only color transform
+                da_stack = np.array([cv.color_scale(img, method) for img in da_stack])
+            sample = da_stack[0]
 
         # undistort source control points
         # if hasattr(camera_config, "gcps"):
