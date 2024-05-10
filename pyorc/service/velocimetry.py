@@ -202,6 +202,12 @@ class VelocityFlowProcessor(object):
         """
         if h_a is not None:
             recipe["video"]["h_a"] = h_a
+        # check what projection method is used, use throughout
+        self.proj_method = "cv"
+        proj = recipe["frames"].get("project")
+        if proj:
+            if proj.get("method") == "numpy":
+                self.proj_method = "numpy"
         self.update = update  # set to True when checks are needed if data already exists or not
         self.recipe = recipe
         self.output = output
@@ -463,7 +469,7 @@ class VelocityFlowProcessor(object):
                 opts = plot_params["frames"] if plot_params["frames"] is not None else {}
                 f = self.video_obj.get_frames(method="rgb")
                 if mode != "camera":
-                    f = f.frames.project()[n]
+                    f = f.frames.project(method=self.proj_method)[n]
                 else:
                     f = f[n]
                 p = f.frames.plot(ax=ax, mode=mode, **opts)
