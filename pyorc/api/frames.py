@@ -235,6 +235,8 @@ class Frames(ORCBase):
             z,
             **kwargs
         )
+        # ensure no missing values are persisting
+        da_proj = da_proj.fillna(0.)
         # assign coordinates
         da_proj = da_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
