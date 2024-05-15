@@ -1,3 +1,25 @@
+## [0.5.5] - 2024-05-15
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+Plots of videos that are projected with `method="numpy"` were not correctly projected in commnad-line use, as they were still using `cv` as method. Now, `method="numpy"` is forced on plots as well, when using the command-line interface (direct use of the API requires the user to ensure the projection method is correct).
+
+Projection with `method="numpy"` sometimes results in missing values in the result when parts of the objective are outside the camera view. This consequently results in only zero values when difference filtering is applied. This has been fixed.
+### Security
+
+
+## [0.5.4] - 2024-04-19
+### Added
+`Video` instances can now be made with `lazy=False` (default is `True`). In this case, frames of videos are read in one go instead of lazily per frame. This consumes more memory but is a lot faster. For tested workflows from opening videos to writing and masking of velocities, this reduces the compute time with about 20%.
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+
 ## [0.5.3] - 2023-11-10
 ### Added
 `frames.project` now has a `method` option which allows for choosing projection using opencv-methods (`method="cv"`)
