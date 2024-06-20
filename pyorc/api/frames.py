@@ -143,7 +143,7 @@ class Frames(ORCBase):
         ds["x"] = x
 
         # add all 2D-coordinates
-        ds = ds.velocimetry._add_xy_coords(
+        ds = ds.velocimetry.add_xy_coords(
             [xp, yp, xs, ys, lons, lats],
             coords,
             {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
@@ -240,7 +240,7 @@ class Frames(ORCBase):
         # ensure no missing values are persisting
         da_proj = da_proj.fillna(0.)
         # assign coordinates
-        da_proj = da_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        da_proj = da_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
             # ensure that "rgb" is the last dimension
             da_proj = da_proj.transpose("time", "y", "x", "rgb")

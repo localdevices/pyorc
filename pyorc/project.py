@@ -3,7 +3,7 @@ import dask
 import numpy as np
 import xarray as xr
 from rasterio.features import rasterize
-from typing import Literal
+from typing import Optional
 from flox.xarray import xarray_reduce
 
 import pyorc
@@ -111,11 +111,10 @@ def project_numpy(
     x: np.ndarray,
     y: np.ndarray,
     z: np.ndarray,
-    reducer: Literal["nearest", "average"] = "nearest"
+    reducer: Optional[str] = None
 ):
     """
-    Projection method that goes from pixels directly to target grid, including undistortion and projection
-    using a lookup method across the grid.
+    Project from FOV pixels directly to target grid, including undistortion and projection.
 
     Parameters
     ----------
@@ -128,6 +127,10 @@ def project_numpy(
         y-axis
     z : float
         vertical level value in real-world coordinates
+    reducer : str, optional
+        If set to a valid reducer (like mean, median, max) oversampled target pixels will be reduced by using the set
+        reducer. Oversampled target pixels are defined as pixels that have more than one pixels in the original
+        Field of View that fit within that pixel. All other pixels are defined with nearest-neighbour.
 
     Returns
     -------
@@ -193,7 +196,7 @@ def project_numpy(
     vals = da.stack(points=("y", "x")).isel(points=idx_back)
     da_new[:, idx_in] = vals
 
-    if reducer is not "nearest":
+    if reducer != "nearest":
         # also fill in the parts that have valid averaged pixels
         coli, rowi = np.meshgrid(
             np.arange(len(da.x)),
