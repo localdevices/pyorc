@@ -266,7 +266,6 @@ class VelocityFlowProcessor(object):
     def fn_video(self, fn_video):
         self._fn_video = fn_video
 
-
     def process(self):
         """
         Single method to perform all processing in logical pre-defined order. Also checks for compulsory steps
@@ -276,7 +275,7 @@ class VelocityFlowProcessor(object):
         -------
 
         """
-        if not(self.concurrency):
+        if not self.concurrency:
             import dask
             # run only synchronous
             dask.config.set(scheduler='synchronous')
@@ -450,7 +449,6 @@ class VelocityFlowProcessor(object):
                 with ProgressBar():
                     delayed_obj.compute()
                 self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
-
 
     @run_func_hash_io(check=False, configs=["video", "frames", "velocimetry", "transect", "plot"], inputs=["fn_video", "fn_piv_mask"], outputs=[])
     def plot(self, **plot_recipes):

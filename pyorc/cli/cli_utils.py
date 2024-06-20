@@ -310,10 +310,15 @@ def validate_recipe(recipe):
                 # find valid args to method
                 if hasattr(method, "__call__"):
                     if k in check_args:
-                        valid_args = method.__code__.co_varnames[:method.__code__.co_argcount]  # get input args to method
-                        for arg in recipe[k][m]:
-                            if not(arg in valid_args):
-                                raise ValueError(f"Method '{check_args[k].capitalize()}.{m}' does not have input argument '{arg}', must be one of {valid_args}")
+                        # check if kwargs is contained in method
+                        if "kwargs" in method.__code__.co_varnames:
+                            valid_args = None
+                        else:
+                            valid_args = method.__code__.co_varnames[:method.__code__.co_argcount]  # get input args to method
+                        if valid_args:
+                            for arg in recipe[k][m]:
+                                if not arg in valid_args:
+                                    raise ValueError(f"Method '{check_args[k].capitalize()}.{m}' does not have input argument '{arg}', must be one of {valid_args}")
     # add empty dicts for missing but compulsory classes
     for _c in required_classes:
         if _c not in recipe:

@@ -2,14 +2,23 @@ import cv2
 import dask
 import numpy as np
 import xarray as xr
-
+from rasterio.features import rasterize
+from typing import Literal
 from flox.xarray import xarray_reduce
-from scipy.interpolate import RegularGridInterpolator
+
+import pyorc
 from pyorc import helpers, cv
 
 __all__ = ["project_numpy", "project_cv"]
 
-def project_cv(da, cc, x, y, z):
+
+def project_cv(
+    da: xr.DataArray,
+    cc: pyorc.CameraConfig,
+    x: np.ndarray,
+    y: np.ndarray,
+    z: np.ndarray
+):
     """
     Projection method that uses pure OpenCV. Reprojection is done in two steps: undistortion and reprojection.
     This method gives incorrect mapping in case of very strong distortion and/or where part of the area of interest is
@@ -96,7 +105,14 @@ def project_cv(da, cc, x, y, z):
     return da_proj
 
 
-def project_numpy(da, cc, x, y, z):
+def project_numpy(
+    da: xr.DataArray,
+    cc: pyorc.CameraConfig,
+    x: np.ndarray,
+    y: np.ndarray,
+    z: np.ndarray,
+    reducer: Literal["nearest", "average"] = "nearest"
+):
     """
     Projection method that goes from pixels directly to target grid, including undistortion and projection
     using a lookup method across the grid.
@@ -159,6 +175,7 @@ def project_numpy(da, cc, x, y, z):
     points_cam = cc.project_points(
         list(zip(xs, ys, np.ones(len(xs)) * z))
     )
+    # find locations that lie within the camera objective, rest should remain missing value
     idx_in = np.all(
         [
             points_cam[:, 0] > 0,
@@ -174,90 +191,67 @@ def project_numpy(da, cc, x, y, z):
     # coerce 2D idxs to 1D idxs
     idx_back = np.array(points_cam[idx_in, 1]) * len(da.x) + np.array(points_cam[idx_in, 0])
     vals = da.stack(points=("y", "x")).isel(points=idx_back)
-
     da_new[:, idx_in] = vals
 
-    # coli, rowi = np.meshgrid(
-    #     np.arange(len(da.x)),
-    #     np.arange(len(da.y))
-    # )
-    # src_pix = list(zip(coli[::stride, ::stride].flatten(), rowi[::stride, ::stride].flatten()))
-    # dst_pix = cc.unproject_points(
-    #     src_pix,
-    #     z
-    # )
-    # # x_pix, y_pix, z_pix = list(zip(*dst_pix))
-    # x_pix, y_pix, z_pix = dst_pix.T
-    # # reorganise to 2D grid
-    # x_pix = x_pix.reshape(*coli[::stride, ::stride].shape)
-    # y_pix = y_pix.reshape(*coli[::stride, ::stride].shape)
-    #
-    # # upscale
-    # interp_x = RegularGridInterpolator((rowi[::stride, 0], coli[0, ::stride]), x_pix, bounds_error=False,
-    #                                    fill_value=None)
-    # interp_y = RegularGridInterpolator((rowi[::stride, 0], coli[0, ::stride]), y_pix, bounds_error=False,
-    #                                    fill_value=None)
-    # x_pix_up = interp_x((rowi, coli))
-    # y_pix_up = interp_y((rowi, coli))
-    # idx_y_up, idx_x_up = helpers.map_to_pixel(x_pix_up, y_pix_up, cc.transform)
-    #
-    # # any location outside of the target grid should become a miss
-    # miss = np.any([idx_x_up >= cc.shape[1], idx_x_up < 0, idx_y_up >= cc.shape[0], idx_y_up < 0], axis=0)
-    #
-    # # flatten to 1D-indexes
-    # idx = np.array(idx_y_up) * len(x) + np.array(idx_x_up)
-    #
-    # # ensure that indexes outside of area of interest are set to -1.
-    # idx[miss] = -1
-    #
-    # # reshape indexes to the source grid. Now we know of each pixel in source, where it belongs in target
-    # # idx = idx.reshape(*coli.shape)
-    #
-    # # turn idx grid into a DataArray
-    # da_idx = xr.DataArray(
-    #     idx,
-    #     dims=("y", "x"),
-    #     name="group",
-    #     coords={
-    #         "y": da.y.values,
-    #         "x": da.x.values
-    #     },
-    # )
-    # # retrieve unique values from this
-    # classes = np.unique(da_idx)
-    # # now we simply group the frames by all the indexes and then take the mean of all identified points per index
-    # da_point = xarray_reduce(da, da_idx, func="mean", expected_groups=classes, engine="numba")
-    # # remaining problem is that the above indexes may be limited to only a few, and cannot be coerced to the grid that we would like.
-    # # So we make a lazy array of the new interpolated shape. But now we stack this array over y and x, so that we can paste the
-    # # interpolated values onto the new array. All to be kept lazy (chunk 1 time step) to prevent memory issues.
-    # idxs = da_new.group.isel(group=np.unique(da_idx))
-    #
-    # # assign the values to the relevant ids
-    # da_point["group"] = idxs
-    # # da_new
-    # if "rgb" in da_new.coords:
-    #     da_new[:, :, np.unique(da_idx)] = da_point
-    #     # get one sample, and create a mask
-    #     mask = np.int8(helpers.get_enclosed_mask(da_new[0][0].unstack().values))
-    # else:
-    #     da_new[:, np.unique(da_idx)] = da_point
-    #     # get one sample, and create a mask
-    #     mask = np.int8(helpers.get_enclosed_mask(da_new[0].unstack().values))
-    return da_new.unstack()
+    if reducer is not "nearest":
+        # also fill in the parts that have valid averaged pixels
+        coli, rowi = np.meshgrid(
+            np.arange(len(da.x)),
+            np.arange(len(da.y))
+        )
+        poly = cc.get_bbox(camera=True, h_a=0.)
+        mask = rasterize([poly], out_shape=(cc.height, cc.width)) == 1
+        # retrieve only the pixels within mask
+        src_pix = list(
+            zip(
+                coli[mask],
+                rowi[mask]
+            )
+        )
+        # orthoproject pixels
+        dst_pix = cc.unproject_points(
 
-    # da_fill = da_new
-    # da_fill = xr.apply_ufunc(
-    #     helpers.mask_fill,
-    #     da_new,
-    #     input_core_dims=[["y", "x"]],
-    #     output_core_dims=[["y", "x"]],
-    #     output_dtypes=da.dtype,
-    #     kwargs={
-    #         "mask": mask,
-    #         "radius": radius
-    #     },
-    #     dask='parallelized',
-    #     keep_attrs=True,
-    #     vectorize=True
-    # )
-    # return da_fill
+            src_pix,
+            z
+        )
+        x_pix, y_pix, z_pix = dst_pix.T
+        idx_y, idx_x = helpers.map_to_pixel(x_pix, y_pix, cc.transform)
+        # ensure no pixels outside of target grid (can be in case of edges)
+        idx_inside = np.all([idx_y >= 0, idx_y < len(y), idx_x >= 0, idx_x < len(idx_x)], axis=0)
+        idx_x = idx_x[idx_inside]
+        idx_y = idx_y[idx_inside]
+        # get 1D flat array indexes
+        idx = np.array(idx_y) * len(x) + np.array(idx_x)
+
+        # flatten points within mask
+        da_point = da.where(mask).stack(points=("y", "x"))
+        da_point["points_idx"] = "points", np.arange(len(da_point.points))
+        da_point = da_point.dropna(dim="points")  # TODO: check if order is correct
+
+        # ensure any values that may be outside of target grid are dropped
+        da_point = da_point.isel(points=idx_inside)
+
+        # create a data array with relevant indexes
+        da_idx = xr.DataArray(
+            idx,
+            dims=("points"),
+            name="group",
+            coords={
+                "points": da_point.points.values,
+            },
+        )
+        # retrieve unique values from this
+        classes = np.unique(da_idx)
+        # group unique values and reduce with average
+        da_point = xarray_reduce(
+            da_point.drop(["y", "x"]),
+            da_idx,func=reducer,
+            expected_groups=classes,
+            engine="numba"
+        )
+
+        # replace the nearest by mean values where relevant
+        idxs = da_point.group.values
+        da_point["group"] = idxs
+        da_new[:, classes] = da_point.values
+    return da_new.unstack()

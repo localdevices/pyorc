@@ -1,14 +1,11 @@
 import copy
-
 import cv2
-import dask
 import matplotlib.pyplot as plt
 import numpy as np
-import rasterio
+from typing import Literal, Optional
 import xarray as xr
-from flox.xarray import xarray_reduce
 
-from matplotlib.animation import FuncAnimation, FFMpegWriter
+from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
 import pyorc.project
@@ -157,7 +154,12 @@ class Frames(ORCBase):
         ds.velocimetry.set_encoding()
         return ds
 
-    def project(self, method="cv", resolution=None, **kwargs):
+    def project(
+            self,
+            method: Literal["cv", "numpy"] = "cv",
+            resolution: Optional[float] = None,
+            **kwargs
+    ):
         """Project frames into a projected frames object, with information from the camera_config attr.
         This requires that the CameraConfig contains full gcp information. If a CRS is provided, also "lat" and "lon"
         variables will be added to the output, containing geographical latitude and longitude coordinates.
