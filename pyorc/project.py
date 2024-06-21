@@ -111,7 +111,7 @@ def project_numpy(
     x: np.ndarray,
     y: np.ndarray,
     z: np.ndarray,
-    reducer: Optional[str] = None
+    reducer: Optional[str] = "mean",
 ):
     """
     Project from FOV pixels directly to target grid, including undistortion and projection.
@@ -130,7 +130,8 @@ def project_numpy(
     reducer : str, optional
         If set to a valid reducer (like mean, median, max) oversampled target pixels will be reduced by using the set
         reducer. Oversampled target pixels are defined as pixels that have more than one pixels in the original
-        Field of View that fit within that pixel. All other pixels are defined with nearest-neighbour.
+        Field of View that fit within that pixel. All other pixels are defined with nearest-neighbour. Default is
+        "nearest" for nearest neighbour.
 
     Returns
     -------
@@ -209,7 +210,6 @@ def project_numpy(
             name="mask",
             # attrs=da.attrs
         )
-        # mask = rasterize([poly], out_shape=(cc.height, cc.width)) == 1
         # retrieve only the pixels within mask
         src_pix = list(
             zip(
