@@ -411,6 +411,7 @@ class CameraConfig:
             self,
             camera: Optional[bool] = False,
             h_a: Optional[float] = None,
+            z_a: Optional[float] = None,
             within_image: Optional[bool] = False,
             expand_exterior=True,
     ) -> Polygon:
@@ -423,8 +424,11 @@ class CameraConfig:
             In this case ``h_a`` may be set to provide the right water level, to estimate the bounding box for.
         h_a : float, optional
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
-            using h_a as a present water level. In case a video with higher (lower) water levels is used, this
-            will result in a different perspective plane than the control video.
+            using h_a as a present water level (in local datum). In case a video with higher (lower) water levels is
+            used, this will result in a different perspective plane than the control video.
+        z_a : float, optional
+            similar to setting h_a, but z_a represent the vertical coordinate in the coordinate reference system of
+            the camera configuration instead of the local datum.
         within_image : bool, optional (default False)
             Set to True to make an attempt to remove parts of the polygon that lie outside of the image field of view
         expand_exterior : bool, optional
@@ -452,7 +456,8 @@ class CameraConfig:
                 new_coords = np.linspace(coords[n], coords[n + 1], 100)
                 coords_expand = np.r_[coords_expand, new_coords]
             coords = coords_expand
-        z_a = self.get_z_a(h_a)
+        if not z_a:
+            z_a = self.get_z_a(h_a)
         # add vertical coordinates to the set
         coords = np.c_[coords, np.ones(len(coords))*z_a]
         # project points to pixel image coordinates

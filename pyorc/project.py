@@ -175,6 +175,8 @@ def project_numpy(
     points_cam = cc.project_points(
         list(zip(xs, ys, np.ones(len(xs)) * z))
     )
+    # round cam coordinates to pixels
+    points_cam = np.int64(np.round(points_cam))
     # find locations that lie within the camera objective, rest should remain missing value
     idx_in = np.all(
         [
@@ -186,12 +188,10 @@ def project_numpy(
         ],
         axis=0
     )
-    # round cam coordinates to pixels
-    points_cam = np.int64(np.round(points_cam))
     # coerce 2D idxs to 1D idxs
     idx_back = np.array(points_cam[idx_in, 1]) * len(da.x) + np.array(points_cam[idx_in, 0])
     vals = da.stack(points=("y", "x")).isel(points=idx_back)
-    da_new[:, idx_in] = vals
+    da_new[..., idx_in] = vals
 
     if reducer is not "nearest":
         # also fill in the parts that have valid averaged pixels
@@ -199,8 +199,14 @@ def project_numpy(
             np.arange(len(da.x)),
             np.arange(len(da.y))
         )
-        poly = cc.get_bbox(camera=True, h_a=0.)
-        mask = rasterize([poly], out_shape=(cc.height, cc.width)) == 1
+        poly = cc.get_bbox(camera=True, z_a=z)
+        mask = xr.DataArray(
+            rasterize([poly], out_shape=(cc.height, cc.width)) == 1,
+            coords={"y": da.y, "x": da.x},
+            name="mask",
+            # attrs=da.attrs
+        )
+        # mask = rasterize([poly], out_shape=(cc.height, cc.width)) == 1
         # retrieve only the pixels within mask
         src_pix = list(
             zip(
@@ -217,7 +223,7 @@ def project_numpy(
         x_pix, y_pix, z_pix = dst_pix.T
         idx_y, idx_x = helpers.map_to_pixel(x_pix, y_pix, cc.transform)
         # ensure no pixels outside of target grid (can be in case of edges)
-        idx_inside = np.all([idx_y >= 0, idx_y < len(y), idx_x >= 0, idx_x < len(idx_x)], axis=0)
+        idx_inside = np.all([idx_y >= 0, idx_y < len(y), idx_x >= 0, idx_x < len(x)], axis=0)
         idx_x = idx_x[idx_inside]
         idx_y = idx_y[idx_inside]
         # get 1D flat array indexes
@@ -226,7 +232,7 @@ def project_numpy(
         # flatten points within mask
         da_point = da.where(mask).stack(points=("y", "x"))
         da_point["points_idx"] = "points", np.arange(len(da_point.points))
-        da_point = da_point.dropna(dim="points")  # TODO: check if order is correct
+        da_point = da_point.dropna(dim="points")
 
         # ensure any values that may be outside of target grid are dropped
         da_point = da_point.isel(points=idx_inside)
@@ -249,9 +255,7 @@ def project_numpy(
             expected_groups=classes,
             engine="numba"
         )
-
         # replace the nearest by mean values where relevant
-        idxs = da_point.group.values
-        da_point["group"] = idxs
-        da_new[:, classes] = da_point.values
+        da_point["group"] = da_new.group[classes]
+        da_new[..., classes] = da_point.values
     return da_new.unstack()

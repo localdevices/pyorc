@@ -3,21 +3,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 @pytest.mark.parametrize(
-    "frames, resolution, method, dims, shape",
+    "frames, resolution, method, dims, shape, kwargs",
     [
-        (pytest.lazy_fixture("frames_grayscale"), 0.1, "numpy", 3, (79, 88)),
-        (pytest.lazy_fixture("frames_rgb"), 0.1, "numpy", 4, (79, 88, 3)),
-        (pytest.lazy_fixture("frames_grayscale"), 0.1, "cv", 3, (79, 88)),
-        (pytest.lazy_fixture("frames_grayscale"), 0.01, "cv", 3, (786, 878)),
-        (pytest.lazy_fixture("frames_grayscale"), 0.05, "cv", 3, (157, 176)),
-        (pytest.lazy_fixture("frames_rgb"), 0.1, "cv", 4, (79, 88, 3)),
+        (pytest.lazy_fixture("frames_grayscale"), 0.1, "numpy", 3, (79, 88), {}),
+        (pytest.lazy_fixture("frames_grayscale"), 0.1, "numpy", 3, (79, 88), {"reducer": "mean"}),
+        (pytest.lazy_fixture("frames_rgb"), 0.1, "numpy", 4, (79, 88, 3), {"reducer": "mean"}),
+        (pytest.lazy_fixture("frames_rgb"), 0.1, "numpy", 4, (79, 88, 3), {}),
+        (pytest.lazy_fixture("frames_grayscale"), 0.1, "cv", 3, (79, 88), {}),
+        (pytest.lazy_fixture("frames_grayscale"), 0.01, "cv", 3, (786, 878), {}),
+        (pytest.lazy_fixture("frames_grayscale"), 0.05, "cv", 3, (157, 176), {}),
+        (pytest.lazy_fixture("frames_rgb"), 0.1, "cv", 4, (79, 88, 3), {}),
     ]
 )
-def test_project(frames, resolution, method, dims, shape):
-# def test_project(frames_grayscale, resolution=0.01, dims=3, shape=(840, 1100)):
+def test_project(frames, resolution, method, dims, shape, kwargs):
 #     import matplotlib
 #     matplotlib.use('Qt5Agg')
-    frames_proj = frames.frames.project(resolution=resolution, method=method)
+    frames_proj = frames.frames.project(resolution=resolution, method=method, **kwargs)
     # check amount of time steps is equal
     assert(len(frames_proj.time) == len(frames.time))
     # check if the amount of dims is as expected (different for rgb)
@@ -27,6 +28,7 @@ def test_project(frames, resolution, method, dims, shape):
 
     # import matplotlib.pyplot as plt
     # plt.imshow(frames_proj[0])
+    # plt.colorbar()
     # plt.show()
 
 
