@@ -89,7 +89,7 @@ def _get_cam_mtx(height, width, c=2.0, focal_length=None):
     return mtx
 
 
-def _get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None, wdw=4):
+def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None, wdw=4):
     # set end_frame to last if not defined
     if end_frame is None:
         end_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
