@@ -233,10 +233,14 @@ def project_numpy(
         idx = np.array(idx_y) * len(x) + np.array(idx_x)
 
         # flatten points within mask
-        da_point = da.where(mask).stack(points=("y", "x"))
-        da_point["points_idx"] = "points", np.arange(len(da_point.points))
-        da_point = da_point.dropna(dim="points")
-
+        da_point = da.stack(
+            points=("y", "x")
+        ).where(
+            mask.stack(points=("y", "x")),
+            drop=True
+        )
+        # da_point = da.where(mask, drop=True).stack(points=("y", "x"))
+        da_point["points_idx"] = "points", np.where(mask.values.flatten())[0]
         # ensure any values that may be outside of target grid are dropped
         da_point = da_point.isel(points=idx_inside)
 
@@ -260,5 +264,5 @@ def project_numpy(
         )
         # replace the nearest by mean values where relevant
         da_point["group"] = da_new.group[classes]
-        da_new[..., classes] = da_point.values
+        da_new[..., classes] = da_point
     return da_new.unstack()
