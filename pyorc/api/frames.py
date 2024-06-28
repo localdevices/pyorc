@@ -1,14 +1,11 @@
 import copy
-
 import cv2
-import dask
 import matplotlib.pyplot as plt
 import numpy as np
-import rasterio
+from typing import Literal, Optional
 import xarray as xr
-from flox.xarray import xarray_reduce
 
-from matplotlib.animation import FuncAnimation, FFMpegWriter
+from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
 import pyorc.project
@@ -146,7 +143,7 @@ class Frames(ORCBase):
         ds["x"] = x
 
         # add all 2D-coordinates
-        ds = ds.velocimetry._add_xy_coords(
+        ds = ds.velocimetry.add_xy_coords(
             [xp, yp, xs, ys, lons, lats],
             coords,
             {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
@@ -157,7 +154,12 @@ class Frames(ORCBase):
         ds.velocimetry.set_encoding()
         return ds
 
-    def project(self, method="cv", resolution=None, **kwargs):
+    def project(
+            self,
+            method: Literal["cv", "numpy"] = "cv",
+            resolution: Optional[float] = None,
+            **kwargs
+    ):
         """Project frames into a projected frames object, with information from the camera_config attr.
         This requires that the CameraConfig contains full gcp information. If a CRS is provided, also "lat" and "lon"
         variables will be added to the output, containing geographical latitude and longitude coordinates.
@@ -169,18 +171,15 @@ class Frames(ORCBase):
             With `cv` (opencv) resampling is performed by first undistorting images, and then by resampling to the
             desired grid. With heavily distorted images and part of the area of interest outside of the field
             of view, the orthoprojection of the corners may end up in the wrong space. With `numpy` each individual
-            image coordinate is mapped to the orthoprojected space, making the projection much more robust.
+            orthoprojected grid cell is mapped to the image pixels space. For oversampled areas, this is also done vice
+            versa. Undersampled areas result in nearest-neighbour interpolations, whilst for oversampled, this results
+            in a reduced value (which can be defined by the user).
             We recommend switching to `numpy` if you experience strange results with `cv`.
         resolution : float, optional
             resolution to project to. If not provided, this will be taken from the camera config in the metadata
              (Default value = None)
-        **kwargs: dict, optional
-            keyword arguments that can be passed to the different projection methods. Currently only used when
-            `method="numpy"`. kwargs in this case can be `stride` (sampling space used to estimate the real-world
-            location of each pixel) and `radius` (maximum search radius in pixels to use to fill in missing values
-            in areas with undersampling after interpolation. `stride` defaults to 10 anbd normally should not be changed.
-            `radius` defaults to 5. If a larger radius is needed, you are likely undersampling too much. Under normal
-            situations, these values should not be altered.
+        reducer: str, optional
+            Currently only used when `method="numpy"`. Default "mean", resulting in averaging of oversampled grid cells.
 
         Returns
         -------
@@ -238,7 +237,7 @@ class Frames(ORCBase):
         # ensure no missing values are persisting
         da_proj = da_proj.fillna(0.)
         # assign coordinates
-        da_proj = da_proj.frames._add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        da_proj = da_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
             # ensure that "rgb" is the last dimension
             da_proj = da_proj.transpose("time", "y", "x", "rgb")

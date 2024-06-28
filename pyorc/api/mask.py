@@ -16,6 +16,8 @@ commondoc = """
         If ``inplace=True``, the dataset will be returned masked with ``mask``.
         
 """
+
+
 def _base_mask(time_allowed=False, time_required=False):
     """
     wrapper generator for creating generalized structure masking methods for velocimetry
@@ -42,23 +44,15 @@ def _base_mask(time_allowed=False, time_required=False):
                 ds = ref._obj.mean(dim="time", keep_attrs=True)
             else:
                 ds = ref._obj
-            if not(ds.velocimetry.is_velocimetry):
+            if not ds.velocimetry.is_velocimetry:
                 raise AssertionError("Dataset is not a valid velocimetry dataset")
             if time_required:
                 # then automatically time is also allowed
-                # time_allowed = True
                 if not("time" in ds.dims):
                     raise AssertionError(
                 f'This mask requires dimension "time". The dataset does not contain dimension "time" or you have set'
                 f'reduce_time=True. Apply this mask without applying any reducers in time.'
             )
-            # if not(time_allowed) and not(time_required):
-            #     if "time" in ref._obj.dims:
-            #         raise AssertionError(
-            #     f'This mask can only work without dimension "time". The dataset contains dimension "time".'
-            #     f'Reduce this by applying a reducer or selecting a time step. '
-            #     f'Reducing can be done e.g. with ds.mean(dim="time", keep_attrs=True) or slicing with ds.isel(time=0)'
-            # )
             if time_required:
                 if not("time" in ds):
                     raise AssertionError(
@@ -67,7 +61,7 @@ def _base_mask(time_allowed=False, time_required=False):
             )
             if not(time_allowed or time_required) and "time" in ds:
                 # function must be applied per time step
-                mask = ds.groupby("time").map(mask_func, **kwargs)
+                mask = ds.groupby("time", squeeze=False).map(mask_func, **kwargs)
             else:
                 # apply the wrapped mask function as is
                 mask = mask_func(ds, **kwargs)

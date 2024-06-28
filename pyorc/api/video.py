@@ -83,7 +83,6 @@ Camera configuration: {:s}
         """
         assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
         assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
-        # assert (isinstance(stabilize, (list, type(None)))), f'stabilize must contain a list of points, but is {stabilize}'
         self.feats_stats = None
         self.feats_errs = None
         self.ms = None
@@ -114,7 +113,7 @@ Camera configuration: {:s}
         # set end and start frame
         self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if start_frame is not None:
-            if (start_frame > self.frame_count and self.frame_count > 0):
+            if start_frame > self.frame_count > 0:
                 raise ValueError("Start frame is larger than total amount of frames")
         else:
             start_frame = 0
@@ -136,7 +135,7 @@ Camera configuration: {:s}
             end_frame,
             lazy=lazy,
             rotation=self.rotation,
-            method="rgb",
+            method="bgr",
             fps=fps
         )
         self.frames = frames
@@ -187,7 +186,6 @@ Camera configuration: {:s}
     def lazy(self, lazy):
         self._lazy = lazy
 
-
     @property
     def mask(self):
         """
@@ -200,7 +198,10 @@ Camera configuration: {:s}
         return self._mask
 
     @mask.setter
-    def mask(self, mask):
+    def mask(
+            self,
+            mask: np.ndarray
+    ):
         if mask is None:
             self._mask = None
         else:
@@ -218,7 +219,10 @@ Camera configuration: {:s}
             return None
 
     @camera_config.setter
-    def camera_config(self, camera_config_input):
+    def camera_config(
+            self,
+            camera_config_input: Union[str, dict]
+    ):
         """
         Set camera config as a serializable object from either a filename, json string or a dict
         :param camera_config_input: str, dict, CameraConfig object, filename string, or json string containing camera
@@ -250,7 +254,10 @@ Camera configuration: {:s}
         return self._end_frame
 
     @end_frame.setter
-    def end_frame(self, end_frame=None):
+    def end_frame(
+            self,
+            end_frame: Optional[int] = None
+    ):
         # sometimes last frames are not read by OpenCV, hence we skip the last frame always
         if end_frame is None:
             self._end_frame = self.frame_count - 1
@@ -304,7 +311,9 @@ Camera configuration: {:s}
             assert (isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
             if h_a < 0:
                 warnings.warn(
-                    "Water level is negative. This can be correct, but may be unlikely, especially if you use a staff gauge.")
+                    "Water level is negative. This can be correct, but may be unlikely, especially if you use a staff "
+                    "gauge."
+                )
         self._h_a = h_a
 
     @property
@@ -324,7 +333,6 @@ Camera configuration: {:s}
             self._start_frame = 0
         else:
             self._start_frame = start_frame
-
 
     @property
     def frames(self):
@@ -369,7 +377,6 @@ Camera configuration: {:s}
     ):
         self._corners = corners
 
-
     @property
     def rotation(self):
         if self._rotation is not None:
@@ -377,7 +384,6 @@ Camera configuration: {:s}
         elif hasattr(self, "camera_config"):
             if hasattr(self.camera_config, "rotation"):
                 return helpers.get_rotation_code(self.camera_config.rotation)
-
 
     @rotation.setter
     def rotation(
@@ -389,11 +395,10 @@ Camera configuration: {:s}
         """
         self._rotation = helpers.get_rotation_code(rotation_code)
 
-
     def get_frame(
             self,
             n: int,
-            method: Optional[Literal["grayscale", "rgb", "hsv"]] = "grayscale"
+            method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale"
     ) -> np.ndarray:
         """
         Retrieve one frame.
@@ -412,7 +417,8 @@ Camera configuration: {:s}
         """
         assert (n >= 0), "frame number cannot be negative"
         assert (
-                n - self.start_frame <= self.end_frame - self.start_frame), "frame number is larger than the different between the start and end frame"
+                n - self.start_frame <= self.end_frame - self.start_frame
+        ), "frame number is larger than the difference between the start and end frame "
         # assert (method in ["grayscale", "rgb",
         #                    "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
         cap = cv2.VideoCapture(self.fn)
@@ -430,7 +436,7 @@ Camera configuration: {:s}
 
     def get_frames(
             self,
-            method: Optional[Literal["grayscale", "rgb", "hsv"]] = "grayscale"
+            method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale"
     ) -> xr.DataArray:
         """
         Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`, expected to be read
@@ -447,8 +453,9 @@ Camera configuration: {:s}
         frames : xr.DataArray
             containing all requested frames
         """
-        assert (hasattr(self,
-                        "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
+        assert (hasattr(
+            self,
+            "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
 
@@ -466,26 +473,18 @@ Camera configuration: {:s}
             da_stack = da.stack(data_array, axis=0)
         else:
             da_stack = self.frames
-            # ensure stabilisation and color scaling is applied
+            # apply stabilisation
             if self.ms is not None:
+                # da_stack = np.array([cv.transform(img, m) for img, m in zip(da_stack, self.ms)])
                 da_stack = np.array([cv.transform(cv.color_scale(img, method), m) for img, m in zip(da_stack, self.ms)])
             else:
                 # only color transform
                 da_stack = np.array([cv.color_scale(img, method) for img in da_stack])
             sample = da_stack[0]
 
-        # undistort source control points
-        # if hasattr(camera_config, "gcps"):
-        #     camera_config.gcps["src"] = cv.undistort_points(
-        #         camera_config.gcps["src"],
-        #         camera_config.camera_matrix,
-        #         camera_config.dist_coeffs,
-        #     )
         time = np.array(
             self.time) * 0.001  # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)
-        # y = np.flipud(np.arange(data_array[0].shape[0]))
-        # x = np.arange(data_array[0].shape[1])
         y = np.flipud(np.arange(sample.shape[0]))
         x = np.arange(sample.shape[1])
         # perspective column and row coordinate grids
@@ -515,13 +514,17 @@ Camera configuration: {:s}
         if len(sample.shape) == 3:
             del coords["rgb"]
         # add coordinate grids (i.e. without time)
-        frames = frames.frames._add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
+        frames = frames.frames.add_xy_coords(
+            [xp, yp],
+            coords,
+            const.PERSPECTIVE_ATTRS
+        )
         frames.name = "frames"
         return frames
 
     def set_mask_from_exterior(
             self,
-            exterior
+            exterior: List[List]
     ):
         """
         Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside
@@ -550,11 +553,10 @@ Camera configuration: {:s}
             cap: cv2.VideoCapture,
             split: Optional[int] = 2
     ):
-        self.ms = cv._get_ms_gftt(
+        self.ms = cv.get_ms_gftt(
             cap,
             start_frame=self.start_frame,
             end_frame=self.end_frame,
             split=split,
             mask=self.mask,
         )
-

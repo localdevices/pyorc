@@ -89,7 +89,7 @@ def _get_cam_mtx(height, width, c=2.0, focal_length=None):
     return mtx
 
 
-def _get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None, wdw=4):
+def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None, wdw=4):
     # set end_frame to last if not defined
     if end_frame is None:
         end_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -649,6 +649,8 @@ def color_scale(img, method):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     elif method == "hsv":
         img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    elif method == "bgr":
+        pass
     return img
 
 
@@ -666,31 +668,10 @@ def get_frame(
         raise IOError(f"Cannot read")
     if ret:
         if ms is not None:
+            # apply stabilization on image
             img = transform(img, ms)
-        # apply lens distortion correction
         img = color_scale(img, method)
     return ret, img
-
-
-def get_frames(cap, start_frame, end_frame):
-    """
-    Get a set of frames from start_frame to end frame from a cap object
-
-    Parameters
-    ----------
-    cap : cv.VideoCapture
-        Opened VideoCapture object
-    start_frame : int
-        first frame to consider for reading
-    end_frame : int
-        last frame to consider for reading
-
-    Returns
-    -------
-    frames : list
-        list with 2D or 3D (in case of RGB) numpy arrays with image intensity values
-    """
-    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
 
 def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
@@ -706,6 +687,8 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
             first frame to consider for reading
         end_frame : int
             last frame to consider for reading
+        lazy : bool
+            read frames lazily (default) or not. Set to False for direct reading (faster, but more memory)
         fps : float
             hard enforced frames per second number (used when metadata of video is incorrect)
 
@@ -730,7 +713,7 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
     while ret:
         if n > end_frame:
             break
-        if not(lazy):
+        if not lazy:
             frames.append(img)
         t1 = cap.get(cv2.CAP_PROP_POS_MSEC)
         if fps is not None:

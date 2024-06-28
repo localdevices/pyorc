@@ -88,7 +88,7 @@ class ORCBase(object):
         self.camera_shape = self._obj.camera_shape
 
 
-    def _add_xy_coords(
+    def add_xy_coords(
         self,
         xy_coord_data,
         coords,

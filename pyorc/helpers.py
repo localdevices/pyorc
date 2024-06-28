@@ -573,6 +573,7 @@ def staggered_index(start=0, end=100):
         idx_sort.sort()
     return idx_order
 
+
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
     """Fill missing surface velocities using a velocity depth profile with
 
@@ -596,25 +597,27 @@ def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
     """
 
     def log_fit(_v):
+        idx_finite = np.isfinite(_v).values.flatten()
         pars = optimize_log_profile(
-            depth[np.isfinite(_v).values],
-            _v[np.isfinite(_v).values],
-            dist_shore[np.isfinite(_v).values]
+            depth[idx_finite],
+            _v[0, idx_finite],
+            dist_shore[idx_finite]
         )
-        _v[np.isnan(_v).values] = log_profile(
+        idx_miss = np.where(np.isnan(_v[0]).values)[0]
+        _v[0, idx_miss] = log_profile(
             (
-                depth[np.isnan(_v).values],
-                dist_shore[np.isnan(_v).values]
+                depth[idx_miss],
+                dist_shore[idx_miss]
             ),
             **pars
         )
         # enforce that velocities are zero with zero depth
-        _v[depth <= 0] = 0.
+        _v[0, depth <= 0] = 0.
         return np.maximum(_v, 0)
 
     # fill per grouped dimension
     v.load()
-    v_group = copy.deepcopy(v).groupby(dim)
+    v_group = copy.deepcopy(v).groupby(dim, squeeze=False)
     return v_group.map(log_fit)
 
 
@@ -642,16 +645,16 @@ def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
         # scale with log depth
         c = xr.DataArray(_v / np.log(np.maximum(dist_wall, d_0) / d_0))
         # fill dry points with the nearest valid value for c
-        c[dist_wall == 0] = c.interpolate_na(dim="points", method="nearest", fill_value="extrapolate")[dist_wall == 0]
+        c[0, np.where(dist_wall == 0)[0]] = c.interpolate_na(dim="points", method="nearest", fill_value="extrapolate")[0, np.where(dist_wall == 0)[0]]
         # interpolate with linear interpolation
         c = c.interpolate_na(dim="points")
         # use filled c to interpret missing v
-        _v[np.isnan(_v)] = (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[np.isnan(_v)]
+        _v[0, np.isnan(_v[0])] = (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[0, np.where(np.isnan(_v[0]))[0]] # (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[np.isnan(_v)]
         return _v
 
     # fill per grouped dimension
     v.load()
-    v_group = copy.deepcopy(v).groupby(dim)
+    v_group = copy.deepcopy(v).groupby(dim, squeeze=False)
     return v_group.map(log_interp)
 
 

@@ -93,11 +93,15 @@ def test_get_M(cam_config, h_a, to_bbox_grid, M_expected):
 @pytest.mark.parametrize(
         "_cam_config, _corners, _bbox",
     [
-        (pytest.lazy_fixture("cam_config_6gcps"), pytest.lazy_fixture("corners_6gcps"), pytest.lazy_fixture("bbox_6gcps")),
-        (pytest.lazy_fixture("cam_config"), pytest.lazy_fixture("corners"), pytest.lazy_fixture("bbox"))
+        ("cam_config_6gcps", "corners_6gcps", "bbox_6gcps"),
+        ("cam_config", "corners", "bbox")
     ]
 )
-def test_set_bbox_from_corners(_cam_config, _corners, _bbox):
+def test_set_bbox_from_corners(_cam_config, _corners, _bbox, request):
+    _cam_config = request.getfixturevalue(_cam_config)
+    _corners = request.getfixturevalue(_corners)
+    _bbox = request.getfixturevalue(_bbox)
+
     # check if this works
     _cam_config.set_bbox_from_corners(_corners)
     assert(np.allclose(_cam_config.bbox.bounds, _bbox.bounds))
@@ -181,11 +185,12 @@ def test_cv_undistort_points(cam_config):
 @pytest.mark.parametrize(
         "cur_cam_config",
     [
-        pytest.lazy_fixture("cam_config_6gcps"),
-        pytest.lazy_fixture("cam_config"),
+        "cam_config_6gcps",
+        "cam_config",
     ]
 )
-def test_unproject_points(cur_cam_config):
+def test_unproject_points(cur_cam_config, request):
+    cur_cam_config = request.getfixturevalue(cur_cam_config)
     src = cur_cam_config.gcps["src"]
     dst = cur_cam_config.gcps_dest
     # project x, y, z point to camera objective
