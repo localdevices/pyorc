@@ -5,19 +5,20 @@ import matplotlib.pyplot as plt
 @pytest.mark.parametrize(
     "frames, resolution, method, dims, shape, kwargs",
     [
-        (pytest.lazy_fixture("frames_grayscale"), 0.1, "numpy", 3, (79, 88), {}),
-        (pytest.lazy_fixture("frames_grayscale"), 0.1, "numpy", 3, (79, 88), {"reducer": "mean"}),
-        (pytest.lazy_fixture("frames_rgb"), 0.1, "numpy", 4, (79, 88, 3), {"reducer": "mean"}),
-        (pytest.lazy_fixture("frames_rgb"), 0.1, "numpy", 4, (79, 88, 3), {}),
-        (pytest.lazy_fixture("frames_grayscale"), 0.1, "cv", 3, (79, 88), {}),
-        (pytest.lazy_fixture("frames_grayscale"), 0.01, "cv", 3, (786, 878), {}),
-        (pytest.lazy_fixture("frames_grayscale"), 0.05, "cv", 3, (157, 176), {}),
-        (pytest.lazy_fixture("frames_rgb"), 0.1, "cv", 4, (79, 88, 3), {}),
+        ("frames_grayscale", 0.1, "numpy", 3, (79, 88), {}),
+        ("frames_grayscale", 0.1, "numpy", 3, (79, 88), {"reducer": "mean"}),
+        ("frames_rgb", 0.1, "numpy", 4, (79, 88, 3), {"reducer": "mean"}),
+        ("frames_rgb", 0.1, "numpy", 4, (79, 88, 3), {}),
+        ("frames_grayscale", 0.1, "cv", 3, (79, 88), {}),
+        ("frames_grayscale", 0.01, "cv", 3, (786, 878), {}),
+        ("frames_grayscale", 0.05, "cv", 3, (157, 176), {}),
+        ("frames_rgb", 0.1, "cv", 4, (79, 88, 3), {}),
     ]
 )
-def test_project(frames, resolution, method, dims, shape, kwargs):
+def test_project(frames, resolution, method, dims, shape, kwargs, request):
 #     import matplotlib
 #     matplotlib.use('Qt5Agg')
+    frames = request.getfixturevalue(frames)
     frames_proj = frames.frames.project(resolution=resolution, method=method, **kwargs)
     # check amount of time steps is equal
     assert(len(frames_proj.time) == len(frames.time))
@@ -25,7 +26,6 @@ def test_project(frames, resolution, method, dims, shape, kwargs):
     assert(len(frames_proj.dims) == dims), f"Expected nr of dims is {dims}, but {len(frames_proj.dims)} found"
     # check shape of x, y grids
     assert(frames_proj.isel(time=0).shape == shape), f"Projected frames shape {frames_proj.isel(time=0).shape} do not have expected shape {shape}"
-
     # import matplotlib.pyplot as plt
     # plt.imshow(frames_proj[0])
     # plt.colorbar()
@@ -35,12 +35,13 @@ def test_project(frames, resolution, method, dims, shape, kwargs):
 @pytest.mark.parametrize(
     "frames, samples",
     [
-        (pytest.lazy_fixture("frames_grayscale"), 2),
-        (pytest.lazy_fixture("frames_grayscale_shift"), 2),
-        (pytest.lazy_fixture("frames_proj"), 2),
+        ("frames_grayscale", 2),
+        ("frames_grayscale_shift", 2),
+        ("frames_proj", 2),
     ]
 )
-def test_normalize(frames, samples):
+def test_normalize(frames, samples, request):
+    frames = request.getfixturevalue(frames)
     frames_norm = frames.frames.normalize(samples=samples)
     assert(frames_norm[0, 0, 0].values.dtype == "uint8"), f'dtype of result is {frames_norm[0, 0, 0].values.dtype}, expected "uint8"'
 
@@ -52,7 +53,6 @@ def test_edge_detect(frames_proj):
     assert(np.allclose(frames_edge.values.flatten()[-4:], [-1.3828125, -4.3359375,  1.71875  ,  7.234375 ]))
 
 
-
 def test_reduce_rolling(frames_grayscale, samples=1):
     frames_reduced = frames_grayscale.frames.reduce_rolling(samples=samples)
     assert(frames_reduced.shape == frames_grayscale.shape)
@@ -61,15 +61,16 @@ def test_reduce_rolling(frames_grayscale, samples=1):
 @pytest.mark.parametrize(
     "frames",
     [
-        pytest.lazy_fixture("frames_grayscale"),
-        pytest.lazy_fixture("frames_rgb"),
+        "frames_grayscale",
+        "frames_rgb",
     ]
 )
 @pytest.mark.parametrize(
     "idx",
     [0, -1]
 )
-def test_plot(frames, idx):
+def test_plot(frames, idx, request):
+    frames = request.getfixturevalue(frames)
     frames[idx].frames.plot()
     frames[idx].frames.plot(mode="camera")
     plt.close("all")
@@ -110,23 +111,25 @@ def test_get_piv(frames_proj, window_size, result):
 @pytest.mark.parametrize(
     "frames",
     [
-        pytest.lazy_fixture("frames_grayscale"),
-        pytest.lazy_fixture("frames_rgb"),
-        pytest.lazy_fixture("frames_proj"),
+        "frames_grayscale",
+        "frames_rgb",
+        "frames_proj",
     ]
 )
-def test_to_ani(frames, ani_mp4):
+def test_to_ani(frames, ani_mp4, request):
+    frames = request.getfixturevalue(frames)
     frames.frames.to_ani(ani_mp4, progress_bar=False)
 
 
 @pytest.mark.parametrize(
     "frames",
     [
-        pytest.lazy_fixture("frames_grayscale"),
-        pytest.lazy_fixture("frames_rgb_stabilize"),
-        pytest.lazy_fixture("frames_proj"),
+        "frames_grayscale",
+        "frames_rgb_stabilize",
+        "frames_proj",
     ]
 )
-def test_to_video(frames, ani_mp4):
+def test_to_video(frames, ani_mp4, request):
+    frames = request.getfixturevalue(frames)
     # only store the first 3 frames
     frames[0:3].frames.to_video(ani_mp4)

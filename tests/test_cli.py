@@ -54,6 +54,7 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
     )
     # assert result.exit_code == 0
 
+
 def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_output_dir):
     # ensure we are in the right folder
     print(f"current file is: {os.path.dirname(__file__)}")
@@ -88,11 +89,12 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
 @pytest.mark.parametrize(
     "recipe_",
     [
-        pytest.lazy_fixture("recipe"),
-        pytest.lazy_fixture("recipe_geojson"),
+        "recipe",
+        "recipe_geojson",
     ]
 )
-def test_service_video(recipe_, vid_file, cam_config, cli_prefix, cli_output_dir):
+def test_service_video(recipe_, vid_file, cam_config, cli_prefix, cli_output_dir, request):
+    recipe_ = request.getfixturevalue(recipe_)
     # ensure we are in the right folder
     print(f"current file is: {os.path.dirname(__file__)}")
     os.chdir(os.path.dirname(__file__))

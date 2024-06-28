@@ -194,7 +194,10 @@ def project_numpy(
     )
     # coerce 2D idxs to 1D idxs
     idx_back = np.array(points_cam[idx_in, 1]) * len(da.x) + np.array(points_cam[idx_in, 0])
-    vals = da.stack(points=("y", "x")).isel(points=idx_back)
+    vals = da.stack(group=("y", "x")).isel(group=idx_back)
+    # overwrite the values group coordinates
+    vals = vals.drop_vars(['group', 'y', 'x'])
+    vals["group"] = da_new.group[idx_in]
     da_new[..., idx_in] = vals
 
     if reducer != "nearest":
@@ -257,7 +260,7 @@ def project_numpy(
         classes = np.unique(da_idx)
         # group unique values and reduce with average
         da_point = xarray_reduce(
-            da_point.drop(["y", "x"]),
+            da_point.drop_vars(["y", "x", "points"]),
             da_idx,func=reducer,
             expected_groups=classes,
             engine="numba"
