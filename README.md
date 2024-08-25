@@ -1,3 +1,8 @@
+<figure>
+    <img src="./docs/_static/orc_logo_color.png" 
+WIDTH=100 align="right">,
+</figure>
+
 pyOpenRiverCam
 ==============
 
