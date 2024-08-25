@@ -8,10 +8,14 @@ Our trademark names include:
 
  * OpenRiverCam
  * pyOpenRiverCam
+ * NodeOpenRiverCam
+ * LiveOpenRiverCam
 
-> **_Note_**: Trademark logos are currently being established and will be included in an update of these trademark guidelines. Guidelines for logos are therefore already included in this guideline document.
+Our logos include color and black-and-white versions of the following logo:
 
-**If you want to report misuse of an OpenRiverCam trademark, please contact us via [this](https://rainbowsensing.com/index.php/contact-2/) link.**
+ ![ORC](https://raw.githubusercontent.com/localdevices/pyorc/176-implement-openrivercam-logo/docs/_static/orc_logo_color.png)
+
+> **_Note_**: If you want to report misuse of an OpenRiverCam trademark, please contact us via [this](https://rainbowsensing.com/index.php/contact-2/) link.
 
 ## When do I need specific permission to use an OpenRiverCam trademark?
 
