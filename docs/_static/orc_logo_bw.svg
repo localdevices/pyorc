@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    version="1.1"
-   viewBox="0 0 171.5 202.24402"
+   viewBox="0 0 171.5 171.5"
    id="svg121"
    sodipodi:docname="orc_logo_bw.svg"
    width="171.5"
-   height="202.24402"
+   height="171.5"
    inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -21,14 +21,14 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="1.0366162"
-     inkscape:cx="-31.35201"
-     inkscape:cy="-105.63216"
+     inkscape:cx="-31.352009"
+     inkscape:cy="-105.63215"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="Layer_1" />
+     inkscape:current-layer="G2_Logo-7" />
   <defs
      id="defs8">
     <style
@@ -37,56 +37,56 @@
        id="clippath">
       <polygon
          class="cls-2"
-         points="115.47,126.94 150.01,161.23 196.97,148.46 209.4,101.41 174.86,67.12 127.89,79.89 "
+         points="150.01,161.23 196.97,148.46 209.4,101.41 174.86,67.12 127.89,79.89 115.47,126.94 "
          id="polygon1" />
     </clipPath>
     <clipPath
        id="clippath-1">
       <polygon
          class="cls-2"
-         points="115.52,368.05 150.06,402.34 197.03,389.58 209.45,342.52 174.91,308.23 127.95,321 "
+         points="150.06,402.34 197.03,389.58 209.45,342.52 174.91,308.23 127.95,321 115.52,368.05 "
          id="polygon2" />
     </clipPath>
     <clipPath
        id="clippath-2">
       <polygon
          class="cls-1"
-         points="115.58,601.55 150.12,635.84 197.08,623.07 209.51,576.02 174.97,541.73 128,554.5 "
+         points="150.12,635.84 197.08,623.07 209.51,576.02 174.97,541.73 128,554.5 115.58,601.55 "
          id="polygon3" />
     </clipPath>
     <clipPath
        id="clippath-3">
       <polygon
          class="cls-4"
-         points="146.81,747.63 153.56,754.33 162.75,751.83 165.17,742.63 158.42,735.93 149.24,738.43 "
+         points="153.56,754.33 162.75,751.83 165.17,742.63 158.42,735.93 149.24,738.43 146.81,747.63 "
          id="polygon4" />
     </clipPath>
     <clipPath
        id="clippath-4">
       <polygon
          class="cls-2"
-         points="372.02,126.42 409.99,164.12 461.63,150.08 475.29,98.34 437.31,60.65 385.68,74.68 "
+         points="409.99,164.12 461.63,150.08 475.29,98.34 437.31,60.65 385.68,74.68 372.02,126.42 "
          id="polygon5" />
     </clipPath>
     <clipPath
        id="clippath-5">
       <polygon
          class="cls-2"
-         points="372.07,367.53 410.05,405.23 461.68,391.19 475.34,339.46 437.37,301.76 385.73,315.79 "
+         points="410.05,405.23 461.68,391.19 475.34,339.46 437.37,301.76 385.73,315.79 372.07,367.53 "
          id="polygon6" />
     </clipPath>
     <clipPath
        id="clippath-6">
       <polygon
          class="cls-1"
-         points="372.12,601.03 410.1,638.73 461.73,624.69 475.39,572.95 437.42,535.26 385.78,549.29 "
+         points="410.1,638.73 461.73,624.69 475.39,572.95 437.42,535.26 385.78,549.29 372.12,601.03 "
          id="polygon7" />
     </clipPath>
     <clipPath
        id="clippath-7">
       <polygon
          class="cls-4"
-         points="408.02,747.63 414.78,754.33 423.96,751.83 426.39,742.63 419.63,735.93 410.45,738.43 "
+         points="414.78,754.33 423.96,751.83 426.39,742.63 419.63,735.93 410.45,738.43 408.02,747.63 "
          id="polygon8" />
     </clipPath>
   </defs>
@@ -169,17 +169,10 @@
             </g>
             <polygon
                class="cls-1"
-               points="410.1,638.73 461.73,624.69 475.39,572.95 437.42,535.26 385.78,549.29 372.12,601.03 "
+               points="475.39,572.95 437.42,535.26 385.78,549.29 372.12,601.03 410.1,638.73 461.73,624.69 "
                id="polygon95" />
           </g>
         </g>
-        <text
-           class="cls-9"
-           transform="translate(337.38,699.3)"
-           id="text97"><tspan
-             x="0"
-             y="0"
-             id="tspan97">OpenRiverCam</tspan></text>
       </g>
     </g>
   </g>
