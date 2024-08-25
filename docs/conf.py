@@ -111,6 +111,9 @@ html_theme_options = {
             "type": "local",
         },
     ],
+    "logo": {
+        "text": f"pyOpenRiverCam {release}"
+    }
 }
 
 html_context = {
