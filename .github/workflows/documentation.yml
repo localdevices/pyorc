@@ -31,7 +31,7 @@ jobs:
       - name: OpenCV dependencies
         run: |
           sudo apt update
-          sudo apt install libegl1 libopengl0 -y
+          sudo apt install libegl1 libopengl0 pandoc -y
 
       - name: Install pyorc
         run: pip install .
