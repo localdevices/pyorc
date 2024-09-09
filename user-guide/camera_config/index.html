@@ -3,40 +3,40 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Camera configurations &#8212; pyorc 0.5.2 documentation</title>
+    <title>Camera configurations &#8212; pyorc 0.5.6 documentation</title>
   
   
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -47,6 +47,7 @@
     <script src="../../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/camera_config/index';</script>
+    <link rel="shortcut icon" href="../../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Videos" href="../video/index.html" />
@@ -60,28 +61,23 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
   <input type="checkbox"
           class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
   
   <input type="checkbox"
           class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
   
   <div class="search-button__wrapper">
     <div class="search-button__overlay"></div>
@@ -103,17 +99,25 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
   </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
+  
+    
   
 
 <a class="navbar-brand logo" href="../../index.html">
@@ -122,7 +126,16 @@
   
   
   
-    <p class="title logo__title">pyorc 0.5.2 documentation</p>
+    
+    
+      
+    
+    
+    <img src="../../_static/orc_logo_color.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
   
 </a></div>
     
@@ -132,49 +145,44 @@
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+        <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../intro.html">
-                        Introduction
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../intro.html">
+    Introduction
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../installation.html">
-                        Installation
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../quickstart.html">
-                        Quick start for programmers
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../api.html">
-                        API reference
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -185,9 +193,10 @@
       
         <div class="navbar-item navbar-persistent--container">
           
+
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -198,17 +207,18 @@
       
       
         <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
   </button>
 `);
 </script></div>
       
-        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -219,7 +229,7 @@ document.write(`
           
           
           
-          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
         </li>
 </ul></div>
       
@@ -229,9 +239,10 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
+
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -242,16 +253,19 @@ document.write(`
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -262,51 +276,49 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../intro.html">
-                        Introduction
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../intro.html">
+    Introduction
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../installation.html">
-                        Installation
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../quickstart.html">
-                        Quick start for programmers
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../api.html">
-                        API reference
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -315,17 +327,18 @@ document.write(`
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
   </button>
 `);
 </script></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -336,7 +349,7 @@ document.write(`
           
           
           
-          <a href="https://localdevices.org" title="Local Devices" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
         </li>
 </ul></div>
         
@@ -345,7 +358,8 @@ document.write(`
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
@@ -372,13 +386,13 @@ document.write(`
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
@@ -387,7 +401,7 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -413,7 +427,7 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="camera-configurations">
 <span id="camera-config-ug"></span><h1>Camera configurations<a class="headerlink" href="#camera-configurations" title="Permalink to this heading">#</a></h1>
@@ -427,7 +441,7 @@ The camera configuration methods of <strong>pyorc</strong> are meant for this pu
 <h2>Setting up a camera configuration<a class="headerlink" href="#setting-up-a-camera-configuration" title="Permalink to this heading">#</a></h2>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-0">
+<label class="sd-tab-label" for="sd-tab-item-0">
 Command-line</label><div class="sd-tab-content docutils">
 <p id="camera-config-cli">The command-line interface supports setting up a camera configuration through a subcommand. To see the options
 simply call the subcommand on a command prompt with <code class="docutils literal notranslate"><span class="pre">--help</span></code> as follows:</p>
@@ -470,6 +484,8 @@ Options:
   -s, --stabilize             Stabilize the videos using this camera
                               configuration (you can provide a stable area in
                               an interactive view).
+  --rotation INTEGER          Provide a rotation of either 90, 180 or 170
+                              degrees if needed to correctly rotate the video
   -v, --verbose               Increase verbosity.
   --help                      Show this message and exit.
 </pre></div>
@@ -495,7 +511,7 @@ will be displayed.</p></li>
 <p>There are several ways to assign this information, further explained below.</p>
 </div>
 <input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-1">
+<label class="sd-tab-label" for="sd-tab-item-1">
 API</label><div class="sd-tab-content docutils">
 <p id="camera-config-api">In <strong>pyorc</strong> all camera configuration is collected into one single class called <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code>. It can be imported
 from the main library and then be used to add information about the lens characteristics and the relation between
@@ -605,7 +621,7 @@ configuration. Instead we just pass the CRS of the WGS84 lat-lon (e.g. using the
 to our configuration. We will see this later in this manual.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-2">
+<label class="sd-tab-label" for="sd-tab-item-2">
 Command-line</label><div class="sd-tab-content docutils">
 <p id="camera-config-cli-geo">To provide a geographical coordinate reference system to your camera configuration,
 you may simply add the option <code class="docutils literal notranslate"><span class="pre">--crs</span></code> to the earlier command. Below an example
@@ -621,7 +637,7 @@ interest.</p>
 <p>The dots represent additional required to make a full camera configuration.</p>
 </div>
 <input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-3">
+<label class="sd-tab-label" for="sd-tab-item-3">
 API</label><div class="sd-tab-content docutils">
 <p id="camera-config-api-geo">Below, we show what the configuration would look like if we would add the Rijksdriehoek projection to our camera
 configuration. You can see that the code is converted into a Well-Known-Text format, so that it can also easily be
@@ -742,7 +758,7 @@ distance.</p>
 <h3>Lens calibration method<a class="headerlink" href="#lens-calibration-method" title="Permalink to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-4">
+<label class="sd-tab-label" for="sd-tab-item-4">
 Command-line</label><div class="sd-tab-content docutils">
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -751,7 +767,7 @@ for lens calibration, then please contact us at <a class="reference external" hr
 </div>
 </div>
 <input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-5">
+<label class="sd-tab-label" for="sd-tab-item-5">
 API</label><div class="sd-tab-content docutils">
 <p id="camera-config-api-lc">Once you have your video, the camera calibration is very simple. After creating your camera configuration you can
 supply the video in the following manner:</p>
@@ -813,7 +829,7 @@ one video with the control points visible, which you can use to setup the camera
 recognize markers over your Field of View. In the figure below you see two examples, one where 4 sticks were placed in
 the water and the interface of the sticks with the water (red dots) is measured. And one where 6 black-and-white
 markers are spread over the field of view.</p>
-<table class="table" id="id1">
+<div class="pst-scrollable-table-container"><table class="table" id="id1">
 <caption><span class="caption-text">Examples of ground control markers and situations</span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
 <tbody>
 <tr class="row-odd"><td><p>4 GCPt at water surface - Chuo Kikuu River, Dar es Salaam, Tanzania</p></td>
@@ -826,6 +842,7 @@ markers are spread over the field of view.</p>
 </tr>
 </tbody>
 </table>
+</div>
 <p>The schematic below shows in a planar view what the situation looks like. It is important that the control points are
 nicely spread over the Field of View, and this is actually more important than an equal spread of points of left and
 right bank. In the schematic we show this by having only 2 control points at the bank close to the camera, and 4 at
@@ -860,7 +877,7 @@ with the same horizontal and vertical coordinate system as <code class="docutils
 <h3>Entering control points in the camera configuration<a class="headerlink" href="#entering-control-points-in-the-camera-configuration" title="Permalink to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-6">
+<label class="sd-tab-label" for="sd-tab-item-6">
 Command-line</label><div class="sd-tab-content docutils">
 <p id="camera-config-cli-gcps">There are several approaches to provide ground control point information to the camera configuration through the
 command-line interface:</p>
@@ -931,7 +948,7 @@ the interactive view. The Home button will bring you back to the original view.<
 </div>
 </div>
 <input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-7">
+<label class="sd-tab-label" for="sd-tab-item-7">
 API</label><div class="sd-tab-content docutils">
 <p id="camera-config-api-gcps">The ground control points are a simple python dictionary that should follow a certain schema. The schema looks as
 follows:</p>
@@ -1010,7 +1027,7 @@ measure the location as accurately as possible, and naturally in exactly the sam
 control points.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-8">
+<label class="sd-tab-label" for="sd-tab-item-8">
 Command-line</label><div class="sd-tab-content docutils">
 <p>The position of the lens can be supplied with a simple list of [x, y, z] coordinate, provided within
 quotes (“). It will be assumed that these coordinates share the same CRS as the ground control points. Hence if
@@ -1022,7 +1039,7 @@ is provided below.</p>
 </div>
 </div>
 <input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-9">
+<label class="sd-tab-label" for="sd-tab-item-9">
 API</label><div class="sd-tab-content docutils">
 <p>The lens position can be provided using a simple method <code class="docutils literal notranslate"><span class="pre">set_lens_position</span></code>. You only
 need to provide x, y, z and the CRS (if this is different from the CRS of the camera configuration itself.</p>
@@ -1057,7 +1074,7 @@ unexpected direction more easily, and without tuning of masking parameters.</p>
 <img alt="../../_images/wark_cam_config.jpg" src="../../_images/wark_cam_config.jpg" />
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-10">
+<label class="sd-tab-label" for="sd-tab-item-10">
 Command-line</label><div class="sd-tab-content docutils">
 <p id="camera-config-cli-bbox">In the command-line interface there are two options to establish a bounding box to the camera configuration:</p>
 <ul class="simple">
@@ -1085,7 +1102,7 @@ satisfied, click on <em>Done</em> and the bounding box will be stored in the cam
 </figure>
 </div>
 <input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-11">
+<label class="sd-tab-label" for="sd-tab-item-11">
 API</label><div class="sd-tab-content docutils">
 <p id="camera-config-api-bbox">The area of interest can theoretically be provided directly, simply by providing
 a <code class="docutils literal notranslate"><span class="pre">shapely.geometry.Polygon</span></code> with 5 bounding points as follows (pseudo-code):</p>
@@ -1151,7 +1168,7 @@ essentially the moving water and possibly also strongly moving vegetation if thi
 the polygon such that it encompasses both water and other strongly moving elements as much as possible.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-12" name="sd-tab-set-6" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-12">
+<label class="sd-tab-label" for="sd-tab-item-12">
 Command-line</label><div class="sd-tab-content docutils">
 <p>On the command line, simply provide <code class="docutils literal notranslate"><span class="pre">--stabilize</span></code> or <code class="docutils literal notranslate"><span class="pre">-s</span></code> as additional argument and you will be provided
 with a interactive point and click view on your selected frame. You may click as many points as you wih to
@@ -1160,7 +1177,7 @@ the frame so that areas outside of the frame become visible. Select the 4th butt
 double-arrows) to select panning. Click on the most left (Home) button to return to the original view.</p>
 </div>
 <input id="sd-tab-item-13" name="sd-tab-set-6" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-13">
+<label class="sd-tab-label" for="sd-tab-item-13">
 API</label><div class="sd-tab-content docutils">
 <p>For stabilization, provide <code class="docutils literal notranslate"><span class="pre">stabilize</span></code> as additional argument to <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code> and provide as value
 a list of lists of coordinates in [column, row] format, similar to <code class="docutils literal notranslate"><span class="pre">gcps[&quot;src&quot;]</span></code>.</p>
@@ -1173,7 +1190,7 @@ a list of lists of coordinates in [column, row] format, similar to <code class="
 used for processing videos into velocimetry.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-14" name="sd-tab-set-7" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-14">
+<label class="sd-tab-label" for="sd-tab-item-14">
 Command-line</label><div class="sd-tab-content docutils">
 <p>When all required parameters are provided, the resulting camera configuration will be stored in a file
 set as <code class="docutils literal notranslate"><span class="pre">&lt;OUTPUT&gt;</span></code> on the command line. If you have our code base and the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder, then you can for
@@ -1199,7 +1216,7 @@ names for this have the same name as &lt;OUTPUT&gt; but with the suffixes <code 
 <code class="docutils literal notranslate"><span class="pre">_cam.jpg</span></code> for the camera FOV perspective.</p>
 </div>
 <input id="sd-tab-item-15" name="sd-tab-set-7" type="radio">
-</input><label class="sd-tab-label" for="sd-tab-item-15">
+<label class="sd-tab-label" for="sd-tab-item-15">
 API</label><div class="sd-tab-content docutils">
 <p>Storing a camera configuration within the API is as simple as calling <code class="docutils literal notranslate"><span class="pre">to_file</span></code>. Camera configurations can
 also be loaded back in memory using <code class="docutils literal notranslate"><span class="pre">pyorc.load_camera_config</span></code>.</p>
@@ -1263,8 +1280,8 @@ the camera configuration is based, extract one frame, and plot it within one axe
               
               
               
-                <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                <footer class="prev-next-footer d-print-none">
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="../api.html"
@@ -1293,11 +1310,14 @@ the camera configuration is based, extract one frame, and plot it within one axe
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-a-camera-configuration">Setting up a camera configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#making-the-camera-configuration-geographically-aware">Making the camera configuration geographically aware</a></li>
@@ -1323,6 +1343,7 @@ the camera configuration is based, extract one frame, and plot it within one axe
   </nav></div>
 
   <div class="sidebar-secondary-item">
+
   <div class="tocsection sourcelink">
     <a href="../../_sources/user-guide/camera_config/index.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
@@ -1343,8 +1364,8 @@ the camera configuration is based, extract one frame, and plot it within one axe
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1352,6 +1373,7 @@ the camera configuration is based, extract one frame, and plot it within one axe
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
       © Copyright 2023, Rainbow Sensing.
@@ -1361,6 +1383,7 @@ the camera configuration is based, extract one frame, and plot it within one axe
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     <br/>
@@ -1373,8 +1396,9 @@ the camera configuration is based, extract one frame, and plot it within one axe
   
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.1.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>
