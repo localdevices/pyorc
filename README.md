@@ -1,5 +1,10 @@
-pyOpenRiverCam
-==============
+<figure>
+    <img src="https://raw.githubusercontent.com/localdevices/pyorc/main/docs/_static/orc_logo_color.svg" 
+width=100 align="right">
+</figure>
+<br>
+
+# pyOpenRiverCam
 
 [![PyPI](https://badge.fury.io/py/pyopenrivercam.svg)](https://pypi.org/project/pyopenrivercam)
 [![Conda-Forge](https://anaconda.org/conda-forge/pyopenrivercam/badges/version.svg)](https://anaconda.org/conda-forge/pyopenrivercam)
@@ -7,7 +12,6 @@ pyOpenRiverCam
 [![docs_latest](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://localdevices.github.io/pyorc/latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/localdevices/pyorc.git/main?labpath=examples)
 [![License](https://img.shields.io/github/license/localdevices/pyorc?style=flat)](https://github.com/localdevices/pyorc/blob/main/LICENSE)
-
 
 **pyorc**, short for "pyOpenRiverCam" is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for 
 computations on the fully open software stack OpenRiverCam. **pyorc** can only be successful if the underlying methods
@@ -43,8 +47,7 @@ If you wish to fund this or other work on features, please contact us at info@ra
 
 > **_compatibility:_** At this moment **pyorc** works with any video compatible with OpenCV as long as it has proper metadata.
 
-Installation
-------------
+## Installation
 
 To get started with **pyorc**, we recommend to setup a python virtual environment. 
 We recommend using a Miniconda or Anaconda environment as this will ease installation, and will allow you to use all
@@ -113,17 +116,14 @@ conda activate pyorc-dev
 pip install -e .
 ```
 
-Using pyorc
------------
+## Using pyorc
 To use **pyorc**, you can use the API for processing. A command-line interface is forthcoming pending funding. 
 A manual is also still in the making.
 
-Acknowledgement
----------------
+## Acknowledgement
 The first development of pyorc has been supported by the World Meteorological Organisation - HydroHub. 
 
-License
--------
+## License
 **pyorc** is licensed under AGPL Version 3 (see [LICENSE](./LICENSE) file).
 
 **pyorc** uses the following libraries and software with said licenses.
@@ -143,6 +143,7 @@ Project organisation
     .
     ├── README.md
     ├── LICENSE
+    ├── TRADEMARK.md
     ├── setup.py            <- setup script compatible with pip
     ├── environment.yml     <- YML-file for setting up a conda environment with dependencies
     ├── docs                <- Sphinx documentation source code
