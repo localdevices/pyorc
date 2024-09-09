@@ -8,4 +8,5 @@ ipykernel
 nbsphinx
 sphinx-gallery
 pandoc
+pypandoc_binary
 matplotlib
