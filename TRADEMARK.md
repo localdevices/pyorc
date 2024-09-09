@@ -13,9 +13,9 @@ Our trademark names include:
 
 Our logos include a color, greyscale and and black-and-white logo as shown below:
 
- ![ORC](https://raw.githubusercontent.com/localdevices/pyorc/176-implement-openrivercam-logo/docs/_static/orc_logo_color.svg)
- ![ORC](https://raw.githubusercontent.com/localdevices/pyorc/176-implement-openrivercam-logo/docs/_static/orc_logo_grey.svg)
- ![ORC](https://raw.githubusercontent.com/localdevices/pyorc/176-implement-openrivercam-logo/docs/_static/orc_logo_bw.svg)
+ ![ORC](https://raw.githubusercontent.com/localdevices/pyorc/main/docs/_static/orc_logo_color.svg)
+ ![ORC](https://raw.githubusercontent.com/localdevices/pyorc/main/docs/_static/orc_logo_grey.svg)
+ ![ORC](https://raw.githubusercontent.com/localdevices/pyorc/main/docs/_static/orc_logo_bw.svg)
 
 > **_Note_**: If you want to report misuse of an OpenRiverCam trademark, please contact us via [this](https://rainbowsensing.com/index.php/contact-2/) link.
 

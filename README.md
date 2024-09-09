@@ -1,5 +1,5 @@
 <figure>
-    <img src="https://raw.githubusercontent.com/localdevices/pyorc/176-implement-openrivercam-logo/docs/_static/orc_logo_color.svg" 
+    <img src="https://raw.githubusercontent.com/localdevices/pyorc/main/docs/_static/orc_logo_color.svg" 
 width=100 align="right">
 </figure>
 <br>
