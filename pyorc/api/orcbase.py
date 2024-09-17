@@ -1,14 +1,14 @@
 import json
 import numpy as np
 import xarray as xr
-from pyorc import helpers
 
 depr_warning = """
 
-The camera configuration of this pyorc output does not have a property "height" and/or "width", because it has been 
+The camera configuration of this pyorc output does not have a property "height" and/or "width", because it has been
 established with version < 0.3.0 version. Adding height and width property. This behaviour is deprecated. Please resave
-your results with ``.to_netcdf()`` to make them compatible with later versions. 
+your results with ``.to_netcdf()`` to make them compatible with later versions.
 """
+
 
 class ORCBase(object):
     def __init__(self, xarray_obj):
@@ -128,4 +128,3 @@ class ORCBase(object):
             frames_coord[k].attrs = v.attrs
         # update the DataArray
         return frames_coord
-

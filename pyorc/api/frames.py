@@ -8,10 +8,13 @@ import xarray as xr
 from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
-import pyorc.project
 from .orcbase import ORCBase
 from .plot import _frames_plot
-from .. import cv, helpers, const, piv_process
+from .. import cv, helpers, const, piv_process, project
+
+__all__ = [
+    "Frames"
+]
 
 
 @xr.register_dataarray_accessor("frames")
@@ -223,9 +226,9 @@ class Frames(ORCBase):
         ## PROJECTION PREPARATIONS
         # ========================
         z = cc.get_z_a(self.h_a)
-        if not(hasattr(pyorc.project, f"project_{method}")):
+        if not(hasattr(project, f"project_{method}")):
             raise ValueError(f"Selected projection method {method} does not exist.")
-        proj_method = getattr(pyorc.project, f"project_{method}")
+        proj_method = getattr(project, f"project_{method}")
         da_proj = proj_method(
             self._obj,
             cc,

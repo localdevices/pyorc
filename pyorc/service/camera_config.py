@@ -1,6 +1,7 @@
 import os.path
-from pyorc import CameraConfig, Video
+from .. import CameraConfig, Video
 import matplotlib.pyplot as plt
+
 
 def camera_config(
         video_file,
@@ -20,6 +21,15 @@ def camera_config(
         Path to file with sample video containing objective of interest
     cam_config_file : str,
         Path to output file containing json camera config
+    lens_position : array-like
+        x, y, z position of lens in real-world coordinates
+    corners : list of lists
+        col, row corner points for definition of bounding box
+    frame_sample : int
+        frame number to use for sampling the control points and bounding box
+    rotation : Literal[90, 180, 270]
+        rotation in degrees to apply on frame
+
     **kwargs: dict,
         Keyword arguments to pass to pyorc.CameraConfig (height and width are added on-the-fly from `video_file`)
 

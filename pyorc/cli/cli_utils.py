@@ -7,12 +7,12 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import pyorc
 import yaml
-
-from pyorc import Video, helpers, CameraConfig, cv, load_camera_config
-from pyorc.cli.cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 from shapely.geometry import Point
+
+import pyorc.api
+from .. import Video, CameraConfig, cv, load_camera_config, helpers
+from .cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 
 
 def get_corners_interactive(
@@ -85,7 +85,6 @@ def get_stabilize_pol(
     return selector.src
 
 
-
 def get_file_hash(fn):
     hash256 = hashlib.sha256()
     with open(fn, "rb") as f:
@@ -94,6 +93,7 @@ def get_file_hash(fn):
             # print(byte_block)
             hash256.update(byte_block)
     return hash256
+
 
 def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
     # optimize cam matrix and dist coeffs with provided control points
@@ -123,6 +123,7 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2., lens_position=None):
     dst_est = np.array(dst_est)[:, 0:len(coord_mean)] + coord_mean
     return src_est, dst_est, camera_matrix, dist_coeffs, err
 
+
 def parse_json(ctx, param, value):
     if value is None:
         return None
@@ -137,6 +138,7 @@ def parse_json(ctx, param, value):
         except json.JSONDecodeError:
             raise ValueError(f'Could not decode JSON "{value}"')
     return kwargs
+
 
 def parse_corners(ctx, param, value):
     if value is None:
@@ -162,11 +164,13 @@ def validate_dir(ctx, param, value):
         os.makedirs(value)
     return value
 
+
 def validate_rotation(ctx, param, value):
     if value is not None:
         if not(value in [90, 180, 270, None]):
             raise click.UsageError(f"Rotation value must be either 90, 180 or 270")
         return value
+
 
 def parse_camconfig(ctx, param, camconfig_file):
     """
@@ -268,6 +272,7 @@ def read_shape(fn=None, geojson=None):
         crs = gdf.crs.to_wkt()
     return coords, crs
 
+
 def validate_dst(value):
     if value is not None:
         if len(value) in [2, 4]:
@@ -281,6 +286,7 @@ def validate_dst(value):
             assert(isinstance(val, list)), f"--dst value {n} is not a list {val}"
             assert(len(val) == len_points), f"--dst value {n} must contain 3 coordinates (x, y, z) but consists of {len(val)} numbers, value is {val}"
     return value
+
 
 def validate_recipe(recipe):
     valid_classes = ["video", "frames", "velocimetry", "mask", "transect", "plot"]  # allowed classes
@@ -303,7 +309,7 @@ def validate_recipe(recipe):
                 recipe[k][m] = {}
             if m not in process_methods and k in check_args:
                 # get the subclass that is called within the section of interest
-                cls = getattr(pyorc, check_args[k].capitalize())
+                cls = getattr(pyorc.api, check_args[k].capitalize())
                 if (not hasattr(cls, m)):
                     raise ValueError(f"Class '{check_args[k].capitalize()}' does not have a method or property '{m}'")
                 method = getattr(cls, m)
@@ -325,4 +331,3 @@ def validate_recipe(recipe):
             # add empties for compulsory recipe components
             recipe[_c] = {}
     return recipe
-

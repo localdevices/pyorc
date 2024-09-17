@@ -7,6 +7,7 @@ from .. import __version__
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 # logger = logging.getLogger(__name__)
 
+
 def setuplog(
     name: str = "pyorc",
     path: str = None,
@@ -48,6 +49,7 @@ def setuplog(
     logger.info(f"pyorc version: {__version__}")
 
     return logger
+
 
 def add_filehandler(logger, path, log_level=20, fmt=FMT):
     """Add file handler to logger."""

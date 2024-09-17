@@ -16,8 +16,9 @@ from matplotlib.backend_bases import MouseButton
 from matplotlib.widgets import Button
 from matplotlib.patches import Polygon
 from mpl_toolkits.axes_grid1 import Divider, Size
-from pyorc import helpers
-from pyorc.cli import cli_utils
+
+from .. import helpers
+from . import cli_utils
 
 path_effects = [
     patheffects.Stroke(linewidth=2, foreground="w"),

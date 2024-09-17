@@ -407,6 +407,15 @@ class CameraConfig:
         self.camera_matrix = camera_matrix
         self.dist_coeffs = dist_coeffs
 
+    def estimate_lens_position(self):
+        """estimate lens position from distortion and intrinsec/extrinsic matrix."""
+        _, rvec, tvec = self.pnp
+        rmat = cv2.Rodrigues(rvec)[0]
+        # determine lens position related to center of objective
+        lens_pos_centroid = (np.array(-rmat).T @ tvec).flatten()
+        lens_pos = np.array(lens_pos_centroid) + self.gcps_mean
+        return lens_pos
+
     def get_bbox(
             self,
             camera: Optional[bool] = False,
@@ -710,7 +719,6 @@ class CameraConfig:
         )
         self.bbox = bbox
 
-
     def set_intrinsic(
             self,
             camera_matrix: Optional[List[List]] = None,
@@ -721,7 +729,6 @@ class CameraConfig:
         self.set_lens_pars()  # default parameters use width of frame
         if hasattr(self, "gcps"):
             if len(self.gcps["src"]) >= 4:
-            # if self.gcp_dims == 3:
                 self.camera_matrix, self.dist_coeffs, err = cv.optimize_intrinsic(
                     self.gcps["src"],
                     self.gcps_dest,
@@ -983,7 +990,7 @@ class CameraConfig:
         **tiles_kwargs
             additional keyword arguments to pass to ax.add_image when tiles are added
         8) :
-            
+
 
         Returns
         -------
@@ -1146,7 +1153,7 @@ class CameraConfig:
             fn: str
     ):
         """Write the CameraConfig object to json structure
-        
+
         Parameters
         ----------
         fn : str
@@ -1159,7 +1166,7 @@ class CameraConfig:
 
     def to_json(self) -> str:
         """Convert CameraConfig object to string
-        
+
         Returns
         -------
         json_str : str
@@ -1169,7 +1176,7 @@ class CameraConfig:
 
 
 depr_warning_height_width = """
-Your camera configuration does not have a property "height" and/or "width", probably because your configuration file is 
+Your camera configuration does not have a property "height" and/or "width", probably because your configuration file is
 from an older < 0.3.0 version. Please rectify this by editing your .json config file. The top of your file should e.g.
 look as follows for a HD video:
 {

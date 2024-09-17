@@ -3,7 +3,7 @@ import xarray as xr
 
 from xarray.core import utils
 
-from pyorc import helpers
+from .. import helpers
 from .plot import _Transect_PlotMethods
 from .orcbase import ORCBase
 
@@ -68,7 +68,7 @@ class Transect(ORCBase):
 
     def get_xyz_perspective(self, M=None, xs=None, ys=None, mask_outside=True):
         """Get camera-perspective column, row coordinates from cross-section locations.
-        
+
         Parameters
         ----------
         M : np.ndarray, optional

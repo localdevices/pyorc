@@ -3,19 +3,21 @@ import click
 import functools
 import logging
 import os.path
-import pyorc
 import subprocess
 import xarray as xr
 import yaml
 
-from pyorc.cli import cli_utils
 from dask.diagnostics import ProgressBar
 from matplotlib.colors import Normalize
 from typing import Dict
 
+from ..cli import cli_utils
+from .. import Video, CameraConfig
+
 __all__ = ["velocity_flow", "velocity_flow_subprocess"]
 
 logger = logging.getLogger(__name__)
+
 
 def vmin_vmax_to_norm(opts):
     """
@@ -221,7 +223,7 @@ class VelocityFlowProcessor(object):
         self.read = True
         self.write = False
         self.fn_video = videofile
-        self.cam_config = pyorc.CameraConfig(**cameraconfig)
+        self.cam_config = CameraConfig(**cameraconfig)
         self.logger = logger
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
@@ -316,7 +318,7 @@ class VelocityFlowProcessor(object):
     # -y is provided, do with user intervention if stale file is present or -y is not provided
 
     def video(self, **kwargs):
-        self.video_obj = pyorc.Video(
+        self.video_obj = Video(
             self.fn_video,
             camera_config=self.cam_config,
             **kwargs
@@ -566,7 +568,7 @@ def velocity_flow_subprocess(
     fn_cam_config = os.path.join(output, "camera_config.json")
     with open(fn_recipe, "w") as f:
         yaml.dump(recipe, f, default_flow_style=False, sort_keys=False)
-    pyorc.CameraConfig(**cameraconfig).to_file(fn_cam_config)
+    CameraConfig(**cameraconfig).to_file(fn_cam_config)
     cmd = [
         "pyorc",
         "velocimetry",
