@@ -129,6 +129,22 @@ def test_lens_position(cam_config, lens_position):
     assert(np.allclose(cam_config.lens_position, lens_position))
 
 
+def test_estimate_lens_position(cam_config):
+    lens_pos = cam_config.estimate_lens_position()
+    assert np.allclose(lens_pos, [6.42731099e+05, 8.30429131e+06, 1.18996749e+03])
+
+
+def test_optimize_intrinsic(cam_config):
+    camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
+        cam_config.gcps["src"],
+        cam_config.gcps_dest,
+        cam_config.height,
+        cam_config.width,
+        lens_position=cam_config.lens_position
+    )
+    print(camera_matrix, dist_coeffs, err)
+
+
 def test_to_file(tmpdir, cam_config, cam_config_str):
     fn = os.path.join(tmpdir, "cam_config.json")
     cam_config.to_file(fn)
