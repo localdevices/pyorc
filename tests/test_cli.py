@@ -2,6 +2,7 @@ import os.path
 
 from click.testing import CliRunner
 from matplotlib import backend_bases
+import matplotlib.pyplot as plt
 
 import pyorc.service
 from pyorc.cli.main import cli
@@ -129,10 +130,9 @@ def test_gcps_interact(gcps_dst, frame_rgb):
     selector.on_left_click(event)
     selector.on_right_click(event)
     selector.on_release(event)
-
+    plt.close("all")
 
 def test_aoi_interact(frame_rgb, cam_config_without_aoi):
-    import matplotlib.pyplot as plt
     # convert dst to
     # del cam_config_without_aoi.crs
     src = cam_config_without_aoi.gcps["src"]
@@ -153,6 +153,7 @@ def test_aoi_interact(frame_rgb, cam_config_without_aoi):
     selector.on_left_click(event)
     selector.on_right_click(event)
     selector.on_release(event)
+    plt.close("all")
 
 
 def test_stabilize_interact(frame_rgb):
@@ -171,7 +172,7 @@ def test_stabilize_interact(frame_rgb):
     selector.close_window(event)
     # uncomment below to test the interaction, not suitable for automated unit test
     # plt.show(block=True)
-
+    plt.close("all")
 
 def test_read_shape(gcps_fn):
     coords, wkt = cli_utils.read_shape(gcps_fn)

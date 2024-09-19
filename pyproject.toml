@@ -12,31 +12,31 @@ packages = [
 ]
 
 dependencies = [
-        "click",
-        "cython; platform_machine == 'armv7l'",
-        "dask",
-        "descartes",
-        "flox",
-        "geojson",
-        "geopandas",
-        "matplotlib",
-        "netCDF4",
-        "numba",
-        "numpy>=1.23, <2",  # pin version to ensure compatibility with C-headers
-        "opencv-python",
-        "openpiv",
-        "packaging; platform_machine == 'armv7l'",
-        "pip",
-        "pyproj",
-        "pythran; platform_machine == 'armv7l'",
-        "pyyaml",
-        "rasterio",
-        "scikit-image",
-        "scipy",
-        "shapely",
-        "tqdm",
-        "typeguard",
-        "xarray"
+    "click",
+    "cython; platform_machine == 'armv7l'",
+    "dask",
+    "descartes",
+    "flox",
+    "geojson",
+    "geopandas",
+    "matplotlib",
+    "netCDF4",
+    "numba",
+    "numpy>=1.23, <2",  # pin version to ensure compatibility with C-headers
+    "opencv-python",
+    "openpiv",
+    "packaging; platform_machine == 'armv7l'",
+    "pip",
+    "pyproj",
+    "pythran; platform_machine == 'armv7l'",
+    "pyyaml",
+    "rasterio",
+    "scikit-image",
+    "scipy",
+    "shapely",
+    "tqdm",
+    "typeguard",
+    "xarray"
 ]
 
 requires-python =">=3.9"
