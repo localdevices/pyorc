@@ -1,11 +1,19 @@
 name: Tests
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
+    paths:
+      - tests/*
+      - pyorc/*
+      - pyproject.toml
   pull_request:
     branches: [ main ]
-
+    paths:
+      - tests/*
+      - pyorc/*
+      - pyproject.toml
 jobs:  
   Test-matrix:
     name: ${{ matrix.os }} - py${{ matrix.python-version }}
@@ -20,29 +28,31 @@ jobs:
         python-version: ["3.10"] # fix tests to support older versions
     
     steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        id: pysetup
         with:
           python-version: ${{ matrix.python-version }}
-          mamba-version: "*"
-          channels: conda-forge,defaults
-          channel-priority: true
-          environment-file: envs/pyorc-test.yml
-          activate-environment: pyorc-test
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
 
-      - name: Conda info
-        run: |
-         conda info
-         conda list
+      - name: Cache hit
+        run: echo '${{ steps.pysetup.outputs.cache-hit }}'
+
       - name: OpenCV dependencies
         run: |
           sudo apt update
           sudo apt install libegl1 libopengl0 -y
-        
+
+      # build environment with pip
+      - name: Install pyorc
+        run: |
+          pip install --upgrade pip
+          pip install .[test,extra]
+
+      # run all tests
       - name: Test
         run: python -m pytest --verbose --cov=pyorc --cov-report xml
-
-      - uses: codecov/codecov-action@v1
-
-#      - name: Check style
-#        run: black --check .
+    
+      - uses: codecov/codecov-action@v4
