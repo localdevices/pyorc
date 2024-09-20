@@ -1,3 +1,18 @@
+## [0.6.0] - 2024-09-20
+### Added
+A logo with modifications in trademark guidelines in TRADEMARK.md and README.md.
+Logo is also shown in the online documentation on https://localdevices.github.io/pyorc
+### Changed
+`Frames.project` with `method="numpy"` is improved so that it also works well in heavily undersampled areas.
+`Video` instances defaulting with `lazy=False`. This in most cases increases the speed of video treatment significantly.
+For large videos with large memory requirements, videos can be opened with `lazy=True`.
+### Deprecated
+### Removed
+### Fixed
+The legacy `setup.py` has been replaced by a `pyproject.toml` using flit installer.
+### Security
+
+
 ## [0.5.6] - 2024-06-28
 ### Added
 ### Changed
