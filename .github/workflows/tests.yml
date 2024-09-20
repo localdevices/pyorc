@@ -43,7 +43,7 @@ jobs:
       - name: OpenCV dependencies
         run: |
           sudo apt update
-          sudo apt install libegl1 libopengl0 -y
+          sudo apt install libegl1 libopengl0 ffmpeg -y
 
       # build environment with pip
       - name: Install pyorc
