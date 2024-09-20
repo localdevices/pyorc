@@ -14,7 +14,7 @@ on:
       - tests/*
       - pyorc/*
       - pyproject.toml
-jobs:  
+jobs:
   Test-matrix:
     name: ${{ matrix.os }} - py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
@@ -26,7 +26,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest" ] #, "macos-latest", "windows-latest"]
         python-version: ["3.10"] # fix tests to support older versions
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -54,5 +54,8 @@ jobs:
       # run all tests
       - name: Test
         run: python -m pytest --verbose --cov=pyorc --cov-report xml
-    
-      - uses: codecov/codecov-action@v4
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -43,7 +43,7 @@ Camera configuration: {:s}
             end_frame: Optional[int] = None,
             freq: Optional[int] = 1,
             stabilize: Optional[List[List]] = None,
-            lazy: bool = True,
+            lazy: bool = False,
             rotation: Optional[int] = None,
             fps: Optional[float] = None,
     ):
@@ -87,11 +87,6 @@ Camera configuration: {:s}
         self.feats_errs = None
         self.ms = None
         self.mask = None
-        if lazy:
-            warnings.warn(
-                "`lazy=False` will become the default in v0.6.0. If you set `lazy=False explicitly, this warning will "
-                "be suppressed"
-            )
         self.lazy = lazy
         self.stabilize = stabilize
         if camera_config is not None:

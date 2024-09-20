@@ -94,3 +94,15 @@ include = ["pyorc"]
 
 [tool.flit.module]
 name = "pyorc"
+
+[tool.pytest.ini_options]
+addopts = "--ff "
+testpaths = ["tests"]
+
+filterwarnings = [
+    "ignore:This process *:DeprecationWarning:multiprocessing", # dask issue, related to python 3.12 stricter multiprocessing checks.
+    "ignore:All-NaN slice encountered*:RuntimeWarning", # expected behaviour when only NaNs occur in slicing in velocimetry results.
+    "ignore:invalid value encountered*:RuntimeWarning", # linestrings issue with plotting transects.
+    "ignore:Degrees of freedom *:RuntimeWarning",   # not fully clear why this appears in user interfacing, test with future updates.
+    "ignore:numpy.ndarray size changed, may indicate binary incompatibility:RuntimeWarning",    # likely caused by incompatibility in used numpy version across libraries. May resolve with future updates.
+]

@@ -1,16 +1,16 @@
-import os.path
-
-from click.testing import CliRunner
+import json
 from matplotlib import backend_bases
 import matplotlib.pyplot as plt
+import os.path
+import pytest
+import warnings
+from click.testing import CliRunner
 
 import pyorc.service
 from pyorc.cli.main import cli
 from pyorc.cli.cli_elements import GcpSelect, AoiSelect, StabilizeSelect
 from pyorc.cli import cli_utils
 from pyorc.helpers import xyz_transform
-import pytest
-import json
 
 def test_cli_cam_config(cli_obj):
     result = cli_obj.invoke(
@@ -79,13 +79,6 @@ def test_cli_velocimetry(cli_obj, vid_file, cam_config_fn, cli_recipe_fn, cli_ou
     time.sleep(1)
     assert result.exit_code == 0
 
-
-# def test_service_video(velocity_flow_processor):
-#     # ensure we are in the right folder
-#     print(f"current file is: {os.path.dirname(__file__)}")
-#     os.chdir(os.path.dirname(__file__))
-#     # just test if everything is running
-#     velocity_flow_processor.process()
 
 @pytest.mark.parametrize(
     "recipe_",
@@ -178,4 +171,3 @@ def test_read_shape(gcps_fn):
     coords, wkt = cli_utils.read_shape(gcps_fn)
     assert(isinstance(wkt, str))
     assert(isinstance(coords, list))
-

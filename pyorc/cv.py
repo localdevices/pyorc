@@ -106,6 +106,7 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
 
     # Read first frame
     _, img_key = cap.read()
+    _, img_key = cap.read()
     # Convert frame to grayscale
     img1 = cv2.cvtColor(img_key, cv2.COLOR_BGR2GRAY)
     img_key = img1
@@ -395,9 +396,6 @@ def calibrate_camera(
                     jpg = os.path.join(dir, "frame_{:06d}.png".format(int(f)))
                     cv2.imwrite(jpg, imS)
 
-                #         print(corners)
-                # skip 25 frames
-                # cap.set(cv2.CAP_PROP_POS_FRAMES, cur_f + df)
                 if len(imgs) == max_imgs:
                     print(f"Maximum required images {max_imgs} found")
                     break
@@ -600,8 +598,6 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
             dist_xy = np.array(_dst)[:, 0:2] - np.array(dst_est)[:, 0:2]
             dist = (dist_xy ** 2).sum(axis=1) ** 0.5
             gcp_err = dist.mean()
-            # print(f"Error: {gcp_err}")
-            # print(f"Parameters: {x}")
             if lens_position is not None:
                 rmat = cv2.Rodrigues(rvec)[0]
                 lens_pos2 = np.array(-rmat).T @ tvec
@@ -635,8 +631,8 @@ def optimize_intrinsic(src, dst, height, width, c=2., lens_position=None):
     dist_coeffs[1][0] = opt.x[2]
     # dist_coeffs[4][0] = opt.x[3]
     # dist_coeffs[3][0] = opt.x[4]
-    print(f"CAMERA MATRIX: {camera_matrix}")
-    print(f"DIST COEFFS: {dist_coeffs}")
+    # print(f"CAMERA MATRIX: {camera_matrix}")
+    # print(f"DIST COEFFS: {dist_coeffs}")
     return camera_matrix, dist_coeffs, opt.fun
 
 

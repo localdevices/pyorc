@@ -480,7 +480,7 @@ class StabilizeSelect(BaseSelect):
             size=12,
             path_effects=path_effects
         )
-        self.ax.legend()
+        # self.ax.legend()
         # add dst coords in the intended CRS
         self.required_clicks = 4  # minimum 4 points needed for a satisfactory ROI
 

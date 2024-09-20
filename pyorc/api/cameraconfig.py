@@ -663,8 +663,6 @@ class CameraConfig:
         z_a = self.get_z_a(h_a)
         z_a -= self.gcps_mean[-1]
         # treating 3D homography
-        print(dst_a)
-        # print(z_a)
         return cv.get_M_3D(
             src=src,
             dst=dst_a,

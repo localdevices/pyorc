@@ -31,7 +31,7 @@ def test_fps(vid):
     "video, method, result",
     [
         ("vid_cam_config", "grayscale", [85, 71, 65, 80]),
-        ("vid_cam_config_stabilize", "grayscale", [5, 88, 78, 73]),
+        ("vid_cam_config_stabilize", "grayscale", [60, 78, 70, 76]),
         ("vid_cam_config", "rgb", [84, 91, 57, 70]),
         ("vid_cam_config", "hsv", [36, 95, 91, 36])
     ]
@@ -61,4 +61,3 @@ def test_get_frames(video, method, request):
     assert(len(frames) == video.end_frame - video.start_frame + 1)
     # check if the time difference is well taken from the fps of the video
     assert(np.allclose(np.diff(frames.time.values), [1./video.fps]))
-

@@ -20,6 +20,7 @@ def test_get_river_flow(piv_transect):
     ]
 )
 def test_get_q(piv_transect, fill_method):
+    piv_transect.load()
     f = piv_transect.transect.get_q(fill_method=fill_method)
     # assert if filled values are more complete than non-filled
 
