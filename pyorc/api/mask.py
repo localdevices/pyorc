@@ -4,8 +4,8 @@ import numpy as np
 import warnings
 import xarray as xr
 
-from pyorc.const import v_x, v_y, s2n, corr
-from pyorc import helpers
+from ..const import v_x, v_y, s2n, corr
+from .. import helpers
 
 
 commondoc = """
@@ -14,7 +14,7 @@ commondoc = """
     mask : xr.DataArray
         mask applicable to input dataset with ``ds.velocimetry.filter(mask)``.
         If ``inplace=True``, the dataset will be returned masked with ``mask``.
-        
+
 """
 
 
@@ -347,4 +347,3 @@ class _Velocimetry_MaskMethods:
             ds_mean = ds_wdw.mean(dim="stride")
             ds = ds.fillna(ds_mean)
         return ds
-

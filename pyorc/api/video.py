@@ -43,7 +43,7 @@ Camera configuration: {:s}
             end_frame: Optional[int] = None,
             freq: Optional[int] = 1,
             stabilize: Optional[List[List]] = None,
-            lazy: bool = True,
+            lazy: bool = False,
             rotation: Optional[int] = None,
             fps: Optional[float] = None,
     ):

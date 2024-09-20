@@ -21,7 +21,7 @@ dependencies:
   - numba
   - opencv
   - pip
-  - pytest<8.0.0 # due to temporary problem with lazy_fixtures, see https://github.com/pytest-dev/pytest/issues/11890
+  - pytest
   - pytest-cov
   - pytest-benchmark
   - pytest-lazy-fixture
@@ -38,4 +38,3 @@ dependencies:
   - yaml
   - pip:
     - openpiv
-

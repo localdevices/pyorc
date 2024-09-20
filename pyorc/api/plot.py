@@ -6,7 +6,7 @@ from matplotlib import patheffects
 from matplotlib.collections import QuadMesh
 import matplotlib.ticker as mticker
 
-from pyorc import helpers, cv
+from .. import helpers, cv
 
 
 def _base_plot(plot_func):
@@ -26,13 +26,13 @@ def _base_plot(plot_func):
         If None (default), use the current axes. Not applicable when using facets.
     *args : additional arguments, passed to wrapped Matplotlib function.
     **kwargs : additional keyword arguments to wrapped Matplotlib function.
-    
+
     Returns
     -------
     artist : matplotlib mappable
         The same type of primitive artist that the wrapped Matplotlib
         function returns.
-    
+
     """
     # This function is largely based on xarray.Dataset function _dsplot
     # Build on the original docstring
@@ -80,7 +80,7 @@ def _base_plot(plot_func):
             (Default value = {})
         *args : additional arguments, passed to wrapped Matplotlib function.
         **kwargs : additional keyword arguments to wrapped Matplotlib function.
-            
+
         Returns
         -------
         p : matplotlib mappable
@@ -193,7 +193,7 @@ def _base_plot(plot_func):
 
 def _frames_plot(ref, ax=None, mode="local", *args, **kwargs):
     """Creates QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes
-    
+
     Wraps :py:func:`matplotlib:matplotlib.collections.QuadMesh`.
 
     Parameters
@@ -532,7 +532,7 @@ class _Velocimetry_PlotMethods:
 @_base_plot
 def quiver(_, x, y, u, v, s=None, ax=None, *args, **kwargs):
     """Creates quiver plot from velocimetry results on new or existing axes
-    
+
     Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
     """
     if "color" in kwargs:
@@ -547,7 +547,7 @@ def quiver(_, x, y, u, v, s=None, ax=None, *args, **kwargs):
 @_base_plot
 def scatter(_, x, y, c=None, ax=None, *args, **kwargs):
     """Creates scatter plot of velocimetry or transect results on new or existing axes
-    
+
     Wraps :py:func:`matplotlib:matplotlib.pyplot.scatter`.
     """
     primitive = ax.scatter(x, y, c=c, *args, **kwargs)
@@ -557,7 +557,7 @@ def scatter(_, x, y, c=None, ax=None, *args, **kwargs):
 @_base_plot
 def streamplot(_, x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kwargs):
     """Creates streamplot of velocimetry results on new or existing axes
-    
+
     Wraps :py:func:`matplotlib:matplotlib.pyplot.streamplot`. Additional input arguments:
     """
     if linewidth_scale is not None:
@@ -572,7 +572,7 @@ def streamplot(_, x, y, u, v, s=None, ax=None, linewidth_scale=None, *args, **kw
 @_base_plot
 def pcolormesh(_, x, y, s=None, ax=None, *args, **kwargs):
     """Creates pcolormesh plot from velocimetry results on new or existing axes
-    
+
     Wraps :py:func:`matplotlib:matplotlib.pyplot.pcolormesh`.
     """
     primitive = ax.pcolormesh(x, y, s, *args, **kwargs)
@@ -593,7 +593,7 @@ def cbar(ax, p, size=12, **kwargs):
     kwargs :
         dict, additional settings passed to plt.colorbar
     **kwargs :
-        
+
 
     Returns
     -------

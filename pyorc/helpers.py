@@ -227,7 +227,7 @@ def get_xs_ys(cols, rows, transform):
 def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
     """Computes raster of longitude and latitude coordinates (default) of a certain raster set of coordinates in a local
     coordinate reference system. User can supply an alternative coordinate reference system if projection other than
-    WGS84 Lat Lon is needed.    
+    WGS84 Lat Lon is needed.
 
     Parameters
     ----------
@@ -794,6 +794,10 @@ def xyz_transform(points, crs_from, crs_to):
     y = points[:, 1]
 
     transform = Transformer.from_crs(crs_from, crs_to, always_xy=True)
+    # with only one point, transformer must not provide an array of points, to prevent a deprecation warning numpy>=1.25
+    if len(points) == 1:
+        x = x[0]
+        y = y[0]
     # transform dst coordinates to local projection
     x_trans, y_trans = transform.transform(x, y)
     # check if finites are found, if not raise error
@@ -802,7 +806,7 @@ def xyz_transform(points, crs_from, crs_to):
             np.all(np.isinf(x_trans))
         )
     ), "Transformation did not give valid results, please check if the provided crs of input coordinates is correct."
-    points[:, 0] = x_trans
-    points[:, 1] = y_trans
+    points[:, 0] = np.atleast_1d(x_trans)
+    points[:, 1] = np.atleast_1d(y_trans)
     return points.tolist()
     # return transform.transform(x, y)

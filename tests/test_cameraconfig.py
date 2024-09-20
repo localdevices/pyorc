@@ -32,13 +32,13 @@ def test_get_bbox(cam_config, vid):
 
 
 def test_shape(cam_config):
-    assert(cam_config.shape == (786, 878))
+    assert(cam_config.shape == (475, 371))
 
 
 def test_transform(cam_config):
     assert(np.allclose(cam_config.transform, Affine(
-        0.0014443784253907177, 0.009895138754169435, 642730.233168765,
-        0.009895138754169435, -0.0014443784253907175, 8304293.351276383
+        -0.001107604584241635, 0.009938471315296278, 642732.3625957984,
+        0.009938471315296278, 0.001107604584241631, 8304293.51724592
     )))
 
 
@@ -68,18 +68,18 @@ def test_z_to_h(cam_config, cross_section):
         (
             True, np.array(
                 [
-                    [-2.83249013e-01, -8.93908572e-01, 7.95238051e+02],
-                    [7.44402125e-01, -4.02349005e-01, -4.19808711e+02],
-                    [-1.21275429e-04, 6.33985134e-04, 1.00000000e+00]
+                    [-4.62466994e-01, -7.62938375e-01,  8.75609302e+02],
+                    [ 6.48451357e-01, -6.15534992e-01, -2.04821521e+02],
+                    [-1.21275313e-04,  6.33985726e-04,  1.00000000e+00]
                 ]
             )
         ),
         (
             False, np.array(
                 [
-                    [6.95684503e-03, -5.27244231e-03, -3.00544137e+00],
-                    [-3.87798711e-03, -8.26420874e-03, 8.47535569e+00],
-                    [-1.21275338e-04, 6.33985524e-04, 1.00000000e+00]
+                    [ 6.95684503e-03, -5.27244231e-03, -3.00544137e+00],
+                    [-3.87798711e-03, -8.26420874e-03,  8.47535569e+00],
+                    [-1.21275338e-04,  6.33985524e-04,  1.00000000e+00]
                 ]
             )
         )
@@ -127,6 +127,22 @@ def test_lens_position(cam_config, lens_position):
     x, y = helpers.xyz_transform([[x, y]], cam_config.crs, 4326)[0]
     cam_config.set_lens_position(x, y, z, crs=4326)
     assert(np.allclose(cam_config.lens_position, lens_position))
+
+
+def test_estimate_lens_position(cam_config):
+    lens_pos = cam_config.estimate_lens_position()
+    assert np.allclose(lens_pos, [6.42731099e+05, 8.30429131e+06, 1.18996749e+03])
+
+
+def test_optimize_intrinsic(cam_config):
+    camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
+        cam_config.gcps["src"],
+        cam_config.gcps_dest,
+        cam_config.height,
+        cam_config.width,
+        lens_position=cam_config.lens_position
+    )
+    print(camera_matrix, dist_coeffs, err)
 
 
 def test_to_file(tmpdir, cam_config, cam_config_str):

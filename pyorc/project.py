@@ -1,20 +1,25 @@
+from __future__ import annotations
+
 import cv2
 import dask
 import numpy as np
 import xarray as xr
+
 from rasterio.features import rasterize
-from typing import Optional
+from typing import Optional, Any
 from flox.xarray import xarray_reduce
 
-import pyorc
-from pyorc import helpers, cv
+
+from . import helpers, cv
+
+# from . import CameraConfig
 
 __all__ = ["project_numpy", "project_cv"]
 
 
 def project_cv(
     da: xr.DataArray,
-    cc: pyorc.CameraConfig,
+    cc: CameraConfig,
     x: np.ndarray,
     y: np.ndarray,
     z: np.ndarray
@@ -107,7 +112,7 @@ def project_cv(
 
 def project_numpy(
     da: xr.DataArray,
-    cc: pyorc.CameraConfig,
+    cc: CameraConfig,
     x: np.ndarray,
     y: np.ndarray,
     z: np.ndarray,

@@ -1,3 +1,29 @@
+## [0.6.0] - 2024-09-20
+### Added
+A logo with modifications in trademark guidelines in TRADEMARK.md and README.md.
+Logo is also shown in the online documentation on https://localdevices.github.io/pyorc
+### Changed
+`Frames.project` with `method="numpy"` is improved so that it also works well in heavily undersampled areas.
+`Video` instances defaulting with `lazy=False`. This in most cases increases the speed of video treatment significantly.
+For large videos with large memory requirements, videos can be opened with `lazy=True`.
+### Deprecated
+### Removed
+### Fixed
+The legacy `setup.py` has been replaced by a `pyproject.toml` using flit installer.
+### Security
+
+
+## [0.5.6] - 2024-06-28
+### Added
+### Changed
+`Frames.project` with `method="numpy"` is improved so that it also works well in heavily undersampled areas.
+### Deprecated
+`Video` instances will default with `lazy=False` in v0.6.0. A warning message will appear for now
+### Removed
+### Fixed
+### Security
+
+
 ## [0.5.5] - 2024-05-15
 ### Added
 ### Changed
@@ -23,7 +49,7 @@ Projection with `method="numpy"` sometimes results in missing values in the resu
 ## [0.5.3] - 2023-11-10
 ### Added
 `frames.project` now has a `method` option which allows for choosing projection using opencv-methods (`method="cv"`)
-which is currently still the default, or numpy-like operations (`method="numpy"`). `method="numpy"` is new and we 
+which is currently still the default, or numpy-like operations (`method="numpy"`). `method="numpy"` is new and we
 may change the default behaviour to this option in a later release as it is much more robust in cases with a lot
 of lens distortion and where part of the area of interest is outside of the field of view.
 
@@ -32,8 +58,8 @@ Video rotation can be defined in the camera configuration, on the CLI with `--ro
 as measured in degrees, or for individual single videos as an additional input argument to `pyorc.Video`
 e.g. `pyorc.Video(..., rotation=90)`.
 ### Changed
-Some default values for estimating the intrinsic lens parameters from control points are changed. We now estimate the 
-first two barrel distortion coefficients if enough information for constraining them is available. 
+Some default values for estimating the intrinsic lens parameters from control points are changed. We now estimate the
+first two barrel distortion coefficients if enough information for constraining them is available.
 ### Deprecated
 ### Removed
 ### Fixed
@@ -54,7 +80,7 @@ pyopenrivercam for scalable computation across a cloud. API / CLI users do not n
 ### Removed
 ### Fixed
 Notebook 02 in the examples folder contained a deprecation error with the stabilize option for opening videos. This
-has been corrected and functionality description improved. 
+has been corrected and functionality description improved.
 ### Security
 
 ## [0.5.1] - 2023-06-27
@@ -63,7 +89,7 @@ has been corrected and functionality description improved.
 ### Deprecated
 ### Removed
 ### Fixed
-- removed the strict cartopy dependency. This enables pip installation for users that are not interested in 
+- removed the strict cartopy dependency. This enables pip installation for users that are not interested in
   geographical plotting. Enables also installation on raspi platforms (only 64-bit!)
 - Transects sometimes gave infinite discharge when areas with zero depth received a small velocity. This has now
   been resolved.
@@ -72,12 +98,12 @@ has been corrected and functionality description improved.
 
 ## [0.5.0] - 2023-05-24
 ### Added
-- make it a lot easier to get well-calibrated ground control and lens parameters at the same time. we now do this 
-  by optimizing the lens'  focal length and (if enough ground control is provided) barrel distortion whilst fitting 
+- make it a lot easier to get well-calibrated ground control and lens parameters at the same time. we now do this
+  by optimizing the lens'  focal length and (if enough ground control is provided) barrel distortion whilst fitting
   the perspective to the user-provided ground control points.
-- provide the fitted ground control points in the interface so that the user can immediately see if the ground control 
+- provide the fitted ground control points in the interface so that the user can immediately see if the ground control
   points are well fitted or if anything seems to be wrong with one or more control points.
-- feature stabilization on command line which consequently provided user-interfacing to select non-moving areas by 
+- feature stabilization on command line which consequently provided user-interfacing to select non-moving areas by
   pointing and clicking.
 ### Changed
 - Much-improved stabilization for non-stable videos
@@ -93,12 +119,12 @@ has been corrected and functionality description improved.
 ## [0.4.0] - 2023-03-10
 ### Added
 The most notable change is that the code now includes an automatically installed command-line interface. This
-will facilitate a much easier use by a large user group. Also the documentation is fully updated to include all 
+will facilitate a much easier use by a large user group. Also the documentation is fully updated to include all
 functionalities for both command-line users and API users. In detail we have the following additions:
 - First release of a command-line interface for the entire process of camera configuration, processing and preparing
   outputs and figures.
 - Service layer that makes it easy for developers to connect pyorc to apps such as GUIs or dashboards.
-- Full user guide with description of both the command-line interface and API. 
+- Full user guide with description of both the command-line interface and API.
 ### Changed
 - Small modifications and additions in the API to accomodate the command-line interface building.
 ### Deprecated
@@ -147,7 +173,7 @@ functionalities for both command-line users and API users. In detail we have the
 - Improved pytest code coverage
 
 ### Changed
-- several API modifications to accommodate lens calibration and 6-point orthorectification 
+- several API modifications to accommodate lens calibration and 6-point orthorectification
 - CameraConfig format changed
 - CameraConfig.lens_parameters no longer used (replaced by camera_matrix and dist_coeffs)
 - CameraConfig.gcps extended orthorectification with 6(+)-point x, y, z perspective option
@@ -178,7 +204,7 @@ functionalities for both command-line users and API users. In detail we have the
 ## [0.2.3] - 2022-08-10
 ### Added
 ### Changed
-- pyorc.transect.get_q added method="log_interp" using a log-depth normalized velocity and linear interpolation 
+- pyorc.transect.get_q added method="log_interp" using a log-depth normalized velocity and linear interpolation
 
 ### Deprecated
 ### Removed

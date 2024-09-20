@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 @pytest.mark.parametrize(
     "frames, resolution, method, dims, shape, kwargs",
     [
-        ("frames_grayscale", 0.1, "numpy", 3, (79, 88), {}),
-        ("frames_grayscale", 0.1, "numpy", 3, (79, 88), {"reducer": "mean"}),
-        ("frames_rgb", 0.1, "numpy", 4, (79, 88, 3), {"reducer": "mean"}),
-        ("frames_rgb", 0.1, "numpy", 4, (79, 88, 3), {}),
-        ("frames_grayscale", 0.1, "cv", 3, (79, 88), {}),
-        ("frames_grayscale", 0.01, "cv", 3, (786, 878), {}),
-        ("frames_grayscale", 0.05, "cv", 3, (157, 176), {}),
-        ("frames_rgb", 0.1, "cv", 4, (79, 88, 3), {}),
+        ("frames_grayscale", 0.25, "numpy", 3, (19, 15), {}),
+        ("frames_grayscale", 0.25, "numpy", 3, (19, 15), {"reducer": "mean"}),
+        ("frames_rgb", 0.25, "numpy", 4, (19, 15, 3), {"reducer": "mean"}),
+        ("frames_rgb", 0.25, "numpy", 4, (19, 15, 3), {}),
+        ("frames_grayscale", 0.25, "cv", 3, (19, 15), {}),
+        ("frames_grayscale", 0.01, "cv", 3, (475, 371), {}),
+        ("frames_grayscale", 0.05, "cv", 3, (95, 74), {}),
+        ("frames_rgb", 0.25, "cv", 4, (19, 15, 3), {}),
     ]
 )
 def test_project(frames, resolution, method, dims, shape, kwargs, request):
@@ -50,7 +50,8 @@ def test_edge_detect(frames_proj):
     frames_edge = frames_proj.frames.edge_detect()
     assert(frames_edge.shape == frames_proj.shape)
     assert(frames_edge[0, 0, 0].values.dtype == "float32"), f'dtype of result is {frames_edge[0, 0, 0].values.dtype}, expected "float32"'
-    assert(np.allclose(frames_edge.values.flatten()[-4:], [-1.3828125, -4.3359375,  1.71875  ,  7.234375 ]))
+    # assert(np.allclose(frames_edge.values.flatten()[-4:], [-1.3828125, -4.3359375,  1.71875  ,  7.234375 ]))
+    assert (np.allclose(frames_edge.values.flatten()[-4:], [-6.0390625, 0.8671875, 6.4765625, 4.40625]))
 
 
 def test_reduce_rolling(frames_grayscale, samples=1):
@@ -97,7 +98,7 @@ def test_plot_proj(frames_proj, idx):
     "window_size, result",
     [
         # (5, [np.nan, np.nan, np.nan, 0.06877007]),
-        (10, [0.1623803 , 0.127019  , 0.26826966, 0.13940813]),
+        (10, [0.11740075, 0.09619355, 0.16204849, 0.14154269]),
         # (15, [0.21774408, 0.21398547, 0.25068682, 0.26456946])
     ]
 )

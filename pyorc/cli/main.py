@@ -7,11 +7,9 @@ import sys
 import yaml
 
 # import CLI components
-from pyorc.cli import cli_utils
-from pyorc.cli import log
 # import pyorc api below
-from pyorc import __version__
-import pyorc
+from .. import service, __version__
+from . import log, cli_utils
 # import cli components below
 
 
@@ -265,7 +263,7 @@ def camera_config(
         )
     else:
         stabilize=None
-    pyorc.service.camera_config(
+    service.camera_config(
         video_file=videofile,
         cam_config_file=output,
         gcps=gcps,
@@ -360,7 +358,7 @@ def velocimetry(
     )
     logger.info(f"Preparing your velocimetry result in {output}")
     # load in recipe and camera config
-    pyorc.service.velocity_flow(
+    service.velocity_flow(
         recipe=recipe,
         videofile=videofile,
         cameraconfig=cameraconfig,
@@ -371,18 +369,6 @@ def velocimetry(
         concurrency=not(lowmem),
         logger=logger
     )
-    # processor = pyorc.service.VelocityFlowProcessor(
-    #     recipe,
-    #     videofile,
-    #     cameraconfig,
-    #     prefix,
-    #     output,
-    #     update=update,
-    #     concurrency=not(lowmem),
-    #     logger=logger
-    # )
-    # # process video following the settings
-    # processor.process()
     pass
 
 if __name__ == "__main__":

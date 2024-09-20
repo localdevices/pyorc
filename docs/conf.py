@@ -49,7 +49,7 @@ shutil.copy("../examples/05_Camera_calibration.ipynb", "_examples")
 # -- Project information -----------------------------------------------------
 
 project = 'pyorc'
-copyright = '2023, Rainbow Sensing'
+copyright = '2024, Rainbow Sensing'
 author = 'Hessel Winsemius'
 
 # The full version, including alpha/beta/rc tags
