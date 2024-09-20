@@ -96,6 +96,8 @@ autoclass_content = "both"
 
 html_static_path = ['_static']
 html_css_files = ["theme-localdevices.css"]
+html_logo = "_static/orc_logo_color.svg"
+html_favicon = "_static/orc_favicon.svg"
 
 html_theme_options = {
     "show_nav_level": 2,
@@ -109,6 +111,9 @@ html_theme_options = {
             "type": "local",
         },
     ],
+    "logo": {
+        "text": f"pyOpenRiverCam {release}"
+    }
 }
 
 html_context = {

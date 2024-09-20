@@ -107,6 +107,11 @@ Camera configuration: {:s}
                     "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
                     "reprojection. You must supply z_0 and h_ref in the camera_config's gcps upon making a camera " \
                     "configuration. "
+        if not os.path.isfile(fn):
+            raise IOError(f"Video file {fn} does not exist. If you are on windows and using \\ as file "
+                          f"separator ensure that the file string is prepended with an r, e.g. "
+                          f"r'c:\\video_files\\filename.mp4'")
+
         cap = cv2.VideoCapture(fn)
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 180.0)
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -426,6 +431,8 @@ Camera configuration: {:s}
         ), "frame number is larger than the difference between the start and end frame "
         # assert (method in ["grayscale", "rgb",
         #                    "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
+        if not os.path.isfile(self.fn):
+            raise IOError(f"Video file {self.fn} does not exist.")
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
         ret, img = cv.get_frame(
