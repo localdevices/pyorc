@@ -1,3 +1,13 @@
+## [0.6.1] - 2024-09-26
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- fixing `rasterio` to version <1.4.0 to allow 2d array transforms
+### Security
+
+
 ## [0.6.0] - 2024-09-20
 ### Added
 A logo with modifications in trademark guidelines in TRADEMARK.md and README.md.

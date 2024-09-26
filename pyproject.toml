@@ -30,7 +30,7 @@ dependencies = [
     "pyproj",
     "pythran; platform_machine == 'armv7l'",
     "pyyaml",
-    "rasterio",
+    "rasterio<1.4.0",
     "scikit-image",
     "scipy",
     "shapely",
