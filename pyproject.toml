@@ -106,3 +106,18 @@ filterwarnings = [
     "ignore:Degrees of freedom *:RuntimeWarning",   # not fully clear why this appears in user interfacing, test with future updates.
     "ignore:numpy.ndarray size changed, may indicate binary incompatibility:RuntimeWarning",    # likely caused by incompatibility in used numpy version across libraries. May resolve with future updates.
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = ["docs"]
+
+[tool.ruff.lint]
+# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
+select = ["E", "F", "I", "PT", "D", "B", "ICN", "TID"]
+ignore = ["D211", "D213", "D206", "E741", "D105", "D203", "E712", "B904"]  # "E501" line length
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D100", "D101", "D102", "D103", "D104"]
+"pyorc/__init__.py" = ["E402", "F401", "F403"]
+"tests/conftest.py" = ["E402"]
