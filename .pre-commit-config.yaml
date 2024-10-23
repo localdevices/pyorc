@@ -5,7 +5,14 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-added-large-files
-
+      - id: mixed-line-ending
+      - id: check-ast
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.2
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
   - repo: https://github.com/kynan/nbstripout
     rev: 0.7.1  # Use the latest version
     hooks:

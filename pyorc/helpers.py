@@ -1,23 +1,39 @@
-import copy
-import cv2
+"""Helper functions for pyorc."""
 
+import copy
+import importlib.util
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-
 from pyproj import Transformer
-from rasterio.transform import Affine, xy
+from rasterio import fill, warp
 from rasterio.crs import CRS
-from rasterio import warp, fill
-
+from rasterio.transform import Affine, xy
+from scipy.interpolate import interp1d
+from scipy.ndimage import binary_fill_holes
 from scipy.optimize import differential_evolution
 from scipy.signal import convolve2d, fftconvolve
-from scipy.ndimage import binary_fill_holes
-from scipy.interpolate import interp1d
+
+
+def _check_cartopy_installed():
+    if importlib.util.find_spec("cartopy") is None:
+        raise ModuleNotFoundError(
+            'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try again.'
+        )
+
+
+def _import_cartopy_modules():
+    import cartopy.crs as ccrs
+    import cartopy.io.img_tiles as cimgt
+
+    return ccrs, cimgt
 
 
 def affine_from_grid(xi, yi):
     """Retrieve the affine transformation from a gridded set of coordinates.
+
     This function (unlike rasterio.transform functions) can also handle rotated grids
 
     Parameters
@@ -30,8 +46,8 @@ def affine_from_grid(xi, yi):
     Returns
     -------
     obj : rasterio.transform.Affine
-    """
 
+    """
     xul, yul = xi[0, 0], yi[0, 0]
     xcol, ycol = xi[0, 1], yi[0, 1]
     xrow, yrow = xi[1, 0], yi[1, 0]
@@ -42,8 +58,27 @@ def affine_from_grid(xi, yi):
     return Affine(dx_col, dy_col, xul, dx_row, dy_row, yul)
 
 
+def densify_points(points, sample_size=1000):
+    """Increase the amount of points through linear interpolation. points are assumed to be sorted in space.
+
+    Parameters
+    ----------
+    points : np.ndarray
+        at minimum one-dimensional array with point coordinates
+
+    sample_size : int
+        amount of samples to expand to by linear interpolation
+
+    """
+    idx = np.arange(len(points))
+    # generate interpolation function
+    f = interp1d(np.arange(len(points)), points, axis=0)
+    # expand to amount of samples
+    return f(np.linspace(0, idx.max(), sample_size))
+
+
 def depth_integrate(depth, v, v_corr=0.85, name="q"):
-    """Integrate velocities [m s-1] to depth-integrated velocity [m2 s-1] using depth information
+    """Integrate velocities [m s-1] to depth-integrated velocity [m2 s-1] using depth information.
 
     Parameters
     ----------
@@ -60,6 +95,7 @@ def depth_integrate(depth, v, v_corr=0.85, name="q"):
     -------
     q: DataArray (time, points)
         depth integrated velocity [m2 s-1]
+
     """
     # compute the depth average velocity
     q = v * v_corr * depth
@@ -78,20 +114,21 @@ def deserialize_attr(data_array, attr, dtype=np.array, args_parse=False):
 
     Parameters
     ----------
-    obj: xr.DataArray
+    data_array : xr.DataArray
         attributes of interest
-    attr: str
+    attr : str
         name of attributes
-    dtype: object type, optional
+    dtype : object type, optional
         function will try to perform type(eval(attr)), default np.array
-    args_parse: boolean, optional
+    args_parse : boolean, optional
         if True, function will try to return type(*eval(attr)), assuming attribute contains list
         of arguments (default: False)
 
     Returns
     -------
-    parsed_arg: type defined by user
+    parsed_arg : type defined by user
         parsed attribute, of type defined by arg type
+
     """
     assert hasattr(data_array, attr), f'frames do not contain attribute with name "{attr}'
     attr_obj = getattr(data_array, attr)
@@ -101,8 +138,9 @@ def deserialize_attr(data_array, attr, dtype=np.array, args_parse=False):
 
 
 def get_axes(cols, rows, x, y):
-    """Retrieve a locally spaced axes for surface velocimetry results on the basis of resolution and row and
-    col distances from the original frames
+    """Retrieve a locally spaced axes for surface velocimetry results.
+
+    axes are based on resolution and row and col distances from the original frames
 
     Parameters
     ----------
@@ -129,18 +167,41 @@ def get_axes(cols, rows, x, y):
 
 
 def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
-    try:
-        import cartopy
-        import cartopy.io.img_tiles as cimgt
-        import cartopy.crs as ccrs
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try '
-            'again.')
+    """Prepare a geographical axis, possibly with an image tiler background.
+
+    Parameters
+    ----------
+    tiles : str
+        Name of cartopy.io.img_tiles tiler
+    extent : List[int]
+        [xmin, xmax, ymin, ymax] extent in longitude, latitude coordinates
+    zoom_level : int
+        zoom level to use for image tiler, increase if you want higher resolution imagery
+    **kwargs : dict
+        additional keyword arguments to pass to the chosen image tiler.
+
+    Returns
+    -------
+    ax
+        Geographical cartopy axis object
+
+    """
+    _check_cartopy_installed()
+    #
+    # try:
+    #     import cartopy
+    #     import cartopy.crs as ccrs
+    #     import cartopy.io.img_tiles as cimgt
+    # except ModuleNotFoundError:
+    #     raise ModuleNotFoundError(
+    #         'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try ' "again."
+    #     )
+    ccrs, cimgt = _import_cartopy_modules()
     if tiles is not None:
         tiler = getattr(cimgt, tiles)(**kwargs)
         crs = tiler.crs
     else:
+        tiler = None
         crs = ccrs.PlateCarree()
     ax = plt.subplot(projection=crs)
     if extent is not None:
@@ -151,8 +212,8 @@ def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
 
 
 def get_enclosed_mask(data, stride=2):
-    """
-    Creates a zero/one binary mask that can be used to fill holes.
+    """Create zero/one binary mask that can be used to fill holes.
+
     The function fills holes in yes/no finite data in a numpy array with data and nans and
     only fills where NaN areas are entirely enclosed by finite values.
 
@@ -174,7 +235,7 @@ def get_enclosed_mask(data, stride=2):
     mask[np.isfinite(data)] = 1
 
     # explode mask by one pixel in all directions
-    mask_edge = np.minimum(fftconvolve(mask,  np.ones((stride*2 + 1, stride*2 + 1))), 1)
+    mask_edge = np.minimum(fftconvolve(mask, np.ones((stride * 2 + 1, stride * 2 + 1))), 1)
 
     # mask_edge = np.minimum(convolve2d(np.ones((stride*2 + 1, stride*2 + 1)), mask), 1)
     mask_edge[stride:-stride, stride:-stride] = mask
@@ -182,13 +243,27 @@ def get_enclosed_mask(data, stride=2):
     # fill holes of areas that are entirely enclosed
     mask_edge_fill = binary_fill_holes(mask_edge)
 
-    mask_fill = np.int8(mask_edge_fill[stride:-stride, stride:-stride])
-    mask_fill[mask_fill == 0] = -1
-    mask_fill[mask_fill == 1 & np.isnan(data)] = 0
-    return mask_fill
+    mask_filled = np.int8(mask_edge_fill[stride:-stride, stride:-stride])
+    mask_filled[mask_filled == 0] = -1
+    mask_filled[mask_filled == 1 & np.isnan(data)] = 0
+    return mask_filled
+
 
 def get_rotation_code(rotation_code):
-    if not (rotation_code in [0, 90, 180, 270, None]):
+    """Convert rotation in degrees into a opencv rotation code.
+
+    Parameters
+    ----------
+    rotation_code : Literal[0, 90, 180, 270]
+        degrees rotation of a video or image
+
+    Returns
+    -------
+    int
+        opencv rotation code
+
+    """
+    if rotation_code not in [0, 90, 180, 270, None]:
         raise ValueError(f"Rotation code must be in allowed codes 0, 90, 180 or 270. Provided code is {rotation_code}")
     if rotation_code == 90:
         return cv2.ROTATE_90_CLOCKWISE
@@ -201,7 +276,7 @@ def get_rotation_code(rotation_code):
 
 
 def get_xs_ys(cols, rows, transform):
-    """Computes rasters of x and y coordinates, based on row and column counts and a defined transform.
+    """Compute rasters of x and y coordinates, based on row and column counts and a defined transform.
 
     Parameters
     ----------
@@ -218,14 +293,17 @@ def get_xs_ys(cols, rows, transform):
         x-coordinates
     ys : np.ndarray (MxN)
         y-coordinates
+
     """
     xs, ys = xy(transform, rows, cols)
     xs, ys = np.array(xs), np.array(ys)
     return xs, ys
 
 
-def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
-    """Computes raster of longitude and latitude coordinates (default) of a certain raster set of coordinates in a local
+def get_lons_lats(xs, ys, src_crs, dst_crs=4326):
+    """Create lon-lat rasters from local projection coordinate grid.
+
+    Computes raster of longitude and latitude coordinates (default) of a certain raster set of coordinates in a local
     coordinate reference system. User can supply an alternative coordinate reference system if projection other than
     WGS84 Lat Lon is needed.
 
@@ -248,7 +326,9 @@ def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
         longitude coordinates
     lats: np.ndarray (MxN)
         latitude coordinates
+
     """
+    dst_crs = CRS.from_user_input(dst_crs)
     lons, lats = warp.transform(src_crs, dst_crs, xs.flatten(), ys.flatten())
     lons, lats = (
         np.array(lons).reshape(xs.shape),
@@ -257,12 +337,12 @@ def get_lons_lats(xs, ys, src_crs, dst_crs=CRS.from_epsg(4326)):
     return lons, lats
 
 
-def log_profile(X, z0, k_max, s0=0., s1=0.):
-    """Returns values of a log-profile function
+def log_profile(x, z0, k_max, s0=0.0, s1=0.0):
+    """Return values of a log-profile function.
 
     Parameters
     ----------
-    X: tuple with np.ndarrays
+    x: tuple with np.ndarrays
         (depth [m], distance to bank [m]) arrays of equal length
     z0: float
         depth with zero velocity [m]
@@ -278,22 +358,23 @@ def log_profile(X, z0, k_max, s0=0., s1=0.):
     -------
     velocity : np.ndarray
         V values from log-profile, equal shape as arrays inside X [m s-1]
+
     """
-    z, s = X
+    z, s = x
     k = k_max * np.minimum(np.maximum((s - s0) / (s1 - s0), 0), 1)
     v = k * np.maximum(np.log(np.maximum(z, 1e-6) / z0), 0)
     return v
 
 
 def pixel_to_map(cols, rows, transform):
-    """
-
-    transform.xy replacement in numpy using rasterio.transform order. This is much faster than rasterio
+    """Replace `transform.xy` in numpy using `rasterio.transform` order. This is much faster than rasterio.
 
     Parameters
     ----------
-    cols : columns set
-    rows : rows set
+    cols : np.ndarray
+        columns set
+    rows : np.ndarray
+        rows set
     transform : array-like or transform object
         transform of raster
 
@@ -313,13 +394,16 @@ def pixel_to_map(cols, rows, transform):
 
 
 def map_to_pixel(xs, ys, transform):
-    """
-    transform.rowcol replacement in numpy using rasterio.transform order. This is much faster than rasterio
+    """Transform with `numpy` similar to `transform.rowcol` using `rasterio.transform`.
+
+    Numpy is much faster than rasterio.
 
     Parameters
     ----------
-    xs : x-coordinates
-    ys : y-coordinates
+    xs : np.ndarray
+        x-coordinates
+    ys : np.ndarray
+        y-coordinates
     transform : array-like or transform object
         transform of raster
 
@@ -331,18 +415,12 @@ def map_to_pixel(xs, ys, transform):
         column coordinates
 
     """
-
     # Calculate the determinant of the upper-left 2x2 submatrix
     det = transform[1] * transform[3] - transform[0] * transform[4]
 
     # Calculate the inverse of the upper-left 2x2 submatrix
     inv_det = 1.0 / det
-    inv_transform = [
-        transform[3] * inv_det,
-        -transform[0] * inv_det,
-        -transform[4] * inv_det,
-        transform[1] * inv_det
-    ]
+    inv_transform = [transform[3] * inv_det, -transform[0] * inv_det, -transform[4] * inv_det, transform[1] * inv_det]
 
     # Calculate the offsets
     dx = xs - transform[2]
@@ -356,9 +434,9 @@ def map_to_pixel(xs, ys, transform):
 
 
 def mask_fill(data, mask, radius=5):
-    """
-    Fills data where np.nan is found, if mask at those location is zero. Areas where mask is one are used
-    to fill up these areas. Areas where mask is -1 are not filled and kept np.nan
+    """Fill data where np.nan is found, if mask at those location is zero.
+
+    Areas where mask is one are used to fill up these areas. Areas where mask is -1 are not filled and kept np.nan
 
     Parameters
     ----------
@@ -366,6 +444,9 @@ def mask_fill(data, mask, radius=5):
         data values with possibly np.nan values to fill
     mask : np.ndarray (2D, type int8)
         mask values to apply, either -1, 0 or 1
+    radius : int, float
+        search distance radius [pix]
+
 
     Returns
     -------
@@ -379,33 +460,33 @@ def mask_fill(data, mask, radius=5):
     return data_fill
 
 
-def mse(pars, func, X, Y):
-    """mean of sum of squares between evaluation of function with provided parameters and X input, and Y as dependent variable.
+def mse(pars, func, x, y):
+    """Give mean of sum of squares between evaluation of function with provided parameters and observations.
 
     Parameters
     ----------
     pars : list or tuple
-        parameter passed as *args to func
+        parameter passed as *args to func.
     func: function def
         receiving X and *pars as input and returning predicted Y as result
-    X: tuple with lists or array-likes
+    x: tuple with lists or array-likes
         indepent variable(s).
-    Y: list or array-like
+    y: list or array-like
         dependent variable, predicted by func
 
     Returns
     -------
-
-    Y_pred : list or array-like
+    y_pred : list or array-like
         predicted Y from X and pars by func
+
     """
-    Y_pred = func(X, *pars)
-    mse = np.sum((Y_pred - Y) ** 2)
-    return mse
+    y_pred = func(x, *pars)
+    ms_error = np.sum((y_pred - y) ** 2)
+    return ms_error
 
 
-def neighbour_stack(array, stride=1, missing=-9999.):
-    """Builds a stack of arrays from a 2-D input array, constructed by permutation in space using a provided stride.
+def neighbour_stack(array, stride=1, missing=-9999.0):
+    """Build stack of arrays from a 2-D input array, constructed by permutation in space using a provided stride.
 
     Parameters
     ----------
@@ -420,6 +501,7 @@ def neighbour_stack(array, stride=1, missing=-9999.):
     -------
     obj : np.array (3D)
         stack of 2-D arrays, with strided neighbours (length 1st dim : (stride*2+1)**2 )
+
     """
     array = copy.deepcopy(array)
     array[np.isnan(array)] = missing
@@ -438,17 +520,18 @@ def neighbour_stack(array, stride=1, missing=-9999.):
 
 
 def optimize_log_profile(
-        z,
-        v,
-        dist_bank=None,
-        bounds=([0.001, 0.1], [-20, 20], [0., 5], [0., 100]),
-        workers=2,
-        popsize=100,
-        updating="deferred",
-        seed=0,
-        **kwargs
+    z,
+    v,
+    dist_bank=None,
+    bounds=([0.001, 0.1], [-20, 20], [0.0, 5], [0.0, 100]),
+    workers=2,
+    popsize=100,
+    updating="deferred",
+    seed=0,
+    **kwargs,
 ):
-    """optimize velocity log profile relation of v=k*max(z/z0) with k a function of distance to bank and k_max
+    """Optimize velocity log profile relation of v=k*max(z/z0) with k a function of distance to bank and k_max.
+
     A differential evolution optimizer is used.
 
     Parameters
@@ -459,28 +542,40 @@ def optimize_log_profile(
         surface velocities [m s-1]
     dist_bank : list, optional
         distances to bank [m]
-    **kwargs : keyword arguments for scipy.optimize.differential_evolution
+    bounds : tuple of int-pairs, optional
+        search boundaries for the optimization function, default: ([0.001, 0.1], [-20, 20], [0.0, 5], [0.0, 100])
+    workers : int, optional
+        Amount of workers used to optimize log profile function (default=2) in `scipy.optimize.differential_evolution`
+    popsize : int, optional
+        size of search population (default: 100) in `scipy.optimize.differential_evolution`
+    updating : str, optional
+        method of updating in `scipy.optimize.differential_evolution` (default: "deferred").
+    seed : float, optional
+        seed point used in `scipy.optimize.differential_evolution` (default: 0).
+    **kwargs : dict
+        additional keyword arguments for scipy.optimize.differential_evolution
 
     Returns
     -------
     pars : dict
         fitted parameters of log_profile {z_0, k_max, s0 and s1}
+
     """
     # replace by infinites if not provided
     dist_bank = np.ones(len(v)) * np.inf if dist_bank is None else dist_bank
     v = np.array(v)
     z = np.array(z)
-    X = (z, dist_bank)
-    Y = v
+    x = (z, dist_bank)
+    y = v
     result = differential_evolution(
         wrap_mse,
-        args=(log_profile, X, Y),
+        args=(log_profile, x, y),
         bounds=bounds,
         workers=workers,
         popsize=popsize,
         updating=updating,
         seed=seed,
-        **kwargs
+        **kwargs,
     )
     # unravel parameters
     z0, k_max, s0, s1 = result.x
@@ -488,7 +583,7 @@ def optimize_log_profile(
 
 
 def rotate_u_v(u, v, theta, deg=False):
-    """Rotate u and v components of vector counter clockwise by an amount of rotation.
+    """Rotate u and v components of vector counterclockwise by an amount of rotation.
 
     Parameters
     ----------
@@ -497,7 +592,7 @@ def rotate_u_v(u, v, theta, deg=False):
     v : float, np.ndarray or xr.DataArray
         y-direction component of vector
     theta : float
-        amount of counter clockwise rotation in radians or degrees (dependent on deg)
+        amount of counterclockwise rotation in radians or degrees (dependent on deg)
     deg : boolean, optional
         if True, theta is defined in degrees, otherwise radians (default: False)
 
@@ -507,6 +602,7 @@ def rotate_u_v(u, v, theta, deg=False):
         rotated x-direction component of vector
     v_rot : float, np.ndarray or xr.DataArray
         rotated y-direction component of vector
+
     """
     theta = np.radians(theta) if deg else theta
     c, s = np.cos(theta), np.sin(theta)
@@ -516,19 +612,40 @@ def rotate_u_v(u, v, theta, deg=False):
     v2 = r[1, 0] * u + r[1, 1] * v
     return u2, v2
 
+
 def round_to_multiple(number, multiple):
+    """Round number to a multiple of a certain number."""
     return multiple * round(number / multiple)
 
 
-def stack_window(
-    ds,
-    wdw=1,
-    wdw_x_min=None,
-    wdw_x_max=None,
-    wdw_y_min=None,
-    wdw_y_max=None,
-    dim="stride"
-):
+def stack_window(ds, wdw=1, wdw_x_min=None, wdw_x_max=None, wdw_y_min=None, wdw_y_max=None, dim="stride"):
+    """Stack moved windows together over a new dimension.
+
+    Typically used to average or take a quantile over a window of pixels in space
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        Dataset to stack over
+    wdw : int (positive), optional
+        general all-directional stride to use (default: 1)
+    wdw_x_min : int, optional
+        Stride to use in negative x-axis direction, if not provided, -`wdw` is used.
+    wdw_x_max
+        Stride to use in positive x-axis direction, if not provided, `wdw` is used.
+    wdw_y_min
+        Stride to use in negative y-axis direction, if not provided, -`wdw` is used.
+    wdw_y_max
+        Stride to use in positive y-axis direction, if not provided, `wdw` is used.
+    dim : str, optional
+        Name of new stack dimension
+
+    Returns
+    -------
+    xr.Dataset
+        Containing all variables of `ds`, but then window shifted over x and y dimension and stacked.
+
+    """
     # set strides
     wdw_x_min = -wdw if wdw_x_min is None else wdw_x_min
     wdw_x_max = wdw if wdw_x_max is None else wdw_x_max
@@ -536,13 +653,17 @@ def stack_window(
     wdw_y_max = wdw if wdw_y_max is None else wdw_y_max
 
     return xr.concat(
-        [ds.shift(x=x_stride, y=y_stride) for x_stride in range(wdw_x_min, wdw_x_max + 1) for y_stride in
-         range(wdw_y_min, wdw_y_max)], dim=dim)
+        [
+            ds.shift(x=x_stride, y=y_stride)
+            for x_stride in range(wdw_x_min, wdw_x_max + 1)
+            for y_stride in range(wdw_y_min, wdw_y_max)
+        ],
+        dim=dim,
+    )
 
 
 def staggered_index(start=0, end=100):
-    """
-    Returns a list of staggered indexes that start at the outer indexes and gradually move inwards
+    """Create staggered indexes that start at the outer indexes and gradually move inwards.
 
     Parameters
     ----------
@@ -555,6 +676,7 @@ def staggered_index(start=0, end=100):
     -------
     idx : list
         staggered indexes from start to end
+
     """
     # make list of frames in order to read, starting with start + end frame
     idx_order = [start, end]
@@ -575,7 +697,7 @@ def staggered_index(start=0, end=100):
 
 
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
-    """Fill missing surface velocities using a velocity depth profile with
+    """Fill missing surface velocities using a velocity log-depth model, fitted with the known points in profile.
 
     Parameters
     ----------
@@ -584,35 +706,25 @@ def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
     depth : xr.DataArray (points)
         bathymetry depths [m]
     dist_shore : xr.DataArray (points)
-        shortest distance to a dry river bed point
+        the shortest distance to a dry river bed point
     dim: str, optional
         dimension over which data should be grouped, default: "quantile", dimension must exist in v, typically
         "quantile" or "time"
 
     Returns
     -------
-
     v_fill: xr.DataArray (quantile or time, points)
-        filled surface velocities  [m s-1]
+        effective surface velocities with interpolated values added  [m s-1]
+
     """
 
     def log_fit(_v):
         idx_finite = np.isfinite(_v).values.flatten()
-        pars = optimize_log_profile(
-            depth[idx_finite],
-            _v[0, idx_finite],
-            dist_shore[idx_finite]
-        )
+        pars = optimize_log_profile(depth[idx_finite], _v[0, idx_finite], dist_shore[idx_finite])
         idx_miss = np.where(np.isnan(_v[0]).values)[0]
-        _v[0, idx_miss] = log_profile(
-            (
-                depth[idx_miss],
-                dist_shore[idx_miss]
-            ),
-            **pars
-        )
+        _v[0, idx_miss] = log_profile((depth[idx_miss], dist_shore[idx_miss]), **pars)
         # enforce that velocities are zero with zero depth
-        _v[0, depth <= 0] = 0.
+        _v[0, depth <= 0] = 0.0
         return np.maximum(_v, 0)
 
     # fill per grouped dimension
@@ -622,14 +734,14 @@ def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
 
 
 def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
-    """
+    """Interpolate missing velocities over log-transform with depth.
 
     Parameters
     ----------
-    v : xr.DataArray (time, points)
+    v : xr.DataArray (time, points) or (quantile, points)
         effective velocity at surface [m s-1]
     dist_wall : xr.DataArray (points)
-        shortest distance to the river bed
+        the shortest distance to the river bed
     d_0 : float, optional
         roughness length (default: 0.1)
     dim: str, optional
@@ -638,6 +750,8 @@ def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
 
     Returns
     -------
+    xr.DataArray (time, points) or (quantile, points)
+        effective velocities with interpolated values added [m s-1]
 
     """
 
@@ -645,11 +759,15 @@ def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
         # scale with log depth
         c = xr.DataArray(_v / np.log(np.maximum(dist_wall, d_0) / d_0))
         # fill dry points with the nearest valid value for c
-        c[0, np.where(dist_wall == 0)[0]] = c.interpolate_na(dim="points", method="nearest", fill_value="extrapolate")[0, np.where(dist_wall == 0)[0]]
+        c[0, np.where(dist_wall == 0)[0]] = c.interpolate_na(dim="points", method="nearest", fill_value="extrapolate")[
+            0, np.where(dist_wall == 0)[0]
+        ]
         # interpolate with linear interpolation
         c = c.interpolate_na(dim="points")
         # use filled c to interpret missing v
-        _v[0, np.isnan(_v[0])] = (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[0, np.where(np.isnan(_v[0]))[0]] # (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[np.isnan(_v)]
+        _v[0, np.isnan(_v[0])] = (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[
+            0, np.where(np.isnan(_v[0]))[0]
+        ]  # (np.log(np.maximum(dist_wall, d_0) / d_0) * c)[np.isnan(_v)]
         return _v
 
     # fill per grouped dimension
@@ -659,13 +777,15 @@ def velocity_log_interp(v, dist_wall, d_0=0.1, dim="quantile"):
 
 
 def wrap_mse(pars_iter, *args):
+    """Wrap function mse for optimization purposes."""
     return mse(pars_iter, *args)
 
 
 def xy_equidistant(x, y, distance, z=None):
-    """Transforms a set of ordered in space x, y (and z if provided) coordinates into x, y (and z) coordinates with equal
-    1-dimensional distance between them using piece-wise linear interpolation. Extrapolation is used for the last point
-    to ensure the range of points covers at least the full range of x, y coordinates.
+    """Transform ordered in space x, y (and z if provided) coordinates into equal spaced x, y (and z) coordinates.
+
+    The 1-dimensional distance between points is used with piece-wise linear interpolation. Extrapolation is used for
+    the last point to ensure the range of points covers at least the full range of x, y coordinates.
 
     Parameters
     ----------
@@ -689,11 +809,12 @@ def xy_equidistant(x, y, distance, z=None):
         interpolated s-coordinates, s being piece-wise linear distance from first point
     z_sample : np.ndarray (1D), optional
         interpolated z-coordinates (only returned if z is not None):
+
     """
     # estimate cumulative distance between points, starting with zero
     x_diff = np.concatenate((np.array([0]), np.diff(x)))
     y_diff = np.concatenate((np.array([0]), np.diff(y)))
-    s = np.cumsum((x_diff ** 2 + y_diff ** 2) ** 0.5)
+    s = np.cumsum((x_diff**2 + y_diff**2) ** 0.5)
 
     # create interpolation functions for x and y coordinates
     f_x = interp1d(s, x, fill_value="extrapolate")
@@ -728,6 +849,7 @@ def xy_angle(x, y):
     angle : np.ndarray (1D)
         angle between the point left and right of the point under consideration. The most left and right coordinates
         are based on the first and last 2 points respectively
+
     """
     angles = np.zeros(len(x))
     angles[1:-1] = np.arctan2(x[2:] - x[0:-2], y[2:] - y[0:-2])
@@ -736,10 +858,10 @@ def xy_angle(x, y):
     return angles
 
 
-def xy_to_perspective(x, y, resolution, M, reverse_y=None):
-    """
-    Back transform local meters-from-top-left coordinates from frame to original perspective of camera using M
-    matrix, belonging to transformation from orthographic to local.
+def xy_to_perspective(x, y, resolution, trans_mat, reverse_y=None):
+    """Back transform local meters-from-top-left coordinates from frame to original perspective of camera.
+
+    Back transform is done using M matrix, belonging to transformation from orthographic to local.
 
     Parameters
     ----------
@@ -749,8 +871,11 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
         axis of y-coordinates in local projection with origin top-left, to be backwards projected
     resolution : float
         resolution of original projected frames coordinates of x and y
-    M : np.ndarray
+    trans_mat : np.ndarray
         2x3 transformation matrix (generated with cv2.getPerspectiveTransform)
+    reverse_y : int, optional
+        if set, it should be set to the amount of rows in the frame, then y will be transformed following
+        y = reverse_y - y
 
     Returns
     -------
@@ -758,20 +883,21 @@ def xy_to_perspective(x, y, resolution, M, reverse_y=None):
         perspective columns with shape len(y), len(x)
     yp : np.ndarray (2D)
         perspective rows with shape len(y), len(x)
+
     """
     cols, rows = x / resolution - 0.5, y / resolution - 0.5
     if reverse_y is not None:
         rows = reverse_y - rows
     # make list of coordinates, compatible with cv2.perspectiveTransform
     coords = np.float32([np.array([cols.flatten(), rows.flatten()]).transpose([1, 0])])
-    coords_trans = cv2.perspectiveTransform(coords, M)
+    coords_trans = cv2.perspectiveTransform(coords, trans_mat)
     xp = coords_trans[0][:, 0].reshape(cols.shape)
     yp = coords_trans[0][:, 1].reshape(cols.shape)
     return xp, yp
 
 
 def xyz_transform(points, crs_from, crs_to):
-    """transforms set of x and y coordinates from one CRS to another
+    """Transform set of x and y coordinates from one CRS to another.
 
     Parameters
     ----------
@@ -788,6 +914,7 @@ def xyz_transform(points, crs_from, crs_to):
         x-coordinates transformed
     y_trans : np.ndarray
         y-coordinates transformed
+
     """
     points = np.array(points)
     x = points[:, 0]
@@ -801,10 +928,8 @@ def xyz_transform(points, crs_from, crs_to):
     # transform dst coordinates to local projection
     x_trans, y_trans = transform.transform(x, y)
     # check if finites are found, if not raise error
-    assert(
-        not(
-            np.all(np.isinf(x_trans))
-        )
+    assert not (
+        np.all(np.isinf(x_trans))
     ), "Transformation did not give valid results, please check if the provided crs of input coordinates is correct."
     points[:, 0] = np.atleast_1d(x_trans)
     points[:, 1] = np.atleast_1d(y_trans)
