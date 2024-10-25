@@ -182,20 +182,35 @@ def _base_plot(plot_func):
                     ax.add_patch(
                         plt.Polygon(
                             points,
-                            alpha=0.15,
+                            alpha=0.3,
                             linewidth=2.0,
                             facecolor=LINE_COLOR,  # "#00FF88",
                             path_effects=path_effects,
                             edgecolor="w",
                         )
                     )
+
+                    # get cross section points in camera perspective
                     points_cross = ref._obj.transect.get_transect_perspective()
+
+                    depth_lines = ref._obj.transect.get_depth_perspective(h=ref._obj.transect.h_a)
+                    for l in depth_lines:
+                        line = np.array(l)
+                        ax.plot(
+                            line[:, 0],
+                            line[:, 1],
+                            color="w",
+                            alpha=0.5,
+                            linewidth=2.0,
+                            # path_effects=path_effects
+                        )
                     ax.plot(
                         points_cross[:, 0],
                         points_cross[:, 1],
                         color=LINE_COLOR,
-                        alpha=0.7,
-                        path_effects=path_effects,
+                        linewidth=4.0,
+                        # path_effects=path_effects,
+                        alpha=0.5,
                         **kwargs_line,
                     )
                 else:

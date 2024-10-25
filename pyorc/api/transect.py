@@ -61,6 +61,35 @@ class Transect(ORCBase):
         v_eff.name = "v_eff_nofill"  # there still may be gaps in this series
         self._obj["v_eff_nofill"] = v_eff
 
+    def get_bottom_surface_z_perspective(self, h, sample_size=1000, interval=None):
+        """Return densified bottom and surface points, warped to image perspective."""
+        # get bottom coordinates
+        bottom_points = self.get_transect_perspective(within_image=True)
+
+        # get surface coordinates
+        surface_points = self.get_transect_perspective(h=h, within_image=True)
+
+        # densify points, to ensure zero water level crossings are captured
+        bottom_points = helpers.densify_points(bottom_points, sample_size=sample_size)
+        surface_points = helpers.densify_points(surface_points, sample_size=sample_size)
+
+        # also densify to the same amount with zcoords
+        z_points = helpers.densify_points(self._obj.zcoords, sample_size=sample_size)
+
+        if interval is not None:
+            # only sample every interval-th point
+            bottom_points = bottom_points[::interval]
+            surface_points = surface_points[::interval]
+            z_points = z_points[::interval]
+        # understand which points are below surface
+        z_surface = h - self.camera_config.gcps["h_ref"] + self.camera_config.gcps["z_0"]
+        mask = z_points < z_surface
+
+        # filter bottom and surface
+        bottom_points = np.array(bottom_points)[mask]
+        surface_points = np.array(surface_points)[mask]
+        return bottom_points, surface_points
+
     def get_transect_perspective(self, h=None, within_image=True):
         """Get row, col locations of the transect coordinates.
 
@@ -108,32 +137,37 @@ class Transect(ORCBase):
             A numpy array containing the points forming the wetted polygon perspective.
 
         """
-        # get bottom coordinates
-        bottom_points = self.get_transect_perspective(within_image=True)
-
-        # get surface coordinates
-        surface_points = self.get_transect_perspective(h=h, within_image=True)
-
-        # densify points, to ensure zero water level crossings are captured
-        bottom_points = helpers.densify_points(bottom_points, sample_size=sample_size)
-        surface_points = helpers.densify_points(surface_points, sample_size=sample_size)
-
-        # also densify to the same amount with zcoords
-        z_points = helpers.densify_points(self._obj.zcoords)
-        # understand which points are below surface
-        z_surface = h - self.camera_config.gcps["h_ref"] + self.camera_config.gcps["z_0"]
-        mask = z_points < z_surface
-
-        # filter bottom and surface
-        bottom_points = np.array(bottom_points)[mask]
-        surface_points = np.array(surface_points)[mask]
-
+        bottom_points, surface_points = self.get_bottom_surface_z_perspective(h=h, sample_size=sample_size)
         # concatenate points reversing one set for preps of a polygon
         pol_points = np.concatenate([bottom_points, np.flipud(surface_points)], axis=0)
 
         # add the first point at the end to close the polygon
         pol_points = np.concatenate([pol_points, pol_points[0:1]], axis=0)
         return pol_points
+
+    def get_depth_perspective(self, h, sample_size=1000, interval=25):
+        """Get line (x, y) pairs that show the depth over several intervals in the wetted part of the cross section.
+
+        Parameters
+        ----------
+        h : float
+            The water level with which the depth perspective needs to be calculated.
+        sample_size : int, optional
+            The number of samples to create by interpolating the cross section (default is 1000).
+        interval : int, optional
+            The interval between extended samples (default is 25).
+
+        Returns
+        -------
+        List of (x, y) tuple pairs.
+            Each tuple pair defines one perspective depth line.
+
+        """
+        bottom_points, surface_points = self.get_bottom_surface_z_perspective(
+            h=h, sample_size=sample_size, interval=interval
+        )
+        # make line pairs
+        return list(zip(bottom_points, surface_points, strict=False))
 
     def get_xyz_perspective(self, trans_mat=None, xs=None, ys=None, mask_outside=True):
         """Get camera-perspective column, row coordinates from cross-section locations.
