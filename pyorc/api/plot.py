@@ -213,15 +213,14 @@ def _base_plot(plot_func):
 
 
 def _frames_plot(ref, ax=None, mode="local", **kwargs):
-    # fmt: off
     """Create QuadMesh plot from a RGB or grayscale frame on a new or existing (if ax is not None) axes.
 
     Wraps :py:func:`matplotlib:matplotlib.collections.QuadMesh`.
 
     Parameters
     ----------
-    ref : plot object
-        you can skip this input
+    ref : plot reference
+        This parameter should not be specified, ignore.
     ax : plt.axes, optional
         If None (default), use the current axes. Not applicable when using facets.
     mode : str, optional
@@ -235,9 +234,7 @@ def _frames_plot(ref, ax=None, mode="local", **kwargs):
     -------
     p : matplotlib.collections.QuadMesh
 
-    """
-    # fmt: on
-
+    """  # noqa: D417
     # prepare axes
     if mode == "geographical":
         try:
