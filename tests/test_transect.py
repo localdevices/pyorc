@@ -35,11 +35,7 @@ def test_get_wetted_perspective(piv_transect):
 
 @pytest.mark.parametrize(
     "mode",
-    [
-        # "local",
-        "camera",
-        # "geographical"
-    ],
+    ["local", "camera", "geographical"],
 )
 @pytest.mark.parametrize(
     "method",
@@ -49,8 +45,5 @@ def test_get_wetted_perspective(piv_transect):
     ],
 )
 def test_plot(piv_transect, mode, method):
-    import matplotlib.pyplot as plt
-
     piv_transect.transect.get_q()
     piv_transect.isel(quantile=2).transect.plot(method=method, mode=mode, add_text=True)
-    plt.show()
