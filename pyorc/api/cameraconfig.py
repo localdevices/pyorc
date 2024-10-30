@@ -1,27 +1,30 @@
+"""Camera configuration for pyorc."""
+
 import copy
-import cv2
 import json
+import os
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import shapely.geometry
-from shapely import ops, wkt
-from shapely.geometry import Polygon, LineString, Point
-
 from matplotlib import patches
 from pyproj import CRS, Transformer
 from pyproj.exceptions import CRSError
+from shapely import ops, wkt
+from shapely.geometry import LineString, Point, Polygon
 
-from typing import Any, Dict, List, Optional, Tuple, Union
-
-from .. import cv, helpers
+from pyorc import cv, helpers
 
 
 class CameraConfig:
+    """Camera configuration containing information about the perspective of the camera.
+
+    The camera configuration contains information and functionalities to reconstruct perspective information
+    relating 2D image coordinates to 3D real world coordinates.
     """
-    Camera configuration containing information about the perspective of the camera with respect to real world
-    coordinates
-    """
+
     def __str__(self):
         return str(self.to_json())
 
@@ -29,25 +32,25 @@ class CameraConfig:
         return self.to_json()
 
     def __init__(
-            self,
-            height: int,
-            width: int,
-            crs: Optional[Any] = None,
-            window_size: int = 10,
-            resolution: float = 0.05,
-            bbox: Optional[Union[shapely.geometry.Polygon, str]] = None,
-            camera_matrix: Optional[List[List[float]]] = None,
-            dist_coeffs: Optional[List[List[float]]] = None,
-            lens_position: Optional[List[float]] = None,
-            corners: Optional[List[List[float]]] = None,
-            gcps: Optional[Dict[str, Union[List, float]]] = None,
-            lens_pars: Optional[Dict[str, float]] = None,
-            calibration_video: Optional[str] = None,
-            is_nadir: Optional[bool] = False,
-            stabilize: Optional[List[List]] = None,
-            rotation: Optional[int] = None,
+        self,
+        height: int,
+        width: int,
+        crs: Optional[Any] = None,
+        window_size: int = 10,
+        resolution: float = 0.05,
+        bbox: Optional[Union[shapely.geometry.Polygon, str]] = None,
+        camera_matrix: Optional[List[List[float]]] = None,
+        dist_coeffs: Optional[List[List[float]]] = None,
+        lens_position: Optional[List[float]] = None,
+        corners: Optional[List[List[float]]] = None,
+        gcps: Optional[Dict[str, Union[List, float]]] = None,
+        lens_pars: Optional[Dict[str, float]] = None,
+        calibration_video: Optional[str] = None,
+        is_nadir: Optional[bool] = False,
+        stabilize: Optional[List[List]] = None,
+        rotation: Optional[int] = None,
     ):
-        """
+        """Initialize a camera configuration instance.
 
         Parameters
         ----------
@@ -64,6 +67,10 @@ class CameraConfig:
             resolution in m. of projected pixels (default: 0.01)
         bbox : shapely.geometry.Polygon, optional
             bounding box in geographical coordinates
+        camera_matrix : List[List[float]], optional
+            pre-defined camera matrix (if e.g. known from a separate calibration)
+        dist_coeffs : List[List[float]], optional
+            pre-defined distortion parameters (if e.g. known from a separate calibration)
         lens_position : list of floats (3),
             x, y, z coordinate of lens position in CRS
         corners : list of lists of floats (2)
@@ -78,7 +85,7 @@ class CameraConfig:
             the same vertical reference as the measured bathymetry and other survey points,
             "crs": int, str or CRS object, CRS in which "dst" points are measured. If None, a local coordinate system is
             assumed (e.g. from spirit level).
-        lens_pars (deprecated) : dict, optional
+        lens_pars : dict, optional
             Lens parameters, containing: "k1": float, barrel lens distortion parameter (default: 0.),
             "c": float, optical center (default: 2.),
             "focal_length": float, focal length (default: width of image frame)
@@ -94,10 +101,11 @@ class CameraConfig:
             are used for stabilization of the video, if this polygon is defined.
         rotation : int [90, 180, 270]
             enforces a rotation of the video of 90, 180 or 2780 degrees clock-wise.
+
         """
-        assert(isinstance(height, int)), 'height must be provided as type "int"'
-        assert(isinstance(width, int)), 'width must be provided as type "int"'
-        assert (isinstance(window_size, int)), 'window_size must be of type "int"'
+        assert isinstance(height, int), 'height must be provided as type "int"'
+        assert isinstance(width, int), 'width must be provided as type "int"'
+        assert isinstance(window_size, int), 'window_size must be of type "int"'
         self.height = height
         self.width = width
         self.is_nadir = is_nadir
@@ -106,7 +114,7 @@ class CameraConfig:
                 crs = CRS.from_user_input(crs)
             except CRSError:
                 raise CRSError(f'crs "{crs}" is not a valid Coordinate Reference System')
-            assert (crs.is_geographic == 0), "Prodstvided crs must be projected with units like [m]"
+            assert crs.is_geographic == 0, "Prodstvided crs must be projected with units like [m]"
             self.crs = crs.to_wkt()
         if resolution is not None:
             self.resolution = resolution
@@ -118,15 +126,13 @@ class CameraConfig:
             self.set_gcps(**gcps)
         if camera_matrix is None or dist_coeffs is None:
             if self.is_nadir:
-                # with nadir, no perspective can be constructed, hence, camera matrix and dist coeffs will be set to default values
+                # with nadir, no perspective can be constructed, hence, camera matrix and dist coeffs will be set
+                # to default values
                 self.camera_matrix = cv._get_cam_mtx(self.height, self.width)
                 self.dist_coeffs = cv.DIST_COEFFS
             # camera pars are incomplete and need to be derived
             else:
-                self.set_intrinsic(
-                    camera_matrix=camera_matrix,
-                    lens_pars=lens_pars
-                )
+                self.set_intrinsic(camera_matrix=camera_matrix, lens_pars=lens_pars)
         else:
             # camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option
             self.camera_matrix = camera_matrix
@@ -147,8 +153,7 @@ class CameraConfig:
 
     @property
     def bbox(self):
-        """
-        Returns geographical bbox fitting around corners points of area of interest in camera perspective
+        """Give geographical bbox fitting around corners points of area of interest in camera perspective.
 
         Returns
         -------
@@ -167,6 +172,7 @@ class CameraConfig:
 
     @property
     def camera_matrix(self):
+        """Get camera matrix."""
         return self._camera_matrix
 
     @camera_matrix.setter
@@ -175,43 +181,48 @@ class CameraConfig:
 
     @property
     def dist_coeffs(self):
+        """Get distortion coefficients."""
         return self._dist_coeffs
 
     @dist_coeffs.setter
     def dist_coeffs(self, dist_coeffs):
         self._dist_coeffs = dist_coeffs.tolist() if isinstance(dist_coeffs, np.ndarray) else dist_coeffs
 
-
     @property
     def gcps_dest(self):
-        """
+        """Get destination coordinates of GCPs.
 
         Returns
         -------
         dst : np.ndarray
             destination coordinates of ground control point. z-coordinates are parsed from z_0 if necessary
+
         """
         if hasattr(self, "gcps"):
             if "dst" in self.gcps:
-                return np.array(self.gcps["dst"] if len(self.gcps["dst"][0]) == 3 else np.c_[self.gcps["dst"], np.ones(4)*self.gcps["z_0"]])
+                return np.array(
+                    self.gcps["dst"]
+                    if len(self.gcps["dst"][0]) == 3
+                    else np.c_[self.gcps["dst"], np.ones(4) * self.gcps["z_0"]]
+                )
         # if conditions are not yet met, then return None
         return None
 
     @property
     def gcps_dest_bbox(self):
-        """
+        """Give destination coordinates as row, col in intended bounding box.
 
         Returns
         -------
         dst : np.ndarray
             Destination coordinates measured as column, row in the intended bounding box with the intended resolution
+
         """
         return np.array(cv.transform_to_bbox(self.gcps_dest, self.bbox, self.resolution))
 
-
     @property
     def gcps_bbox_reduced(self):
-        """
+        """Give col, row coordinates of gcps within intended bounding box, reduced by mean coordinate.
 
         Returns
         -------
@@ -220,33 +231,34 @@ class CameraConfig:
 
         """
         return self.gcps_dest_bbox - self.gcps_dest_bbox.mean(axis=0)
+
     @property
     def gcps_reduced(self):
-        """
-        Get the location of gcp destination points, reduced with their mean for better local projection
+        """Get location of gcp destination points, reduced with their mean for better local projection.
 
         Returns
         -------
         dst : np.ndarray
             Reduced coordinate (x, y) or (x, y, z) of gcp destination points
+
         """
         return np.array(self.gcps_dest - self.gcps_mean)
 
     @property
     def gcps_mean(self):
-        """
-        Get the mean location of gcp destination points
+        """Get mean location of gcp destination points.
 
         Returns
         -------
         dst_mean : np.ndarray
             mean coordinate (x, y) or (x, y, z) of gcp destination points
+
         """
         return np.array(self.gcps_dest).mean(axis=0)
 
     @property
     def gcps_dims(self):
-        """
+        """Return amount of dimensions of GCPs provided (2 or 3).
 
         Returns
         -------
@@ -258,8 +270,7 @@ class CameraConfig:
 
     @property
     def is_nadir(self):
-        """
-        Returns if the camera configuration belongs to nadir video
+        """Return if the camera configuration belongs to nadir video.
 
         Returns
         -------
@@ -270,26 +281,17 @@ class CameraConfig:
         return self._is_nadir
 
     @is_nadir.setter
-    def is_nadir(
-            self,
-            nadir_prop: bool
-    ):
+    def is_nadir(self, nadir_prop: bool):
         self._is_nadir = nadir_prop
 
     @property
     def pnp(self):
-        return cv.solvepnp(
-            self.gcps_reduced,
-            self.gcps["src"],
-            self.camera_matrix,
-            self.dist_coeffs
-        )
-
+        """Return Precise N point solution from ground control points, intrinsics and distortion."""
+        return cv.solvepnp(self.gcps_reduced, self.gcps["src"], self.camera_matrix, self.dist_coeffs)
 
     @property
     def shape(self):
-        """
-        Returns rows and columns in projected frames from ``Frames.project``
+        """Return rows and columns in projected frames from `Frames.project`.
 
         Returns
         -------
@@ -297,43 +299,36 @@ class CameraConfig:
             Amount of rows in projected frame
         cols : int
             Amount of columns in projected frame
+
         """
-        cols, rows = cv._get_shape(
-            self.bbox,
-            resolution=self.resolution,
-            round=1
-        )
+        cols, rows = cv._get_shape(self.bbox, resolution=self.resolution, round=1)
         return rows, cols
 
     @property
     def stabilize(self):
-        """
-        Return stabilization polygon (anything outside is used for stabilization
+        """Return stabilization polygon (anything outside is used for stabilization.
 
         Returns
         -------
         coords : list of lists
             coordinates in original image frame comprising the polygon for use in stabilization
+
         """
         return self._stabilize
 
     @stabilize.setter
-    def stabilize(
-            self,
-            coords: List[List[float]]
-    ):
+    def stabilize(self, coords: List[List[float]]):
         self._stabilize = coords
-
 
     @property
     def rotation(self):
-        """
-        Return rotation OpenCV code
+        """Return rotation OpenCV code.
 
         Returns
         -------
         code : int
             integer code belonging to rotation, 0 for 90 deg, 1 for 180 deg and 2 for 270 deg
+
         """
         if hasattr(self, "_rotation"):
             return self._rotation
@@ -341,17 +336,12 @@ class CameraConfig:
             return None
 
     @rotation.setter
-    def rotation(
-            self,
-            rotation_code: int
-    ):
+    def rotation(self, rotation_code: int):
         self._rotation = rotation_code
-
 
     @property
     def transform(self):
-        """
-        Returns Affine transform of projected frames from ``Frames.project``
+        """Returns Affine transform of projected frames from `Frames.project`.
 
         Returns
         -------
@@ -367,10 +357,10 @@ class CameraConfig:
         max_imgs: Optional[int] = 30,
         plot: Optional[bool] = True,
         progress_bar: Optional[bool] = True,
-        **kwargs
+        **kwargs,
     ):
-        """
-        Calibrates and sets the properties ``camera_matrix`` and ``dist_coeffs`` using a video of a chessboard pattern.
+        """Calibrate and set the properties `camera_matrix` and `dist_coeffs` using a video of a chessboard pattern.
+
         Follows methods described on https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
 
         Parameters
@@ -392,23 +382,17 @@ class CameraConfig:
             (default: True).
         progress_bar : bool, optional
             if set, a progress bar going through the frames is plotted (default: True).
-
+        **kwargs : dict
+            keyword arguments to pass to underlying methods
 
         """
-        assert(os.path.isfile(fn)), f"Video calibration file {fn} not found"
-        camera_matrix, dist_coeffs = cv.calibrate_camera(
-            fn,
-            chessboard_size,
-            max_imgs,
-            plot,
-            progress_bar,
-            **kwargs
-        )
+        assert os.path.isfile(fn), f"Video calibration file {fn} not found"
+        camera_matrix, dist_coeffs = cv.calibrate_camera(fn, chessboard_size, max_imgs, plot, progress_bar, **kwargs)
         self.camera_matrix = camera_matrix
         self.dist_coeffs = dist_coeffs
 
     def estimate_lens_position(self):
-        """estimate lens position from distortion and intrinsec/extrinsic matrix."""
+        """Estimate lens position from distortion and intrinsec/extrinsic matrix."""
         _, rvec, tvec = self.pnp
         rmat = cv2.Rodrigues(rvec)[0]
         # determine lens position related to center of objective
@@ -417,14 +401,16 @@ class CameraConfig:
         return lens_pos
 
     def get_bbox(
-            self,
-            camera: Optional[bool] = False,
-            h_a: Optional[float] = None,
-            z_a: Optional[float] = None,
-            within_image: Optional[bool] = False,
-            expand_exterior=True,
+        self,
+        camera: Optional[bool] = False,
+        h_a: Optional[float] = None,
+        z_a: Optional[float] = None,
+        within_image: Optional[bool] = False,
+        expand_exterior=True,
     ) -> Polygon:
-        """
+        """Get bounding box.
+
+        Can be retrieved in geographical or camera perpective.
 
         Parameters
         ----------
@@ -451,6 +437,7 @@ class CameraConfig:
         using the homography belonging to the available ground control points and current water level.
 
         This can then be used to reconstruct the grid for velocimetry calculations.
+
         """
         bbox = self.bbox
         coords = np.array(bbox.exterior.coords)
@@ -458,23 +445,23 @@ class CameraConfig:
             # in this case, always more points than just corners are needed, so expand_exterior is forced to True
             expand_exterior = True
         if expand_exterior:
-            # make a new set of bbox coordinates with a higher density. This is meant to enable plotting of distortion on
-            # image frame, and to plot partial coverage in the real-world coordinates
+            # make a new set of bbox coordinates with a higher density. This is meant to enable plotting of
+            # distortion on image frame, and to plot partial coverage in the real-world coordinates
             coords_expand = np.zeros((0, 2))
-            for n in range(0, len(coords)-1):
+            for n in range(0, len(coords) - 1):
                 new_coords = np.linspace(coords[n], coords[n + 1], 100)
                 coords_expand = np.r_[coords_expand, new_coords]
             coords = coords_expand
         if not z_a:
             z_a = self.get_z_a(h_a)
         # add vertical coordinates to the set
-        coords = np.c_[coords, np.ones(len(coords))*z_a]
+        coords = np.c_[coords, np.ones(len(coords)) * z_a]
         # project points to pixel image coordinates
         corners = self.project_points(coords, within_image=within_image)
         corners = corners[np.isfinite(corners[:, 0])]
-        if not(camera):
+        if not (camera):
             # project back to real-world coordinates after possibly cutting at edges of visibility
-            corners = self.unproject_points(np.array(np.array(list(zip(*corners))).T), z_a)
+            corners = self.unproject_points(np.array(np.array(list(zip(*corners, strict=False))).T), z_a)
             # corners = self.unproject_points(list(zip(coords[:, 0], coords[:, 1])), z_a)
             # project points (after cutting on image edges) to geographical space
         bbox = Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
@@ -482,11 +469,11 @@ class CameraConfig:
         return bbox
 
     def get_camera_coords(
-            self,
-            points: List[List],
+        self,
+        points: List[List],
     ):
-        """
-        Convert real-world coordinates into camera coordinates using
+        """Convert real-world coordinates into camera coordinates.
+
         Parameters
         ----------
         points : array-like list (of lists)
@@ -496,6 +483,7 @@ class CameraConfig:
         -------
         cam_points : np.ndarray (of points)
             [x, y, z] camera coordinates
+
         """
         _, rvec, tvec = self.pnp
         # get rotation matrix
@@ -503,16 +491,13 @@ class CameraConfig:
 
         # convert points into array
         points = np.array(points)
-        cam_points = np.einsum('ij,kj->ki', R, np.array(points)) + tvec.flatten()
+        cam_points = np.einsum("ij,kj->ki", R, np.array(points)) + tvec.flatten()
         return cam_points
 
-    def get_depth(
-            self,
-            z: List[float],
-            h_a: Optional[float] = None
-    ) -> List[float]:
-        """
-        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level,
+    def get_depth(self, z: List[float], h_a: Optional[float] = None) -> List[float]:
+        """Retrieve depth for measured bathymetry points.
+
+        This is done using the camera configuration and an actual water level,
         measured in local reference (e.g. staff gauge).
 
         Parameters
@@ -533,16 +518,12 @@ class CameraConfig:
         z_pressure = np.maximum(self.gcps["z_0"] - self.gcps["h_ref"] + h_a, z)
         return z_pressure - z
 
-
     def get_dist_shore(
-            self,
-            x: List[float],
-            y: List[float],
-            z: List[float],
-            h_a: Optional[float] = None
+        self, x: List[float], y: List[float], z: List[float], h_a: Optional[float] = None
     ) -> List[float]:
-        """
-        Retrieve depth for measured bathymetry points using the camera configuration and an actual water level, measured
+        """Retrieve depth for measured bathymetry points.
+
+        This is done using the camera configuration and an actual water level, measured
         in local reference (e.g. staff gauge).
 
         Parameters
@@ -565,28 +546,26 @@ class CameraConfig:
         # retrieve depth
         depth = self.get_depth(z, h_a=h_a)
         if h_a is None:
-            assert(self.gcps["h_ref"] is None), "No actual water level is provided, but a reference water level is " \
-                                                "provided "
+            assert self.gcps["h_ref"] is None, (
+                "No actual water level is provided, but a reference water level is " "provided "
+            )
             # h_a = 0.
             # h_ref = 0.
         # else:
-            # h_ref = self.gcps["h_ref"]
+        # h_ref = self.gcps["h_ref"]
         z_dry = depth <= 0
         z_dry[[0, -1]] = True
         # compute distance to nearest dry points with Pythagoras
-        dist_shore = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y, in zip(x, y)])
+        dist_shore = np.array(
+            [(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y in zip(x, y, strict=False)]
+        )
         return dist_shore
 
-    def get_dist_wall(
-            self,
-            x: List[float],
-            y: List[float],
-            z: List[float],
-            h_a: Optional[float] = None
-    ) -> List[float]:
-        """
-        Retrieve distance to wall for measured bathymetry points using the camera configuration and an actual water
-        level, measured in local reference (e.g. staff gauge).
+    def get_dist_wall(self, x: List[float], y: List[float], z: List[float], h_a: Optional[float] = None) -> List[float]:
+        """Retrieve distance to wall for measured bathymetry points.
+
+        Done by using the camera configuration and an actual water level, measured in local reference (e.g. staff
+        gauge).
 
         Parameters
         ----------
@@ -607,14 +586,11 @@ class CameraConfig:
         """
         depth = self.get_depth(z, h_a=h_a)
         dist_shore = self.get_dist_shore(x, y, z, h_a=h_a)
-        dist_wall = (dist_shore**2 + depth**2)**0.5
+        dist_wall = (dist_shore**2 + depth**2) ** 0.5
         return dist_wall
 
-    def z_to_h(
-            self,
-            z: float
-    ) -> float:
-        """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge)
+    def z_to_h(self, z: float) -> float:
+        """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge).
 
         Parameters
         ----------
@@ -624,19 +600,19 @@ class CameraConfig:
         Returns
         -------
         h : float
+
         """
         h_ref = 0 if self.gcps["h_ref"] is None else self.gcps["h_ref"]
         h = z + h_ref - self.gcps["z_0"]
         return h
 
     def get_M(
-            self,
-            h_a: Optional[float] = None,
-            to_bbox_grid: Optional[bool] = False,
-            reverse: Optional[bool] = False
+        self, h_a: Optional[float] = None, to_bbox_grid: Optional[bool] = False, reverse: Optional[bool] = False
     ) -> np.ndarray:
-        """Establish a transformation matrix for a certain actual water level `h_a`. This is done by mapping where the
-        ground control points, measured at `h_ref` will end up with new water level `h_a`, given the lens position.
+        """Establish a transformation matrix for a certain actual water level `h_a`.
+
+        This is done by mapping where the ground control points, measured at `h_ref` will end up with new water level
+        `h_a`, given the lens position.
 
         Parameters
         ----------
@@ -667,16 +643,16 @@ class CameraConfig:
             src=src,
             dst=dst_a,
             camera_matrix=self.camera_matrix,
-            dist_coeffs=cv.DIST_COEFFS, # self.dist_coeffs,
+            dist_coeffs=cv.DIST_COEFFS,  # self.dist_coeffs,
             z=z_a,
-            reverse=reverse
+            reverse=reverse,
         )
 
-    def get_z_a(
-            self,
-            h_a: Optional[float] = None
-    ) -> float:
-        """
+    def get_z_a(self, h_a: Optional[float] = None) -> float:
+        """Get actual water level measured in global vertical datum (+z_0) from water level in local datum (+h_ref).
+
+        Parameters
+        ----------
         h_a : float, optional
             actual water level measured [m], if not set, assumption is that a single video
             is processed and thus changes in water level are not relevant. (default: None)
@@ -685,19 +661,15 @@ class CameraConfig:
         -------
         Actual locations of control points (in case these are only x, y) given the current set water level and
         the camera location
+
         """
         if h_a is None:
             return self.gcps["z_0"]
         else:
             return self.gcps["z_0"] + (h_a - self.gcps["h_ref"])
 
-    def set_bbox_from_corners(
-            self,
-            corners: List[List[float]]
-    ):
-        """
-        Establish bbox based on a set of camera perspective corner points Assign corner coordinates to camera
-        configuration
+    def set_bbox_from_corners(self, corners: List[List[float]]):
+        """Establish bbox based on a set of camera perspective corner points.
 
         Parameters
         ----------
@@ -705,24 +677,40 @@ class CameraConfig:
             [columns, row] coordinates in original camera perspective without any undistortion applied
 
         """
-        assert (np.array(corners).shape == (4,
-                                            2)), f"a list of lists of 4 coordinates must be given, resulting in (4, " \
-                                                 f"2) shape. Current shape is {corners.shape} "
+        assert np.array(corners).shape == (4, 2), (
+            f"a list of lists of 4 coordinates must be given, resulting in (4, "
+            f"2) shape. Current shape is {corners.shape} "
+        )
 
         # get homography
-        corners_xyz = self.unproject_points(corners, np.ones(4)*self.gcps["z_0"])
-        bbox = cv.get_aoi(
-            corners_xyz,
-            resolution=self.resolution
-        )
+        corners_xyz = self.unproject_points(corners, np.ones(4) * self.gcps["z_0"])
+        bbox = cv.get_aoi(corners_xyz, resolution=self.resolution)
         self.bbox = bbox
 
     def set_intrinsic(
-            self,
-            camera_matrix: Optional[List[List]] = None,
-            dist_coeffs: Optional[List[List]] = None,
-            lens_pars: Optional[Dict[str, float]] = None
+        self,
+        camera_matrix: Optional[List[List]] = None,
+        dist_coeffs: Optional[List[List]] = None,
+        lens_pars: Optional[Dict[str, float]] = None,
     ):
+        """Set lens and distortion parameters.
+
+        If not provided, they are derived by optimizing pnp fitting together with optimizing the focal length.
+
+        Parameters
+        ----------
+        camera_matrix : Optional[List[List]]
+            A defined camera matrix to set as intrinsic parameters. If not provided, it will use default values or
+            those derived from ground control points (GCPs) if available.
+
+        dist_coeffs : Optional[List[List]]
+            Distortion coefficients to be used for the camera. If not provided, it will use default values or those
+            derived from GCPs if available.
+
+        lens_pars : Optional[Dict[str, float]]
+            Lens parameters to be set. These will override any default settings or those derived from GCPs if provided.
+
+        """
         # first set a default estimate from pose if 3D gcps are available
         self.set_lens_pars()  # default parameters use width of frame
         if hasattr(self, "gcps"):
@@ -733,7 +721,7 @@ class CameraConfig:
                     # self.gcps["dst"],
                     self.height,
                     self.width,
-                    lens_position=self.lens_position
+                    lens_position=self.lens_position,
                 )
             if lens_pars is not None:
                 # override with lens parameter set by user
@@ -743,14 +731,8 @@ class CameraConfig:
                 self.camera_matrix = camera_matrix
                 self.dist_coeffs = dist_coeffs
 
-
-    def set_lens_pars(
-            self,
-            k1: Optional[float] = 0.,
-            c: Optional[float] = 2.,
-            focal_length: Optional[float] = None
-    ):
-        """Set the lens parameters of the given CameraConfig
+    def set_lens_pars(self, k1: Optional[float] = 0.0, c: Optional[float] = 2.0, focal_length: Optional[float] = None):
+        """Set the lens parameters of the given CameraConfig.
 
         Parameters
         ----------
@@ -759,28 +741,22 @@ class CameraConfig:
         c : float, optional
             optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the
             centre.
-        f : float, optional
+        focal_length : float, optional
             focal length [mm], typical values could be 2.8, or 4 (default).
 
 
         """
-        assert (isinstance(k1, (int, float))), "k1 must be a float"
-        assert (isinstance(c, (int, float))), "c must be a float"
+        assert isinstance(k1, (int, float)), "k1 must be a float"
+        assert isinstance(c, (int, float)), "c must be a float"
         if focal_length is not None:
-            assert (isinstance(focal_length, (int, float, None))), "f must be a float"
+            assert isinstance(focal_length, (int, float, None)), "f must be a float"
         self.dist_coeffs = cv._get_dist_coefs(k1)
         self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, focal_length=focal_length)
 
     def set_gcps(
-            self,
-            src: List[List],
-            dst: List[List],
-            z_0: float,
-            h_ref: Optional[float] = None,
-            crs: Optional[Any] = None
+        self, src: List[List], dst: List[List], z_0: float, h_ref: Optional[float] = None, crs: Optional[Any] = None
     ):
-        """
-        Set ground control points for the given CameraConfig
+        """Set ground control points for the given CameraConfig.
 
         Parameters
         ----------
@@ -803,29 +779,32 @@ class CameraConfig:
             reprojected to the local crs of the CameraConfig. (Default: None)
 
         """
-        assert (isinstance(src, list)), f"src must be a list of (x, y) or (x, y, z) coordinates"
-        assert (isinstance(dst, list)), f"dst must be a list of (x, y) or (x, y, z) coordinates"
+        assert isinstance(src, list), "src must be a list of (x, y) or (x, y, z) coordinates"
+        assert isinstance(dst, list), "dst must be a list of (x, y) or (x, y, z) coordinates"
         if np.array(dst).shape[1] == 2:
-            assert (len(src) in [2, 4]), f"2 or 4 source points are expected in src, but {len(src)} were found"
+            assert len(src) in [2, 4], f"2 or 4 source points are expected in src, but {len(src)} were found"
             if len(src) == 4:
-                assert (len(dst) == 4), f"4 destination points are expected in dst, but {len(dst)} were found"
+                assert len(dst) == 4, f"4 destination points are expected in dst, but {len(dst)} were found"
             else:
-                assert (len(dst) == 2), f"2 destination points are expected in dst, but {len(dst)} were found"
+                assert len(dst) == 2, f"2 destination points are expected in dst, but {len(dst)} were found"
         else:
-            assert(len(src) == len(dst)), f"Amount of (x, y, z) coordinates in src ({len(src)}) and dst ({len(dst)} must be equal"
-            assert(len(src) >= 6), f"for (x, y, z) points, at least 6 pairs must be available, only {len(src)} provided"
+            assert len(src) == len(
+                dst
+            ), f"Amount of (x, y, z) coordinates in src ({len(src)}) and dst ({len(dst)} must be equal"
+            assert len(src) >= 6, f"for (x, y, z) points, at least 6 pairs must be available, only {len(src)} provided"
         if h_ref is not None:
-            assert (isinstance(h_ref, (float, int))), "h_ref must contain a float number"
+            assert isinstance(h_ref, (float, int)), "h_ref must contain a float number"
         if z_0 is not None:
-            assert (isinstance(z_0, (float, int))), "z_0 must be provided as type float"
-        assert (all(isinstance(x, (float, int)) for p in src for x in p)), "src contains non-int parts"
-        assert (all(isinstance(x, (float, int)) for p in dst for x in p)), "dst contains non-float parts"
+            assert isinstance(z_0, (float, int)), "z_0 must be provided as type float"
+        assert all(isinstance(x, (float, int)) for p in src for x in p), "src contains non-int parts"
+        assert all(isinstance(x, (float, int)) for p in dst for x in p), "dst contains non-float parts"
         if crs is not None:
             if not (hasattr(self, "crs")):
                 raise ValueError(
-                    'CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided '
-                    'destination coordinates are in a locally defined coordinate reference system, e.g. established '
-                    'with a spirit level.')
+                    "CameraConfig does not contain a crs, so gcps also cannot contain a crs. Ensure that the provided "
+                    "destination coordinates are in a locally defined coordinate reference system, e.g. established "
+                    "with a spirit level."
+                )
             dst = helpers.xyz_transform(dst, crs, CRS.from_wkt(self.crs))
         # if there is no h_ref, then no local gauge system, so set h_ref to zero
         # check if 2 points are available
@@ -833,7 +812,7 @@ class CameraConfig:
             self.is_nadir = True
             src, dst = cv._get_gcps_2_4(src, dst, self.width, self.height)
         if h_ref is None:
-            h_ref = 0.
+            h_ref = 0.0
         self.gcps = {
             "src": src,
             "dst": dst,
@@ -841,13 +820,7 @@ class CameraConfig:
             "z_0": z_0,
         }
 
-    def set_lens_position(
-            self,
-            x: float,
-            y: float,
-            z: float,
-            crs: Optional[Any] = None
-    ):
+    def set_lens_position(self, x: float, y: float, z: float, crs: Optional[Any] = None):
         """Set the geographical position of the lens of current CameraConfig.
 
         Parameters
@@ -862,42 +835,37 @@ class CameraConfig:
             Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to
             measure the lens position (e.g. 4326 for WGS84 lat-lon). The position's x and y coordinates will
             automatically be reprojected to the local crs of the CameraConfig.
-        """
 
+        """
         if crs is not None:
             if self.crs is None:
                 raise ValueError("CameraConfig does not contain a crs, ")
             x, y = helpers.xyz_transform([[x, y]], crs, self.crs)[0]
         self.lens_position = [x, y, z]
 
-    def project_points(
-            self,
-            points: List[List],
-            within_image=False
-    ) -> np.ndarray:
-        """
-        Project real world x, y, z coordinates into col, row coordinates on image. If
-        col, row coordinates are not allowed to go outside of the image frame, then set within_image = True
+    def project_points(self, points: List[List], within_image=False) -> np.ndarray:
+        """Project real world x, y, z coordinates into col, row coordinates on image.
+
+        If col, row coordinates are not allowed to go outside of the image frame, then set within_image = True
 
         Parameters
         ----------
         points : list of lists or array-like
             list of points [x, y, z] in real world coordinates
+        within_image : bool
+            Set coordinates to NaN if these fall outside of the image.
 
         Returns
         -------
         points_project : list or array-like
             list of points (equal in length as points) with [col, row] coordinates
+
         """
         _, rvec, tvec = self.pnp
         # normalize points wrt mean of gcps
         points = np.float32(np.array(points) - self.gcps_mean)
         points_proj, jacobian = cv2.projectPoints(
-            points,
-            rvec,
-            tvec,
-            np.array(self.camera_matrix),
-            np.array(self.dist_coeffs)
+            points, rvec, tvec, np.array(self.camera_matrix), np.array(self.dist_coeffs)
         )
         points_proj = np.array([list(point[0]) for point in points_proj])
 
@@ -910,66 +878,58 @@ class CameraConfig:
                 rvec=rvec,
                 tvec=tvec,
                 camera_matrix=self.camera_matrix,
-                dist_coeffs=self.dist_coeffs
+                dist_coeffs=self.dist_coeffs,
             )
             # TODO: figure out how to filter out points that bend into the image frame according to the
             # distortion parameters, but are in fact outside. This is not yet working the way it should
             filter = np.all(np.isclose(np.array(points_back), np.array(points), atol=1e-2), axis=1)
             points_proj[~filter] = np.nan
             # also filter points outside edges of image
-            points_proj[points_proj[:, 0] < 0, 0] = 0.
+            points_proj[points_proj[:, 0] < 0, 0] = 0.0
             points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width - 1
-            points_proj[points_proj[:, 1] < 0, 1] = 0.
+            points_proj[points_proj[:, 1] < 0, 1] = 0.0
             points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height - 1
         return points_proj
 
+    def unproject_points(self, points: List[List], zs: Union[float, List[float]]) -> np.ndarray:
+        """Reverse projects points in [column, row] space to [x, y, z] real world.
 
-    def unproject_points(
-            self,
-            points: List[List],
-            zs: Union[float, List[float]]
-    ) -> np.ndarray:
-        """
-        Reverse projects points in [column, row] space to [x, y, z] real world
         Parameters
         ----------
         points : List of lists or array-like
             Points in [col, row] to unproject
-        zs : float or list of floats : z-coordinate on which to unproject points
+        zs : float or list of floats
+            z-coordinates on which to unproject points
 
         Returns
         -------
         points_unproject : List of lists or array-like
             unprojected points as list of [x, y, z] coordinates
+
         """
         _, rvec, tvec = self.pnp
         # reduce zs by the mean of the gcps
         _zs = zs - self.gcps_mean[-1]
         dst = cv.unproject_points(
-            np.array(points),
-            _zs,
-            rvec=rvec,
-            tvec=tvec,
-            camera_matrix=self.camera_matrix,
-            dist_coeffs=self.dist_coeffs
+            np.array(points), _zs, rvec=rvec, tvec=tvec, camera_matrix=self.camera_matrix, dist_coeffs=self.dist_coeffs
         )
         dst = np.array(dst) + self.gcps_mean
         return dst
 
-
     def plot(
-            self,
-            figsize: Optional[Tuple] = (13, 8),
-            ax: Optional[plt.Axes] = None,
-            tiles: Optional[Any] = None,
-            buffer: Optional[float] = 0.0005,
-            zoom_level: Optional[int] = 19,
-            camera: Optional[bool] = False,
-            tiles_kwargs: Optional[Dict] = {}
+        self,
+        figsize: Optional[Tuple] = (13, 8),
+        ax: Optional[plt.Axes] = None,
+        tiles: Optional[Any] = None,
+        buffer: Optional[float] = 0.0005,
+        zoom_level: Optional[int] = 19,
+        camera: Optional[bool] = False,
+        tiles_kwargs: Optional[Dict] = None,
     ) -> plt.Axes:
-        """
-        Plot the geographical situation of the CameraConfig. This is very useful to check if the CameraConfig seems
-        to be in the right location. Requires cartopy to be installed.
+        """Plot geographical situation of the CameraConfig.
+
+        This is very useful to check if the CameraConfig seems to be in the right location. Requires `cartopy`
+        to be installed.
 
         Parameters
         ----------
@@ -985,16 +945,16 @@ class CameraConfig:
             zoom level of image tiler service (default: 18)
         camera : bool, optional
             If set to True, all camera config information will be back projected to the original camera objective.
-        **tiles_kwargs
+        tiles_kwargs : dict
             additional keyword arguments to pass to ax.add_image when tiles are added
-        8) :
-
 
         Returns
         -------
         ax : plt.axes
 
         """
+        if not tiles_kwargs:
+            tiles_kwargs = {}
         # initiate transform
         transformer = None
         # if there is an axes, get the extent
@@ -1009,16 +969,15 @@ class CameraConfig:
 
         if not camera:
             if self.lens_position is not None and not camera:
-            #
-            # if hasattr(self, "lens_position") and not camera:
+                #
+                # if hasattr(self, "lens_position") and not camera:
                 points.append(Point(self.lens_position[0], self.lens_position[1]))
             # transform points in case a crs is provided
             if hasattr(self, "crs"):
                 # make a transformer to lat lon
                 transformer = Transformer.from_crs(
-                    CRS.from_user_input(self.crs),
-                    CRS.from_epsg(4326),
-                    always_xy=True).transform
+                    CRS.from_user_input(self.crs), CRS.from_epsg(4326), always_xy=True
+                ).transform
                 points = [ops.transform(transformer, p) for p in points]
             xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
             extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
@@ -1026,36 +985,30 @@ class CameraConfig:
         y = [p.y for p in points]
 
         if ax is None:
-            f = plt.figure(figsize=figsize)
-            if (hasattr(self, "crs") and not(camera)):
+            plt.figure(figsize=figsize)
+            if hasattr(self, "crs") and not (camera):
                 ax = helpers.get_geo_axes(tiles=tiles, extent=extent, zoom_level=zoom_level, **tiles_kwargs)
             else:
                 ax = plt.subplot()
         if hasattr(ax, "add_geometries"):
             import cartopy.crs as ccrs
+
             plot_kwargs = dict(transform=ccrs.PlateCarree())
         else:
             plot_kwargs = {}
         ax.plot(
-            x[0:len(self.gcps["dst"])],
-            y[0:len(self.gcps["dst"])],
+            x[0 : len(self.gcps["dst"])],
+            y[0 : len(self.gcps["dst"])],
             ".",
             label="Control points",
             markersize=12,
             markeredgecolor="w",
             zorder=2,
-            **plot_kwargs
+            **plot_kwargs,
         )
         if len(x) > len(self.gcps["dst"]):
             ax.plot(
-                x[-1],
-                y[-1],
-                ".",
-                label="Lens position",
-                markersize=12,
-                zorder=2,
-                markeredgecolor="w",
-                **plot_kwargs
+                x[-1], y[-1], ".", label="Lens position", markersize=12, zorder=2, markeredgecolor="w", **plot_kwargs
             )
         patch_kwargs = {
             **plot_kwargs,
@@ -1063,7 +1016,7 @@ class CameraConfig:
             "zorder": 2,
             "edgecolor": "w",
             "label": "Area of interest",
-            **plot_kwargs
+            **plot_kwargs,
         }
         if hasattr(self, "bbox"):
             self.plot_bbox(ax=ax, camera=camera, transformer=transformer, within_image=True, **patch_kwargs)
@@ -1077,17 +1030,18 @@ class CameraConfig:
         return ax
 
     def plot_bbox(
-            self,
-            ax: Optional[plt.Axes] = None,
-            camera: Optional[bool] = False,
-            transformer: Optional[Any] = None,
-            h_a: Optional[float] = None,
-            within_image: Optional[bool] = True,
-            **kwargs
+        self,
+        ax: Optional[plt.Axes] = None,
+        camera: Optional[bool] = False,
+        transformer: Optional[Any] = None,
+        h_a: Optional[float] = None,
+        within_image: Optional[bool] = True,
+        **kwargs,
     ):
-        """
-        Plot bounding box for orthorectification in a geographical projection (``camera=False``) or the camera
-        Field Of View (``camera=True``).
+        """Plot bounding box.
+
+        This can be done for orthorectification in a geographical projection (`camera=False`) or the camera
+        Field Of View (`camera=True`).
 
         Parameters
         ----------
@@ -1101,10 +1055,15 @@ class CameraConfig:
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level. In case a video with higher (lower) water levels is used, this
             will result in a different perspective plane than the control video.
+        within_image : bool, optional
+            If set (default), points outside the camera objective are removed.
+        **kwargs : dict
+            additional keyword arguments used for plotting the bbox polygon with `matplotlib.patches.Polygon`
 
         Returns
         -------
         p : matplotlib.patch mappable
+
         """
         # collect information to plot
         bbox = self.get_bbox(camera=camera, h_a=h_a, within_image=within_image)
@@ -1113,17 +1072,13 @@ class CameraConfig:
             bbox = ops.transform(transformer, bbox)
 
         bbox_x, bbox_y = bbox.exterior.xy
-        bbox_coords = list(zip(bbox_x, bbox_y))
-        patch = patches.Polygon(
-            bbox_coords,
-            **kwargs
-        )
+        bbox_coords = list(zip(bbox_x, bbox_y, strict=False))
+        patch = patches.Polygon(bbox_coords, **kwargs)
         p = ax.add_patch(patch)
         return p
 
-
     def to_dict(self) -> Dict:
-        """Return the CameraConfig object as dictionary
+        """Return the CameraConfig object as dictionary.
 
         Returns
         -------
@@ -1131,7 +1086,6 @@ class CameraConfig:
             serialized CameraConfig
 
         """
-
         d = copy.deepcopy(self.__dict__)
         # replace underscore keys for keys without underscore
         for k in list(d.keys()):
@@ -1141,16 +1095,22 @@ class CameraConfig:
         return d
 
     def to_dict_str(self) -> Dict:
+        """Convert the current instance to a dictionary with all values converted to strings.
+
+        Returns
+        -------
+        dict
+            A dictionary representation of the instance where all values are strings. If an attribute is an instance
+            of `Polygon`, it is converted to its string representation.
+
+        """
         d = self.to_dict()
         # convert anything that is not string in string
-        dict_str = {k: v if not(isinstance(v, Polygon)) else v.__str__() for k, v in d.items()}
+        dict_str = {k: v if not (isinstance(v, Polygon)) else v.__str__() for k, v in d.items()}
         return dict_str
 
-    def to_file(
-            self,
-            fn: str
-    ):
-        """Write the CameraConfig object to json structure
+    def to_file(self, fn: str):
+        """Write the CameraConfig object to json structure.
 
         Parameters
         ----------
@@ -1158,17 +1118,17 @@ class CameraConfig:
             Path to file to write camera config to
 
         """
-
         with open(fn, "w") as f:
             f.write(self.to_json())
 
     def to_json(self) -> str:
-        """Convert CameraConfig object to string
+        """Convert CameraConfig object to string.
 
         Returns
         -------
         json_str : str
             json string with CameraConfig components
+
         """
         return json.dumps(self, default=lambda o: o.to_dict_str(), indent=4)
 
@@ -1186,10 +1146,8 @@ look as follows for a HD video:
 """
 
 
-def get_camera_config(
-        s: str
-) -> CameraConfig:
-    """Read camera config from string
+def get_camera_config(s: str) -> CameraConfig:
+    """Read camera config from string.
 
     Parameters
     ----------
@@ -1202,7 +1160,7 @@ def get_camera_config(
 
     """
     d = json.loads(s)
-    if not "height" in d or not "width" in d:
+    if "height" not in d or "width" not in d:
         raise IOError(depr_warning_height_width)
     # ensure the bbox is a Polygon object
     if "bbox" in d:
@@ -1211,10 +1169,7 @@ def get_camera_config(
     return CameraConfig(**d)
 
 
-
-def load_camera_config(
-        fn: str
-) -> CameraConfig:
+def load_camera_config(fn: str) -> CameraConfig:
     """Load a CameraConfig from a geojson file.
 
     Parameters
