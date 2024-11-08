@@ -38,16 +38,8 @@ def vmin_vmax_to_norm(opts):
 
     """
     if "vmin" in opts or "vmax" in opts:
-        if "vmin" in opts:
-            vmin = opts["vmin"]
-            del opts["vmin"]
-        else:
-            vmin = None
-        if "vmax" in opts:
-            vmax = opts["vmax"]
-            del opts["vmax"]
-        else:
-            vmax = None
+        vmin = opts.pop("vmin", None)
+        vmax = opts.pop("vmax", None)
         norm = Normalize(vmin=vmin, vmax=vmax)
         opts["norm"] = norm
     return opts
@@ -93,14 +85,10 @@ def run_func_hash_io(
     Wrapper function to run a sub function if either output is not present or input has changed. If check is False then
     simply passes everything.
     """
-    if attrs is None:
-        attrs = []
-    if inputs is None:
-        inputs = []
-    if configs is None:
-        configs = []
-    if outputs is None:
-        outputs = []
+    attrs = [] if attrs is None else attrs
+    inputs = [] if inputs is None else inputs
+    configs = [] if configs is None else configs
+    outputs = [] if outputs is None else outputs
 
     def decorator_func(processor_func):
         @functools.wraps(processor_func)
@@ -164,7 +152,6 @@ def run_func_hash_io(
                     fn_hash = os.path.join(path_out, f"{os.path.basename(getattr(ref, i))}.hash")
                     # get hash
                     hash256 = cli_utils.get_file_hash(getattr(ref, i))
-                    # print(hash256.hexdigest())
                     with open(fn_hash, "w") as f:
                         f.write(hash256.hexdigest())
             else:
@@ -382,8 +369,7 @@ class VelocityFlowProcessor(object):
     def velocimetry(self, method="get_piv", write=False, **kwargs):
         if len(kwargs) > 1:
             raise OverflowError(f"Too many arguments under velocimetry, only one allowed, but {len(kwargs)} given.")
-        if len(kwargs) == 0:
-            kwargs[method] = {}
+        kwargs[method] = kwargs.get(method, {}) if len(kwargs) == 0 else kwargs[method]
         # get velocimetry results
         self.velocimetry_obj = apply_methods(self.da_frames, "frames", logger=self.logger, **kwargs)
         m = list(kwargs.keys())[0]
