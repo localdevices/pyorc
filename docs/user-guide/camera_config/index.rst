@@ -282,6 +282,14 @@ control points.
             lens_position = [6.0478872, 49.8830221, 309.8]  # lon, lat, elevation position of the camera
             cam_config.set_lens_position(*lens_position, crs=4326)
 
+Setting rotation
+----------------
+If you are setting up a camera configuration on the CLI with a portrait video set up you may have to manually ensure
+the video is rotated to portrait scale. With a smartphone video, this is usually detected automatically. With a
+raspberry pi or IP camera this can usually not be detected. In this case, ensure that you manually provide the
+``--rotation`` flag with a valid value (90, 180 or 270 degrees). Also use the same angle when you perform velocimetry
+on the same or other videos with the same view. See :ref:`video rotation <video_rotation>` for more information.
+
 
 Setting the area of interest
 ----------------------------
