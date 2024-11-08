@@ -1,11 +1,37 @@
+"""Logging module for pyorc CLI."""
+
 import logging
 import os
 import sys
-from .. import __version__
 
+from pyorc import __version__
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
-# logger = logging.getLogger(__name__)
+
+
+class CustomFormatter(logging.Formatter):
+    """Adapted formatter for pyorc."""
+
+    grey = "\x1b[38;20m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    format = FMT
+
+    FORMATS = {
+        logging.DEBUG: grey + format + reset,
+        logging.INFO: grey + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: bold_red + format + reset,
+    }
+
+    def format(self, record):
+        """Get format conditional on record level."""
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
 
 
 def setuplog(
@@ -15,7 +41,8 @@ def setuplog(
     fmt: str = FMT,
     append: bool = True,
 ) -> logging.Logger:
-    f"""Set-up the logging on sys.stdout and file if path is given.
+    """Set up the logging on sys.stdout and file if path is given.
+
     Parameters
     ----------
     name : str, optional
@@ -27,11 +54,13 @@ def setuplog(
     fmt : str, optional
         log message formatter, by default {FMT}
     append : bool, optional
-        Wether to append (True) or overwrite (False) to a logfile at path, by default True
+        Whether to append (True) or overwrite (False) to a logfile at path, by default True
+
     Returns
     -------
     logging.Logger
         _description_
+
     """
     logger = logging.getLogger(name)
     for _ in range(len(logger.handlers)):
@@ -40,7 +69,8 @@ def setuplog(
     logger.setLevel(log_level)
     console = logging.StreamHandler(sys.stdout)
     console.setLevel(log_level)
-    console.setFormatter(logging.Formatter(fmt))
+    # console.setFormatter(logging.Formatter(fmt))
+    console.setFormatter(CustomFormatter())
     logger.addHandler(console)
     if path is not None:
         if append is False and os.path.isfile(path):

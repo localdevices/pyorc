@@ -154,6 +154,42 @@ providing a start frame and end frame.
         If you set this to an integer larger than 0 and smaller than the maximum frames available, then only the frames
         in between will be processed.
 
+.. _video_rotation:
+
+Rotation
+--------
+Generally, videos that are taken in portrait position with a smartphone, are automatically rotated upon loading.
+If you use a camera that does not recognize the rotation, then you may also supply a rotation upon loading a video.
+
+.. tab-set::
+
+    .. tab-item:: Command-line
+
+        You can set a rotation by providing ``rotation`` in the video
+        section and supply either 90, 180, or 270 degrees which are clockwise rotations. The example below for
+        instance rotates clockwise by 90 degrees.
+
+        .. code-block:: yaml
+
+            video:
+              start_frame: 150
+              end_frame: 250
+              h_a: 92.23
+              rotation: 90
+
+    .. tab-item:: API
+
+        You can set a rotation by providing ``rotation`` in the ``Video`` instance. Only values 90, 180, or 270
+        degrees (clockwise) are accepted. E.g.:
+
+        .. code-block:: python
+
+            import pyorc
+            video_file = "some_portrait_video_file.mp4"
+            cam_conf_file = "some_cam_config.json"
+            video = pyorc.Video(video_file, camera_config=cam_conf_file, rotation=90)
+
+
 
 Stabilization
 -------------
@@ -269,4 +305,3 @@ becomes very easy.
         To extract all frames, you only need to call ``video.get_frames()``. This will five you grayscale
         frames, in a ``xr.DataArray`` object. The structure of this object follows a specific data model for frames, and
         therefore, methods that work on sets of frames can be applied, as described in the next section on :ref:`frames`.
-

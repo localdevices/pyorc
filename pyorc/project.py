@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, Optional
 
 import cv2
@@ -156,6 +157,16 @@ def project_numpy(
         ],
         axis=0,
     )
+    # check if there are values inside the objective. If not raise a warning
+    if idx_in.sum() == 0:
+        warnings.warn(
+            f"The water level is either very low or high compared to the reference water level. As a result, there are"
+            f"no pixels in the objective that fit in the area of interest. Difference in water level and reference "
+            f"water level is {z - cc.gcps['z_0']}. You will get missing values only.",
+            stacklevel=2,
+        )
+        return da_new.unstack()
+
     # coerce 2D idxs to 1D idxs
     idx_back = np.array(points_cam[idx_in, 1]) * len(da.x) + np.array(points_cam[idx_in, 0])
     vals = da.stack(group=("y", "x")).isel(group=idx_back)

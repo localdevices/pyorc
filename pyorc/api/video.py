@@ -1,22 +1,25 @@
+"""Video module for pyorc."""
+
 import copy
+import json
+import os
+import warnings
+from typing import List, Literal, Optional, Union
+
 import cv2
 import dask
 import dask.array as da
-import json
-
-import matplotlib.pyplot as plt
 import numpy as np
-import os
-import warnings
 import xarray as xr
 
-from typing import List, Optional, Union, Literal
+from pyorc import const, cv, helpers
 
-from .. import cv, const, helpers
-from .cameraconfig import load_camera_config, get_camera_config, CameraConfig
+from .cameraconfig import CameraConfig, get_camera_config, load_camera_config
 
 
 class Video:  # (cv2.VideoCapture)
+    """Video class for reading and extracting data from video files."""
+
     def __repr__(self):
         template = """
 Filename: {:s}
@@ -31,26 +34,27 @@ Camera configuration: {:s}
             self.fps,
             self.start_frame,
             self.end_frame,
-            self.camera_config.__repr__() if hasattr(self, "camera_config") else "none"
+            self.camera_config.__repr__() if hasattr(self, "camera_config") else "none",
         )
 
     def __init__(
-            self,
-            fn: str,
-            camera_config: Optional[Union[str, CameraConfig]] = None,
-            h_a: Optional[float] = None,
-            start_frame: Optional[int] = None,
-            end_frame: Optional[int] = None,
-            freq: Optional[int] = 1,
-            stabilize: Optional[List[List]] = None,
-            lazy: bool = False,
-            rotation: Optional[int] = None,
-            fps: Optional[float] = None,
+        self,
+        fn: str,
+        camera_config: Optional[Union[str, CameraConfig]] = None,
+        h_a: Optional[float] = None,
+        start_frame: Optional[int] = None,
+        end_frame: Optional[int] = None,
+        freq: Optional[int] = 1,
+        stabilize: Optional[List[List]] = None,
+        lazy: bool = False,
+        rotation: Optional[int] = None,
+        fps: Optional[float] = None,
     ):
-        """
-        Video class, inheriting parts from cv2.VideoCapture. Contains a camera configuration to it, and a start and end
-        frame to read from the video. Several methods read frames into memory or into a xr.DataArray with attributes.
-        These can then be processed with other pyorc API functionalities.
+        """Video class, inheriting parts from cv2.VideoCapture.
+
+        Contains a camera configuration to it, and a start and end frame to read from the video. Several methods read
+        frames into memory or into a xr.DataArray with attributes. These can then be processed with other pyorc API
+        functionalities.
 
         Parameters
         ----------
@@ -67,6 +71,8 @@ Camera configuration: {:s}
             first frame to use in analysis (default: 0)
         end_frame : int, optional
             last frame to use in analysis (if not set, last frame available in video will be used)
+        freq : int, optional
+            Frequency to read frames with. Default is 1, if set to e.g. 2 only each 2nd frame will be read.
         stabilize : list of lists, optional
             set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
             The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no
@@ -80,9 +86,10 @@ Camera configuration: {:s}
         fps : float, optional
             hard set for frames per second. Use this with utmost caution and only when you are confident that the video
             metadata is incorrect.
+
         """
-        assert (isinstance(start_frame, (int, type(None)))), 'start_frame must be of type "int"'
-        assert (isinstance(end_frame, (int, type(None)))), 'end_frame must be of type "int"'
+        assert isinstance(start_frame, (int, type(None))), 'start_frame must be of type "int"'
+        assert isinstance(end_frame, (int, type(None))), 'end_frame must be of type "int"'
         self.feats_stats = None
         self.feats_errs = None
         self.ms = None
@@ -94,21 +101,34 @@ Camera configuration: {:s}
             # if camera_config is not None:
             # check if h_a is supplied, if so, then also z_0 and h_ref must be available
             if h_a is not None:
-                assert (isinstance(self.camera_config.gcps["z_0"], float)), \
-                    "h_a was supplied, but camera config's gcps do not contain z_0, this is needed for dynamic " \
-                    "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera " \
+                assert isinstance(self.camera_config.gcps["z_0"], float), (
+                    "h_a was supplied, but camera config's gcps do not contain z_0, this is needed for dynamic "
+                    "reprojection. You can supplying z_0 and h_ref in the camera_config's gcps upon making a camera "
                     "configuration. "
-                assert (isinstance(self.camera_config.gcps["h_ref"], float)), \
-                    "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic " \
-                    "reprojection. You must supply z_0 and h_ref in the camera_config's gcps upon making a camera " \
+                )
+                assert isinstance(self.camera_config.gcps["h_ref"], float), (
+                    "h_a was supplied, but camera config's gcps do not contain h_ref, this is needed for dynamic "
+                    "reprojection. You must supply z_0 and h_ref in the camera_config's gcps upon making a camera "
                     "configuration. "
+                )
+                # check if h_a is not very far from h_ref
+                if np.abs(h_a - self.camera_config.gcps["h_ref"]) > const.WATER_LEVEL_MAX_DIFF:
+                    warnings.warn(
+                        f"h_a is more than {const.WATER_LEVEL_MAX_DIFF} meters different from h_ref. You may have "
+                        "made a mistake in the h_a definition. Check for instance if your h_a is measured with the same"
+                        "datum as h_ref. ",
+                        stacklevel=2,
+                    )
         if not os.path.isfile(fn):
-            raise IOError(f"Video file {fn} does not exist. If you are on windows and using \\ as file "
-                          f"separator ensure that the file string is prepended with an r, e.g. "
-                          f"r'c:\\video_files\\filename.mp4'")
+            raise IOError(
+                f"Video file {fn} does not exist. If you are on windows and using \\ as file "
+                f"separator ensure that the file string is prepended with an r, e.g. "
+                f"r'c:\\video_files\\filename.mp4'"
+            )
 
         cap = cv2.VideoCapture(fn)
-        cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 180.0)
+        # Force to automatically rotate frames
+        cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1)
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         # explicitly open file for reading
@@ -124,29 +144,24 @@ Camera configuration: {:s}
             start_frame = 0
         if end_frame is not None:
             if end_frame < start_frame:
-                raise ValueError(
-                    f"Start frame {start_frame} is larger than end frame {end_frame}"
-                )
+                raise ValueError(f"Start frame {start_frame} is larger than end frame {end_frame}")
             # end frame cannot be larger than total amount of available frames
             end_frame = np.minimum(end_frame, self.frame_count)
         else:
             end_frame = self.frame_count
         self.fps = cap.get(cv2.CAP_PROP_FPS)
-        self.rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
+        self.rotation = rotation
         # extract times, frame numbers and frames as far as available
         time, frame_number, frames = cv.get_time_frames(
-            cap,
-            start_frame,
-            end_frame,
-            lazy=lazy,
-            rotation=self.rotation,
-            method="bgr",
-            fps=fps
+            cap, start_frame, end_frame, lazy=lazy, rotation=self.rotation, method="bgr", fps=fps
         )
         self.frames = frames
         # check if end_frame changed
         if frame_number[-1] != end_frame:
-            warnings.warn(f"End frame {end_frame} cannot be read from file. End frame is adapted to {frame_number[-1]}")
+            warnings.warn(
+                f"End frame {end_frame} cannot be read from file. End frame is adapted to {frame_number[-1]}",
+                stacklevel=2,
+            )
             end_frame = frame_number[-1]
 
         self.end_frame = end_frame
@@ -161,12 +176,6 @@ Camera configuration: {:s}
             self.fps = cap.get(cv2.CAP_PROP_FPS)
         else:
             self.fps = fps
-        if rotation is None:
-            rotation = cap.get(cv2.CAP_PROP_ORIENTATION_META)
-            if rotation in [90, 270]:
-                # fix a bug in the cv2 code, that rotates portrait videos in the wrong direction
-                rotation = 180
-        self.rotation = rotation
         # set other properties
         self.h_a = h_a
         # make camera config part of the video object
@@ -178,13 +187,7 @@ Camera configuration: {:s}
 
     @property
     def lazy(self):
-        """
-
-        Returns
-        -------
-        np.ndarray
-            Mask of region of interest
-        """
+        """Get lazy flag."""
         return self._lazy
 
     @lazy.setter
@@ -193,20 +196,11 @@ Camera configuration: {:s}
 
     @property
     def mask(self):
-        """
-
-        Returns
-        -------
-        np.ndarray
-            Mask of region of interest
-        """
+        """Get region mask for stabilization."""
         return self._mask
 
     @mask.setter
-    def mask(
-            self,
-            mask: np.ndarray
-    ):
+    def mask(self, mask: np.ndarray):
         if mask is None:
             self._mask = None
         else:
@@ -214,25 +208,15 @@ Camera configuration: {:s}
 
     @property
     def camera_config(self):
-        """
-
-        :return: CameraConfig object
-        """
+        """Get `CameraConfig` object attached to `Video` instance."""
         if hasattr(self, "_camera_config"):
             return self._camera_config
         else:
             return None
 
     @camera_config.setter
-    def camera_config(
-            self,
-            camera_config_input: Union[str, dict]
-    ):
-        """
-        Set camera config as a serializable object from either a filename, json string or a dict
-        :param camera_config_input: str, dict, CameraConfig object, filename string, or json string containing camera
-            configuration.
-        """
+    def camera_config(self, camera_config_input: Union[str, dict]):
+        """Set camera config as a serializable object from either a filename, json string or a dict."""
         try:
             if isinstance(camera_config_input, str):
                 if os.path.isfile(camera_config_input):
@@ -246,23 +230,18 @@ Camera configuration: {:s}
             elif isinstance(camera_config_input, dict):
                 # Create CameraConfig from dict
                 self._camera_config = CameraConfig(**camera_config_input)
-        except:
+        except IOError:
             raise IOError(
-                "Could not recognise input as a CameraConfig file, string, dictionary or CameraConfig object.")
+                "Could not recognise input as a CameraConfig file, string, dictionary or CameraConfig object."
+            )
 
     @property
     def end_frame(self):
-        """
-
-        :return: int, last frame considered in analysis
-        """
+        """:return: int, last frame considered in analysis"""
         return self._end_frame
 
     @end_frame.setter
-    def end_frame(
-            self,
-            end_frame: Optional[int] = None
-    ):
+    def end_frame(self, end_frame: Optional[int] = None):
         # sometimes last frames are not read by OpenCV, hence we skip the last frame always
         if end_frame is None:
             self._end_frame = self.frame_count - 1
@@ -271,13 +250,7 @@ Camera configuration: {:s}
 
     @property
     def freq(self):
-        """
-
-        Returns
-        -------
-        int: frequency (1 in nth frames to select)
-
-        """
+        """Get video sampling frequency."""
         return self._freq
 
     @freq.setter
@@ -286,6 +259,7 @@ Camera configuration: {:s}
 
     @property
     def stabilize(self):
+        """Get stabilization region coordinates."""
         if self._stabilize is not None:
             return self._stabilize
         elif hasattr(self, "camera_config"):
@@ -293,47 +267,33 @@ Camera configuration: {:s}
                 return self.camera_config.stabilize
 
     @stabilize.setter
-    def stabilize(
-            self,
-            coords: Optional[List[List]] = None
-    ):
+    def stabilize(self, coords: Optional[List[List]] = None):
         self._stabilize = coords
 
     @property
     def h_a(self):
-        """
-
-        :return: Actual water level [m] during video
-        """
+        """:return: Actual water level [m] during video"""
         return self._h_a
 
     @h_a.setter
-    def h_a(
-            self,
-            h_a: float
-    ):
+    def h_a(self, h_a: float):
         if h_a is not None:
-            assert (isinstance(h_a, float)), f"The actual water level must be a float, you supplied a {type(h_a)}"
+            assert isinstance(h_a, float), f"The actual water level must be a float, you supplied a {type(h_a)}"
             if h_a < 0:
                 warnings.warn(
-                    "Water level is negative. This can be correct, but may be unlikely, especially if you use a staff "
-                    "gauge."
+                    "Water level is negative. This can be correct, but may be unlikely, especially if you use a "
+                    "staff gauge.",
+                    stacklevel=2,
                 )
         self._h_a = h_a
 
     @property
     def start_frame(self):
-        """
-
-        :return: int, first frame considered in analysis
-        """
+        """:return: int, first frame considered in analysis"""
         return self._start_frame
 
     @start_frame.setter
-    def start_frame(
-            self,
-            start_frame: Optional[int] = None
-    ):
+    def start_frame(self, start_frame: Optional[int] = None):
         if start_frame is None:
             self._start_frame = 0
         else:
@@ -341,49 +301,36 @@ Camera configuration: {:s}
 
     @property
     def frames(self):
+        """Get frames of Video instance."""
         return self._frames
 
     @frames.setter
-    def frames(
-            self,
-            frames: Optional[List] = None
-    ):
+    def frames(self, frames: Optional[List] = None):
         self._frames = frames
 
     @property
     def fps(self):
-        """
-
-        :return: float, frames per second
-        """
+        """:return: float, frames per second"""
         return self._fps
 
     @fps.setter
-    def fps(
-            self,
-            fps: float
-    ):
+    def fps(self, fps: float):
         if (np.isinf(fps)) or (fps <= 0):
             raise ValueError(f"FPS in video is {fps} which is not a valid value. Repair the video file before use")
         self._fps = fps
 
     @property
     def corners(self):
-        """
-
-        :return: list of 4 lists (int) with [column, row] locations of area of interest in video objective
-        """
+        """:return: list of 4 lists (int) with [column, row] locations of area of interest in video objective"""
         return self._corners
 
     @corners.setter
-    def corners(
-            self,
-            corners: List[List]
-    ):
+    def corners(self, corners: List[List]):
         self._corners = corners
 
     @property
     def rotation(self):
+        """Get rotation code."""
         if self._rotation is not None:
             return self._rotation
         elif hasattr(self, "camera_config"):
@@ -391,25 +338,17 @@ Camera configuration: {:s}
                 return helpers.get_rotation_code(self.camera_config.rotation)
 
     @rotation.setter
-    def rotation(
-            self,
-            rotation_code: int
-    ):
-        """
-        Set rotation from integer in the form of OpenCV rotation codes
-        """
+    def rotation(self, rotation_code: int):
+        """Set rotation from integer in the form of OpenCV rotation codes."""
         self._rotation = helpers.get_rotation_code(rotation_code)
 
     def get_frame(
-            self,
-            n: int,
-            method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale"
+        self, n: int, method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale"
     ) -> np.ndarray:
-        """
-        Retrieve one frame.
+        """Retrieve one frame.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         n : int
             frame number to retrieve
         method : str
@@ -419,10 +358,11 @@ Camera configuration: {:s}
         -------
         frame : np.ndarray
             2d array (grayscale) or 3d (rgb/hsv) with frame
+
         """
-        assert (n >= 0), "frame number cannot be negative"
+        assert n >= 0, "frame number cannot be negative"
         assert (
-                n - self.start_frame <= self.end_frame - self.start_frame
+            n - self.start_frame <= self.end_frame - self.start_frame
         ), "frame number is larger than the difference between the start and end frame "
         # assert (method in ["grayscale", "rgb",
         #                    "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
@@ -430,39 +370,32 @@ Camera configuration: {:s}
             raise IOError(f"Video file {self.fn} does not exist.")
         cap = cv2.VideoCapture(self.fn)
         cap.set(cv2.CAP_PROP_POS_FRAMES, n + self.start_frame)
-        ret, img = cv.get_frame(
-            cap,
-            rotation=self.rotation,
-            ms=self.ms[n] if self.ms else None,
-            method=method
-        )
+        ret, img = cv.get_frame(cap, rotation=self.rotation, ms=self.ms[n] if self.ms else None, method=method)
         self.frame_count = n + 1
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         cap.release()
         return img
 
-    def get_frames(
-            self,
-            method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale"
-    ) -> xr.DataArray:
-        """
-        Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`, expected to be read
-        lazily. The xr.DataArray will contain all coordinate variables and attributes, needed for further processing
-        steps.
+    def get_frames(self, method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale") -> xr.DataArray:
+        """Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`.
+
+        The xr.DataArray will contain all coordinate variables and attributes, needed for further processing. It
+        may be lazy, so that frames can be read at a later stage.
 
         Parameters
         ----------
         method: str, optional
-            method for color scaling, can be "
+            method for color scaling, can be "grayscale" (default) or "rgb"
 
         Returns
         -------
         frames : xr.DataArray
             containing all requested frames
+
         """
-        assert (hasattr(
-            self,
-            "_camera_config")), "No camera configuration is set, add it to the video using the .camera_config method"
+        assert hasattr(
+            self, "_camera_config"
+        ), "No camera configuration is set, add it to the video using the .camera_config method"
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
 
@@ -472,35 +405,30 @@ Camera configuration: {:s}
             # get all listed frames
             frames = [get_frame(n=n, method=method) for n, f_number in enumerate(self.frame_number)]
             sample = frames[0].compute()
-            data_array = [da.from_delayed(
-                frame,
-                dtype=sample.dtype,
-                shape=sample.shape
-            ) for frame in frames]
+            data_array = [da.from_delayed(frame, dtype=sample.dtype, shape=sample.shape) for frame in frames]
             da_stack = da.stack(data_array, axis=0)
         else:
             da_stack = self.frames
             # apply stabilisation
             if self.ms is not None:
                 # da_stack = np.array([cv.transform(img, m) for img, m in zip(da_stack, self.ms)])
-                da_stack = np.array([cv.transform(cv.color_scale(img, method), m) for img, m in zip(da_stack, self.ms)])
+                da_stack = np.array(
+                    [cv.transform(cv.color_scale(img, method), m) for img, m in zip(da_stack, self.ms, strict=False)]
+                )
             else:
                 # only color transform
                 da_stack = np.array([cv.color_scale(img, method) for img in da_stack])
             sample = da_stack[0]
 
-        time = np.array(
-            self.time) * 0.001  # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
+        time = (
+            np.array(self.time) * 0.001
+        )  # measure in seconds to comply with CF conventions # np.arange(len(data_array))*1/self.fps
         # y needs to be flipped up down to match the order of rows followed by coordinate systems (bottom to top)
         y = np.flipud(np.arange(sample.shape[0]))
         x = np.arange(sample.shape[1])
         # perspective column and row coordinate grids
         xp, yp = np.meshgrid(x, y)
-        coords = {
-            "time": time,
-            "y": y,
-            "x": x
-        }
+        coords = {"time": time, "y": y, "x": x}
         if len(sample.shape) == 3:
             coords["rgb"] = np.array([0, 1, 2])
         # make DataArray dimensions and attributes
@@ -508,33 +436,25 @@ Camera configuration: {:s}
         attrs = {
             "camera_shape": str([len(y), len(x)]),
             "camera_config": camera_config.to_json(),
-            "h_a": json.dumps(self.h_a)
+            "h_a": json.dumps(self.h_a),
         }
         frames = xr.DataArray(
             da_stack,
             dims=dims,
             coords=coords,
             attrs=attrs,
-        )[::self.freq]
+        )[:: self.freq]
         frames = frames.chunk({"time": 1})  # set chunks over time dimension
         del coords["time"]
         if len(sample.shape) == 3:
             del coords["rgb"]
         # add coordinate grids (i.e. without time)
-        frames = frames.frames.add_xy_coords(
-            [xp, yp],
-            coords,
-            const.PERSPECTIVE_ATTRS
-        )
+        frames = frames.frames.add_xy_coords([xp, yp], coords, const.PERSPECTIVE_ATTRS)
         frames.name = "frames"
         return frames
 
-    def set_mask_from_exterior(
-            self,
-            exterior: List[List]
-    ):
-        """
-        Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside
+    def set_mask_from_exterior(self, exterior: List[List]):
+        """Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside.
 
         Parameters
         ----------
@@ -555,11 +475,20 @@ Camera configuration: {:s}
         mask[mask == 1] = 255
         self.mask = mask
 
-    def get_ms(
-            self,
-            cap: cv2.VideoCapture,
-            split: Optional[int] = 2
-    ):
+    def get_ms(self, cap: cv2.VideoCapture, split: Optional[int] = 2):
+        """Get stabilization transforms for each frame based on analysis of stable points outside of water area.
+
+        Parameters
+        ----------
+        cap : cv2.VideoCapture
+            ref to video file
+
+        split : int
+            Amount of quadrants to split the area in to search for stabilization points. In each quadrant, an equal
+            number of stabilization points will be searched for .This is in order to ensure stabilization uses points
+            in all quadrants and prevent overfitting on only one part of the objective.
+
+        """
         self.ms = cv.get_ms_gftt(
             cap,
             start_frame=self.start_frame,
