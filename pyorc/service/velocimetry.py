@@ -1,18 +1,20 @@
+"""Service module for pyorc."""
+
 import copy
-import click
 import functools
 import logging
 import os.path
 import subprocess
-import xarray as xr
-import yaml
-
-from dask.diagnostics import ProgressBar
-from matplotlib.colors import Normalize
 from typing import Dict
 
-from ..cli import cli_utils
-from .. import Video, CameraConfig
+import click
+import xarray as xr
+import yaml
+from dask.diagnostics import ProgressBar
+from matplotlib.colors import Normalize
+
+from pyorc import CameraConfig, Video, const
+from pyorc.cli import cli_utils
 
 __all__ = ["velocity_flow", "velocity_flow_subprocess"]
 
@@ -20,8 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 def vmin_vmax_to_norm(opts):
-    """
-    Check if opts contains vmin and/or vmax. If so change that into a norm option which works for all plotting methods
+    """Convert vmin and/or vmax into norm option.
+
+    This is done to ensure plotting options work for all plotting methods.
 
     Parameters
     ----------
@@ -49,18 +52,22 @@ def vmin_vmax_to_norm(opts):
         opts["norm"] = norm
     return opts
 
-def apply_methods(obj, subclass, logger=logger, skip_args=[], **kwargs):
+
+def apply_methods(obj, subclass, logger=logger, skip_args=None, **kwargs):
+    if skip_args is None:
+        skip_args = []
     for m, _kwargs in kwargs.items():
         if m not in skip_args:
             # get the subclass with the expected methods
             cls = getattr(obj, subclass)
-            if not(hasattr(cls, m)):
+            if not (hasattr(cls, m)):
                 raise ValueError(f'Method "{m}" for {subclass} does not exist, please check your recipe')
             logger.debug(f"Applying {m} on {subclass} with parameters {_kwargs}")
             meth = getattr(cls, m)
             obj = meth(**_kwargs)
 
     return obj
+
 
 def get_masks(obj, **mask_methods):
     masks = []
@@ -74,24 +81,34 @@ def get_masks(obj, **mask_methods):
 
 
 def run_func_hash_io(
-        attrs=[],
-        inputs=[],
-        configs=[],
-        outputs=[],
-        write_path=".pyorc",
-        check=False,
+    attrs=None,
+    inputs=None,
+    configs=None,
+    outputs=None,
+    write_path=".pyorc",
+    check=False,
 ):
+    """Check if inputs to function have changed and or output is present or not.
+
+    Wrapper function to run a sub function if either output is not present or input has changed. If check is False then
+    simply passes everything.
     """
-    wrapper function that checks if inputs to function have changed and or output is present or not.
-    Runs function if either output is not present or input has changed. If check is False then simply passes everything
-    """
+    if attrs is None:
+        attrs = []
+    if inputs is None:
+        inputs = []
+    if configs is None:
+        configs = []
+    if outputs is None:
+        outputs = []
+
     def decorator_func(processor_func):
         @functools.wraps(processor_func)
         def wrapper_func(ref, *args, **kwargs):
             func_name = processor_func.__name__
             # set output path for state files
             path_out = os.path.join(ref.output, write_path)
-            if not(os.path.isdir(path_out)):
+            if not (os.path.isdir(path_out)):
                 os.makedirs(path_out)
             # default, assume running will take place
             run = True
@@ -110,17 +127,17 @@ def run_func_hash_io(
                         # config has changed
                         ref.logger.debug(f'Configuration of "{func_name}" has changed, requiring rerun')
                         run = True
-                if not(run):
+                if not (run):
                     # if configs are not changed, then go to the file integrity checks
                     for i in inputs + outputs:
                         fn = getattr(ref, i)
                         fn_hash = os.path.join(path_out, f"{os.path.basename(getattr(ref, i))}.hash")
-                        if not(os.path.isfile(fn)):
+                        if not (os.path.isfile(fn)):
                             run = True
                             break
                         else:
                             # also check if hash file exists
-                            if not(os.path.isfile(fn_hash)):
+                            if not (os.path.isfile(fn_hash)):
                                 run = True
                                 break
                             else:
@@ -128,13 +145,14 @@ def run_func_hash_io(
                                 with open(fn_hash, "r") as f:
                                     hash256_ancient = f.read()
                                 if hash256.hexdigest() != hash256_ancient:
-                                    ref.logger.debug(f"File integrity of {fn} has changed, requiring rerun of {func_name}")
+                                    ref.logger.debug(
+                                        f"File integrity of {fn} has changed, requiring rerun of {func_name}"
+                                    )
                                     run = True
                                     break
             if run:
                 # apply the wrapped processor function
-                ref.logger.info(
-                    f"Running {func_name}")
+                ref.logger.info(f"Running {func_name}")
                 processor_func(ref, *args, **kwargs)
                 # after run, store configuration file and hashes of in- and outputs
                 fn_recipe = os.path.join(path_out, f"{ref.prefix}{func_name}.yml")
@@ -150,39 +168,42 @@ def run_func_hash_io(
                     with open(fn_hash, "w") as f:
                         f.write(hash256.hexdigest())
             else:
-                ref.logger.info(f'Configuration, dependencies, input and output files for section "{func_name}" have not changed since last run, skipping...')
-                for attr, output in zip(attrs, outputs):
+                ref.logger.info(
+                    f'Configuration, dependencies, input and output files for section "{func_name}" have not changed '
+                    f"since last run, skipping..."
+                )
+                for attr, output in zip(attrs, outputs, strict=False):
                     if attr is not None:
                         fn = getattr(ref, output)
-                        ref.logger.info(f'Results for section "{func_name}" already available, reading from {os.path.abspath(fn)}')
+                        ref.logger.info(
+                            f'Results for section "{func_name}" already available, reading from {os.path.abspath(fn)}'
+                        )
                         setattr(ref, attr, xr.open_dataset(fn))
+
         return wrapper_func
+
     return decorator_func
 
 
 class VelocityFlowProcessor(object):
-    """
-    General processor class for processing of videos in to velocities and flow and derivative products
-
-    """
+    """General processor class for processing of videos in to velocities and flow and derivative products."""
 
     def __init__(
-            self,
-            recipe: Dict,
-            videofile: str,
-            cameraconfig: Dict,
-            prefix: str,
-            output: str,
-            h_a: float=None,
-            update: bool=False,
-            concurrency=True,
-            fn_piv="piv.nc",
-            fn_piv_mask="piv_mask.nc",
-            fn_transect_template="transect_{:s}.nc",
-            logger=logger
+        self,
+        recipe: Dict,
+        videofile: str,
+        cameraconfig: Dict,
+        prefix: str,
+        output: str,
+        h_a: float = None,
+        update: bool = False,
+        concurrency=True,
+        fn_piv="piv.nc",
+        fn_piv_mask="piv_mask.nc",
+        fn_transect_template="transect_{:s}.nc",
+        logger=logger,
     ):
-        """
-        Initialize processor with settings and files
+        """Initialize processor with settings and files.
 
         Parameters
         ----------
@@ -196,13 +217,29 @@ class VelocityFlowProcessor(object):
             prefix of produced output files
         output : str
             path to output file
+        h_a : float, optional
+            Current water level in meters
         update : bool, optional
             if set, only update components with changed inputs and configurations
         concurrency : bool, optional
             if set to False, then dask will only run synchronous preventing overuse of memory. This will be slower
+        fn_piv : str, optional
+            Path to piv result file (default "piv.nc")
+        fn_piv_mask : str, optional
+            Path to piv masked result file (default "piv_mask.nc")
+        fn_transect_template : str, optional
+            Path template to transect result files (default: "transect_{:s}.nc")
+        logger : logging, optional
+            reference to logger instance
 
         """
         if h_a is not None:
+            if abs(h_a - cameraconfig["gcps"]["h_ref"]) > const.WATER_LEVEL_MAX_DIFF:
+                logger.warning(
+                    f"Water level is very different from reference. Difference is {h_a - cameraconfig['gcps']['h_ref']}"
+                    f" meter. Check if your water level, units and/or datum are correct. This difference may result in "
+                    "no projected pixels inside area of interest."
+                )
             recipe["video"]["h_a"] = h_a
         # check what projection method is used, use throughout
         self.proj_method = "cv"
@@ -217,7 +254,9 @@ class VelocityFlowProcessor(object):
         self.prefix = prefix
         self.fn_piv = os.path.join(self.output, prefix + fn_piv)
         self.fn_piv_mask = os.path.join(self.output, prefix + fn_piv_mask) if "mask" in recipe else self.fn_piv
-        self.fn_transect_template = os.path.join(self.output, prefix + fn_transect_template).format if "transect" in recipe else None
+        self.fn_transect_template = (
+            os.path.join(self.output, prefix + fn_transect_template).format if "transect" in recipe else None
+        )
         if self.fn_transect_template is not None:
             self.fn_transects = [self.fn_transect_template(t) for t in recipe["transect"]]
         self.read = True
@@ -269,18 +308,15 @@ class VelocityFlowProcessor(object):
         self._fn_video = fn_video
 
     def process(self):
-        """
-        Single method to perform all processing in logical pre-defined order. Also checks for compulsory steps
+        """Perform all velocimetry processing in logical pre-defined order.
 
-
-        Returns
-        -------
-
+        The process also checks for compulsory steps.
         """
         if not self.concurrency:
             import dask
+
             # run only synchronous
-            dask.config.set(scheduler='synchronous')
+            dask.config.set(scheduler="synchronous")
         # dask.config.set(pool=Pool(4))
         # dask.config.set(scheduler='processes')
         self.video(**self.recipe["video"])
@@ -311,45 +347,38 @@ class VelocityFlowProcessor(object):
 
         #  perform any post processing such as plotting or possibly later other analyses
 
-
     # def wrapper
     # when status is update, then a wrapper function should check the consistency of all input data for each function
     # block with previous runs. If not consistent then rerun. Do this automatically if data is not present or
     # -y is provided, do with user intervention if stale file is present or -y is not provided
 
     def video(self, **kwargs):
-        self.video_obj = Video(
-            self.fn_video,
-            camera_config=self.cam_config,
-            **kwargs
-        )
+        self.video_obj = Video(self.fn_video, camera_config=self.cam_config, **kwargs)
         # some checks ...
         self.logger.info(f"Video successfully read from {self.fn_video}")
         # at the end
         self.da_frames = self.video_obj.get_frames()
         self.logger.debug(f"{len(self.da_frames)} frames retrieved from video")
 
-
     def frames(self, **kwargs):
         # TODO: preprocess steps
         if "project" not in kwargs:
             kwargs["project"] = {}
         # iterate over steps in processing
-        self.da_frames = apply_methods(
-            self.da_frames,
-            "frames",
-            logger=self.logger,
-            skip_args=["to_video"],
-            **kwargs
-        )
+        self.da_frames = apply_methods(self.da_frames, "frames", logger=self.logger, skip_args=["to_video"], **kwargs)
         if "to_video" in kwargs:
             kwargs_video = kwargs["to_video"]
             self.logger.info(f"Writing video of processed frames to {kwargs_video['fn']}")
             self.da_frames.frames.to_video(**kwargs_video)
-        self.logger.info(f'Frames are preprocessed')
+        self.logger.info("Frames are preprocessed")
 
-
-    @run_func_hash_io(attrs=["velocimetry_obj"], check=True, inputs=["fn_video"], configs=["video", "frames", "velocimetry"], outputs=["fn_piv"])
+    @run_func_hash_io(
+        attrs=["velocimetry_obj"],
+        check=True,
+        inputs=["fn_video"],
+        configs=["video", "frames", "velocimetry"],
+        outputs=["fn_piv"],
+    )
     def velocimetry(self, method="get_piv", write=False, **kwargs):
         if len(kwargs) > 1:
             raise OverflowError(f"Too many arguments under velocimetry, only one allowed, but {len(kwargs)} given.")
@@ -370,8 +399,13 @@ class VelocityFlowProcessor(object):
             delattr(self, "velocimetry_obj")
             self.velocimetry_obj = xr.open_dataset(self.fn_piv)
 
-
-    @run_func_hash_io(attrs=["velocimetry_mask_obj"], check=True, inputs=["fn_piv"], configs=["video", "frames", "velocimetry", "mask"], outputs=["fn_piv_mask"])
+    @run_func_hash_io(
+        attrs=["velocimetry_mask_obj"],
+        check=True,
+        inputs=["fn_piv"],
+        configs=["video", "frames", "velocimetry", "mask"],
+        outputs=["fn_piv_mask"],
+    )
     def mask(self, write=False, **kwargs):
         # TODO go through several masking groups
         self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
@@ -380,7 +414,7 @@ class VelocityFlowProcessor(object):
             masks = get_masks(self.velocimetry_mask_obj, **mask_grp)
             # apply found masks on velocimetry object
             self.velocimetry_mask_obj.velocimetry.mask(masks, inplace=True)
-        self.logger.info(f"Velocimetry masks applied")
+        self.logger.info("Velocimetry masks applied")
         # set the encoding to a good compression level
         self.velocimetry_mask_obj.velocimetry.set_encoding()
         # store results to file
@@ -389,7 +423,6 @@ class VelocityFlowProcessor(object):
             with ProgressBar():
                 delayed_obj.compute()
             del delayed_obj
-
 
     @run_func_hash_io(check=False, configs=["transect"], inputs=["fn_piv_mask"])
     def transect(self, write=False, **kwargs):
@@ -401,8 +434,10 @@ class VelocityFlowProcessor(object):
             # check if there are coordinates provided
 
             if not ("shapefile" in transect_grp or "geojson" in transect_grp):
-                raise click.UsageError(f'Transect with name "{transect_name}" does not have a "shapefile" or '
-                                       f'"geojson". Please add "shapefile" in the recipe file')
+                raise click.UsageError(
+                    f'Transect with name "{transect_name}" does not have a "shapefile" or '
+                    f'"geojson". Please add "shapefile" in the recipe file'
+                )
             # read geojson or shapefile (as alternative
             if "geojson" in transect_grp:
                 # read directly from geojson
@@ -413,21 +448,18 @@ class VelocityFlowProcessor(object):
             # check if coords have z coordinates
             if len(coords[0]) == 2:
                 raise click.UsageError(
-                    f'Transect in {os.path.jabspath(transect_grp["shapefile"])} only contains x, y, but no z-coordinates.'
+                    f'Transect in {os.path.abspath(transect_grp["shapefile"])} only contains x, y, but no '
+                    f'z-coordinates.'
                 )
-            x, y, z = zip(*coords)
+            x, y, z = zip(*coords, strict=False)
             self.logger.debug(f"Sampling transect {transect_name}")
             # sample the coordinates
-            if not("get_transect" in transect_grp):
+            if "get_transect" not in transect_grp:
                 transect_grp["get_transect"] = {}
             if transect_grp["get_transect"] is None:
                 transect_grp["get_transect"] = {}
             self.transects[transect_name] = self.velocimetry_mask_obj.velocimetry.get_transect(
-                x=x,
-                y=y,
-                z=z,
-                crs=crs,
-                **transect_grp["get_transect"]
+                x=x, y=y, z=z, crs=crs, **transect_grp["get_transect"]
             )
             if "get_q" in transect_grp:
                 if transect_grp["get_q"] is None:
@@ -435,9 +467,10 @@ class VelocityFlowProcessor(object):
                 # add q
                 self.transects[transect_name] = self.transects[transect_name].transect.get_q(**transect_grp["get_q"])
             if "get_river_flow" in transect_grp:
-                if not("get_q" in transect_grp):
+                if "get_q" not in transect_grp:
                     raise click.UsageError(
-                        f'"get_river_flow" found in {transect_name} but no "get_q" found, which is a requirement for "get_river_flow"'
+                        f'"get_river_flow" found in {transect_name} but no "get_q" found, which is a requirement for'
+                        f' "get_river_flow"'
                     )
                 if transect_grp["get_river_flow"] is None:
                     transect_grp["get_river_flow"] = {}
@@ -452,7 +485,12 @@ class VelocityFlowProcessor(object):
                     delayed_obj.compute()
                 self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
 
-    @run_func_hash_io(check=False, configs=["video", "frames", "velocimetry", "transect", "plot"], inputs=["fn_video", "fn_piv_mask"], outputs=[])
+    @run_func_hash_io(
+        check=False,
+        configs=["video", "frames", "velocimetry", "transect", "plot"],
+        inputs=["fn_video", "fn_piv_mask"],
+        outputs=[],
+    )
     def plot(self, **plot_recipes):
         _plot_recipes = copy.deepcopy(plot_recipes)
         for name, plot_params in _plot_recipes.items():
@@ -482,13 +520,8 @@ class VelocityFlowProcessor(object):
                 reducer = plot_params["reducer"] if "reducer" in plot_params else "mean"
                 reducer_params = plot_params["reducer_params"] if "reducer_params" in plot_params else {}
                 # reduce the velocimetry over time for plotting purposes
-                velocimetry_reduced = getattr(
-                    self.velocimetry_mask_obj,
-                    reducer
-                )(
-                    dim="time",
-                    keep_attrs=True,
-                    **reducer_params
+                velocimetry_reduced = getattr(self.velocimetry_mask_obj, reducer)(
+                    dim="time", keep_attrs=True, **reducer_params
                 )
                 p = velocimetry_reduced.velocimetry.plot(ax=ax, mode=mode, **opts)
                 ax = p.axes
@@ -500,7 +533,7 @@ class VelocityFlowProcessor(object):
                     fn_transect = self.fn_transect_template(transect_name)
                     ds_trans = xr.open_dataset(fn_transect)
                     # default quantile is 2 (50%), otherwise choose from list
-                    quantile = 2 if not("quantile") in opts else opts["quantile"]
+                    quantile = 2 if ("quantile") not in opts else opts["quantile"]
                     ds_trans_q = ds_trans.isel(quantile=quantile)
                     # add to plot
                     p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
@@ -515,8 +548,9 @@ class VelocityFlowProcessor(object):
             ax.figure.savefig(fn_jpg, **write_pars)
             self.logger.info(f'Plot "{name}" written to {fn_jpg}')
 
+
 def velocity_flow(**kwargs):
-    # simply execute the entire process
+    """Execute the entire velocimetry processor."""
     processor = VelocityFlowProcessor(**kwargs)
     # process video following the settings
     processor.process()
@@ -533,10 +567,9 @@ def velocity_flow_subprocess(
     h_a: float = None,
     update: bool = False,
     concurrency=True,
-    logger=logging
+    logger=logging,
 ):
-    """
-    Writes the requirements to temporary files and runs velocimetry from a separate CLI instance
+    """Write the requirements to temporary files and run velocimetry from a separate CLI instance.
 
     Parameters
     ----------
@@ -548,37 +581,33 @@ def velocity_flow_subprocess(
         camera config as dict (not yet loaded as CamerConfig object)
     prefix : str
         prefix of produced output files
+    h_a : float, optional
+        Current water level in meters (default None)
     output : str
         path to output file
     update : bool, optional
         if set, only update components with changed inputs and configurations
     concurrency : bool, optional
         if set to False, then dask will only run synchronous preventing overuse of memory. This will be slower
-
+    logger : logging
+        reference to logger instance
 
     Returns
     -------
+    subprocess.CompletedProcess
+        Process status
 
     """
     # store recipe in file
     logger.info(f"Launching separate pyorc instance for videofile {videofile}")
-    if not(os.path.isdir(output)):
+    if not (os.path.isdir(output)):
         os.makedirs(output)
     fn_recipe = os.path.join(output, "recipe.yml")
     fn_cam_config = os.path.join(output, "camera_config.json")
     with open(fn_recipe, "w") as f:
         yaml.dump(recipe, f, default_flow_style=False, sort_keys=False)
     CameraConfig(**cameraconfig).to_file(fn_cam_config)
-    cmd = [
-        "pyorc",
-        "velocimetry",
-        "-V",
-        videofile,
-        "-c",
-        fn_cam_config,
-        "-r",
-        fn_recipe
-    ]
+    cmd = ["pyorc", "velocimetry", "-V", videofile, "-c", fn_cam_config, "-r", fn_recipe]
     # add components where needed
     if h_a is not None:
         cmd.append("-h")
@@ -590,11 +619,7 @@ def velocity_flow_subprocess(
     if prefix:
         cmd.append("-p")
         cmd.append(prefix)
-    cmd_suffix = [
-        "-u",
-        "-vvv",
-        output
-    ]
+    cmd_suffix = ["-u", "-vvv", output]
     cmd = cmd + cmd_suffix
     # call subprocess
     result = subprocess.run(cmd)

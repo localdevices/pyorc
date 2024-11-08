@@ -1,30 +1,29 @@
-# Main command line routines
-import click
-from typing import List, Optional, Union
-from typeguard import typechecked
+"""Main command line routines pyorc."""
+
 import os
 import sys
-import yaml
+from typing import List, Optional, Union
 
-# import CLI components
-# import pyorc api below
-from .. import service, __version__
-from . import log, cli_utils
-# import cli components below
+import click
+from typeguard import typechecked
 
+from pyorc import __version__, service
+from pyorc.cli import cli_utils, log
 
-## MAIN
 
 def print_info(ctx, param, value):
+    """Display pyorc information."""
     if not value:
         return {}
-    click.echo(f"PyOpenRiverCam, Copyright Localdevices, Rainbow Sensing")
+    click.echo(f"PyOpenRiverCam version {__version__}, Copyright Localdevices, Rainbow Sensing\n")
     ctx.exit()
 
+
 def print_license(ctx, param, value):
+    """Display pyorc license."""
     if not value:
         return {}
-    click.echo(f"GNU Affero General Public License v3 (AGPLv3). See https://www.gnu.org/licenses/agpl-3.0.en.html")
+    click.echo("GNU Affero General Public License v3 (AGPLv3). See https://www.gnu.org/licenses/agpl-3.0.en.html\n")
     ctx.exit()
 
 
@@ -35,7 +34,7 @@ video_opt = click.option(
     type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="video file with required objective and resolution and control points in view",
     callback=cli_utils.validate_file,
-    required=True
+    required=True,
 )
 
 
@@ -57,11 +56,6 @@ video_opt = click.option(
     help="Print license information for PyOpenRiverCam",
     callback=print_license,
 )
-@click.option(
-    '--debug/--no-debug',
-    default=False,
-    envvar='REPO_DEBUG'
-)
 @click.pass_context
 def cli(ctx, info, license, debug):  # , quiet, verbose):
     """Command line interface for pyOpenRiverCam."""
@@ -76,7 +70,7 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
 #
 @cli.command(short_help="Prepare Camera Configuration file")
 @click.argument(
-    'OUTPUT',
+    "OUTPUT",
     type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
     required=True,
 )
@@ -85,78 +79,57 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
     "--crs",
     type=str,
     callback=cli_utils.parse_str_num,
-    help="Coordinate reference system to be used for camera configuration"
+    help="Coordinate reference system to be used for camera configuration",
 )
 @click.option(
-    "-f",
-    "--frame-sample",
-    type=int,
-    default=0,
-    help="Frame number to use for camera configuration background"
+    "-f", "--frame-sample", type=int, default=0, help="Frame number to use for camera configuration background"
 )
 @click.option(
-    "--src",
-    type=str,
-    callback=cli_utils.parse_src,
-    help='Source control points as list of [column, row] pairs.'
+    "--src", type=str, callback=cli_utils.parse_src, help="Source control points as list of [column, row] pairs."
 )
 @click.option(
     "--dst",
     type=str,
     callback=cli_utils.parse_dst,
-    help='Destination control points as list of 2 or 4 [x, y] pairs, or at least 6 [x, y, z]. If --crs_gcps is provided, --dst is assumed to be in this CRS."'
+    help="Destination control points as list of 2 or 4 [x, y] pairs, or at least 6 [x, y, z]. If --crs_gcps is "
+    "provided, --dst is assumed to be in this CRS.",
 )
-@click.option(
-    "--z_0",
-    type=float,
-    help="Water level [m] +CRS (e.g. geoid or ellipsoid of GPS)"
-)
-@click.option(
-    "--h_ref",
-    type=float,
-    help="Water level [m] +local datum (e.g. staff or pressure gauge)"
-)
+@click.option("--z_0", type=float, help="Water level [m] +CRS (e.g. geoid or ellipsoid of GPS)")
+@click.option("--h_ref", type=float, help="Water level [m] +local datum (e.g. staff or pressure gauge)")
 @click.option(
     "--crs_gcps",
     type=str,
     callback=cli_utils.parse_str_num,
-    help="Coordinate reference system in which destination GCP points (--dst) are measured"
+    help="Coordinate reference system in which destination GCP points (--dst) are measured",
 )
+@click.option("--resolution", type=float, help="Target resolution [m] for ortho-projection.")
 @click.option(
-    "--resolution",
-    type=float,
-    help="Target resolution [m] for ortho-projection."
-)
-@click.option(
-    "--window_size",
-    type=int,
-    help="Target window size [px] for interrogation window for Particle Image Velocimetry"
+    "--window_size", type=int, help="Target window size [px] for interrogation window for Particle Image Velocimetry"
 )
 @click.option(
     "--shapefile",
     type=click.Path(resolve_path=True, dir_okay=False, file_okay=True),
     help="Shapefile or other GDAL compatible vector file containing dst GCP points [x, y] or [x, y, z] in its geometry",
-    callback=cli_utils.validate_file
+    callback=cli_utils.validate_file,
 )
 @click.option(
     "--lens_position",
     type=str,
     help="Lens position as [x, y, z]. If --crs_gcps is provided, --lens_position is assumed to be in this CRS.",
-    callback=cli_utils.parse_json
+    callback=cli_utils.parse_json,
 )
 @click.option(
     "--corners",
     type=str,
     callback=cli_utils.parse_corners,
-    help="Video ojective corner points as list of 4 [column, row] points"
+    help="Video ojective corner points as list of 4 [column, row] points",
 )
 @click.option(
     "--stabilize",
     "-s",
     is_flag=True,
     default=False,
-    help="Stabilize the videos using this camera configuration (you can provide a stable area in an interactive view)."
-
+    help="Stabilize the videos using this camera configuration (you can provide a stable area in an interactive view).",
 )
 @click.option(
     "--rotation",
@@ -169,25 +142,26 @@ def cli(ctx, info, license, debug):  # , quiet, verbose):
 @click.pass_context
 @typechecked
 def camera_config(
-        ctx,
-        output: str,
-        videofile: str,
-        crs: Optional[Union[str, int]],
-        frame_sample: Optional[int],
-        src: Optional[List[List[float]]],
-        dst: Optional[List[List[float]]],
-        z_0: Optional[float],
-        h_ref: Optional[float],
-        crs_gcps: Optional[Union[str, int]],
-        resolution: Optional[float],
-        window_size: Optional[int],
-        lens_position: Optional[List[float]],
-        shapefile: Optional[str],
-        corners: Optional[List[List]],
-        stabilize: Optional[bool],
-        rotation: Optional[int],
-        verbose: int
+    ctx,
+    output: str,
+    videofile: str,
+    crs: Optional[Union[str, int]],
+    frame_sample: Optional[int],
+    src: Optional[List[List[float]]],
+    dst: Optional[List[List[float]]],
+    z_0: Optional[float],
+    h_ref: Optional[float],
+    crs_gcps: Optional[Union[str, int]],
+    resolution: Optional[float],
+    window_size: Optional[int],
+    lens_position: Optional[List[float]],
+    shapefile: Optional[str],
+    corners: Optional[List[List]],
+    stabilize: Optional[bool],
+    rotation: Optional[int],
+    verbose: int,
 ):
+    """CLI subcommand for camera configuration."""
     log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("cameraconfig", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your cameraconfig file in {output}")
@@ -200,25 +174,37 @@ def camera_config(
     if z_0 is None:
         z_0: float = click.prompt("--z_0 not provided, please enter a number, or Enter for default", default=0.0)
     if h_ref is None:
-        href: float = click.prompt("--h_ref not provided, please enter a number, or Enter for default", default=0.0)
+        h_ref: float = click.prompt("--h_ref not provided, please enter a number, or Enter for default", default=0.0)
     if resolution is None:
-        resolution: float = click.prompt("--resolution not provided, please enter a number, or Enter for default", default=0.05)
+        resolution: float = click.prompt(
+            "--resolution not provided, please enter a number, or Enter for default", default=0.05
+        )
     if window_size is None:
-        window_size: int = click.prompt("--window_size not provided, please enter a number, or Enter for default", default=10)
+        window_size: int = click.prompt(
+            "--window_size not provided, please enter a number, or Enter for default", default=10
+        )
     if shapefile is not None:
         if dst is None:
             dst, crs_gcps = cli_utils.read_shape(shapefile)
             # validate if amount of points is logical
             dst = cli_utils.validate_dst(dst)
         else:
-            logger.warning(f"Shapefile {shapefile} not used, because --dst was provided explicitly and overrules the use of --shapefile.")
+            logger.warning(
+                f"Shapefile {shapefile} not used, because --dst was provided explicitly and overrules the use of "
+                f"--shapefile."
+            )
     if dst is not None:
         logger.info("Destination points found and validated")
     else:
-        raise click.UsageError("No destination control points for found, either provide a list of points with --dst or provide a shapefile with --shapefile")
+        raise click.UsageError(
+            "No destination control points for found, either provide a list of points with --dst or provide a "
+            "shapefile with --shapefile"
+        )
     if not src:
-        logger.warning("No source control points provided. No problem, you can interactively click them in your objective")
-        if click.confirm('Do you want to continue and provide source points interactively?', default=True):
+        logger.warning(
+            "No source control points provided. No problem, you can interactively click them in your objective"
+        )
+        if click.confirm("Do you want to continue and provide source points interactively?", default=True):
             src, camera_matrix, dist_coeffs = cli_utils.get_gcps_interactive(
                 videofile,
                 dst,
@@ -227,22 +213,18 @@ def camera_config(
                 frame_sample=frame_sample,
                 lens_position=lens_position,
                 rotation=rotation,
-                logger=logger
+                logger=logger,
             )
             if len(src) != len(dst):
                 raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
     if crs is None and crs_gcps is not None:
         raise click.UsageError(f"--crs is None while --crs_gcps is {crs_gcps}, please supply --crs.")
-    gcps = {
-        "src": src,
-        "dst": dst,
-        "z_0": z_0,
-        "h_ref": h_ref,
-        "crs": crs_gcps
-    }
+    gcps = {"src": src, "dst": dst, "z_0": z_0, "h_ref": h_ref, "crs": crs_gcps}
     if not corners:
-        logger.warning("No corner points for projection provided. No problem, you can interactively click them in your objective")
-        if click.confirm('Do you want to continue and provide corners interactively?', default=True):
+        logger.warning(
+            "No corner points for projection provided. No problem, you can interactively click them in your objective"
+        )
+        if click.confirm("Do you want to continue and provide corners interactively?", default=True):
             corners = cli_utils.get_corners_interactive(
                 videofile,
                 gcps,
@@ -252,7 +234,7 @@ def camera_config(
                 camera_matrix=camera_matrix,
                 dist_coeffs=dist_coeffs,
                 rotation=rotation,
-                logger=logger
+                logger=logger,
             )
     if stabilize:
         stabilize = cli_utils.get_stabilize_pol(
@@ -262,7 +244,7 @@ def camera_config(
             logger=logger,
         )
     else:
-        stabilize=None
+        stabilize = None
     service.camera_config(
         video_file=videofile,
         cam_config_file=output,
@@ -277,7 +259,6 @@ def camera_config(
         dist_coeffs=dist_coeffs,
         stabilize=stabilize,
         rotation=rotation,
-
     )
     logger.info(f"Camera configuration created and stored in {output}")
 
@@ -285,7 +266,7 @@ def camera_config(
 # VELOCIMETRY
 @cli.command(short_help="Estimate velocimetry")
 @click.argument(
-    'OUTPUT',
+    "OUTPUT",
     type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
     callback=cli_utils.validate_dir,
     required=True,
@@ -297,7 +278,7 @@ def camera_config(
     type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="Options file (*.yml)",
     callback=cli_utils.parse_recipe,
-    required=True
+    required=True,
 )
 @click.option(
     "-c",
@@ -305,21 +286,15 @@ def camera_config(
     type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="Camera config file (*.json)",
     callback=cli_utils.parse_camconfig,
-    required=True
+    required=True,
 )
-@click.option(
-    "-p",
-    "--prefix",
-    type=str,
-    default="",
-    help="Prefix for produced output files"
-)
+@click.option("-p", "--prefix", type=str, default="", help="Prefix for produced output files")
 @click.option(
     "-h",
     "--h_a",
     type=float,
     required=False,
-    help="Water level in local vertical datum (e.g. staff or pressure gauge) belonging to video."
+    help="Water level in local vertical datum (e.g. staff or pressure gauge) belonging to video.",
 )
 @click.option(
     "-u",
@@ -334,28 +309,12 @@ def camera_config(
     default=False,
     help="Reduce memory consumption. Computation will be slower",
 )
-
 @verbose_opt
 @click.pass_context
-def velocimetry(
-        ctx,
-        output,
-        videofile,
-        recipe,
-        cameraconfig,
-        prefix,
-        h_a,
-        update,
-        lowmem,
-        verbose
-):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, lowmem, verbose):
+    """CLI subcommand for velocimetry."""
     log_level = max(10, 20 - 10 * verbose)
-    logger = log.setuplog(
-        "velocimetry",
-        os.path.abspath("pyorc.log"),
-        append=False,
-        log_level=log_level
-    )
+    logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
     logger.info(f"Preparing your velocimetry result in {output}")
     # load in recipe and camera config
     service.velocity_flow(
@@ -366,11 +325,12 @@ def velocimetry(
         prefix=prefix,
         output=output,
         update=update,
-        concurrency=not(lowmem),
-        logger=logger
+        concurrency=not (lowmem),
+        logger=logger,
     )
     pass
 
+
 if __name__ == "__main__":
-#if getattr(sys, 'frozen', False):
+    # if getattr(sys, 'frozen', False):
     cli(sys.argv[1:])

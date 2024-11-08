@@ -205,6 +205,7 @@ class Frames(ORCBase):
         da_proj = proj_method(self._obj, cc, x, y, z, reducer)
         # ensure no missing values are persisting
         da_proj = da_proj.fillna(0.0)
+
         # assign coordinates
         da_proj = da_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
