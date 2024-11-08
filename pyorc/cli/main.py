@@ -57,17 +57,13 @@ video_opt = click.option(
     callback=print_license,
 )
 @click.pass_context
-def cli(ctx, info, license, debug):  # , quiet, verbose):
+def cli(ctx, info, license):
     """Command line interface for pyOpenRiverCam."""
     if ctx.obj is None:
         ctx.obj = {}
 
-    # ctx.obj["log_level"] = max(10, 30 - 10 * (verbose - quiet))
-    # logging.basicConfig(stream=sys.stderr, level=ctx.obj["log_level"])
 
-
-## CAMERA CONFIG
-#
+# CAMERA CONFIG
 @cli.command(short_help="Prepare Camera Configuration file")
 @click.argument(
     "OUTPUT",
