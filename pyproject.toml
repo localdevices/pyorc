@@ -13,6 +13,7 @@ packages = [
 
 dependencies = [
     "click",
+    "cartopy",
     "cython; platform_machine == 'armv7l'",
     "dask",
     "descartes",
@@ -59,7 +60,6 @@ dynamic = ['version', 'description']
 io = [
 ]
 extra = [
-    "cartopy",
     "notebook"
 ]
 test = [

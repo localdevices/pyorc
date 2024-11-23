@@ -7,6 +7,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from ffpiv import window
 from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
@@ -33,7 +34,7 @@ class Frames(ORCBase):
         """
         super(Frames, self).__init__(xarray_obj)
 
-    def get_piv(self, **kwargs):
+    def get_piv(self, window_size=None, overlap=None, **kwargs):
         """Perform PIV computation on projected frames.
 
         Only a pipeline graph to computation is set up. Call a result to trigger actual computation. The dataset
@@ -43,8 +44,12 @@ class Frames(ORCBase):
 
         Parameters
         ----------
-        **kwargs : keyword arguments to pass to dask_piv, used to control the manner in which openpiv.pyprocess
-            is called.
+        window_size : (int, int), optional
+            size of interrogation windows in pixels (y, x)
+        overlap : (int, int), optional
+            amount of overlap between interrogation windows in pixels (y, x)
+        **kwargs : dict
+            keyword arguments to pass to dask_piv, used to control the manner in which openpiv.pyprocess is called.
 
         Returns
         -------
@@ -55,16 +60,20 @@ class Frames(ORCBase):
         camera_config = copy.deepcopy(self.camera_config)
         dt = self._obj["time"].diff(dim="time")
 
-        # add a number of kwargs for the piv function
-        if "window_size" in kwargs:
-            camera_config.window_size = kwargs["window_size"]
-        kwargs["search_area_size"] = camera_config.window_size
-        kwargs["window_size"] = camera_config.window_size
-        kwargs["res_x"] = camera_config.resolution
-        kwargs["res_y"] = camera_config.resolution
+        # Use window_size from camera_config unless provided in the method
+        if window_size is not None:
+            camera_config.window_size = window_size
+        window_size = (
+            2 * (camera_config.window_size,)
+            if isinstance(camera_config.window_size, int)
+            else camera_config.window_size
+        )
+        search_area_size = window_size
+        # res_x = camera_config.resolution
+        # res_y = camera_config.resolution
         # set an overlap if not provided in kwargs
-        if "overlap" not in kwargs:
-            kwargs["overlap"] = int(round(camera_config.window_size) / 2)
+        if overlap is None:
+            overlap = 2 * (int(round(camera_config.window_size) / 2),)
         # first get rid of coordinates that need to be recalculated
         coords_drop = list(set(self._obj.coords) - set(self._obj.dims))
         obj = self._obj.drop_vars(coords_drop)
@@ -73,11 +82,10 @@ class Frames(ORCBase):
         frames2 = obj[1:].chunk({"time": 1})
 
         # get the cols and rows coordinates of the expected results
-        cols, rows = piv_process.get_piv_size(
-            image_size=frames1[0].shape, search_area_size=kwargs["search_area_size"], overlap=kwargs["overlap"]
+        cols_vector, rows_vector = window.get_rect_coordinates(
+            dim_size=frames1[0].shape, window_size=window_size, search_area_size=search_area_size, overlap=overlap
         )
-        cols_vector = cols[0].astype(np.int64)
-        rows_vector = rows[:, 0].astype(np.int64)
+        cols, rows = np.meshgrid(cols_vector, rows_vector)
         # retrieve the x and y-axis belonging to the results
         x, y = helpers.get_axes(cols_vector, rows_vector, frames1.x.values, frames1.y.values)
         # convert in projected and latlon coordinates
@@ -100,6 +108,7 @@ class Frames(ORCBase):
         M = cv.get_M_2D(src, dst, reverse=True)
         # TODO: remove when above 4 lines work
         # M = camera_config.get_M(self.h_a, to_bbox_grid=True, reverse=True)
+        # TODO: compute xp and yp through the unproject_points function
         # compute row and column position of vectors in original reprojected background image col/row coordinates
         xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
         # ensure y coordinates start at the top in the right orientation (different from order of a CRS)
