@@ -513,7 +513,7 @@ class Frames(ORCBase):
             video_format = cv2.VideoWriter_fourcc(*"mp4v")
         if fps is None:
             # estimate it from the time differences
-            fps = 1 / (self._obj["time"][1].values - self._obj["time"][0].values)
+            fps = 1 / (self._obj["time"].diff(dim="time").values.mean())
         h = self._obj.shape[1]
         w = self._obj.shape[2]
         out = cv2.VideoWriter(fn, video_format, fps, (w, h))
