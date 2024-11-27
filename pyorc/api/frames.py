@@ -34,7 +34,73 @@ class Frames(ORCBase):
         """
         super(Frames, self).__init__(xarray_obj)
 
-    def get_piv(self, window_size=None, overlap=None, **kwargs):
+    def get_piv_coords(self, window_size, search_area_size, overlap):
+        """Get Particle Image Velocimetry (PIV) coordinates and mesh grid projections.
+
+        This function calculates the PIV coordinates and the corresponding mesh grid
+        projections based on the provided window size, search area size, and overlap.
+        The results include both projected coordinates (xp, yp) and the respective
+        longitude and latitude values (if available).
+
+        Parameters
+        ----------
+        window_size : int
+            The size of the window for the PIV analysis.
+        search_area_size : int
+            The size of the search area for the PIV analysis.
+        overlap : float
+            The overlap ratio between consecutive windows.
+
+        Returns
+        -------
+        coords : dict
+            A dictionary containing the PIV local non-geographical projection coordinates:
+                - 'y': The y-axis coordinates.
+                - 'x': The x-axis coordinates.
+        mesh_coords : dict
+            A dictionary containing the mesh grid projections and coordinates:
+                - 'xp': The projected x-coordinates.
+                - 'yp': The projected y-coordinates.
+                - 'xs': The x-coordinates in the image space.
+                - 'ys': The y-coordinates in the image space.
+                - 'lon': The longitude values (if CRS is provided).
+                - 'lat': The latitude values (if CRS is provided).
+
+        """
+        dim_size = self._obj[0].shape
+
+        # get the cols and rows coordinates of the expected results
+        cols_vector, rows_vector = window.get_rect_coordinates(
+            dim_size=dim_size,
+            window_size=window_size,
+            search_area_size=search_area_size,
+            overlap=overlap,
+            center_on_field=True,
+        )
+        cols, rows = np.meshgrid(cols_vector, rows_vector)
+        # retrieve the x and y-axis belonging to the results
+        x, y = helpers.get_axes(cols_vector, rows_vector, self._obj.x.values, self._obj.y.values)
+        # convert in projected and latlon coordinates
+        xs, ys = helpers.get_xs_ys(
+            cols,
+            rows,
+            self.camera_config.transform,
+        )
+        if hasattr(self.camera_config, "crs"):
+            lons, lats = helpers.get_lons_lats(xs, ys, self.camera_config.crs)
+        else:
+            lons = None
+            lats = None
+        # calculate projected coordinates
+        z = self.camera_config.h_to_z(self.h_a)
+        zs = np.ones(xs.shape) * z
+        xp, yp = self.camera_config.project_grid(xs, ys, zs, swap_y_coords=True)
+        # package the coordinates
+        coords = {"y": y, "x": x}
+        mesh_coords = {"xp": xp, "yp": yp, "xs": xs, "ys": ys, "lon": lons, "lat": lats}
+        return coords, mesh_coords
+
+    def get_piv(self, window_size=None, overlap=None):
         """Perform PIV computation on projected frames.
 
         Only a pipeline graph to computation is set up. Call a result to trigger actual computation. The dataset
@@ -48,8 +114,6 @@ class Frames(ORCBase):
             size of interrogation windows in pixels (y, x)
         overlap : (int, int), optional
             amount of overlap between interrogation windows in pixels (y, x)
-        **kwargs : dict
-            keyword arguments to pass to dask_piv, used to control the manner in which openpiv.pyprocess is called.
 
         Returns
         -------
@@ -59,7 +123,6 @@ class Frames(ORCBase):
         """
         camera_config = copy.deepcopy(self.camera_config)
         dt = self._obj["time"].diff(dim="time")
-
         # Use window_size from camera_config unless provided in the method
         if window_size is not None:
             camera_config.window_size = window_size
@@ -69,8 +132,6 @@ class Frames(ORCBase):
             else camera_config.window_size
         )
         search_area_size = window_size
-        # res_x = camera_config.resolution
-        # res_y = camera_config.resolution
         # set an overlap if not provided in kwargs
         if overlap is None:
             overlap = 2 * (int(round(camera_config.window_size) / 2),)
@@ -81,40 +142,16 @@ class Frames(ORCBase):
         frames1 = obj.shift(time=1)[1:].chunk({"time": 1})
         frames2 = obj[1:].chunk({"time": 1})
 
-        # get the cols and rows coordinates of the expected results
-        cols_vector, rows_vector = window.get_rect_coordinates(
-            dim_size=frames1[0].shape, window_size=window_size, search_area_size=search_area_size, overlap=overlap
-        )
-        cols, rows = np.meshgrid(cols_vector, rows_vector)
-        # retrieve the x and y-axis belonging to the results
-        x, y = helpers.get_axes(cols_vector, rows_vector, frames1.x.values, frames1.y.values)
-        # convert in projected and latlon coordinates
-        xs, ys = helpers.get_xs_ys(
-            cols,
-            rows,
-            camera_config.transform,
-        )
-        if hasattr(camera_config, "crs"):
-            lons, lats = helpers.get_lons_lats(xs, ys, camera_config.crs)
-        else:
-            lons = None
-            lats = None
-
-        # new approach to getting M (from bbox coordinates)
-        src = camera_config.get_bbox(camera=True, h_a=self.h_a, expand_exterior=False).exterior.coords[0:4]
-        dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
-        # get geographic coordinates bbox corners
-        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
-        M = cv.get_M_2D(src, dst, reverse=True)
-        # TODO: remove when above 4 lines work
-        # M = camera_config.get_M(self.h_a, to_bbox_grid=True, reverse=True)
-        # TODO: compute xp and yp through the unproject_points function
-        # compute row and column position of vectors in original reprojected background image col/row coordinates
-        xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
-        # ensure y coordinates start at the top in the right orientation (different from order of a CRS)
-        shape_y, shape_x = self.camera_shape
-        yp = shape_y - yp
-        coords = {"y": y, "x": x}
+        # get all required coordinates for the PIV result
+        coords, mesh_coords = self.get_piv_coords(window_size, search_area_size, overlap)
+        # provide kwargs for OpenPIV analysis
+        kwargs = {
+            "search_area_size": search_area_size[0],
+            "window_size": window_size[0],
+            "overlap": overlap[0],
+            "res_x": camera_config.resolution,
+            "res_y": camera_config.resolution,
+        }
         # retrieve all data arrays
         v_x, v_y, s2n, corr = xr.apply_ufunc(
             piv_process.piv,
@@ -125,7 +162,7 @@ class Frames(ORCBase):
             input_core_dims=[["y", "x"], ["y", "x"], []],
             output_core_dims=[["new_y", "new_x"]] * 4,
             dask_gufunc_kwargs={
-                "output_sizes": {"new_y": len(y), "new_x": len(x)},
+                "output_sizes": {"new_y": len(coords["y"]), "new_x": len(coords["x"])},
             },
             output_dtypes=[np.float32] * 4,
             vectorize=True,
@@ -137,13 +174,11 @@ class Frames(ORCBase):
             {"new_x": "x", "new_y": "y"}
         )
         # add y and x-axis values
-        ds["y"] = y
-        ds["x"] = x
+        ds["y"] = coords["y"]
+        ds["x"] = coords["x"]
 
         # add all 2D-coordinates
-        ds = ds.velocimetry.add_xy_coords(
-            [xp, yp, xs, ys, lons, lats], coords, {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
-        )
+        ds = ds.velocimetry.add_xy_coords(mesh_coords, coords, {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS})
         # in case window_size was changed, overrule the camera_config attribute
         ds.attrs.update(camera_config=camera_config.to_json())
         # set encoding
@@ -216,7 +251,9 @@ class Frames(ORCBase):
         da_proj = da_proj.fillna(0.0)
 
         # assign coordinates
-        da_proj = da_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        da_proj = da_proj.frames.add_xy_coords(
+            {"xs": xs, "ys": ys, "lon": lons, "lat": lats}, coords, const.GEOGRAPHICAL_ATTRS
+        )
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
             # ensure that "rgb" is the last dimension
             da_proj = da_proj.transpose("time", "y", "x", "rgb")
