@@ -11,7 +11,8 @@ from ffpiv import window
 from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
-from pyorc import const, cv, helpers, piv_process, project
+from pyorc import const, cv, helpers, project
+from pyorc.velocimetry import ffpiv, openpiv
 
 from .orcbase import ORCBase
 from .plot import _frames_plot
@@ -34,7 +35,9 @@ class Frames(ORCBase):
         """
         super(Frames, self).__init__(xarray_obj)
 
-    def get_piv_coords(self, window_size, search_area_size, overlap):
+    def get_piv_coords(
+        self, window_size: tuple[int, int], search_area_size: tuple[int, int], overlap: tuple[int, int]
+    ) -> tuple[dict, dict]:
         """Get Particle Image Velocimetry (PIV) coordinates and mesh grid projections.
 
         This function calculates the PIV coordinates and the corresponding mesh grid
@@ -44,11 +47,11 @@ class Frames(ORCBase):
 
         Parameters
         ----------
-        window_size : int
+        window_size : (int, int)
             The size of the window for the PIV analysis.
-        search_area_size : int
+        search_area_size : (int, int)
             The size of the search area for the PIV analysis.
-        overlap : float
+        overlap : (int, int)
             The overlap ratio between consecutive windows.
 
         Returns
@@ -75,7 +78,6 @@ class Frames(ORCBase):
             window_size=window_size,
             search_area_size=search_area_size,
             overlap=overlap,
-            center_on_field=True,
         )
         cols, rows = np.meshgrid(cols_vector, rows_vector)
         # retrieve the x and y-axis belonging to the results
@@ -100,7 +102,12 @@ class Frames(ORCBase):
         mesh_coords = {"xp": xp, "yp": yp, "xs": xs, "ys": ys, "lon": lons, "lat": lats}
         return coords, mesh_coords
 
-    def get_piv(self, window_size=None, overlap=None):
+    def get_piv(
+        self,
+        window_size: Optional[tuple[int, int]] = None,
+        overlap: Optional[tuple[int, int]] = None,
+        engine: str = "numba",
+    ) -> xr.Dataset:
         """Perform PIV computation on projected frames.
 
         Only a pipeline graph to computation is set up. Call a result to trigger actual computation. The dataset
@@ -114,11 +121,20 @@ class Frames(ORCBase):
             size of interrogation windows in pixels (y, x)
         overlap : (int, int), optional
             amount of overlap between interrogation windows in pixels (y, x)
+        engine : str, optional
+            select the compute engine, can be "openpiv" (default), "numba", or "numpy". "numba" will give the fastest
+            performance but is still experimental. It can boost performance by almost an order of magnitude compared
+            to openpiv or numpy. both "numba" and "numpy" use the FF-PIV library as back-end.
 
         Returns
         -------
         xr.Dataset
             PIV results in a lazy dask.array form in DataArrays "v_x", "v_y", "corr" and "s2n".
+
+        See Also
+        --------
+        OpenPIV project: https://github.com/OpenPIV/openpiv-python
+        FF-PIV project: https://github.com/localdevices/ffpiv
 
         """
         camera_config = copy.deepcopy(self.camera_config)
@@ -131,54 +147,40 @@ class Frames(ORCBase):
             if isinstance(camera_config.window_size, int)
             else camera_config.window_size
         )
+        # ensure window size is a round number
+        window_size = window.round_to_even(window_size)
         search_area_size = window_size
         # set an overlap if not provided in kwargs
         if overlap is None:
             overlap = 2 * (int(round(camera_config.window_size) / 2),)
-        # first get rid of coordinates that need to be recalculated
-        coords_drop = list(set(self._obj.coords) - set(self._obj.dims))
-        obj = self._obj.drop_vars(coords_drop)
-        # get frames and shifted frames in time
-        frames1 = obj.shift(time=1)[1:].chunk({"time": 1})
-        frames2 = obj[1:].chunk({"time": 1})
 
         # get all required coordinates for the PIV result
         coords, mesh_coords = self.get_piv_coords(window_size, search_area_size, overlap)
         # provide kwargs for OpenPIV analysis
-        kwargs = {
-            "search_area_size": search_area_size[0],
-            "window_size": window_size[0],
-            "overlap": overlap[0],
-            "res_x": camera_config.resolution,
-            "res_y": camera_config.resolution,
-        }
-        # retrieve all data arrays
-        v_x, v_y, s2n, corr = xr.apply_ufunc(
-            piv_process.piv,
-            frames1,
-            frames2,
-            dt,
-            kwargs=kwargs,
-            input_core_dims=[["y", "x"], ["y", "x"], []],
-            output_core_dims=[["new_y", "new_x"]] * 4,
-            dask_gufunc_kwargs={
-                "output_sizes": {"new_y": len(coords["y"]), "new_x": len(coords["x"])},
-            },
-            output_dtypes=[np.float32] * 4,
-            vectorize=True,
-            keep_attrs=True,
-            dask="parallelized",
-        )
-        # merge all DataArrays in one Dataset
-        ds = xr.merge([v_x.rename("v_x"), v_y.rename("v_y"), s2n.rename("s2n"), corr.rename("corr")]).rename(
-            {"new_x": "x", "new_y": "y"}
-        )
-        # add y and x-axis values
-        ds["y"] = coords["y"]
-        ds["x"] = coords["x"]
-
+        if engine == "openpiv":
+            kwargs = {
+                "search_area_size": search_area_size[0],
+                "window_size": window_size[0],
+                "overlap": overlap[0],
+                "res_x": camera_config.resolution,
+                "res_y": camera_config.resolution,
+            }
+            ds = openpiv.get_openpiv(self._obj, coords["y"], coords["x"], dt, **kwargs)
+        elif engine == "numba":
+            kwargs = {
+                "search_area_size": search_area_size,
+                "window_size": window_size,
+                "overlap": overlap,
+                "res_x": camera_config.resolution,
+                "res_y": camera_config.resolution,
+            }
+            ds = ffpiv.get_ffpiv(self._obj, coords["y"], coords["x"], dt, **kwargs)
+        else:
+            raise ValueError(f"Selected PIV engine {engine} does not exist.")
         # add all 2D-coordinates
         ds = ds.velocimetry.add_xy_coords(mesh_coords, coords, {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS})
+        # ensure all metadata is transferred
+        ds.attrs = self._obj.attrs
         # in case window_size was changed, overrule the camera_config attribute
         ds.attrs.update(camera_config=camera_config.to_json())
         # set encoding
