@@ -103,9 +103,9 @@ def get_ffpiv(
     for n in pbar:
         da = frames_chunks[n]
         # get time slice
+        da = load_frame_chunk(da)
         time = da.time[1:]
         dt_chunk = dt.sel(time=time)
-        da = load_frame_chunk(da)
         # check length again, only if ge 2, assess velocities
         if len(da) >= 2:
             # perform cross correlation analysis yielding correlations for each interrogation window
