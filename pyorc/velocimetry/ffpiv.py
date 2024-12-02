@@ -1,6 +1,5 @@
 """PIV processing wrappers for FF-PIV."""
 
-import copy
 import gc
 import warnings
 
@@ -8,6 +7,17 @@ import numpy as np
 import xarray as xr
 from ffpiv import cross_corr, u_v_displacement, window
 from tqdm import tqdm
+
+
+def load_frame_chunk(da):
+    """Load frame chunk into memory. If not successful try to reduce size of frame chunk."""
+    da_loaded = da.copy(deep=True)
+    try:
+        da_loaded = da.load()
+    except TypeError:
+        da_loaded = da[:-1]
+        da_loaded = load_frame_chunk(da_loaded)
+    return da_loaded
 
 
 def get_ffpiv(
@@ -91,55 +101,57 @@ def get_ffpiv(
     # Loop over list
     ds_piv_chunks = []  # datasets with piv results per chunk
     for n in pbar:
-        da = copy.deepcopy(frames_chunks[n])
+        da = frames_chunks[n]
         # get time slice
         time = da.time[1:]
         dt_chunk = dt.sel(time=time)
-        da.load()
-        # perform cross correlation analysis yielding correlations for each interrogation window
-        x_, y_, corr = cross_corr(
-            da.values,
-            window_size=window_size,
-            overlap=overlap,
-            search_area_size=search_area_size,
-            normalize=False,
-            engine=engine,
-        )
-        frames_chunks[n] = None
-        del da
-        gc.collect()
+        da = load_frame_chunk(da)
+        # check length again, only if ge 2, assess velocities
+        if len(da) >= 2:
+            # perform cross correlation analysis yielding correlations for each interrogation window
+            x_, y_, corr = cross_corr(
+                da.values,
+                window_size=window_size,
+                overlap=overlap,
+                search_area_size=search_area_size,
+                normalize=False,
+                engine=engine,
+            )
+            frames_chunks[n] = None
+            del da
+            gc.collect()
 
-        # get the maximum correlation per interrogation window
-        corr_max = np.nanmax(corr, axis=(-1, -2))
+            # get the maximum correlation per interrogation window
+            corr_max = np.nanmax(corr, axis=(-1, -2))
 
-        # get signal-to-noise, whilst suppressing nanmean over empty slice warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            s2n = corr_max / np.nanmean(corr, axis=(-1, -2))
+            # get signal-to-noise, whilst suppressing nanmean over empty slice warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                s2n = corr_max / np.nanmean(corr, axis=(-1, -2))
 
-        # reshape corr / s2n to the amount of expected rows and columns
-        s2n = (s2n.reshape(-1, n_rows, n_cols)).astype(np.float32)
-        corr_max = (corr_max.reshape(-1, n_rows, n_cols)).astype(np.float32)
-        u, v = u_v_displacement(corr, n_rows, n_cols, engine=engine)
-        # convert into meter per second and store as float32 to save memory / disk space
-        u = (u * res_x / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
-        v = (v * res_y / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
-        # put s2n, corr_max, u and v in one xarray dataset, with coordinates time, y and x
-        ds = xr.Dataset(
-            {
-                "s2n": (["time", "y", "x"], s2n),
-                "corr": (["time", "y", "x"], corr_max),
-                "v_x": (["time", "y", "x"], u),
-                "v_y": (["time", "y", "x"], v),
-            },
-            coords={
-                "time": time,
-                "y": y,
-                "x": x,
-            },
-        )
-        # u and v to meter per second
-        ds_piv_chunks.append(ds)
+            # reshape corr / s2n to the amount of expected rows and columns
+            s2n = (s2n.reshape(-1, n_rows, n_cols)).astype(np.float32)
+            corr_max = (corr_max.reshape(-1, n_rows, n_cols)).astype(np.float32)
+            u, v = u_v_displacement(corr, n_rows, n_cols, engine=engine)
+            # convert into meter per second and store as float32 to save memory / disk space
+            u = (u * res_x / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
+            v = (v * res_y / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
+            # put s2n, corr_max, u and v in one xarray dataset, with coordinates time, y and x
+            ds = xr.Dataset(
+                {
+                    "s2n": (["time", "y", "x"], s2n),
+                    "corr": (["time", "y", "x"], corr_max),
+                    "v_x": (["time", "y", "x"], u),
+                    "v_y": (["time", "y", "x"], v),
+                },
+                coords={
+                    "time": time,
+                    "y": y,
+                    "x": x,
+                },
+            )
+            # u and v to meter per second
+            ds_piv_chunks.append(ds)
     # concatenate all parts in time
     ds = xr.concat(ds_piv_chunks, dim="time")
     return ds
