@@ -1,5 +1,7 @@
 """PIV processing wrappers for FF-PIV."""
 
+import copy
+import gc
 import warnings
 
 import numpy as np
@@ -8,7 +10,9 @@ from ffpiv import cross_corr, u_v_displacement, window
 from tqdm import tqdm
 
 
-def get_ffpiv(frames, y, x, dt, window_size, overlap, search_area_size, res_y, res_x, chunks=None, engine="numba"):
+def get_ffpiv(
+    frames, y, x, dt, window_size, overlap, search_area_size, res_y, res_x, chunks=None, memory_factor=4, engine="numba"
+):
     """Compute time-resolved Particle Image Velocimetry (PIV) using Fast Fourier Transform (FFT) within FF-PIV.
 
     This function calculates the velocity field from a sequence of image frames using PIV techniques. The process
@@ -41,6 +45,8 @@ def get_ffpiv(frames, y, x, dt, window_size, overlap, search_area_size, res_y, r
     chunks : int, optional
         if provided, the frames will be treated in chunks as provided, if not, optimal chunk size is estimated based
         on available memory.
+    memory_factor : float, optional
+        available memory is divided by this factor to estimate the chunk size. Default is 4.
     engine : str, optional
         ff-piv engine to use, can be "numpy" or "numba". "numba" is generally much faster.
 
@@ -51,6 +57,11 @@ def get_ffpiv(frames, y, x, dt, window_size, overlap, search_area_size, res_y, r
         components (`v_x`, `v_y`).
 
     """
+    CHUNK_SIZE_ERROR = (
+        "Chunk size with selected nr of chunks ({chunks}) is 2 or less. If this is the result of"
+        "automatically selected number of chunks, you likely have too little memory for the problem. If you manually"
+        "selected `chunks={chunks}` then consider increasing chunk size to at least 2, and preferrably more."
+    )
     # compute memory availability and size of problem to pipe to ffpiv functions
     dim_size = frames[0].shape
     req_mem = window.required_memory(
@@ -62,23 +73,25 @@ def get_ffpiv(frames, y, x, dt, window_size, overlap, search_area_size, res_y, r
     )
     if chunks is None:
         # estimate chunk size
-        avail_mem = window.available_memory()
-        print(f"Mem available: {avail_mem/1e9} GB")
-        print(f"Mem required: {req_mem/1e9} GB")
-
+        avail_mem = window.available_memory() / memory_factor
         chunks = int((req_mem // avail_mem) + 1)
 
     chunksize = int(len(frames) // chunks + 1)
+    if chunksize <= 2:
+        raise OverflowError(CHUNK_SIZE_ERROR.format(chunks=chunks))
     frames_chunks = [frames[np.maximum(chunk * chunksize - 1, 0) : (chunk + 1) * chunksize] for chunk in range(chunks)]
+    # check if there are chunks that are too small in size, needs to be at least 2 frames per chunk
+    frames_chunks = [frames_chunk for frames_chunk in frames_chunks if len(frames_chunk) >= 2]
     n_rows, n_cols = len(y), len(x)
 
     # make progress bar
-    pbar = tqdm(frames_chunks, position=0, leave=True)
+    pbar = tqdm(range(len(frames_chunks)), position=0, leave=True)
     pbar.set_description("Computing PIV per chunk")
 
     # Loop over list
     ds_piv_chunks = []  # datasets with piv results per chunk
-    for da in pbar:
+    for n in pbar:
+        da = copy.deepcopy(frames_chunks[n])
         # get time slice
         time = da.time[1:]
         dt_chunk = dt.sel(time=time)
@@ -92,6 +105,9 @@ def get_ffpiv(frames, y, x, dt, window_size, overlap, search_area_size, res_y, r
             normalize=False,
             engine=engine,
         )
+        frames_chunks[n] = None
+        del da
+        gc.collect()
 
         # get the maximum correlation per interrogation window
         corr_max = np.nanmax(corr, axis=(-1, -2))
@@ -102,12 +118,12 @@ def get_ffpiv(frames, y, x, dt, window_size, overlap, search_area_size, res_y, r
             s2n = corr_max / np.nanmean(corr, axis=(-1, -2))
 
         # reshape corr / s2n to the amount of expected rows and columns
-        s2n = s2n.reshape(-1, n_rows, n_cols)
-        corr_max = corr_max.reshape(-1, n_rows, n_cols)
+        s2n = (s2n.reshape(-1, n_rows, n_cols)).astype(np.float32)
+        corr_max = (corr_max.reshape(-1, n_rows, n_cols)).astype(np.float32)
         u, v = u_v_displacement(corr, n_rows, n_cols, engine=engine)
-        # convert into meter per second
-        u *= res_x / np.expand_dims(dt_chunk, (1, 2))
-        v *= res_y / np.expand_dims(dt_chunk, (1, 2))
+        # convert into meter per second and store as float32 to save memory / disk space
+        u = (u * res_x / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
+        v = (v * res_y / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
         # put s2n, corr_max, u and v in one xarray dataset, with coordinates time, y and x
         ds = xr.Dataset(
             {

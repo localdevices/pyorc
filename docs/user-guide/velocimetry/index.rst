@@ -10,7 +10,7 @@ has implemented one of these methods called "Particle Image Velocimetry".
 Particle Image Velocimetry
 --------------------------
 
-Particle Image Velocimetry uses cross-correlation methods to estimate the most likely position of an observed pattern
+Particle Image Velocimetry (PIV) uses cross-correlation methods to estimate the most likely position of an observed pattern
 from frame to frame. Therefore there is no interdependency over more than 2 frames. To observe patterns, the total area
 of interest is subdivided into small blocks of pixels with overlap, also called "interrogation windows". Currently the
 overlap is fixed in *pyorc* on 50% of each block. Say that you have reprojected your data to a 0.02 m resolution
@@ -33,6 +33,11 @@ and hence a velocity will be resolved for each 0.2 x 0.2 meters.
         - retrieved frames from it using ``video.get_frames`` (e.g. into a ``DataArray`` called ``frames``);
         - orthorectified the frames using ``frames.project`` (e.g. into ``frames_proj``).
 
+We implemented several engines to compute PIV. The default is ``openpiv`` which uses the OpenPIV library to
+perform computations. The alternatives are ``numba`` or ``numpy`` which use the numba and numpy libraries for
+the computations, as provided in the underlying FF-PIV library. ``numba`` is by far the fastest option, and likely
+will become the default in the future.
+
 Naturally, before orthorectification you may decide to apply one or several preprocessing methods as described in
 :ref:`frames_ug` to improve the visibility of tracers. We highly recommend that in many cases, as shown in the snippets
 in :ref:`frames_ug`.
@@ -50,7 +55,15 @@ in :ref:`frames_ug`.
 
             velocimetry:
                 get_piv:
-                    window_size: 10
+                    window_size: 64
+                    engine: numba
+
+        Here the ``engine: numba`` ensures that the much faster numba implementation is used. ``window_size: 64``
+        overrides any window size provided in the camera configuration and sets it to 64. When using the engine
+        parameter with ``numba`` or ``numpy``, you can also provide memory safety margins by manually adjusting the
+        amount of chunks in which the problem is sub-divided. If you notice a list of 20 chunks is made and the
+        calculations crash, try manually setting it to twice the amount with ``chunks: 40``. The default should be
+        reasonably safe, so we hope you never have to touch this parameter at all :-).
 
         .. note::
 
@@ -73,7 +86,16 @@ in :ref:`frames_ug`.
         .. code:: python
 
             # ignore the window size in the camera config and set this to 10 pixels
-            piv = frame_proj.get_piv(window_size=10)
+            piv = frame_proj.get_piv(window_size=64)
+
+        Use thew ``engine`` parameter to select a much faster computational engine. With ``engine="numba"`` a very fast
+        numba-based computation will be used. The computation will be chunked into several batches based on available
+        memory. If you find out your computations crash it is likely due to lack of memory. In this case you can
+        override automatically computed chunk amounts by setting ``chunks`` to a larger amount than automatically
+        selected, or provide ``memory_factor`` and set this to a higher amount than the default (4). ``memory_factor``
+        decides on the fraction of the memory reserved for one entire chunk of computation. By setting it to 4 only
+        1/4th of the available memory is used. In practice, for large problems, more temporary memory storage is needed
+        within the lazy subprocessing.
 
 Interrogating and storing PIV results
 -------------------------------------
@@ -374,5 +396,3 @@ work.
 * ``window_nan``: this mask can only be applied on time-reduced results and analyses (instead of time series) values
   of neighbours in a certain window defined by parameter ``wdw``. If there are too many missings in the window, then the value considered
   is also removed. This is meant to remove isolated values. Also described in :ref:`spatial masks <spatial_mask>`
-
-

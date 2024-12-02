@@ -8,7 +8,10 @@ def test_get_river_flow(piv_transect):
     piv_transect.transect.get_river_flow()
     # we allow for 0.001 m3/s deviation for differences in versions of libs
     assert np.allclose(
-        piv_transect.river_flow.values, [0.0821733, 0.08626413, 0.09137767, 0.09649121, 0.10058204], atol=0.001
+        # piv_transect.river_flow.values, [0.0821733, 0.08626413, 0.09137767, 0.09649121, 0.10058204], atol=0.001
+        piv_transect.river_flow.values,
+        [0.08729524, 0.08801068, 0.08890499, 0.08979929, 0.09051473],
+        atol=0.001,
     )
 
 

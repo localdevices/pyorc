@@ -106,7 +106,8 @@ class Frames(ORCBase):
         self,
         window_size: Optional[tuple[int, int]] = None,
         overlap: Optional[tuple[int, int]] = None,
-        engine: str = "numba",
+        engine: str = "openpiv",
+        **kwargs,
     ) -> xr.Dataset:
         """Perform PIV computation on projected frames.
 
@@ -125,6 +126,9 @@ class Frames(ORCBase):
             select the compute engine, can be "openpiv" (default), "numba", or "numpy". "numba" will give the fastest
             performance but is still experimental. It can boost performance by almost an order of magnitude compared
             to openpiv or numpy. both "numba" and "numpy" use the FF-PIV library as back-end.
+        **kwargs : dict
+            keyword arguments to pass to the piv engine. For "numba" and "numpy" the argument `chunks` can be provided
+            with an integer defining in how many batches of work the total velocimetry problem should be subdivided.
 
         Returns
         -------
@@ -159,6 +163,7 @@ class Frames(ORCBase):
         # provide kwargs for OpenPIV analysis
         if engine == "openpiv":
             kwargs = {
+                **kwargs,
                 "search_area_size": search_area_size[0],
                 "window_size": window_size[0],
                 "overlap": overlap[0],
@@ -166,15 +171,16 @@ class Frames(ORCBase):
                 "res_y": camera_config.resolution,
             }
             ds = openpiv.get_openpiv(self._obj, coords["y"], coords["x"], dt, **kwargs)
-        elif engine == "numba":
+        elif engine in ["numba", "numpy"]:
             kwargs = {
+                **kwargs,
                 "search_area_size": search_area_size,
                 "window_size": window_size,
                 "overlap": overlap,
                 "res_x": camera_config.resolution,
                 "res_y": camera_config.resolution,
             }
-            ds = ffpiv.get_ffpiv(self._obj, coords["y"], coords["x"], dt, **kwargs)
+            ds = ffpiv.get_ffpiv(self._obj, coords["y"], coords["x"], dt, engine=engine, **kwargs)
         else:
             raise ValueError(f"Selected PIV engine {engine} does not exist.")
         # add all 2D-coordinates
