@@ -493,7 +493,7 @@ class VelocityFlowProcessor(object):
                 opts = plot_params["frames"] if plot_params["frames"] is not None else {}
                 f = self.video_obj.get_frames(method="rgb")
                 if mode != "camera":
-                    f = f.frames.project(method=self.proj_method)[n]
+                    f = f[n : n + 1].frames.project(method=self.proj_method)[0]
                 else:
                     f = f[n]
                 p = f.frames.plot(ax=ax, mode=mode, **opts)

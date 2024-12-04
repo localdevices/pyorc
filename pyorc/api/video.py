@@ -46,7 +46,7 @@ Camera configuration: {:s}
         end_frame: Optional[int] = None,
         freq: Optional[int] = 1,
         stabilize: Optional[List[List]] = None,
-        lazy: bool = False,
+        lazy: bool = True,
         rotation: Optional[int] = None,
         fps: Optional[float] = None,
     ):
@@ -78,9 +78,9 @@ Camera configuration: {:s}
             The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no
             stabilization will be performed
         lazy : bool, optional
-            If set, frames are read lazily. This slows down the processing, but makes interaction with large videos
-            easier and consuming less memory. For operational processing with short videos, it is recommended to set
-            this explicitly to False.
+            By default set to True, making frames read in organised chunks. If set to False, video is read in memory
+            entirely. Likely, we will deprecate this option in the future as we plan to optimize chunked reading.
+            Currently if memory size allows, setting lazy to False results in faster processing.
         rotation : int, optional
             can be 0, 90, 180, 270. If provided, images will be forced to rotate along the provided angle.
         fps : float, optional
@@ -376,6 +376,45 @@ Camera configuration: {:s}
         cap.release()
         return img
 
+    def get_frames_chunk(
+        self, n_start: int, n_end: int, method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale"
+    ) -> np.ndarray:
+        """Retrieve a chunk of frames in one go.
+
+        Parameters
+        ----------
+        n_start : int
+            frame number to initiate retrieval
+        n_end : int
+            last frame number of retrieval
+        method : str
+            can be "rgb", "grayscale", or "hsv", default: "grayscale"
+
+        Returns
+        -------
+        frame : np.ndarray
+            2d array (grayscale) or 3d (rgb/hsv) with frame
+
+        """
+        assert n_start >= 0, "frame number cannot be negative"
+        assert (
+            n_start - self.start_frame <= self.end_frame - self.start_frame
+        ), "frame number is larger than the difference between the start and end frame "
+        # assert (method in ["grayscale", "rgb",
+        #                    "hsv"]), f'method must be "grayscale", "rgb" or "hsv", method is "{method}"'
+        if not os.path.isfile(self.fn):
+            raise IOError(f"Video file {self.fn} does not exist.")
+        cap = cv2.VideoCapture(self.fn)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, n_start + self.start_frame)
+        imgs = []
+        for n in range(n_start, n_end):
+            ret, img = cv.get_frame(cap, rotation=self.rotation, ms=self.ms[n] if self.ms else None, method=method)
+            self.frame_count = n + 1
+            imgs.append(img)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        cap.release()
+        return np.array(imgs)
+
     def get_frames(self, method: Optional[Literal["grayscale", "rgb", "hsv", "bgr"]] = "grayscale") -> xr.DataArray:
         """Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`.
 
@@ -398,15 +437,26 @@ Camera configuration: {:s}
         ), "No camera configuration is set, add it to the video using the .camera_config method"
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
-
+        frames_chunk = 20
         if self.frames is None:
             # a specific method for collecting frames is requested or lazy access is requested.
-            get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
+            # get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
+            get_frames_chunk = dask.delayed(self.get_frames_chunk, pure=True)  # Lazy version of get_frame
             # get all listed frames
-            frames = [get_frame(n=n, method=method) for n, f_number in enumerate(self.frame_number)]
-            sample = frames[0].compute()
-            data_array = [da.from_delayed(frame, dtype=sample.dtype, shape=sample.shape) for frame in frames]
-            da_stack = da.stack(data_array, axis=0)
+            # frames = [get_frame(n=n, method=method) for n, f_number in enumerate(self.frame_number)]
+            # derive video shape
+            sample = get_frames_chunk(n_start=0, n_end=1, method=method).compute()[0]
+            data_array = []
+            for n_start in range(0, len(self.frame_number), frames_chunk):
+                n_end = np.minimum(n_start + frames_chunk, len(self.frame_number))
+                frame_chunk = get_frames_chunk(n_start=n_start, n_end=n_end, method=method)
+                shape = (n_end - n_start, *sample.shape)
+                data_array.append(da.from_delayed(frame_chunk, dtype=sample.dtype, shape=shape))
+
+            # sample = frames[0].compute()
+            # data_array = [da.from_delayed(frame, dtype=sample.dtype, shape=sample.shape) for frame in frames]
+            # da_stack = da.stack(data_array, axis=0)
+            da_stack = da.concatenate(data_array, axis=0)
         else:
             da_stack = self.frames
             # apply stabilisation
