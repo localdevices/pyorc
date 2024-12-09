@@ -971,7 +971,6 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
             time.append(t1)
         frame_number.append(n)
         n += 1
-        print(f"Check {n} equal to {cap.get(cv2.CAP_PROP_POS_FRAMES)}")
         ret, img = get_frame(cap, **kwargs)  # read frame 1 + ...
         if ret == False:
             break
@@ -983,7 +982,6 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
     # do a final check if the last frame(s) are readable by direct seek and read. Sometimes this results in not being
     # able to r
     last_valid_idx = _check_valid_frames(cap, frame_number)
-    print(f"Last IDX: {last_valid_idx}")
     if last_valid_idx is not None:
         time = time[:last_valid_idx]
         frame_number = frame_number[:last_valid_idx]

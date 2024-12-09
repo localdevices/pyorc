@@ -17,8 +17,6 @@ import pytest
     ],
 )
 def test_project(frames, resolution, method, dims, shape, kwargs, request):
-    #     import matplotlib
-    #     matplotlib.use('Qt5Agg')
     frames = request.getfixturevalue(frames)
     frames_proj = frames.frames.project(resolution=resolution, method=method, **kwargs)
     # check amount of time steps is equal
@@ -29,10 +27,6 @@ def test_project(frames, resolution, method, dims, shape, kwargs, request):
     assert (
         frames_proj.isel(time=0).shape == shape
     ), f"Projected frames shape {frames_proj.isel(time=0).shape} do not have expected shape {shape}"
-    # import matplotlib.pyplot as plt
-    # plt.imshow(frames_proj[0])
-    # plt.colorbar()
-    # plt.show()
 
 
 @pytest.mark.parametrize(
@@ -114,10 +108,7 @@ def test_get_piv(frames_proj, window_size, engine, result):
 @pytest.mark.parametrize(
     "window_size",
     [
-        # (5, [np.nan, np.nan, np.nan, 0.06877007]),
-        10,
-        # (10, "ffpiv", [0.11740075, 0.09619355, 0.16204849, 0.14154269]),
-        # (15, [0.21774408, 0.21398547, 0.25068682, 0.26456946])
+        26,
     ],
 )
 def test_compare_piv(frames_proj, window_size):
