@@ -136,7 +136,7 @@ Camera configuration: {:s}
             # set a gridded mask based on the roi points
             self.set_mask_from_exterior(self.stabilize)
         # set end and start frame
-        self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - 1
         if start_frame is not None:
             if start_frame > self.frame_count > 0:
                 raise ValueError("Start frame is larger than total amount of frames")

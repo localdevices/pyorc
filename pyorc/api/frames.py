@@ -162,6 +162,13 @@ class Frames(ORCBase):
         coords, mesh_coords = self.get_piv_coords(window_size, search_area_size, overlap)
         # provide kwargs for OpenPIV analysis
         if engine == "openpiv":
+            import warnings
+
+            warnings.warn(
+                '"openpiv" is currently the default engine, but it will be replaced by "numba" in a future release.',
+                DeprecationWarning,
+                stacklevel=2,
+            )
             kwargs = {
                 **kwargs,
                 "search_area_size": search_area_size[0],
