@@ -52,7 +52,7 @@ def _check_valid_frames(cap, frame_number):
         if not (ret):
             last_valid_idx = n
         n -= 1
-        if n == -len(frame_number):
+        if n == -len(frame_number) - 1:
             last_valid_idx = 0
             break
 

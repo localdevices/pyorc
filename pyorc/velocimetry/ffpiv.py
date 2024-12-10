@@ -21,7 +21,18 @@ def load_frame_chunk(da):
 
 
 def get_ffpiv(
-    frames, y, x, dt, window_size, overlap, search_area_size, res_y, res_x, chunks=None, memory_factor=4, engine="numba"
+    frames,
+    y,
+    x,
+    dt,
+    window_size,
+    overlap,
+    search_area_size,
+    res_y,
+    res_x,
+    chunksize=None,
+    memory_factor=2,
+    engine="numba",
 ):
     """Compute time-resolved Particle Image Velocimetry (PIV) using Fast Fourier Transform (FFT) within FF-PIV.
 
@@ -52,9 +63,9 @@ def get_ffpiv(
         Spatial resolution in the y-direction.
     res_x : float
         Spatial resolution in the x-direction.
-    chunks : int, optional
-        if provided, the frames will be treated in chunks as provided, if not, optimal chunk size is estimated based
-        on available memory.
+    chunksize : int, optional
+        if provided, the frames will be treated per chunk with `chunksize` as provided, if not, optimal chunk size is
+        estimated based on available memory.
     memory_factor : float, optional
         available memory is divided by this factor to estimate the chunk size. Default is 4.
     engine : str, optional
@@ -68,9 +79,16 @@ def get_ffpiv(
 
     """
     CHUNK_SIZE_ERROR = (
-        "Chunk size with selected nr of chunks ({chunks}) is 2 or less. If this is the result of"
-        "automatically selected number of chunks, you likely have too little memory for the problem. If you manually"
-        "selected `chunks={chunks}` then consider increasing chunk size to at least 2, and preferrably more."
+        "Chunk size with selected nr of chunks ({chunks}) is 2 or less. If you manually "
+        "selected `chunks={chunks}` then consider increasing chunk size to at least 2, and preferrably more. If memory "
+        "is limited, consider closing memory intensive applications. If pyorc crashes, then this is due to "
+        " insufficient memory."
+    )
+    CHUNK_SIZE_WARNING = (
+        "Memory availability is poor ({avail_mem} GB). Chunk size is automatically set to {chunksize} to avoid "
+        "memory issues. If pyorc crashes, then this is due to insufficient memory. Consider to manually set a lower "
+        "chunk size e.g using `get_piv(engine={engine}, chunk=2)` or `get_piv(engine={engine}, chunk=3)` or close "
+        "memory intensive applications."
     )
     # compute memory availability and size of problem to pipe to ffpiv functions
     dim_size = frames[0].shape
@@ -81,13 +99,18 @@ def get_ffpiv(
         overlap=overlap,
         search_area_size=search_area_size,
     )
-    if chunks is None:
+    if chunksize is None:
         # estimate chunk size
         avail_mem = window.available_memory() / memory_factor
         chunks = int((req_mem // avail_mem) + 1)
-
-    chunksize = int(len(frames) // chunks + 1)
-    if chunksize <= 2:
+        chunksize = int(np.ceil((len(frames)) / chunks))
+        if chunksize <= 5:
+            warnings.warn(
+                CHUNK_SIZE_WARNING.format(avail_mem=avail_mem / 1e9, chunksize=chunksize, engine=engine), stacklevel=2
+            )
+            chunksize = 5  # hard override, try to manage with 5
+            chunks = int(np.ceil((len(frames)) / chunksize))
+    if chunksize < 2:
         raise OverflowError(CHUNK_SIZE_ERROR.format(chunks=chunks))
     frames_chunks = [frames[np.maximum(chunk * chunksize - 1, 0) : (chunk + 1) * chunksize] for chunk in range(chunks)]
     # check if there are chunks that are too small in size, needs to be at least 2 frames per chunk
@@ -116,6 +139,7 @@ def get_ffpiv(
                 search_area_size=search_area_size,
                 normalize=False,
                 engine=engine,
+                verbose=False,
             )
             frames_chunks[n] = None
             del da

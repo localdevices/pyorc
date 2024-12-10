@@ -33,6 +33,8 @@ We use the well-known **xarray** data models and computation pipelines (with das
 guarantee an easy interoperability with other tools and methods, and allow for lazy computing.
 
 We are seeking funding for the following frequently requested functionalities:
+* Exports to simple text formats and GIS-compatible layers
+* Exports to augmented reality videos
 * Implementation of additional processing algorithms (STIV and LSPTV)
 * Implementation of several optical methods for reading water levels
 * Improved nighttime / poor weather conditions processing through learning approaches
@@ -156,25 +158,27 @@ The first development of pyorc has been supported by the World Meteorological Or
 ## License
 **pyorc** is licensed under AGPL Version 3 (see [LICENSE](./LICENSE) file).
 
-**pyorc** uses the following libraries and software with said licenses.
+**pyorc** uses the following important libraries and software with said licenses.
 
 | Package    | Version | License                            |
 |------------|---------|------------------------------------|
-| numpy      | 1.23.2  | BSD License                        |
-| opencv2    | 4.6.0   | MIT License                        |
-| openpiv    | 0.23.8  | GPLv3                              |
-| matplotlib | 3.5.3   | Python Software Foundation License |
-| geopandas  | 0.10.2  | BSD License                        |
- | pandas     | 1.4.3   | BSD License                        |
+| ffpiv      | 0.1.2   | AGPLv3                             |
+| numpy      | 1.26.4  | BSD License                        |
+| opencv2    | 4.10.0  | MIT License                        |
+| openpiv    | 0.25.3  | GPLv3                              |
+| matplotlib | 3.9.2   | Python Software Foundation License |
+| geopandas  | 1.0.1   | BSD License                        |
+| pandas     | 2.2.2   | BSD License                        |
 
 Project organisation
 --------------------
 
     .
-    ├── README.md
-    ├── LICENSE
-    ├── TRADEMARK.md
-    ├── setup.py            <- setup script compatible with pip
+    ├── CHANGELOG.md        <- Version-based changelog documentation
+    ├── README.md           <- This file
+    ├── LICENSE             <- License file containing AGPLv3.0 license terms
+    ├── TRADEMARK.md        <- Trademark guidelines
+    ├── pyproject.toml      <- setup pipeline compatible with pip
     ├── environment.yml     <- YML-file for setting up a conda environment with dependencies
     ├── docs                <- Sphinx documentation source code
         ├── ...             <- Sphinx source code files

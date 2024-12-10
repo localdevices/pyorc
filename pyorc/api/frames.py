@@ -550,16 +550,34 @@ class Frames(ORCBase):
     def to_video(self, fn, video_format=None, fps=None):
         """Write frames to a video file without any layout.
 
+        Frames from the input object are written into a video file. The format and frame
+        rate can be customized as per user preference or derived automatically from the
+        input object.
+
         Parameters
         ----------
         fn : str
-            Path to output file
+            Path to the output video file.
         video_format : cv2.VideoWriter_fourcc, optional
-            A VideoWriter preference, default is cv2.VideoWriter_fourcc(*"mp4v")
+            The desired video file format codec. If not provided, defaults to
+            `cv2.VideoWriter_fourcc(*"mp4v")`.
         fps : float, optional
-            Frames per second, if not provided, derived from original video
+            Frames per second for the output video. If not specified, it is estimated
+            from the time differences in the input frames.
 
         """
+        # """Write frames to a video file without any layout.
+        #
+        # Parameters
+        # ----------
+        # fn : str
+        #     Path to output file
+        # video_format : cv2.VideoWriter_fourcc, optional
+        #     A VideoWriter preference, default is cv2.VideoWriter_fourcc(*"mp4v")
+        # fps : float, optional
+        #     Frames per second, if not provided, derived from original video
+        #
+        # """
         if video_format is None:
             # set to a default
             video_format = cv2.VideoWriter_fourcc(*"mp4v")

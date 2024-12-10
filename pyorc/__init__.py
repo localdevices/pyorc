@@ -1,8 +1,9 @@
 """pyorc: free and open-source image-based surface velocity and discharge."""
 
-__version__ = "0.6.1"
+__version__ = "0.7.0"
 
-from .api import *
+from . import cli, service
+from .api import CameraConfig, Frames, Transect, Velocimetry, Video, get_camera_config, load_camera_config
 from .project import *
 
 __all__ = [
@@ -14,5 +15,5 @@ __all__ = [
     "Velocimetry",
     "Transect",
     "service",
-    "cli"
+    "cli",
 ]

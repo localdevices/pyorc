@@ -1,3 +1,16 @@
+## [0.7.0] - 2024-12-10
+### Added
+`get_piv` now uses several engines, `engine="numba"` is a lot fastr
+### Changed
+Reading frames is now a lot more efficient as they are read in bulks (20 by default). As a result, very large videos
+can be processed efficiently.
+### Deprecated
+openpiv is still default, but may become deprecated in future versions.
+### Removed
+### Fixed
+### Security
+
+
 ## [0.6.1] - 2024-09-26
 ### Added
 ### Changed

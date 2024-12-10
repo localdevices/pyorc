@@ -240,7 +240,7 @@ def camera_config(
             logger=logger,
         )
     else:
-        stabilize = None
+        stabilize_pol = None
     service.camera_config(
         video_file=videofile,
         cam_config_file=output,
