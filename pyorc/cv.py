@@ -220,9 +220,7 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
 
     """
     # set end_frame to last if not defined
-    if end_frame is None:
-        end_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
+    end_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) if end_frame is None else end_frame
     m = np.eye(3)[0:2]
     # m2 = np.eye(3)[0:2]
     ms = []
@@ -566,7 +564,6 @@ def calibrate_camera(
         idx = np.array(errs) < tolerance
         obj_pts = list(np.array(obj_pts)[idx])
         img_pts = list(np.array(img_pts)[idx])
-        print(len(img_pts))
         # do calibration
         ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
         errs = []
@@ -954,21 +951,14 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
     n = start_frame
     time = []
     frame_number = []
-    if lazy:
-        frames = None
-    else:
-        # already collect the frames
-        frames = []
+    frames = None if lazy else []
     while ret:
         if n > end_frame:
             break
         if not lazy:
             frames.append(img)
         t1 = cap.get(cv2.CAP_PROP_POS_MSEC)
-        if fps is not None:
-            time.append(n * 1000.0 / fps)
-        else:
-            time.append(t1)
+        time.append(n * 1000.0 / fps) if fps is not None else time.append(t1)
         frame_number.append(n)
         n += 1
         ret, img = get_frame(cap, **kwargs)  # read frame 1 + ...

@@ -45,6 +45,15 @@ def test_normalize(frames, samples, request):
     ), f'dtype of result is {frames_norm[0, 0, 0].values.dtype}, expected "uint8"'
 
 
+def test_smooth(frames_grayscale):
+    frames_smooth = frames_grayscale.frames.smooth()
+    assert frames_smooth.shape == frames_grayscale.shape
+    assert (
+        frames_smooth[0, 0, 0].values.dtype == "float32"
+    ), f'dtype of result is {frames_smooth[0, 0, 0].values.dtype}, expected "float32"'
+    assert np.allclose(frames_smooth.values.flatten()[-4:], [158.125, 153.5, 151.375, 151.0])
+
+
 def test_edge_detect(frames_proj):
     frames_edge = frames_proj.frames.edge_detect()
     assert frames_edge.shape == frames_proj.shape

@@ -141,11 +141,6 @@ def piv(
     return v_x * res_x, v_y * res_y, s2n, corr
 
 
-def get_piv_size(**kwargs):
-    """Get column, row coordinates of center of PIV windows."""
-    return openpiv.pyprocess.get_coordinates(**kwargs)
-
-
 def extended_search_area_piv(
     frame_a: np.ndarray,
     frame_b: np.ndarray,
@@ -270,8 +265,7 @@ def extended_search_area_piv(
         overlap = [overlap, overlap]
 
     # check the inputs for validity
-    if search_area_size is None:
-        search_area_size = window_size
+    search_area_size = window_size if search_area_size is None else search_area_size
 
     if overlap[0] >= window_size[0] or overlap[1] >= window_size[1]:
         raise ValueError("Overlap has to be smaller than the window_size")
@@ -321,6 +315,7 @@ def extended_search_area_piv(
         u, v = openpiv.pyprocess.correlation_to_displacement(corr, n_rows, n_cols, subpixel_method=subpixel_method)
 
     # return output depending if user wanted sig2noise information
+    sig2noise = np.zeros_like(u) * np.nan
     if sig2noise_method is not None:
         if use_vectorized == True:
             sig2noise = openpiv.pyprocess.vectorized_sig2noise_ratio(
@@ -328,8 +323,6 @@ def extended_search_area_piv(
             )
         else:
             sig2noise = openpiv.pyprocess.sig2noise_ratio(corr, sig2noise_method=sig2noise_method, width=width)
-    else:
-        sig2noise = np.zeros_like(u) * np.nan
 
     sig2noise = sig2noise.reshape(n_rows, n_cols)
     # extended code for exporting the maximum found value for corr
