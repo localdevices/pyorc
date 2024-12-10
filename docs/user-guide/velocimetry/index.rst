@@ -10,7 +10,7 @@ has implemented one of these methods called "Particle Image Velocimetry".
 Particle Image Velocimetry
 --------------------------
 
-Particle Image Velocimetry uses cross-correlation methods to estimate the most likely position of an observed pattern
+Particle Image Velocimetry (PIV) uses cross-correlation methods to estimate the most likely position of an observed pattern
 from frame to frame. Therefore there is no interdependency over more than 2 frames. To observe patterns, the total area
 of interest is subdivided into small blocks of pixels with overlap, also called "interrogation windows". Currently the
 overlap is fixed in *pyorc* on 50% of each block. Say that you have reprojected your data to a 0.02 m resolution
@@ -33,6 +33,11 @@ and hence a velocity will be resolved for each 0.2 x 0.2 meters.
         - retrieved frames from it using ``video.get_frames`` (e.g. into a ``DataArray`` called ``frames``);
         - orthorectified the frames using ``frames.project`` (e.g. into ``frames_proj``).
 
+We implemented several engines to compute PIV. The default is ``openpiv`` which uses the OpenPIV library to
+perform computations. The alternatives are ``numba`` or ``numpy`` which use the numba and numpy libraries for
+the computations, as provided in the underlying FF-PIV library. ``numba`` is by far the fastest option, and likely
+will become the default in the future.
+
 Naturally, before orthorectification you may decide to apply one or several preprocessing methods as described in
 :ref:`frames_ug` to improve the visibility of tracers. We highly recommend that in many cases, as shown in the snippets
 in :ref:`frames_ug`.
@@ -50,7 +55,15 @@ in :ref:`frames_ug`.
 
             velocimetry:
                 get_piv:
-                    window_size: 10
+                    window_size: 64
+                    engine: numba
+
+        Here the ``engine: numba`` ensures that the much faster numba implementation is used. ``window_size: 64``
+        overrides any window size provided in the camera configuration and sets it to 64. When using the engine
+        parameter with ``numba`` or ``numpy``, you can also provide memory safety margins by manually adjusting the
+        chunk size with the ``chunksize`` parameter. If you notice a memory warning is given, and ``chunksize`` is
+        set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we hope you never
+        have to touch this parameter at all :-) unless you process very very large videos with very large objectives.
 
         .. note::
 
@@ -73,7 +86,16 @@ in :ref:`frames_ug`.
         .. code:: python
 
             # ignore the window size in the camera config and set this to 10 pixels
-            piv = frame_proj.get_piv(window_size=10)
+            piv = frame_proj.get_piv(window_size=64)
+
+        Use thew ``engine`` parameter to select a much faster computational engine. With ``engine="numba"`` a very fast
+        numba-based computation will be used. The computation will be chunked into several batches based on available
+        memory. If you find out your computations crash it is likely due to lack of memory. In this case you can
+        override automatically computed chunk amounts by setting ``chunksize`` to a smaller or user-defined amount.
+        You may also set ``memory_factor`` to a higher amount than the default (2). ``memory_factor``
+        decides on the fraction of the memory reserved for one entire chunk of computation. E.g. by setting it to 4 only
+        1/4th of the available memory is assumed to be available. In practice, for large problems, more temporary
+        memory storage is needed within the subprocessing.
 
 Interrogating and storing PIV results
 -------------------------------------
@@ -124,24 +146,14 @@ These results can be stored so that they can be interrogated later, by other sof
             # store results in a file, this will take a while
             piv.to_netcdf("piv_results.nc")
 
-        Only when you store or otherwise retrieve data resulting from ``get_piv``, the computations will actually be performed.
-        Therefore it is normal that only after calling a command that retrieves data, you will need to wait for a while before
-        data is returned. This may take several minutes for small problems, but for large areas of interest or large amounts of
-        time steps (or a slow machine) it can also take half an hour or longer. To keep track of progress you can also first
-        prepare the storage process and the wrap a ``ProgressBar`` from the ``dask.diagnostics`` library.
-        Below you can find an example how to store data with such a progress bar.
+        PIV computations are the longest in time. Therefore it is normal that you will need to wait for a while before
+        data is returned. This may take a few seconds for small problems, but for large areas of interest or large
+        amounts of time steps (or a slow machine with little memory) it can also take half an hour or longer. With
+        the new (>=0.7.0) numba and numpy engines, you can keep track of progress with a progress bar which is
+        automatically displayed during the processing.
 
-        .. code:: python
-
-            # import ProgressBar
-            from dask.diagnostics import ProgressBar
-            # store results with a progress bar
-            delayed_obj = piv.to_netcdf("piv_results.nc", compute=False)
-            with ProgressBar():
-                results = delayed_obj.compute()
-
-        You should then see a progressing bar on your screen while data is stored. If you wish to load your results into
-        memory after having stored it in a previous session, you can simply use ``xarray`` functionality to do so.
+        If you wish to load your results into memory after having stored it in a previous session, you can simply
+        use ``xarray`` functionality to do so.
 
         .. code:: python
 
@@ -374,5 +386,3 @@ work.
 * ``window_nan``: this mask can only be applied on time-reduced results and analyses (instead of time series) values
   of neighbours in a certain window defined by parameter ``wdw``. If there are too many missings in the window, then the value considered
   is also removed. This is meant to remove isolated values. Also described in :ref:`spatial masks <spatial_mask>`
-
-

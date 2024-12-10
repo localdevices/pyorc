@@ -16,6 +16,7 @@ dependencies = [
     "cython; platform_machine == 'armv7l'",
     "dask",
     "descartes",
+    "ffpiv",
     "flox",
     "geojson",
     "geopandas",
@@ -56,11 +57,9 @@ classifiers = [
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-io = [
-]
 extra = [
+    "notebook",
     "cartopy",
-    "notebook"
 ]
 test = [
     "pytest",
@@ -80,8 +79,7 @@ docs = [
     "matplotlib",
 ]
 
-full = ["pyopenrivercam[io,extra,dev,test,doc]"]
-slim = ["pyopenrivercam[io]"]
+full = ["pyopenrivercam[extra,test,docs]"]
 
 [project.urls]
 Source = "https://github.com/localdevices/pyorc"

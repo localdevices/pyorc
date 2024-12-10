@@ -117,8 +117,7 @@ class Transect(ORCBase):
             z = self._obj.zcoords  # retrieve the bottom coordinates
         points = [[_x, _y, _z] for _x, _y, _z in zip(x, y, z, strict=False)]
         # ensure that y coordinates are in the right direction
-        points_proj = self.camera_config.project_points(points, within_image=within_image)
-        points_proj[:, 1] = self.camera_config.height - points_proj[:, 1]
+        points_proj = self.camera_config.project_points(points, within_image=within_image, swap_y_coords=True)
         return points_proj
 
     def get_wetted_perspective(self, h, sample_size=1000):

@@ -9,9 +9,9 @@ API reference
 **pyorc**'s API consists of several subclasses of the ``xarray.Dataset`` and ``xarray.DataArray`` data models.
 In a nutshell, xarray_'s data models are meant to store and analyze scientific datasets with multiple
 dimensions. A ``xarray.DataArray`` contains one variable with possibly several dimensions and coordinates
-within those dimensions. A ``xarray.Dataset`` may contain multiple ``xarray.DataArray`` objects, with shared 
+within those dimensions. A ``xarray.Dataset`` may contain multiple ``xarray.DataArray`` objects, with shared
 coordinates. In **pyorc** typically the coordinates are ``time`` for time epochs measured in seconds since
-the beginning of a video, ``x`` for horizontal grid spacing (in meters), ``y`` for vertical grid spacing 
+the beginning of a video, ``x`` for horizontal grid spacing (in meters), ``y`` for vertical grid spacing
 (in meters). Operations you can apply on both data models are very comparable with operations you may
 already use in pandas_, such as resampling, reindexing, aggregations, and so on.
 
@@ -47,6 +47,7 @@ Setting of properties and attributes
     CameraConfig.set_bbox_from_corners
     CameraConfig.set_gcps
     CameraConfig.set_lens_pars
+    CameraConfig.set_intrinsic
     CameraConfig.set_lens_calibration
     CameraConfig.set_lens_position
 
@@ -57,6 +58,7 @@ Exporting
     :toctree: _generated
 
     CameraConfig.to_dict
+    CameraConfig.to_dict_str
     CameraConfig.to_file
     CameraConfig.to_json
 
@@ -68,8 +70,18 @@ Retrieve geometrical information
     :toctree: _generated
 
     CameraConfig.get_M
+    CameraConfig.get_bbox
+    CameraConfig.get_camera_coords
+    CameraConfig.get_dist_shore
+    CameraConfig.get_dist_wall
     CameraConfig.get_depth
+    CameraConfig.get_z_a
+    CameraConfig.project_grid
+    CameraConfig.project_points
+    CameraConfig.unproject_points
     CameraConfig.z_to_h
+    CameraConfig.h_to_z
+    CameraConfig.estimate_lens_position
 
 Plotting methods
 ----------------
@@ -93,10 +105,26 @@ Class and properties
 
     Video
     Video.camera_config
-    Video.fps
     Video.end_frame
+    Video.fps
+    Video.frames
+    Video.freq
+    Video.h_a
+    Video.lazy
+    Video.mask
+    Video.rotation
+    Video.stabilize
     Video.start_frame
     Video.corners
+
+Setting properties
+------------------
+
+.. autosummary::
+    :toctree: _generated
+
+    Video.set_mask_from_exterior
+
 
 Getting frames from video objects
 ---------------------------------
@@ -106,6 +134,8 @@ Getting frames from video objects
 
     Video.get_frame
     Video.get_frames
+    Video.get_frames_chunk
+    Video.get_ms
 
 .. _frames:
 
@@ -132,9 +162,11 @@ Enhancing frames
     :toctree: _generated
 
     Frames.edge_detect
+    Frames.minmax
     Frames.normalize
-    Frames.time_diff
+    Frames.reduce_rolling
     Frames.smooth
+    Frames.time_diff
 
 Projecting frames to planar views
 ---------------------------------
@@ -178,6 +210,7 @@ Class and properties
     Velocimetry.camera_config
     Velocimetry.camera_shape
     Velocimetry.h_a
+    Velocimetry.is_velocimetry
 
 .. _masks:
 
@@ -274,6 +307,10 @@ Derivatives
 
     Transect.vector_to_scalar
     Transect.get_xyz_perspective
+    Transect.get_depth_perspective
+    Transect.get_bottom_surface_z_perspective
+    Transect.get_transect_perspective
+    Transect.get_wetted_perspective
 
 .. _river_flow:
 

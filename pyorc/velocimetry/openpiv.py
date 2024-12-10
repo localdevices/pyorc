@@ -1,17 +1,97 @@
-import openpiv.tools
-import openpiv.pyprocess
+"""PIV processing wrappers for OpenPIV."""
+
+from typing import List, Optional, Tuple, Union
+
 import numpy as np
+import openpiv.pyprocess
+import openpiv.tools
 import xarray as xr
+
+__all__ = [
+    "get_openpiv",
+    "piv",
+]
+
+
+def get_openpiv(frames, y, x, dt, **kwargs):
+    """Compute time-resolved Particle Image Velocimetry (PIV) using Fast Fourier Transform (FFT) within OpenPIV.
+
+    Calculates velocity using the OpenPIV algorithms by processing sequential frames
+    from a dataset and returning the velocity components, signal-to-noise ratio, and
+    correlation values. The function shifts frames in time and applies the PIV algorithm
+    to compute flow fields over the specified spatial axes.
+
+    Parameters
+    ----------
+    frames : xarray.Dataset
+        The input dataset containing time-dependent frames with coordinates.
+    y : array-like
+        The spatial coordinates along the y-axis where the outputs should be interpolated.
+    x : array-like
+        The spatial coordinates along the x-axis where the outputs should be interpolated.
+    dt : float
+        The time step between consecutive frames (used to go from per-frame to per-second displacement).
+    **kwargs : dict
+        Additional keyword arguments to be passed to the PIV function.
+
+    Returns
+    -------
+    xarray.Dataset
+        A dataset containing computed velocity components `v_x` and `v_y`,
+        signal-to-noise ratios `s2n`, and correlation values `corr`. The dataset
+        includes updated x and y coordinates representing the flow field grid.
+
+    """
+    # first get rid of coordinates that need to be recalculated
+    coords_drop = list(set(frames.coords) - set(frames.dims))
+    frames = frames.drop_vars(coords_drop)
+    # get frames and shifted frames in time
+    frames1 = frames.shift(time=1)[1:].chunk({"time": 1})
+    frames2 = frames[1:].chunk({"time": 1})
+    # retrieve all data arrays
+    v_x, v_y, s2n, corr = xr.apply_ufunc(
+        piv,
+        frames1,
+        frames2,
+        dt,
+        kwargs=kwargs,
+        input_core_dims=[["y", "x"], ["y", "x"], []],
+        output_core_dims=[["new_y", "new_x"]] * 4,
+        dask_gufunc_kwargs={
+            "output_sizes": {"new_y": len(y), "new_x": len(x)},
+        },
+        output_dtypes=[np.float32] * 4,
+        vectorize=True,
+        keep_attrs=True,
+        dask="parallelized",
+    )
+    # merge all DataArrays in one Dataset
+    ds = xr.merge([v_x.rename("v_x"), v_y.rename("v_y"), s2n.rename("s2n"), corr.rename("corr")]).rename(
+        {"new_x": "x", "new_y": "y"}
+    )
+    # add y and x-axis values
+    ds["y"] = y
+    ds["x"] = x
+    return ds
 
 
 def piv(
-    frame_a, frame_b, dt, res_x=0.01, res_y=0.01, search_area_size=30, correlation=True, window_size=None, overlap=None,
-        **kwargs
+    frame_a,
+    frame_b,
+    dt,
+    res_x=0.01,
+    res_y=0.01,
+    search_area_size=30,
+    window_size=None,
+    overlap=None,
+    **kwargs,
 ):
-    """PIV analysis following keyword arguments from openpiv. This function also computes the correlations per
-    interrogation window, so that poorly correlated values can be filtered out. Furthermore, the resolution is used to convert
-    pixel per second velocity estimates, into meter per second velocity estimates. The centre of search area columns
-    and rows are also returned so that a georeferenced grid can be written from the results.
+    """Perform PIV analysis on two sequential frames following keyword arguments from openpiv.
+
+    This function also computes the correlations per interrogation window, so that poorly correlated values can be
+    filtered out. Furthermore, the resolution is used to convert pixel per second velocity estimates, into meter per
+    second velocity estimates. The centre of search area columns and rows are also returned so that a georeferenced
+    grid can be written from the results.
 
     Note: Typical openpiv kwargs are for instance
     window_size=60, overlap=30, search_area_size=60, dt=1./25
@@ -22,26 +102,25 @@ def piv(
         first frame
     frame_b: np.ndarray (2D)
         second frame
+    dt : float
+        time resolution in seconds.
     res_x: float, optional
         resolution of x-dir pixels in a user-defined unit per pixel (e.g. m pixel-1) Default: 0.01
     res_y: float, optional
         resolution of y-dir pixels in a user-defined unit per pixel (e.g. m pixel-1) Default: 0.01
     search_area_size: int, optional
         length of subsetted matrix to search for correlations (default: 30)
-    correlation: bool, optional
-        if True (default), the best found correlation coefficient is also returned for each interrogation
     window_size: int, optional
-        size of interrogation window in amount of pixels. If not set, it is set equal to search_area_size (default: None).
+        size of interrogation window in amount of pixels. If not set, it is set equal to search_area_size
+        (default: None).
     overlap: int, optional
-        length of overlap between interrogation windows. If not set, this defaults to 50% of the window_size parameter (default: None).
-    **kwargs: keyword arguments related to openpiv. See openpiv manual for further information
+        length of overlap between interrogation windows. If not set, this defaults to 50% of the window_size parameter
+        (default: None).
+    **kwargs: dict
+        keyword arguments related to openpiv. See openpiv manual for further information
 
     Returns
     -------
-    cols: np.ndarray (1D)
-        col number of centre of interrogation windows
-    rows: np.ndarray (1D)
-        row number of centre of interrogation windows
     v_x: np.ndarray(2D)
         raw x-dir velocities [m s-1] in interrogation windows (requires filtering to get valid velocities)
     v_y: np.ndarray (2D)
@@ -51,118 +130,34 @@ def piv(
         (method="peak2mean") or second to maximum correlation (method="peak2peak") found within search area
     corr: np.ndarray (2D)
         correlation values in interrogation windows
+
     """
-    # if isinstance(frame_a, xr.core.dataarray.DataArray):
-    #     frame_a = frame_a.values
-    # if isinstance(frame_b, xr.core.dataarray.DataArray):
-    #     frame_b = frame_b.values
     window_size = search_area_size if window_size is None else window_size
-    overlap = int(round(window_size)/2) if overlap is None else overlap
-    # v_x, v_y, s2n = openpiv.pyprocess.extended_search_area_piv(
-    #     frame_a, frame_b, dt=dt, search_area_size=search_area_size, overlap=overlap, window_size=window_size, **kwargs
-    # )
+    overlap = int(round(window_size) / 2) if overlap is None else overlap
     # modified version of extended_search_area_piv to accomodate exporting corr
     v_x, v_y, s2n, corr = extended_search_area_piv(
-        frame_a,
-        frame_b,
-        dt=dt,
-        search_area_size=search_area_size,
-        overlap=overlap,
-        window_size=window_size,
-        **kwargs
+        frame_a, frame_b, dt=dt, search_area_size=search_area_size, overlap=overlap, window_size=window_size, **kwargs
     )
     return v_x * res_x, v_y * res_y, s2n, corr
 
 
-def get_piv_size(**kwargs):
-    return openpiv.pyprocess.get_coordinates(**kwargs)
-
-
-def piv_corr(
-    frame_a,
-    frame_b,
-    search_area_size,
-    overlap,
-    window_size=None,
-    correlation_method="circular",
-    normalized_correlation=True,
-):
-    """Estimate the maximum correlation in piv analyses over two frames. Function taken from openpiv library.
-    This is a temporary fix. If correlation can be exported from openpiv, then this function can be removed.
-
-    Parameters
-    ----------
-    frame_a: np.ndarray (2D)
-        first frame
-    frame_b: np.ndarray (2D)
-        second frame
-    overlap: int, optional
-        length of overlap between interrogation windows. If not set, this defaults to 50% of the window_size parameter (default: None).
-    window_size: int, optional
-        size of interrogation window in amount of pixels. If not set, it is set equal to search_area_size (default: None).
-    search_area_size: int, optional
-        length of subsetted matrix to search for correlations (default: 30)
-    correlation_method: str, optional
-        method for correlation used, as openpiv setting (default: "circular")
-    normalized_correlation: boolean, optional
-        if True (default) return a normalized correlation number between zero and one, else not normalized
-
-    Returns
-    -------
-    corr : np.ndarray (2D)
-        maximum correlations found in search areas
-    """
-    # extract the correlation matrix
-    window_size = search_area_size if window_size is None else window_size
-    # get field shape
-
-    n_rows, n_cols = openpiv.pyprocess.get_field_shape(
-        frame_a.shape, search_area_size, overlap
-    )
-
-    # We implement the new vectorized code
-    aa = openpiv.pyprocess.moving_window_array(frame_a, search_area_size, overlap)
-    bb = openpiv.pyprocess.moving_window_array(frame_b, search_area_size, overlap)
-
-    if search_area_size > window_size:
-        # before masking with zeros we need to remove
-        # edges
-
-        aa = openpiv.pyprocess.normalize_intensity(aa)
-        bb = openpiv.pyprocess.normalize_intensity(bb)
-
-        mask = np.zeros((search_area_size, search_area_size)).astype(aa.dtype)
-        pad = np.int((search_area_size - window_size) / 2)
-        mask[slice(pad, search_area_size - pad), slice(pad, search_area_size - pad)] = 1
-        mask = np.broadcast_to(mask, aa.shape)
-        aa *= mask
-
-    corr = openpiv.pyprocess.fft_correlate_images(
-        aa,
-        bb,
-        correlation_method=correlation_method,
-        normalized_correlation=normalized_correlation,
-    )
-    corr = corr.max(axis=-1).max(axis=-1).reshape((n_rows, n_cols))
-    return corr
-
-
 def extended_search_area_piv(
-        frame_a,
-        frame_b,
-        window_size,
-        overlap=0,
-        dt=1.0,
-        search_area_size=None,
-        correlation_method="circular",
-        subpixel_method="gaussian",
-        sig2noise_method='peak2mean',
-        width=2,
-        normalized_correlation=True,
-        use_vectorized=False,
-):
-    """Standard PIV cross-correlation algorithm, with an option for
-    extended area search that increased dynamic range. The search region
+    frame_a: np.ndarray,
+    frame_b: np.ndarray,
+    window_size: int,
+    overlap: int = 0,
+    dt: float = 1.0,
+    search_area_size: Optional[Union[Tuple[int, int], List[int], int]] = None,
+    correlation_method: str = "circular",
+    subpixel_method: str = "gaussian",
+    sig2noise_method: Optional[str] = "peak2mean",
+    width: int = 2,
+    normalized_correlation: bool = True,
+    use_vectorized: bool = False,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Perform PIV cross-correlation analysis.
+
+    Extended area search can be used to increased dynamic range. The search region
     in the second frame is larger than the interrogation window size in the
     first frame. For Cython implementation see
     openpiv.process.extended_search_area_piv
@@ -223,6 +218,9 @@ def extended_search_area_piv(
         the correlation map will be normalized. It's slower but could be
         more robust
 
+    use_vectorized : bool
+        If set, vectorization is used to speed up analysis.
+
     Returns
     -------
     u : 2d np.ndarray
@@ -233,10 +231,12 @@ def extended_search_area_piv(
         a two dimensional array containing the v velocity component,
         in pixels/seconds.
 
-    sig2noise : 2d np.ndarray, ( optional: only if sig2noise_method != None )
+    sig2noise : 2d np.ndarray ( optional: only if sig2noise_method != None )
         a two dimensional array the signal to noise ratio for each
         window pair.
 
+    corr : 2d np.ndarray
+        a two dimensional array with the maximum correlation values found in each interrogation window.
 
     The implementation of the one-step direct correlation with different
     size of the interrogation window and the search area. The increased
@@ -265,8 +265,7 @@ def extended_search_area_piv(
         overlap = [overlap, overlap]
 
     # check the inputs for validity
-    if search_area_size is None:
-        search_area_size = window_size
+    search_area_size = window_size if search_area_size is None else search_area_size
 
     if overlap[0] >= window_size[0] or overlap[1] >= window_size[1]:
         raise ValueError("Overlap has to be smaller than the window_size")
@@ -301,37 +300,32 @@ def extended_search_area_piv(
         mask = np.zeros((search_area_size[0], search_area_size[1])).astype(aa.dtype)
         pady = int((search_area_size[0] - window_size[0]) / 2)
         padx = int((search_area_size[1] - window_size[1]) / 2)
-        mask[slice(pady, search_area_size[0] - pady),
-        slice(padx, search_area_size[1] - padx)] = 1
+        mask[slice(pady, search_area_size[0] - pady), slice(padx, search_area_size[1] - padx)] = 1
         mask = np.broadcast_to(mask, aa.shape)
         aa *= mask
 
-    corr = openpiv.pyprocess.fft_correlate_images(aa, bb,
-                                correlation_method=correlation_method,
-                                normalized_correlation=normalized_correlation)
+    corr = openpiv.pyprocess.fft_correlate_images(
+        aa, bb, correlation_method=correlation_method, normalized_correlation=normalized_correlation
+    )
     if use_vectorized == True:
-        u, v = openpiv.pyprocess.vectorized_correlation_to_displacements(corr, n_rows, n_cols,
-                                                       subpixel_method=subpixel_method)
+        u, v = openpiv.pyprocess.vectorized_correlation_to_displacements(
+            corr, n_rows, n_cols, subpixel_method=subpixel_method
+        )
     else:
-        u, v = openpiv.pyprocess.correlation_to_displacement(corr, n_rows, n_cols,
-                                           subpixel_method=subpixel_method)
+        u, v = openpiv.pyprocess.correlation_to_displacement(corr, n_rows, n_cols, subpixel_method=subpixel_method)
 
     # return output depending if user wanted sig2noise information
+    sig2noise = np.zeros_like(u) * np.nan
     if sig2noise_method is not None:
         if use_vectorized == True:
             sig2noise = openpiv.pyprocess.vectorized_sig2noise_ratio(
                 corr, sig2noise_method=sig2noise_method, width=width
             )
         else:
-            sig2noise = openpiv.pyprocess.sig2noise_ratio(
-                corr, sig2noise_method=sig2noise_method, width=width
-            )
-    else:
-        sig2noise = np.zeros_like(u) * np.nan
+            sig2noise = openpiv.pyprocess.sig2noise_ratio(corr, sig2noise_method=sig2noise_method, width=width)
 
     sig2noise = sig2noise.reshape(n_rows, n_cols)
     # extended code for exporting the maximum found value for corr
     corr = corr.max(axis=-1).max(axis=-1).reshape((n_rows, n_cols))
 
     return u / dt, v / dt, sig2noise, corr
-

@@ -233,14 +233,14 @@ def camera_config(
                 logger=logger,
             )
     if stabilize:
-        stabilize = cli_utils.get_stabilize_pol(
+        stabilize_pol = cli_utils.get_stabilize_pol(
             videofile,
             frame_sample=frame_sample,
             rotation=rotation,
             logger=logger,
         )
     else:
-        stabilize = None
+        stabilize_pol = None
     service.camera_config(
         video_file=videofile,
         cam_config_file=output,
@@ -253,7 +253,7 @@ def camera_config(
         corners=corners,
         camera_matrix=camera_matrix,
         dist_coeffs=dist_coeffs,
-        stabilize=stabilize,
+        stabilize=stabilize_pol,
         rotation=rotation,
     )
     logger.info(f"Camera configuration created and stored in {output}")

@@ -7,10 +7,12 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from ffpiv import window
 from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
-from pyorc import const, cv, helpers, piv_process, project
+from pyorc import const, cv, helpers, project
+from pyorc.velocimetry import ffpiv, openpiv
 
 from .orcbase import ORCBase
 from .plot import _frames_plot
@@ -33,7 +35,80 @@ class Frames(ORCBase):
         """
         super(Frames, self).__init__(xarray_obj)
 
-    def get_piv(self, **kwargs):
+    def get_piv_coords(
+        self, window_size: tuple[int, int], search_area_size: tuple[int, int], overlap: tuple[int, int]
+    ) -> tuple[dict, dict]:
+        """Get Particle Image Velocimetry (PIV) coordinates and mesh grid projections.
+
+        This function calculates the PIV coordinates and the corresponding mesh grid
+        projections based on the provided window size, search area size, and overlap.
+        The results include both projected coordinates (xp, yp) and the respective
+        longitude and latitude values (if available).
+
+        Parameters
+        ----------
+        window_size : (int, int)
+            The size of the window for the PIV analysis.
+        search_area_size : (int, int)
+            The size of the search area for the PIV analysis.
+        overlap : (int, int)
+            The overlap ratio between consecutive windows.
+
+        Returns
+        -------
+        coords : dict
+            A dictionary containing the PIV local non-geographical projection coordinates:
+                - 'y': The y-axis coordinates.
+                - 'x': The x-axis coordinates.
+        mesh_coords : dict
+            A dictionary containing the mesh grid projections and coordinates:
+                - 'xp': The projected x-coordinates.
+                - 'yp': The projected y-coordinates.
+                - 'xs': The x-coordinates in the image space.
+                - 'ys': The y-coordinates in the image space.
+                - 'lon': The longitude values (if CRS is provided).
+                - 'lat': The latitude values (if CRS is provided).
+
+        """
+        dim_size = self._obj[0].shape
+
+        # get the cols and rows coordinates of the expected results
+        cols_vector, rows_vector = window.get_rect_coordinates(
+            dim_size=dim_size,
+            window_size=window_size,
+            search_area_size=search_area_size,
+            overlap=overlap,
+        )
+        cols, rows = np.meshgrid(cols_vector, rows_vector)
+        # retrieve the x and y-axis belonging to the results
+        x, y = helpers.get_axes(cols_vector, rows_vector, self._obj.x.values, self._obj.y.values)
+        # convert in projected and latlon coordinates
+        xs, ys = helpers.get_xs_ys(
+            cols,
+            rows,
+            self.camera_config.transform,
+        )
+        if hasattr(self.camera_config, "crs"):
+            lons, lats = helpers.get_lons_lats(xs, ys, self.camera_config.crs)
+        else:
+            lons = None
+            lats = None
+        # calculate projected coordinates
+        z = self.camera_config.h_to_z(self.h_a)
+        zs = np.ones(xs.shape) * z
+        xp, yp = self.camera_config.project_grid(xs, ys, zs, swap_y_coords=True)
+        # package the coordinates
+        coords = {"y": y, "x": x}
+        mesh_coords = {"xp": xp, "yp": yp, "xs": xs, "ys": ys, "lon": lons, "lat": lats}
+        return coords, mesh_coords
+
+    def get_piv(
+        self,
+        window_size: Optional[tuple[int, int]] = None,
+        overlap: Optional[tuple[int, int]] = None,
+        engine: str = "openpiv",
+        **kwargs,
+    ) -> xr.Dataset:
         """Perform PIV computation on projected frames.
 
         Only a pipeline graph to computation is set up. Call a result to trigger actual computation. The dataset
@@ -43,98 +118,82 @@ class Frames(ORCBase):
 
         Parameters
         ----------
-        **kwargs : keyword arguments to pass to dask_piv, used to control the manner in which openpiv.pyprocess
-            is called.
+        window_size : (int, int), optional
+            size of interrogation windows in pixels (y, x)
+        overlap : (int, int), optional
+            amount of overlap between interrogation windows in pixels (y, x)
+        engine : str, optional
+            select the compute engine, can be "openpiv" (default), "numba", or "numpy". "numba" will give the fastest
+            performance but is still experimental. It can boost performance by almost an order of magnitude compared
+            to openpiv or numpy. both "numba" and "numpy" use the FF-PIV library as back-end.
+        **kwargs : dict
+            keyword arguments to pass to the piv engine. For "numba" and "numpy" the argument `chunks` can be provided
+            with an integer defining in how many batches of work the total velocimetry problem should be subdivided.
 
         Returns
         -------
         xr.Dataset
             PIV results in a lazy dask.array form in DataArrays "v_x", "v_y", "corr" and "s2n".
 
+        See Also
+        --------
+        OpenPIV project: https://github.com/OpenPIV/openpiv-python
+        FF-PIV project: https://github.com/localdevices/ffpiv
+
         """
         camera_config = copy.deepcopy(self.camera_config)
         dt = self._obj["time"].diff(dim="time")
-
-        # add a number of kwargs for the piv function
-        if "window_size" in kwargs:
-            camera_config.window_size = kwargs["window_size"]
-        kwargs["search_area_size"] = camera_config.window_size
-        kwargs["window_size"] = camera_config.window_size
-        kwargs["res_x"] = camera_config.resolution
-        kwargs["res_y"] = camera_config.resolution
+        # Use window_size from camera_config unless provided in the method
+        if window_size is not None:
+            camera_config.window_size = window_size
+        window_size = (
+            2 * (camera_config.window_size,)
+            if isinstance(camera_config.window_size, int)
+            else camera_config.window_size
+        )
+        # ensure window size is a round number
+        window_size = window.round_to_even(window_size)
+        search_area_size = window_size
         # set an overlap if not provided in kwargs
-        if "overlap" not in kwargs:
-            kwargs["overlap"] = int(round(camera_config.window_size) / 2)
-        # first get rid of coordinates that need to be recalculated
-        coords_drop = list(set(self._obj.coords) - set(self._obj.dims))
-        obj = self._obj.drop_vars(coords_drop)
-        # get frames and shifted frames in time
-        frames1 = obj.shift(time=1)[1:].chunk({"time": 1})
-        frames2 = obj[1:].chunk({"time": 1})
+        if overlap is None:
+            overlap = 2 * (int(round(camera_config.window_size) / 2),)
 
-        # get the cols and rows coordinates of the expected results
-        cols, rows = piv_process.get_piv_size(
-            image_size=frames1[0].shape, search_area_size=kwargs["search_area_size"], overlap=kwargs["overlap"]
-        )
-        cols_vector = cols[0].astype(np.int64)
-        rows_vector = rows[:, 0].astype(np.int64)
-        # retrieve the x and y-axis belonging to the results
-        x, y = helpers.get_axes(cols_vector, rows_vector, frames1.x.values, frames1.y.values)
-        # convert in projected and latlon coordinates
-        xs, ys = helpers.get_xs_ys(
-            cols,
-            rows,
-            camera_config.transform,
-        )
-        if hasattr(camera_config, "crs"):
-            lons, lats = helpers.get_lons_lats(xs, ys, camera_config.crs)
+        # get all required coordinates for the PIV result
+        coords, mesh_coords = self.get_piv_coords(window_size, search_area_size, overlap)
+        # provide kwargs for OpenPIV analysis
+        if engine == "openpiv":
+            import warnings
+
+            warnings.warn(
+                '"openpiv" is currently the default engine, but it will be replaced by "numba" in a future release.',
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            kwargs = {
+                **kwargs,
+                "search_area_size": search_area_size[0],
+                "window_size": window_size[0],
+                "overlap": overlap[0],
+                "res_x": camera_config.resolution,
+                "res_y": camera_config.resolution,
+            }
+            ds = openpiv.get_openpiv(self._obj, coords["y"], coords["x"], dt, **kwargs)
+        elif engine in ["numba", "numpy"]:
+            kwargs = {
+                **kwargs,
+                "search_area_size": search_area_size,
+                "window_size": window_size,
+                "overlap": overlap,
+                "res_x": camera_config.resolution,
+                "res_y": camera_config.resolution,
+            }
+            ds = ffpiv.get_ffpiv(self._obj, coords["y"], coords["x"], dt, engine=engine, **kwargs)
         else:
-            lons = None
-            lats = None
-
-        # new approach to getting M (from bbox coordinates)
-        src = camera_config.get_bbox(camera=True, h_a=self.h_a, expand_exterior=False).exterior.coords[0:4]
-        dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
-        # get geographic coordinates bbox corners
-        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
-        M = cv.get_M_2D(src, dst, reverse=True)
-        # TODO: remove when above 4 lines work
-        # M = camera_config.get_M(self.h_a, to_bbox_grid=True, reverse=True)
-        # compute row and column position of vectors in original reprojected background image col/row coordinates
-        xp, yp = helpers.xy_to_perspective(*np.meshgrid(x, np.flipud(y)), self.camera_config.resolution, M)
-        # ensure y coordinates start at the top in the right orientation (different from order of a CRS)
-        shape_y, shape_x = self.camera_shape
-        yp = shape_y - yp
-        coords = {"y": y, "x": x}
-        # retrieve all data arrays
-        v_x, v_y, s2n, corr = xr.apply_ufunc(
-            piv_process.piv,
-            frames1,
-            frames2,
-            dt,
-            kwargs=kwargs,
-            input_core_dims=[["y", "x"], ["y", "x"], []],
-            output_core_dims=[["new_y", "new_x"]] * 4,
-            dask_gufunc_kwargs={
-                "output_sizes": {"new_y": len(y), "new_x": len(x)},
-            },
-            output_dtypes=[np.float32] * 4,
-            vectorize=True,
-            keep_attrs=True,
-            dask="parallelized",
-        )
-        # merge all DataArrays in one Dataset
-        ds = xr.merge([v_x.rename("v_x"), v_y.rename("v_y"), s2n.rename("s2n"), corr.rename("corr")]).rename(
-            {"new_x": "x", "new_y": "y"}
-        )
-        # add y and x-axis values
-        ds["y"] = y
-        ds["x"] = x
-
+            raise ValueError(f"Selected PIV engine {engine} does not exist.")
         # add all 2D-coordinates
-        ds = ds.velocimetry.add_xy_coords(
-            [xp, yp, xs, ys, lons, lats], coords, {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS}
-        )
+        ds = ds.velocimetry.add_xy_coords(mesh_coords, coords, {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS})
+        # ensure all metadata is transferred
+        ds.attrs = self._obj.attrs
         # in case window_size was changed, overrule the camera_config attribute
         ds.attrs.update(camera_config=camera_config.to_json())
         # set encoding
@@ -207,7 +266,9 @@ class Frames(ORCBase):
         da_proj = da_proj.fillna(0.0)
 
         # assign coordinates
-        da_proj = da_proj.frames.add_xy_coords([xs, ys, lons, lats], coords, const.GEOGRAPHICAL_ATTRS)
+        da_proj = da_proj.frames.add_xy_coords(
+            {"xs": xs, "ys": ys, "lon": lons, "lat": lats}, coords, const.GEOGRAPHICAL_ATTRS
+        )
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
             # ensure that "rgb" is the last dimension
             da_proj = da_proj.transpose("time", "y", "x", "rgb")
@@ -489,22 +550,40 @@ class Frames(ORCBase):
     def to_video(self, fn, video_format=None, fps=None):
         """Write frames to a video file without any layout.
 
+        Frames from the input object are written into a video file. The format and frame
+        rate can be customized as per user preference or derived automatically from the
+        input object.
+
         Parameters
         ----------
         fn : str
-            Path to output file
+            Path to the output video file.
         video_format : cv2.VideoWriter_fourcc, optional
-            A VideoWriter preference, default is cv2.VideoWriter_fourcc(*"mp4v")
+            The desired video file format codec. If not provided, defaults to
+            `cv2.VideoWriter_fourcc(*"mp4v")`.
         fps : float, optional
-            Frames per second, if not provided, derived from original video
+            Frames per second for the output video. If not specified, it is estimated
+            from the time differences in the input frames.
 
         """
+        # """Write frames to a video file without any layout.
+        #
+        # Parameters
+        # ----------
+        # fn : str
+        #     Path to output file
+        # video_format : cv2.VideoWriter_fourcc, optional
+        #     A VideoWriter preference, default is cv2.VideoWriter_fourcc(*"mp4v")
+        # fps : float, optional
+        #     Frames per second, if not provided, derived from original video
+        #
+        # """
         if video_format is None:
             # set to a default
             video_format = cv2.VideoWriter_fourcc(*"mp4v")
         if fps is None:
             # estimate it from the time differences
-            fps = 1 / (self._obj["time"][1].values - self._obj["time"][0].values)
+            fps = 1 / (self._obj["time"].diff(dim="time").values.mean())
         h = self._obj.shape[1]
         w = self._obj.shape[2]
         out = cv2.VideoWriter(fn, video_format, fps, (w, h))

@@ -606,6 +606,23 @@ class CameraConfig:
         h = z + h_ref - self.gcps["z_0"]
         return h
 
+    def h_to_z(self, h_a: float) -> float:
+        """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge).
+
+        Parameters
+        ----------
+        h_a : float
+            measured level in local datum
+
+        Returns
+        -------
+        z : float
+            level in global datum
+
+        """
+        h_ref = 0 if self.gcps["h_ref"] is None else self.gcps["h_ref"]
+        return h_a - h_ref + self.gcps["z_0"]
+
     def get_M(
         self, h_a: Optional[float] = None, to_bbox_grid: Optional[bool] = False, reverse: Optional[bool] = False
     ) -> np.ndarray:
@@ -843,17 +860,21 @@ class CameraConfig:
             x, y = helpers.xyz_transform([[x, y]], crs, self.crs)[0]
         self.lens_position = [x, y, z]
 
-    def project_points(self, points: List[List], within_image=False) -> np.ndarray:
+    def project_points(self, points: List[List], within_image=False, swap_y_coords=False) -> np.ndarray:
         """Project real world x, y, z coordinates into col, row coordinates on image.
 
-        If col, row coordinates are not allowed to go outside of the image frame, then set within_image = True
+        If col, row coordinates are not allowed to go outside of the image frame, then set `within_image = True`.
+        Method uses the intrinsics and extrinsics and distortion parameters to perform the projection.
 
         Parameters
         ----------
         points : list of lists or array-like
             list of points [x, y, z] in real world coordinates
-        within_image : bool
+        within_image : bool, optional
             Set coordinates to NaN if these fall outside of the image.
+        swap_y_coords : bool, optional
+            If set to True (default: False), y-coordinates will be swapped, in order to match plotting defaults
+            which return row counting from top to bottom instead of bottom to top.
 
         Returns
         -------
@@ -889,7 +910,43 @@ class CameraConfig:
             points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width - 1
             points_proj[points_proj[:, 1] < 0, 1] = 0.0
             points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height - 1
+        # swap y coords if set
+        if swap_y_coords:
+            points_proj[:, 1] = self.height - points_proj[:, 1]
         return points_proj
+
+    def project_grid(self, xs, ys, zs, swap_y_coords=False):
+        """Project gridded coordinates to col, row coordinates on image.
+
+        Method uses the intrinsics and extrinsics and distortion parameters to perform the projection.
+
+        Parameters
+        ----------
+        xs : np.ndarray
+            2d array of real-world x-coordinates
+        ys : np.ndarray
+            2d array of real-world y-coordinates
+        zs : np.ndarray
+            2d array of real-world z-coordinates
+        swap_y_coords : bool, optional
+            If set to True (default: False), y-coordinates will be swapped, in order to match plotting defaults
+            which return row counting from top to bottom instead of bottom to top.
+
+        Returns
+        -------
+        xp : np.ndarray
+            list of col coordinates of image objective
+        yp : np.ndarray
+            list of row coordinates of image objective
+
+        """
+        points = list(zip(xs.flatten(), ys.flatten(), zs.flatten(), strict=False))
+        points_proj = np.array(self.project_points(points, swap_y_coords=swap_y_coords))
+        xp, yp = points_proj[:, 0], points_proj[:, 1]
+        # reshape back
+        xp = np.reshape(xp, (len(xs), -1))
+        yp = np.reshape(yp, (len(xs), -1))
+        return xp, yp
 
     def unproject_points(self, points: List[List], zs: Union[float, List[float]]) -> np.ndarray:
         """Reverse projects points in [column, row] space to [x, y, z] real world.

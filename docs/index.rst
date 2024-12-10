@@ -54,12 +54,10 @@ Support us
 We are seeking funding for the following frequently requested functionalities:
 
 * Exports to simple text formats and GIS-compatible layers
-* Compiled windows executables
-* Implementation of better filtering in pre-processing
-* Improved efficiency of processing (e.g. through GPU/TPU acceleration)
-* Establishing on-site edge computation through a raspberry-pi camera setup
+* Exports to augmented reality videos
 * Implementation of additional processing algorithms (STIV and LSPTV)
-* Establishment of dashboard environments for several use cases
+* Implementation of several optical methods for reading water levels
+* Improved nighttime / poor weather conditions processing through learning approaches
 
 Please contact us at info@rainbowsensing.com for further information.
 
@@ -72,7 +70,8 @@ Please contact us at info@rainbowsensing.com for further information.
 .. note::
 
    Acknowledgement: the development of **pyorc** has been funded partly by the World Meteorological Organisation,
-   Rijkswaterstaat and in-kind contributions of `Rainbow Sensing <https://rainbowsensing.com>`_.
+   Rijkswaterstaat, the European Commission TEMBO Africa project, Grant Agreement No. 101086209
+   and in-kind contributions of `Rainbow Sensing <https://rainbowsensing.com>`_.
 
 .. toctree::
    :maxdepth: 1
