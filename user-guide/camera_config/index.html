@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Camera configurations &#8212; pyorc 0.5.6 documentation</title>
+    <title>Camera configurations &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -450,6 +450,8 @@ simply call the subcommand on a command prompt with <code class="docutils litera
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: pyorc camera-config [OPTIONS] OUTPUT
 
+  CLI subcommand for camera configuration.
+
 Options:
   -V, --videofile FILE        video file with required objective and
                               resolution and control points in view
@@ -462,8 +464,7 @@ Options:
                               pairs.
   --dst TEXT                  Destination control points as list of 2 or 4 [x,
                               y] pairs, or at least 6 [x, y, z]. If --crs_gcps
-                              is provided, --dst is assumed to be in this
-                              CRS.&quot;
+                              is provided, --dst is assumed to be in this CRS.
   --z_0 FLOAT                 Water level [m] +CRS (e.g. geoid or ellipsoid of
                               GPS)
   --h_ref FLOAT               Water level [m] +local datum (e.g. staff or
@@ -938,7 +939,7 @@ click as many times as needed to remove points, and add them again with left cli
 again once you have reached the total amount of control points. The view after the optimization is shown in the example
 below.</p>
 <figure class="align-default">
-<img alt="_images/GCPs_interactive.jpg" src="_images/GCPs_interactive.jpg" />
+<img alt="../../_images/GCPs_interactive.jpg" src="../../_images/GCPs_interactive.jpg" />
 </figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1052,6 +1053,14 @@ need to provide x, y, z and the CRS (if this is different from the CRS of the ca
 </div>
 </div>
 </section>
+<section id="setting-rotation">
+<h2>Setting rotation<a class="headerlink" href="#setting-rotation" title="Permalink to this heading">#</a></h2>
+<p>If you are setting up a camera configuration on the CLI with a portrait video set up you may have to manually ensure
+the video is rotated to portrait scale. With a smartphone video, this is usually detected automatically. With a
+raspberry pi or IP camera this can usually not be detected. In this case, ensure that you manually provide the
+<code class="docutils literal notranslate"><span class="pre">--rotation</span></code> flag with a valid value (90, 180 or 270 degrees). Also use the same angle when you perform velocimetry
+on the same or other videos with the same view. See <a class="reference internal" href="../video/index.html#video-rotation"><span class="std std-ref">video rotation</span></a> for more information.</p>
+</section>
 <section id="setting-the-area-of-interest">
 <h2>Setting the area of interest<a class="headerlink" href="#setting-the-area-of-interest" title="Permalink to this heading">#</a></h2>
 <p><strong>pyorc</strong> is organized such that it processes a planar rectangular shaped area as shown in the example below
@@ -1098,7 +1107,7 @@ simply use right-click to remove points and select new locations for them to cha
 satisfied, click on <em>Done</em> and the bounding box will be stored in the camera configuration.</p>
 <p>Below an example of the bounding box as it appears in the interactive interface is shown.</p>
 <figure class="align-default">
-<img alt="_images/bbox_interactive.jpg" src="_images/bbox_interactive.jpg" />
+<img alt="../../_images/bbox_interactive.jpg" src="../../_images/bbox_interactive.jpg" />
 </figure>
 </div>
 <input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
@@ -1336,6 +1345,7 @@ the camera configuration is based, extract one frame, and plot it within one axe
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-the-lens-position">Setting the lens position</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-rotation">Setting rotation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-the-area-of-interest">Setting the area of interest</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stabilization">Stabilization</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#result-of-a-camera-configuration">Result of a camera configuration</a></li>
@@ -1376,7 +1386,7 @@ the camera configuration is based, extract one frame, and plot it within one axe
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

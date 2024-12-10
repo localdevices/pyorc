@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Setup a camera configuration for processing a single video &#8212; pyorc 0.5.6 documentation</title>
+    <title>Setup a camera configuration for processing a single video &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -138,7 +138,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -475,7 +475,7 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f353393de10&gt;
+&lt;matplotlib.image.AxesImage at 0x7f79990f6740&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -513,7 +513,7 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f3531837310&gt;
+&lt;matplotlib.legend.Legend at 0x7f7a201874c0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -533,7 +533,7 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 <ul class="simple">
 <li><p>the locally measured water level <code class="docutils literal notranslate"><span class="pre">h_ref</span></code> during your survey. Typically this comes from a staff gauge, that a local person reads out or a pressure gauge. For each video, a new water level must then be provided, which is used to relocate the ground control points to the right location for the new water level, and to estimate the depth over cross-sections, applied later in the process. Since we here process a single video, we don’t have to worry about this.</p></li>
 </ul>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
@@ -557,17 +557,6 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 <span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">gcps</span><span class="o">=</span><span class="n">gcps</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32735</span><span class="p">)</span>
 <br/></pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-CAMERA MATRIX: [[1.4286971e+03 0.0000000e+00 9.6000000e+02]
- [0.0000000e+00 1.4286971e+03 5.4000000e+02]
- [0.0000000e+00 0.0000000e+00 1.0000000e+00]]
-DIST COEFFS: [[0.0], [0.0], [0.0], [0.0], [0.0]]
-</pre></div></div>
 </div>
 <p>Below we make a quick plot. Cartopy is used to make the plot geographically aware. We use GoogleTiles, using the satellite style, to get some awareness of the surroundings.</p>
 <div class="nbinput docutils container">
@@ -621,7 +610,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f353072e3e0&gt;
+&lt;matplotlib.legend.Legend at 0x7f7990e87910&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -745,13 +734,13 @@ objective. * a target resolution (in meters) must be selected. The resolution is
     ],
     &#34;camera_matrix&#34;: [
         [
-            1428.6971435546875,
+            1430.636962890625,
             0.0,
             960.0
         ],
         [
             0.0,
-            1428.6971435546875,
+            1430.636962890625,
             540.0
         ],
         [
@@ -760,7 +749,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
             1.0
         ]
     ],
-    &#34;bbox&#34;: &#34;POLYGON ((642730.1118669873 8304293.170683222, 642731.2166022267 8304302.7069067955, 642739.3621265283 8304301.763278779, 642738.2573912889 8304292.227055205, 642730.1118669873 8304293.170683222))&#34;
+    &#34;bbox&#34;: &#34;POLYGON ((642730.1126120435 8304293.179440579, 642731.2229648121 8304302.7150117075, 642739.3679318167 8304301.766585384, 642738.2575790482 8304292.231014256, 642730.1126120435 8304293.179440579))&#34;
 }
 </pre></div></div>
 </div>
@@ -860,7 +849,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

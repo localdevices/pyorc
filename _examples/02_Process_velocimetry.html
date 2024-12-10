@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Analyze surface velocities of a video with velocimetry &#8212; pyorc 0.5.6 documentation</title>
+    <title>Analyze surface velocities of a video with velocimetry &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -138,7 +138,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -480,7 +480,7 @@ document.write(`
     <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">end_frame</span><span class="o">=</span><span class="mi">125</span><span class="p">,</span>
     <span class="n">stabilize</span><span class="o">=</span><span class="n">stabilize</span><span class="p">,</span>
-    <span class="n">h_a</span><span class="o">=</span><span class="mf">0.</span>
+    <span class="n">h_a</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">video</span>
 <br/></pre></div>
@@ -491,7 +491,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 126/126 [00:02&lt;00:00, 44.11it/s]
+100%|██████████| 126/126 [00:02&lt;00:00, 44.52it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -676,14 +676,14 @@ Camera configuration: {
   --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
 }
 
-html[theme=dark],
-html[data-theme=dark],
-body[data-theme=dark],
+html[theme="dark"],
+html[data-theme="dark"],
+body[data-theme="dark"],
 body.vscode-dark {
   --xr-font-color0: rgba(255, 255, 255, 1);
   --xr-font-color2: rgba(255, 255, 255, 0.54);
   --xr-font-color3: rgba(255, 255, 255, 0.38);
-  --xr-border-color: #1F1F1F;
+  --xr-border-color: #1f1f1f;
   --xr-disabled-color: #515151;
   --xr-background-color: #111111;
   --xr-background-color-row-even: #111111;
@@ -728,7 +728,7 @@ body.vscode-dark {
 .xr-sections {
   padding-left: 0 !important;
   display: grid;
-  grid-template-columns: 150px auto auto 1fr 20px 20px;
+  grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
 }
 
 .xr-section-item {
@@ -736,7 +736,9 @@ body.vscode-dark {
 }
 
 .xr-section-item input {
-  display: none;
+  display: inline-block;
+  opacity: 0;
+  height: 0;
 }
 
 .xr-section-item input + label {
@@ -746,6 +748,10 @@ body.vscode-dark {
 .xr-section-item input:enabled + label {
   cursor: pointer;
   color: var(--xr-font-color2);
+}
+
+.xr-section-item input:focus + label {
+  border: 2px solid var(--xr-font-color0);
 }
 
 .xr-section-item input:enabled + label:hover {
@@ -769,7 +775,7 @@ body.vscode-dark {
 
 .xr-section-summary-in + label:before {
   display: inline-block;
-  content: '►';
+  content: "►";
   font-size: 11px;
   width: 15px;
   text-align: center;
@@ -780,7 +786,7 @@ body.vscode-dark {
 }
 
 .xr-section-summary-in:checked + label:before {
-  content: '▼';
+  content: "▼";
 }
 
 .xr-section-summary-in:checked + label > span {
@@ -852,15 +858,15 @@ body.vscode-dark {
 }
 
 .xr-dim-list:before {
-  content: '(';
+  content: "(";
 }
 
 .xr-dim-list:after {
-  content: ')';
+  content: ")";
 }
 
 .xr-dim-list li:not(:last-child):after {
-  content: ',';
+  content: ",";
   padding-right: 5px;
 }
 
@@ -1011,7 +1017,7 @@ dl.xr-attrs {
   fill: currentColor;
 }
 </style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;frames&#x27; (time: 126, y: 1080, x: 1920)&gt; Size: 261MB
-dask.array&lt;stack, shape=(126, 1080, 1920), dtype=uint8, chunksize=(1, 1080, 1920), chunktype=numpy.ndarray&gt;
+dask.array&lt;rechunk-merge, shape=(126, 1080, 1920), dtype=uint8, chunksize=(1, 1080, 1920), chunktype=numpy.ndarray&gt;
 Coordinates:
   * time     (time) float64 1kB 0.0 0.03333 0.06667 0.1 ... 4.1 4.133 4.167
   * y        (y) int64 9kB 1079 1078 1077 1076 1075 1074 1073 ... 6 5 4 3 2 1 0
@@ -1021,7 +1027,7 @@ Coordinates:
 Attributes:
     camera_shape:   [1080, 1920]
     camera_config:  {\n    &quot;height&quot;: 1080,\n    &quot;width&quot;: 1920,\n    &quot;crs&quot;: &quot;P...
-    h_a:            0.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-a48c71b7-94e3-48e4-afe9-49140bbeae8f' class='xr-array-in' type='checkbox' checked><label for='section-a48c71b7-94e3-48e4-afe9-49140bbeae8f' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    h_a:            0.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'frames'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 126</li><li><span class='xr-has-index'>y</span>: 1080</li><li><span class='xr-has-index'>x</span>: 1920</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-fe65d7e9-0c7e-4405-846c-a8b246445e9d' class='xr-array-in' type='checkbox' checked><label for='section-fe65d7e9-0c7e-4405-846c-a8b246445e9d' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(1, 1080, 1920), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1047,7 +1053,7 @@ Attributes:
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 126 chunks in 253 graph layers </td>
+                        <td colspan="2"> 126 chunks in 16 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1135,7 +1141,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-3d8e282f-0ae6-4475-a933-3843330d485b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-3d8e282f-0ae6-4475-a933-3843330d485b' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-1236dce7-c9ea-406e-9389-5b9a6a2b7e07' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-1236dce7-c9ea-406e-9389-5b9a6a2b7e07' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-202ea40d-c0b1-4438-bf58-e1c065712f8b' class='xr-var-data-in' type='checkbox'><label for='data-202ea40d-c0b1-4438-bf58-e1c065712f8b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
+</table></div></div></li><li class='xr-section-item'><input id='section-5a5839c5-5976-49fe-adad-b24c4dac4159' class='xr-section-summary-in' type='checkbox'  checked><label for='section-5a5839c5-5976-49fe-adad-b24c4dac4159' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.0 0.03333 0.06667 ... 4.133 4.167</div><input id='attrs-12ad56a6-0e91-4133-bfe3-d2b561a7fcf4' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-12ad56a6-0e91-4133-bfe3-d2b561a7fcf4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-60952fdb-72b2-4305-9b63-5a3e303db8ea' class='xr-var-data-in' type='checkbox'><label for='data-60952fdb-72b2-4305-9b63-5a3e303db8ea' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0.      , 0.033333, 0.066667, 0.1     , 0.133333, 0.166667, 0.2     ,
        0.233333, 0.266667, 0.3     , 0.333333, 0.366667, 0.4     , 0.433333,
        0.466667, 0.5     , 0.533333, 0.566667, 0.6     , 0.633333, 0.666667,
        0.7     , 0.733333, 0.766667, 0.8     , 0.833333, 0.866667, 0.9     ,
@@ -1152,19 +1158,19 @@ Attributes:
        3.266667, 3.3     , 3.333333, 3.366667, 3.4     , 3.433333, 3.466667,
        3.5     , 3.533333, 3.566667, 3.6     , 3.633333, 3.666667, 3.7     ,
        3.733333, 3.766667, 3.8     , 3.833333, 3.866667, 3.9     , 3.933333,
-       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-f2be03dd-2fd4-4e48-a357-06b007e1be60' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-f2be03dd-2fd4-4e48-a357-06b007e1be60' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-96c29b57-6520-46d4-befb-63418fe3bcb7' class='xr-var-data-in' type='checkbox'><label for='data-96c29b57-6520-46d4-befb-63418fe3bcb7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-b0e3c5d7-7df2-4ef3-82f4-c2e173540648' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-b0e3c5d7-7df2-4ef3-82f4-c2e173540648' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-90d11996-96e3-4bb5-b39b-e8c02f50566c' class='xr-var-data-in' type='checkbox'><label for='data-90d11996-96e3-4bb5-b39b-e8c02f50566c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-c65ef1be-a358-43cd-88b7-94a6e3f19d65' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c65ef1be-a358-43cd-88b7-94a6e3f19d65' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-819d806c-2002-47bf-b5c3-e5ee02e474e6' class='xr-var-data-in' type='checkbox'><label for='data-819d806c-2002-47bf-b5c3-e5ee02e474e6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
+       3.966667, 4.      , 4.033333, 4.066667, 4.1     , 4.133333, 4.166667])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>y</span></div><div class='xr-var-dims'>(y)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1078 1077 1076 ... 3 2 1 0</div><input id='attrs-7640a84d-734e-4562-ab95-003d0de75892' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-7640a84d-734e-4562-ab95-003d0de75892' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-67fac1f5-08ae-41da-9434-893495ef72e4' class='xr-var-data-in' type='checkbox'><label for='data-67fac1f5-08ae-41da-9434-893495ef72e4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1079, 1078, 1077, ...,    2,    1,    0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>x</span></div><div class='xr-var-dims'>(x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-3d0899ff-e474-4675-8d22-15466a3f7023' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-3d0899ff-e474-4675-8d22-15466a3f7023' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-58a7d948-f4e3-44b4-907c-9bbf38d3ba8f' class='xr-var-data-in' type='checkbox'><label for='data-58a7d948-f4e3-44b4-907c-9bbf38d3ba8f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([   0,    1,    2, ..., 1917, 1918, 1919])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>xp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 ... 1916 1917 1918 1919</div><input id='attrs-cb238a01-1a26-4c57-ba1e-6f8fd8afd884' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-cb238a01-1a26-4c57-ba1e-6f8fd8afd884' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c3c28016-1ee9-427c-8798-b1de99a4e8f8' class='xr-var-data-in' type='checkbox'><label for='data-c3c28016-1ee9-427c-8798-b1de99a4e8f8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>X</dd><dt><span>long_name :</span></dt><dd>column in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
        ...,
        [   0,    1,    2, ..., 1917, 1918, 1919],
        [   0,    1,    2, ..., 1917, 1918, 1919],
-       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-a13d39cc-bc12-45bd-88ff-c42e4fa359f1' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a13d39cc-bc12-45bd-88ff-c42e4fa359f1' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-647505e4-35be-427e-9f68-8f19f8795cdf' class='xr-var-data-in' type='checkbox'><label for='data-647505e4-35be-427e-9f68-8f19f8795cdf' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
+       [   0,    1,    2, ..., 1917, 1918, 1919]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>yp</span></div><div class='xr-var-dims'>(y, x)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1079 1079 1079 1079 ... 0 0 0 0</div><input id='attrs-76f7c327-54e6-4930-8dee-b6da95144d69' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-76f7c327-54e6-4930-8dee-b6da95144d69' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-544805d1-3a0b-4b14-9707-25ff0e550038' class='xr-var-data-in' type='checkbox'><label for='data-544805d1-3a0b-4b14-9707-25ff0e550038' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>Y</dd><dt><span>long_name :</span></dt><dd>row in camera perspective</dd><dt><span>units :</span></dt><dd>-</dd></dl></div><div class='xr-var-data'><pre>array([[1079, 1079, 1079, ..., 1079, 1079, 1079],
        [1078, 1078, 1078, ..., 1078, 1078, 1078],
        [1077, 1077, 1077, ..., 1077, 1077, 1077],
        ...,
        [   2,    2,    2, ...,    2,    2,    2],
        [   1,    1,    1, ...,    1,    1,    1],
-       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-369ae3a2-b968-45ad-8fbb-90fe97cacc72' class='xr-section-summary-in' type='checkbox'  ><label for='section-369ae3a2-b968-45ad-8fbb-90fe97cacc72' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-f495a72c-ecda-4303-9ff9-9075cb5bdf34' class='xr-index-data-in' type='checkbox'/><label for='index-f495a72c-ecda-4303-9ff9-9075cb5bdf34' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([                0.0, 0.03333333333333334, 0.06666666666666668,
+       [   0,    0,    0, ...,    0,    0,    0]])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-77c40318-590f-496b-aa16-dd45f710f05a' class='xr-section-summary-in' type='checkbox'  ><label for='section-77c40318-590f-496b-aa16-dd45f710f05a' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-e4d91dd4-83d0-4cc2-832f-778e56dace7f' class='xr-index-data-in' type='checkbox'/><label for='index-e4d91dd4-83d0-4cc2-832f-778e56dace7f' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([                0.0, 0.03333333333333334, 0.06666666666666668,
                        0.1, 0.13333333333333336, 0.16666666666666666,
                        0.2, 0.23333333333333334,  0.2666666666666667,
                        0.3,
@@ -1173,13 +1179,13 @@ Attributes:
         3.9666666666666672,                 4.0,   4.033333333333333,
          4.066666666666666,                 4.1,   4.133333333333333,
          4.166666666666667],
-      dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-8aedf354-ddd9-4488-8358-e3dceb940384' class='xr-index-data-in' type='checkbox'/><label for='index-8aedf354-ddd9-4488-8358-e3dceb940384' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
+      dtype=&#x27;float64&#x27;, name=&#x27;time&#x27;, length=126))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>y</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-7c74a595-d0ad-4f3e-b957-a856156ff4e0' class='xr-index-data-in' type='checkbox'/><label for='index-7c74a595-d0ad-4f3e-b957-a856156ff4e0' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([1079, 1078, 1077, 1076, 1075, 1074, 1073, 1072, 1071, 1070,
        ...
           9,    8,    7,    6,    5,    4,    3,    2,    1,    0],
-      dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-0073df57-5d07-4e0d-81d2-506974862f09' class='xr-index-data-in' type='checkbox'/><label for='index-0073df57-5d07-4e0d-81d2-506974862f09' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
+      dtype=&#x27;int64&#x27;, name=&#x27;y&#x27;, length=1080))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>x</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-0e71f101-b27f-4dfa-8d04-90ab9e16b04c' class='xr-index-data-in' type='checkbox'/><label for='index-0e71f101-b27f-4dfa-8d04-90ab9e16b04c' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([   0,    1,    2,    3,    4,    5,    6,    7,    8,    9,
        ...
        1910, 1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919],
-      dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-0b0aa51b-845b-41c3-96e6-4f9802f3d7d5' class='xr-section-summary-in' type='checkbox'  checked><label for='section-0b0aa51b-845b-41c3-96e6-4f9802f3d7d5' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
+      dtype=&#x27;int64&#x27;, name=&#x27;x&#x27;, length=1920))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-6930420d-d41e-41a9-b3dc-928a01bfe616' class='xr-section-summary-in' type='checkbox'  checked><label for='section-6930420d-d41e-41a9-b3dc-928a01bfe616' class='xr-section-summary' >Attributes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>camera_shape :</span></dt><dd>[1080, 1920]</dd><dt><span>camera_config :</span></dt><dd>{
     &quot;height&quot;: 1080,
     &quot;width&quot;: 1920,
     &quot;crs&quot;: &quot;PROJCRS[\&quot;WGS 84 / UTM zone 35S\&quot;,BASEGEOGCRS[\&quot;WGS 84\&quot;,ENSEMBLE[\&quot;World Geodetic System 1984 ensemble\&quot;,MEMBER[\&quot;World Geodetic System 1984 (Transit)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G730)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G873)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1150)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1674)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G1762)\&quot;],MEMBER[\&quot;World Geodetic System 1984 (G2139)\&quot;],ELLIPSOID[\&quot;WGS 84\&quot;,6378137,298.257223563,LENGTHUNIT[\&quot;metre\&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[\&quot;Greenwich\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433]],ID[\&quot;EPSG\&quot;,4326]],CONVERSION[\&quot;UTM zone 35S\&quot;,METHOD[\&quot;Transverse Mercator\&quot;,ID[\&quot;EPSG\&quot;,9807]],PARAMETER[\&quot;Latitude of natural origin\&quot;,0,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8801]],PARAMETER[\&quot;Longitude of natural origin\&quot;,27,ANGLEUNIT[\&quot;degree\&quot;,0.0174532925199433],ID[\&quot;EPSG\&quot;,8802]],PARAMETER[\&quot;Scale factor at natural origin\&quot;,0.9996,SCALEUNIT[\&quot;unity\&quot;,1],ID[\&quot;EPSG\&quot;,8805]],PARAMETER[\&quot;False easting\&quot;,500000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8806]],PARAMETER[\&quot;False northing\&quot;,10000000,LENGTHUNIT[\&quot;metre\&quot;,1],ID[\&quot;EPSG\&quot;,8807]]],CS[Cartesian,2],AXIS[\&quot;(E)\&quot;,east,ORDER[1],LENGTHUNIT[\&quot;metre\&quot;,1]],AXIS[\&quot;(N)\&quot;,north,ORDER[2],LENGTHUNIT[\&quot;metre\&quot;,1]],USAGE[SCOPE[\&quot;Engineering survey, topographic mapping.\&quot;],AREA[\&quot;Between 24\u00b0E and 30\u00b0E, southern hemisphere between 80\u00b0S and equator, onshore and offshore. Botswana. Burundi. Democratic Republic of the Congo (Zaire). Rwanda. South Africa. Tanzania. Uganda. Zambia. Zimbabwe.\&quot;],BBOX[-80,24,0,30]],ID[\&quot;EPSG\&quot;,32735]]&quot;,
@@ -1273,18 +1279,25 @@ use the default plot functionalities of <code class="docutils literal notranslat
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f0016567d30&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f907c3cae30&gt;
 </pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_02_Process_velocimetry_9_1.png" src="../_images/_examples_02_Process_velocimetry_9_1.png" />
+</div>
 </div>
 </section>
 <section id="normalize-to-add-contrast">
@@ -1294,8 +1307,11 @@ use the default plot functionalities of <code class="docutils literal notranslat
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da_norm</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
-<span class="n">da_norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># da_norm = da.frames.time_diff(abs=False, thres=0.)</span>
+<span class="c1"># da_norm = da_norm.frames.minmax(min=0.)</span>
+<span class="n">da_norm</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">da_norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -1305,7 +1321,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f00165fb160&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f907c16b400&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1315,13 +1331,13 @@ use the default plot functionalities of <code class="docutils literal notranslat
 <img alt="../_images/_examples_02_Process_velocimetry_11_1.png" src="../_images/_examples_02_Process_velocimetry_11_1.png" />
 </div>
 </div>
-<p>A lot more contrast is visible now. We can now project the frames to an orthoprojected plane. The camera configuration, which is part of the <code class="docutils literal notranslate"><span class="pre">Video</span></code> object is used under the hood to do this.</p>
+<p>A lot more contrast is visible now. We can now project the frames to an orthoprojected plane. The camera configuration, which is part of the <code class="docutils literal notranslate"><span class="pre">Video</span></code> object is used under the hood to do this. We use the new numpy-based projection method. The default is to use OpenCV methods, remove <code class="docutils literal notranslate"><span class="pre">method=&quot;numpy&quot;</span></code> to try that.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
-<span class="n">da_norm_proj</span> <span class="o">=</span> <span class="n">da_norm</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">project</span><span class="p">()</span>
+<span class="n">da_norm_proj</span> <span class="o">=</span> <span class="n">da_norm</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span>
 <span class="n">da_norm_proj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
 <br/></pre></div>
 </div>
@@ -1332,7 +1348,7 @@ use the default plot functionalities of <code class="docutils literal notranslat
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f00165f8310&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f907f557ee0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1389,28 +1405,26 @@ to the plotting functionalities. The grid is rotated so that its orientation alw
 </section>
 <section id="Velocimetry-estimates">
 <h2>Velocimetry estimates<a class="headerlink" href="#Velocimetry-estimates" title="Permalink to this heading">#</a></h2>
-<p>Now that we have real-world projected frames, with contrast enhanced, let’s do some velocimetry! For Particle Image Velocimetry, this is as simple as calling the <code class="docutils literal notranslate"><span class="pre">.get_piv</span></code> method on the frames. Again a lazy result is returned really fast. If you want to do the computations, you can either extract a single frame, or (as below) store the result in a nice NetCDF file. Note that this file can be loaded back into memory with the <code class="docutils literal notranslate"><span class="pre">xarray</span></code> API without any additional fuss. We use a delayed method
-for storing, just to see a progress bar. If you are not interested in that, you can also replace the last 3 lines by:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>piv.to_netcdf(&quot;ngwerere_piv.nc&quot;)
+<p>Now that we have real-world projected frames, with contrast enhanced, let’s do some velocimetry! For Particle Image Velocimetry, this is as simple as calling the <code class="docutils literal notranslate"><span class="pre">.get_piv</span></code> method on the frames. We then store the result in a nice NetCDF file. This file can be loaded back into memory with the <code class="docutils literal notranslate"><span class="pre">xarray</span></code> API without any additional fuss. We also use our new <code class="docutils literal notranslate"><span class="pre">numba</span></code> engine to compute PIV (version &gt;= 0.7.0). This is faster than the original <code class="docutils literal notranslate"><span class="pre">openpiv</span></code> engine. If you want to try <code class="docutils literal notranslate"><span class="pre">openpiv</span></code> you
+can do this by changing the engine.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">piv</span> <span class="o">=</span> <span class="n">da_norm_proj</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">get_piv</span><span class="p">(</span><span class="n">engine</span><span class="o">=</span><span class="s2">&quot;openpiv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">piv</span> <span class="o">=</span> <span class="n">da_norm_proj</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">get_piv</span><span class="p">()</span>
-<span class="n">delayed_obj</span> <span class="o">=</span> <span class="n">piv</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="s2">&quot;ngwerere_piv.nc&quot;</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">with</span> <span class="n">ProgressBar</span><span class="p">():</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="n">delayed_obj</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">piv</span> <span class="o">=</span> <span class="n">da_norm_proj</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">get_piv</span><span class="p">(</span><span class="n">engine</span><span class="o">=</span><span class="s2">&quot;numba&quot;</span><span class="p">)</span>
+<span class="n">piv</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="s2">&quot;ngwerere_piv.nc&quot;</span><span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-[########################################] | 100% Completed | 82.13 s
+Computing PIV per chunk: 100%|██████████| 1/1 [00:29&lt;00:00, 29.16s/it]
 </pre></div></div>
 </div>
 </section>
@@ -1509,7 +1523,7 @@ for storing, just to see a progress bar. If you are not interested in that, you 
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

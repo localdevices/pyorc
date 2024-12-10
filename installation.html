@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Installation &#8212; pyorc 0.5.6 documentation</title>
+    <title>Installation &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -424,51 +424,64 @@ document.write(`
 <a class="reference external" href="https://github.com/conda-forge/miniforge">Miniforge</a> and <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> will install Python and the conda package manager.</p>
 <p>In general, <strong>mamba</strong> is a lot faster than <strong>conda</strong> and requires less memory.</p>
 </section>
-<section id="installation-from-conda-forge-package">
-<span id="install-conda-forge"></span><h2>Installation from conda-forge package<a class="headerlink" href="#installation-from-conda-forge-package" title="Permalink to this heading">#</a></h2>
-<p>We always recommend working in a dedicated virtual environment for <strong>pyorc</strong>. If you need a new virtual environment,
-then you can make and then activate one with the following commands</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>&lt;YOUR-FAVORITE-NAME&gt;
-<span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>&lt;YOUR-FAVORITE-NAME&gt;
+<section id="making-a-virtual-environment">
+<h2>Making a virtual environment<a class="headerlink" href="#making-a-virtual-environment" title="Permalink to this heading">#</a></h2>
+<p>To get started with <strong>pyorc</strong>, we recommend to set up a python virtual environment. This ensures that installed libraries
+<strong>pyorc</strong> will not conflict with other libraries or library versions which you may need for other projects.</p>
+<p>Setting up a virtual environment can be done with:
+.. code-block:: console</p>
+<blockquote>
+<div><p>$ python -m venv pyorc_env</p>
+</div></blockquote>
+<p>this creates a new folder <cite>pyorc_env</cite> on your disk which contains your virtual environment.
+After activating the environment, any package you install will be installed in this environment only.
+Activating in Unix/Linux is done as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">source pyorc_env/bin/activate</span>
 </pre></div>
 </div>
-<p>Naturally <cite>&lt;YOUR-FAVORITE-NAME&gt;</cite> should be replaced by a name of your liking for instance <cite>pyorc</cite>. If you already have
-a virtual environment, then please skip the first line, and only use the last line to activate the environment you want
-to use.</p>
-<p>Once the environment is prepared, install the latest <cite>conda-forge</cite> package, with all dependencies using the following
-command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>pyopenrivercam
+<p>In Windows, the activation script is in a different folder. Type the following to activate the environment.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pyorc_env\Scripts\activate</span>
 </pre></div>
 </div>
-<p>Mamba users will have a faster experience. They can use the following command instead:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mamba<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>pyopenrivercam
+<p>Alternatively, you can make and activate an environment with mamba and python and pip
+installations in that environment as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mamba create --name pyorc_env</span>
+<span class="go">mamba activate pyorc_env</span>
+<span class="go">mamba install python pip</span>
 </pre></div>
 </div>
 </section>
 <section id="installation-from-pypi-with-pip">
 <span id="install-pip"></span><h2>Installation from pypi with pip<a class="headerlink" href="#installation-from-pypi-with-pip" title="Permalink to this heading">#</a></h2>
-<p>This may be useful for deployment on servers or Docker environments.
+<p>The most straightforward installation is through <code class="docutils literal notranslate"><span class="pre">pip</span></code>. This also works in a Raspberry Pi 64-bit OS.
 First activate the environment you want <strong>pyorc</strong> to be installed in (if you don’t care about virtual environments, then
-simply skip this step). Dependencies <strong>rasterio</strong>, <strong>geopandas</strong> and <strong>cartopy</strong> are known to be difficult to install with
-<strong>pip</strong>. Therefore, we highly recommend to use a conda environment that already includes these dependencies before
-installation. If you don’t have them yet, install them as follows:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>&lt;name-of-your-environment&gt;
-<span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>cartopy<span class="w"> </span>geopandas<span class="w"> </span>rasterio
+simply skip this step). Activation of a virtual environment made with <code class="docutils literal notranslate"><span class="pre">venv</span></code> or with mamba is
+explained in the section above.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pyopenrivercam<span class="o">[</span>extra<span class="o">]</span>
 </pre></div>
 </div>
-<p>Then get the pyorc library from pypi using</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pyopenrivercam
+<p>The <code class="docutils literal notranslate"><span class="pre">[extra]</span></code> section ensures that also geographical plotting is supported, which we recommend especially for the
+set up of a camera configuration.</p>
+</section>
+<section id="upgrading-from-pypi-with-pip">
+<span id="install-conda-forge"></span><h2>Upgrading from pypi with pip<a class="headerlink" href="#upgrading-from-pypi-with-pip" title="Permalink to this heading">#</a></h2>
+<p>Did you read about a new version and you want to upgrade? Simply activate your virtual environment, type</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pyopenrivercam<span class="o">[</span>extra<span class="o">]</span>
 </pre></div>
 </div>
-<div class="admonition note" id="install-code">
-<p class="admonition-title">Note</p>
-<p>Since version 0.5.1 we also support installation under the Raspberry Pi platform. Please follow the instructions
-for installation from pypi with pip. <em>pyorc</em> only works on Raspberry Pi OS 64-bit Operating System. On 32-bit
-the package will not be found in the pypi repositories.</p>
+<p>and then enjoy the latest features.</p>
+</section>
+<section id="installation-from-conda-forge-package">
+<h2>Installation from conda-forge package<a class="headerlink" href="#installation-from-conda-forge-package" title="Permalink to this heading">#</a></h2>
+<p>Activate your mamba created virtual environment with the activate command as follows</p>
+<p>Once the environment is prepared, install the latest <cite>conda-forge</cite> package, with all dependencies using the following
+command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mamba<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>pyopenrivercam
+</pre></div>
 </div>
 </section>
 <section id="installation-from-latest-code-base">
-<h2>Installation from latest code base<a class="headerlink" href="#installation-from-latest-code-base" title="Permalink to this heading">#</a></h2>
+<span id="install-code"></span><h2>Installation from latest code base<a class="headerlink" href="#installation-from-latest-code-base" title="Permalink to this heading">#</a></h2>
 <p>To install the latest (unreleased) version from github, replace the last command shown in the previous section by:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/localdevices/pyorc.git
 </pre></div>
@@ -527,8 +540,10 @@ the package will not be found in the pypi repositories.</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#user-install">User install</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-from-conda-forge-package">Installation from conda-forge package</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#making-a-virtual-environment">Making a virtual environment</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-from-pypi-with-pip">Installation from pypi with pip</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#upgrading-from-pypi-with-pip">Upgrading from pypi with pip</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-from-conda-forge-package">Installation from conda-forge package</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-from-latest-code-base">Installation from latest code base</a></li>
 </ul>
   </nav></div>
@@ -567,7 +582,7 @@ the package will not be found in the pypi repositories.</p>
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Videos &#8212; pyorc 0.5.6 documentation</title>
+    <title>Videos &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -595,6 +595,39 @@ in between will be processed.</p>
 </div>
 </div>
 </section>
+<section id="rotation">
+<span id="video-rotation"></span><h2>Rotation<a class="headerlink" href="#rotation" title="Permalink to this heading">#</a></h2>
+<p>Generally, videos that are taken in portrait position with a smartphone, are automatically rotated upon loading.
+If you use a camera that does not recognize the rotation, then you may also supply a rotation upon loading a video.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+Command-line</label><div class="sd-tab-content docutils">
+<p>You can set a rotation by providing <code class="docutils literal notranslate"><span class="pre">rotation</span></code> in the video
+section and supply either 90, 180, or 270 degrees which are clockwise rotations. The example below for
+instance rotates clockwise by 90 degrees.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">  </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
+<span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
+<span class="w">  </span><span class="nt">rotation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
+API</label><div class="sd-tab-content docutils">
+<p>You can set a rotation by providing <code class="docutils literal notranslate"><span class="pre">rotation</span></code> in the <code class="docutils literal notranslate"><span class="pre">Video</span></code> instance. Only values 90, 180, or 270
+degrees (clockwise) are accepted. E.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;some_portrait_video_file.mp4&quot;</span>
+<span class="n">cam_conf_file</span> <span class="o">=</span> <span class="s2">&quot;some_cam_config.json&quot;</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">video_file</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_conf_file</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 <section id="stabilization">
 <h2>Stabilization<a class="headerlink" href="#stabilization" title="Permalink to this heading">#</a></h2>
 <div class="admonition note">
@@ -634,8 +667,8 @@ a few mouse clicks.</p>
 </table>
 </div>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-8">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-10">
 Command-line</label><div class="sd-tab-content docutils">
 <p>Add the <code class="docutils literal notranslate"><span class="pre">stabilize</span></code> option in the recipe with the name of the stabilization strategy as argument. Below, a
 full example is provided including a set of coordinates that bounds the water surface. These are provides as
@@ -648,8 +681,8 @@ full example is provided including a set of coordinates that bounds the water su
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-9">
+<input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-11">
 API</label><div class="sd-tab-content docutils">
 <p>A working example to obtain a stabilized video from our example section is provided below.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
@@ -692,14 +725,14 @@ will then only load and process the frames you select afterwards.</p>
 and start and end frame, then extracting frames, and working with these to sharpen features, reproject and store these
 becomes very easy.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-10">
+<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-6" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-12">
 Command-line</label><div class="sd-tab-content docutils">
 <p>Frames will be extracted automatically when a <code class="docutils literal notranslate"><span class="pre">frames</span></code> section is available in the recipe. More on the use of
 frames can be found in <a class="reference internal" href="../frames/index.html#frames-ug"><span class="std std-ref">frames section</span></a></p>
 </div>
-<input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-11">
+<input id="sd-tab-item-13" name="sd-tab-set-6" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-13">
 API</label><div class="sd-tab-content docutils">
 <p>To extract all frames, you only need to call <code class="docutils literal notranslate"><span class="pre">video.get_frames()</span></code>. This will five you grayscale
 frames, in a <code class="docutils literal notranslate"><span class="pre">xr.DataArray</span></code> object. The structure of this object follows a specific data model for frames, and
@@ -758,6 +791,7 @@ therefore, methods that work on sets of frames can be applied, as described in t
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#camera-configuration">Camera configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-current-water-level">The current water level</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#frame-range">Frame range</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rotation">Rotation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stabilization">Stabilization</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-frames">Getting frames</a></li>
 </ul>
@@ -797,7 +831,7 @@ therefore, methods that work on sets of frames can be applied, as described in t
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

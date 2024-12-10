@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Velocimetry &#8212; pyorc 0.5.6 documentation</title>
+    <title>Velocimetry &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -436,7 +436,7 @@ of frames, by analyzing frame to frame movements in time. This can be done with 
 has implemented one of these methods called “Particle Image Velocimetry”.</p>
 <section id="particle-image-velocimetry">
 <h2>Particle Image Velocimetry<a class="headerlink" href="#particle-image-velocimetry" title="Permalink to this heading">#</a></h2>
-<p>Particle Image Velocimetry uses cross-correlation methods to estimate the most likely position of an observed pattern
+<p>Particle Image Velocimetry (PIV) uses cross-correlation methods to estimate the most likely position of an observed pattern
 from frame to frame. Therefore there is no interdependency over more than 2 frames. To observe patterns, the total area
 of interest is subdivided into small blocks of pixels with overlap, also called “interrogation windows”. Currently the
 overlap is fixed in <em>pyorc</em> on 50% of each block. Say that you have reprojected your data to a 0.02 m resolution
@@ -461,6 +461,10 @@ API</label><div class="sd-tab-content docutils">
 </ul>
 </div>
 </div>
+<p>We implemented several engines to compute PIV. The default is <code class="docutils literal notranslate"><span class="pre">openpiv</span></code> which uses the OpenPIV library to
+perform computations. The alternatives are <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code> which use the numba and numpy libraries for
+the computations, as provided in the underlying FF-PIV library. <code class="docutils literal notranslate"><span class="pre">numba</span></code> is by far the fastest option, and likely
+will become the default in the future.</p>
 <p>Naturally, before orthorectification you may decide to apply one or several preprocessing methods as described in
 <a class="reference internal" href="../frames/index.html#frames-ug"><span class="std std-ref">Frames</span></a> to improve the visibility of tracers. We highly recommend that in many cases, as shown in the snippets
 in <a class="reference internal" href="../frames/index.html#frames-ug"><span class="std std-ref">Frames</span></a>.</p>
@@ -474,9 +478,16 @@ configuration will be used to inform the window size of the velocimetry. If you 
 supply an extra section in the recipe as follows:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">velocimetry</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">get_piv</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">window_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">        </span><span class="nt">window_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64</span>
+<span class="w">        </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">numba</span>
 </pre></div>
 </div>
+<p>Here the <code class="docutils literal notranslate"><span class="pre">engine:</span> <span class="pre">numba</span></code> ensures that the much faster numba implementation is used. <code class="docutils literal notranslate"><span class="pre">window_size:</span> <span class="pre">64</span></code>
+overrides any window size provided in the camera configuration and sets it to 64. When using the engine
+parameter with <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, you can also provide memory safety margins by manually adjusting the
+chunk size with the <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> parameter. If you notice a memory warning is given, and <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> is
+set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we hope you never
+have to touch this parameter at all :-) unless you process very very large videos with very large objectives.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>It seems a little superfluous to have a section called <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code>, then a subsection <code class="docutils literal notranslate"><span class="pre">get_piv</span></code> and then
@@ -495,9 +506,17 @@ API</label><div class="sd-tab-content docutils">
 <p>The size of the interrogation window can already be set in the camera configuration, as shown in <a class="reference internal" href="../camera_config/index.html#camera-config-ug"><span class="std std-ref">Camera configurations</span></a>.
 However, you may also provide a different window size on the fly using the keyword <code class="docutils literal notranslate"><span class="pre">window_size</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ignore the window size in the camera config and set this to 10 pixels</span>
-<span class="n">piv</span> <span class="o">=</span> <span class="n">frame_proj</span><span class="o">.</span><span class="n">get_piv</span><span class="p">(</span><span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">piv</span> <span class="o">=</span> <span class="n">frame_proj</span><span class="o">.</span><span class="n">get_piv</span><span class="p">(</span><span class="n">window_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Use thew <code class="docutils literal notranslate"><span class="pre">engine</span></code> parameter to select a much faster computational engine. With <code class="docutils literal notranslate"><span class="pre">engine=&quot;numba&quot;</span></code> a very fast
+numba-based computation will be used. The computation will be chunked into several batches based on available
+memory. If you find out your computations crash it is likely due to lack of memory. In this case you can
+override automatically computed chunk amounts by setting <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> to a smaller or user-defined amount.
+You may also set <code class="docutils literal notranslate"><span class="pre">memory_factor</span></code> to a higher amount than the default (2). <code class="docutils literal notranslate"><span class="pre">memory_factor</span></code>
+decides on the fraction of the memory reserved for one entire chunk of computation. E.g. by setting it to 4 only
+1/4th of the available memory is assumed to be available. In practice, for large problems, more temporary
+memory storage is needed within the subprocessing.</p>
 </div>
 </div>
 </section>
@@ -543,22 +562,13 @@ the NetCDF standard as the data model. <em>pyorc</em> also follows the <a class=
 <span class="n">piv</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="s2">&quot;piv_results.nc&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Only when you store or otherwise retrieve data resulting from <code class="docutils literal notranslate"><span class="pre">get_piv</span></code>, the computations will actually be performed.
-Therefore it is normal that only after calling a command that retrieves data, you will need to wait for a while before
-data is returned. This may take several minutes for small problems, but for large areas of interest or large amounts of
-time steps (or a slow machine) it can also take half an hour or longer. To keep track of progress you can also first
-prepare the storage process and the wrap a <code class="docutils literal notranslate"><span class="pre">ProgressBar</span></code> from the <code class="docutils literal notranslate"><span class="pre">dask.diagnostics</span></code> library.
-Below you can find an example how to store data with such a progress bar.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import ProgressBar</span>
-<span class="kn">from</span> <span class="nn">dask.diagnostics</span> <span class="kn">import</span> <span class="n">ProgressBar</span>
-<span class="c1"># store results with a progress bar</span>
-<span class="n">delayed_obj</span> <span class="o">=</span> <span class="n">piv</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="s2">&quot;piv_results.nc&quot;</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">with</span> <span class="n">ProgressBar</span><span class="p">():</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="n">delayed_obj</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>You should then see a progressing bar on your screen while data is stored. If you wish to load your results into
-memory after having stored it in a previous session, you can simply use <code class="docutils literal notranslate"><span class="pre">xarray</span></code> functionality to do so.</p>
+<p>PIV computations are the longest in time. Therefore it is normal that you will need to wait for a while before
+data is returned. This may take a few seconds for small problems, but for large areas of interest or large
+amounts of time steps (or a slow machine with little memory) it can also take half an hour or longer. With
+the new (&gt;=0.7.0) numba and numpy engines, you can keep track of progress with a progress bar which is
+automatically displayed during the processing.</p>
+<p>If you wish to load your results into memory after having stored it in a previous session, you can simply
+use <code class="docutils literal notranslate"><span class="pre">xarray</span></code> functionality to do so.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 <span class="n">piv</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;piv_results.nc&quot;</span><span class="p">)</span>
 <span class="n">piv</span>
@@ -883,7 +893,7 @@ is also removed. This is meant to remove isolated values. Also described in <a c
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

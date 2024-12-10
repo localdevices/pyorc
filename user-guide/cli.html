@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Command line interface &#8212; pyorc 0.5.6 documentation</title>
+    <title>Command line interface &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -450,11 +450,10 @@ the <code class="docutils literal notranslate"><span class="pre">--help</span></
   Command line interface for pyOpenRiverCam.
 
 Options:
-  --version             Show the version and exit.
-  --info                Print information and version of PyOpenRiverCam
-  --license             Print license information for PyOpenRiverCam
-  --debug / --no-debug
-  --help                Show this message and exit.
+  --version  Show the version and exit.
+  --info     Print information and version of PyOpenRiverCam
+  --license  Print license information for PyOpenRiverCam
+  --help     Show this message and exit.
 
 Commands:
   camera-config  Prepare Camera Configuration file
@@ -469,6 +468,8 @@ To find out more about them, you can request specific help on them on the comman
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: pyorc camera-config [OPTIONS] OUTPUT
 
+  CLI subcommand for camera configuration.
+
 Options:
   -V, --videofile FILE        video file with required objective and
                               resolution and control points in view
@@ -481,8 +482,7 @@ Options:
                               pairs.
   --dst TEXT                  Destination control points as list of 2 or 4 [x,
                               y] pairs, or at least 6 [x, y, z]. If --crs_gcps
-                              is provided, --dst is assumed to be in this
-                              CRS.&quot;
+                              is provided, --dst is assumed to be in this CRS.
   --z_0 FLOAT                 Water level [m] +CRS (e.g. geoid or ellipsoid of
                               GPS)
   --h_ref FLOAT               Water level [m] +local datum (e.g. staff or
@@ -517,6 +517,8 @@ found in the section <a class="reference internal" href="camera_config/index.htm
 </pre></div>
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: pyorc velocimetry [OPTIONS] OUTPUT
+
+  CLI subcommand for velocimetry.
 
 Options:
   -V, --videofile FILE     video file with required objective and resolution
@@ -775,7 +777,7 @@ For quick reference you can use the links below:</p>
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

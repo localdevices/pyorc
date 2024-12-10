@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Frames &#8212; pyorc 0.5.6 documentation</title>
+    <title>Frames &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -136,7 +136,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -455,28 +455,25 @@ Cell <span class="ansi-green-fg">In[1], line 7</span>
 <span class="ansi-green-intense-fg ansi-bold">     14</span> da_frames <span style="color: rgb(98,98,98)">=</span> video<span style="color: rgb(98,98,98)">.</span>get_frames(method<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">rgb</span><span style="color: rgb(175,0,0)">&#34;</span>)
 <span class="ansi-green-intense-fg ansi-bold">     15</span> da_frames
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:117</span>, in <span class="ansi-cyan-fg">Video.__init__</span><span class="ansi-blue-fg">(self, fn, camera_config, h_a, start_frame, end_frame, freq, stabilize, lazy, rotation, fps)</span>
-<span class="ansi-green-intense-fg ansi-bold">    114</span> <span style="color: rgb(95,135,135)"># explicitly open file for reading</span>
-<span class="ansi-green-intense-fg ansi-bold">    115</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>stabilize <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
-<span class="ansi-green-intense-fg ansi-bold">    116</span>     <span style="color: rgb(95,135,135)"># set a gridded mask based on the roi points</span>
-<span class="ansi-green-fg">--&gt; 117</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">set_mask_from_exterior</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    118</span> <span style="color: rgb(95,135,135)"># set end and start frame</span>
-<span class="ansi-green-intense-fg ansi-bold">    119</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>frame_count <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">int</span>(cap<span style="color: rgb(98,98,98)">.</span>get(cv2<span style="color: rgb(98,98,98)">.</span>CAP_PROP_FRAME_COUNT))
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:137</span>, in <span class="ansi-cyan-fg">Video.__init__</span><span class="ansi-blue-fg">(self, fn, camera_config, h_a, start_frame, end_frame, freq, stabilize, lazy, rotation, fps)</span>
+<span class="ansi-green-intense-fg ansi-bold">    134</span> <span style="color: rgb(95,135,135)"># explicitly open file for reading</span>
+<span class="ansi-green-intense-fg ansi-bold">    135</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>stabilize <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-intense-fg ansi-bold">    136</span>     <span style="color: rgb(95,135,135)"># set a gridded mask based on the roi points</span>
+<span class="ansi-green-fg">--&gt; 137</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">set_mask_from_exterior</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    138</span> <span style="color: rgb(95,135,135)"># set end and start frame</span>
+<span class="ansi-green-intense-fg ansi-bold">    139</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>frame_count <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">int</span>(cap<span style="color: rgb(98,98,98)">.</span>get(cv2<span style="color: rgb(98,98,98)">.</span>CAP_PROP_FRAME_COUNT)) <span style="color: rgb(98,98,98)">-</span> <span style="color: rgb(98,98,98)">1</span>
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:550</span>, in <span class="ansi-cyan-fg">Video.set_mask_from_exterior</span><span class="ansi-blue-fg">(self, exterior)</span>
-<span class="ansi-green-intense-fg ansi-bold">    532</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">set_mask_from_exterior</span>(
-<span class="ansi-green-intense-fg ansi-bold">    533</span>         <span style="color: rgb(0,135,0)">self</span>,
-<span class="ansi-green-intense-fg ansi-bold">    534</span>         exterior: List[List]
-<span class="ansi-green-intense-fg ansi-bold">    535</span> ):
-<span class="ansi-green-intense-fg ansi-bold">    536</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    537</span> <span style="color: rgb(175,0,0)">    Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside</span>
-<span class="ansi-green-intense-fg ansi-bold">    538</span>
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:520</span>, in <span class="ansi-cyan-fg">Video.set_mask_from_exterior</span><span class="ansi-blue-fg">(self, exterior)</span>
+<span class="ansi-green-intense-fg ansi-bold">    506</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">set_mask_from_exterior</span>(<span style="color: rgb(0,135,0)">self</span>, exterior: List[List]):
+<span class="ansi-green-intense-fg ansi-bold">    507</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">&#34;&#34;&#34;Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside.</span>
+<span class="ansi-green-intense-fg ansi-bold">    508</span>
+<span class="ansi-green-intense-fg ansi-bold">    509</span> <span style="color: rgb(175,0,0)">    Parameters</span>
 <span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    548</span>
-<span class="ansi-green-intense-fg ansi-bold">    549</span> <span style="color: rgb(175,0,0)">    &#34;&#34;&#34;</span>
-<span class="ansi-green-fg">--&gt; 550</span>     mask_coords <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">array</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">exterior</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dtype</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">int32</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    551</span>     mask <span style="color: rgb(98,98,98)">=</span> np<span style="color: rgb(98,98,98)">.</span>zeros((<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>height, <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>width), np<span style="color: rgb(98,98,98)">.</span>uint8)
-<span class="ansi-green-intense-fg ansi-bold">    552</span>     mask <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>fillPoly(mask, [mask_coords], <span style="color: rgb(98,98,98)">255</span>)
+<span class="ansi-green-intense-fg ansi-bold">    518</span>
+<span class="ansi-green-intense-fg ansi-bold">    519</span> <span style="color: rgb(175,0,0)">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; 520</span>     mask_coords <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">array</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">exterior</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dtype</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">int32</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    521</span>     mask <span style="color: rgb(98,98,98)">=</span> np<span style="color: rgb(98,98,98)">.</span>zeros((<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>height, <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>width), np<span style="color: rgb(98,98,98)">.</span>uint8)
+<span class="ansi-green-intense-fg ansi-bold">    522</span>     mask <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>fillPoly(mask, [mask_coords], <span style="color: rgb(98,98,98)">255</span>)
 
 <span class="ansi-red-fg">ValueError</span>: invalid literal for int() with base 10: &#39;fixed&#39;
 </pre></div></div>
@@ -835,7 +832,7 @@ Cell <span class="ansi-green-fg">In[9], line 2</span>
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>

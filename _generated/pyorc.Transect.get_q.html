@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Transect.get_q &#8212; pyorc 0.5.6 documentation</title>
+    <title>pyorc.Transect.get_q &#8212; pyorc 0.7.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.5.6</p>
+    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
   
 </a></div>
     
@@ -372,18 +372,30 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html">pyorc.CameraConfig.set_bbox_from_corners</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_gcps.html">pyorc.CameraConfig.set_gcps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">pyorc.CameraConfig.set_lens_pars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_intrinsic.html">pyorc.CameraConfig.set_intrinsic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html">pyorc.CameraConfig.set_lens_calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">pyorc.CameraConfig.set_lens_position</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_dict.html">pyorc.CameraConfig.to_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_dict_str.html">pyorc.CameraConfig.to_dict_str</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_file.html">pyorc.CameraConfig.to_file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_json.html">pyorc.CameraConfig.to_json</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_M.html">pyorc.CameraConfig.get_M</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_bbox.html">pyorc.CameraConfig.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_camera_coords.html">pyorc.CameraConfig.get_camera_coords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_dist_shore.html">pyorc.CameraConfig.get_dist_shore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_dist_wall.html">pyorc.CameraConfig.get_dist_wall</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_depth.html">pyorc.CameraConfig.get_depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_z_a.html">pyorc.CameraConfig.get_z_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.project_grid.html">pyorc.CameraConfig.project_grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.project_points.html">pyorc.CameraConfig.project_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.unproject_points.html">pyorc.CameraConfig.unproject_points</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.z_to_h.html">pyorc.CameraConfig.z_to_h</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.h_to_z.html">pyorc.CameraConfig.h_to_z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.estimate_lens_position.html">pyorc.CameraConfig.estimate_lens_position</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot.html">pyorc.CameraConfig.plot</a></li>
@@ -392,14 +404,26 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.camera_config.html">pyorc.Video.camera_config</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.fps.html">pyorc.Video.fps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.fps.html">pyorc.Video.fps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.frames.html">pyorc.Video.frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.freq.html">pyorc.Video.freq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.h_a.html">pyorc.Video.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.lazy.html">pyorc.Video.lazy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.mask.html">pyorc.Video.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.rotation.html">pyorc.Video.rotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.stabilize.html">pyorc.Video.stabilize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.corners.html">pyorc.Video.corners</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.set_mask_from_exterior.html">pyorc.Video.set_mask_from_exterior</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frames.html">pyorc.Video.get_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frames_chunk.html">pyorc.Video.get_frames_chunk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_ms.html">pyorc.Video.get_ms</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.html">pyorc.Frames</a></li>
@@ -409,9 +433,11 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.minmax.html">pyorc.Frames.minmax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.project.html">pyorc.Frames.project</a></li>
@@ -429,6 +455,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.camera_config.html">pyorc.Velocimetry.camera_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.camera_shape.html">pyorc.Velocimetry.camera_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.h_a.html">pyorc.Velocimetry.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.is_velocimetry.html">pyorc.Velocimetry.is_velocimetry</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.minmax.html">pyorc.Velocimetry.mask.minmax</a></li>
@@ -466,6 +493,10 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">pyorc.Transect.vector_to_scalar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_xyz_perspective.html">pyorc.Transect.get_xyz_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_depth_perspective.html">pyorc.Transect.get_depth_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_bottom_surface_z_perspective.html">pyorc.Transect.get_bottom_surface_z_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_transect_perspective.html">pyorc.Transect.get_transect_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_wetted_perspective.html">pyorc.Transect.get_wetted_perspective</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_river_flow.html">pyorc.Transect.get_river_flow</a></li>
@@ -537,8 +568,8 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Transect.get_q">
 <span class="sig-prename descclassname"><span class="pre">Transect.</span></span><span class="sig-name descname"><span class="pre">get_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_corr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zeros'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/transect.html#Transect.get_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Transect.get_q" title="Permalink to this definition">#</a></dt>
-<dd><p>Depth integrated velocity for quantiles of time series using a correction v_corr between surface velocity and
-depth-average velocity.</p>
+<dd><p>Integrated velocity over depth for quantiles of time series.</p>
+<p>A correction <cite>v_corr</cite> between surface velocity and depth-average velocity is used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -646,7 +677,7 @@ integrated values, filled with chosen fill method.</p>
 
   <p class="copyright">
     
-      © Copyright 2023, Rainbow Sensing.
+      © Copyright 2024, Rainbow Sensing.
       <br/>
     
   </p>
