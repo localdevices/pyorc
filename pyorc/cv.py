@@ -233,7 +233,6 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
 
     # Read first frame
     _, img_key = cap.read()
-    _, img_key = cap.read()
     # Convert frame to grayscale
     img1 = cv2.cvtColor(img_key, cv2.COLOR_BGR2GRAY)
     img_key = img1
