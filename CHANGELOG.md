@@ -1,3 +1,17 @@
+## [0.7.1] - 2024-12-13
+### Added
+### Changed
+progress bars while reading can be configured with new flag `progress`
+
+### Deprecated
+### Removed
+### Fixed
+Reading of last frame in video often got errors. This is now more robust
+Writing with `frames.to_video` became very slow with the latest video reader, this has been fixed, it is now very fast.
+
+### Security
+
+
 ## [0.7.0] - 2024-12-10
 ### Added
 `get_piv` now uses several engines, `engine="numba"` is a lot fastr

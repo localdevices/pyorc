@@ -187,7 +187,7 @@ def _get_cam_mtx(height, width, c=2.0, focal_length=None):
     return mtx
 
 
-def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None, wdw=4):
+def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=None, wdw=4, progress=True):
     """Calculate motion smoothing of video frames using Good Features to Track and Lucas-Kanade Optical Flow methods.
 
     This function processes each frame between `start_frame` and `end_frame` to estimate and smooth affine
@@ -212,6 +212,8 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
         Optional mask to specify regions of interest within the frame for feature detection.
     wdw : int, optional
         Window size for smoothing the affine transformations over time. Defaults to 4.
+    progress : bool, optional
+        Show progress bar or not. Defaults to True.
 
     Returns
     -------
@@ -221,10 +223,9 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
     """
     # set end_frame to last if not defined
     end_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) if end_frame is None else end_frame
+    # make a start transform which does not change the first frame
     m = np.eye(3)[0:2]
-    # m2 = np.eye(3)[0:2]
     ms = []
-    # ms2 = []
     m_key = copy.deepcopy(m)
     # get start frame and points
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
@@ -232,7 +233,6 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
     n_frames = int(end_frame + 1) - int(start_frame)
 
     # Read first frame
-    _, img_key = cap.read()
     _, img_key = cap.read()
     # Convert frame to grayscale
     img1 = cv2.cvtColor(img_key, cv2.COLOR_BGR2GRAY)
@@ -245,15 +245,13 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
     # get features from first key frame
     prev_pts = _gftt_split(img_key, split, n_pts, mask=mask)
 
-    pbar = tqdm(range(n_frames), position=0, leave=True)
+    pbar = tqdm(range(n_frames - 1), position=0, leave=True, disable=not (progress))
+    pbar.set_description("Deriving stabilization parameters from second frame onwards")
     for i in pbar:
         ms.append(m)
-        #     ms2.append(m2)
         _, img2 = cap.read()
         img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
         curr_pts, status, err = cv2.calcOpticalFlowPyrLK(img_key, img2, prev_pts, None)
-        #     curr_pts = curr_pts[status == 1]
-        #     prev_pts = prev_pts[status == 1]
         m_part = cv2.estimateAffine2D(curr_pts, prev_pts)[0]
         m = _combine_m(m_key, m_part)
         if i % 30 == 0:
@@ -261,7 +259,8 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
             prev_pts = _gftt_split(img_key, split, n_pts, mask=mask)
             m_key = copy.deepcopy(m)
         img1 = img2
-
+    # add the very last transformation
+    ms.append(m)
     # smooth the affines over time
     ma = np.array(ms)
     for m in range(ma.shape[1]):
@@ -917,7 +916,7 @@ def get_frame(cap, rotation=None, ms=None, method="grayscale"):
     return ret, img
 
 
-def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
+def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, progress=True, **kwargs):
     """Obtain valid time stamps and frame numbers from video capture object.
 
     Valid frames may start and end at start_frame and end_frame, respectively. However, certain required frames may
@@ -935,6 +934,8 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
         read frames lazily (default) or not. Set to False for direct reading (faster, but more memory)
     fps : float, optional
         hard enforced frames per second number (used when metadata of video is incorrect)
+    progress : bool, optional
+        display progress bar. Default is True.
     **kwargs : dict, optional
         additional keyword arguments passed to get_frame() function
 
@@ -947,7 +948,11 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
 
     """
     cap.set(cv2.CAP_PROP_POS_FRAMES, np.float64(start_frame))
+    pbar = tqdm(
+        total=end_frame - start_frame + 1, position=0, desc="Scanning video", disable=not (progress), leave=True
+    )
     ret, img = get_frame(cap, **kwargs)
+    # pbar.update(1)
     n = start_frame
     time = []
     frame_number = []
@@ -962,13 +967,13 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
         frame_number.append(n)
         n += 1
         ret, img = get_frame(cap, **kwargs)  # read frame 1 + ...
+        pbar.update(1)
         if ret == False:
             break
         t2 = cap.get(cv2.CAP_PROP_POS_MSEC)
         if t2 <= 0.0:
             # invalid time difference, stop reading.
             break
-
     # do a final check if the last frame(s) are readable by direct seek and read. Sometimes this results in not being
     # able to r
     last_valid_idx = _check_valid_frames(cap, frame_number)

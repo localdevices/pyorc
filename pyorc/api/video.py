@@ -44,11 +44,13 @@ Camera configuration: {:s}
         h_a: Optional[float] = None,
         start_frame: Optional[int] = None,
         end_frame: Optional[int] = None,
-        freq: Optional[int] = 1,
+        freq: int = 1,
+        chunksize: int = 20,
         stabilize: Optional[List[List]] = None,
         lazy: bool = True,
         rotation: Optional[int] = None,
         fps: Optional[float] = None,
+        progress: bool = True,
     ):
         """Video class, inheriting parts from cv2.VideoCapture.
 
@@ -73,6 +75,8 @@ Camera configuration: {:s}
             last frame to use in analysis (if not set, last frame available in video will be used)
         freq : int, optional
             Frequency to read frames with. Default is 1, if set to e.g. 2 only each 2nd frame will be read.
+        chunksize : int, optional
+            Amount of frames to read in one pass, defaults to 20
         stabilize : list of lists, optional
             set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.
             The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no
@@ -86,6 +90,8 @@ Camera configuration: {:s}
         fps : float, optional
             hard set for frames per second. Use this with utmost caution and only when you are confident that the video
             metadata is incorrect.
+        progress : bool, optional
+            Display progress bar while reading video. Default is True.
 
         """
         assert isinstance(start_frame, (int, type(None))), 'start_frame must be of type "int"'
@@ -95,6 +101,7 @@ Camera configuration: {:s}
         self.ms = None
         self.mask = None
         self.lazy = lazy
+        self.progress = progress
         self.stabilize = stabilize
         if camera_config is not None:
             self.camera_config = camera_config
@@ -153,7 +160,7 @@ Camera configuration: {:s}
         self.rotation = rotation
         # extract times, frame numbers and frames as far as available
         time, frame_number, frames = cv.get_time_frames(
-            cap, start_frame, end_frame, lazy=lazy, rotation=self.rotation, method="bgr", fps=fps
+            cap, start_frame, end_frame, lazy=lazy, rotation=self.rotation, method="bgr", fps=fps, progress=progress
         )
         self.frames = frames
         # check if end_frame changed
@@ -166,6 +173,7 @@ Camera configuration: {:s}
 
         self.end_frame = end_frame
         self.freq = freq
+        self.chunksize = chunksize
         self.time = time
         self.frame_number = frame_number
         self.start_frame = start_frame
@@ -246,7 +254,7 @@ Camera configuration: {:s}
         if end_frame is None:
             self._end_frame = self.frame_count - 1
         else:
-            self._end_frame = min(self.frame_count - 1, end_frame)
+            self._end_frame = end_frame
 
     @property
     def freq(self):
@@ -256,6 +264,15 @@ Camera configuration: {:s}
     @freq.setter
     def freq(self, freq=1):
         self._freq = freq
+
+    @property
+    def progress(self):
+        """Get progress property."""
+        return self._progress
+
+    @progress.setter
+    def progress(self, progress=True):
+        self._progress = progress
 
     @property
     def stabilize(self):
@@ -437,7 +454,7 @@ Camera configuration: {:s}
         ), "No camera configuration is set, add it to the video using the .camera_config method"
         # camera_config may be altered for the frames object, so copy below
         camera_config = copy.deepcopy(self.camera_config)
-        frames_chunk = 20
+        # frames_chunk = 20
         if self.frames is None:
             # a specific method for collecting frames is requested or lazy access is requested.
             # get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame
@@ -447,15 +464,12 @@ Camera configuration: {:s}
             # derive video shape
             sample = get_frames_chunk(n_start=0, n_end=1, method=method).compute()[0]
             data_array = []
-            for n_start in range(0, len(self.frame_number), frames_chunk):
-                n_end = np.minimum(n_start + frames_chunk, len(self.frame_number))
+            for n_start in range(0, len(self.frame_number), self.chunksize):
+                n_end = np.minimum(n_start + self.chunksize, len(self.frame_number))
                 frame_chunk = get_frames_chunk(n_start=n_start, n_end=n_end, method=method)
                 shape = (n_end - n_start, *sample.shape)
                 data_array.append(da.from_delayed(frame_chunk, dtype=sample.dtype, shape=shape))
 
-            # sample = frames[0].compute()
-            # data_array = [da.from_delayed(frame, dtype=sample.dtype, shape=sample.shape) for frame in frames]
-            # da_stack = da.stack(data_array, axis=0)
             da_stack = da.concatenate(data_array, axis=0)
         else:
             da_stack = self.frames
@@ -487,6 +501,7 @@ Camera configuration: {:s}
             "camera_shape": str([len(y), len(x)]),
             "camera_config": camera_config.to_json(),
             "h_a": json.dumps(self.h_a),
+            "chunksize": self.chunksize,
         }
         frames = xr.DataArray(
             da_stack,
@@ -545,4 +560,5 @@ Camera configuration: {:s}
             end_frame=self.end_frame,
             split=split,
             mask=self.mask,
+            progress=self.progress,
         )

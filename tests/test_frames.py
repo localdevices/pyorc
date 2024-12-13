@@ -121,7 +121,6 @@ def test_get_piv(frames_proj, window_size, engine, result):
     ],
 )
 def test_compare_piv(frames_proj, window_size):
-    frames_proj.load()
     piv = frames_proj.frames.get_piv(window_size=window_size, engine="openpiv")
     piv.load()
     u1, v1 = piv["v_x"].mean(dim="time").values, piv["v_y"].mean(dim="time").values
