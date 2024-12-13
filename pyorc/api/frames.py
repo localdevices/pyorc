@@ -566,18 +566,6 @@ class Frames(ORCBase):
             from the time differences in the input frames.
 
         """
-        # """Write frames to a video file without any layout.
-        #
-        # Parameters
-        # ----------
-        # fn : str
-        #     Path to output file
-        # video_format : cv2.VideoWriter_fourcc, optional
-        #     A VideoWriter preference, default is cv2.VideoWriter_fourcc(*"mp4v")
-        # fps : float, optional
-        #     Frames per second, if not provided, derived from original video
-        #
-        # """
         if video_format is None:
             # set to a default
             video_format = cv2.VideoWriter_fourcc(*"mp4v")
@@ -587,20 +575,42 @@ class Frames(ORCBase):
         h = self._obj.shape[1]
         w = self._obj.shape[2]
         out = cv2.VideoWriter(fn, video_format, fps, (w, h))
-        pbar = tqdm(self._obj, position=0, leave=True)
-        pbar.set_description("Writing frames")
-        for n, f in enumerate(pbar):
-            if len(f.shape) == 3:
-                img = cv2.cvtColor(np.uint8(f.values), cv2.COLOR_RGB2BGR)
-            else:
-                img = f.values
-                if n == 0:
-                    # make a scale between 0 and 255, only with first frame
-                    img_min = img.min(axis=0).min(axis=0)
-                    img_max = img.max(axis=0).max(axis=0)
-                img = np.uint8(255 * ((img - img_min) / (img_max - img_min)))
-                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-            out.write(img)
+        with tqdm(total=len(self._obj), position=0, leave=True) as pbar:
+            pbar.set_description("Writing frames")
+            first_frame = True
+            for n_start in range(0, len(self._obj), self._obj.chunksize):
+                frames_chunk = self._obj.isel(time=slice(n_start, n_start + self._obj.chunksize))
+                frames_chunk.load()  # load in memory only once
+                for f in frames_chunk:
+                    if len(f.shape) == 3:
+                        img = cv2.cvtColor(np.uint8(f.values), cv2.COLOR_RGB2BGR)
+                    else:
+                        img = f.values
+                        if first_frame:
+                            first_frame = False
+                            # make a scale between 0 and 255, only with first frame
+                            img_min = img.min(axis=0).min(axis=0)
+                            img_max = img.max(axis=0).max(axis=0)
+                        img = np.uint8(255 * ((img - img_min) / (img_max - img_min)))
+                        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+                    out.write(img)
+                    pbar.update(1)
+        #
+        # pbar = tqdm(self._obj, position=0, leave=True)
+        # pbar.set_description("Writing frames")
+        # for n, f in enumerate(pbar):
+        #     if len(f.shape) == 3:
+        #         img = cv2.cvtColor(np.uint8(f.values), cv2.COLOR_RGB2BGR)
+        #     else:
+        #         img = f.values
+        #         if n == 0:
+        #             # make a scale between 0 and 255, only with first frame
+        #             img_min = img.min(axis=0).min(axis=0)
+        #             img_max = img.max(axis=0).max(axis=0)
+        #         img = np.uint8(255 * ((img - img_min) / (img_max - img_min)))
+        #         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        #     out.write(img)
         out.release()
 
     plot = _frames_plot

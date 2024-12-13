@@ -245,6 +245,8 @@ def get_ms_gftt(cap, start_frame=0, end_frame=None, n_pts=None, split=2, mask=No
     prev_pts = _gftt_split(img_key, split, n_pts, mask=mask)
 
     pbar = tqdm(range(n_frames), position=0, leave=True)
+    pbar.set_description("Deriving stabilization parameters")
+
     for i in pbar:
         ms.append(m)
         #     ms2.append(m2)
@@ -946,6 +948,7 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
 
     """
     cap.set(cv2.CAP_PROP_POS_FRAMES, np.float64(start_frame))
+    pbar = tqdm(total=end_frame - start_frame + 1, position=0, desc="Scanning video", leave=True)
     ret, img = get_frame(cap, **kwargs)
     n = start_frame
     time = []
@@ -967,7 +970,7 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, **kwargs):
         if t2 <= 0.0:
             # invalid time difference, stop reading.
             break
-
+        pbar.update(1)
     # do a final check if the last frame(s) are readable by direct seek and read. Sometimes this results in not being
     # able to r
     last_valid_idx = _check_valid_frames(cap, frame_number)
