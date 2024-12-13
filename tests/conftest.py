@@ -252,17 +252,15 @@ def vid_file_6gcps():
 
 @pytest.fixture()
 def vid(vid_file):
-    vid = pyorc.Video(
-        vid_file,
-        start_frame=0,
-        end_frame=2,
-    )
+    vid = pyorc.Video(vid_file, start_frame=0, end_frame=2, progress=False)
     return vid
 
 
 @pytest.fixture()
 def vid_6gcps_cam_config(vid_file_6gcps, cam_config_6gcps):
-    vid = pyorc.Video(vid_file_6gcps, start_frame=0, end_frame=2, camera_config=cam_config_6gcps, h_a=92.36)
+    vid = pyorc.Video(
+        vid_file_6gcps, start_frame=0, end_frame=2, camera_config=cam_config_6gcps, h_a=92.36, progress=False
+    )
     return vid
 
 
@@ -274,6 +272,7 @@ def vid_cam_config(cam_config):
         end_frame=2,
         camera_config=cam_config,
         h_a=0.0,
+        progress=False,
     )
     return vid
 
@@ -287,6 +286,7 @@ def vid_cam_config_nonlazy(cam_config):
         camera_config=cam_config,
         h_a=0.0,
         lazy=False,
+        progress=False,
     )
     return vid
 
@@ -299,6 +299,7 @@ def vid_cam_config_shift(cam_config):
         end_frame=4,
         camera_config=cam_config,
         h_a=0.0,
+        progress=False,
     )
     return vid
 
@@ -317,6 +318,7 @@ def vid_cam_config_stabilize(cam_config):
             [1000, 0],
             [1750, 1080],
         ],  # coordinates for which outside area is meant for stabilization
+        progress=False,
     )
     return vid
 

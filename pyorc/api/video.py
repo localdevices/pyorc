@@ -50,6 +50,7 @@ Camera configuration: {:s}
         lazy: bool = True,
         rotation: Optional[int] = None,
         fps: Optional[float] = None,
+        progress: bool = True,
     ):
         """Video class, inheriting parts from cv2.VideoCapture.
 
@@ -89,6 +90,8 @@ Camera configuration: {:s}
         fps : float, optional
             hard set for frames per second. Use this with utmost caution and only when you are confident that the video
             metadata is incorrect.
+        progress : bool, optional
+            Display progress bar while reading video. Default is True.
 
         """
         assert isinstance(start_frame, (int, type(None))), 'start_frame must be of type "int"'
@@ -98,6 +101,7 @@ Camera configuration: {:s}
         self.ms = None
         self.mask = None
         self.lazy = lazy
+        self.progress = progress
         self.stabilize = stabilize
         if camera_config is not None:
             self.camera_config = camera_config
@@ -156,7 +160,7 @@ Camera configuration: {:s}
         self.rotation = rotation
         # extract times, frame numbers and frames as far as available
         time, frame_number, frames = cv.get_time_frames(
-            cap, start_frame, end_frame, lazy=lazy, rotation=self.rotation, method="bgr", fps=fps
+            cap, start_frame, end_frame, lazy=lazy, rotation=self.rotation, method="bgr", fps=fps, progress=progress
         )
         self.frames = frames
         # check if end_frame changed
@@ -250,7 +254,7 @@ Camera configuration: {:s}
         if end_frame is None:
             self._end_frame = self.frame_count - 1
         else:
-            self._end_frame = min(self.frame_count - 1, end_frame)
+            self._end_frame = end_frame
 
     @property
     def freq(self):
@@ -260,6 +264,15 @@ Camera configuration: {:s}
     @freq.setter
     def freq(self, freq=1):
         self._freq = freq
+
+    @property
+    def progress(self):
+        """Get progress property."""
+        return self._progress
+
+    @progress.setter
+    def progress(self, progress=True):
+        self._progress = progress
 
     @property
     def stabilize(self):
@@ -547,4 +560,5 @@ Camera configuration: {:s}
             end_frame=self.end_frame,
             split=split,
             mask=self.mask,
+            progress=self.progress,
         )

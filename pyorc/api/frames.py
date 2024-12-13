@@ -547,7 +547,7 @@ class Frames(ORCBase):
         anim = FuncAnimation(f, animate, init_func=init, frames=frames, **anim_kwargs)
         anim.save(fn, **video_kwargs)
 
-    def to_video(self, fn, video_format=None, fps=None):
+    def to_video(self, fn, video_format=None, fps=None, progress=True):
         """Write frames to a video file without any layout.
 
         Frames from the input object are written into a video file. The format and frame
@@ -564,6 +564,8 @@ class Frames(ORCBase):
         fps : float, optional
             Frames per second for the output video. If not specified, it is estimated
             from the time differences in the input frames.
+        progress : bool, optional
+            Display a progress bar while writing the video frames. (default: True)
 
         """
         if video_format is None:
@@ -575,7 +577,7 @@ class Frames(ORCBase):
         h = self._obj.shape[1]
         w = self._obj.shape[2]
         out = cv2.VideoWriter(fn, video_format, fps, (w, h))
-        with tqdm(total=len(self._obj), position=0, leave=True) as pbar:
+        with tqdm(total=len(self._obj), position=0, leave=True, disable=not (progress)) as pbar:
             pbar.set_description("Writing frames")
             first_frame = True
             for n_start in range(0, len(self._obj), self._obj.chunksize):
