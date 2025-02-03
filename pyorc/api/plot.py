@@ -182,11 +182,12 @@ def _base_plot(plot_func):
                     ax.add_patch(
                         plt.Polygon(
                             points,
-                            alpha=0.3,
+                            alpha=0.15,
                             linewidth=2.0,
                             facecolor=LINE_COLOR,  # "#00FF88",
                             path_effects=path_effects,
                             edgecolor="w",
+                            zorder=1,
                         )
                     )
 
@@ -202,6 +203,7 @@ def _base_plot(plot_func):
                             color="w",
                             alpha=0.5,
                             linewidth=2.0,
+                            zorder=1,
                             # path_effects=path_effects
                         )
                     ax.plot(
@@ -211,6 +213,7 @@ def _base_plot(plot_func):
                         linewidth=4.0,
                         # path_effects=path_effects,
                         alpha=0.5,
+                        zorder=1,
                         **kwargs_line,
                     )
                 else:

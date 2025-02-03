@@ -2,7 +2,7 @@
 
 __version__ = "0.7.1"
 
-from .api import CameraConfig, Frames, Transect, Velocimetry, Video, WaterLevel, get_camera_config, load_camera_config  # noqa
+from .api import CameraConfig, Frames, Transect, Velocimetry, Video, CrossSection, get_camera_config, load_camera_config  # noqa
 from .project import *  # noqa
 from . import cli, service  # noqa
 
@@ -14,7 +14,7 @@ __all__ = [
     "Frames",
     "Velocimetry",
     "Transect",
-    "WaterLevel",
+    "CrossSection",
     "service",
     "cli",
 ]

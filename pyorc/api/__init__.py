@@ -1,11 +1,11 @@
 """API for pyorc."""
 
 from .cameraconfig import CameraConfig, get_camera_config, load_camera_config
+from .cross_section import CrossSection
 from .frames import Frames
 from .transect import Transect
 from .velocimetry import Velocimetry
 from .video import Video
-from .water_level import WaterLevel
 
 __all__ = [
     "CameraConfig",
@@ -14,6 +14,6 @@ __all__ = [
     "Video",
     "Frames",
     "Velocimetry",
-    "WaterLevel",
+    "CrossSection",
     "Transect",
 ]

@@ -1,12 +1,13 @@
 """Tests for water level functionalities."""
 
 import geopandas as gpd
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from pyproj import CRS
 from shapely import wkt
 
-from pyorc import CameraConfig, WaterLevel
+from pyorc import CameraConfig, CrossSection
 
 
 @pytest.fixture()
@@ -154,8 +155,72 @@ def camera_config():
     return CameraConfig(**camera_config)
 
 
+@pytest.fixture()
+def cs(xyz, camera_config):
+    return CrossSection(camera_config=camera_config, cross_section=xyz)
+
+
 def test_init_water_level(xyz, camera_config):
-    wl = WaterLevel(camera_config=camera_config, cross_section=xyz)
-    assert isinstance(wl, WaterLevel)
+    cs = CrossSection(camera_config=camera_config, cross_section=xyz)
+    assert isinstance(cs, CrossSection)
+
+
+def test_init_water_level_from_gdf(gdf, camera_config):
+    cs = CrossSection(camera_config=camera_config, cross_section=gdf)
+    assert isinstance(cs, CrossSection)
 
     # get coordinates
+
+
+def test_get_csl_point(cs):
+    h1 = 92.5
+    h2 = 93.0
+    # both should get two points back
+    cross1 = cs.get_csl_point(h=h1)
+    cross2 = cs.get_csl_point(h=h2)
+    ax = plt.axes(projection="3d")
+
+    for cross in cross1:
+        ax.plot(*cross.coords[0], "bo", label="cross 1")
+    for cross in cross2:
+        ax.plot(*cross.coords[0], "ro", label="cross 2")
+    cs.plot_cs(ax=ax, marker=".", color="c")
+    ax.legend()
+    plt.show()
+
+
+def test_get_csl_point_camera(cs):
+    h1 = 92.5
+    h2 = 93.0
+    # both should get two points back
+    cross1 = cs.get_csl_point(h=h1, camera=True)
+    cross2 = cs.get_csl_point(h=h2, camera=True)
+    ax = plt.axes()
+
+    for cross in cross1:
+        ax.plot(*cross.coords[0], "bo")
+    for cross in cross2:
+        ax.plot(*cross.coords[0], "ro")
+    cs.plot_cs(ax=ax, camera=True)
+    ax.axis("equal")
+    ax.set_xlim([0, cs.camera_config.width])
+    ax.set_ylim([0, cs.camera_config.height])
+    plt.show()
+
+
+def test_get_csl_line(cs):
+    h1 = 92.5
+    h2 = 93.0
+
+    cross1 = cs.get_csl_line(h=h1, offset=2.0)
+    cross2 = cs.get_csl_line(h=h1, offset=0.0)
+
+    ax = plt.axes(projection="3d")
+    for cross in cross1:
+        ax.plot(*cross.xy, cs.camera_config.h_to_z(h1), "bo", label="cross 1")
+    for cross in cross2:
+        ax.plot(*cross.xy, cs.camera_config.h_to_z(h2), "ro", label="cross 2")
+    cs.plot_cs(ax=ax, marker=".", color="c")
+    ax.axis("equal")
+    ax.legend()
+    plt.show()
