@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from pyproj import CRS
-from shapely import wkt
+from shapely import geometry, wkt
 
-from pyorc import CameraConfig, CrossSection
+from pyorc import CameraConfig, CrossSection, plot_helpers
 
 
 @pytest.fixture()
@@ -214,13 +214,130 @@ def test_get_csl_line(cs):
 
     cross1 = cs.get_csl_line(h=h1, offset=2.0)
     cross2 = cs.get_csl_line(h=h1, offset=0.0)
+    assert len(cross1) == 2
+    assert len(cross2) == 2
 
     ax = plt.axes(projection="3d")
     for cross in cross1:
-        ax.plot(*cross.xy, cs.camera_config.h_to_z(h1), "bo", label="cross 1")
+        ax.plot(*cross.xy, cs.camera_config.h_to_z(h1), "b-o", label="cross 1")
     for cross in cross2:
-        ax.plot(*cross.xy, cs.camera_config.h_to_z(h2), "ro", label="cross 2")
+        ax.plot(*cross.xy, cs.camera_config.h_to_z(h2), "r-o", label="cross 2")
     cs.plot_cs(ax=ax, marker=".", color="c")
+    ax.axis("equal")
+    ax.legend()
+    plt.show()
+
+
+def test_get_csl_camera(cs):
+    h1 = 92.5
+
+    cross1 = cs.get_csl_line(h=h1, offset=2.0, camera=True)
+    cross2 = cs.get_csl_line(h=h1, offset=0.0, camera=True)
+    assert len(cross1) == 2
+    assert len(cross2) == 2
+    ax = plt.axes()
+    for cross in cross1:
+        ax.plot(*cross.xy, "b-o", label="cross 1")
+    for cross in cross2:
+        ax.plot(*cross.xy, "r-o", label="cross 2")
+    cs.plot_cs(ax=ax, camera=True, marker=".", color="c")
+    ax.axis("equal")
+    ax.set_xlim([0, cs.camera_config.width])
+    ax.set_ylim([0, cs.camera_config.height])
+    ax.legend()
+    plt.show()
+
+
+def test_get_csl_line_above_first_bank(cs):
+    h = 94.9  # this level is above one of the banks and should return only one line
+    cross = cs.get_csl_line(h=h)
+    # check length
+    assert len(cross) == 1
+
+
+def test_get_csl_pol(cs):
+    h1 = 92.5
+    pols1 = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0)
+    pols2 = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0)
+
+    ax = plt.axes(projection="3d")
+    cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
+    p1_1, p_1_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
+    p2_1, p_2_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
+    ax.axis("equal")
+    ax.legend()
+    plt.show()
+
+
+def test_get_csl_pol_camera(cs):
+    h1 = 92.5
+    pols1 = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0, camera=True)
+    pols2 = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0, camera=True)
+
+    ax = plt.axes()
+    cs.plot_cs(ax=ax, marker=".", color="c", label="cross section", camera=True)
+    p1_1, p_1_2 = [plot_helpers.plot_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
+    p2_1, p_2_2 = [plot_helpers.plot_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
+    ax.axis("equal")
+    ax.set_xlabel("Camera pixel column [-]")
+    ax.set_ylabel("Camera pixel row [-]")
+    ax.set_xlim([0, cs.camera_config.width])
+    ax.set_ylim([0, cs.camera_config.height])
+    ax.legend()
+    plt.show()
+
+
+def test_get_planar_surface(cs):
+    h1 = 92.5
+    h2 = 93.0
+    h3 = 94.9
+    pol1 = cs.get_planar_surface(h=h1, length=10.0)
+    pol2 = cs.get_planar_surface(h=h2, length=5, offset=2.5)
+    with pytest.raises(ValueError, match="must be 2 for"):
+        cs.get_planar_surface(h=h3)
+    ax = plt.axes(projection="3d")
+    cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
+
+    _ = plot_helpers.plot_3d_polygon(pol1, ax=ax, alpha=0.3, label="h=92.5", color="r")
+    _ = plot_helpers.plot_3d_polygon(pol2, ax=ax, alpha=0.3, label="h=93.0", color="g")
+    ax.axis("equal")
+    ax.legend()
+    plt.show()
+
+
+def test_get_planar_surface_camera(cs):
+    h1 = 92.5
+    h2 = 93.0
+    pol1 = cs.get_planar_surface(h=h1, length=10.0, camera=True)
+    pol2 = cs.get_planar_surface(h=h2, length=5, offset=2.5, camera=True)
+    ax = plt.axes()
+    _ = plot_helpers.plot_polygon(pol1, ax=ax, alpha=0.3, label="h=92.5", color="r")
+    _ = plot_helpers.plot_polygon(pol2, ax=ax, alpha=0.3, label="h=93.0", color="g")
+    ax.axis("equal")
+    cs.plot_cs(ax=ax, camera=True, marker=".", color="c", label="cross section")
+    ax.set_xlim([0, cs.camera_config.width])
+    ax.set_ylim([0, cs.camera_config.height])
+    ax.legend()
+    plt.show()
+
+
+def test_get_wetted_surface(cs):
+    h1 = 92.5
+    h2 = 93.0
+    h3 = 94.9
+    pol1 = cs.get_wetted_surface(h=h1)
+    pol2 = cs.get_wetted_surface(h=h2)
+    assert isinstance(pol1, geometry.Polygon)
+    assert pol1.has_z
+    assert pol2.has_z
+
+    with pytest.raises(ValueError, match="Water level is not crossed"):
+        cs.get_wetted_surface(h=h3)
+
+    ax = plt.axes(projection="3d")
+    cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
+    _ = plot_helpers.plot_3d_polygon(pol1, ax=ax, alpha=0.3, label="h=92.5", color="r")
+    _ = plot_helpers.plot_3d_polygon(pol2, ax=ax, alpha=0.3, label="h=93.0", color="g")
     ax.axis("equal")
     ax.legend()
     plt.show()
