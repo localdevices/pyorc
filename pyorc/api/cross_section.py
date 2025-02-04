@@ -90,7 +90,21 @@ class CrossSection:
         return np.arctan2(diff_xy[1], diff_xy[0])
 
     def get_cs_waterlevel(self, h: float, yz=False) -> geometry.LineString:
-        """Retrieve LineString of water surface at cross section at a given water level."""
+        """Retrieve LineString of water surface at cross section at a given water level.
+
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        yz : bool, optional
+            If set, return water level line in y-z projection, by default False.
+
+        Returns
+        -------
+        geometry.LineString
+            horizontal line at water level (2d if yz=True, 3d if yz=False)
+
+        """
         # get water level in camera config vertical datum
         z = self.camera_config.h_to_z(h)
         if yz:
@@ -98,7 +112,23 @@ class CrossSection:
         return geometry.LineString(zip(self.x, self.y, [z] * len(self.x), strict=False))
 
     def get_csl_point(self, h: float, camera: bool = False) -> List[geometry.Point]:
-        """Retrieve list of points, where cross section (cs) touches the land (l). Multiple points may be found."""
+        """Retrieve list of points, where cross section (cs) touches the land (l).
+
+        Multiple points may be found.
+
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        camera : bool, optional
+            If set, return 2D projected points, by default False.
+
+        Returns
+        -------
+        List[shapely.geometry.Point]
+            List of points, where water line touches land, can be only one or two points.
+
+        """
         # get water level in camera config vertical datum
         z = self.camera_config.h_to_z(h)
         if z > np.array(self.z).max() or z < np.array(self.z).min():
@@ -131,6 +161,22 @@ class CrossSection:
         """Retrieve waterlines over the cross section, perpendicular to the orientation of the cross section.
 
         Returns a 2D LineString if camera is True, 3D if False
+
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        length : float, optional
+            length of the waterline [m], by default 0.5
+        offset : float, optional
+            perpendicular offset of the waterline from the cross section [m], by default 0.0
+        camera : bool, optional
+            If set, return 2D projected lines, by default False.
+
+        Returns
+        -------
+        List[shapely.geometry.LineString]
+            List of lines perpendicular to cross section orientation, can be only one or two lines.
 
         """
         z = self.camera_config.h_to_z(h)
@@ -180,6 +226,25 @@ class CrossSection:
 
         Returns a 2D Polygon if camera is True, 3D if False
 
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        length : float, optional
+            length of the waterline [m], by default 0.5
+        padding : Tuple[float, float], optional
+            amount if distance [m] to extend the polygon beyond the waterline, by default (-0.5, 0.5)
+        offset : float, optional
+            perpendicular offset of the waterline from the cross section [m], by default 0.0
+        camera : bool, optional
+            If set, return 2D projected polygons, by default False.
+
+        Returns
+        -------
+        List[shapely.geometry.LineString]
+            List of lines perpendicular to cross section orientation, can be only one or two lines.
+
+
         """
         # retrieve water line(s)
         csl = self.get_csl_line(h=h, length=length, offset=offset)
@@ -215,6 +280,24 @@ class CrossSection:
 
         Returns a 2D Polygon if camera is True, 3D if False
 
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        length : float, optional
+            length of the waterline [m], by default 0.5
+        offset : float, optional
+            perpendicular offset of the waterline from the cross section [m], by default 0.0
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False.
+
+        Returns
+        -------
+        shapely.geometry.Polygon
+            rectangular horizontal polygon representing the planar water surface (2d if camera=True,
+            3d if camera=False).
+
+
         """
         wls = self.get_csl_line(h=h, offset=offset, length=length, camera=camera)
         if len(wls) != 2:
@@ -222,7 +305,19 @@ class CrossSection:
         return geometry.Polygon(list(wls[0].coords) + list(wls[1].coords[::-1]))
 
     def get_wetted_surface_yz(self, h: float) -> geometry.Polygon:
-        """Retrieve a wetted surface for a given water level, as a geometry.Polygon."""
+        """Retrieve a wetted surface for a given water level, as a geometry.Polygon.
+
+        Parameters
+        ----------
+        h : float
+            water level [m]
+
+        Returns
+        -------
+        geometry.Polygon
+            Wetted surface as a polygon, in Y-Z projection.
+
+        """
         wl = self.get_cs_waterlevel(h=h, yz=True)
         # create polygon by making a union
         pol = list(polygonize(wl.union(self.cs_linestring_yz)))
@@ -235,7 +330,22 @@ class CrossSection:
         return pol
 
     def get_wetted_surface(self, h: float, camera: bool = False) -> geometry.Polygon:
-        """Retrieve a wetted surface for a given water level, as a geometry.Polygon."""
+        """Retrieve a wetted surface for a given water level, as a geometry.Polygon.
+
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False.
+
+        Returns
+        -------
+        geometry.Polygon
+            Wetted surface as a polygon (2d if camera=True, 3d if camera=False).
+
+
+        """
         pol = self.get_wetted_surface_yz(h=h)
         coords = [[self.interp_x(p[0]), self.interp_y(p[0]), p[1]] for p in pol.exterior.coords]
         if camera:
