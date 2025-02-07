@@ -208,12 +208,30 @@ def test_get_csl_point_camera(cs):
     plt.show()
 
 
+def test_get_csl_point_s(cs):
+    s1 = 5.0
+    s2 = 8.0
+    # both should get two points back
+    cross1 = cs.get_csl_point(s=s1)
+    cross2 = cs.get_csl_point(s=s2)
+    ax = plt.axes(projection="3d")
+
+    for cross in cross1:
+        ax.plot(*cross.coords[0], "bo", label="cross 1")
+    for cross in cross2:
+        ax.plot(*cross.coords[0], "ro", label="cross 2")
+    cs.plot_cs(ax=ax, marker=".", color="c")
+    ax.legend()
+    plt.show()
+
+
+
 def test_get_csl_line(cs):
     h1 = 92.5
     h2 = 93.0
 
-    cross1 = cs.get_csl_line(h=h1, offset=2.0)
-    cross2 = cs.get_csl_line(h=h1, offset=0.0)
+    cross1 = cs.get_csl_line(h=h1, offset=0.0, length=4)
+    cross2 = cs.get_csl_line(h=h2, offset=0.0, length=4)
     assert len(cross1) == 2
     assert len(cross2) == 2
 
@@ -222,6 +240,25 @@ def test_get_csl_line(cs):
         ax.plot(*cross.xy, cs.camera_config.h_to_z(h1), "b-o", label="cross 1")
     for cross in cross2:
         ax.plot(*cross.xy, cs.camera_config.h_to_z(h2), "r-o", label="cross 2")
+    cs.plot_cs(ax=ax, marker=".", color="c")
+    ax.axis("equal")
+    ax.legend()
+    plt.show()
+
+def test_get_csl_line_s(cs):
+    s1 = 5.0
+    s2 = 8.0
+
+    cross1 = cs.get_csl_line(s=s1, offset=0.0, length=4)
+    cross2 = cs.get_csl_line(s=s2, offset=0.0, length=4)
+    assert len(cross1) == 1
+    assert len(cross2) == 1
+
+    ax = plt.axes(projection="3d")
+    for cross in cross1:
+        ax.plot(*cross.xy, cross.coords[0][-1], "b-o", label="cross 1")
+    for cross in cross2:
+        ax.plot(*cross.xy, cross.coords[0][-1], "r-o", label="cross 2")
     cs.plot_cs(ax=ax, marker=".", color="c")
     ax.axis("equal")
     ax.legend()
@@ -264,6 +301,19 @@ def test_get_csl_pol(cs):
     cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
     p1_1, p_1_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
     p2_1, p_2_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
+    ax.axis("equal")
+    ax.legend()
+    plt.show()
+
+def test_get_csl_pol(cs):
+    s1 = 5.0
+    pols1 = cs.get_csl_pol(s=s1, offset=0.0, padding=(-2, 0), length=4.0)
+    pols2 = cs.get_csl_pol(s=s1, offset=0.0, padding=(0, 2), length=4.0)
+
+    ax = plt.axes(projection="3d")
+    cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
+    p1 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
+    p2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
     ax.axis("equal")
     ax.legend()
     plt.show()

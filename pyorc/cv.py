@@ -1077,6 +1077,17 @@ def get_aoi(dst_corners, resolution=None):
     return bbox
 
 
+def get_polygon_pixels(img, pol, reverse_y=True):
+    """Get pixel intensities within a polygon."""
+    polygon_coords = list(pol.exterior.coords)
+    mask = np.zeros_like(img, dtype=np.uint8)
+    cv2.fillPoly(mask, np.array([polygon_coords], np.int32), color=255)
+    if reverse_y:
+        return np.flipud(img)[mask==255]
+    return img[mask==255]
+
+
+
 def undistort_img(img, camera_matrix, dist_coeffs):
     """Correct lens distortion of image based on lens characteristics.
 
