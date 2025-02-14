@@ -1,7 +1,7 @@
 """Tests for water level functionalities."""
 
 import geopandas as gpd
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from pyproj import CRS
@@ -391,3 +391,10 @@ def test_get_wetted_surface(cs):
     # ax.axis("equal")
     # ax.legend()
     # plt.show()
+
+def test_plot_cs(cs):
+    ax = plt.axes()
+    cs.plot_cs(ax=ax, camera=True, marker=".", color="c", label="cross section")
+    ax.set_xlim([0, cs.camera_config.width])
+    ax.set_ylim([0, cs.camera_config.height])
+    assert ax.has_data()
