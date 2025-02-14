@@ -1,6 +1,13 @@
 import numpy as np
 import pytest
 
+try:
+    import cartopy  # Try to import cartopy
+
+    CARTOPY_AVAILABLE = True
+except ImportError:
+    CARTOPY_AVAILABLE = False
+
 
 def test_get_river_flow(piv_transect):
     # fill method is already tested in get_q, so choose default only
@@ -48,7 +55,7 @@ def test_get_wetted_perspective(piv_transect):
     ],
 )
 def test_plot(piv_transect, mode, method):
-    if mode == "geographical":
+    if mode == "geographical" and not CARTOPY_AVAILABLE:
         pytest.importorskip("cartopy", "Cartopy is required for geographical plotting")
     piv_transect.transect.get_q()
     piv_transect.isel(quantile=2).transect.plot(method=method, mode=mode, add_text=True)
