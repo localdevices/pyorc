@@ -1,6 +1,6 @@
 """pyorc: free and open-source image-based surface velocity and discharge."""
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 
 from .api import CameraConfig, Frames, Transect, Velocimetry, Video, CrossSection, get_camera_config, load_camera_config  # noqa
 from .project import *  # noqa

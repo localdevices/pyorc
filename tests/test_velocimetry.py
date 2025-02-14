@@ -23,13 +23,9 @@ def test_get_transect(piv, cross_section, distance, nr_points):
     ],
 )
 def test_plot(piv, mode, method):
-    plot = True
     if mode == "geographical":
-        try:
-            pass
-        except ImportError:
-            print("Cartopy is missing, skipping cartopy dependent test")
-            plot = False
+        pytest.importorskip("cartopy", "Cartopy is required for geographical plotting")
+    plot = True
     if method == "streamplot":
         if mode != "local":
             # skipping the test, because streamplot only works local
