@@ -1,8 +1,11 @@
-from .cameraconfig import CameraConfig, load_camera_config, get_camera_config
-from .video import Video
+"""API for pyorc."""
+
+from .cameraconfig import CameraConfig, get_camera_config, load_camera_config
+from .cross_section import CrossSection
 from .frames import Frames
-from .velocimetry import Velocimetry
 from .transect import Transect
+from .velocimetry import Velocimetry
+from .video import Video
 
 __all__ = [
     "CameraConfig",
@@ -11,5 +14,6 @@ __all__ = [
     "Video",
     "Frames",
     "Velocimetry",
-    "Transect"
+    "CrossSection",
+    "Transect",
 ]

@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
+try:
+    import cartopy  # Try to import cartopy
+
+    CARTOPY_AVAILABLE = True
+except ImportError:
+    CARTOPY_AVAILABLE = False
 
 @pytest.mark.parametrize(("distance", "nr_points"), [(None, 36), (0.1, 50), (0.3, 17)])
 def test_get_transect(piv, cross_section, distance, nr_points):
@@ -23,13 +29,9 @@ def test_get_transect(piv, cross_section, distance, nr_points):
     ],
 )
 def test_plot(piv, mode, method):
+    if mode == "geographical" and not CARTOPY_AVAILABLE:
+        pytest.importorskip("cartopy", "Cartopy is required for geographical plotting")
     plot = True
-    if mode == "geographical":
-        try:
-            pass
-        except ImportError:
-            print("Cartopy is missing, skipping cartopy dependent test")
-            plot = False
     if method == "streamplot":
         if mode != "local":
             # skipping the test, because streamplot only works local

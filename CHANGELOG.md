@@ -1,3 +1,17 @@
+## [0.7.2] = 2025-02-14
+### Added
+- New class CrossSection. This is to prepare for water level estimation functionalities.
+  It provides several geometrical operations along a cross section. This is documented yet.
+  and may change significantly in the near future.
+
+### Changed
+- `cli.cli_utils.get_gcps_optimized_fit` now export rotation and translation vectors also, for
+  later use in front end functionalities (e.g. show pose of camera interactively).
+### Deprecated
+### Removed
+### Fixed
+### Security
+
 ## [0.7.1] - 2024-12-13
 ### Added
 ### Changed
