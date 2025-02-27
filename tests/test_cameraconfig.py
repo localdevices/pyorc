@@ -171,7 +171,7 @@ def test_load_camera_config(cam_config_fn, cam_config, lens_position):
     "camera",
     [
         True,
-#        False
+        False
     ]
 )
 def test_plot(cam_config, vid, camera):
@@ -181,11 +181,6 @@ def test_plot(cam_config, vid, camera):
         assert(
             isinstance(ax, matplotlib.axes.Axes)
         )
-    #else:
-        #assert(
-            #isinstance(ax, GeoAxesSubplot)
-        #)
-
 
 def test_cv_undistort_points(cam_config):
     # let's fake a distortion
@@ -203,6 +198,7 @@ def test_cv_undistort_points(cam_config):
     [
         "cam_config_6gcps",
         "cam_config",
+        "cam_config_rvec_tvec"
     ]
 )
 def test_unproject_points(cur_cam_config, request):

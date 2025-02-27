@@ -300,8 +300,19 @@ class CrossSection:
             list(lines[0].coords) + list(lines[1].coords[::-1]) + [lines[0].coords[0]] for lines in csl_pol_bounds
         ]
         if camera:
+            coords_expand = np.zeros((0, 3))
+            for cn, coords in enumerate(csl_pol_coords):
+                for n in range(0, len(coords) - 1):
+                    new_coords = np.linspace(coords[n], coords[n + 1], 100)
+                    coords_expand = np.r_[coords_expand, new_coords]
+                coords = coords_expand
+                csl_pol_coords[cn] = coords
             csl_pol_coords = [
-                self.camera_config.project_points(coords, swap_y_coords=True) for coords in csl_pol_coords
+                self.camera_config.project_points(coords, swap_y_coords=True, within_image=True) for coords in
+                csl_pol_coords
+            ]
+            csl_pol_coords = [
+                coords[np.isfinite(coords[:, 0])] for coords in csl_pol_coords
             ]
         polygons = [geometry.Polygon(coords) for coords in csl_pol_coords]
         return polygons

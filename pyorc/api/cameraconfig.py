@@ -49,6 +49,8 @@ class CameraConfig:
         is_nadir: Optional[bool] = False,
         stabilize: Optional[List[List]] = None,
         rotation: Optional[int] = None,
+        rvec: Optional[List[float]] = None,
+        tvec: Optional[List[float]] = None
     ):
         """Initialize a camera configuration instance.
 
@@ -109,6 +111,8 @@ class CameraConfig:
         self.height = height
         self.width = width
         self.is_nadir = is_nadir
+        self.rvec = rvec
+        self.tvec = tvec
         if crs is not None:
             try:
                 crs = CRS.from_user_input(crs)
@@ -254,6 +258,8 @@ class CameraConfig:
             mean coordinate (x, y) or (x, y, z) of gcp destination points
 
         """
+        if self.gcps_dest is None:
+            return np.array([0., 0., 0.])
         return np.array(self.gcps_dest).mean(axis=0)
 
     @property
@@ -288,6 +294,16 @@ class CameraConfig:
     def pnp(self):
         """Return Precise N point solution from ground control points, intrinsics and distortion."""
         return cv.solvepnp(self.gcps_reduced, self.gcps["src"], self.camera_matrix, self.dist_coeffs)
+
+    @property
+    def rvec(self):
+        if self._rvec is None:
+            return self.pnp[1]
+        return self._rvec
+
+    @rvec.setter
+    def rvec(self, _rvec):
+        self._rvec = _rvec
 
     @property
     def shape(self):
@@ -350,6 +366,17 @@ class CameraConfig:
         """
         return cv._get_transform(self.bbox, resolution=self.resolution)
 
+
+    @property
+    def tvec(self):
+        if self._tvec is None:
+            return self.pnp[2]
+        return self._tvec
+
+    @tvec.setter
+    def tvec(self, _tvec):
+        self._tvec = _tvec
+
     def set_lens_calibration(
         self,
         fn: str,
@@ -393,7 +420,7 @@ class CameraConfig:
 
     def estimate_lens_position(self):
         """Estimate lens position from distortion and intrinsec/extrinsic matrix."""
-        _, rvec, tvec = self.pnp
+        rvec, tvec = self.rvec, self.tvec
         rmat = cv2.Rodrigues(rvec)[0]
         # determine lens position related to center of objective
         lens_pos_centroid = (np.array(-rmat).T @ tvec).flatten()
@@ -485,7 +512,7 @@ class CameraConfig:
             [x, y, z] camera coordinates
 
         """
-        _, rvec, tvec = self.pnp
+        rvec, tvec = self.rvec, self.tvec
         # get rotation matrix
         R, _ = cv2.Rodrigues(rvec)
 
@@ -882,7 +909,7 @@ class CameraConfig:
             list of points (equal in length as points) with [col, row] coordinates
 
         """
-        _, rvec, tvec = self.pnp
+        rvec, tvec = np.array(self.rvec), np.array(self.tvec)
         # normalize points wrt mean of gcps
         points = np.float32(np.array(points) - self.gcps_mean)
         points_proj, jacobian = cv2.projectPoints(
@@ -892,24 +919,18 @@ class CameraConfig:
 
         # points_back = cv.unproject_points(src=points_proj, z=points[:, -1], )
         if within_image:
-            # back project, the ones that do not get close to the original will be removed
-            points_back = cv.unproject_points(
-                points_proj,
-                z=points[:, -1],
-                rvec=rvec,
-                tvec=tvec,
-                camera_matrix=self.camera_matrix,
-                dist_coeffs=self.dist_coeffs,
-            )
-            # TODO: figure out how to filter out points that bend into the image frame according to the
-            # distortion parameters, but are in fact outside. This is not yet working the way it should
-            filter = np.all(np.isclose(np.array(points_back), np.array(points), atol=1e-2), axis=1)
-            points_proj[~filter] = np.nan
             # also filter points outside edges of image
-            points_proj[points_proj[:, 0] < 0, 0] = 0.0
-            points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width - 1
-            points_proj[points_proj[:, 1] < 0, 1] = 0.0
-            points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height - 1
+            points_proj[points_proj[:, 0] < 0, 0] = -1.0
+            points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width
+            points_proj[points_proj[:, 1] < 0, 1] = -1.0
+            points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height
+
+            # check which points lie behind the camera
+            R, _ = cv2.Rodrigues(rvec)
+            points_camera = cv.world_to_camera(points, rvec, tvec)
+            behind_camera = points_camera[:, 2] <= 0.0
+            # set points behind camera to nan
+            points_proj[behind_camera, :] = np.nan
         # swap y coords if set
         if swap_y_coords:
             points_proj[:, 1] = self.height - points_proj[:, 1]
@@ -964,7 +985,7 @@ class CameraConfig:
             unprojected points as list of [x, y, z] coordinates
 
         """
-        _, rvec, tvec = self.pnp
+        rvec, tvec = self.rvec, self.tvec
         # reduce zs by the mean of the gcps
         _zs = zs - self.gcps_mean[-1]
         dst = cv.unproject_points(

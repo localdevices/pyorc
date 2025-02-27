@@ -80,8 +80,8 @@ def test_reduce_rolling(frames_grayscale, samples=1):
 def test_plot(frames, idx, request):
     frames = request.getfixturevalue(frames)
     frames[idx].frames.plot()
-    frames[idx].frames.plot(mode="camera")
     plt.close("all")
+    frames[idx].frames.plot(mode="camera")
 
 
 @pytest.mark.parametrize("idx", [0, -1])
