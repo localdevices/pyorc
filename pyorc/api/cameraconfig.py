@@ -307,19 +307,19 @@ class CameraConfig:
         tvec_cam += self.gcps_mean
         # transform back to world
         rvec, tvec = cv.pose_world_to_camera(rvec_cam, tvec_cam)
-        self.rvec = rvec
-        self.tvec = tvec
         return _, rvec, tvec
 
     @property
     def rvec(self):
         """Return rvec from precise N point solution."""
         if self._rvec is None:
-            return self.pnp[1]
+            return self.pnp[1].tolist()
         return self._rvec
 
     @rvec.setter
     def rvec(self, _rvec):
+        if isinstance(_rvec, np.ndarray):
+            _rvec = _rvec.tolist()
         self._rvec = _rvec
 
     @property
@@ -387,11 +387,14 @@ class CameraConfig:
     def tvec(self):
         """Return tvec from precise N point solution."""
         if self._tvec is None:
-            return self.pnp[2]
+            return self.pnp[2].tolist()
         return self._tvec
 
     @tvec.setter
     def tvec(self, _tvec):
+        if isinstance(_tvec, np.ndarray):
+            _tvec = _tvec.tolist()
+
         self._tvec = _tvec
 
     def set_lens_calibration(
@@ -437,11 +440,10 @@ class CameraConfig:
 
     def estimate_lens_position(self):
         """Estimate lens position from distortion and intrinsec/extrinsic matrix."""
-        rvec, tvec = self.rvec, self.tvec
+        rvec, tvec = np.array(self.rvec), np.array(self.tvec)
         rmat = cv2.Rodrigues(rvec)[0]
         # determine lens position related to center of objective
-        lens_pos_centroid = (np.array(-rmat).T @ tvec).flatten()
-        lens_pos = np.array(lens_pos_centroid) + self.gcps_mean
+        lens_pos = (np.array(-rmat).T @ tvec).flatten()
         return lens_pos
 
     def get_bbox(
@@ -1004,10 +1006,9 @@ class CameraConfig:
         """
         rvec, tvec = self.rvec, self.tvec
         # reduce zs by the mean of the gcps
-        _zs = zs  # - self.gcps_mean[-1]
         dst = cv.unproject_points(
             np.array(points, dtype=np.float64),
-            _zs,
+            zs,
             rvec=rvec,
             tvec=tvec,
             camera_matrix=self.camera_matrix,

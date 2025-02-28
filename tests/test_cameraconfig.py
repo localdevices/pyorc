@@ -197,6 +197,7 @@ def test_lens_position(cam_config, lens_position):
 
 def test_estimate_lens_position(cam_config):
     lens_pos = cam_config.estimate_lens_position()
+    assert lens_pos.dtype == np.float64
     assert np.allclose(lens_pos, [6.42731099e05, 8.30429131e06, 1.18996749e03])
 
 
@@ -264,35 +265,6 @@ def test_unproject_points(cur_cam_config, request):
     zs = [pt[-1] for pt in dst]
     dst_est = cur_cam_config.unproject_points(src_est, zs)
     print(dst_est[0] - dst[0])
-    assert np.allclose(dst, dst_est)
-
-
-@pytest.mark.parametrize("cur_cam_config", ["cam_config_6gcps", "cam_config", "cam_config_rvec_tvec"])
-def test_unproject_points_variation(cur_cam_config, request):
-    import cv2
-
-    cur_cam_config = request.getfixturevalue(cur_cam_config)
-    dst = cur_cam_config.gcps_dest
-    # project x, y, z point to camera objective
-    src_est = cur_cam_config.project_points(dst)
-
-    # new approach, would add gcps_mean to the tvec instead
-    self = cur_cam_config
-    points = dst
-    rvec, tvec = np.array(self.rvec), np.array(self.tvec)
-    rvec, tvec = cv.pose_world_to_camera(rvec, tvec)
-    tvec += self.gcps_mean
-    rvec, tvec = cv.pose_world_to_camera(rvec, tvec)
-    # normalize points wrt mean of gcps
-    points = np.array(points, dtype=np.float64)
-    points_proj, jacobian = cv2.projectPoints(
-        points, rvec, tvec, np.array(self.camera_matrix), np.array(self.dist_coeffs)
-    )
-    src_est_2 = np.array([list(point[0]) for point in points_proj])
-    assert np.allclose(src_est, src_est_2)
-    # now back project and compare if the results are nearly identical
-    zs = [pt[-1] for pt in dst]
-    dst_est = cur_cam_config.unproject_points(src_est, zs)
     assert np.allclose(dst, dst_est)
 
 
