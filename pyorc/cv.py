@@ -588,6 +588,7 @@ def _Rt_to_M(rvec, tvec, camera_matrix, z=0.0, reverse=False):
         M = np.linalg.inv(np.dot(camera_matrix, R))
     # normalize homography before returning
     return M / M[-1, -1]
+    return M / M[-1, -1]
 
 
 def pose_world_to_camera(rvec, tvec):

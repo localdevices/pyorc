@@ -61,7 +61,7 @@ def project_cv(da: xr.DataArray, cc: Any, x: np.ndarray, y: np.ndarray, z: np.nd
     # also undistort the src control points
     cc.gcps["src"] = cv.undistort_points(cc.gcps["src"], cc.camera_matrix, cc.dist_coeffs)
     h_a = cc.z_to_h(z)
-    src = cc.get_bbox(camera=True, h_a=h_a, expand_exterior=False).exterior.coords[0:4]
+    src = cc.get_bbox(mode="camera", h_a=h_a, expand_exterior=False).exterior.coords[0:4]
     dst_xy = cc.get_bbox(expand_exterior=False).exterior.coords[0:4]
     # get geographic coordinates bbox corners
     dst = cv.transform_to_bbox(dst_xy, cc.bbox, cc.resolution)
@@ -178,7 +178,7 @@ def project_numpy(
     if reducer != "nearest":
         # also fill in the parts that have valid averaged pixels
         coli, rowi = np.meshgrid(np.arange(len(da.x)), np.arange(len(da.y)))
-        poly = cc.get_bbox(camera=True, z_a=z)
+        poly = cc.get_bbox(mode="camera", z_a=z)
         mask = xr.DataArray(
             rasterize([poly], out_shape=(cc.height, cc.width)) == 1,
             coords={"y": da.y, "x": da.x},

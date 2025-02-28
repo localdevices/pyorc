@@ -374,7 +374,7 @@ class _Transect_PlotMethods:
         transect = self._obj.transect
         camera_config = transect.camera_config
         # M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
-        src = camera_config.get_bbox(camera=True, h_a=transect.h_a, expand_exterior=False).exterior.coords[0:4]
+        src = camera_config.get_bbox(mode="camera", h_a=transect.h_a, expand_exterior=False).exterior.coords[0:4]
         dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
         # get geographic coordinates bbox corners
         # get geographic coordinates bbox corners
@@ -538,7 +538,7 @@ class _Velocimetry_PlotMethods:
         velocimetry = self._obj.velocimetry
         camera_config = velocimetry.camera_config
         # M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
-        src = camera_config.get_bbox(camera=True, h_a=velocimetry.h_a, expand_exterior=False).exterior.coords[0:4]
+        src = camera_config.get_bbox(mode="camera", h_a=velocimetry.h_a, expand_exterior=False).exterior.coords[0:4]
         dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
         # get geographic coordinates bbox corners
         dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)

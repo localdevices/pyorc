@@ -242,12 +242,10 @@ def test_load_camera_config(cam_config_fn, cam_config, lens_position):
 )
 def test_plot(cam_config, vid, mode):
     import matplotlib as mpl
-    import matplotlib.pyplot as plt
 
     ax = cam_config.plot(mode=mode)
     if mode == "camera":
         assert isinstance(ax, mpl.axes.Axes)
-    plt.show()
 
 
 def test_cv_undistort_points(cam_config):

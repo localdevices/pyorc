@@ -327,7 +327,7 @@ class AoiSelect(BaseSelect):
                     bbox_cam = list(
                         zip(
                             *self.camera_config.get_bbox(
-                                camera=True, expand_exterior=True, within_image=True
+                                mode="camera", expand_exterior=True, within_image=True
                             ).exterior.xy,
                             strict=False,
                         )

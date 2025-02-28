@@ -471,7 +471,7 @@ class CameraConfig:
             is returned in the geographical coordinates. If set to "camera", the bounding box is returned in the
             camera perspective. If set to "3d", the bounding box is returned as a 3D polygon in the CRS
         h_a : float, optional
-            If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
+            If set with `mode="camera"`, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level (in local datum). In case a video with higher (lower) water levels is
             used, this will result in a different perspective plane than the control video.
         z_a : float, optional
@@ -486,7 +486,7 @@ class CameraConfig:
         -------
         A bounding box, that in the used CRS is perfectly rectangular, and aligned in the up/downstream direction.
         It can (and certainly will) be rotated with respect to a typical bbox with xlim, ylim coordinates.
-        If user sets ``camera=True`` then the geographical bounding box will be converted into a camera perspective,
+        If user sets ``mode="camera"`` then the geographical bounding box will be converted into a camera perspective,
         using the homography belonging to the available ground control points and current water level.
 
         This can then be used to reconstruct the grid for velocimetry calculations.
@@ -1225,7 +1225,7 @@ class CameraConfig:
         """Plot bounding box.
 
         This can be done for orthorectification in a geographical projection (`camera=False`) or the camera
-        Field Of View (`camera=True`).
+        Field Of View (`mode="camera"`).
 
         Parameters
         ----------
@@ -1241,7 +1241,7 @@ class CameraConfig:
         transformer : pyproj transformer transformation function, optional
             used to reproject bbox to axes object projection (e.g. lat lon)
         h_a : float, optional
-            If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
+            If set with `mode="camera"`, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level. In case a video with higher (lower) water levels is used, this
             will result in a different perspective plane than the control video.
         within_image : bool, optional
