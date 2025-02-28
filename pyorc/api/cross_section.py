@@ -56,17 +56,17 @@ class CrossSection:
     @property
     def interp_x(self) -> interp1d:
         """Linear interpolation function for x-coordinates."""
-        return interp1d(self.s, self.x, kind="linear", fill_value="extrapolate")
+        return interp1d(self.l, self.x, kind="linear", fill_value="extrapolate")
 
     @property
     def interp_y(self) -> interp1d:
         """Linear interpolation function for x-coordinates."""
-        return interp1d(self.s, self.y, kind="linear", fill_value="extrapolate")
+        return interp1d(self.l, self.y, kind="linear", fill_value="extrapolate")
 
     @property
     def interp_z(self) -> interp1d:
         """Linear interpolation function for x-coordinates."""
-        return interp1d(self.s, self.z, kind="linear", fill_value="extrapolate")
+        return interp1d(self.l, self.z, kind="linear", fill_value="extrapolate")
 
     @property
     def interp_s_from_l(self) -> interp1d:
@@ -127,7 +127,7 @@ class CrossSection:
             return geometry.LineString(zip(self.s, [z] * len(self.s), strict=False))
         return geometry.LineString(zip(self.x, self.y, [z] * len(self.x), strict=False))
 
-    def get_csl_point(self, h: Optional[float] = None, s: Optional[float] = None, camera: bool = False) -> List[geometry.Point]:
+    def get_csl_point(self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False) -> List[geometry.Point]:
         """Retrieve list of points, where cross section (cs) touches the land (l).
 
         Multiple points may be found.
@@ -136,8 +136,8 @@ class CrossSection:
         ----------
         h : float, optional
             water level [m], if provided, s must not be provided.
-        s : float
-            coordinate of distance from left to right bank [m], if provided, h must not be provided.
+        l : float
+            coordinate of distance from left to right bank, including height [m], if provided, h must not be provided.
         camera : bool, optional
             If set, return 2D projected points, by default False.
 
@@ -147,20 +147,20 @@ class CrossSection:
             List of points, where water line touches land, can be only one or two points.
 
         """
-        if h is not None and s is not None:
+        if h is not None and l is not None:
             raise ValueError("Only one of h or s can be provided.")
-        if h is None and s is None:
+        if h is None and l is None:
             raise ValueError("One of h or s must be provided.")
         # get water level in camera config vertical datum
-        if s is not None:
-            if s < 0 or s > self.s[-1]:
+        if l is not None:
+            if l < 0 or l > self.s[-1]:
                 raise ValueError(
                     "Value of s is lower (higher) than the minimum (maximum) value found in the cross section"
                 )
-            cross = [geometry.Point(self.interp_x(s), self.interp_y(s), self.interp_z(s))]
+            cross = [geometry.Point(self.interp_x(l), self.interp_y(l), self.interp_z(l))]
         else:
             print(h)
-            print(s)
+            print(l)
             z = self.camera_config.h_to_z(h)
             if z > np.array(self.z).max() or z < np.array(self.z).min():
                 raise ValueError(
@@ -188,15 +188,17 @@ class CrossSection:
             cross = [geometry.Point(p[0], p[1]) for p in coords_proj]
         return cross
 
-    def get_csl_line(self, h: Optional[float] = None, s: Optional[float] = None, length=0.5, offset=0.0, camera: bool = False) -> List[geometry.LineString]:
+    def get_csl_line(self, h: Optional[float] = None, l: Optional[float] = None, length=0.5, offset=0.0, camera: bool = False) -> List[geometry.LineString]:
         """Retrieve waterlines over the cross section, perpendicular to the orientation of the cross section.
 
         Returns a 2D LineString if camera is True, 3D if False
 
         Parameters
         ----------
-        h : float
+        h : float, optional
             water level [m]
+        l : float
+            coordinate of distance from left to right bank, including height [m], if provided, h must not be provided.
         length : float, optional
             length of the waterline [m], by default 0.5
         offset : float, optional
@@ -210,7 +212,7 @@ class CrossSection:
             List of lines perpendicular to cross section orientation, can be only one or two lines.
 
         """
-        csl_points = self.get_csl_point(h=h, s=s)
+        csl_points = self.get_csl_point(h=h, l=l)
         z = csl_points[0].z
         # z = self.camera_config.h_to_z(h)
         # acquire angle perpendicular to cross section
@@ -249,7 +251,7 @@ class CrossSection:
     def get_csl_pol(
         self,
         h: Optional[float] = None,
-        s: Optional[float] = None,
+        l: Optional[float] = None,
         length: float = 0.5,
         padding: Tuple[float, float] = (-0.5, 0.5),
         offset: float = 0.0,
@@ -263,6 +265,8 @@ class CrossSection:
         ----------
         h : float
             water level [m]
+        l : float
+            coordinate of distance from left to right bank, including height [m], if provided, h must not be provided.
         length : float, optional
             length of the waterline [m], by default 0.5
         padding : Tuple[float, float], optional
@@ -280,7 +284,7 @@ class CrossSection:
 
         """
         # retrieve water line(s)
-        csl = self.get_csl_line(h=h, s=s, length=length, offset=offset)
+        csl = self.get_csl_line(h=h, l=l, length=length, offset=offset)
         if len(padding) != 2:
             raise ValueError(f"padding must contain two values (provided: {len(padding)}")
         if padding[1] <= padding[0]:
@@ -421,7 +425,7 @@ class CrossSection:
         else:
             if camera:
                 # extract pixel locations
-                pix = self.camera_config.project_points(list(map(list, self.cs_linestring.coords)), swap_y_coords=True)
+                pix = self.camera_config.project_points(list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=True)
                 # map to x and y arrays
                 x, y = zip(*[(c[0], c[1]) for c in pix], strict=False)
             else:

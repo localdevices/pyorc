@@ -209,11 +209,11 @@ def test_get_csl_point_camera(cs):
 
 
 def test_get_csl_point_s(cs):
-    s1 = 5.0
-    s2 = 8.0
+    l1 = 5.0
+    l2 = 8.0
     # both should get two points back
-    cross1 = cs.get_csl_point(s=s1)
-    cross2 = cs.get_csl_point(s=s2)
+    cross1 = cs.get_csl_point(l=l1)
+    cross2 = cs.get_csl_point(l=l2)
     # ax = plt.axes(projection="3d")
     #
     # for cross in cross1:
@@ -246,11 +246,11 @@ def test_get_csl_line(cs):
     # plt.show()
 
 def test_get_csl_line_s(cs):
-    s1 = 5.0
-    s2 = 8.0
+    l1 = 5.0
+    l2 = 8.0
 
-    cross1 = cs.get_csl_line(s=s1, offset=0.0, length=4)
-    cross2 = cs.get_csl_line(s=s2, offset=0.0, length=4)
+    cross1 = cs.get_csl_line(l=l1, offset=0.0, length=4)
+    cross2 = cs.get_csl_line(l=l2, offset=0.0, length=4)
     assert len(cross1) == 1
     assert len(cross2) == 1
 
@@ -306,9 +306,9 @@ def test_get_csl_pol(cs):
     # plt.show()
 
 def test_get_csl_pol(cs):
-    s1 = 5.0
-    pols1 = cs.get_csl_pol(s=s1, offset=0.0, padding=(-2, 0), length=4.0)
-    pols2 = cs.get_csl_pol(s=s1, offset=0.0, padding=(0, 2), length=4.0)
+    l1 = 5.0
+    pols1 = cs.get_csl_pol(l=l1, offset=0.0, padding=(-2, 0), length=4.0)
+    pols2 = cs.get_csl_pol(l=l1, offset=0.0, padding=(0, 2), length=4.0)
 
     # ax = plt.axes(projection="3d")
     # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
