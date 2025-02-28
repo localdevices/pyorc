@@ -73,7 +73,6 @@ class CrossSection:
         """Linear interpolation function for s-coordinates, from left to right bank, interpolated from length."""
         return interp1d(self.l, self.s, kind="linear", fill_value="extrapolate")
 
-
     @property
     def cs_points(self) -> List[geometry.Point]:
         """Cross section as list of shapely.geometry.Point."""
@@ -127,7 +126,9 @@ class CrossSection:
             return geometry.LineString(zip(self.s, [z] * len(self.s), strict=False))
         return geometry.LineString(zip(self.x, self.y, [z] * len(self.x), strict=False))
 
-    def get_csl_point(self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False) -> List[geometry.Point]:
+    def get_csl_point(
+        self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False
+    ) -> List[geometry.Point]:
         """Retrieve list of points, where cross section (cs) touches the land (l).
 
         Multiple points may be found.
@@ -188,7 +189,9 @@ class CrossSection:
             cross = [geometry.Point(p[0], p[1]) for p in coords_proj]
         return cross
 
-    def get_csl_line(self, h: Optional[float] = None, l: Optional[float] = None, length=0.5, offset=0.0, camera: bool = False) -> List[geometry.LineString]:
+    def get_csl_line(
+        self, h: Optional[float] = None, l: Optional[float] = None, length=0.5, offset=0.0, camera: bool = False
+    ) -> List[geometry.LineString]:
         """Retrieve waterlines over the cross section, perpendicular to the orientation of the cross section.
 
         Returns a 2D LineString if camera is True, 3D if False
@@ -278,7 +281,7 @@ class CrossSection:
 
         Returns
         -------
-        List[shapely.geometry.LineString]
+        List[shapely.geometry.Polygon]
             List of lines perpendicular to cross section orientation, can be only one or two lines.
 
 
@@ -312,12 +315,10 @@ class CrossSection:
                 coords = coords_expand
                 csl_pol_coords[cn] = coords
             csl_pol_coords = [
-                self.camera_config.project_points(coords, swap_y_coords=True, within_image=True) for coords in
-                csl_pol_coords
+                self.camera_config.project_points(coords, swap_y_coords=True, within_image=True)
+                for coords in csl_pol_coords
             ]
-            csl_pol_coords = [
-                coords[np.isfinite(coords[:, 0])] for coords in csl_pol_coords
-            ]
+            csl_pol_coords = [coords[np.isfinite(coords[:, 0])] for coords in csl_pol_coords]
         polygons = [geometry.Polygon(coords) for coords in csl_pol_coords]
         return polygons
 
@@ -425,7 +426,9 @@ class CrossSection:
         else:
             if camera:
                 # extract pixel locations
-                pix = self.camera_config.project_points(list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=True)
+                pix = self.camera_config.project_points(
+                    list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=True
+                )
                 # map to x and y arrays
                 x, y = zip(*[(c[0], c[1]) for c in pix], strict=False)
             else:

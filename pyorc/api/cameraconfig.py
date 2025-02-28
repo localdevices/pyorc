@@ -3,19 +3,20 @@
 import copy
 import json
 import os
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import shapely.geometry
-from matplotlib import patches
 from pyproj import CRS, Transformer
 from pyproj.exceptions import CRSError
 from shapely import ops, wkt
 from shapely.geometry import LineString, Point, Polygon
 
-from pyorc import cv, helpers
+from pyorc import cv, helpers, plot_helpers
+
+MODES = Literal["camera", "geographical", "3d"]
 
 
 class CameraConfig:
@@ -449,6 +450,7 @@ class CameraConfig:
     def get_bbox(
         self,
         camera: Optional[bool] = False,
+        mode: Optional[MODES] = "geographical",
         h_a: Optional[float] = None,
         z_a: Optional[float] = None,
         within_image: Optional[bool] = False,
@@ -463,6 +465,11 @@ class CameraConfig:
         camera : bool, optional
             If set, the bounding box will be returned as row and column coordinates in the camera perspective.
             In this case ``h_a`` may be set to provide the right water level, to estimate the bounding box for.
+            This option is deprecated, instead use mode="camera".
+        mode : Literal["geographical", "camera", "3d"], optional
+            Determines the type of bounding box to return. If set to "geographical" (default), the bounding box
+            is returned in the geographical coordinates. If set to "camera", the bounding box is returned in the
+            camera perspective. If set to "3d", the bounding box is returned as a 3D polygon in the CRS
         h_a : float, optional
             If set with ``camera=True``, then the bbox coordinates will be transformed to the camera perspective,
             using h_a as a present water level (in local datum). In case a video with higher (lower) water levels is
@@ -485,6 +492,16 @@ class CameraConfig:
         This can then be used to reconstruct the grid for velocimetry calculations.
 
         """
+        if camera:
+            import warnings
+
+            warnings.warn(
+                "The camera=True option is deprecated, use mode='camera' instead. This option will be removed in "
+                "a future release.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            mode = "camera"
         bbox = self.bbox
         coords = np.array(bbox.exterior.coords)
         if within_image:
@@ -505,14 +522,12 @@ class CameraConfig:
         # project points to pixel image coordinates
         corners = self.project_points(coords, within_image=within_image)
         corners = corners[np.isfinite(corners[:, 0])]
-        if not (camera):
+        if not mode == "camera":
             # project back to real-world coordinates after possibly cutting at edges of visibility
             corners = self.unproject_points(np.array(np.array(list(zip(*corners, strict=False))).T), z_a)
-            # corners = self.unproject_points(list(zip(coords[:, 0], coords[:, 1])), z_a)
-            # project points (after cutting on image edges) to geographical space
-        bbox = Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
-
-        return bbox
+        if mode == "3d":
+            return Polygon(corners[np.isfinite(corners[:, 0])])
+        return Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
 
     def get_camera_coords(
         self,
@@ -1025,6 +1040,7 @@ class CameraConfig:
         buffer: Optional[float] = 0.0005,
         zoom_level: Optional[int] = 19,
         camera: Optional[bool] = False,
+        mode: Optional[MODES] = "geographical",
         tiles_kwargs: Optional[Dict] = None,
     ) -> plt.Axes:
         """Plot geographical situation of the CameraConfig.
@@ -1046,6 +1062,12 @@ class CameraConfig:
             zoom level of image tiler service (default: 18)
         camera : bool, optional
             If set to True, all camera config information will be back projected to the original camera objective.
+            This option is deprecated, instead use mode="camera".
+        mode : Literal["geographical", "camera", "3d"], optional
+            Determines the type of bounding box to return. If set to "geographical" (default), the bounding box
+            is returned in the geographical coordinates. If set to "camera", the bounding box is returned in the
+            camera perspective. If set to "3d", the bounding box is returned as a 3D polygon in the CRS
+
         tiles_kwargs : dict
             additional keyword arguments to pass to ax.add_image when tiles are added
 
@@ -1054,6 +1076,16 @@ class CameraConfig:
         ax : plt.axes
 
         """
+        if camera:
+            import warnings
+
+            warnings.warn(
+                "The camera=True option is deprecated, use mode='camera' instead. This option will be removed in "
+                "a future release.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            mode = "camera"
         if not tiles_kwargs:
             tiles_kwargs = {}
         # initiate transform
@@ -1063,54 +1095,98 @@ class CameraConfig:
         ylim = ax.get_ylim() if ax is not None else None
 
         # prepare points for plotting
-        if camera:
+        if mode == "camera":
             points = [Point(x, y) for x, y in self.gcps["src"]]
-        else:
+        elif mode == "geographical":
             points = [Point(p[0], p[1]) for p in self.gcps["dst"]]
-
-        if not camera:
-            if self.lens_position is not None and not camera:
-                #
-                # if hasattr(self, "lens_position") and not camera:
-                points.append(Point(self.lens_position[0], self.lens_position[1]))
-            # transform points in case a crs is provided
-            if hasattr(self, "crs"):
+        else:
+            # 3d points are needed
+            if len(self.gcps["dst"]) == 3:
+                points = [Point(*p) for p in self.gcps["dst"]]
+            else:
+                points = [Point(p[0], p[1], self.gcps["z_0"]) for p in self.gcps["dst"]]
+        if mode != "camera":
+            if self.lens_position is not None:
+                if mode == "3d":
+                    points.append(Point(*self.lens_position))
+                else:
+                    points.append(Point(self.lens_position[0], self.lens_position[1]))
+            # transform points in case a crs is provided and we want a geographical plot
+            if mode == "geographical" and hasattr(self, "crs"):
                 # make a transformer to lat lon
                 transformer = Transformer.from_crs(
                     CRS.from_user_input(self.crs), CRS.from_epsg(4326), always_xy=True
                 ).transform
                 points = [ops.transform(transformer, p) for p in points]
-            xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
-            extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
+            if mode == "geographical":
+                xmin, ymin, xmax, ymax = list(np.array(LineString(points).bounds))
+                extent = [xmin - buffer, xmax + buffer, ymin - buffer, ymax + buffer]
         x = [p.x for p in points]
         y = [p.y for p in points]
-
+        if mode == "3d":
+            z = [p.z for p in points]
         if ax is None:
             plt.figure(figsize=figsize)
-            if hasattr(self, "crs") and not (camera):
+            if hasattr(self, "crs") and mode == "geographical":
                 ax = helpers.get_geo_axes(tiles=tiles, extent=extent, zoom_level=zoom_level, **tiles_kwargs)
             else:
-                ax = plt.subplot()
+                if mode == "3d":
+                    ax = plt.axes(projection="3d")
+                else:
+                    ax = plt.axes()
         if hasattr(ax, "add_geometries"):
             import cartopy.crs as ccrs
 
             plot_kwargs = dict(transform=ccrs.PlateCarree())
         else:
             plot_kwargs = {}
-        ax.plot(
-            x[0 : len(self.gcps["dst"])],
-            y[0 : len(self.gcps["dst"])],
-            ".",
-            label="Control points",
-            markersize=12,
-            markeredgecolor="w",
-            zorder=2,
-            **plot_kwargs,
-        )
-        if len(x) > len(self.gcps["dst"]):
+        if mode == "3d":
             ax.plot(
-                x[-1], y[-1], ".", label="Lens position", markersize=12, zorder=2, markeredgecolor="w", **plot_kwargs
+                x[0 : len(self.gcps["dst"])],
+                y[0 : len(self.gcps["dst"])],
+                z[0 : len(self.gcps["dst"])],
+                ".",
+                label="Control points",
+                markersize=12,
+                markeredgecolor="w",
+                zorder=2,
+                **plot_kwargs,
             )
+        else:
+            ax.plot(
+                x[0 : len(self.gcps["dst"])],
+                y[0 : len(self.gcps["dst"])],
+                ".",
+                label="Control points",
+                markersize=12,
+                markeredgecolor="w",
+                zorder=2,
+                **plot_kwargs,
+            )
+        if len(x) > len(self.gcps["dst"]):
+            if mode == "3d":
+                ax.plot(
+                    x[-1],
+                    y[-1],
+                    z[-1],
+                    ".",
+                    label="Lens position",
+                    markersize=12,
+                    zorder=2,
+                    markeredgecolor="w",
+                    **plot_kwargs,
+                )
+            else:
+                ax.plot(
+                    x[-1],
+                    y[-1],
+                    ".",
+                    label="Lens position",
+                    markersize=12,
+                    zorder=2,
+                    markeredgecolor="w",
+                    **plot_kwargs,
+                )
         patch_kwargs = {
             **plot_kwargs,
             "alpha": 0.5,
@@ -1120,13 +1196,19 @@ class CameraConfig:
             **plot_kwargs,
         }
         if hasattr(self, "bbox"):
-            self.plot_bbox(ax=ax, camera=camera, transformer=transformer, within_image=True, **patch_kwargs)
-        if camera:
+            self.plot_bbox(ax=ax, mode=mode, transformer=transformer, within_image=True, **patch_kwargs)
+        if mode == "camera":
             # make sure that zero is on the top
             ax.set_aspect("equal")
             if xlim is not None:
                 ax.set_xlim(xlim)
                 ax.set_ylim(ylim)
+            ax.set_xlabel("column [-]")
+            ax.set_ylabel("row [-]")
+        elif mode == "3d":
+            ax.set_xlabel("x [m]")
+            ax.set_ylabel("y [m]")
+            ax.set_zlabel("z [m]")
         ax.legend()
         return ax
 
@@ -1134,6 +1216,7 @@ class CameraConfig:
         self,
         ax: Optional[plt.Axes] = None,
         camera: Optional[bool] = False,
+        mode: Optional[MODES] = "geographical",
         transformer: Optional[Any] = None,
         h_a: Optional[float] = None,
         within_image: Optional[bool] = True,
@@ -1150,6 +1233,11 @@ class CameraConfig:
             if not provided, axes is setup (Default: None)
         camera : bool, optional
             If set to True, all camera config information will be back projected to the original camera objective.
+            This option is deprecated, instead use mode="camera".
+        mode : Literal["geographical", "camera", "3d"], optional
+            Determines the type of bounding box to return. If set to "geographical" (default), the bounding box
+            is returned in the geographical coordinates. If set to "camera", the bounding box is returned in the
+            camera perspective. If set to "3d", the bounding box is returned as a 3D polygon in the CRS
         transformer : pyproj transformer transformation function, optional
             used to reproject bbox to axes object projection (e.g. lat lon)
         h_a : float, optional
@@ -1167,16 +1255,29 @@ class CameraConfig:
 
         """
         # collect information to plot
-        bbox = self.get_bbox(camera=camera, h_a=h_a, within_image=within_image)
-        if camera is False and transformer is not None:
+        if camera:
+            import warnings
+
+            warnings.warn(
+                "The camera=True option is deprecated, use mode='camera' instead. This option will be removed in "
+                "a future release.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            mode = "camera"
+        bbox = self.get_bbox(mode=mode, h_a=h_a, within_image=within_image)
+        if mode == "geographical" and transformer is not None:
             # geographical projection is needed
             bbox = ops.transform(transformer, bbox)
-
-        bbox_x, bbox_y = bbox.exterior.xy
-        bbox_coords = list(zip(bbox_x, bbox_y, strict=False))
-        patch = patches.Polygon(bbox_coords, **kwargs)
-        p = ax.add_patch(patch)
-        return p
+        if mode == "3d":
+            return plot_helpers.plot_3d_polygon(bbox, ax=ax, **kwargs)
+        return plot_helpers.plot_polygon(bbox, ax=ax, **kwargs)
+        #
+        # bbox_x, bbox_y = bbox.exterior.xy
+        # bbox_coords = list(zip(bbox_x, bbox_y, strict=False))
+        # patch = patches.Polygon(bbox_coords, **kwargs)
+        # p = ax.add_patch(patch)
+        # return p
 
     def to_dict(self) -> Dict:
         """Return the CameraConfig object as dictionary.

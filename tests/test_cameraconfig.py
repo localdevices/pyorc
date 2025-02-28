@@ -28,9 +28,11 @@ def test_gcp_mean(cam_config):
     assert np.allclose(cam_config.gcps_mean, np.array([642734.7117, 8304295.74875, 1182.2]))
 
 
-def test_get_bbox(cam_config, vid):
-    bbox = cam_config.get_bbox(camera=True)
+@pytest.mark.parametrize(("mode", "has_z"), [("geographic", False), ("camera", False), ("3d", True)])
+def test_get_bbox(cam_config, vid, mode, has_z):
+    bbox = cam_config.get_bbox(mode=mode)
     assert isinstance(bbox, Polygon)
+    assert bbox.has_z == has_z
 
 
 def test_shape(cam_config):
@@ -234,13 +236,18 @@ def test_load_camera_config(cam_config_fn, cam_config, lens_position):
     assert cam_config2.resolution == cam_config.resolution
 
 
-@pytest.mark.parametrize("camera", [True, False])
-def test_plot(cam_config, vid, camera):
+@pytest.mark.parametrize(
+    "mode",
+    ["camera", "geographical", "3d"],
+)
+def test_plot(cam_config, vid, mode):
     import matplotlib as mpl
+    import matplotlib.pyplot as plt
 
-    ax = cam_config.plot(camera=camera)
-    if camera:
+    ax = cam_config.plot(mode=mode)
+    if mode == "camera":
         assert isinstance(ax, mpl.axes.Axes)
+    plt.show()
 
 
 def test_cv_undistort_points(cam_config):
