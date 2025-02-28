@@ -431,8 +431,8 @@ def solvepnp(dst, src, camera_matrix, dist_coeffs):
 
     """
     # set points to float32
-    _src = np.float32(src)
-    _dst = np.float32(dst)
+    _src = np.float64(src)
+    _dst = np.float64(dst)
 
     if len(_dst) == 4:
         flags = cv2.SOLVEPNP_P3P
@@ -590,6 +590,39 @@ def _Rt_to_M(rvec, tvec, camera_matrix, z=0.0, reverse=False):
     return M / M[-1, -1]
 
 
+def pose_world_to_camera(rvec, tvec):
+    """Convert a world coordinate pose to a camera coordinate pose or vice versa.
+
+    Parameters
+    ----------
+    rvec : numpy.ndarray
+        A 3x1 or 1x3 rotation vector in world coordinates.
+    tvec : numpy.ndarray
+        A 3x1 translation vector in world coordinates.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - rvec (numpy.ndarray): A 1-dimensional array representing the rotation vector
+          in camera coordinates.
+        - tvec (numpy.ndarray): A 3x1 array representing the translation vector
+          in camera coordinates.
+
+    """
+    # Get Rodriguez rotation matrix
+    R_input, _ = cv2.Rodrigues(rvec.flatten())
+
+    # 2. Create the OpenCV-compatible transformation
+    R = R_input.T  # Transpose of the rotation matrix
+    tvec = -R @ tvec.flatten()  # Transform the translation vector
+
+    # 3. Convert the adjusted rotation matrix back to a rotation vector
+    rvec, _ = cv2.Rodrigues(R)
+    rvec = rvec.flatten()
+    return rvec, tvec
+
+
 def distort_points(points, camera_matrix, dist_coeffs):
     """Distort x, y point locations with provided lens parameters.
 
@@ -612,7 +645,7 @@ def distort_points(points, camera_matrix, dist_coeffs):
         distorted point coordinates [x, y] as floats
 
     """
-    points = np.array(points, dtype="float32")
+    points = np.array(points, dtype=np.float64)
     # ptsTemp = np.array([], dtype='float32')
     # make empty rotation and translation vectors (we are only undistorting)
     rtemp = ttemp = np.array([0, 0, 0], dtype="float32")
@@ -913,8 +946,8 @@ def get_polygon_pixels(img, pol, reverse_y=True):
     mask = np.zeros_like(img, dtype=np.uint8)
     cv2.fillPoly(mask, np.array([polygon_coords], np.int32), color=255)
     if reverse_y:
-        return np.flipud(img)[mask==255]
-    return img[mask==255]
+        return np.flipud(img)[mask == 255]
+    return img[mask == 255]
 
 
 def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
@@ -989,8 +1022,7 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
         # dist_coeffs[4][0] = float(x[3])
         # dist_coeffs[3][0] = float(x[4])
         coord_mean = np.array(dst).mean(axis=0)
-        # _src = np.float32(src)
-        _dst = np.float32(np.array(dst) - coord_mean)
+        _dst = np.float64(np.array(dst) - coord_mean)
         zs = np.zeros(4) if len(_dst[0]) == 2 else np.array(_dst)[:, -1]
         if lens_position is not None:
             _lens_pos = np.array(lens_position) - coord_mean
@@ -1122,9 +1154,9 @@ def unproject_points(src, z, rvec, tvec, camera_matrix, dist_coeffs):
         unprojected points (x, y, z)
 
     """
-    src = np.float32(np.atleast_1d(src))
+    src = np.float64(np.atleast_1d(src))
     # first undistort points
-    src = np.float32(np.array(undistort_points(src, camera_matrix, dist_coeffs)))
+    src = np.float64(np.array(undistort_points(src, camera_matrix, dist_coeffs)))
     rvec = np.array(rvec)
     tvec = np.array(tvec)
     if isinstance(z, (list, np.ndarray)):
@@ -1180,13 +1212,13 @@ def undistort_points(points, camera_matrix, dist_coeffs, reverse=False):
         return distort_points(points, camera_matrix, dist_coeffs)
 
     points_undistort = cv2.undistortPoints(
-        np.expand_dims(np.float32(points), axis=1), camera_matrix, dist_coeffs, P=camera_matrix
+        np.expand_dims(np.float64(points), axis=1), camera_matrix, dist_coeffs, P=camera_matrix
     )
     return points_undistort[:, 0].tolist()
 
+
 def world_to_camera(points: np.ndarray, rvec: np.ndarray, tvec: np.ndarray):
-    """
-    Transforms points from the world coordinate system to the camera coordinate system.
+    """Transform points from the world coordinate system to the camera coordinate system.
 
     Parameters
     ----------
@@ -1201,6 +1233,7 @@ def world_to_camera(points: np.ndarray, rvec: np.ndarray, tvec: np.ndarray):
     -------
     np.ndarray
         array of 3D points in the camera coordinate system.
+
     """
     # get Rodriguez rotation matrix
     R, _ = cv2.Rodrigues(rvec)

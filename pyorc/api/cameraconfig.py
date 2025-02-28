@@ -50,7 +50,7 @@ class CameraConfig:
         stabilize: Optional[List[List]] = None,
         rotation: Optional[int] = None,
         rvec: Optional[List[float]] = None,
-        tvec: Optional[List[float]] = None
+        tvec: Optional[List[float]] = None,
     ):
         """Initialize a camera configuration instance.
 
@@ -103,6 +103,12 @@ class CameraConfig:
             are used for stabilization of the video, if this polygon is defined.
         rotation : int [90, 180, 270]
             enforces a rotation of the video of 90, 180 or 2780 degrees clock-wise.
+        rvec : list of floats (3), optional
+            OpenCV compatible rotation vector, if known. If None, the rotation will be computed from pnp solving if
+            gcps are available.
+        tvec : list of floats (3), optional
+            OpenCV compatible translation vector, if known. If None, the rotation will be computed from pnp solving if
+            gcps are available.
 
         """
         assert isinstance(height, int), 'height must be provided as type "int"'
@@ -207,7 +213,8 @@ class CameraConfig:
                 return np.array(
                     self.gcps["dst"]
                     if len(self.gcps["dst"][0]) == 3
-                    else np.c_[self.gcps["dst"], np.ones(4) * self.gcps["z_0"]]
+                    else np.c_[self.gcps["dst"], np.ones(4) * self.gcps["z_0"]],
+                    dtype=np.float64,
                 )
         # if conditions are not yet met, then return None
         return None
@@ -259,7 +266,7 @@ class CameraConfig:
 
         """
         if self.gcps_dest is None:
-            return np.array([0., 0., 0.])
+            return np.array([0.0, 0.0, 0.0])
         return np.array(self.gcps_dest).mean(axis=0)
 
     @property
@@ -293,10 +300,20 @@ class CameraConfig:
     @property
     def pnp(self):
         """Return Precise N point solution from ground control points, intrinsics and distortion."""
-        return cv.solvepnp(self.gcps_reduced, self.gcps["src"], self.camera_matrix, self.dist_coeffs)
+        # solve rvec and tvec with reduced coordinates, this ensure that the solvepnp solution is stable.
+        _, rvec, tvec = cv.solvepnp(self.gcps_reduced, self.gcps["src"], self.camera_matrix, self.dist_coeffs)
+        # ensure that rvec and tvec are corrected for the fact that mean gcp location was subtracted
+        rvec_cam, tvec_cam = cv.pose_world_to_camera(rvec, tvec)
+        tvec_cam += self.gcps_mean
+        # transform back to world
+        rvec, tvec = cv.pose_world_to_camera(rvec_cam, tvec_cam)
+        self.rvec = rvec
+        self.tvec = tvec
+        return _, rvec, tvec
 
     @property
     def rvec(self):
+        """Return rvec from precise N point solution."""
         if self._rvec is None:
             return self.pnp[1]
         return self._rvec
@@ -366,9 +383,9 @@ class CameraConfig:
         """
         return cv._get_transform(self.bbox, resolution=self.resolution)
 
-
     @property
     def tvec(self):
+        """Return tvec from precise N point solution."""
         if self._tvec is None:
             return self.pnp[2]
         return self._tvec
@@ -911,7 +928,7 @@ class CameraConfig:
         """
         rvec, tvec = np.array(self.rvec), np.array(self.tvec)
         # normalize points wrt mean of gcps
-        points = np.float32(np.array(points) - self.gcps_mean)
+        points = np.array(points, dtype=np.float64)
         points_proj, jacobian = cv2.projectPoints(
             points, rvec, tvec, np.array(self.camera_matrix), np.array(self.dist_coeffs)
         )
@@ -987,11 +1004,16 @@ class CameraConfig:
         """
         rvec, tvec = self.rvec, self.tvec
         # reduce zs by the mean of the gcps
-        _zs = zs - self.gcps_mean[-1]
+        _zs = zs  # - self.gcps_mean[-1]
         dst = cv.unproject_points(
-            np.array(points), _zs, rvec=rvec, tvec=tvec, camera_matrix=self.camera_matrix, dist_coeffs=self.dist_coeffs
+            np.array(points, dtype=np.float64),
+            _zs,
+            rvec=rvec,
+            tvec=tvec,
+            camera_matrix=self.camera_matrix,
+            dist_coeffs=self.dist_coeffs,
         )
-        dst = np.array(dst) + self.gcps_mean
+        dst = np.array(dst, dtype=np.float64)
         return dst
 
     def plot(
