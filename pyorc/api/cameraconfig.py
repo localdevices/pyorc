@@ -1041,6 +1041,7 @@ class CameraConfig:
         zoom_level: Optional[int] = 19,
         camera: Optional[bool] = False,
         mode: Optional[MODES] = "geographical",
+        pose_length: float = 1.0,
         tiles_kwargs: Optional[Dict] = None,
     ) -> plt.Axes:
         """Plot geographical situation of the CameraConfig.
@@ -1067,7 +1068,8 @@ class CameraConfig:
             Determines the type of bounding box to return. If set to "geographical" (default), the bounding box
             is returned in the geographical coordinates. If set to "camera", the bounding box is returned in the
             camera perspective. If set to "3d", the bounding box is returned as a 3D polygon in the CRS
-
+        pose_length: float, optional
+            length of pose axes to draw (only used in mode="3d").
         tiles_kwargs : dict
             additional keyword arguments to pass to ax.add_image when tiles are added
 
@@ -1107,10 +1109,13 @@ class CameraConfig:
                 points = [Point(p[0], p[1], self.gcps["z_0"]) for p in self.gcps["dst"]]
         if mode != "camera":
             if self.lens_position is not None:
-                if mode == "3d":
-                    points.append(Point(*self.lens_position))
-                else:
-                    points.append(Point(self.lens_position[0], self.lens_position[1]))
+                lens_position = self.lens_position
+            else:
+                lens_position = self.estimate_lens_position()
+            if mode == "3d":
+                points.append(Point(*lens_position))
+            else:
+                points.append(Point(lens_position[0], lens_position[1]))
             # transform points in case a crs is provided and we want a geographical plot
             if mode == "geographical" and hasattr(self, "crs"):
                 # make a transformer to lat lon
@@ -1176,6 +1181,8 @@ class CameraConfig:
                     markeredgecolor="w",
                     **plot_kwargs,
                 )
+                # add pose
+                _ = self.plot_3d_pose(ax=ax, length=pose_length)
             else:
                 ax.plot(
                     x[-1],
@@ -1278,6 +1285,57 @@ class CameraConfig:
         # patch = patches.Polygon(bbox_coords, **kwargs)
         # p = ax.add_patch(patch)
         # return p
+
+    def plot_3d_pose(self, ax=None, length=1):
+        """Plot 3D pose of a camera using its rotation and translation vectors.
+
+        Parameters
+        ----------
+        ax : axes, optional
+            3d axes to plot on, if not set, a new axes will be established.
+        length : float
+            length of the axes drawn in meters
+
+        Returns
+        -------
+        list[handles]
+            list of handles to the plotted pose axes
+
+        """
+        rvec = np.array(self.rvec)
+        tvec = np.array(self.tvec)
+        # rvec, tvec = cv.pose_world_to_camera(rvec, tvec)
+        # Convert the rotation vector to a 3x3 rotation matrix
+        R, _ = cv2.Rodrigues(rvec.flatten())
+
+        # Define the camera's axis directions in its local coordinate system
+        camera_axes = (
+            np.array(
+                [
+                    [0, 0, 0],  # lens center
+                    [1, 0, 0],  # X-axis (red - right looking)
+                    [0, 1, 0],  # Y-axis (green - down looking)
+                    [0, 0, 1],  # Z-axis (blue - forward looking)
+                ]
+            )
+            * length
+        )
+        pts_trans = camera_axes - tvec
+        world_axes_translated = (R.T @ pts_trans.T).T
+        if ax is None:
+            ax = plt.axes(projection="3d")
+        # Plot the origin of the camera
+        ps = []
+        # Plot the camera axes
+        for i, (color, label) in enumerate(
+            zip(["r", "g", "b"], ["right-pose", "down-pose", "forward-pose"], strict=False)
+        ):
+            # if i == 2:
+            xx = [world_axes_translated[0, 0], world_axes_translated[i + 1, 0]]
+            yy = [world_axes_translated[0, 1], world_axes_translated[i + 1, 1]]
+            zz = [world_axes_translated[0, 2], world_axes_translated[i + 1, 2]]
+            ps.append(ax.plot(xx, yy, zz, color=color, label=label))
+        return ps
 
     def to_dict(self) -> Dict:
         """Return the CameraConfig object as dictionary.
