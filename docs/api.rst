@@ -92,6 +92,72 @@ Plotting methods
     CameraConfig.plot
     CameraConfig.plot_bbox
 
+.. _cross_section:
+
+CrossSection class
+==================
+
+The `CrossSection` class is made to facilitate geometrical operations with cross sections.
+It can be used to guide water line detection methods, estimate the water level and
+possibly other optical methods conceived by the user, that require understanding of the
+perspective, jointly with a measured cross section.
+
+To facilitate geometric operations, most of the geometric properties are returned as
+`shapely.geometry` objects such as `Point`, `LineString` and `Polygon`.
+
+This makes it easy to derive important flow properties such as wetted surface [m2] and
+wetted perimeter [m].
+
+Class and properties
+--------------------
+
+.. autosummary::
+    :toctree: _generated
+
+    CrossSection
+    CrossSection.cs_points
+    CrossSection.cs_points_sz
+    CrossSection.cs_linestring_sz
+    CrossSection.cs_angle
+
+Getting cross section geometries
+--------------------------------
+
+.. autosummary::
+    :toctree: _generated
+
+    CrossSection.get_cs_waterlevel
+    CrossSection.get_csl_point
+    CrossSection.get_csl_line
+    CrossSection.get_csl_pol
+    CrossSection.get_bottom_surface
+    CrossSection.get_planar_surface
+    CrossSection.get_wetted_surface
+    CrossSection.get_wetted_surface_sz
+
+Plotting methods
+----------------
+
+The plotting methods consist of a number of smaller methods, as well as one
+overarching `CrossSection.plot` method, that combines the smaller methods.
+The plotting functions are meant to provide the user insight in the situation
+on a site. All methods can be combined with the parallel plotting method
+for camera configurations `CameraConfig.plot`.
+
+.. autosummary::
+    :toctree: _generated
+
+    CrossSection.plot
+    CrossSection.plot_cs
+    CrossSection.plot_planar_surface
+    CrossSection.plot_bottom_surface
+
+Water level detection
+---------------------
+
+Water level detection methods are not yet available but are forthcoming in a later release.
+
+
 .. _video:
 
 Video class

@@ -1,19 +1,16 @@
+"""Module for camera configuration service."""
+
 import os.path
-from .. import CameraConfig, Video
+
 import matplotlib.pyplot as plt
+
+from pyorc import CameraConfig, Video
 
 
 def camera_config(
-        video_file,
-        cam_config_file,
-        lens_position=None,
-        corners=None,
-        frame_sample=0.,
-        rotation=None,
-        **kwargs
+    video_file, cam_config_file, lens_position=None, corners=None, frame_sample=0.0, rotation=None, **kwargs
 ):
-    """
-    Recipe for preparing a configuration file
+    """Create recipe for preparing a configuration file.
 
     Parameters
     ----------
@@ -66,5 +63,5 @@ def camera_config(
     f = plt.figure()
     ax = plt.axes()
     ax.imshow(img_rgb)
-    cam_config.plot(ax=ax, camera=True)
-    f.savefig(fn_cam)#, bbox_inches="tight")
+    cam_config.plot(ax=ax, mode="camera")
+    f.savefig(fn_cam)  # , bbox_inches="tight")

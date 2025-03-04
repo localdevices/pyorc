@@ -431,8 +431,8 @@ def solvepnp(dst, src, camera_matrix, dist_coeffs):
 
     """
     # set points to float32
-    _src = np.float32(src)
-    _dst = np.float32(dst)
+    _src = np.float64(src)
+    _dst = np.float64(dst)
 
     if len(_dst) == 4:
         flags = cv2.SOLVEPNP_P3P
@@ -588,60 +588,76 @@ def _Rt_to_M(rvec, tvec, camera_matrix, z=0.0, reverse=False):
         M = np.linalg.inv(np.dot(camera_matrix, R))
     # normalize homography before returning
     return M / M[-1, -1]
+    return M / M[-1, -1]
 
 
-def unproject_points(src, z, rvec, tvec, camera_matrix, dist_coeffs):
-    """Reverse-project points from the image to the 3D world.
-
-    As points on the objective are a ray line in the real world, a x, y, z coordinate can only be reconstructed if
-    the points have one known coordinate (z).
+def pose_world_to_camera(rvec, tvec):
+    """Convert a world coordinate pose to a camera coordinate pose or vice versa.
 
     Parameters
     ----------
-    src : list (of lists)
-        pixel coordinates
-    z : float or list of floats
-        z-level belonging to src points (if list, then the length should be equal to the number of src points)
-    rvec : array-like
-        rotation vector
-    tvec : array-like
-        translation vector
-    camera_matrix : array-like
+    rvec : numpy.ndarray
+        A 3x1 or 1x3 rotation vector in world coordinates.
+    tvec : numpy.ndarray
+        A 3x1 translation vector in world coordinates.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - rvec (numpy.ndarray): A 1-dimensional array representing the rotation vector
+          in camera coordinates.
+        - tvec (numpy.ndarray): A 3x1 array representing the translation vector
+          in camera coordinates.
+
+    """
+    # Get Rodriguez rotation matrix
+    R_input, _ = cv2.Rodrigues(rvec.flatten())
+
+    # 2. Create the OpenCV-compatible transformation
+    R = R_input.T  # Transpose of the rotation matrix
+    tvec = -R @ tvec.flatten()  # Transform the translation vector
+
+    # 3. Convert the adjusted rotation matrix back to a rotation vector
+    rvec, _ = cv2.Rodrigues(R)
+    rvec = rvec.flatten()
+    return rvec, tvec
+
+
+def distort_points(points, camera_matrix, dist_coeffs):
+    """Distort x, y point locations with provided lens parameters.
+
+    Points can be back projected on original (distorted) frame positions.
+
+    Adapted from https://answers.opencv.org/question/148670/re-distorting-a-set-of-points-after-camera-calibration/
+
+    Parameters
+    ----------
+    points : list of lists
+        undistorted points [x, y], provided as float
+    camera_matrix : array-like [3x3]
         camera matrix
-    dist_coeffs : array_like
+    dist_coeffs : array-like [4]
         distortion coefficients
 
     Returns
     -------
-    np.ndarray
-        unprojected points (x, y, z)
+    points : list of lists
+        distorted point coordinates [x, y] as floats
 
     """
-    src = np.float32(np.atleast_1d(src))
-    # first undistort points
-    src = np.float32(np.array(undistort_points(src, camera_matrix, dist_coeffs)))
-    if isinstance(z, (list, np.ndarray)):
-        #         zs = np.atleast_1d(zs)
-        z = np.float64(z)
-        dst = []
-        assert len(z) == len(
-            src
-        ), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(z)}"
-        for pt, _z in zip(src, z, strict=False):
-            M = _Rt_to_M(rvec, tvec, camera_matrix, z=_z, reverse=False)
-            x, y = list(cv2.perspectiveTransform(pt[None, None, ...], M)[0][0])
-            dst.append([x, y, _z])
-    else:
-        # z is only one value, so there is no change in M. We can do this faster in one go
-        M = _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=False)
-        dst = cv2.perspectiveTransform(src[None, ...], M)[0]
-        dst = np.hstack(
-            (
-                dst,
-                np.ones((len(dst), 1)) * z,
-            )
-        )
-    return dst
+    points = np.array(points, dtype=np.float64)
+    # ptsTemp = np.array([], dtype='float32')
+    # make empty rotation and translation vectors (we are only undistorting)
+    rtemp = ttemp = np.array([0, 0, 0], dtype="float32")
+    # normalize the points to be independent of the camera matrix using undistortPoints with no distortion matrix
+    ptsOut = cv2.undistortPoints(points, camera_matrix, None)
+    # convert points to 3d points
+    ptsTemp = cv2.convertPointsToHomogeneous(ptsOut)
+    # project them back to image space using the distortion matrix
+    return np.int32(
+        np.round(cv2.projectPoints(ptsTemp, rtemp, ttemp, camera_matrix, dist_coeffs, ptsOut)[0][:, 0])
+    ).tolist()
 
 
 def get_M_2D(src, dst, reverse=False):
@@ -707,131 +723,6 @@ def get_M_3D(src, dst, camera_matrix, dist_coeffs=None, z=0.0, reverse=False):
     dist_coeffs = np.zeros((1, 4)) if dist_coeffs is None else dist_coeffs
     success, rvec, tvec = solvepnp(dst, src, camera_matrix, dist_coeffs)
     return _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=reverse)
-
-
-def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
-    """Optimize the intrinsic parameters of a camera model.
-
-    The function finds optimal intrinsic camera parameters, including focal length and distortion coefficients, by
-    minimizing the reprojection error from 3D source points to 2D destination points. It uses differential evolution
-    for optimization. Optionally lens position can be provided to include additional geometric constraints.
-
-    Parameters
-    ----------
-    src : array_like
-        Source points in the original 3D space to be projected.
-    dst : array_like
-        Destination points in the 2D image space, serving as the target for
-        projecting the source points.
-    height : int
-        The height of the image in pixels.
-    width : int
-        The width of the image in pixels.
-    c : float, optional
-        Center parameter of the camera matrix.
-    lens_position : array_like, optional
-        The assumed position of the lens in the 3D space.
-
-    Returns
-    -------
-    Tuple[numpy.ndarray, numpy.ndarray, float]
-        A tuple containing the optimized camera matrix, distortion coefficients,
-        and the minimized reprojection error.
-
-    """
-
-    def error_intrinsic(x, src, dst, height, width, c=2.0, lens_position=None, dist_coeffs=DIST_COEFFS):
-        """Compute the reprojection error for the intrinsic parameters of a camera model.
-
-        This function optimizes for the focal length and first two distortion coefficients based on the source and
-        destination point correspondences provided. Lens position may be provided as additional geometric constraint.
-
-        Parameters
-        ----------
-        x : array_like
-            The array containing the optimization parameters, where `x[0]` is used
-            to compute the focal length and `x[1]` and `x[2]` are used to adjust
-            the distortion coefficients.
-        src : array_like
-            Source points in the original 3D space that need to be projected.
-        dst : array_like
-            Destination points in the 2D image space, which are the target for
-            the projection of the source points.
-        height : int
-            The height of the image in pixels.
-        width : int
-            The width of the image in pixels.
-        c : float, optional
-            center parameter of camera matrix.
-        lens_position : array_like, optional
-            The assumed position of the lens in the 3D space.
-        dist_coeffs : array_like, optional
-            Distortion coefficients.
-
-        Returns
-        -------
-        float
-            The computed mean reprojection error, with optional contributions from
-            the camera position error if the lens position is provided.
-
-        """
-        f = x[0] * width  # only one parameter to optimize for now, can easily be extended!
-        dist_coeffs[0][0] = float(x[1])
-        dist_coeffs[1][0] = float(x[2])
-        # dist_coeffs[4][0] = float(x[3])
-        # dist_coeffs[3][0] = float(x[4])
-        coord_mean = np.array(dst).mean(axis=0)
-        # _src = np.float32(src)
-        _dst = np.float32(np.array(dst) - coord_mean)
-        zs = np.zeros(4) if len(_dst[0]) == 2 else np.array(_dst)[:, -1]
-        if lens_position is not None:
-            _lens_pos = np.array(lens_position) - coord_mean
-
-        camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
-        success, rvec, tvec = solvepnp(_dst, src, camera_matrix, dist_coeffs)
-        if success:
-            # estimate destination locations from pose
-            dst_est = unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
-            # src_est = np.array([list(point[0]) for point in src_est])
-            dist_xy = np.array(_dst)[:, 0:2] - np.array(dst_est)[:, 0:2]
-            dist = (dist_xy**2).sum(axis=1) ** 0.5
-            gcp_err = dist.mean()
-            if lens_position is not None:
-                rmat = cv2.Rodrigues(rvec)[0]
-                lens_pos2 = np.array(-rmat).T @ tvec
-                cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
-            else:
-                cam_err = None
-                # TODO: for now camera errors are weighted with 10% needs further investigation
-            err = float(0.1 * cam_err + gcp_err) if cam_err is not None else gcp_err
-        else:
-            err = 100
-        return err  # assuming gcp pixel distance is about 5 cm
-
-    if len(dst) == 4:
-        bnds_k1 = (-0.0, 0.0)
-        bnds_k2 = (-0.0, 0.0)
-    else:
-        # bnds_k1 = (-0.2501, -0.25)
-        bnds_k1 = (-0.9, 0.9)
-        bnds_k2 = (-0.5, 0.5)
-    opt = optimize.differential_evolution(
-        error_intrinsic,
-        # bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
-        bounds=[(float(0.25), float(2)), bnds_k1, bnds_k2],
-        # bounds=[(1710./width, 1714./width), bnds_k1, bnds_k2],
-        args=(src, dst, height, width, c, lens_position, DIST_COEFFS),
-        atol=0.001,  # one mm
-    )
-    camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0] * width)
-    dist_coeffs = DIST_COEFFS
-    dist_coeffs[0][0] = opt.x[1]
-    dist_coeffs[1][0] = opt.x[2]
-    # dist_coeffs[4][0] = opt.x[3]
-    # dist_coeffs[3][0] = opt.x[4]
-    # print(f"CAMERA MATRIX: {camera_matrix}")
-    # print(f"DIST COEFFS: {dist_coeffs}")
-    return camera_matrix, dist_coeffs, opt.fun
 
 
 def color_scale(img, method):
@@ -985,35 +876,6 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, progress=T
     return time, frame_number, frames
 
 
-def transform_to_bbox(coords, bbox, resolution):
-    """Transform coordinates defined in crs of bbox, into cv2 compatible pixel coordinates.
-
-    Parameters
-    ----------
-    coords : list of lists
-        [x, y, z] with coordinates
-    bbox : shapely Polygon
-        Bounding box. The coordinate order is very important and has to be upstream-left, downstream-left,
-        downstream-right, upstream-right, upstream-left
-    resolution : float
-        resolution of target pixels within bbox
-
-    Returns
-    -------
-    colrows : list
-        tuples of columns and rows
-
-    """
-    # first assemble x and y coordinates
-    transform = _get_transform(bbox, resolution)
-    if len(coords[0]) == 3:
-        xs, ys, zs = zip(*coords, strict=False)
-    else:
-        xs, ys = zip(*coords, strict=False)
-    rows, cols = rasterio.transform.rowcol(transform, xs, ys, op=float)
-    return list(zip(cols, rows, strict=False)) if len(coords[0]) == 2 else list(zip(cols, rows, zs, strict=False))
-
-
 def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
     """Reproject an image to a given shape using perspective transformation matrix M.
 
@@ -1079,13 +941,165 @@ def get_aoi(dst_corners, resolution=None):
 
 def get_polygon_pixels(img, pol, reverse_y=True):
     """Get pixel intensities within a polygon."""
+    if pol.is_empty:
+        return np.array([np.nan])
     polygon_coords = list(pol.exterior.coords)
     mask = np.zeros_like(img, dtype=np.uint8)
     cv2.fillPoly(mask, np.array([polygon_coords], np.int32), color=255)
     if reverse_y:
-        return np.flipud(img)[mask==255]
-    return img[mask==255]
+        return np.flipud(img)[mask == 255]
+    return img[mask == 255]
 
+
+def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
+    """Optimize the intrinsic parameters of a camera model.
+
+    The function finds optimal intrinsic camera parameters, including focal length and distortion coefficients, by
+    minimizing the reprojection error from 3D source points to 2D destination points. It uses differential evolution
+    for optimization. Optionally lens position can be provided to include additional geometric constraints.
+
+    Parameters
+    ----------
+    src : array_like
+        Source points in the original 3D space to be projected.
+    dst : array_like
+        Destination points in the 2D image space, serving as the target for
+        projecting the source points.
+    height : int
+        The height of the image in pixels.
+    width : int
+        The width of the image in pixels.
+    c : float, optional
+        Center parameter of the camera matrix.
+    lens_position : array_like, optional
+        The assumed position of the lens in the 3D space.
+
+    Returns
+    -------
+    Tuple[numpy.ndarray, numpy.ndarray, float]
+        A tuple containing the optimized camera matrix, distortion coefficients,
+        and the minimized reprojection error.
+
+    """
+
+    def error_intrinsic(x, src, dst, height, width, c=2.0, lens_position=None, dist_coeffs=DIST_COEFFS):
+        """Compute the reprojection error for the intrinsic parameters of a camera model.
+
+        This function optimizes for the focal length and first two distortion coefficients based on the source and
+        destination point correspondences provided. Lens position may be provided as additional geometric constraint.
+
+        Parameters
+        ----------
+        x : array_like
+            The array containing the optimization parameters, where `x[0]` is used
+            to compute the focal length and `x[1]` and `x[2]` are used to adjust
+            the distortion coefficients.
+        src : array_like
+            Source points in the original 3D space that need to be projected.
+        dst : array_like
+            Destination points in the 2D image space, which are the target for
+            the projection of the source points.
+        height : int
+            The height of the image in pixels.
+        width : int
+            The width of the image in pixels.
+        c : float, optional
+            center parameter of camera matrix.
+        lens_position : array_like, optional
+            The assumed position of the lens in the 3D space.
+        dist_coeffs : array_like, optional
+            Distortion coefficients.
+
+        Returns
+        -------
+        float
+            The computed mean reprojection error, with optional contributions from
+            the camera position error if the lens position is provided.
+
+        """
+        err = 100
+        cam_err = None
+        f = x[0] * width  # only one parameter to optimize for now, can easily be extended!
+        dist_coeffs[0][0] = float(x[1])
+        dist_coeffs[1][0] = float(x[2])
+        # dist_coeffs[4][0] = float(x[3])
+        # dist_coeffs[3][0] = float(x[4])
+        coord_mean = np.array(dst).mean(axis=0)
+        _dst = np.float64(np.array(dst) - coord_mean)
+        zs = np.zeros(4) if len(_dst[0]) == 2 else np.array(_dst)[:, -1]
+        if lens_position is not None:
+            _lens_pos = np.array(lens_position) - coord_mean
+
+        camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
+        success, rvec, tvec = solvepnp(_dst, src, camera_matrix, dist_coeffs)
+        if success:
+            # estimate destination locations from pose
+            dst_est = unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
+            # src_est = np.array([list(point[0]) for point in src_est])
+            dist_xy = np.array(_dst)[:, 0:2] - np.array(dst_est)[:, 0:2]
+            dist = (dist_xy**2).sum(axis=1) ** 0.5
+            gcp_err = dist.mean()
+            if lens_position is not None:
+                rmat = cv2.Rodrigues(rvec)[0]
+                lens_pos2 = np.array(-rmat).T @ tvec
+                cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
+                # TODO: for now camera errors are weighted with 10% needs further investigation
+            err = float(0.1 * cam_err + gcp_err) if cam_err is not None else gcp_err
+        return err  # assuming gcp pixel distance is about 5 cm
+
+    if len(dst) == 4:
+        bnds_k1 = (-0.0, 0.0)
+        bnds_k2 = (-0.0, 0.0)
+    else:
+        # bnds_k1 = (-0.2501, -0.25)
+        bnds_k1 = (-0.9, 0.9)
+        bnds_k2 = (-0.5, 0.5)
+    opt = optimize.differential_evolution(
+        error_intrinsic,
+        # bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
+        bounds=[(float(0.25), float(2)), bnds_k1, bnds_k2],
+        # bounds=[(1710./width, 1714./width), bnds_k1, bnds_k2],
+        args=(src, dst, height, width, c, lens_position, DIST_COEFFS),
+        atol=0.001,  # one mm
+    )
+    camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0] * width)
+    dist_coeffs = DIST_COEFFS
+    dist_coeffs[0][0] = opt.x[1]
+    dist_coeffs[1][0] = opt.x[2]
+    # dist_coeffs[4][0] = opt.x[3]
+    # dist_coeffs[3][0] = opt.x[4]
+    # print(f"CAMERA MATRIX: {camera_matrix}")
+    # print(f"DIST COEFFS: {dist_coeffs}")
+    return camera_matrix, dist_coeffs, opt.fun
+
+
+def transform_to_bbox(coords, bbox, resolution):
+    """Transform coordinates defined in crs of bbox, into cv2 compatible pixel coordinates.
+
+    Parameters
+    ----------
+    coords : list of lists
+        [x, y, z] with coordinates
+    bbox : shapely Polygon
+        Bounding box. The coordinate order is very important and has to be upstream-left, downstream-left,
+        downstream-right, upstream-right, upstream-left
+    resolution : float
+        resolution of target pixels within bbox
+
+    Returns
+    -------
+    colrows : list
+        tuples of columns and rows
+
+    """
+    # first assemble x and y coordinates
+    transform = _get_transform(bbox, resolution)
+    if len(coords[0]) == 3:
+        xs, ys, zs = zip(*coords, strict=False)
+    else:
+        xs, ys = zip(*coords, strict=False)
+    rows, cols = rasterio.transform.rowcol(transform, xs, ys, op=float)
+    return list(zip(cols, rows, strict=False)) if len(coords[0]) == 2 else list(zip(cols, rows, zs, strict=False))
 
 
 def undistort_img(img, camera_matrix, dist_coeffs):
@@ -1112,40 +1126,60 @@ def undistort_img(img, camera_matrix, dist_coeffs):
     return cv2.undistort(img, np.array(camera_matrix), np.array(dist_coeffs))
 
 
-def distort_points(points, camera_matrix, dist_coeffs):
-    """Distort x, y point locations with provided lens parameters.
+def unproject_points(src, z, rvec, tvec, camera_matrix, dist_coeffs):
+    """Reverse-project points from the image to the 3D world.
 
-    Points can be back projected on original (distorted) frame positions.
-
-    Adapted from https://answers.opencv.org/question/148670/re-distorting-a-set-of-points-after-camera-calibration/
+    As points on the objective are a ray line in the real world, a x, y, z coordinate can only be reconstructed if
+    the points have one known coordinate (z).
 
     Parameters
     ----------
-    points : list of lists
-        undistorted points [x, y], provided as float
-    camera_matrix : array-like [3x3]
+    src : list (of lists)
+        pixel coordinates
+    z : float or list of floats
+        z-level belonging to src points (if list, then the length should be equal to the number of src points)
+    rvec : array-like
+        rotation vector
+    tvec : array-like
+        translation vector
+    camera_matrix : array-like
         camera matrix
-    dist_coeffs : array-like [4]
+    dist_coeffs : array_like
         distortion coefficients
 
     Returns
     -------
-    points : list of lists
-        distorted point coordinates [x, y] as floats
+    np.ndarray
+        unprojected points (x, y, z)
 
     """
-    points = np.array(points, dtype="float32")
-    # ptsTemp = np.array([], dtype='float32')
-    # make empty rotation and translation vectors (we are only undistorting)
-    rtemp = ttemp = np.array([0, 0, 0], dtype="float32")
-    # normalize the points to be independent of the camera matrix using undistortPoints with no distortion matrix
-    ptsOut = cv2.undistortPoints(points, camera_matrix, None)
-    # convert points to 3d points
-    ptsTemp = cv2.convertPointsToHomogeneous(ptsOut)
-    # project them back to image space using the distortion matrix
-    return np.int32(
-        np.round(cv2.projectPoints(ptsTemp, rtemp, ttemp, camera_matrix, dist_coeffs, ptsOut)[0][:, 0])
-    ).tolist()
+    src = np.float64(np.atleast_1d(src))
+    # first undistort points
+    src = np.float64(np.array(undistort_points(src, camera_matrix, dist_coeffs)))
+    rvec = np.array(rvec)
+    tvec = np.array(tvec)
+    if isinstance(z, (list, np.ndarray)):
+        #         zs = np.atleast_1d(zs)
+        z = np.float64(z)
+        dst = []
+        assert len(z) == len(
+            src
+        ), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(z)}"
+        for pt, _z in zip(src, z, strict=False):
+            M = _Rt_to_M(rvec, tvec, camera_matrix, z=_z, reverse=False)
+            x, y = list(cv2.perspectiveTransform(pt[None, None, ...], M)[0][0])
+            dst.append([x, y, _z])
+    else:
+        # z is only one value, so there is no change in M. We can do this faster in one go
+        M = _Rt_to_M(rvec, tvec, camera_matrix, z=z, reverse=False)
+        dst = cv2.perspectiveTransform(src[None, ...], M)[0]
+        dst = np.hstack(
+            (
+                dst,
+                np.ones((len(dst), 1)) * z,
+            )
+        )
+    return dst
 
 
 def undistort_points(points, camera_matrix, dist_coeffs, reverse=False):
@@ -1177,6 +1211,30 @@ def undistort_points(points, camera_matrix, dist_coeffs, reverse=False):
         return distort_points(points, camera_matrix, dist_coeffs)
 
     points_undistort = cv2.undistortPoints(
-        np.expand_dims(np.float32(points), axis=1), camera_matrix, dist_coeffs, P=camera_matrix
+        np.expand_dims(np.float64(points), axis=1), camera_matrix, dist_coeffs, P=camera_matrix
     )
     return points_undistort[:, 0].tolist()
+
+
+def world_to_camera(points: np.ndarray, rvec: np.ndarray, tvec: np.ndarray):
+    """Transform points from the world coordinate system to the camera coordinate system.
+
+    Parameters
+    ----------
+    points : np.ndarray
+        An array of 3D points in the world coordinate system.
+    rvec : np.ndarray
+        OpenCV compatible rotation vector.
+    tvec : np.ndarray
+        OpenCV comptatible translation vector.
+
+    Returns
+    -------
+    np.ndarray
+        array of 3D points in the camera coordinate system.
+
+    """
+    # get Rodriguez rotation matrix
+    R, _ = cv2.Rodrigues(rvec)
+    # rotate and translate points
+    return (points @ R.T) + tvec.T

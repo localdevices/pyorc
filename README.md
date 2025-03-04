@@ -148,6 +148,12 @@ conda activate pyorc-dev
 pip install -e .
 ```
 
+Make sure you install pre-commit hooks so that code is properly linted before pushing.
+```
+pip install pre-commit
+pre-commit install
+```
+
 ## Using pyorc
 To use **pyorc**, you can use the API for processing. A command-line interface is forthcoming pending funding.
 A manual is also still in the making.

@@ -1,3 +1,21 @@
+## [0.x.x] = yyyy-mm-dd
+### Added
+### Changed
+- class CrossSection interpolates all coordinates over the length of the cross section, not over the left-right 
+  width. This ensures that also if entirely vertical profile parts are found, unique coordinates are returned from 
+  selected locations in the cross section. 
+
+### Deprecated
+### Removed
+### Fixed
+- rvec and tvec can now be immutable properties of CameraConfig. This makes the solution more stable and prevents
+  unnecessary iterations in estimating rvec and tvec.
+- rvec and tvec are now always defined in the coordinate system of the camera configuration, not in coordinates
+  relative to the ground control point mean. This makes rvec and tvec directly usable without knowledge of the 
+  original control points.
+
+### Security
+
 ## [0.7.2] = 2025-02-14
 ### Added
 - New class CrossSection. This is to prepare for water level estimation functionalities.
