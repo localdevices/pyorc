@@ -7,7 +7,7 @@ import pytest
 from pyproj import CRS
 from shapely import geometry, wkt
 
-from pyorc import CameraConfig, CrossSection, plot_helpers
+from pyorc import CameraConfig, CrossSection
 
 
 @pytest.fixture()
@@ -176,8 +176,8 @@ def test_get_csl_point(cs):
     h1 = 92.5
     h2 = 93.0
     # both should get two points back
-    cross1 = cs.get_csl_point(h=h1)
-    cross2 = cs.get_csl_point(h=h2)
+    _ = cs.get_csl_point(h=h1)
+    __ = cs.get_csl_point(h=h2)
     # ax = plt.axes(projection="3d")
     #
     # for cross in cross1:
@@ -193,8 +193,8 @@ def test_get_csl_point_camera(cs):
     h1 = 92.5
     h2 = 93.0
     # both should get two points back
-    cross1 = cs.get_csl_point(h=h1, camera=True)
-    cross2 = cs.get_csl_point(h=h2, camera=True)
+    _ = cs.get_csl_point(h=h1, camera=True)
+    __ = cs.get_csl_point(h=h2, camera=True)
     # ax = plt.axes()
     #
     # for cross in cross1:
@@ -212,8 +212,8 @@ def test_get_csl_point_s(cs):
     l1 = 5.0
     l2 = 8.0
     # both should get two points back
-    cross1 = cs.get_csl_point(l=l1)
-    cross2 = cs.get_csl_point(l=l2)
+    _ = cs.get_csl_point(l=l1)
+    __ = cs.get_csl_point(l=l2)
     # ax = plt.axes(projection="3d")
     #
     # for cross in cross1:
@@ -223,7 +223,6 @@ def test_get_csl_point_s(cs):
     # cs.plot_cs(ax=ax, marker=".", color="c")
     # ax.legend()
     # plt.show()
-
 
 
 def test_get_csl_line(cs):
@@ -244,6 +243,7 @@ def test_get_csl_line(cs):
     # ax.axis("equal")
     # ax.legend()
     # plt.show()
+
 
 def test_get_csl_line_s(cs):
     l1 = 5.0
@@ -293,56 +293,62 @@ def test_get_csl_line_above_first_bank(cs):
 
 
 def test_get_csl_pol(cs):
-    h1 = 92.5
-    pols1 = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0)
-    pols2 = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0)
-    #
-    # ax = plt.axes(projection="3d")
+    h1 = 92.25
+    _ = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0)
+    __ = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0)
+
+    ax = plt.axes(projection="3d")
     # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
     # p1_1, p_1_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
     # p2_1, p_2_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
-    # ax.axis("equal")
-    # ax.legend()
-    # plt.show()
+    # cs.plot_planar_surface(h=h1, ax=ax, alpha=0.5, color="c", length=20)
+    # cs.plot_bottom_surface(ax=ax, alpha=0.1, color="brown", length=20)
+    cs.plot(h=h1, ax=ax)
+    cs.camera_config.plot(ax=ax, mode="3d", pose_length=3.0)
+    ax.axis("equal")
+    ax.legend()
+    plt.show()
 
-def test_get_csl_pol(cs):
-    l1 = 5.0
-    pols1 = cs.get_csl_pol(l=l1, offset=0.0, padding=(-2, 0), length=4.0)
-    pols2 = cs.get_csl_pol(l=l1, offset=0.0, padding=(0, 2), length=4.0)
 
-    # ax = plt.axes(projection="3d")
-    # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
-    # p1 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
-    # p2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
-    # ax.axis("equal")
-    # ax.legend()
-    # plt.show()
+# def test_get_csl_pol(cs):
+#     l1 = 5.0
+#     pols1 = cs.get_csl_pol(l=l1, offset=0.0, padding=(-2, 0), length=4.0)
+#     pols2 = cs.get_csl_pol(l=l1, offset=0.0, padding=(0, 2), length=4.0)
+
+# ax = plt.axes(projection="3d")
+# cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
+# p1 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
+# p2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
+# ax.axis("equal")
+# ax.legend()
+# plt.show()
 
 
 def test_get_csl_pol_camera(cs):
     h1 = 92.5
-    pols1 = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0, camera=True)
-    pols2 = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0, camera=True)
+    _ = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0, camera=True)
+    __ = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0, camera=True)
 
-    # ax = plt.axes()
-    # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section", camera=True)
+    ax = plt.axes()
+    cs.plot_cs(ax=ax, marker=".", color="c", label="cross section", camera=True)
     # p1_1, p_1_2 = [plot_helpers.plot_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
     # p2_1, p_2_2 = [plot_helpers.plot_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
-    # ax.axis("equal")
-    # ax.set_xlabel("Camera pixel column [-]")
-    # ax.set_ylabel("Camera pixel row [-]")
-    # ax.set_xlim([0, cs.camera_config.width])
-    # ax.set_ylim([0, cs.camera_config.height])
-    # ax.legend()
-    # plt.show()
+    cs.plot_bottom_surface(ax=ax, alpha=0.1, color="brown", length=20, camera=True)
+    ax.axis("equal")
+    ax.set_xlabel("Camera pixel column [-]")
+    ax.set_ylabel("Camera pixel row [-]")
+    ax.set_xlim([0, cs.camera_config.width])
+    ax.set_ylim([0, cs.camera_config.height])
+    ax.legend()
+    plt.show()
 
 
 def test_get_planar_surface(cs):
     h1 = 92.5
     h2 = 93.0
     h3 = 94.9
-    pol1 = cs.get_planar_surface(h=h1, length=10.0)
-    pol2 = cs.get_planar_surface(h=h2, length=5, offset=2.5)
+    _ = cs.get_planar_surface(h=h1, length=10.0)
+    __ = cs.get_planar_surface(h=h2, length=5, offset=2.5)
     with pytest.raises(ValueError, match="must be 2 for"):
         cs.get_planar_surface(h=h3)
     # ax = plt.axes(projection="3d")
@@ -358,8 +364,8 @@ def test_get_planar_surface(cs):
 def test_get_planar_surface_camera(cs):
     h1 = 92.5
     h2 = 93.0
-    pol1 = cs.get_planar_surface(h=h1, length=10.0, camera=True)
-    pol2 = cs.get_planar_surface(h=h2, length=5, offset=2.5, camera=True)
+    _ = cs.get_planar_surface(h=h1, length=10.0, camera=True)
+    __ = cs.get_planar_surface(h=h2, length=5, offset=2.5, camera=True)
     # ax = plt.axes()
     # _ = plot_helpers.plot_polygon(pol1, ax=ax, alpha=0.3, label="h=92.5", color="r")
     # _ = plot_helpers.plot_polygon(pol2, ax=ax, alpha=0.3, label="h=93.0", color="g")
@@ -391,6 +397,7 @@ def test_get_wetted_surface(cs):
     # ax.axis("equal")
     # ax.legend()
     # plt.show()
+
 
 def test_plot_cs(cs):
     ax = plt.axes()

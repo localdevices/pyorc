@@ -1150,7 +1150,7 @@ class CameraConfig:
                 x[0 : len(self.gcps["dst"])],
                 y[0 : len(self.gcps["dst"])],
                 z[0 : len(self.gcps["dst"])],
-                ".",
+                "o",
                 label="Control points",
                 markersize=12,
                 markeredgecolor="w",
@@ -1174,7 +1174,7 @@ class CameraConfig:
                     x[-1],
                     y[-1],
                     z[-1],
-                    ".",
+                    "o",
                     label="Lens position",
                     markersize=12,
                     zorder=2,
@@ -1183,6 +1183,12 @@ class CameraConfig:
                 )
                 # add pose
                 _ = self.plot_3d_pose(ax=ax, length=pose_length)
+                if hasattr(self, "bbox"):
+                    # also plot dashed lines from cam to bbox
+                    for xy in self.bbox.exterior.coords:
+                        ax.plot([x[-1], xy[0]], [y[-1], xy[1]], [z[-1], self.gcps["z_0"]], linestyle="--", color="gray")
+                    # plot bbox exterior
+                    ax.plot(*self.bbox.exterior.xy, [self.gcps["z_0"]] * 5, color="k", label="bbox exterior")
             else:
                 ax.plot(
                     x[-1],
@@ -1199,7 +1205,7 @@ class CameraConfig:
             "alpha": 0.5,
             "zorder": 2,
             "edgecolor": "w",
-            "label": "Area of interest",
+            "label": "bbox visible",
             **plot_kwargs,
         }
         if hasattr(self, "bbox"):
@@ -1334,7 +1340,7 @@ class CameraConfig:
             xx = [world_axes_translated[0, 0], world_axes_translated[i + 1, 0]]
             yy = [world_axes_translated[0, 1], world_axes_translated[i + 1, 1]]
             zz = [world_axes_translated[0, 2], world_axes_translated[i + 1, 2]]
-            ps.append(ax.plot(xx, yy, zz, color=color, label=label))
+            ps.append(ax.plot(xx, yy, zz, color=color, label=label, linewidth=3))
         return ps
 
     def to_dict(self) -> Dict:
