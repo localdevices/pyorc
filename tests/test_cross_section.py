@@ -297,17 +297,17 @@ def test_get_csl_pol(cs):
     _ = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0)
     __ = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0)
 
-    ax = plt.axes(projection="3d")
+    # ax = plt.axes(projection="3d")
     # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
     # p1_1, p_1_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
     # p2_1, p_2_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
     # cs.plot_planar_surface(h=h1, ax=ax, alpha=0.5, color="c", length=20)
     # cs.plot_bottom_surface(ax=ax, alpha=0.1, color="brown", length=20)
-    cs.plot(h=h1, ax=ax)
-    cs.camera_config.plot(ax=ax, mode="3d", pose_length=3.0)
-    ax.axis("equal")
-    ax.legend()
-    plt.show()
+    # cs.plot(h=h1, ax=ax)
+    # cs.camera_config.plot(ax=ax, mode="3d", pose_length=3.0)
+    # ax.axis("equal")
+    # ax.legend()
+    # plt.show()
 
 
 # def test_get_csl_pol(cs):

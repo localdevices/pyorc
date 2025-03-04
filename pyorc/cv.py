@@ -1017,6 +1017,8 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
             the camera position error if the lens position is provided.
 
         """
+        err = 100
+        cam_err = None
         f = x[0] * width  # only one parameter to optimize for now, can easily be extended!
         dist_coeffs[0][0] = float(x[1])
         dist_coeffs[1][0] = float(x[2])
@@ -1041,12 +1043,8 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
                 rmat = cv2.Rodrigues(rvec)[0]
                 lens_pos2 = np.array(-rmat).T @ tvec
                 cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
-            else:
-                cam_err = None
                 # TODO: for now camera errors are weighted with 10% needs further investigation
             err = float(0.1 * cam_err + gcp_err) if cam_err is not None else gcp_err
-        else:
-            err = 100
         return err  # assuming gcp pixel distance is about 5 cm
 
     if len(dst) == 4:

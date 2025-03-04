@@ -266,9 +266,7 @@ class CameraConfig:
             mean coordinate (x, y) or (x, y, z) of gcp destination points
 
         """
-        if self.gcps_dest is None:
-            return np.array([0.0, 0.0, 0.0])
-        return np.array(self.gcps_dest).mean(axis=0)
+        return np.array([0.0, 0.0, 0.0]) if self.gcps_dest is None else np.array(self.gcps_dest).mean(axis=0)
 
     @property
     def gcps_dims(self):
@@ -313,15 +311,11 @@ class CameraConfig:
     @property
     def rvec(self):
         """Return rvec from precise N point solution."""
-        if self._rvec is None:
-            return self.pnp[1].tolist()
-        return self._rvec
+        return self.pnp[1].tolist() if self._rvec is None else self._rvec
 
     @rvec.setter
     def rvec(self, _rvec):
-        if isinstance(_rvec, np.ndarray):
-            _rvec = _rvec.tolist()
-        self._rvec = _rvec
+        self._rvec = _rvec.tolist() if isinstance(_rvec, np.ndarray) else _rvec
 
     @property
     def shape(self):
@@ -387,16 +381,11 @@ class CameraConfig:
     @property
     def tvec(self):
         """Return tvec from precise N point solution."""
-        if self._tvec is None:
-            return self.pnp[2].tolist()
-        return self._tvec
+        return self.pnp[2].tolist() if self._tvec is None else self._tvec
 
     @tvec.setter
     def tvec(self, _tvec):
-        if isinstance(_tvec, np.ndarray):
-            _tvec = _tvec.tolist()
-
-        self._tvec = _tvec
+        self._tvec = _tvec.tolist if isinstance(_tvec, np.ndarray) else _tvec
 
     def set_lens_calibration(
         self,
@@ -528,32 +517,6 @@ class CameraConfig:
         if mode == "3d":
             return Polygon(corners[np.isfinite(corners[:, 0])])
         return Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
-
-    def get_camera_coords(
-        self,
-        points: List[List],
-    ):
-        """Convert real-world coordinates into camera coordinates.
-
-        Parameters
-        ----------
-        points : array-like list (of lists)
-            [x, y, z] real-world coordinates
-
-        Returns
-        -------
-        cam_points : np.ndarray (of points)
-            [x, y, z] camera coordinates
-
-        """
-        rvec, tvec = self.rvec, self.tvec
-        # get rotation matrix
-        R, _ = cv2.Rodrigues(rvec)
-
-        # convert points into array
-        points = np.array(points)
-        cam_points = np.einsum("ij,kj->ki", R, np.array(points)) + tvec.flatten()
-        return cam_points
 
     def get_depth(self, z: List[float], h_a: Optional[float] = None) -> List[float]:
         """Retrieve depth for measured bathymetry points.
@@ -1328,8 +1291,7 @@ class CameraConfig:
         )
         pts_trans = camera_axes - tvec
         world_axes_translated = (R.T @ pts_trans.T).T
-        if ax is None:
-            ax = plt.axes(projection="3d")
+        ax = plt.axes(projection="3d") if ax is None else ax
         # Plot the origin of the camera
         ps = []
         # Plot the camera axes
