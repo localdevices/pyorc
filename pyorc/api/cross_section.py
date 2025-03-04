@@ -483,6 +483,9 @@ class CrossSection:
     def get_wetted_surface_sz(self, h: float) -> geometry.Polygon:
         """Retrieve a wetted surface perpendicular to flow direction (SZ) for a water level, as a geometry.Polygon.
 
+        This is a useful method for instance to estimate m2 wetted surface for a given water level in the cross
+        section.
+
         Parameters
         ----------
         h : float
