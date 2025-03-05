@@ -1,5 +1,7 @@
 """Tests for water level functionalities."""
 
+import os
+
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,7 +9,8 @@ import pytest
 from pyproj import CRS
 from shapely import geometry, wkt
 
-from pyorc import CameraConfig, CrossSection
+from pyorc import CameraConfig, CrossSection, Video
+from tests.conftest import EXAMPLE_DATA_DIR
 
 
 @pytest.fixture()
@@ -116,7 +119,7 @@ def gdf(xs, ys, zs):
 
 @pytest.fixture()
 def xyz(gdf, crs):
-    """Sample cross section xyz list for Geul river (real data). Must be returned in CameraConfig set up."""
+    """Sample cross-section xyz list for Geul river (real data). Must be returned in CameraConfig set up."""
     gdf.to_crs(crs, inplace=True)
     g = gdf.geometry
     x, y, z = g.x, g.y, g.z
@@ -153,6 +156,23 @@ def camera_config():
         ),
     }
     return CameraConfig(**camera_config)
+
+
+@pytest.fixture()
+def vid_file():
+    return os.path.join(EXAMPLE_DATA_DIR, "hommerich", "20240718_162737.mp4")
+
+
+@pytest.fixture()
+def img(vid_file):
+    vid = Video(vid_file, start_frame=0, end_frame=1)
+    return vid.get_frame(0)
+
+
+@pytest.fixture()
+def img_rgb(vid_file):
+    vid = Video(vid_file, start_frame=0, end_frame=1)
+    return vid.get_frame(0, method="rgb")
 
 
 @pytest.fixture()
@@ -397,6 +417,25 @@ def test_get_wetted_surface(cs):
     # ax.axis("equal")
     # ax.legend()
     # plt.show()
+
+
+def test_detect_wl(cs, img):
+    h = cs.detect_wl(img, bank="far", length=1.0)
+    print(f"Water level: {h}")
+    assert h is not None
+    assert isinstance(h, float)
+
+
+def test_detect_wl_near_bank(cs, img):
+    h = cs.detect_wl(img, bank="near", length=2.0)
+    print(f"Water level near bank: {h}")
+    assert h is not None
+    assert isinstance(h, float)
+
+
+def test_detect_wl_no_bank_specified(cs, img):
+    h = cs.detect_wl(img, length=2.0)
+    print(f"Water level without bank specified: {h}")
 
 
 def test_plot_cs(cs):

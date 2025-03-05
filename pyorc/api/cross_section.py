@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -9,10 +10,11 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.optimize import differential_evolution
 from shapely import affinity, geometry
 from shapely.ops import polygonize
 
-from pyorc import plot_helpers
+from pyorc import cv, plot_helpers
 
 MODES = Literal["camera", "geographic", "cross_section"]
 
@@ -38,6 +40,42 @@ def _make_angle_lines(csl_points, angle_perp, length, offset):
         affinity.rotate(l, angle_perp, origin=p, use_radians=True) for l, p in zip(csl_lines, csl_points, strict=False)
     ]
     return csl_lines
+
+
+def _histogram(data, bin_size: int = 5, normalize=False):
+    """Create a histogram with predefined bin size."""
+    bin_size = int(bin_size)
+    if not data.dtype == np.uint8:
+        raise ValueError("Image data must be of type uint8.")
+    if not (bin_size >= 5 and bin_size <= 20):
+        raise ValueError("Bin size must be between 5 and 20")
+    bins = np.arange(0, 256, bin_size)
+    # Compute histogram counts
+    counts, edges = np.histogram(data, bins=bins)
+
+    # Normalize counts if required
+    if normalize and np.sum(counts) > 0:
+        bin_widths = np.diff(edges)
+        counts = counts / (np.sum(counts) * bin_widths)  # Normalize to sum to 1 over the distribution
+
+    # Calculate bin centers
+    centers = (edges[:-1] + edges[1:]) / 2
+
+    return centers, edges, counts
+
+
+def _histogram_union(edges, hist1, hist2):
+    """Measures the union of two normalized histograms and turns into score. They must have the same bins.
+
+    A score of 0 means the histograms are entirely different, score of 1 means they are identical.
+    """
+    bin_chunks = edges[1:] - edges[:-1]
+    # take the piecewise maximum of histograms
+    hist_max = np.maximum(hist1, hist2)
+    # integrate
+    union = (bin_chunks * hist_max).sum()
+    # normalize score: 1 least optimal, 0 most optimal.
+    return 2 - union
 
 
 class CrossSection:
@@ -116,9 +154,9 @@ class CrossSection:
         # estimate length coordinates
         l = np.cumsum(np.sqrt(x_diff**2 + y_diff**2 + z_diff**2))
 
-        self.x = x  # x-coordinates in local projection or crs
-        self.y = y  # y-coordinates in local projection or crs
-        self.z = z  # z-coordinates in local projection or crs
+        self.x = np.array(x)  # x-coordinates in local projection or crs
+        self.y = np.array(y)  # y-coordinates in local projection or crs
+        self.z = np.array(z)  # z-coordinates in local projection or crs
         self.s = s  # horizontal distance from left to right bank (only used for interpolation funcs).
         self.l = l  # length distance (following horizontal and vertical) over cross section from left to right
         self.d = d  # horizontal distance between lens horizontal position and cross section point
@@ -196,14 +234,14 @@ class CrossSection:
         return np.arctan2(diff_xy[1], diff_xy[0])
 
     @property
-    def closest_point(self):
+    def idx_closest_point(self):
         """Determine point in cross-section, closest to the camera."""
-        pass
+        return self.d.argmin()
 
     @property
-    def farthest_point(self):
+    def idx_farthest_point(self):
         """Determine point in cross-section, farthest from the camera."""
-        pass
+        return self.d.argmax()
 
     def get_cs_waterlevel(self, h: float, sz=False) -> geometry.LineString:
         """Retrieve LineString of water surface at cross-section at a given water level.
@@ -551,6 +589,55 @@ class CrossSection:
         else:
             return geometry.Polygon(coords)
 
+    def get_line_of_interest(self, bank: BANK_OPTIONS = None):
+        """Retrieve the points of interest within the cross section for water level detection.
+
+        This may be all points, points only at the far-bank or closest-bank of the camera position.
+        """
+        if not bank:
+            return self.l.min(), self.l.max()
+        elif bank == "far":
+            start_point = self.l[self.idx_farthest_point]
+
+        elif bank == "near":
+            start_point = self.l[self.idx_closest_point]
+        else:
+            raise ValueError(f"bank must be one of {BANK_OPTIONS}, not {bank}")
+        # find l values at lowest point
+
+        l_lowest = self.l[np.where(self.z == self.z.min())]
+        # find which is closest to start_point
+        end_point = l_lowest[np.argmin(np.abs(l_lowest - start_point))]
+
+        # sort from low to high
+        return tuple(np.sort(np.array([start_point, end_point])))
+        # fin l-value closest to
+
+    def get_histogram_score(
+        self,
+        x: float,
+        img: np.array,
+        bin_size: float = 5.0,
+        offset: float = 0.0,
+        padding: float = 0.5,
+        length: float = 2.0,
+        min_samples: int = 50,
+    ):
+        """Retrieve a histogram score for a given l-value."""
+        l = x[0]
+        # print(l)
+        pol1 = self.get_csl_pol(l=l, offset=offset, padding=(0, padding), length=length, camera=True)[0]
+        pol2 = self.get_csl_pol(l=l, offset=offset, padding=(-padding, 0), length=length, camera=True)[0]
+        # get intensity values within polygons
+        ints1 = cv.get_polygon_pixels(img, pol1)
+        ints2 = cv.get_polygon_pixels(img, pol2)
+        if ints1.size < min_samples or ints2.size < min_samples:
+            # return a strong penalty score value
+            return 2.0
+        _, _, norm_counts1 = _histogram(ints1, normalize=True, bin_size=bin_size)
+        bin_centers, bin_edges, norm_counts2 = _histogram(ints2, normalize=True, bin_size=bin_size)
+        return _histogram_union(bin_edges, norm_counts1, norm_counts2)
+
     def plot(
         self,
         h: Optional[float] = None,
@@ -650,6 +737,7 @@ class CrossSection:
         bank: Optional[BANK_OPTIONS] = None,
         h_min: Optional[float] = None,
         h_max: Optional[float] = None,
+        bin_size: int = 5,
         offset: float = 0.0,
         padding: float = 0.5,
         length: float = 2.0,
@@ -681,18 +769,23 @@ class CrossSection:
             img.shape[1] == self.camera_config.width
         ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
         # determine the relevant start point if only one is used
-        if bank == "far":
-            start_point = self.farthest_point
-        elif bank == "near":
-            start_point = self.closest_point
-        else:
-            start_point = None
-        print(start_point)
-        # for _ in np.arange(self.z.min(), self.z.max(), step):
-        #     # TODO implement detection
-        #     pass
-
-        # TODO: do an optimization
-        z = None
-        # finally, return water level:
-        return self.camera_config.h_to_z(z)
+        l_min, l_max = self.get_line_of_interest(bank=bank)
+        opt = differential_evolution(
+            self.get_histogram_score,
+            popsize=50,
+            bounds=[(l_min, l_max)],
+            args=(img, bin_size, offset, padding, length),
+            atol=0.01,  # one mm
+        )
+        print(opt.x, opt.fun)
+        z = self.interp_z(opt.x[0])
+        h = self.camera_config.z_to_h(z)
+        # warning if the optimum is on the edge of the search space for l
+        if np.isclose(opt.x[0], l_min) or np.isclose(opt.x[0], l_max):
+            warnings.warn(
+                f"The detected water level is on the edge of the search space and may be wrong. "
+                f"Water level is {h} m. at cross-section length {opt.x[0]}.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return h
