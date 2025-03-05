@@ -18,6 +18,7 @@ MODES = Literal["camera", "geographic", "cross_section"]
 
 PLANAR_KWARGS = {"color": "c", "alpha": 0.5}
 BOTTOM_KWARGS = {"color": "brown", "alpha": 0.1}
+BANK_OPTIONS = {"far", "close", "both"}
 
 
 def _make_angle_lines(csl_points, angle_perp, length, offset):
@@ -110,7 +111,8 @@ class CrossSection:
         z_diff = np.concatenate((np.array([0]), np.diff(z)))
         # estimate distance from left to right bank
         s = np.cumsum((x_diff**2 + y_diff**2) ** 0.5)
-
+        lens_position_xy = camera_config.estimate_lens_position()[0:2]
+        d = ((x - lens_position_xy[0]) ** 2 + (y - lens_position_xy[1]) ** 2) ** 0.5
         # estimate length coordinates
         l = np.cumsum(np.sqrt(x_diff**2 + y_diff**2 + z_diff**2))
 
@@ -119,6 +121,7 @@ class CrossSection:
         self.z = z  # z-coordinates in local projection or crs
         self.s = s  # horizontal distance from left to right bank (only used for interpolation funcs).
         self.l = l  # length distance (following horizontal and vertical) over cross section from left to right
+        self.d = d  # horizontal distance between lens horizontal position and cross section point
         self.camera_config = camera_config
 
     @property
@@ -135,6 +138,11 @@ class CrossSection:
     def interp_z(self) -> interp1d:
         """Linear interpolation function for z-coordinates, using l as input."""
         return interp1d(self.l, self.z, kind="linear", fill_value="extrapolate")
+
+    @property
+    def interp_d(self) -> interp1d:
+        """Linear interpolation function for distances (d) to lens, using l as input."""
+        return interp1d(self.l, self.d, kind="linear", fill_value="extrapolate")
 
     @property
     def interp_x_from_s(self) -> interp1d:
@@ -187,6 +195,16 @@ class CrossSection:
         diff_xy = np.array(point2_xy) - np.array(point1_xy)
         return np.arctan2(diff_xy[1], diff_xy[0])
 
+    @property
+    def closest_point(self):
+        """Determine point in cross-section, closest to the camera."""
+        pass
+
+    @property
+    def farthest_point(self):
+        """Determine point in cross-section, farthest from the camera."""
+        pass
+
     def get_cs_waterlevel(self, h: float, sz=False) -> geometry.LineString:
         """Retrieve LineString of water surface at cross-section at a given water level.
 
@@ -232,14 +250,14 @@ class CrossSection:
 
         """
         if h is not None and l is not None:
-            raise ValueError("Only one of h or s can be provided.")
+            raise ValueError("Only one of h or l can be provided.")
         if h is None and l is None:
-            raise ValueError("One of h or s must be provided.")
+            raise ValueError("One of h or l must be provided.")
         # get water level in camera config vertical datum
         if l is not None:
-            if l < 0 or l > self.s[-1]:
+            if l < 0 or l > self.l[-1]:
                 raise ValueError(
-                    "Value of s is lower (higher) than the minimum (maximum) value found in the cross section"
+                    "Value of l is lower (higher) than the minimum (maximum) value found in the cross section"
                 )
             cross = [geometry.Point(self.interp_x(l), self.interp_y(l), self.interp_z(l))]
         else:
@@ -602,7 +620,7 @@ class CrossSection:
             if camera:
                 # extract pixel locations
                 pix = self.camera_config.project_points(
-                    list(map(list, self.cs_linestring.coords)), within_image=False, swap_y_coords=True
+                    list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=True
                 )
                 # map to x and y arrays
                 x, y = zip(*[(c[0], c[1]) for c in pix], strict=False)
@@ -626,7 +644,32 @@ class CrossSection:
         else:
             _ = plot_helpers.plot_3d_polygon(surf, ax=ax, label="bottom", **kwargs)
 
-    def detect_wl(self, img: np.ndarray, step: float = 0.05):
+    def detect_wl(
+        self,
+        img: np.ndarray,
+        bank: Optional[BANK_OPTIONS] = None,
+        h_min: Optional[float] = None,
+        h_max: Optional[float] = None,
+        offset: float = 0.0,
+        padding: float = 0.5,
+        length: float = 2.0,
+    ) -> float:
+        """Detect water level optically from provided image.
+
+        Water level detection is done by first detecting the water line along the cross section by comparisons
+        of distribution functions left and right of hypothesized water lines, and then looking up the water level
+        associated with the water line location.
+
+        # Parameters
+        # ----------
+        # bank: Literal["far", "near"], optional
+        # select from which bank to detect the water level. Use this if camera is positioned in a way that only
+        # one shore is clearly distinguishable and not obscured. Typically you will use "far" if the camera is
+        # positioned on one bank, aimed perpendicular to the flow. Use "near" if not the full cross section is
+        # visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and
+        # approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based
+        # on the best estimate from both banks.
+        """
         """Attempt to detect the water line level along the cross-section, using a provided pre-treated image."""
         if len(img.shape) == 3:
             # flatten image first
@@ -637,11 +680,19 @@ class CrossSection:
         assert (
             img.shape[1] == self.camera_config.width
         ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
-        for _ in np.arange(self.z.min(), self.z.max(), step):
-            # TODO implement detection
-            pass
+        # determine the relevant start point if only one is used
+        if bank == "far":
+            start_point = self.farthest_point
+        elif bank == "near":
+            start_point = self.closest_point
+        else:
+            start_point = None
+        print(start_point)
+        # for _ in np.arange(self.z.min(), self.z.max(), step):
+        #     # TODO implement detection
+        #     pass
 
-            # TODO: do an optimization
+        # TODO: do an optimization
         z = None
         # finally, return water level:
         return self.camera_config.h_to_z(z)
