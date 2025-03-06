@@ -259,7 +259,15 @@ def parse_str_num(ctx, param, value):
             return float(value)
 
 
-def read_shape(fn=None, geojson=None):
+def parse_cross_section_gdf(ctx, param, value):
+    """Parse cross-section coordinates from geojson or shapefile."""
+    if value is None:
+        return None
+    gdf, _ = read_shape_as_gdf(fn=value)  # crs is inside the gdf if available, so leave out
+    return gdf
+
+
+def read_shape_as_gdf(fn=None, geojson=None):
     """Read shapefile."""
     if fn is None and geojson is None:
         raise click.UsageError("Either fn or geojson must be provided")
@@ -271,10 +279,31 @@ def read_shape(fn=None, geojson=None):
         gdf = gpd.GeoDataFrame().from_features(geojson, crs=crs)
     else:
         gdf = gpd.read_file(fn)
+        crs = gdf.crs if hasattr(gdf, "crs") else None
     # check if all geometries are points
     assert all([isinstance(geom, Point) for geom in gdf.geometry]), (
         "shapefile may only contain geometries of type " '"Point"'
     )
+    return gdf, crs
+
+
+def read_shape(fn=None, geojson=None):
+    """Read shapefile."""
+    gdf, crs = read_shape_as_gdf(fn=fn, geojson=geojson)
+    # if fn is None and geojson is None:
+    #     raise click.UsageError("Either fn or geojson must be provided")
+    # if geojson:
+    #     if "crs" in geojson:
+    #         crs = geojson["crs"]["properties"]["name"]
+    #     else:
+    #         crs = None
+    #     gdf = gpd.GeoDataFrame().from_features(geojson, crs=crs)
+    # else:
+    #     gdf = gpd.read_file(fn)
+    # # check if all geometries are points
+    # assert all([isinstance(geom, Point) for geom in gdf.geometry]), (
+    #     "shapefile may only contain geometries of type " '"Point"'
+    # )
     # use the first point to check if points are 2d or 3d
     if gdf.geometry[0].has_z:
         coords = [[p.x, p.y, p.z] for p in gdf.geometry]
@@ -315,7 +344,7 @@ def validate_dst(value):
 
 def validate_recipe(recipe):
     """Validate recipe."""
-    valid_classes = ["video", "frames", "velocimetry", "mask", "transect", "plot"]  # allowed classes
+    valid_classes = ["video", "water_level", "frames", "velocimetry", "mask", "transect", "plot"]  # allowed classes
     required_classes = ["video", "frames", "velocimetry"]  # mandatory classes (if not present, these are added)
     check_args = {
         "video": "video",

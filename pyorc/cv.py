@@ -757,6 +757,13 @@ def color_scale(img, method):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     elif method == "bgr":
         pass
+    elif method == "hue":
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)[:, :, 0]
+    elif method == "sat":
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)[:, :, 1]
+    elif method == "val":
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)[:, :, 2]
+
     return img
 
 
@@ -777,7 +784,7 @@ def get_frame(cap, rotation=None, ms=None, method="grayscale"):
         2x3 affina transformation parameters. If None, the image will not undergo stabilization.
     method : str, optional
         Describes the color scaling method to be applied on the image.
-        Default is "grayscale".
+        Default is "grayscale". Can also be "rgb", "hsv", "bgr", "hue", "sat", or "val".
 
     Returns
     -------

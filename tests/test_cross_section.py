@@ -420,21 +420,21 @@ def test_get_wetted_surface(cs):
 
 
 def test_detect_wl(cs, img):
-    h = cs.detect_wl(img, bank="far", length=1.0)
+    h = cs.detect_water_level(img, bank="far", length=1.0)
     print(f"Water level: {h}")
     assert h is not None
     assert isinstance(h, float)
 
 
 def test_detect_wl_near_bank(cs, img):
-    h = cs.detect_wl(img, bank="near", length=2.0)
+    h = cs.detect_water_level(img, bank="near", length=2.0)
     print(f"Water level near bank: {h}")
     assert h is not None
     assert isinstance(h, float)
 
 
 def test_detect_wl_no_bank_specified(cs, img):
-    h = cs.detect_wl(img, length=2.0)
+    h = cs.detect_water_level(img, length=2.0)
     print(f"Water level without bank specified: {h}")
 
 

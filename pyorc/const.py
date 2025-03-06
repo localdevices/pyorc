@@ -1,6 +1,7 @@
 """Constants used in pyorc."""
 
 import operator
+from typing import Literal
 
 # attributes for PIV variables
 
@@ -72,6 +73,7 @@ VIDEO_ARGS = {
     "extra_args": ["-vcodec", "libx264"],
     "dpi": 120,
 }
+ALLOWED_COLOR_METHODS_WATER_LEVEL = Literal["grayscale", "hue", "sat", "val"]
 
 ANIM_ARGS = {"interval": 20, "blit": False}
 

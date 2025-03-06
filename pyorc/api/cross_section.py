@@ -20,7 +20,7 @@ MODES = Literal["camera", "geographic", "cross_section"]
 
 PLANAR_KWARGS = {"color": "c", "alpha": 0.5}
 BOTTOM_KWARGS = {"color": "brown", "alpha": 0.1}
-BANK_OPTIONS = {"far", "close", "both"}
+BANK_OPTIONS = {"far", "near", "both"}
 
 
 def _make_angle_lines(csl_points, angle_perp, length, offset):
@@ -589,12 +589,12 @@ class CrossSection:
         else:
             return geometry.Polygon(coords)
 
-    def get_line_of_interest(self, bank: BANK_OPTIONS = None):
-        """Retrieve the points of interest within the cross section for water level detection.
+    def get_line_of_interest(self, bank: BANK_OPTIONS = "far"):
+        """Retrieve the points of interest within the cross-section for water level detection.
 
         This may be all points, points only at the far-bank or closest-bank of the camera position.
         """
-        if not bank:
+        if bank == "both":
             return self.l.min(), self.l.max()
         elif bank == "far":
             start_point = self.l[self.idx_farthest_point]
@@ -731,10 +731,10 @@ class CrossSection:
         else:
             _ = plot_helpers.plot_3d_polygon(surf, ax=ax, label="bottom", **kwargs)
 
-    def detect_wl(
+    def detect_water_level(
         self,
         img: np.ndarray,
-        bank: Optional[BANK_OPTIONS] = None,
+        bank: BANK_OPTIONS = "far",
         h_min: Optional[float] = None,
         h_max: Optional[float] = None,
         bin_size: int = 5,
@@ -744,13 +744,13 @@ class CrossSection:
     ) -> float:
         """Detect water level optically from provided image.
 
-        Water level detection is done by first detecting the water line along the cross section by comparisons
+        Water level detection is done by first detecting the water line along the cross-section by comparisons
         of distribution functions left and right of hypothesized water lines, and then looking up the water level
         associated with the water line location.
 
         # Parameters
         # ----------
-        # bank: Literal["far", "near"], optional
+        # bank: Literal["far", "near", "both"], optional
         # select from which bank to detect the water level. Use this if camera is positioned in a way that only
         # one shore is clearly distinguishable and not obscured. Typically you will use "far" if the camera is
         # positioned on one bank, aimed perpendicular to the flow. Use "near" if not the full cross section is
@@ -777,7 +777,6 @@ class CrossSection:
             args=(img, bin_size, offset, padding, length),
             atol=0.01,  # one mm
         )
-        print(opt.x, opt.fun)
         z = self.interp_z(opt.x[0])
         h = self.camera_config.z_to_h(z)
         # warning if the optimum is on the edge of the search space for l
