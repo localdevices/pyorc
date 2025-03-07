@@ -248,12 +248,12 @@ class CrossSection:
 
     @property
     def idx_closest_point(self):
-        """Determine point in cross-section, closest to the camera."""
+        """Determine index of point in cross-section, closest to the camera."""
         return self.d.argmin()
 
     @property
     def idx_farthest_point(self):
-        """Determine point in cross-section, farthest from the camera."""
+        """Determine index of point in cross-section, farthest from the camera."""
         return self.d.argmax()
 
     def get_cs_waterlevel(self, h: float, sz=False) -> geometry.LineString:
@@ -415,9 +415,9 @@ class CrossSection:
         length : float, optional
             length of the waterline [m], by default 0.5
         padding : Tuple[float, float], optional
-            amount if distance [m] to extend the polygon beyond the waterline, by default (-0.5, 0.5)
+            amount of distance [m] to extend the polygon beyond the waterline, by default (-0.5, 0.5)
         offset : float, optional
-            perpendicular offset of the waterline from the cross section [m], by default 0.0
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0
         camera : bool, optional
             If set, return 2D projected polygons, by default False.
 
@@ -605,10 +605,23 @@ class CrossSection:
         else:
             return geometry.Polygon(coords)
 
-    def get_line_of_interest(self, bank: BANK_OPTIONS = "far"):
+    def get_line_of_interest(self, bank: BANK_OPTIONS = "far") -> List[float]:
         """Retrieve the points of interest within the cross-section for water level detection.
 
         This may be all points, points only at the far-bank or closest-bank of the camera position.
+
+        Parameters
+        ----------
+        bank: Literal["far", "near", "both"], optional
+            Select relevant part of cross section. If "both", select the full cross-section. If "far", select
+            only the furthest part from the deepest point in the cross section, if any. If "near", select only
+            the "nearest".
+
+        Returns
+        -------
+        list of 2 floats
+            start and end point of the line of interest in l-coordinates.
+
         """
         if bank == "both":
             return self.l.min(), self.l.max()
@@ -708,6 +721,11 @@ class CrossSection:
             keyword arguments used to make the polygon plot of the wetted surface. If not provided, a set of defaults
             will be used that give a natural look.
 
+        Returns
+        -------
+        mpl.axes.Axes
+            The developed axes object with all data
+
         """
         if not cs_kwargs:
             cs_kwargs = {}
@@ -727,7 +745,23 @@ class CrossSection:
         return ax
 
     def plot_cs(self, ax=None, camera=False, **kwargs):
-        """Plot the cross section."""
+        """Plot the cross section.
+
+        Parameters
+        ----------
+        ax : plt.axes, optional
+            if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
+            projection. If `camera=False`, an axes must be provided with `projection="3d"`.
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False.
+        **kwargs : dict, optional
+            keyword arguments used to make the line plot of the cross-section.
+
+        Returns
+        -------
+        mpl mappable
+
+        """
         if not ax:
             if camera:
                 ax = plt.axes()
@@ -753,7 +787,30 @@ class CrossSection:
     def plot_planar_surface(
         self, h: float, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, **kwargs
     ) -> mpl.axes.Axes:
-        """Plot the planar surface for a given water level."""
+        """Plot the planar surface for a given water level.
+
+        Parameters
+        ----------
+        h : float, optional
+            water level [m]. If not provided, the water level is taken from the camera config
+            `cross_section.camera_config.gcps["h_ref"]`.
+        length : float, optional
+            length of the waterline [m], by default 2.0
+        offset : float, optional
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False.
+        ax : plt.axes, optional
+            if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
+            projection. If `camera=False`, an axes must be provided with `projection="3d"`.
+        **kwargs : dict, optional
+            keyword arguments used to make the polygon plot of the planar surface.
+
+        Returns
+        -------
+        plt.axes
+
+        """
         surf = self.get_planar_surface(h=h, length=length, offset=offset, camera=camera)
         if camera:
             p = plot_helpers.plot_polygon(surf, ax=ax, label="surface", **kwargs)
@@ -764,7 +821,27 @@ class CrossSection:
     def plot_bottom_surface(
         self, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, **kwargs
     ) -> mpl.axes.Axes:
-        """Plot the bottom surface for a given water level."""
+        """Plot the bottom surface for a given water level.
+
+        Parameters
+        ----------
+        length : float, optional
+            length of the waterline [m], by default 2.0
+        offset : float, optional
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False.
+        ax : plt.axes, optional
+            if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
+            projection. If `camera=False`, an axes must be provided with `projection="3d"`.
+        **kwargs : dict, optional
+            keyword arguments used to make the polygon plot of the bottom surface.
+
+        Returns
+        -------
+        plt.axes
+
+        """
         surf = self.get_bottom_surface(length=length, offset=offset, camera=camera)
         if camera:
             p = plot_helpers.plot_polygon(surf, ax=ax, label="bottom", **kwargs)
@@ -773,7 +850,26 @@ class CrossSection:
         return p.axes
 
     def plot_wetted_surface(self, h: float, camera: bool = False, ax=None, **kwargs):
-        """Plot the wetted surface for a given water level."""
+        """Plot the wetted surface for a given water level.
+
+        Parameters
+        ----------
+        h : float, optional
+            water level [m]. If not provided, the water level is taken from the camera config
+            `cross_section.camera_config.gcps["h_ref"]`.
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False.
+        ax : plt.axes, optional
+            if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
+            projection. If `camera=False`, an axes must be provided with `projection="3d"`.
+        **kwargs : dict, optional
+            keyword arguments used to make the polygon plot of the wetted surface.
+
+        Returns
+        -------
+        plt.axes
+
+        """
         surf = self.get_wetted_surface(h=h, camera=camera)
         if camera:
             p = plot_helpers.plot_polygon(surf, ax=ax, label="wetted", **kwargs)
@@ -791,7 +887,32 @@ class CrossSection:
         ax: Optional[mpl.axes.Axes] = None,
         **kwargs,
     ) -> mpl.axes.Axes:
-        """Plot the water level at user provided value `h`."""
+        """Plot the water level at user provided value `h`.
+
+        Parameters
+        ----------
+        h : float, optional
+            water level [m]. If not provided, the water level is taken from the camera config
+            `cross_section.camera_config.gcps["h_ref"]`.
+        length : float, optional
+            length of the waterline [m], by default 2.0
+        offset : float, optional
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False.
+        add_text : bool, optional
+            Default True, determines whether to add a text label to the water level plot at the farthest line.
+        ax : plt.axes, optional
+            if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
+            projection. If `camera=False`, an axes must be provided with `projection="3d"`.
+        **kwargs : dict, optional
+            keyword arguments used to make the line plot of the water level, perpendicular to the cross-section.
+
+        Returns
+        -------
+        plt.axes
+
+        """
         if ax is None:
             if camera:
                 ax = plt.axes()
@@ -835,12 +956,10 @@ class CrossSection:
         self,
         img: np.ndarray,
         bank: BANK_OPTIONS = "far",
-        h_min: Optional[float] = None,
-        h_max: Optional[float] = None,
         bin_size: int = 5,
-        offset: float = 0.0,
-        padding: float = 0.5,
         length: float = 2.0,
+        padding: float = 0.5,
+        offset: float = 0.0,
     ) -> float:
         """Detect water level optically from provided image.
 
@@ -848,15 +967,27 @@ class CrossSection:
         of distribution functions left and right of hypothesized water lines, and then looking up the water level
         associated with the water line location.
 
-        # Parameters
-        # ----------
-        # bank: Literal["far", "near", "both"], optional
-        # select from which bank to detect the water level. Use this if camera is positioned in a way that only
-        # one shore is clearly distinguishable and not obscured. Typically you will use "far" if the camera is
-        # positioned on one bank, aimed perpendicular to the flow. Use "near" if not the full cross section is
-        # visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and
-        # approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based
-        # on the best estimate from both banks.
+        Parameters
+        ----------
+        img : np.ndarray
+            image (uint8) used to estimate water level from.
+        bank: Literal["far", "near", "both"], optional
+            select from which bank to detect the water level. Use this if camera is positioned in a way that only
+            one shore is clearly distinguishable and not obscured. Typically you will use "far" if the camera is
+            positioned on one bank, aimed perpendicular to the flow. Use "near" if not the full cross section is
+            visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and
+            approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based
+            on the best estimate from both banks.
+        bin_size : int, optional
+            Size of bins for histogram calculation of the provided image intensities, default 5.
+        length : float, optional
+            length of the waterline [m], by default 2.0
+        padding : float, optional
+            amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn
+            left and right of hypothesized water line at -padding and +padding.
+        offset : float, optional
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0
+
         """
         """Attempt to detect the water line level along the cross-section, using a provided pre-treated image."""
         if len(img.shape) == 3:

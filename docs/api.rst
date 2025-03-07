@@ -117,8 +117,11 @@ Class and properties
     CrossSection
     CrossSection.cs_points
     CrossSection.cs_points_sz
+    CrossSection.cs_linestring
     CrossSection.cs_linestring_sz
     CrossSection.cs_angle
+    CrossSection.idx_closest_point
+    CrossSection.idx_farthest_point
 
 Getting cross section geometries
 --------------------------------
@@ -134,6 +137,7 @@ Getting cross section geometries
     CrossSection.get_planar_surface
     CrossSection.get_wetted_surface
     CrossSection.get_wetted_surface_sz
+    CrossSection.get_line_of_interest
 
 Plotting methods
 ----------------
@@ -151,12 +155,16 @@ for camera configurations `CameraConfig.plot`.
     CrossSection.plot_cs
     CrossSection.plot_planar_surface
     CrossSection.plot_bottom_surface
+    CrossSection.plot_wetted_surface
 
 Water level detection
 ---------------------
+Combined with a preprocessed image from e.g. a video file, a water level can be detected.
 
-Water level detection methods are not yet available but are forthcoming in a later release.
+.. autosummary::
+    :toctree: _generated
 
+    CrossSection.detect_water_level
 
 .. _video:
 
