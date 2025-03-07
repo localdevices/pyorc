@@ -60,10 +60,12 @@ dynamic = ['version', 'description']
 extra = [
     "notebook",
     "cartopy",
+    "pooch"
 ]
 test = [
     "pytest",
     "pytest-cov",
+    "pooch",
 ]
 docs = [
     "sphinx==5.3",  # >6.0 causes bug in pydata_sphinx_theme

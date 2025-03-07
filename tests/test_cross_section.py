@@ -1,7 +1,5 @@
 """Tests for water level functionalities."""
 
-import os
-
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,8 +7,9 @@ import pytest
 from pyproj import CRS
 from shapely import geometry, wkt
 
-from pyorc import CameraConfig, CrossSection, Video, plot_helpers
-from tests.conftest import EXAMPLE_DATA_DIR
+from pyorc import CameraConfig, CrossSection, Video, plot_helpers, sample_data
+
+# from tests.conftest import EXAMPLE_DATA_DIR
 
 
 @pytest.fixture()
@@ -160,7 +159,7 @@ def camera_config():
 
 @pytest.fixture()
 def vid_file():
-    return os.path.join(EXAMPLE_DATA_DIR, "hommerich", "20240718_162737.mp4")
+    return sample_data.get_hommerich_dataset()  # os.path.join(EXAMPLE_DATA_DIR, "hommerich", "20240718_162737.mp4")
 
 
 @pytest.fixture()
