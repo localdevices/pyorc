@@ -1,35 +1,40 @@
+"""Velocimetry functionalities that can be applied on `xarray.Dataset`."""
+
+import warnings
+
 import numpy as np
 import rasterio
 import xarray as xr
-import warnings
-
 from pyproj import CRS
 from scipy.interpolate import interp1d
-from .orcbase import ORCBase
-from .plot import _Velocimetry_PlotMethods
-from .mask import _Velocimetry_MaskMethods
-from .. import helpers, const
 from xarray.core import utils
+
+from pyorc import const, helpers
+from pyorc.api.mask import _Velocimetry_MaskMethods
+from pyorc.api.orcbase import ORCBase
+from pyorc.api.plot import _Velocimetry_PlotMethods
 
 
 @xr.register_dataset_accessor("velocimetry")
 class Velocimetry(ORCBase):
-    """Velocimetry functionalities that can be applied on ``xarray.Dataset``"""
+    """Velocimetry functionalities that can be applied on `xarray.Dataset`."""
+
     def __init__(self, xarray_obj):
-        """Initialize a velocimetry ``xarray.Dataset``
+        """Initialize a velocimetry `xarray.Dataset`.
 
         Parameters
         ----------
         xarray_obj: xr.Dataset
             velocimetry data fields (from ``pyorc.Frames.get_piv``)
+
         """
         super(Velocimetry, self).__init__(xarray_obj)
 
     @property
     def is_velocimetry(self):
-        """
-        Checks if the data contained in the object seems to be velocimetry data by checking naming of dims
-        and available variables.
+        """Check if the data contained in the object seems to be velocimetry data.
+
+        Done by checking naming of dims and available variables.
 
         Returns
         -------
@@ -52,7 +57,7 @@ class Velocimetry(ORCBase):
             print(f"Variables missing: {missed_vars}")
             return False
         # check for available metadata
-        if not(hasattr(self._obj, "camera_config")):
+        if not (hasattr(self._obj, "camera_config")):
             print("camera_config metadata is missing")
             return False
         return True
@@ -60,25 +65,30 @@ class Velocimetry(ORCBase):
     mask = utils.UncachedAccessor(_Velocimetry_MaskMethods)
 
     def get_transect(
-            self, x, y, z=None, s=None,
-            crs=None,
-            v_eff=True,
-            xs="xs",
-            ys="ys",
-            distance=None,
-            wdw=1,
-            wdw_x_min=None,
-            wdw_x_max=None,
-            wdw_y_min=None,
-            wdw_y_max=None,
-            rolling=None,
-            tolerance=0.5,
-            quantiles=[0.05, 0.25, 0.5, 0.75, 0.95]
+        self,
+        x,
+        y,
+        z=None,
+        s=None,
+        crs=None,
+        v_eff=True,
+        xs="xs",
+        ys="ys",
+        distance=None,
+        wdw=1,
+        wdw_x_min=None,
+        wdw_x_max=None,
+        wdw_y_min=None,
+        wdw_y_max=None,
+        rolling=None,
+        tolerance=0.5,
+        quantiles=None,
     ):
-        """Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the
-        grid can be rotated and that xs and ys are supplied following the projected coordinates supplied in
-        "xs" and "ys" coordinate variables in ds. x-coordinates and y-coordinates that fall outside the
-        domain of ds, are still stored in the result for further interpolation or extrapolation.
+        """Interpolate all variables to supplied x and y coordinates of a cross-section.
+
+        This function assumes that the grid can be rotated and that xs and ys are supplied following the projected
+        coordinates supplied in "xs" and "ys" coordinate variables in ds. x-coordinates and y-coordinates that fall
+        outside the domain of ds, are still stored in the result for further interpolation or extrapolation.
         Original coordinate values supplied are stored in coordinates "x", "y" and (if supplied) "z".
         Time series are transformed to set quantiles.
 
@@ -130,15 +140,19 @@ class Velocimetry(ORCBase):
         -------
         ds_points: xr.Dataset
             interpolated data at the supplied x and y coordinates over quantiles
+
         """
+        if quantiles is None:
+            quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
         transform = helpers.affine_from_grid(self._obj[xs].values, self._obj[ys].values)
         if crs is not None:
             # transform coordinates of cross-section
-            x, y = zip(*helpers.xyz_transform(
-                list(zip(*(x, y))),
-                crs_from=crs,
-                crs_to=CRS.from_wkt(self.camera_config.crs)
-            ))
+            x, y = zip(
+                *helpers.xyz_transform(
+                    list(zip(*(x, y), strict=False)), crs_from=crs, crs_to=CRS.from_wkt(self.camera_config.crs)
+                ),
+                strict=False,
+            )
             x, y = list(x), list(y)
         if s is None:
             if distance is None:
@@ -152,10 +166,7 @@ class Velocimetry(ORCBase):
         self._obj["cols"], self._obj["rows"] = (["y", "x"], coli), (["y", "x"], rowi)
         # compute rows and cols locations of coordinates (x, y)
         rows, cols = rasterio.transform.rowcol(
-            transform,
-            list(x),
-            list(y),
-            op=float
+            transform, list(x), list(y), op=float
         )  # ensure we get rows and columns in fractions instead of whole numbers
         rows, cols = np.array(rows), np.array(cols)
 
@@ -175,13 +186,7 @@ class Velocimetry(ORCBase):
         else:
             # collect points within a stride, collate and analyze for outliers
             ds_wdw = helpers.stack_window(
-                self._obj,
-                wdw=wdw,
-                wdw_x_min=wdw_x_min,
-                wdw_x_max=wdw_x_max,
-                wdw_y_min=wdw_y_min,
-                wdw_y_max=wdw_y_max
-
+                self._obj, wdw=wdw, wdw_x_min=wdw_x_min, wdw_x_max=wdw_x_max, wdw_y_min=wdw_y_min, wdw_y_max=wdw_y_max
             )
             # use the median (not mean) to prevent a large influence of serious outliers
             missing_tolerance = ds_wdw.mean(dim="time").count(dim="stride") > tolerance * len(ds_wdw.stride)
@@ -199,7 +204,8 @@ class Velocimetry(ORCBase):
         if np.isnan(ds_points["v_x"].mean(dim="time")).all():
             warnings.warn(
                 "No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera "
-                "objective or anything is visible in objective. "
+                "objective or anything is visible in objective. ",
+                stacklevel=2,
             )
         # add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the
         # grid covered by ds can be found back from this dataset
@@ -215,7 +221,7 @@ class Velocimetry(ORCBase):
         ds_points["v_dir"].attrs = {
             "standard_name": "river_flow_angle",
             "long_name": "Angle of river flow in radians from North",
-            "units": "rad"
+            "units": "rad",
         }
         # convert to a Transect object
         ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
@@ -233,17 +239,16 @@ class Velocimetry(ORCBase):
     plot = utils.UncachedAccessor(_Velocimetry_PlotMethods)
 
     def set_encoding(self, enc_pars=const.ENCODING_PARAMS):
-        """Set encoding parameters for all typical variables in a velocimetry dataset. This reduces the required storage
-        for this dataset significantly, when stored to disk in e.g. a netcdf file using ``xarray.Dataset.to_netcdf``.
+        """Set encoding parameters for all typical variables in a velocimetry dataset.
+
+        This reduces the required storage for this dataset significantly, when stored to disk in e.g. a netcdf file
+        using ``xarray.Dataset.to_netcdf``.
 
         Parameters
         ----------
         enc_pars : dict of dicts, optional
             per variable, a dict containing encoding parameters. When called without input, a standard set of encoding
             parameters is used that compresses well. (Default value = const.ENCODING_PARAMS)
-
-        Returns
-        -------
 
         """
         for k in const.ENCODE_VARS:

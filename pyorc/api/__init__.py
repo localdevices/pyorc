@@ -9,11 +9,11 @@ from .video import Video
 
 __all__ = [
     "CameraConfig",
+    "CrossSection",
     "load_camera_config",
     "get_camera_config",
     "Video",
     "Frames",
     "Velocimetry",
-    "CrossSection",
     "Transect",
 ]

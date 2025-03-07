@@ -9,6 +9,7 @@ import geopandas as gpd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import patheffects
 from scipy.interpolate import interp1d
 from scipy.optimize import differential_evolution
 from shapely import affinity, geometry
@@ -17,10 +18,22 @@ from shapely.ops import polygonize
 from pyorc import cv, plot_helpers
 
 MODES = Literal["camera", "geographic", "cross_section"]
-
+PATH_EFFECTS = [
+    patheffects.Stroke(linewidth=3, foreground="w"),
+    patheffects.Normal(),
+]
+LINE_COLOR = "#385895"
 PLANAR_KWARGS = {"color": "c", "alpha": 0.5}
 BOTTOM_KWARGS = {"color": "brown", "alpha": 0.1}
 BANK_OPTIONS = {"far", "near", "both"}
+WETTED_KWARGS = {
+    "alpha": 0.15,
+    "linewidth": 2.0,
+    "facecolor": LINE_COLOR,
+    "path_effects": PATH_EFFECTS,
+    "edgecolor": "w",
+    "zorder": 1,
+}
 
 
 def _make_angle_lines(csl_points, angle_perp, length, offset):
@@ -82,10 +95,10 @@ class CrossSection:
     """Water Level functionality."""
 
     def __str__(self):
-        return str(self)
+        return str(self.cs_linestring)
 
     def __repr__(self):
-        return self
+        return str(self.cs_linestring)
 
     def __init__(self, camera_config, cross_section: Union[gpd.GeoDataFrame, List[List]]):
         """Initialize a cross-section representation.
@@ -299,8 +312,6 @@ class CrossSection:
                 )
             cross = [geometry.Point(self.interp_x(l), self.interp_y(l), self.interp_z(l))]
         else:
-            print(h)
-            print(l)
             z = self.camera_config.h_to_z(h)
             if z > np.array(self.z).max() or z < np.array(self.z).min():
                 raise ValueError(
@@ -331,7 +342,12 @@ class CrossSection:
         return cross
 
     def get_csl_line(
-        self, h: Optional[float] = None, l: Optional[float] = None, length=0.5, offset=0.0, camera: bool = False
+        self,
+        h: Optional[float] = None,
+        l: Optional[float] = None,
+        length: float = 0.5,
+        offset: float = 0.0,
+        camera: bool = False,
     ) -> List[geometry.LineString]:
         """Retrieve waterlines over the cross-section, perpendicular to the orientation of the cross-section.
 
@@ -582,7 +598,7 @@ class CrossSection:
 
         """
         pol = self.get_wetted_surface_sz(h=h)
-        coords = [[self.interp_x(p[0]), self.interp_y(p[0]), p[1]] for p in pol.exterior.coords]
+        coords = [[self.interp_x_from_s(p[0]), self.interp_y_from_s(p[0]), p[1]] for p in pol.exterior.coords]
         if camera:
             coords_proj = self.camera_config.project_points(coords, swap_y_coords=True)
             return geometry.Polygon(coords_proj)
@@ -646,8 +662,12 @@ class CrossSection:
         camera: bool = False,
         ax: Optional[mpl.axes.Axes] = None,
         cs_kwargs: Dict = None,
+        planar=True,
+        bottom=True,
+        wetted=True,
         planar_kwargs: Dict = PLANAR_KWARGS,
         bottom_kwargs: Dict = BOTTOM_KWARGS,
+        wetted_kwargs: Dict = WETTED_KWARGS,
     ) -> mpl.axes.Axes:
         """Plot the cross-section situation.
 
@@ -672,11 +692,20 @@ class CrossSection:
             projection. If `camera=False`, an axes must be provided with `projection="3d"`.
         cs_kwargs : dict, optional
             keyword arguments used to make the line plot of the cross section.
+        planar : bool, optional
+            whether to plot the planar, by default True.
+        bottom : bool, optional
+            whether to plot the bottom surface, by default True.
+        wetted : bool, optional
+            whether to plot the wetted surface, by default True.
         planar_kwargs : dict, optional
             keyword arguments used to make the polygon plot of the water plane. If not provided, a set of defaults
             will be used that give a natural look.
         bottom_kwargs : dict, optional
             keyword arguments used to make the polygon plot of the bottom surface. If not provided, a set of defaults
+            will be used that give a natural look.
+        wetted_kwargs : dict, optional
+            keyword arguments used to make the polygon plot of the wetted surface. If not provided, a set of defaults
             will be used that give a natural look.
 
         """
@@ -687,9 +716,14 @@ class CrossSection:
                 f, ax = plt.subplots(1, 1, projection="3d")
             else:
                 f, ax = plt.subplots(1, 1)
-        self.plot_planar_surface(h=h, length=length, offset=offset, camera=camera, ax=ax, **planar_kwargs)
-        self.plot_bottom_surface(length=length, offset=offset, camera=camera, ax=ax, **bottom_kwargs)
+        if planar:
+            self.plot_planar_surface(h=h, length=length, offset=offset, camera=camera, ax=ax, **planar_kwargs)
+        if bottom:
+            self.plot_bottom_surface(length=length, offset=offset, camera=camera, ax=ax, **bottom_kwargs)
+        if wetted:
+            self.plot_wetted_surface(h=h, camera=camera, ax=ax, **wetted_kwargs)
         self.plot_cs(ax=ax, camera=camera, **cs_kwargs)
+        ax.set_aspect("equal")
         return ax
 
     def plot_cs(self, ax=None, camera=False, **kwargs):
@@ -710,7 +744,7 @@ class CrossSection:
                     list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=True
                 )
                 # map to x and y arrays
-                x, y = zip(*[(c[0], c[1]) for c in pix], strict=False)
+                x, y = zip(*[(c[0], c[1]) for c in pix if np.isfinite(c[0])], strict=False)
             else:
                 x, y = zip(*[(c[0], c[1]) for c in self.cs_linestring_sz.coords], strict=False)
             p = ax.plot(x, y, **kwargs)
@@ -718,18 +752,84 @@ class CrossSection:
 
     def plot_planar_surface(
         self, h: float, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, **kwargs
-    ):
+    ) -> mpl.axes.Axes:
         """Plot the planar surface for a given water level."""
         surf = self.get_planar_surface(h=h, length=length, offset=offset, camera=camera)
-        _ = plot_helpers.plot_3d_polygon(surf, ax=ax, label="surface", **kwargs)
+        if camera:
+            p = plot_helpers.plot_polygon(surf, ax=ax, label="surface", **kwargs)
+        else:
+            p = plot_helpers.plot_3d_polygon(surf, ax=ax, label="surface", **kwargs)
+        return p.axes
 
-    def plot_bottom_surface(self, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, **kwargs):
+    def plot_bottom_surface(
+        self, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, **kwargs
+    ) -> mpl.axes.Axes:
         """Plot the bottom surface for a given water level."""
         surf = self.get_bottom_surface(length=length, offset=offset, camera=camera)
         if camera:
-            _ = plot_helpers.plot_polygon(surf, ax=ax, label="bottom", **kwargs)
+            p = plot_helpers.plot_polygon(surf, ax=ax, label="bottom", **kwargs)
         else:
-            _ = plot_helpers.plot_3d_polygon(surf, ax=ax, label="bottom", **kwargs)
+            p = plot_helpers.plot_3d_polygon(surf, ax=ax, label="bottom", **kwargs)
+        return p.axes
+
+    def plot_wetted_surface(self, h: float, camera: bool = False, ax=None, **kwargs):
+        """Plot the wetted surface for a given water level."""
+        surf = self.get_wetted_surface(h=h, camera=camera)
+        if camera:
+            p = plot_helpers.plot_polygon(surf, ax=ax, label="wetted", **kwargs)
+        else:
+            p = plot_helpers.plot_3d_polygon(surf, ax=ax, label="wetted", **kwargs)
+        return p.axes
+
+    def plot_water_level(
+        self,
+        h: float,
+        length: float = 0.5,
+        offset: float = 0.0,
+        camera: bool = False,
+        add_text: bool = True,
+        ax: Optional[mpl.axes.Axes] = None,
+        **kwargs,
+    ) -> mpl.axes.Axes:
+        """Plot the water level at user provided value `h`."""
+        if ax is None:
+            if camera:
+                ax = plt.axes()
+            else:
+                ax = plt.axes(projection="3d")
+        lines = self.get_csl_line(h=h, length=length, offset=offset, camera=camera)
+        if camera:
+            plot_f = plot_helpers.plot_line
+        else:
+            plot_f = plot_helpers.plot_3d_line
+        for l in lines:
+            _ = plot_f(l, ax=ax, **kwargs)
+        if add_text and camera:
+            points = self.get_csl_point(h=h, camera=False)  # find real-world points
+            lens_position_xy = self.camera_config.estimate_lens_position()[0:2]
+            dists = [((p.x - lens_position_xy[0]) ** 2 + (p.y - lens_position_xy[1]) ** 2) ** 0.5 for p in points]
+            points = self.get_csl_point(h=h, camera=True)  # find camera positions
+            x, y = points[np.argmax(dists)].xy
+            x, y = float(x[0]), float(y[0])
+            line = lines[np.argmax(dists)]
+            # angle of line
+            line_coords = list(line.coords)
+            x_diff, y_diff = line_coords[-1][0] - line_coords[0][0], line_coords[-1][1] - line_coords[0][1]
+            rotation = np.degrees(np.arctan2(y_diff, x_diff))
+
+            # only plot text in 2D camera perspective at farthest point
+            ax.text(
+                x,
+                y,
+                "{:1.3f}".format(h),
+                path_effects=PATH_EFFECTS,
+                ha="center",
+                va="bottom",
+                rotation=rotation,
+                size=12,
+                # bbox=dict(boxstyle="round", fc="w", ec="k", lw=1),
+            )
+        return ax
 
     def detect_water_level(
         self,
