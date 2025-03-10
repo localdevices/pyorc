@@ -69,9 +69,9 @@ Retrieve geometrical information
 .. autosummary::
     :toctree: _generated
 
+    CameraConfig.estimate_lens_position
     CameraConfig.get_M
     CameraConfig.get_bbox
-    CameraConfig.get_camera_coords
     CameraConfig.get_dist_shore
     CameraConfig.get_dist_wall
     CameraConfig.get_depth

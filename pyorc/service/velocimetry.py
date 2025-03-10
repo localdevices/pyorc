@@ -483,7 +483,8 @@ class VelocityFlowProcessor(object):
             if not ("shapefile" in transect_grp or "geojson" in transect_grp):
                 raise click.UsageError(
                     f'Transect with name "{transect_name}" does not have a "shapefile" or '
-                    f'"geojson". Please add "shapefile" in the recipe file'
+                    f'"geojson". Please add "shapefile" in the recipe file or provide a '
+                    f'shapefile or geojson file with the "--cross" option.'
                 )
             # read geojson or shapefile (as alternative
             if "geojson" in transect_grp:

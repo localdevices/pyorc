@@ -52,7 +52,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11"
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
 ]
 dynamic = ['version', 'description']
 
@@ -111,7 +112,7 @@ filterwarnings = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py312"
+target-version = "py313"
 exclude = ["docs"]
 
 [tool.ruff.lint]

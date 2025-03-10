@@ -12,6 +12,7 @@ width=100 align="right">
 [![docs_latest](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://localdevices.github.io/pyorc/latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/localdevices/pyorc.git/main?labpath=examples)
 [![License](https://img.shields.io/github/license/localdevices/pyorc?style=flat)](https://github.com/localdevices/pyorc/blob/main/LICENSE)
+[![downloads](https://img.shields.io/pypi/dm/pyopenrivercam)](https://pypi.org/project/pyopenrivercam/)
 
 **pyorc**, short for "pyOpenRiverCam" is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for
 computations on the fully open software stack OpenRiverCam. **pyorc** can only be successful if the underlying methods
