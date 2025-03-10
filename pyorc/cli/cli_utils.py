@@ -260,14 +260,17 @@ def parse_str_num(ctx, param, value):
 
 
 def parse_cross_section_gdf(ctx, param, value):
-    """Parse cross-section coordinates from geojson or shapefile."""
+    """Check if cross-section can be read. Return file itself."""
     if value is None:
         return None
-    gdf, _ = read_shape_as_gdf(fn=value)  # crs is inside the gdf if available, so leave out
-    return gdf
+    try:
+        gdf, _ = read_shape_as_gdf(fn=value)  # crs is inside the gdf if available, so leave out
+    except Exception:
+        raise click.FileError(f"There is a problem with the cross section file {value}")
+    return value
 
 
-def read_shape_as_gdf(fn=None, geojson=None):
+def read_shape_as_gdf(fn=None, geojson=None, gdf=None):
     """Read shapefile."""
     if fn is None and geojson is None:
         raise click.UsageError("Either fn or geojson must be provided")

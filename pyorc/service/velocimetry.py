@@ -8,7 +8,6 @@ import subprocess
 from typing import Dict, Optional
 
 import click
-import geopandas as gpd
 import numpy as np
 import xarray as xr
 import yaml
@@ -33,6 +32,10 @@ def get_water_level(
     frames_options: Optional[Dict] = None,
     water_level_options: Optional[Dict] = None,
 ):
+    if water_level_options is None:
+        water_level_options = {}
+    if frames_options is None:
+        frames_options = {}
     if method not in ["grayscale", "hue", "sat", "val"]:
         raise ValueError(
             f"Method {method} not supported for water level detection, choose one"
@@ -209,7 +212,7 @@ class VelocityFlowProcessor(object):
         prefix: str,
         output: str,
         h_a: Optional[float] = None,
-        cross: Optional[gpd.GeoDataFrame] = None,
+        cross: Optional[str] = None,
         update: bool = False,
         concurrency: bool = True,
         fn_piv: str = "piv.nc",
@@ -233,8 +236,9 @@ class VelocityFlowProcessor(object):
             path to output file
         h_a : float, optional
             Current water level in meters
-        cross : gpd.GeoDataFrame, optional
-            cross-section coordinates and crs in GeoDataFrame, to be used for water level detection
+        cross : str, optional
+            path to cross-section coordinates and crs file in GeoJSON or other readible by geopandas
+            to be used for water level detection.
         update : bool, optional
             if set, only update components with changed inputs and configurations
         concurrency : bool, optional
@@ -268,7 +272,8 @@ class VelocityFlowProcessor(object):
             recipe["video"]["h_a"] = h_a
         elif cross is not None:
             logger.info("Cross section provided, and no water level set, water level will be estimated optically.")
-            cross_section = pyorc.CrossSection(camera_config=camera_config, cross_section=cross)
+            gdf, _ = cli_utils.read_shape(fn=cross)
+            cross_section = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
             if "water_level" not in recipe:
                 # make sure water_level is represented
                 recipe["water_level"] = {}
@@ -290,7 +295,7 @@ class VelocityFlowProcessor(object):
         # set cross section for water levels
         self.cross_section_wl = cross_section
         # for now also provide a cross section for flow extraction, use the same.
-        self.cross_section_flow = cross_section  # TODO use this property to extract velocity transects.
+        self.cross_section_fn = cross  # TODO use this property to extract velocity transects.
         self.fn_piv = os.path.join(self.output, prefix + fn_piv)
         self.fn_piv_mask = os.path.join(self.output, prefix + fn_piv_mask) if "mask" in recipe else self.fn_piv
         self.fn_transect_template = (
@@ -370,6 +375,11 @@ class VelocityFlowProcessor(object):
             # no masking so use non-masked velocimetry as masked
             self.velocimetry_mask_obj = self.velocimetry_obj
         if "transect" in self.recipe:
+            if self.cross_section_fn is not None:
+                # ensure that the cross section is available for transect measurements
+                print("SETTING GEOJSON FROM CROSS SECTION")
+                self.recipe["transect"]["transect_1"]["shapefile"] = self.cross_section_fn
+                print(self.recipe["transect"]["transect_1"]["shapefile"])
             self.transect(**self.recipe["transect"])
         if "plot" in self.recipe:
             self.plot(**self.recipe["plot"])
