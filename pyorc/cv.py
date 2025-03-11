@@ -946,7 +946,7 @@ def get_aoi(dst_corners, resolution=None):
     return bbox
 
 
-def get_polygon_pixels(img, pol, reverse_y=True):
+def get_polygon_pixels(img, pol, reverse_y=False):
     """Get pixel intensities within a polygon."""
     if pol.is_empty:
         return np.array([np.nan])

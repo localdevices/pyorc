@@ -279,7 +279,7 @@ class CrossSection:
         return geometry.LineString(zip(self.x, self.y, [z] * len(self.x), strict=False))
 
     def get_csl_point(
-        self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False
+        self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False, swap_y_coords: bool = False
     ) -> List[geometry.Point]:
         """Retrieve list of points, where cross-section (cs) touches the land (l).
 
@@ -293,6 +293,9 @@ class CrossSection:
             coordinate of distance from left to right bank, including height [m], if provided, h must not be provided.
         camera : bool, optional
             If set, return 2D projected points, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
 
         Returns
         -------
@@ -337,7 +340,7 @@ class CrossSection:
 
         if camera:
             coords = [[p.x, p.y, p.z] for p in cross]
-            coords_proj = self.camera_config.project_points(coords, swap_y_coords=True)
+            coords_proj = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords)
             cross = [geometry.Point(p[0], p[1]) for p in coords_proj]
         return cross
 
@@ -348,6 +351,7 @@ class CrossSection:
         length: float = 0.5,
         offset: float = 0.0,
         camera: bool = False,
+        swap_y_coords: bool = False,
     ) -> List[geometry.LineString]:
         """Retrieve waterlines over the cross-section, perpendicular to the orientation of the cross-section.
 
@@ -365,6 +369,9 @@ class CrossSection:
             perpendicular offset of the waterline from the cross-section [m], by default 0.0
         camera : bool, optional
             If set, return 2D projected lines, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
 
         Returns
         -------
@@ -385,7 +392,9 @@ class CrossSection:
             # transform to 2D projected lines, make list of lists of coordinates
             coords_lines = [[[_x, _y, z] for _x, _y in l.coords] for l in csl_lines]
             # project list of lists
-            coords_lines_proj = [self.camera_config.project_points(cl, swap_y_coords=True) for cl in coords_lines]
+            coords_lines_proj = [
+                self.camera_config.project_points(cl, swap_y_coords=swap_y_coords) for cl in coords_lines
+            ]
             # turn list of lists into list of LineString
             csl_lines = [geometry.LineString([geometry.Point(_x, _y) for _x, _y in l]) for l in coords_lines_proj]
         else:
@@ -401,6 +410,7 @@ class CrossSection:
         padding: Tuple[float, float] = (-0.5, 0.5),
         offset: float = 0.0,
         camera: bool = False,
+        swap_y_coords: bool = False,
     ) -> List[geometry.Polygon]:
         """Get horizontal polygon from cross-section land-line towards water or towards land.
 
@@ -420,6 +430,9 @@ class CrossSection:
             perpendicular offset of the waterline from the cross-section [m], by default 0.0
         camera : bool, optional
             If set, return 2D projected polygons, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
 
         Returns
         -------
@@ -457,14 +470,14 @@ class CrossSection:
                 coords = coords_expand
                 csl_pol_coords[cn] = coords
             csl_pol_coords = [
-                self.camera_config.project_points(coords, swap_y_coords=True, within_image=True)
+                self.camera_config.project_points(coords, swap_y_coords=swap_y_coords, within_image=True)
                 for coords in csl_pol_coords
             ]
             csl_pol_coords = [coords[np.isfinite(coords[:, 0])] for coords in csl_pol_coords]
         polygons = [geometry.Polygon(coords) for coords in csl_pol_coords]
         return polygons
 
-    def get_bottom_surface(self, length: float = 2.0, offset: float = 0.0, camera: bool = False):
+    def get_bottom_surface(self, length: float = 2.0, offset: float = 0.0, camera: bool = False, swap_y_coords=False):
         """Retrieve a bottom surface polygon for the entire cross section, expanded over a length.
 
         Returns a 2D Polygon if camera is True, 3D if False. Useful in particular for 3d situation plots.
@@ -479,6 +492,9 @@ class CrossSection:
         camera : bool, optional
             If set, return 2D projected polygon, by default False. Note that any plotting does not provide shading or
             ray tracing hence plotting a 2D polygon is not recommended.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
 
         Returns
         -------
@@ -512,14 +528,14 @@ class CrossSection:
         if camera:
             coords = np.array([list(p.coords[0]) for p in all_points])
 
-            all_points = self.camera_config.project_points(coords, swap_y_coords=True, within_image=True)
+            all_points = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords, within_image=True)
             all_points = all_points[np.isfinite(all_points[:, 0])]
             all_points = [geometry.Point(*p) for p in all_points]
 
         return geometry.Polygon(all_points)
 
     def get_planar_surface(
-        self, h: float, length: float = 2.0, offset: float = 0.0, camera: bool = False
+        self, h: float, length: float = 2.0, offset: float = 0.0, camera: bool = False, swap_y_coords=False
     ) -> geometry.Polygon:
         """Retrieve a planar water surface for a given water level, as a geometry.Polygon.
 
@@ -535,6 +551,9 @@ class CrossSection:
             perpendicular offset of the waterline from the cross section [m], by default 0.0
         camera : bool, optional
             If set, return 2D projected polygon, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
 
         Returns
         -------
@@ -547,7 +566,7 @@ class CrossSection:
         CrossSection.plot_planar_surface : Plot the planar surface resulting from this method.
 
         """
-        wls = self.get_csl_line(h=h, offset=offset, length=length, camera=camera)
+        wls = self.get_csl_line(h=h, offset=offset, length=length, camera=camera, swap_y_coords=swap_y_coords)
         if len(wls) != 2:
             raise ValueError("Amount of water line crossings must be 2 for a planar surface estimate.")
         return geometry.Polygon(list(wls[0].coords) + list(wls[1].coords[::-1]))
@@ -580,7 +599,7 @@ class CrossSection:
             pol = pol[0]
         return pol
 
-    def get_wetted_surface(self, h: float, camera: bool = False) -> geometry.Polygon:
+    def get_wetted_surface(self, h: float, camera: bool = False, swap_y_coords=False) -> geometry.Polygon:
         """Retrieve a wetted surface for a given water level, as a geometry.Polygon.
 
         Parameters
@@ -589,6 +608,9 @@ class CrossSection:
             water level [m]
         camera : bool, optional
             If set, return 2D projected polygon, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
 
         Returns
         -------
@@ -600,7 +622,7 @@ class CrossSection:
         pol = self.get_wetted_surface_sz(h=h)
         coords = [[self.interp_x_from_s(p[0]), self.interp_y_from_s(p[0]), p[1]] for p in pol.exterior.coords]
         if camera:
-            coords_proj = self.camera_config.project_points(coords, swap_y_coords=True)
+            coords_proj = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords)
             return geometry.Polygon(coords_proj)
         else:
             return geometry.Polygon(coords)
@@ -678,6 +700,7 @@ class CrossSection:
         planar=True,
         bottom=True,
         wetted=True,
+        swap_y_coords=False,
         planar_kwargs: Dict = PLANAR_KWARGS,
         bottom_kwargs: Dict = BOTTOM_KWARGS,
         wetted_kwargs: Dict = WETTED_KWARGS,
@@ -711,6 +734,9 @@ class CrossSection:
             whether to plot the bottom surface, by default True.
         wetted : bool, optional
             whether to plot the wetted surface, by default True.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
         planar_kwargs : dict, optional
             keyword arguments used to make the polygon plot of the water plane. If not provided, a set of defaults
             will be used that give a natural look.
@@ -731,20 +757,29 @@ class CrossSection:
             cs_kwargs = {}
         if not ax:
             if not camera:
-                f, ax = plt.subplots(1, 1, projection="3d")
+                ax = plt.axes(projection="3d")
             else:
-                f, ax = plt.subplots(1, 1)
+                ax = plt.axes()
+        if h is None:
+            h = self.camera_config.gcps["h_ref"]
+            warnings.warn(
+                "No water level is provided. Camera configuration reference water level is used.", stacklevel=2
+            )
         if planar:
-            self.plot_planar_surface(h=h, length=length, offset=offset, camera=camera, ax=ax, **planar_kwargs)
+            self.plot_planar_surface(
+                h=h, length=length, offset=offset, camera=camera, ax=ax, swap_y_coords=swap_y_coords, **planar_kwargs
+            )
         if bottom:
-            self.plot_bottom_surface(length=length, offset=offset, camera=camera, ax=ax, **bottom_kwargs)
+            self.plot_bottom_surface(
+                length=length, offset=offset, camera=camera, ax=ax, swap_y_coords=swap_y_coords, **bottom_kwargs
+            )
         if wetted:
-            self.plot_wetted_surface(h=h, camera=camera, ax=ax, **wetted_kwargs)
+            self.plot_wetted_surface(h=h, camera=camera, ax=ax, swap_y_coords=swap_y_coords, **wetted_kwargs)
         self.plot_cs(ax=ax, camera=camera, **cs_kwargs)
         ax.set_aspect("equal")
         return ax
 
-    def plot_cs(self, ax=None, camera=False, **kwargs):
+    def plot_cs(self, ax=None, camera=False, swap_y_coords: bool = False, **kwargs):
         """Plot the cross section.
 
         Parameters
@@ -754,6 +789,9 @@ class CrossSection:
             projection. If `camera=False`, an axes must be provided with `projection="3d"`.
         camera : bool, optional
             If set, return 2D projected polygon, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
         **kwargs : dict, optional
             keyword arguments used to make the line plot of the cross-section.
 
@@ -775,7 +813,7 @@ class CrossSection:
             if camera:
                 # extract pixel locations
                 pix = self.camera_config.project_points(
-                    list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=True
+                    list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=swap_y_coords
                 )
                 # map to x and y arrays
                 x, y = zip(*[(c[0], c[1]) for c in pix if np.isfinite(c[0])], strict=False)
@@ -785,7 +823,14 @@ class CrossSection:
         return p
 
     def plot_planar_surface(
-        self, h: float, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, **kwargs
+        self,
+        h: float,
+        length: float = 2.0,
+        offset: float = 0.0,
+        camera: bool = False,
+        swap_y_coords=False,
+        ax=None,
+        **kwargs,
     ) -> mpl.axes.Axes:
         """Plot the planar surface for a given water level.
 
@@ -800,6 +845,9 @@ class CrossSection:
             perpendicular offset of the waterline from the cross-section [m], by default 0.0
         camera : bool, optional
             If set, return 2D projected polygon, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
         ax : plt.axes, optional
             if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
             projection. If `camera=False`, an axes must be provided with `projection="3d"`.
@@ -811,7 +859,7 @@ class CrossSection:
         plt.axes
 
         """
-        surf = self.get_planar_surface(h=h, length=length, offset=offset, camera=camera)
+        surf = self.get_planar_surface(h=h, length=length, offset=offset, swap_y_coords=swap_y_coords, camera=camera)
         if camera:
             p = plot_helpers.plot_polygon(surf, ax=ax, label="surface", **kwargs)
         else:
@@ -819,7 +867,7 @@ class CrossSection:
         return p.axes
 
     def plot_bottom_surface(
-        self, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, **kwargs
+        self, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, swap_y_coords=False, **kwargs
     ) -> mpl.axes.Axes:
         """Plot the bottom surface for a given water level.
 
@@ -831,6 +879,9 @@ class CrossSection:
             perpendicular offset of the waterline from the cross-section [m], by default 0.0
         camera : bool, optional
             If set, return 2D projected polygon, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
         ax : plt.axes, optional
             if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
             projection. If `camera=False`, an axes must be provided with `projection="3d"`.
@@ -842,14 +893,14 @@ class CrossSection:
         plt.axes
 
         """
-        surf = self.get_bottom_surface(length=length, offset=offset, camera=camera)
+        surf = self.get_bottom_surface(length=length, offset=offset, camera=camera, swap_y_coords=swap_y_coords)
         if camera:
             p = plot_helpers.plot_polygon(surf, ax=ax, label="bottom", **kwargs)
         else:
             p = plot_helpers.plot_3d_polygon(surf, ax=ax, label="bottom", **kwargs)
         return p.axes
 
-    def plot_wetted_surface(self, h: float, camera: bool = False, ax=None, **kwargs):
+    def plot_wetted_surface(self, h: float, camera: bool = False, swap_y_coords=False, ax=None, **kwargs):
         """Plot the wetted surface for a given water level.
 
         Parameters
@@ -859,6 +910,9 @@ class CrossSection:
             `cross_section.camera_config.gcps["h_ref"]`.
         camera : bool, optional
             If set, return 2D projected polygon, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
         ax : plt.axes, optional
             if not provided, axes is setup (Default: None). If provided, user must take care to provide the correct
             projection. If `camera=False`, an axes must be provided with `projection="3d"`.
@@ -870,7 +924,7 @@ class CrossSection:
         plt.axes
 
         """
-        surf = self.get_wetted_surface(h=h, camera=camera)
+        surf = self.get_wetted_surface(h=h, camera=camera, swap_y_coords=swap_y_coords)
         if camera:
             p = plot_helpers.plot_polygon(surf, ax=ax, label="wetted", **kwargs)
         else:
@@ -883,6 +937,7 @@ class CrossSection:
         length: float = 0.5,
         offset: float = 0.0,
         camera: bool = False,
+        swap_y_coords: bool = False,
         add_text: bool = True,
         ax: Optional[mpl.axes.Axes] = None,
         **kwargs,
@@ -900,6 +955,9 @@ class CrossSection:
             perpendicular offset of the waterline from the cross-section [m], by default 0.0
         camera : bool, optional
             If set, return 2D projected polygon, by default False.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
         add_text : bool, optional
             Default True, determines whether to add a text label to the water level plot at the farthest line.
         ax : plt.axes, optional
@@ -918,13 +976,13 @@ class CrossSection:
                 ax = plt.axes()
             else:
                 ax = plt.axes(projection="3d")
-        lines = self.get_csl_line(h=h, length=length, offset=offset, camera=camera)
+        lines = self.get_csl_line(h=h, length=length, offset=offset, camera=camera, swap_y_coords=swap_y_coords)
         if camera:
             plot_f = plot_helpers.plot_line
         else:
             plot_f = plot_helpers.plot_3d_line
         for l in lines:
-            _ = plot_f(l, ax=ax, **kwargs)
+            _ = plot_f(l, ax=ax, zorder=1, **kwargs)
         if add_text and camera:
             points = self.get_csl_point(h=h, camera=False)  # find real-world points
             lens_position_xy = self.camera_config.estimate_lens_position()[0:2]
@@ -932,23 +990,10 @@ class CrossSection:
             points = self.get_csl_point(h=h, camera=True)  # find camera positions
             x, y = points[np.argmax(dists)].xy
             x, y = float(x[0]), float(y[0])
-            line = lines[np.argmax(dists)]
-            # angle of line
-            line_coords = list(line.coords)
-            x_diff, y_diff = line_coords[-1][0] - line_coords[0][0], line_coords[-1][1] - line_coords[0][1]
-            rotation = np.degrees(np.arctan2(y_diff, x_diff))
 
             # only plot text in 2D camera perspective at farthest point
             ax.text(
-                x,
-                y,
-                "{:1.3f}".format(h),
-                path_effects=PATH_EFFECTS,
-                ha="center",
-                va="bottom",
-                rotation=rotation,
-                size=12,
-                # bbox=dict(boxstyle="round", fc="w", ec="k", lw=1),
+                x, y, "{:1.3f} m.".format(h), path_effects=PATH_EFFECTS, ha="center", va="bottom", size=12, zorder=2
             )
         return ax
 

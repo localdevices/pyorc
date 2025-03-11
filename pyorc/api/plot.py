@@ -177,7 +177,13 @@ def _base_plot(plot_func):
                 if mode == "camera":
                     # # lens position is needed, so check this
                     ref._obj.transect.cross_section.plot(
-                        h=ref._obj.transect.h_a, ax=ax, camera=True, wetted=True, planar=False, bottom=False
+                        h=ref._obj.transect.h_a,
+                        ax=ax,
+                        camera=True,
+                        swap_y_coords=True,
+                        wetted=True,
+                        planar=False,
+                        bottom=False,
                     )
                     ref._obj.transect.cross_section.plot_water_level(
                         h=ref._obj.transect.h_a,
@@ -185,6 +191,7 @@ def _base_plot(plot_func):
                         linewidth=3.0,
                         ax=ax,
                         camera=True,
+                        swap_y_coords=True,
                         color="r",
                         label="water level",
                     )
