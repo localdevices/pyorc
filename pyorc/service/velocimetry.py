@@ -8,6 +8,7 @@ import subprocess
 from typing import Dict, Optional
 
 import click
+import geopandas as gpd
 import numpy as np
 import xarray as xr
 import yaml
@@ -272,7 +273,7 @@ class VelocityFlowProcessor(object):
             recipe["video"]["h_a"] = h_a
         elif cross is not None:
             logger.info("Cross section provided, and no water level set, water level will be estimated optically.")
-            gdf, _ = cli_utils.read_shape(fn=cross)
+            gdf = gpd.read_file(cross)
             cross_section = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
             if "water_level" not in recipe:
                 # make sure water_level is represented
@@ -377,9 +378,7 @@ class VelocityFlowProcessor(object):
         if "transect" in self.recipe:
             if self.cross_section_fn is not None:
                 # ensure that the cross section is available for transect measurements
-                print("SETTING GEOJSON FROM CROSS SECTION")
                 self.recipe["transect"]["transect_1"]["shapefile"] = self.cross_section_fn
-                print(self.recipe["transect"]["transect_1"]["shapefile"])
             self.transect(**self.recipe["transect"])
         if "plot" in self.recipe:
             self.plot(**self.recipe["plot"])
