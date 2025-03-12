@@ -33,10 +33,9 @@ def get_water_level(
     frames_options: Optional[Dict] = None,
     water_level_options: Optional[Dict] = None,
 ):
-    if water_level_options is None:
-        water_level_options = {}
-    if frames_options is None:
-        frames_options = {}
+    water_level_options = {} if water_level_options is None else water_level_options
+    frames_options = {} if frames_options is None else frames_options
+
     if method not in ["grayscale", "hue", "sat", "val"]:
         raise ValueError(
             f"Method {method} not supported for water level detection, choose one"

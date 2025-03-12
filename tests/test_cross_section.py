@@ -189,6 +189,26 @@ def test_init_water_level_from_gdf(gdf, camera_config):
     assert isinstance(cs, CrossSection)
 
 
+def test_cs_str(cs):
+    assert isinstance(cs.__str__(), str)
+
+
+def test_cs_repr(cs):
+    assert isinstance(cs.__repr__(), str)
+
+
+def test_get_cs_waterlevel(cs):
+    line = cs.get_cs_waterlevel(h=93.0)
+    assert isinstance(line, geometry.LineString)
+    assert line.has_z
+
+
+def test_get_cs_waterlevel_sz(cs):
+    line = cs.get_cs_waterlevel(h=93.0, sz=True)
+    assert isinstance(line, geometry.LineString)
+    assert line.has_z == False
+
+
 def test_get_csl_point(cs):
     h1 = 92.5
     h2 = 93.0
@@ -212,7 +232,7 @@ def test_get_csl_point_camera(cs):
     assert len(p2) == 2
 
 
-def test_get_csl_point_s(cs):
+def test_get_csl_point_l(cs):
     l1 = 5.0
     l2 = 8.0
     # both should get one point back as we are seeking a certain point left to right
@@ -220,6 +240,16 @@ def test_get_csl_point_s(cs):
     p2 = cs.get_csl_point(l=l2)
     assert len(p1) == 1
     assert len(p2) == 1
+
+
+def test_get_csl_point_no_h_l(cs):
+    with pytest.raises(ValueError, match="One of h or l"):
+        cs.get_csl_point()
+
+
+def test_get_csl_point_both_h_l(cs):
+    with pytest.raises(ValueError, match="Only one of h or l"):
+        cs.get_csl_point(h=93.0, l=5.0)
 
 
 def test_get_csl_line(cs):
@@ -333,9 +363,8 @@ def test_detect_wl_no_bank_specified(cs, img, bank="both"):
 
 
 def test_plot_cs_camera(cs):
-    ax = plt.axes()
+    ax = cs.plot(h=93, camera=True)
     cs.plot_cs(ax=ax, camera=True, marker=".", color="c", label="cross section")
-    cs.plot(h=93, ax=ax, camera=True)
     ax.set_xlim([0, cs.camera_config.width])
     ax.set_ylim([0, cs.camera_config.height])
     assert ax.has_data()
@@ -348,10 +377,15 @@ def test_plot_cs(cs):
     assert ax.has_data()
 
 
+def test_plot_no_h_no_ax(cs):
+    ax = cs.plot()
+    assert ax.has_data()
+
+
 def test_plot_water_level_camera(cs):
-    ax = plt.axes()
-    ax = cs.plot_water_level(h=93.0, length=2.0, ax=None, camera=True, color="r", label="water level")
-    cs.plot_cs(ax=ax, camera=True, marker=".", color="c", label="cross section")
+    p = cs.plot_cs(camera=True, marker=".", color="c", label="cross section")
+    ax = p[0].axes
+    cs.plot_water_level(h=93.0, length=2.0, ax=ax, camera=True, color="r", label="water level")
     assert ax.has_data()
 
 

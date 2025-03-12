@@ -293,21 +293,6 @@ def read_shape_as_gdf(fn=None, geojson=None, gdf=None):
 def read_shape(fn=None, geojson=None):
     """Read shapefile."""
     gdf, crs = read_shape_as_gdf(fn=fn, geojson=geojson)
-    # if fn is None and geojson is None:
-    #     raise click.UsageError("Either fn or geojson must be provided")
-    # if geojson:
-    #     if "crs" in geojson:
-    #         crs = geojson["crs"]["properties"]["name"]
-    #     else:
-    #         crs = None
-    #     gdf = gpd.GeoDataFrame().from_features(geojson, crs=crs)
-    # else:
-    #     gdf = gpd.read_file(fn)
-    # # check if all geometries are points
-    # assert all([isinstance(geom, Point) for geom in gdf.geometry]), (
-    #     "shapefile may only contain geometries of type " '"Point"'
-    # )
-    # use the first point to check if points are 2d or 3d
     if gdf.geometry[0].has_z:
         coords = [[p.x, p.y, p.z] for p in gdf.geometry]
     else:

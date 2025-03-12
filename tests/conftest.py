@@ -179,7 +179,8 @@ def cam_config(gcps, lens_position, lens_pars, corners):
         crs=32735,
     )
 
-@pytest.fixture
+
+@pytest.fixture()
 def cam_config_rvec_tvec(cam_config):
     # fix rvec and tvec
     cam_config.rvec = cam_config.pnp[1].tolist()
