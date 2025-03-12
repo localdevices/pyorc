@@ -79,7 +79,9 @@ docs = [
     "nbsphinx",
     "sphinx-gallery",
     "pandoc",
+    "pooch",
     "matplotlib",
+
 ]
 
 full = ["pyopenrivercam[extra,test,docs]"]
