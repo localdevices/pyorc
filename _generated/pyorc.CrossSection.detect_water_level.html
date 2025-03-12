@@ -1,0 +1,743 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>pyorc.CrossSection.detect_water_level &#8212; pyorc 0.8.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CrossSection.detect_water_level';</script>
+    <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyorc.Video" href="pyorc.Video.html" />
+    <link rel="prev" title="pyorc.CrossSection.plot_wetted_surface" href="pyorc.CrossSection.plot_wetted_surface.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/orc_logo_color.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.html">pyorc.CameraConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.bbox.html">pyorc.CameraConfig.bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.shape.html">pyorc.CameraConfig.shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.transform.html">pyorc.CameraConfig.transform</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html">pyorc.CameraConfig.set_bbox_from_corners</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_gcps.html">pyorc.CameraConfig.set_gcps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">pyorc.CameraConfig.set_lens_pars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_intrinsic.html">pyorc.CameraConfig.set_intrinsic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html">pyorc.CameraConfig.set_lens_calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">pyorc.CameraConfig.set_lens_position</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_dict.html">pyorc.CameraConfig.to_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_dict_str.html">pyorc.CameraConfig.to_dict_str</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_file.html">pyorc.CameraConfig.to_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_json.html">pyorc.CameraConfig.to_json</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.estimate_lens_position.html">pyorc.CameraConfig.estimate_lens_position</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_M.html">pyorc.CameraConfig.get_M</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_bbox.html">pyorc.CameraConfig.get_bbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_dist_shore.html">pyorc.CameraConfig.get_dist_shore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_dist_wall.html">pyorc.CameraConfig.get_dist_wall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_depth.html">pyorc.CameraConfig.get_depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_z_a.html">pyorc.CameraConfig.get_z_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.project_grid.html">pyorc.CameraConfig.project_grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.project_points.html">pyorc.CameraConfig.project_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.unproject_points.html">pyorc.CameraConfig.unproject_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.z_to_h.html">pyorc.CameraConfig.z_to_h</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.h_to_z.html">pyorc.CameraConfig.h_to_z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.estimate_lens_position.html">pyorc.CameraConfig.estimate_lens_position</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot.html">pyorc.CameraConfig.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot_bbox.html">pyorc.CameraConfig.plot_bbox</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.html">pyorc.CrossSection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_points.html">pyorc.CrossSection.cs_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_points_sz.html">pyorc.CrossSection.cs_points_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_linestring.html">pyorc.CrossSection.cs_linestring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_linestring_sz.html">pyorc.CrossSection.cs_linestring_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_angle.html">pyorc.CrossSection.cs_angle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.idx_closest_point.html">pyorc.CrossSection.idx_closest_point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.idx_farthest_point.html">pyorc.CrossSection.idx_farthest_point</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_cs_waterlevel.html">pyorc.CrossSection.get_cs_waterlevel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_csl_point.html">pyorc.CrossSection.get_csl_point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_csl_line.html">pyorc.CrossSection.get_csl_line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_csl_pol.html">pyorc.CrossSection.get_csl_pol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_bottom_surface.html">pyorc.CrossSection.get_bottom_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_planar_surface.html">pyorc.CrossSection.get_planar_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface.html">pyorc.CrossSection.get_wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_line_of_interest.html">pyorc.CrossSection.get_line_of_interest</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot.html">pyorc.CrossSection.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_cs.html">pyorc.CrossSection.plot_cs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_planar_surface.html">pyorc.CrossSection.plot_planar_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CrossSection.detect_water_level</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.camera_config.html">pyorc.Video.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.end_frame.html">pyorc.Video.end_frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.fps.html">pyorc.Video.fps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.frames.html">pyorc.Video.frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.freq.html">pyorc.Video.freq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.h_a.html">pyorc.Video.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.lazy.html">pyorc.Video.lazy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.mask.html">pyorc.Video.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.rotation.html">pyorc.Video.rotation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.stabilize.html">pyorc.Video.stabilize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.start_frame.html">pyorc.Video.start_frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.corners.html">pyorc.Video.corners</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.set_mask_from_exterior.html">pyorc.Video.set_mask_from_exterior</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frame.html">pyorc.Video.get_frame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frames.html">pyorc.Video.get_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_frames_chunk.html">pyorc.Video.get_frames_chunk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Video.get_ms.html">pyorc.Video.get_ms</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.html">pyorc.Frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.camera_config.html">pyorc.Frames.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.camera_shape.html">pyorc.Frames.camera_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.h_a.html">pyorc.Frames.h_a</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.minmax.html">pyorc.Frames.minmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.project.html">pyorc.Frames.project</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.get_piv.html">pyorc.Frames.get_piv</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.plot.html">pyorc.Frames.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.to_ani.html">pyorc.Frames.to_ani</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.to_video.html">pyorc.Frames.to_video</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.html">pyorc.Velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.camera_config.html">pyorc.Velocimetry.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.camera_shape.html">pyorc.Velocimetry.camera_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.h_a.html">pyorc.Velocimetry.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.is_velocimetry.html">pyorc.Velocimetry.is_velocimetry</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.minmax.html">pyorc.Velocimetry.mask.minmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.corr.html">pyorc.Velocimetry.mask.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.angle.html">pyorc.Velocimetry.mask.angle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.rolling.html">pyorc.Velocimetry.mask.rolling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.outliers.html">pyorc.Velocimetry.mask.outliers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.variance.html">pyorc.Velocimetry.mask.variance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.count.html">pyorc.Velocimetry.mask.count</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_mean.html">pyorc.Velocimetry.mask.window_mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_nan.html">pyorc.Velocimetry.mask.window_nan</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.mask.window_replace.html">pyorc.Velocimetry.mask.window_replace</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html">pyorc.Velocimetry.set_encoding</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.html">pyorc.Velocimetry.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.pcolormesh.html">pyorc.Velocimetry.plot.pcolormesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.scatter.html">pyorc.Velocimetry.plot.scatter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.streamplot.html">pyorc.Velocimetry.plot.streamplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.quiver.html">pyorc.Velocimetry.plot.quiver</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.html">pyorc.Transect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_config.html">pyorc.Transect.camera_config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_shape.html">pyorc.Transect.camera_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.h_a.html">pyorc.Transect.h_a</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">pyorc.Transect.vector_to_scalar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_xyz_perspective.html">pyorc.Transect.get_xyz_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_depth_perspective.html">pyorc.Transect.get_depth_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_bottom_surface_z_perspective.html">pyorc.Transect.get_bottom_surface_z_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_transect_perspective.html">pyorc.Transect.get_transect_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_wetted_perspective.html">pyorc.Transect.get_wetted_perspective</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_river_flow.html">pyorc.Transect.get_river_flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_q.html">pyorc.Transect.get_q</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.plot.html">pyorc.Transect.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.plot.quiver.html">pyorc.Transect.plot.quiver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.plot.scatter.html">pyorc.Transect.plot.scatter</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">pyorc.CrossS...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="pyorc-crosssection-detect-water-level">
+<h1>pyorc.CrossSection.detect_water_level<a class="headerlink" href="#pyorc-crosssection-detect-water-level" title="Permalink to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyorc.CrossSection.detect_water_level">
+<span class="sig-prename descclassname"><span class="pre">CrossSection.</span></span><span class="sig-name descname"><span class="pre">detect_water_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BANK_OPTIONS</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'far'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/pyorc/api/cross_section.html#CrossSection.detect_water_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CrossSection.detect_water_level" title="Permalink to this definition">#</a></dt>
+<dd><p>Detect water level optically from provided image.</p>
+<p>Water level detection is done by first detecting the water line along the cross-section by comparisons
+of distribution functions left and right of hypothesized water lines, and then looking up the water level
+associated with the water line location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>np.ndarray</em>) – image (uint8) used to estimate water level from.</p></li>
+<li><p><strong>bank</strong> (<em>Literal</em><em>[</em><em>&quot;far&quot;</em><em>, </em><em>&quot;near&quot;</em><em>, </em><em>&quot;both&quot;</em><em>]</em><em>, </em><em>optional</em>) – select from which bank to detect the water level. Use this if camera is positioned in a way that only
+one shore is clearly distinguishable and not obscured. Typically you will use “far” if the camera is
+positioned on one bank, aimed perpendicular to the flow. Use “near” if not the full cross section is
+visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and
+approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based
+on the best estimate from both banks.</p></li>
+<li><p><strong>bin_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of bins for histogram calculation of the provided image intensities, default 5.</p></li>
+<li><p><strong>length</strong> (<em>float</em><em>, </em><em>optional</em>) – length of the waterline [m], by default 2.0</p></li>
+<li><p><strong>padding</strong> (<em>float</em><em>, </em><em>optional</em>) – amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn
+left and right of hypothesized water line at -padding and +padding.</p></li>
+<li><p><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – perpendicular offset of the waterline from the cross-section [m], by default 0.0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="pyorc.CrossSection.plot_wetted_surface.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">pyorc.CrossSection.plot_wetted_surface</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="pyorc.Video.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">pyorc.Video</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.CrossSection.detect_water_level"><code class="docutils literal notranslate"><span class="pre">CrossSection.detect_water_level()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/_generated/pyorc.CrossSection.detect_water_level.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Rainbow Sensing.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

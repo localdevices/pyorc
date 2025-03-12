@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.frames &#8212; pyorc 0.7.0 documentation</title>
+    <title>pyorc.api.frames &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -407,31 +407,31 @@ document.write(`
   <h1>Source code for pyorc.api.frames</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Frames methods for pyorc.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">cv2</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">from</span> <span class="nn">ffpiv</span> <span class="kn">import</span> <span class="n">window</span>
-<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ffpiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">window</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.animation</span><span class="w"> </span><span class="kn">import</span> <span class="n">FuncAnimation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">pyorc</span> <span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">project</span>
-<span class="kn">from</span> <span class="nn">pyorc.velocimetry</span> <span class="kn">import</span> <span class="n">ffpiv</span><span class="p">,</span> <span class="n">openpiv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">project</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.velocimetry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ffpiv</span><span class="p">,</span> <span class="n">openpiv</span>
 
-<span class="kn">from</span> <span class="nn">.orcbase</span> <span class="kn">import</span> <span class="n">ORCBase</span>
-<span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">_frames_plot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.orcbase</span><span class="w"> </span><span class="kn">import</span> <span class="n">ORCBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">_frames_plot</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Frames&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Frames"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.html#pyorc.Frames">[docs]</a><span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataarray_accessor</span><span class="p">(</span><span class="s2">&quot;frames&quot;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Frames</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Frames</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Frames functionalities that can be applied on xr.DataArray.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Frames.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.html#pyorc.Frames.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.html#pyorc.Frames.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a frames `xr.DataArray`.</span>
 
 <span class="sd">        Parameters</span>
@@ -442,7 +442,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Frames</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get_piv_coords</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_piv_coords</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">window_size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">search_area_size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">overlap</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get Particle Image Velocimetry (PIV) coordinates and mesh grid projections.</span>
@@ -509,11 +509,11 @@ document.write(`
         <span class="n">mesh_coords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;xp&quot;</span><span class="p">:</span> <span class="n">xp</span><span class="p">,</span> <span class="s2">&quot;yp&quot;</span><span class="p">:</span> <span class="n">yp</span><span class="p">,</span> <span class="s2">&quot;xs&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="p">,</span> <span class="s2">&quot;ys&quot;</span><span class="p">:</span> <span class="n">ys</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">lons</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">lats</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">coords</span><span class="p">,</span> <span class="n">mesh_coords</span>
 
-<div class="viewcode-block" id="Frames.get_piv"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.get_piv.html#pyorc.Frames.get_piv">[docs]</a>    <span class="k">def</span> <span class="nf">get_piv</span><span class="p">(</span>
+<div class="viewcode-block" id="Frames.get_piv"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.get_piv.html#pyorc.Frames.get_piv">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_piv</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">window_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overlap</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">engine</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openpiv&quot;</span><span class="p">,</span>
+        <span class="n">engine</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;numba&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform PIV computation on projected frames.</span>
@@ -569,10 +569,10 @@ document.write(`
         <span class="n">coords</span><span class="p">,</span> <span class="n">mesh_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_piv_coords</span><span class="p">(</span><span class="n">window_size</span><span class="p">,</span> <span class="n">search_area_size</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span>
         <span class="c1"># provide kwargs for OpenPIV analysis</span>
         <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;openpiv&quot;</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">warnings</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s1">&#39;&quot;openpiv&quot; is currently the default engine, but it will be replaced by &quot;numba&quot; in a future release.&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;&quot;openpiv&quot; is deprecated, please use &quot;numba&quot; or &quot;numpy&quot; as engine&#39;</span><span class="p">,</span>
                 <span class="ne">DeprecationWarning</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
@@ -607,7 +607,7 @@ document.write(`
         <span class="n">ds</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">set_encoding</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ds</span></div>
 
-<div class="viewcode-block" id="Frames.project"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.project.html#pyorc.Frames.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span>
+<div class="viewcode-block" id="Frames.project"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.project.html#pyorc.Frames.project">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">project</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="s2">&quot;numpy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reducer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Project frames into a projected frames object, with information from the camera_config attr.</span>
@@ -683,7 +683,7 @@ document.write(`
         <span class="n">da_proj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="n">cc</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">da_proj</span></div>
 
-    <span class="k">def</span> <span class="nf">landmask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dilate_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">landmask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dilate_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attempt to mask out land from water.</span>
 
 <span class="sd">        This is done by assuming that the time standard deviation over mean of land is much</span>
@@ -725,7 +725,7 @@ document.write(`
         <span class="c1"># make mask 3-dimensional</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">*</span> <span class="n">mask</span>
 
-<div class="viewcode-block" id="Frames.normalize"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.normalize.html#pyorc.Frames.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.normalize"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.normalize.html#pyorc.Frames.normalize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove the temporal mean of sampled frames.</span>
 
 <span class="sd">        This is typically used to remove non-moving background from foreground, and helps to increase contrast when</span>
@@ -754,7 +754,7 @@ document.write(`
         <span class="n">frames_norm</span> <span class="o">=</span> <span class="p">((</span><span class="n">frames_reduce</span> <span class="o">-</span> <span class="n">frames_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">frames_max</span> <span class="o">-</span> <span class="n">frames_min</span><span class="p">)</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frames_norm</span></div>
 
-<div class="viewcode-block" id="Frames.edge_detect"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect">[docs]</a>    <span class="k">def</span> <span class="nf">edge_detect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wdw_1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wdw_2</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.edge_detect"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.edge_detect.html#pyorc.Frames.edge_detect">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">edge_detect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wdw_1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wdw_2</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Highlight edges of frame intensities, using a band convolution filter.</span>
 
 <span class="sd">        The filter uses two slightly differently convolved images and computes their difference to detect edges.</span>
@@ -790,7 +790,7 @@ document.write(`
             <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Frames.minmax"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.minmax.html#pyorc.Frames.minmax">[docs]</a>    <span class="k">def</span> <span class="nf">minmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">Inf</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">Inf</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.minmax"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.minmax.html#pyorc.Frames.minmax">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">minmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">Inf</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">Inf</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Minimum / maximum intensity filter.</span>
 
 <span class="sd">        All pixels will be thresholded to a minimum and maximum value.</span>
@@ -810,7 +810,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="nb">max</span><span class="p">),</span> <span class="nb">min</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Frames.reduce_rolling"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_rolling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.reduce_rolling"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reduce_rolling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a rolling mean from the frames.</span>
 
 <span class="sd">        Very slow method, so in most cases, it is recommended to use Frames.normalize instead.</span>
@@ -838,7 +838,7 @@ document.write(`
         <span class="n">frames_norm</span> <span class="o">=</span> <span class="n">frames_norm</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">roll_mean</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frames_norm</span></div>
 
-<div class="viewcode-block" id="Frames.time_diff"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.time_diff.html#pyorc.Frames.time_diff">[docs]</a>    <span class="k">def</span> <span class="nf">time_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thres</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.time_diff"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.time_diff.html#pyorc.Frames.time_diff">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">time_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thres</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a difference over time.</span>
 
 <span class="sd">        Method subtracts frame 1 from frame 2, frame 2 from frame 3, etcetera.</span>
@@ -868,7 +868,7 @@ document.write(`
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">frames_diff</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frames_diff</span></div>
 
-<div class="viewcode-block" id="Frames.smooth"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.smooth.html#pyorc.Frames.smooth">[docs]</a>    <span class="k">def</span> <span class="nf">smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.smooth"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.smooth.html#pyorc.Frames.smooth">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Smooth each frame with a Gaussian kernel.</span>
 
 <span class="sd">        Parameters</span>
@@ -899,7 +899,7 @@ document.write(`
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">f</span></div>
 
-<div class="viewcode-block" id="Frames.to_ani"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani">[docs]</a>    <span class="k">def</span> <span class="nf">to_ani</span><span class="p">(</span>
+<div class="viewcode-block" id="Frames.to_ani"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_ani</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fn</span><span class="p">,</span>
         <span class="n">figure_kwargs</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">FIGURE_ARGS</span><span class="p">,</span>
@@ -929,12 +929,12 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">():</span>
             <span class="c1"># set imshow data to values in the first frame</span>
             <span class="n">im</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">ax</span>  <span class="c1"># line,</span>
 
-        <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">animate</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
             <span class="c1"># set imshow data to values in the current frame</span>
             <span class="n">im</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">ax</span>
@@ -954,7 +954,7 @@ document.write(`
         <span class="n">anim</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">animate</span><span class="p">,</span> <span class="n">init_func</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="n">frames</span><span class="p">,</span> <span class="o">**</span><span class="n">anim_kwargs</span><span class="p">)</span>
         <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">**</span><span class="n">video_kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Frames.to_video"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_video.html#pyorc.Frames.to_video">[docs]</a>    <span class="k">def</span> <span class="nf">to_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">video_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.to_video"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_video.html#pyorc.Frames.to_video">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">video_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write frames to a video file without any layout.</span>
 
 <span class="sd">        Frames from the input object are written into a video file. The format and frame</span>
@@ -971,20 +971,10 @@ document.write(`
 <span class="sd">        fps : float, optional</span>
 <span class="sd">            Frames per second for the output video. If not specified, it is estimated</span>
 <span class="sd">            from the time differences in the input frames.</span>
+<span class="sd">        progress : bool, optional</span>
+<span class="sd">            Display a progress bar while writing the video frames. (default: True)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># &quot;&quot;&quot;Write frames to a video file without any layout.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Parameters</span>
-        <span class="c1"># ----------</span>
-        <span class="c1"># fn : str</span>
-        <span class="c1">#     Path to output file</span>
-        <span class="c1"># video_format : cv2.VideoWriter_fourcc, optional</span>
-        <span class="c1">#     A VideoWriter preference, default is cv2.VideoWriter_fourcc(*&quot;mp4v&quot;)</span>
-        <span class="c1"># fps : float, optional</span>
-        <span class="c1">#     Frames per second, if not provided, derived from original video</span>
-        <span class="c1">#</span>
-        <span class="c1"># &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">video_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># set to a default</span>
             <span class="n">video_format</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="s2">&quot;mp4v&quot;</span><span class="p">)</span>
@@ -994,20 +984,42 @@ document.write(`
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">video_format</span><span class="p">,</span> <span class="n">fps</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
-        <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s2">&quot;Writing frames&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pbar</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2BGR</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span>
-                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="c1"># make a scale between 0 and 255, only with first frame</span>
-                    <span class="n">img_min</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">img_max</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="p">((</span><span class="n">img</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">img_max</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">)))</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_GRAY2BGR</span><span class="p">)</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">),</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="p">(</span><span class="n">progress</span><span class="p">))</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s2">&quot;Writing frames&quot;</span><span class="p">)</span>
+            <span class="n">first_frame</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">n_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">chunksize</span><span class="p">):</span>
+                <span class="n">frames_chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">n_start</span><span class="p">,</span> <span class="n">n_start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">chunksize</span><span class="p">))</span>
+                <span class="n">frames_chunk</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>  <span class="c1"># load in memory only once</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frames_chunk</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2BGR</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">img</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">values</span>
+                        <span class="k">if</span> <span class="n">first_frame</span><span class="p">:</span>
+                            <span class="n">first_frame</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="c1"># make a scale between 0 and 255, only with first frame</span>
+                            <span class="n">img_min</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                            <span class="n">img_max</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="p">((</span><span class="n">img</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">img_max</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">)))</span>
+                        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_GRAY2BGR</span><span class="p">)</span>
+
+                    <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="c1"># pbar = tqdm(self._obj, position=0, leave=True)</span>
+        <span class="c1"># pbar.set_description(&quot;Writing frames&quot;)</span>
+        <span class="c1"># for n, f in enumerate(pbar):</span>
+        <span class="c1">#     if len(f.shape) == 3:</span>
+        <span class="c1">#         img = cv2.cvtColor(np.uint8(f.values), cv2.COLOR_RGB2BGR)</span>
+        <span class="c1">#     else:</span>
+        <span class="c1">#         img = f.values</span>
+        <span class="c1">#         if n == 0:</span>
+        <span class="c1">#             # make a scale between 0 and 255, only with first frame</span>
+        <span class="c1">#             img_min = img.min(axis=0).min(axis=0)</span>
+        <span class="c1">#             img_max = img.max(axis=0).max(axis=0)</span>
+        <span class="c1">#         img = np.uint8(255 * ((img - img_min) / (img_max - img_min)))</span>
+        <span class="c1">#         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)</span>
+        <span class="c1">#     out.write(img)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
 
     <span class="n">plot</span> <span class="o">=</span> <span class="n">_frames_plot</span></div>
@@ -1052,7 +1064,7 @@ document.write(`
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

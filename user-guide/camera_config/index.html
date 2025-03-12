@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Camera configurations &#8212; pyorc 0.7.0 documentation</title>
+    <title>Camera configurations &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -368,6 +368,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../api.html">Application Programming Interface</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Camera configurations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../video/index.html">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross_section/index.html">Cross sections and water level detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../frames/index.html">Frames</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../velocimetry/index.html">Velocimetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../transect/index.html">Transects</a></li>
@@ -521,7 +522,7 @@ and geographically aware. You can also add a camera configuration, stored in a J
 Once this is done, the video has added intelligence about the real-world, and you can orthorectify its frames.
 Below a simple example is shown, where only the expected size of the objective in <code class="docutils literal notranslate"><span class="pre">height</span></code> and <code class="docutils literal notranslate"><span class="pre">width</span></code> is provided.</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
 <span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">1080</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1920</span><span class="p">)</span>
 <span class="n">cam_config</span>
 
@@ -643,7 +644,7 @@ API</label><div class="sd-tab-content docutils">
 <p id="camera-config-api-geo">Below, we show what the configuration would look like if we would add the Rijksdriehoek projection to our camera
 configuration. You can see that the code is converted into a Well-Known-Text format, so that it can also easily be
 stored in a generic text (json) format.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
 <span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CameraConfig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">1080</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1920</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">32631</span><span class="p">)</span>
 <span class="n">cam_config</span>
 
@@ -1230,7 +1231,7 @@ API</label><div class="sd-tab-content docutils">
 <p>Storing a camera configuration within the API is as simple as calling <code class="docutils literal notranslate"><span class="pre">to_file</span></code>. Camera configurations can
 also be loaded back in memory using <code class="docutils literal notranslate"><span class="pre">pyorc.load_camera_config</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># cam_config was generated before from our examples/ngwerere folder</span>
-<span class="kn">import</span> <span class="nn">pyorc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
 <span class="n">cam_config</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">&quot;ngwerere_cam_config.json&quot;</span><span class="p">)</span>
 <span class="c1"># load the configuration back in memory</span>
 <span class="n">cam_config2</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">load_camera_config</span><span class="p">(</span><span class="s2">&quot;ngwerere_cam_config.json&quot;</span><span class="p">)</span>
@@ -1386,7 +1387,7 @@ the camera configuration is based, extract one frame, and plot it within one axe
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

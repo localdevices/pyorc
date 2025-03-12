@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Velocimetry &#8212; pyorc 0.7.0 documentation</title>
+    <title>Velocimetry &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -368,6 +368,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../api.html">Application Programming Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../camera_config/index.html">Camera configurations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../video/index.html">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross_section/index.html">Cross sections and water level detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../frames/index.html">Frames</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Velocimetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../transect/index.html">Transects</a></li>
@@ -569,7 +570,7 @@ the new (&gt;=0.7.0) numba and numpy engines, you can keep track of progress wit
 automatically displayed during the processing.</p>
 <p>If you wish to load your results into memory after having stored it in a previous session, you can simply
 use <code class="docutils literal notranslate"><span class="pre">xarray</span></code> functionality to do so.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="n">piv</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;piv_results.nc&quot;</span><span class="p">)</span>
 <span class="n">piv</span>
 </pre></div>
@@ -893,7 +894,7 @@ is also removed. This is meant to remove isolated values. Also described in <a c
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

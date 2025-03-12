@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.CameraConfig.get_camera_coords &#8212; pyorc 0.7.0 documentation</title>
+    <title>pyorc.CrossSection.cs_angle &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -46,12 +46,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CameraConfig.get_camera_coords';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CrossSection.cs_angle';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyorc.CameraConfig.get_dist_shore" href="pyorc.CameraConfig.get_dist_shore.html" />
-    <link rel="prev" title="pyorc.CameraConfig.get_bbox" href="pyorc.CameraConfig.get_bbox.html" />
+    <link rel="next" title="pyorc.CrossSection.idx_closest_point" href="pyorc.CrossSection.idx_closest_point.html" />
+    <link rel="prev" title="pyorc.CrossSection.cs_linestring_sz" href="pyorc.CrossSection.cs_linestring_sz.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -382,10 +382,10 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_file.html">pyorc.CameraConfig.to_file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.to_json.html">pyorc.CameraConfig.to_json</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.estimate_lens_position.html">pyorc.CameraConfig.estimate_lens_position</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_M.html">pyorc.CameraConfig.get_M</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_bbox.html">pyorc.CameraConfig.get_bbox</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CameraConfig.get_camera_coords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_dist_shore.html">pyorc.CameraConfig.get_dist_shore</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_dist_wall.html">pyorc.CameraConfig.get_dist_wall</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.get_depth.html">pyorc.CameraConfig.get_depth</a></li>
@@ -400,6 +400,37 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot.html">pyorc.CameraConfig.plot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot_bbox.html">pyorc.CameraConfig.plot_bbox</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.html">pyorc.CrossSection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_points.html">pyorc.CrossSection.cs_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_points_sz.html">pyorc.CrossSection.cs_points_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_linestring.html">pyorc.CrossSection.cs_linestring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_linestring_sz.html">pyorc.CrossSection.cs_linestring_sz</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CrossSection.cs_angle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.idx_closest_point.html">pyorc.CrossSection.idx_closest_point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.idx_farthest_point.html">pyorc.CrossSection.idx_farthest_point</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_cs_waterlevel.html">pyorc.CrossSection.get_cs_waterlevel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_csl_point.html">pyorc.CrossSection.get_csl_point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_csl_line.html">pyorc.CrossSection.get_csl_line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_csl_pol.html">pyorc.CrossSection.get_csl_pol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_bottom_surface.html">pyorc.CrossSection.get_bottom_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_planar_surface.html">pyorc.CrossSection.get_planar_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface.html">pyorc.CrossSection.get_wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_line_of_interest.html">pyorc.CrossSection.get_line_of_interest</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot.html">pyorc.CrossSection.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_cs.html">pyorc.CrossSection.plot_cs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_planar_surface.html">pyorc.CrossSection.plot_planar_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
@@ -546,7 +577,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">pyorc.Camera...</li>
+    <li class="breadcrumb-item active" aria-current="page">pyorc.CrossS...</li>
   </ul>
 </nav>
 </div>
@@ -563,23 +594,13 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="pyorc-cameraconfig-get-camera-coords">
-<h1>pyorc.CameraConfig.get_camera_coords<a class="headerlink" href="#pyorc-cameraconfig-get-camera-coords" title="Permalink to this heading">#</a></h1>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyorc.CameraConfig.get_camera_coords">
-<span class="sig-prename descclassname"><span class="pre">CameraConfig.</span></span><span class="sig-name descname"><span class="pre">get_camera_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/cameraconfig.html#CameraConfig.get_camera_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CameraConfig.get_camera_coords" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert real-world coordinates into camera coordinates.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>points</strong> (<em>array-like list</em><em> (of </em><em>lists</em><em>)</em>) – [x, y, z] real-world coordinates</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>cam_points</strong> – [x, y, z] camera coordinates</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray (of points)</p>
-</dd>
-</dl>
+  <section id="pyorc-crosssection-cs-angle">
+<h1>pyorc.CrossSection.cs_angle<a class="headerlink" href="#pyorc-crosssection-cs-angle" title="Permalink to this heading">#</a></h1>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyorc.CrossSection.cs_angle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CrossSection.</span></span><span class="sig-name descname"><span class="pre">cs_angle</span></span><a class="headerlink" href="#pyorc.CrossSection.cs_angle" title="Permalink to this definition">#</a></dt>
+<dd><p>Average angle orientation that cross-section makes in geographical space.</p>
+<p>Zero means left to right direction, positive means counter-clockwise, negative means clockwise.</p>
 </dd></dl>
 
 </section>
@@ -595,20 +616,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pyorc.CameraConfig.get_bbox.html"
+       href="pyorc.CrossSection.cs_linestring_sz.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pyorc.CameraConfig.get_bbox</p>
+        <p class="prev-next-title">pyorc.CrossSection.cs_linestring_sz</p>
       </div>
     </a>
     <a class="right-next"
-       href="pyorc.CameraConfig.get_dist_shore.html"
+       href="pyorc.CrossSection.idx_closest_point.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyorc.CameraConfig.get_dist_shore</p>
+        <p class="prev-next-title">pyorc.CrossSection.idx_closest_point</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -630,14 +651,14 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.CameraConfig.get_camera_coords"><code class="docutils literal notranslate"><span class="pre">CameraConfig.get_camera_coords()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.CrossSection.cs_angle"><code class="docutils literal notranslate"><span class="pre">CrossSection.cs_angle</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/_generated/pyorc.CameraConfig.get_camera_coords.rst.txt">
+    <a href="../_sources/_generated/pyorc.CrossSection.cs_angle.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
@@ -668,7 +689,7 @@ document.write(`
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

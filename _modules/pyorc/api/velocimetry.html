@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.velocimetry &#8212; pyorc 0.7.0 documentation</title>
+    <title>pyorc.api.velocimetry &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -405,38 +405,43 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for pyorc.api.velocimetry</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">rasterio</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="sd">&quot;&quot;&quot;Velocimetry functionalities that can be applied on `xarray.Dataset`.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
-<span class="kn">from</span> <span class="nn">.orcbase</span> <span class="kn">import</span> <span class="n">ORCBase</span>
-<span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">_Velocimetry_PlotMethods</span>
-<span class="kn">from</span> <span class="nn">.mask</span> <span class="kn">import</span> <span class="n">_Velocimetry_MaskMethods</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">const</span>
-<span class="kn">from</span> <span class="nn">xarray.core</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">helpers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.api.mask</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Velocimetry_MaskMethods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.api.orcbase</span><span class="w"> </span><span class="kn">import</span> <span class="n">ORCBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.api.plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Velocimetry_PlotMethods</span>
 
 
 <div class="viewcode-block" id="Velocimetry"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.html#pyorc.Velocimetry">[docs]</a><span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;velocimetry&quot;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Velocimetry</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Velocimetry functionalities that can be applied on ``xarray.Dataset``&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="Velocimetry.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.html#pyorc.Velocimetry.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a velocimetry ``xarray.Dataset``</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Velocimetry</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Velocimetry functionalities that can be applied on `xarray.Dataset`.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Velocimetry.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.html#pyorc.Velocimetry.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a velocimetry `xarray.Dataset`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        xarray_obj: xr.Dataset</span>
 <span class="sd">            velocimetry data fields (from ``pyorc.Frames.get_piv``)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Velocimetry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_velocimetry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks if the data contained in the object seems to be velocimetry data by checking naming of dims</span>
-<span class="sd">        and available variables.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_velocimetry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the data contained in the object seems to be velocimetry data.</span>
+
+<span class="sd">        Done by checking naming of dims and available variables.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -459,33 +464,38 @@ document.write(`
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables missing: </span><span class="si">{</span><span class="n">missed_vars</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="c1"># check for available metadata</span>
-        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s2">&quot;camera_config&quot;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s2">&quot;camera_config&quot;</span><span class="p">)):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;camera_config metadata is missing&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="n">mask</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">UncachedAccessor</span><span class="p">(</span><span class="n">_Velocimetry_MaskMethods</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Velocimetry.get_transect"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect">[docs]</a>    <span class="k">def</span> <span class="nf">get_transect</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">v_eff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">xs</span><span class="o">=</span><span class="s2">&quot;xs&quot;</span><span class="p">,</span>
-            <span class="n">ys</span><span class="o">=</span><span class="s2">&quot;ys&quot;</span><span class="p">,</span>
-            <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">wdw_x_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">wdw_x_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">wdw_y_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">wdw_y_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">rolling</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-            <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]</span>
+<div class="viewcode-block" id="Velocimetry.get_transect"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_transect</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">s</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">v_eff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">xs</span><span class="o">=</span><span class="s2">&quot;xs&quot;</span><span class="p">,</span>
+        <span class="n">ys</span><span class="o">=</span><span class="s2">&quot;ys&quot;</span><span class="p">,</span>
+        <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wdw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">wdw_x_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wdw_x_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wdw_y_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wdw_y_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">rolling</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">quantiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate all variables to supplied x and y coordinates of a cross section. This function assumes that the</span>
-<span class="sd">        grid can be rotated and that xs and ys are supplied following the projected coordinates supplied in</span>
-<span class="sd">        &quot;xs&quot; and &quot;ys&quot; coordinate variables in ds. x-coordinates and y-coordinates that fall outside the</span>
-<span class="sd">        domain of ds, are still stored in the result for further interpolation or extrapolation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate all variables to supplied x and y coordinates of a cross-section.</span>
+
+<span class="sd">        This function assumes that the grid can be rotated and that xs and ys are supplied following the projected</span>
+<span class="sd">        coordinates supplied in &quot;xs&quot; and &quot;ys&quot; coordinate variables in ds. x-coordinates and y-coordinates that fall</span>
+<span class="sd">        outside the domain of ds, are still stored in the result for further interpolation or extrapolation.</span>
 <span class="sd">        Original coordinate values supplied are stored in coordinates &quot;x&quot;, &quot;y&quot; and (if supplied) &quot;z&quot;.</span>
 <span class="sd">        Time series are transformed to set quantiles.</span>
 
@@ -537,15 +547,19 @@ document.write(`
 <span class="sd">        -------</span>
 <span class="sd">        ds_points: xr.Dataset</span>
 <span class="sd">            interpolated data at the supplied x and y coordinates over quantiles</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">quantiles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">quantiles</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]</span>
         <span class="n">transform</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">affine_from_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">xs</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">ys</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># transform coordinates of cross-section</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">helpers</span><span class="o">.</span><span class="n">xyz_transform</span><span class="p">(</span>
-                <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))),</span>
-                <span class="n">crs_from</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
-                <span class="n">crs_to</span><span class="o">=</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-            <span class="p">))</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">helpers</span><span class="o">.</span><span class="n">xyz_transform</span><span class="p">(</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span> <span class="n">crs_from</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">crs_to</span><span class="o">=</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">distance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -559,10 +573,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;cols&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;rows&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">coli</span><span class="p">),</span> <span class="p">([</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">rowi</span><span class="p">)</span>
         <span class="c1"># compute rows and cols locations of coordinates (x, y)</span>
         <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rowcol</span><span class="p">(</span>
-            <span class="n">transform</span><span class="p">,</span>
-            <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-            <span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-            <span class="n">op</span><span class="o">=</span><span class="nb">float</span>
+            <span class="n">transform</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">op</span><span class="o">=</span><span class="nb">float</span>
         <span class="p">)</span>  <span class="c1"># ensure we get rows and columns in fractions instead of whole numbers</span>
         <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
 
@@ -582,13 +593,7 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># collect points within a stride, collate and analyze for outliers</span>
             <span class="n">ds_wdw</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">stack_window</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span>
-                <span class="n">wdw</span><span class="o">=</span><span class="n">wdw</span><span class="p">,</span>
-                <span class="n">wdw_x_min</span><span class="o">=</span><span class="n">wdw_x_min</span><span class="p">,</span>
-                <span class="n">wdw_x_max</span><span class="o">=</span><span class="n">wdw_x_max</span><span class="p">,</span>
-                <span class="n">wdw_y_min</span><span class="o">=</span><span class="n">wdw_y_min</span><span class="p">,</span>
-                <span class="n">wdw_y_max</span><span class="o">=</span><span class="n">wdw_y_max</span>
-
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">wdw</span><span class="o">=</span><span class="n">wdw</span><span class="p">,</span> <span class="n">wdw_x_min</span><span class="o">=</span><span class="n">wdw_x_min</span><span class="p">,</span> <span class="n">wdw_x_max</span><span class="o">=</span><span class="n">wdw_x_max</span><span class="p">,</span> <span class="n">wdw_y_min</span><span class="o">=</span><span class="n">wdw_y_min</span><span class="p">,</span> <span class="n">wdw_y_max</span><span class="o">=</span><span class="n">wdw_y_max</span>
             <span class="p">)</span>
             <span class="c1"># use the median (not mean) to prevent a large influence of serious outliers</span>
             <span class="n">missing_tolerance</span> <span class="o">=</span> <span class="n">ds_wdw</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;stride&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tolerance</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds_wdw</span><span class="o">.</span><span class="n">stride</span><span class="p">)</span>
@@ -606,7 +611,8 @@ document.write(`
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">ds_points</span><span class="p">[</span><span class="s2">&quot;v_x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;No valid velocimetry points found over bathymetry. Check if the bathymetry is within the camera &quot;</span>
-                <span class="s2">&quot;objective or anything is visible in objective. &quot;</span>
+                <span class="s2">&quot;objective or anything is visible in objective. &quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="c1"># add the xcoords and ycoords (and zcoords if available) originally assigned so that even points outside the</span>
         <span class="c1"># grid covered by ds can be found back from this dataset</span>
@@ -622,7 +628,7 @@ document.write(`
         <span class="n">ds_points</span><span class="p">[</span><span class="s2">&quot;v_dir&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;standard_name&quot;</span><span class="p">:</span> <span class="s2">&quot;river_flow_angle&quot;</span><span class="p">,</span>
             <span class="s2">&quot;long_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Angle of river flow in radians from North&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;rad&quot;</span>
+            <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;rad&quot;</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="c1"># convert to a Transect object</span>
         <span class="n">ds_points</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">ds_points</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">ds_points</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
@@ -639,18 +645,17 @@ document.write(`
     <span class="c1"># add .plot as group of methods, UncachedAccessor ensures that Velocimetry is passed as object</span>
     <span class="n">plot</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">UncachedAccessor</span><span class="p">(</span><span class="n">_Velocimetry_PlotMethods</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Velocimetry.set_encoding"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding">[docs]</a>    <span class="k">def</span> <span class="nf">set_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc_pars</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">ENCODING_PARAMS</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set encoding parameters for all typical variables in a velocimetry dataset. This reduces the required storage</span>
-<span class="sd">        for this dataset significantly, when stored to disk in e.g. a netcdf file using ``xarray.Dataset.to_netcdf``.</span>
+<div class="viewcode-block" id="Velocimetry.set_encoding"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc_pars</span><span class="o">=</span><span class="n">const</span><span class="o">.</span><span class="n">ENCODING_PARAMS</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set encoding parameters for all typical variables in a velocimetry dataset.</span>
+
+<span class="sd">        This reduces the required storage for this dataset significantly, when stored to disk in e.g. a netcdf file</span>
+<span class="sd">        using ``xarray.Dataset.to_netcdf``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        enc_pars : dict of dicts, optional</span>
 <span class="sd">            per variable, a dict containing encoding parameters. When called without input, a standard set of encoding</span>
 <span class="sd">            parameters is used that compresses well. (Default value = const.ENCODING_PARAMS)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">const</span><span class="o">.</span><span class="n">ENCODE_VARS</span><span class="p">:</span>
@@ -696,7 +701,7 @@ document.write(`
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Setup a camera configuration for processing a single video &#8212; pyorc 0.7.0 documentation</title>
+    <title>Setup a camera configuration for processing a single video &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -138,7 +138,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -373,6 +373,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="03_Plotting_and_masking_velocimetry_results.html">Immersive plotting and analyzing results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">Obtain a discharge measurement over a cross section</a></li>
 <li class="toctree-l1"><a class="reference internal" href="05_Camera_calibration.html">Camera calibration with chessboard pattern</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Estimating_water_levels_optically.html">Optical water level detection with a cross section</a></li>
 </ul>
 </div>
 </nav></div>
@@ -434,17 +435,22 @@ document.write(`
 <h1>Setup a camera configuration for processing a single video<a class="headerlink" href="#Setup-a-camera-configuration-for-processing-a-single-video" title="Permalink to this heading">#</a></h1>
 <p>To process a video, a camera configuration is needed. The camera configuration makes the processing aware how to project the movie’s frames to an orthorectified plane with real-world distances, and a user defined area of interest and processing resolution. It also tells the processing what the water level during the survey video is, so that the depth can be estimated, once bathymetry cross-sections are added. The process for a fixed video setup that takes videos with changing water level
 conditions is slightly more advanced. Therefore we here start with the assumption that you walk to a stream with a smart phone and a GPS (RTK) device or a spirit level instrument, record control points and record a short video for just one single observation.</p>
-<p>In this notebook, we will extract one frame from the survey video to grab the control points. For this example, field observations were collected at the Ngwerere River, in Lusaka. We will first setup an empty camera configuration, and then gradually fill this with the required information. Along the way we plot what we have in a geospatial plot. The information we add is: * Ground-control points (row and columns locations in the frame as well as real world coordinates) * Row and column
-coordinates that define the area of interest. * The water level during the video and survey (set at zero, because this survey was only done for one single video, this is only relevant if multiple videos with different water levels are processed) * The position of the camera lens. This is relevant in case multiple videos with different water levels are processed. We here add this, but it is not actually used.</p>
+<p>In this notebook, we will extract one frame from the survey video to grab the control points. For this example, field observations were collected at the Ngwerere River, in Lusaka. We will first setup an empty camera configuration, and then gradually fill this with the required information. Along the way we plot what we have in a geospatial plot. The information we add is:</p>
+<ul class="simple">
+<li><p>Ground-control points (row and columns locations in the frame as well as real world coordinates)</p></li>
+<li><p>Row and column coordinates that define the area of interest.</p></li>
+<li><p>The water level during the video and survey (set at zero, because this survey was only done for one single video, this is only relevant if multiple videos with different water levels are processed)</p></li>
+<li><p>The position of the camera lens. This is relevant in case multiple videos with different water levels are processed. We here add this, but it is not actually used.</p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">import</span> <span class="nn">pyorc</span>
-<span class="kn">import</span> <span class="nn">cartopy</span>
-<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cartopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 </pre></div>
 </div>
 </div>
@@ -470,19 +476,27 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 </div>
 </div>
 <div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Scanning video: 100%|██████████| 2/2 [00:00&lt;00:00, 17.69it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f79990f6740&gt;
+&lt;matplotlib.image.AxesImage at 0x7f17ac50ca90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_01_Camera_Configuration_single_video_3_1.png" src="../_images/_examples_01_Camera_Configuration_single_video_3_1.png" />
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_3_2.png" src="../_images/_examples_01_Camera_Configuration_single_video_3_2.png" />
 </div>
 </div>
 <p>You can identify different marker x (column) and y (row) positions in the camera’s objective. Below, we have put several of these into a “src” part of the required gcp dictionary. Then we plot the frame and coordinates together.</p>
@@ -513,7 +527,7 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f7a201874c0&gt;
+&lt;matplotlib.legend.Legend at 0x7f17ac43f0a0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -574,8 +588,12 @@ bottom-right. velocimetry is normally done on one image channel (greyscale), but
 <img alt="../_images/_examples_01_Camera_Configuration_single_video_9_0.png" src="../_images/_examples_01_Camera_Configuration_single_video_9_0.png" />
 </div>
 </div>
-<p>Finally we add information to define our area of interest, and how the camera objective must be reprojected and the resolution of the velocimetry. * For the area of interest, 4 coordinates must be selected in the camera perspective. A geographically rectangular box will be shaped around those to make a suitable area of interest. We can simply use pixel (column row) xy coordinates for this, so we can select them using the original frame. Below, 4 points are selected and shown in the camera
-objective. * a target resolution (in meters) must be selected. The resolution is used to reproject the camera objective to a planar projection with real-world coordinates. * a window size (in number of pixels) is needed. Velocimetry will be performed in windows of this size. Since the stream is quite small, we use 1 centimeter (0.01 m) and a 25 pixel (so 25 centimeter) window size, used to find patterns on the water to trace.</p>
+<p>Finally we add information to define our area of interest, and how the camera objective must be reprojected and the resolution of the velocimetry.</p>
+<ul class="simple">
+<li><p>For the area of interest, 4 coordinates must be selected in the camera perspective. A geographically rectangular box will be shaped around those to make a suitable area of interest. We can simply use pixel (column row) xy coordinates for this, so we can select them using the original frame. Below, 4 points are selected and shown in the camera objective.</p></li>
+<li><p>a target resolution (in meters) must be selected. The resolution is used to reproject the camera objective to a planar projection with real-world coordinates.</p></li>
+<li><p>a window size (in number of pixels) is needed. Velocimetry will be performed in windows of this size. Since the stream is quite small, we use 1 centimeter (0.01 m) and a 25 pixel (so 25 centimeter) window size, used to find patterns on the water to trace.</p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -610,7 +628,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f7990e87910&gt;
+&lt;matplotlib.legend.Legend at 0x7f17ac4aaad0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -641,20 +659,52 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<img alt="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" src="../_images/_examples_01_Camera_Configuration_single_video_14_0.png" />
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_3381/608833754.py:8: DeprecationWarning: The camera=True option is deprecated, use mode=&#39;camera&#39; instead. This option will be removed in a future release.
+  cam_config.plot(ax=ax2, camera=True)
+</pre></div></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/_examples_01_Camera_Configuration_single_video_14_1.png" src="../_images/_examples_01_Camera_Configuration_single_video_14_1.png" />
 </div>
 </div>
-<p>Our camera configuration is ready. Below we still show a string representation and then we store the configuration to a file for use in our next notebook using the <code class="docutils literal notranslate"><span class="pre">.to_file</span></code> method.</p>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_14_2.png" src="../_images/_examples_01_Camera_Configuration_single_video_14_2.png" />
+</div>
+</div>
+<p>To better grasp the perspective and the situation, a 3D plot may be very useful. The camera configuration has a powerful 3D plotting method.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for interactive plotting, please install ipython matplotlib e.g. through `pip install ipympl`. You may need additional requirements, see https://matplotlib.org/ipympl/installing.html</span>
+<span class="c1"># then uncomment the line below.</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_01_Camera_Configuration_single_video_16_0.png" src="../_images/_examples_01_Camera_Configuration_single_video_16_0.png" />
+</div>
+</div>
+<p>Our camera configuration is ready. Below we still show a string representation and then we store the configuration to a file for use in our next notebook using the <code class="docutils literal notranslate"><span class="pre">.to_file</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">cam_config</span><span class="p">)</span>
@@ -715,6 +765,8 @@ objective. * a target resolution (in meters) must be selected. The resolution is
     },
     &#34;window_size&#34;: 25,
     &#34;is_nadir&#34;: false,
+    &#34;rvec&#34;: null,
+    &#34;tvec&#34;: null,
     &#34;dist_coeffs&#34;: [
         [
             0.0
@@ -734,13 +786,13 @@ objective. * a target resolution (in meters) must be selected. The resolution is
     ],
     &#34;camera_matrix&#34;: [
         [
-            1430.636962890625,
+            1429.853271484375,
             0.0,
             960.0
         ],
         [
             0.0,
-            1430.636962890625,
+            1429.853271484375,
             540.0
         ],
         [
@@ -749,17 +801,9 @@ objective. * a target resolution (in meters) must be selected. The resolution is
             1.0
         ]
     ],
-    &#34;bbox&#34;: &#34;POLYGON ((642730.1126120435 8304293.179440579, 642731.2229648121 8304302.7150117075, 642739.3679318167 8304301.766585384, 642738.2575790482 8304292.231014256, 642730.1126120435 8304293.179440579))&#34;
+    &#34;bbox&#34;: &#34;POLYGON ((642730.1123098535 8304293.175910449, 642731.2203983115 8304302.711744968, 642739.3655902958 8304301.765252743, 642738.2575018378 8304292.229418225, 642730.1123098535 8304293.175910449))&#34;
 }
 </pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 </div>
 </section>
 
@@ -849,7 +893,7 @@ objective. * a target resolution (in meters) must be selected. The resolution is
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

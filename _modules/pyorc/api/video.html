@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.video &#8212; pyorc 0.7.0 documentation</title>
+    <title>pyorc.api.video &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -407,27 +407,27 @@ document.write(`
   <h1>Source code for pyorc.api.video</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Video module for pyorc.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">cv2</span>
-<span class="kn">import</span> <span class="nn">dask</span>
-<span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dask</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dask.array</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">da</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 
-<span class="kn">from</span> <span class="nn">pyorc</span> <span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span>
 
-<span class="kn">from</span> <span class="nn">.cameraconfig</span> <span class="kn">import</span> <span class="n">CameraConfig</span><span class="p">,</span> <span class="n">get_camera_config</span><span class="p">,</span> <span class="n">load_camera_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.cameraconfig</span><span class="w"> </span><span class="kn">import</span> <span class="n">CameraConfig</span><span class="p">,</span> <span class="n">get_camera_config</span><span class="p">,</span> <span class="n">load_camera_config</span>
 
 
-<div class="viewcode-block" id="Video"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video">[docs]</a><span class="k">class</span> <span class="nc">Video</span><span class="p">:</span>  <span class="c1"># (cv2.VideoCapture)</span>
+<div class="viewcode-block" id="Video"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Video</span><span class="p">:</span>  <span class="c1"># (cv2.VideoCapture)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Video class for reading and extracting data from video files.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">Filename: </span><span class="si">{:s}</span>
 <span class="s2">FPS: </span><span class="si">{:f}</span>
@@ -444,18 +444,20 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;camera_config&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Video.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="Video.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Video.html#pyorc.Video.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">camera_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CameraConfig</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">h_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">start_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">freq</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">chunksize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
         <span class="n">stabilize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">rotation</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">fps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Video class, inheriting parts from cv2.VideoCapture.</span>
 
@@ -480,6 +482,8 @@ document.write(`
 <span class="sd">            last frame to use in analysis (if not set, last frame available in video will be used)</span>
 <span class="sd">        freq : int, optional</span>
 <span class="sd">            Frequency to read frames with. Default is 1, if set to e.g. 2 only each 2nd frame will be read.</span>
+<span class="sd">        chunksize : int, optional</span>
+<span class="sd">            Amount of frames to read in one pass, defaults to 20</span>
 <span class="sd">        stabilize : list of lists, optional</span>
 <span class="sd">            set of coordinates, that together encapsulate the polygon that defines the mask, separating land from water.</span>
 <span class="sd">            The mask is used to select region (on land) for rigid point search for stabilization. If not set, then no</span>
@@ -493,6 +497,8 @@ document.write(`
 <span class="sd">        fps : float, optional</span>
 <span class="sd">            hard set for frames per second. Use this with utmost caution and only when you are confident that the video</span>
 <span class="sd">            metadata is incorrect.</span>
+<span class="sd">        progress : bool, optional</span>
+<span class="sd">            Display progress bar while reading video. Default is True.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_frame</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))),</span> <span class="s1">&#39;start_frame must be of type &quot;int&quot;&#39;</span>
@@ -502,6 +508,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">ms</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="n">lazy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="n">progress</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stabilize</span> <span class="o">=</span> <span class="n">stabilize</span>
         <span class="k">if</span> <span class="n">camera_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span> <span class="o">=</span> <span class="n">camera_config</span>
@@ -560,7 +567,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="n">rotation</span>
         <span class="c1"># extract times, frame numbers and frames as far as available</span>
         <span class="n">time</span><span class="p">,</span> <span class="n">frame_number</span><span class="p">,</span> <span class="n">frames</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_time_frames</span><span class="p">(</span>
-            <span class="n">cap</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="n">lazy</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bgr&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="n">fps</span>
+            <span class="n">cap</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="n">lazy</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bgr&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="n">fps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">progress</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="o">=</span> <span class="n">frames</span>
         <span class="c1"># check if end_frame changed</span>
@@ -573,6 +580,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span> <span class="o">=</span> <span class="n">end_frame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunksize</span> <span class="o">=</span> <span class="n">chunksize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span> <span class="o">=</span> <span class="n">frame_number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span> <span class="o">=</span> <span class="n">start_frame</span>
@@ -593,28 +601,28 @@ document.write(`
         <span class="k">del</span> <span class="n">cap</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">lazy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lazy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get lazy flag.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lazy</span>
 
     <span class="nd">@lazy</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">lazy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lazy</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lazy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lazy</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lazy</span> <span class="o">=</span> <span class="n">lazy</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get region mask for stabilization.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>
 
     <span class="nd">@mask</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">mask</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">camera_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">camera_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get `CameraConfig` object attached to `Video` instance.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_camera_config&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_config</span>
@@ -622,7 +630,7 @@ document.write(`
             <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@camera_config</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">camera_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_config_input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">camera_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_config_input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set camera config as a serializable object from either a filename, json string or a dict.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">camera_config_input</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -643,29 +651,38 @@ document.write(`
             <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:return: int, last frame considered in analysis&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span>
 
     <span class="nd">@end_frame</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="c1"># sometimes last frames are not read by OpenCV, hence we skip the last frame always</span>
         <span class="k">if</span> <span class="n">end_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_frame</span> <span class="o">=</span> <span class="n">end_frame</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get video sampling frequency.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_freq</span>
 
     <span class="nd">@freq</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_freq</span> <span class="o">=</span> <span class="n">freq</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">stabilize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get progress property.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span>
+
+    <span class="nd">@progress</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span> <span class="o">=</span> <span class="n">progress</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stabilize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stabilization region coordinates.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span>
@@ -674,16 +691,16 @@ document.write(`
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">stabilize</span>
 
     <span class="nd">@stabilize</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">stabilize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stabilize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stabilize</span> <span class="o">=</span> <span class="n">coords</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:return: Actual water level [m] during video&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h_a</span>
 
     <span class="nd">@h_a</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">h_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_a</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">h_a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h_a</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;The actual water level must be a float, you supplied a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">h_a</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">if</span> <span class="n">h_a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -695,48 +712,48 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_h_a</span> <span class="o">=</span> <span class="n">h_a</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">start_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:return: int, first frame considered in analysis&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_frame</span>
 
     <span class="nd">@start_frame</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">start_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">start_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_start_frame</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_start_frame</span> <span class="o">=</span> <span class="n">start_frame</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get frames of Video instance.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span>
 
     <span class="nd">@frames</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span> <span class="o">=</span> <span class="n">frames</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:return: float, frames per second&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span>
 
     <span class="nd">@fps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">fps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">fps</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">fps</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FPS in video is </span><span class="si">{</span><span class="n">fps</span><span class="si">}</span><span class="s2"> which is not a valid value. Repair the video file before use&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="n">fps</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:return: list of 4 lists (int) with [column, row] locations of area of interest in video objective&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span>
 
     <span class="nd">@corners</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span> <span class="o">=</span> <span class="n">corners</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get rotation code.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span>
@@ -745,11 +762,11 @@ document.write(`
                 <span class="k">return</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_rotation_code</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">rotation</span><span class="p">)</span>
 
     <span class="nd">@rotation</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotation_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotation_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set rotation from integer in the form of OpenCV rotation codes.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_rotation_code</span><span class="p">(</span><span class="n">rotation_code</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Video.get_frame"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frame.html#pyorc.Video.get_frame">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame</span><span class="p">(</span>
+<div class="viewcode-block" id="Video.get_frame"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frame.html#pyorc.Video.get_frame">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_frame</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb&quot;</span><span class="p">,</span> <span class="s2">&quot;hsv&quot;</span><span class="p">,</span> <span class="s2">&quot;bgr&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;grayscale&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve one frame.</span>
@@ -783,7 +800,7 @@ document.write(`
         <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">img</span></div>
 
-<div class="viewcode-block" id="Video.get_frames_chunk"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frames_chunk.html#pyorc.Video.get_frames_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">get_frames_chunk</span><span class="p">(</span>
+<div class="viewcode-block" id="Video.get_frames_chunk"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frames_chunk.html#pyorc.Video.get_frames_chunk">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_frames_chunk</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">n_start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb&quot;</span><span class="p">,</span> <span class="s2">&quot;hsv&quot;</span><span class="p">,</span> <span class="s2">&quot;bgr&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;grayscale&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve a chunk of frames in one go.</span>
@@ -822,7 +839,7 @@ document.write(`
         <span class="n">cap</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Video.get_frames"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frames.html#pyorc.Video.get_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb&quot;</span><span class="p">,</span> <span class="s2">&quot;hsv&quot;</span><span class="p">,</span> <span class="s2">&quot;bgr&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;grayscale&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<div class="viewcode-block" id="Video.get_frames"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_frames.html#pyorc.Video.get_frames">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb&quot;</span><span class="p">,</span> <span class="s2">&quot;hsv&quot;</span><span class="p">,</span> <span class="s2">&quot;bgr&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;grayscale&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a xr.DataArray, containing a dask array of frames, from `start_frame` until `end_frame`.</span>
 
 <span class="sd">        The xr.DataArray will contain all coordinate variables and attributes, needed for further processing. It</span>
@@ -844,7 +861,7 @@ document.write(`
         <span class="p">),</span> <span class="s2">&quot;No camera configuration is set, add it to the video using the .camera_config method&quot;</span>
         <span class="c1"># camera_config may be altered for the frames object, so copy below</span>
         <span class="n">camera_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">)</span>
-        <span class="n">frames_chunk</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="c1"># frames_chunk = 20</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># a specific method for collecting frames is requested or lazy access is requested.</span>
             <span class="c1"># get_frame = dask.delayed(self.get_frame, pure=True)  # Lazy version of get_frame</span>
@@ -854,15 +871,12 @@ document.write(`
             <span class="c1"># derive video shape</span>
             <span class="n">sample</span> <span class="o">=</span> <span class="n">get_frames_chunk</span><span class="p">(</span><span class="n">n_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data_array</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">n_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span><span class="p">),</span> <span class="n">frames_chunk</span><span class="p">):</span>
-                <span class="n">n_end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">n_start</span> <span class="o">+</span> <span class="n">frames_chunk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">n_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunksize</span><span class="p">):</span>
+                <span class="n">n_end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">n_start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunksize</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span><span class="p">))</span>
                 <span class="n">frame_chunk</span> <span class="o">=</span> <span class="n">get_frames_chunk</span><span class="p">(</span><span class="n">n_start</span><span class="o">=</span><span class="n">n_start</span><span class="p">,</span> <span class="n">n_end</span><span class="o">=</span><span class="n">n_end</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
                 <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_end</span> <span class="o">-</span> <span class="n">n_start</span><span class="p">,</span> <span class="o">*</span><span class="n">sample</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
                 <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">from_delayed</span><span class="p">(</span><span class="n">frame_chunk</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sample</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">))</span>
 
-            <span class="c1"># sample = frames[0].compute()</span>
-            <span class="c1"># data_array = [da.from_delayed(frame, dtype=sample.dtype, shape=sample.shape) for frame in frames]</span>
-            <span class="c1"># da_stack = da.stack(data_array, axis=0)</span>
             <span class="n">da_stack</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">data_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">da_stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frames</span>
@@ -894,6 +908,7 @@ document.write(`
             <span class="s2">&quot;camera_shape&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)]),</span>
             <span class="s2">&quot;camera_config&quot;</span><span class="p">:</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
             <span class="s2">&quot;h_a&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">),</span>
+            <span class="s2">&quot;chunksize&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunksize</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">frames</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
             <span class="n">da_stack</span><span class="p">,</span>
@@ -910,7 +925,7 @@ document.write(`
         <span class="n">frames</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;frames&quot;</span>
         <span class="k">return</span> <span class="n">frames</span></div>
 
-<div class="viewcode-block" id="Video.set_mask_from_exterior"><a class="viewcode-back" href="../../../_generated/pyorc.Video.set_mask_from_exterior.html#pyorc.Video.set_mask_from_exterior">[docs]</a>    <span class="k">def</span> <span class="nf">set_mask_from_exterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exterior</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]):</span>
+<div class="viewcode-block" id="Video.set_mask_from_exterior"><a class="viewcode-back" href="../../../_generated/pyorc.Video.set_mask_from_exterior.html#pyorc.Video.set_mask_from_exterior">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_mask_from_exterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exterior</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside.</span>
 
 <span class="sd">        Parameters</span>
@@ -932,7 +947,7 @@ document.write(`
         <span class="n">mask</span><span class="p">[</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span></div>
 
-<div class="viewcode-block" id="Video.get_ms"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_ms.html#pyorc.Video.get_ms">[docs]</a>    <span class="k">def</span> <span class="nf">get_ms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cap</span><span class="p">:</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="Video.get_ms"><a class="viewcode-back" href="../../../_generated/pyorc.Video.get_ms.html#pyorc.Video.get_ms">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_ms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cap</span><span class="p">:</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stabilization transforms for each frame based on analysis of stable points outside of water area.</span>
 
 <span class="sd">        Parameters</span>
@@ -952,6 +967,7 @@ document.write(`
             <span class="n">end_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">end_frame</span><span class="p">,</span>
             <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
             <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 </pre></div>
 
@@ -994,7 +1010,7 @@ document.write(`
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

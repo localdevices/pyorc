@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Immersive plotting and analyzing results &#8212; pyorc 0.7.0 documentation</title>
+    <title>Immersive plotting and analyzing results &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -138,7 +138,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -373,6 +373,7 @@ document.write(`
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Immersive plotting and analyzing results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">Obtain a discharge measurement over a cross section</a></li>
 <li class="toctree-l1"><a class="reference internal" href="05_Camera_calibration.html">Camera calibration with chessboard pattern</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Estimating_water_levels_optically.html">Optical water level detection with a cross section</a></li>
 </ul>
 </div>
 </nav></div>
@@ -437,9 +438,9 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">import</span> <span class="nn">pyorc</span>
-<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">Normalize</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normalize</span>
 <br/></pre></div>
 </div>
 </div>
@@ -508,19 +509,27 @@ this process, the <code class="docutils literal notranslate"><span class="pre">k
 </div>
 </div>
 <div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 72.55it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f2e715bb790&gt;
+&lt;matplotlib.quiver.Quiver at 0x7ff40d2af2e0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_03_Plotting_and_masking_velocimetry_results_6_1.png" src="../_images/_examples_03_Plotting_and_masking_velocimetry_results_6_1.png" />
+<img alt="../_images/_examples_03_Plotting_and_masking_velocimetry_results_6_2.png" src="../_images/_examples_03_Plotting_and_masking_velocimetry_results_6_2.png" />
 </div>
 </div>
 </section>
@@ -539,7 +548,7 @@ variance over time for each location will likely already be lower, because you m
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">copy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="n">ds_mask</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
 <span class="n">mask_corr</span> <span class="o">=</span> <span class="n">ds_mask</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">mask_minmax</span> <span class="o">=</span> <span class="n">ds_mask</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -587,7 +596,7 @@ variance over time for each location will likely already be lower, because you m
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f2e88fcda50&gt;
+&lt;matplotlib.quiver.Quiver at 0x7ff3f119a440&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -607,7 +616,7 @@ mean) is very different, the value at that location will be excluded.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># apply all methods in time domain with relaxed angle masking</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="n">ds_mask2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
 <span class="n">ds_mask2</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">ds_mask2</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -657,7 +666,7 @@ mean) is very different, the value at that location will be excluded.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f2e88944760&gt;
+&lt;matplotlib.quiver.Quiver at 0x7ff405b8a8f0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -688,8 +697,8 @@ mean) is very different, the value at that location will be excluded.</p>
 <span class="p">)</span>
 
 <span class="c1"># for fun, let&#39;s also add a satellite background from cartopy</span>
-<span class="kn">import</span> <span class="nn">cartopy.io.img_tiles</span> <span class="k">as</span> <span class="nn">cimgt</span>
-<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.io.img_tiles</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cimgt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
 <span class="n">tiles</span> <span class="o">=</span> <span class="n">cimgt</span><span class="o">.</span><span class="n">GoogleTiles</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;satellite&quot;</span><span class="p">)</span>
 <span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">tiles</span><span class="p">,</span> <span class="mi">19</span><span class="p">)</span>
 <span class="c1"># zoom out a little bit so that we can actually see a bit</span>
@@ -742,7 +751,7 @@ mean) is very different, the value at that location will be excluded.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f2e885553c0&gt;
+&lt;matplotlib.quiver.Quiver at 0x7ff404733df0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -855,7 +864,7 @@ mean) is very different, the value at that location will be excluded.</p>
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

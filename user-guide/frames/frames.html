@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Frames &#8212; pyorc 0.7.0 documentation</title>
+    <title>Frames &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -136,7 +136,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -417,8 +417,8 @@ document.write(`
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="c1"># set a video filename below, change to your own local file location</span>
 <span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;../../../examples/ngwerere/ngwerere_20191103.mp4&quot;</span>
 <span class="c1"># point to a file containing the camera configuration</span>
@@ -455,25 +455,25 @@ Cell <span class="ansi-green-fg">In[1], line 7</span>
 <span class="ansi-green-intense-fg ansi-bold">     14</span> da_frames <span style="color: rgb(98,98,98)">=</span> video<span style="color: rgb(98,98,98)">.</span>get_frames(method<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">rgb</span><span style="color: rgb(175,0,0)">&#34;</span>)
 <span class="ansi-green-intense-fg ansi-bold">     15</span> da_frames
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:137</span>, in <span class="ansi-cyan-fg">Video.__init__</span><span class="ansi-blue-fg">(self, fn, camera_config, h_a, start_frame, end_frame, freq, stabilize, lazy, rotation, fps)</span>
-<span class="ansi-green-intense-fg ansi-bold">    134</span> <span style="color: rgb(95,135,135)"># explicitly open file for reading</span>
-<span class="ansi-green-intense-fg ansi-bold">    135</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>stabilize <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
-<span class="ansi-green-intense-fg ansi-bold">    136</span>     <span style="color: rgb(95,135,135)"># set a gridded mask based on the roi points</span>
-<span class="ansi-green-fg">--&gt; 137</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">set_mask_from_exterior</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    138</span> <span style="color: rgb(95,135,135)"># set end and start frame</span>
-<span class="ansi-green-intense-fg ansi-bold">    139</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>frame_count <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">int</span>(cap<span style="color: rgb(98,98,98)">.</span>get(cv2<span style="color: rgb(98,98,98)">.</span>CAP_PROP_FRAME_COUNT)) <span style="color: rgb(98,98,98)">-</span> <span style="color: rgb(98,98,98)">1</span>
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:144</span>, in <span class="ansi-cyan-fg">Video.__init__</span><span class="ansi-blue-fg">(self, fn, camera_config, h_a, start_frame, end_frame, freq, chunksize, stabilize, lazy, rotation, fps, progress)</span>
+<span class="ansi-green-intense-fg ansi-bold">    141</span> <span style="color: rgb(95,135,135)"># explicitly open file for reading</span>
+<span class="ansi-green-intense-fg ansi-bold">    142</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>stabilize <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-intense-fg ansi-bold">    143</span>     <span style="color: rgb(95,135,135)"># set a gridded mask based on the roi points</span>
+<span class="ansi-green-fg">--&gt; 144</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">set_mask_from_exterior</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    145</span> <span style="color: rgb(95,135,135)"># set end and start frame</span>
+<span class="ansi-green-intense-fg ansi-bold">    146</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>frame_count <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">int</span>(cap<span style="color: rgb(98,98,98)">.</span>get(cv2<span style="color: rgb(98,98,98)">.</span>CAP_PROP_FRAME_COUNT)) <span style="color: rgb(98,98,98)">-</span> <span style="color: rgb(98,98,98)">1</span>
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:520</span>, in <span class="ansi-cyan-fg">Video.set_mask_from_exterior</span><span class="ansi-blue-fg">(self, exterior)</span>
-<span class="ansi-green-intense-fg ansi-bold">    506</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">set_mask_from_exterior</span>(<span style="color: rgb(0,135,0)">self</span>, exterior: List[List]):
-<span class="ansi-green-intense-fg ansi-bold">    507</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">&#34;&#34;&#34;Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside.</span>
-<span class="ansi-green-intense-fg ansi-bold">    508</span>
-<span class="ansi-green-intense-fg ansi-bold">    509</span> <span style="color: rgb(175,0,0)">    Parameters</span>
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:535</span>, in <span class="ansi-cyan-fg">Video.set_mask_from_exterior</span><span class="ansi-blue-fg">(self, exterior)</span>
+<span class="ansi-green-intense-fg ansi-bold">    521</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span style="color: rgb(0,0,255)">set_mask_from_exterior</span>(<span style="color: rgb(0,135,0)">self</span>, exterior: List[List]):
+<span class="ansi-green-intense-fg ansi-bold">    522</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">&#34;&#34;&#34;Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside.</span>
+<span class="ansi-green-intense-fg ansi-bold">    523</span>
+<span class="ansi-green-intense-fg ansi-bold">    524</span> <span style="color: rgb(175,0,0)">    Parameters</span>
 <span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    518</span>
-<span class="ansi-green-intense-fg ansi-bold">    519</span> <span style="color: rgb(175,0,0)">    &#34;&#34;&#34;</span>
-<span class="ansi-green-fg">--&gt; 520</span>     mask_coords <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">array</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">exterior</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dtype</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">int32</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    521</span>     mask <span style="color: rgb(98,98,98)">=</span> np<span style="color: rgb(98,98,98)">.</span>zeros((<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>height, <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>width), np<span style="color: rgb(98,98,98)">.</span>uint8)
-<span class="ansi-green-intense-fg ansi-bold">    522</span>     mask <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>fillPoly(mask, [mask_coords], <span style="color: rgb(98,98,98)">255</span>)
+<span class="ansi-green-intense-fg ansi-bold">    533</span>
+<span class="ansi-green-intense-fg ansi-bold">    534</span> <span style="color: rgb(175,0,0)">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; 535</span>     mask_coords <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">array</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">exterior</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dtype</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">int32</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    536</span>     mask <span style="color: rgb(98,98,98)">=</span> np<span style="color: rgb(98,98,98)">.</span>zeros((<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>height, <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>width), np<span style="color: rgb(98,98,98)">.</span>uint8)
+<span class="ansi-green-intense-fg ansi-bold">    537</span>     mask <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>fillPoly(mask, [mask_coords], <span style="color: rgb(98,98,98)">255</span>)
 
 <span class="ansi-red-fg">ValueError</span>: invalid literal for int() with base 10: &#39;fixed&#39;
 </pre></div></div>
@@ -671,8 +671,8 @@ camera’s objective plot are provided below. Note that the <code class="docutil
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartopy.io.img_tiles</span> <span class="k">as</span> <span class="nn">cimgt</span>
-<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.io.img_tiles</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cimgt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
 <span class="c1"># when using mode=&quot;geographical&quot; and not supplying an axes, the plot function will make a geogrpahical aware axes</span>
 <span class="c1"># for you.</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">da_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;geographical&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">)</span>
@@ -699,7 +699,7 @@ camera’s objective plot are provided below. Note that the <code class="docutil
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
 Cell <span class="ansi-green-fg">In[8], line 5</span>
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> <span class="ansi-bold" style="color: rgb(0,0,255)">cartopy</span><span class="ansi-bold" style="color: rgb(0,0,255)">.</span><span class="ansi-bold" style="color: rgb(0,0,255)">crs</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> <span class="ansi-bold" style="color: rgb(0,0,255)">ccrs</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">cartopy</span><span class="ansi-bold" style="color: rgb(0,0,255)">.</span><span class="ansi-bold" style="color: rgb(0,0,255)">crs</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">as</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">ccrs</span>
 <span class="ansi-green-intense-fg ansi-bold">      3</span> <span style="color: rgb(95,135,135)"># when using mode=&#34;geographical&#34; and not supplying an axes, the plot function will make a geogrpahical aware axes</span>
 <span class="ansi-green-intense-fg ansi-bold">      4</span> <span style="color: rgb(95,135,135)"># for you.</span>
 <span class="ansi-green-fg">----&gt; 5</span> p <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">da_edge</span>[<span style="color: rgb(98,98,98)">0</span>]<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>plot(mode<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">geographical</span><span style="color: rgb(175,0,0)">&#34;</span>, vmin<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">10</span>, vmax<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>, cmap<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">RdBu_r</span><span style="color: rgb(175,0,0)">&#34;</span>)
@@ -832,7 +832,7 @@ Cell <span class="ansi-green-fg">In[9], line 2</span>
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

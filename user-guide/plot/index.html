@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting &#8212; pyorc 0.7.0 documentation</title>
+    <title>Plotting &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -368,6 +368,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../api.html">Application Programming Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../camera_config/index.html">Camera configurations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../video/index.html">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross_section/index.html">Cross sections and water level detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../frames/index.html">Frames</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../velocimetry/index.html">Velocimetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../transect/index.html">Transects</a></li>
@@ -494,10 +495,10 @@ and a <code class="docutils literal notranslate"><span class="pre">pyorc.Transec
 do a full example, starting with an already processed video. Below we re-open the video, also open the
 velocimetry results, retrieve a transect from it, and plot everything together in one figure. The
 specifics are explained after that.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">pyorc</span>
-<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">Normalize</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normalize</span>
 <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;examples/ngwerere/ngwerere_masked.nc&quot;</span><span class="p">)</span>
 
 <span class="c1"># also open the original video file, only one frame needed</span>
@@ -764,7 +765,7 @@ and in turn the axes parent figure.</p>
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

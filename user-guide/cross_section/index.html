@@ -1,0 +1,859 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Cross Sections and water level detection &#8212; pyorc 0.8.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-localdevices.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/cross_section/index';</script>
+    <link rel="shortcut icon" href="../../_static/orc_favicon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Frames" href="../frames/index.html" />
+    <link rel="prev" title="Videos" href="../video/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/orc_logo_color.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command-line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Application Programming Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../camera_config/index.html">Camera configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../video/index.html">Videos</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Cross sections and water level detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frames/index.html">Frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../velocimetry/index.html">Velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transect/index.html">Transects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plot/index.html">Plotting</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Cross...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="cross-sections-and-water-level-detection">
+<span id="cross-section-ug"></span><h1>Cross Sections and water level detection<a class="headerlink" href="#cross-sections-and-water-level-detection" title="Permalink to this heading">#</a></h1>
+<p>Cross sections are essential in <strong>pyorc</strong> for two reasons:</p>
+<ul class="simple">
+<li><p>detection of water levels</p></li>
+<li><p>extraction of a transect of velocities and integration to discharge</p></li>
+</ul>
+<p>Most of this section will go into the water level detection option. It is important to understand the merits, but
+also the shortcomings of this method before you decide if it is a useful method for your case.</p>
+<section id="some-principles-of-water-level-detection">
+<h2>Some principles of water level detection<a class="headerlink" href="#some-principles-of-water-level-detection" title="Permalink to this heading">#</a></h2>
+<p>It is important to understand how the water level detection works, in order to judge if it is a suitable method for
+your use case. This water level detection method explicitly uses understanding of the perspective (through the camera
+configuration) and cross section data as a means to estimate the water level. It does not use any Machine Learning, but
+instead completely relies on computer vision and statistics to infer a water level.
+This has benefits but also limitations such as:</p>
+<ul class="simple">
+<li><p>benefits machine learning: machine learning approaches may read water levels disregardless of field conditions and
+understanding of perspective. This may reduce the efforts of field surveying (e.g. control points and cross section
+measurements). Also, once enough training data over enough conditions and seasons is treated, it may result in a
+higher accuracy.</p></li>
+<li><p>Computer vision models, using the perspective, do not require any training data at all. They are also generally
+lighter and easier to run on simple hardware in the field. As the methods are based on physical understanding of
+both perspective and segmentation of image conditions that distinguish water from land, it can also more easily be
+judged if the model will likely work or not work.</p></li>
+</ul>
+<p>To ensure that operational use of the method is possible, without collecting training datasets and training, we decided
+to start with a fully computer vision based approach. In essence the method work as follows:</p>
+<p>You need:</p>
+<p>1) a camera configuration (i.e. containing all perspective information)
+1) an image from the camera of interest, that fits with the established camera configuration
+3) a cross section, e.g. stored in a shapefile as 3d (x, y, z) points.</p>
+<p>If you are able to use the API within python, you can easily visualize these all together. We’ll use here an example
+of a small concrete channel.</p>
+<img alt="../../_images/cross_section.jpg" src="../../_images/cross_section.jpg" />
+<p>Here, you can clearly distinguish the water line with your eyes: you can only see the water level on the far side
+as the closer side is obscured by the concrete wall. Furthermore, the concrete has a notable different color and
+intensity, compared to the water.</p>
+<p>The manner in which our computer vision algorithm determines the water level is as follows:
+- the cross section coordinates can be interpreted in both real-world coordinates (i.e. as provided by you, measured</p>
+<blockquote>
+<div><p>in the field, but also as camera coordinates, i.e. through the camera configuration.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>the cross section is made “smart” by enabling all sorts of geometric operations on the cross section. You can for
+instance see in the top-right figure, that the cross section is extended left and right so that you can better see the
+channel shape. Also in the top-left (camera view), you can see that same extension in brown colored polygon</p></li>
+<li><p>with this “smart” cross section, we draw two polygon on a cross section point, extending left and right of the
+cross section. We can do this at any random point in the cross section.</p></li>
+<li><p>we then extract pixel intensities, here from a grayscale image, and compare the intensity distribution functions.</p></li>
+<li><p>if the distributions are very similar, it is likely that left and right of the point in the cross section, we are
+looking at similar “stuff”. We see that in the left-side below, where both polygons lie over water.</p></li>
+<li><p>In the right-hand-side figure below, we see that the polygons are drawn at the opposite side, exactly at the water
+line. Here the distribution functions are very (in fact, the most!) different. This is therefore the most likely
+candidate point of the water line.</p></li>
+<li><p>Then we can simply look up in our original 3-dimensional cross section coordinates, which water level belongs to
+this water line.</p></li>
+</ul>
+<p>In the figure below you can see
+a “score” of 0.82 and 0.21 for the different levels. The lower the score the more likely we have found the water level.
+A value of one means the distribution functions are identical, a value of zero means the distribution functions have
+no overlap at all. Naturally the methods works with an optimization algorithm, that efficiently seeks the location in
+the cross section where the two polygons provide the most difference in intensity distribution functions. This
+is fully automated. You only need to provide a cross section file.</p>
+<img alt="../../_images/polygon_samples.jpg" src="../../_images/polygon_samples.jpg" />
+<p>Hopefully this explanation helps to better understand the water level detection approach. This hopefully also
+clarifies the limitations. Please note the following two limitations:</p>
+<ul class="simple">
+<li><p>the method relies on a clear distinction in color, intensity or other to find the water line. If the water looks
+very similar to the bank, the algorithm may return a wrong value. In strongly shaded places, the darkness of a shade
+may look a lot like darkness of water, and therefore if a clear straight shaded line is found, the algorithm can
+easily mistake the shade line as the water line.</p></li>
+<li><p>strong seasonal changes in the banks are problematic. For instance, overhanging growth of vegetation during spring
+and summer will likely cause the waterline to be detected at the edge of the vegetation rather than the real bank.
+Also in this case you will most likely underestimate the water level, as the water line is estimated to be somewhere
+in the water, rather than the real bank.</p></li>
+</ul>
+<p>Note for instance the example below. We have neatly identified the optimum in this vegetated bank, but it is too far on
+the water because of the floating grassy vegetation on the water. As a result we have underestimated the water level
+by about 0.25 meters (compared to a local gauge).</p>
+<img alt="../../_images/wrong_estimate.jpg" src="../../_images/wrong_estimate.jpg" />
+<p>For more advanced control over the optical measurements, you can add details to your recipe that:</p>
+<ul class="simple">
+<li><p>define the size and location of the polygons in which intensities are collected, and;</p></li>
+<li><p>the manner in which a frame is extracted from the provided video.</p></li>
+</ul>
+<p>The size and location of the rectangular polygons can be defined using the following parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">offset</span></code>: the up-to-downstream offset of the polygon in meters. Defaults to 0.0m. This can be useful if the
+cross section may fall better within the visible domain of the camera if moved slightly up or downstream.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length</span></code>: the up-to-downstream length of the polygon (default: 2 meters)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">padding</span></code>: the left-to-right width of the polygons (default 0.5 meters).</p></li>
+</ul>
+<p>Note that the defaults are generally quite appropriate for banks. But there may be other use case conditions.
+If you for instance decide to build a cross section profile over several staff gauges, it may make a lot of
+sense to reduce the length to a much smaller size, covering the staff gauge width.</p>
+</section>
+<section id="how-to-work-with-cross-sections">
+<h2>How to work with cross sections<a class="headerlink" href="#how-to-work-with-cross-sections" title="Permalink to this heading">#</a></h2>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Command-line</label><div class="sd-tab-content docutils">
+<p>A cross section must be provided on the command line by using the <code class="docutils literal notranslate"><span class="pre">--cross</span></code> parameter and a reference
+to a GeoJSON or shapefile containing x, y, z Point geometries only! If the file contains a coordinate reference
+system (CRS), that will also be interpreted and used to ensure coordinates are (if necessary) transformed to
+the same CRS as the <a class="reference internal" href="../camera_config/index.html#camera-config-ug"><span class="std std-ref">camera configuration</span></a>. This file is then used in two places.</p>
+<ul class="simple">
+<li><p>If no external water level is provided (on the CLI using the <code class="docutils literal notranslate"><span class="pre">--h_a</span></code> option, or by directly inserting
+a water level in the recipe under the <a class="reference internal" href="../video/index.html#video-ug"><span class="std std-ref">video section</span></a> the <code class="docutils literal notranslate"><span class="pre">--cross</span></code> Points,
+will be used by <strong>pyorc</strong>  to estimate the water level optically from an image (see below) derived from the
+video.</p></li>
+<li><p>If your recipe file contains a <code class="docutils literal notranslate"><span class="pre">transect</span></code> section, the coordinates will be extracted and used to extract
+a transect of velocities, and perform further processing as configured under <code class="docutils literal notranslate"><span class="pre">transect</span></code>. Note that the
+<code class="docutils literal notranslate"><span class="pre">transect</span></code> section also allows you to provide a geojson string as input, or a shapefile as input directly.
+If you do that, the shapefile provided at <code class="docutils literal notranslate"><span class="pre">--cross</span></code> will be ignored.</p></li>
+</ul>
+<p>The cross section points are also used to produce a plot of the wetted surface area in any camera perspective
+plot you may generate in the recipe. See the <a class="reference internal" href="../plot/index.html#plot-ug"><span class="std std-ref">plot</span></a> for further information.</p>
+<p>For further fine tuning, you can add a <code class="docutils literal notranslate"><span class="pre">water_level</span></code> section below the <code class="docutils literal notranslate"><span class="pre">video</span></code> section in your recipe.
+Changing the polygon size and location as described, can be done through a subsection <code class="docutils literal notranslate"><span class="pre">water_level_options</span></code>
+e.g. as follows</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span><span class="w">  </span><span class="c1"># this is from the earlier example</span>
+<span class="w">  </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">  </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
+<span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
+
+<span class="nt">water_level</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">water_level_options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.</span>
+<span class="w">    </span><span class="nt">padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">  </span><span class="c1"># make the polygons wider than the default 0.5 meters.</span>
+</pre></div>
+</div>
+<p>Extracting an image from the video may require specific preprocessing. In fact, all the same preprocessing
+methods as available in the <code class="docutils literal notranslate"><span class="pre">frames</span></code> section can be utilized. Bear in mind that many of these will not
+lead to a sharper contrast between water and land. Also bear in mind that after application of the
+preprocessing, the resulting set of images on which this is applied are averaged in time. By default a single
+grayscale image will be extracted from the first frame in the set of frames identified in the <code class="docutils literal notranslate"><span class="pre">video</span></code> section
+with the <code class="docutils literal notranslate"><span class="pre">start_frame</span></code> and <code class="docutils literal notranslate"><span class="pre">end_frame</span></code> settings. But this can be modified. We can also extract e.g. the hue
+values, other sets of frames, and even do a full preprocessing on the frames before letting them enter the
+water level detection scheme. Finally, by default, the algorithm only looks at the part of the cross section that
+is furthest away from the camera, assuming that this side offers best visibility of the shoreline. This can also
+be modified to detect using both, or only the nearest shore, but you have to make sure that the camera indeed can
+see the shoreline at the nearby water line. Modifying these options can be done following the below recipe as
+example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span><span class="w">  </span><span class="c1"># this is from the earlier example</span>
+<span class="w">  </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">  </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
+<span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
+
+<span class="nt">water_level</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">n_start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># use the 10th frame of the extracted video frames...</span>
+<span class="w">  </span><span class="nt">n_end</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">  </span><span class="c1"># ...until the 20th frame. The average of the extracted and preprocessed frames is used.</span>
+<span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hue&quot;</span><span class="w">  </span><span class="c1"># we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.</span>
+<span class="w">  </span><span class="nt">bank</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;near&quot;</span><span class="w">  </span><span class="c1"># in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose &quot;both&quot; for seeking the optimal on both banks</span>
+<span class="w">  </span><span class="nt">frames_options</span><span class="p">:</span><span class="w">  </span><span class="c1"># we add preprocessing methods from the frames methods. You can extend this similar to the frames section.</span>
+<span class="w">    </span><span class="nt">minmax</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span><span class="w">  </span><span class="c1"># we maximize intensities to 150</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"> </span><span class="c1"># other preprocessing after minmax, remove this line if not used.</span>
+<span class="w">  </span><span class="nt">water_level_options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.</span>
+<span class="w">    </span><span class="nt">padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">  </span><span class="c1"># make the polygons wider than the default 0.5 meters.</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+API</label><div class="sd-tab-content docutils">
+<p>The <a class="reference internal" href="../../api.html#cross-section"><span class="std std-ref">API</span></a> provides powerful mechanisms to both plot the cross section and to use the optical water level
+estimation. Starting a cross section requires only a <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code> object, and a list of lists containing x, y, z coordinates.
+You can also read in a GeoJSON or shapefile with <code class="docutils literal notranslate"><span class="pre">geopandas</span></code> and simply pass the results GeoDataFrame.
+Any coordinates will be automatically transformed to the CRS of the <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code> object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
+
+<span class="n">cs_file</span> <span class="o">=</span> <span class="s2">&quot;some_file_with_xyz_point_geometries.geojson&quot;</span>
+<span class="n">cc_file</span> <span class="o">=</span> <span class="s2">&quot;camera_config.json&quot;</span>  <span class="c1"># file path of camera configuration file</span>
+<span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">load_camera_config</span><span class="p">(</span><span class="n">cc_file</span><span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cs_file</span><span class="p">)</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CrossSection</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">gdf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">cs</span></code> will contain your cross section object. You can perform powerful plotting with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="mf">93.5</span><span class="p">)</span>  <span class="c1"># we plot wetted surface areas and planar surface at a user-provided water level of 93.5.</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will make a plot of the cross section in a 3D axis. If you do this on a interactive axes, you can rotate
+the view to gain more insight. The plot contains a bottom profile extended over some length, a wetted surface
+and a planar surface area at the user-provided water level. Naturally this level must be in the same datum as
+all local datum levels, similar as valid for <code class="docutils literal notranslate"><span class="pre">h_ref</span></code> in the camera configuration file.</p>
+<p>You can switch on and off several parts of the plot, and manipulate colors, linewidth and so on with typical
+keyword arguments for matplotlib. You can also use separate plot functions for the bottom, planar surface,
+and wetted surface. This is further explained in the API documentation for
+<a class="reference internal" href="../../api.html#cross-section"><span class="std std-ref">cross sections</span></a>.</p>
+<p>You can also easily combine this plot with a neat 3D plot of the camera configuration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># first define a common axes</span>
+<span class="n">ax3D</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">cs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="mf">93.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax3D</span><span class="p">)</span>
+<span class="c1"># now we add the camera configuration plot</span>
+<span class="n">cs</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax3D</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It can also be useful to see the plot in the camera perspective. In fact, all geometrical objects that can be
+derived from the <code class="docutils literal notranslate"><span class="pre">CrossSection</span></code> object can be retrieved in camera projected form. This is possible because
+the <code class="docutils literal notranslate"><span class="pre">CameraConfig</span></code> object is added to the <code class="docutils literal notranslate"><span class="pre">CrossSection</span></code>. Let’s assume we also have a video and want
+to plot on top of that, we can do the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vid_file</span> <span class="o">=</span> <span class="s2">&quot;some_video.mp4&quot;</span>
+<span class="c1"># derive one RGB image from a video with a common CameraConfig</span>
+<span class="n">vid</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">vid_file</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span> <span class="n">end_frame</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">imgs_rgb</span> <span class="o">=</span> <span class="n">vid</span><span class="o">.</span><span class="n">get_frames</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;rgb&quot;</span><span class="p">)</span>  <span class="c1"># all frames in RGB</span>
+<span class="n">img_rgb</span> <span class="o">=</span> <span class="n">imgs_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># derive only the first and retrieve the values. Result is a numpy array</span>
+<span class="c1"># first define a common axes</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>  <span class="c1"># now we make a normal 2d axes</span>
+<span class="n">img_rgb</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">cs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="mf">93.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># now we add the camera configuration plot</span>
+<span class="n">cs</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It is important to understand the different coordinates available within the <code class="docutils literal notranslate"><span class="pre">CrossSection</span></code> object.
+These are as follows with interpolators referring to methods that provide interpolated values using <code class="docutils literal notranslate"><span class="pre">l</span></code> as
+input or, with suffix <code class="docutils literal notranslate"><span class="pre">_from_s</span></code>, <code class="docutils literal notranslate"><span class="pre">s</span></code> as input. s-coordinates can also be derived from l-coordinates with
+<code class="docutils literal notranslate"><span class="pre">interp_s_from_l</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Symbol</p></th>
+<th class="head"><p>Interpolators</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">x</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">interp_x</span></code></p></td>
+<td><p>x-coordinates as derived from the user-provided data</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">y</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">interp_y</span></code></p></td>
+<td><p>y-coordinates as derived from the user-provided data</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">z</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">interp_z</span></code>, <code class="docutils literal notranslate"><span class="pre">interp_z_from_s</span></code></p></td>
+<td><p>z-coordinates as derived from the user-provided data</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">s</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">interp_s_from_l</span></code></p></td>
+<td><p>coordinates as horizontally measured from left-to-right</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">l</span></code></p></td>
+<td><p>None</p></td>
+<td><p>length as followed from left-to-right bank, including
+vertical distance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">d</span></code></p></td>
+<td><p>None</p></td>
+<td><p>horizontal distance from the camera position</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>From these, the <code class="docutils literal notranslate"><span class="pre">l</span></code> coordinates are leading in defining a unique position in the cross section. <code class="docutils literal notranslate"><span class="pre">s</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> may
+also seem suitable candidates, but in cases where vertical walls (or entirely flat bottoms) are experienced,
+<code class="docutils literal notranslate"><span class="pre">z</span></code> (<code class="docutils literal notranslate"><span class="pre">s</span></code>) does not provide a unique point in the cross section. Only <code class="docutils literal notranslate"><span class="pre">l</span></code> can provide that. Moreover,
+<code class="docutils literal notranslate"><span class="pre">z</span></code> may provide a value in both the left and right-side of the cross section.</p>
+<p>Geometrical derivatives such as lines perpendicular to the cross section coordinates, and the earlier show
+polygons can be derived with underlying methods. These largely work in similar manners. Below we show examples
+of perpendicular lines and polygons. You can here see that indeed <code class="docutils literal notranslate"><span class="pre">l</span></code> is used to define a unique location in
+the cross section.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import a helper function for plotting polygons</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_helpers</span>
+
+<span class="n">pol1</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_csl_pol</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">.5</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">pol2</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_csl_pol</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
+<span class="n">plot_helpers</span><span class="p">(</span><span class="n">pol1</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;1st polygon (0.5)&quot;</span><span class="p">)</span>
+<span class="n">plot_helpers</span><span class="p">(</span><span class="n">pol2</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;2nd polygon (-0.5)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>For other geometries like lines and points (which are simpler), we refer to the <a class="reference internal" href="../../api.html#cross-section"><span class="std std-ref">API</span></a>
+documentation.</p>
+<p>The water level detection is available under a method called <code class="docutils literal notranslate"><span class="pre">detect_water_level</span></code>, and this requires an
+extracted image (the numpy values) as input. For instance, for a simple greyscale image, you can call the
+method as follows, using the earlier defined <code class="docutils literal notranslate"><span class="pre">vid</span></code> object as video.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vid</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()</span>  <span class="c1"># without arguments this retrieves greyscale lazily.</span>
+<span class="c1"># extract one (the first) frame, and convert to a numpy array.</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">vid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to manipulate the shape of the polygons over which intensities are sampled, you can alter the
+<code class="docutils literal notranslate"><span class="pre">lenth</span></code>, <code class="docutils literal notranslate"><span class="pre">padding</span></code> and <code class="docutils literal notranslate"><span class="pre">offset</span></code> parameters. For instance, if you have a very straight rectangular concrete
+aligned channel, and perfectly identified intrinsic and extrinsic parameters, using a longer polygon shape
+can help to improve the water level detection. Assuming you want a 10 meters long polygon and displace it
+slightly upstream by 2 meters for better camera coverage, change the above to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vid</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()</span>  <span class="c1"># without arguments this retrieves greyscale lazily.</span>
+<span class="c1"># extract one (the first) frame, and convert to a numpy array.</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">vid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># adjust the polygon shape to better match the situation</span>
+<span class="c1"># you could also have added `padding=1.0` to make the polygon wider, but we generally don&#39;t recommend that.</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../video/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Videos</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../frames/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Frames</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#some-principles-of-water-level-detection">Some principles of water level detection</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-work-with-cross-sections">How to work with cross sections</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/user-guide/cross_section/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Rainbow Sensing.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

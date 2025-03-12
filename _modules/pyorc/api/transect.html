@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.transect &#8212; pyorc 0.7.0 documentation</title>
+    <title>pyorc.api.transect &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -407,21 +407,22 @@ document.write(`
   <h1>Source code for pyorc.api.transect</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Transect module for pyorc.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">from</span> <span class="nn">xarray.core</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
 
-<span class="kn">from</span> <span class="nn">pyorc</span> <span class="kn">import</span> <span class="n">helpers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">helpers</span>
 
-<span class="kn">from</span> <span class="nn">.orcbase</span> <span class="kn">import</span> <span class="n">ORCBase</span>
-<span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">_Transect_PlotMethods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.cross_section</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrossSection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.orcbase</span><span class="w"> </span><span class="kn">import</span> <span class="n">ORCBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Transect_PlotMethods</span>
 
 
 <div class="viewcode-block" id="Transect"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.html#pyorc.Transect">[docs]</a><span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s2">&quot;transect&quot;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Transect</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Transect</span><span class="p">(</span><span class="n">ORCBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transect functionalities that can be applied on ``xarray.Dataset``.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Transect.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.html#pyorc.Transect.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.__init__"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.html#pyorc.Transect.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a transect ``xarray.Dataset`` containing cross-sectional velocities in [time, points] dimensions.</span>
 
 <span class="sd">        Parameters</span>
@@ -432,7 +433,17 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Transect</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Transect.vector_to_scalar"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">vector_to_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cross_section</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return cross-sectional coordinates as `CrossSection` object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="s2">&quot;zcoords&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">_z</span><span class="p">]</span> <span class="k">for</span> <span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">_z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">xcoords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">ycoords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">zcoords</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">CrossSection</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Transect.vector_to_scalar"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">vector_to_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle.</span>
 
 <span class="sd">        Parameters</span>
@@ -468,7 +479,7 @@ document.write(`
         <span class="n">v_eff</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;v_eff_nofill&quot;</span>  <span class="c1"># there still may be gaps in this series</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;v_eff_nofill&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_eff</span></div>
 
-<div class="viewcode-block" id="Transect.get_bottom_surface_z_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_bottom_surface_z_perspective.html#pyorc.Transect.get_bottom_surface_z_perspective">[docs]</a>    <span class="k">def</span> <span class="nf">get_bottom_surface_z_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.get_bottom_surface_z_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_bottom_surface_z_perspective.html#pyorc.Transect.get_bottom_surface_z_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_bottom_surface_z_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return densified bottom and surface points, warped to image perspective.&quot;&quot;&quot;</span>
         <span class="c1"># get bottom coordinates</span>
         <span class="n">bottom_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_transect_perspective</span><span class="p">(</span><span class="n">within_image</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -497,7 +508,7 @@ document.write(`
         <span class="n">surface_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">surface_points</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">bottom_points</span><span class="p">,</span> <span class="n">surface_points</span></div>
 
-<div class="viewcode-block" id="Transect.get_transect_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_transect_perspective.html#pyorc.Transect.get_transect_perspective">[docs]</a>    <span class="k">def</span> <span class="nf">get_transect_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within_image</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.get_transect_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_transect_perspective.html#pyorc.Transect.get_transect_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_transect_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within_image</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get row, col locations of the transect coordinates.</span>
 
 <span class="sd">        Parameters</span>
@@ -527,7 +538,7 @@ document.write(`
         <span class="n">points_proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">project_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">within_image</span><span class="o">=</span><span class="n">within_image</span><span class="p">,</span> <span class="n">swap_y_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">points_proj</span></div>
 
-<div class="viewcode-block" id="Transect.get_wetted_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_wetted_perspective.html#pyorc.Transect.get_wetted_perspective">[docs]</a>    <span class="k">def</span> <span class="nf">get_wetted_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.get_wetted_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_wetted_perspective.html#pyorc.Transect.get_wetted_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_wetted_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get wetted polygon in camera perspective.</span>
 
 <span class="sd">        Parameters</span>
@@ -551,7 +562,7 @@ document.write(`
         <span class="n">pol_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">pol_points</span><span class="p">,</span> <span class="n">pol_points</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pol_points</span></div>
 
-<div class="viewcode-block" id="Transect.get_depth_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_depth_perspective.html#pyorc.Transect.get_depth_perspective">[docs]</a>    <span class="k">def</span> <span class="nf">get_depth_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.get_depth_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_depth_perspective.html#pyorc.Transect.get_depth_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_depth_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get line (x, y) pairs that show the depth over several intervals in the wetted part of the cross section.</span>
 
 <span class="sd">        Parameters</span>
@@ -575,7 +586,7 @@ document.write(`
         <span class="c1"># make line pairs</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">bottom_points</span><span class="p">,</span> <span class="n">surface_points</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Transect.get_xyz_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyz_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trans_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_outside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.get_xyz_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_xyz_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trans_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_outside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get camera-perspective column, row coordinates from cross-section locations.</span>
 
 <span class="sd">        Parameters</span>
@@ -636,7 +647,7 @@ document.write(`
 
         <span class="k">return</span> <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span></div>
 
-<div class="viewcode-block" id="Transect.get_river_flow"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_river_flow.html#pyorc.Transect.get_river_flow">[docs]</a>    <span class="k">def</span> <span class="nf">get_river_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">discharge_name</span><span class="o">=</span><span class="s2">&quot;river_flow&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.get_river_flow"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_river_flow.html#pyorc.Transect.get_river_flow">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_river_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">discharge_name</span><span class="o">=</span><span class="s2">&quot;river_flow&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1].</span>
 
 <span class="sd">        Depth average velocities must first have been estimated using get_q. A variable &quot;Q&quot; will be added to Dataset</span>
@@ -667,7 +678,7 @@ document.write(`
         <span class="n">discharge</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Q&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">discharge_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">discharge</span></div>
 
-<div class="viewcode-block" id="Transect.get_q"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_q.html#pyorc.Transect.get_q">[docs]</a>    <span class="k">def</span> <span class="nf">get_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_corr</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">fill_method</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Transect.get_q"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_q.html#pyorc.Transect.get_q">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_corr</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">fill_method</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Integrated velocity over depth for quantiles of time series.</span>
 
 <span class="sd">        A correction `v_corr` between surface velocity and depth-average velocity is used.</span>
@@ -768,7 +779,7 @@ document.write(`
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

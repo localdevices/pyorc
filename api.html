@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>API reference &#8212; pyorc 0.7.0 documentation</title>
+    <title>API reference &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -51,7 +51,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyorc.CameraConfig" href="_generated/pyorc.CameraConfig.html" />
-    <link rel="prev" title="Camera calibration" href="_examples/05_Camera_calibration.html" />
+    <link rel="prev" title="Estimating a water level optically using the camera configuration and a cross section" href="_examples/06_Estimating_water_levels_optically.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -383,9 +383,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.to_json.html">pyorc.CameraConfig.to_json</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.estimate_lens_position.html">pyorc.CameraConfig.estimate_lens_position</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.get_M.html">pyorc.CameraConfig.get_M</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.get_bbox.html">pyorc.CameraConfig.get_bbox</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.get_camera_coords.html">pyorc.CameraConfig.get_camera_coords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.get_dist_shore.html">pyorc.CameraConfig.get_dist_shore</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.get_dist_wall.html">pyorc.CameraConfig.get_dist_wall</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.get_depth.html">pyorc.CameraConfig.get_depth</a></li>
@@ -400,6 +400,37 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.plot.html">pyorc.CameraConfig.plot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.plot_bbox.html">pyorc.CameraConfig.plot_bbox</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.html">pyorc.CrossSection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.cs_points.html">pyorc.CrossSection.cs_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.cs_points_sz.html">pyorc.CrossSection.cs_points_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.cs_linestring.html">pyorc.CrossSection.cs_linestring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.cs_linestring_sz.html">pyorc.CrossSection.cs_linestring_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.cs_angle.html">pyorc.CrossSection.cs_angle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.idx_closest_point.html">pyorc.CrossSection.idx_closest_point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.idx_farthest_point.html">pyorc.CrossSection.idx_farthest_point</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_cs_waterlevel.html">pyorc.CrossSection.get_cs_waterlevel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_csl_point.html">pyorc.CrossSection.get_csl_point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_csl_line.html">pyorc.CrossSection.get_csl_line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_csl_pol.html">pyorc.CrossSection.get_csl_pol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_bottom_surface.html">pyorc.CrossSection.get_bottom_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_planar_surface.html">pyorc.CrossSection.get_planar_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface.html">pyorc.CrossSection.get_wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_line_of_interest.html">pyorc.CrossSection.get_line_of_interest</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot.html">pyorc.CrossSection.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_cs.html">pyorc.CrossSection.plot_cs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_planar_surface.html">pyorc.CrossSection.plot_planar_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Video.html">pyorc.Video</a></li>
@@ -648,14 +679,14 @@ how to effectively work with the <a class="reference external" href="https://doc
 <h3>Retrieve geometrical information<a class="headerlink" href="#retrieve-geometrical-information" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M" title="pyorc.CameraConfig.get_M"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.get_M</span></code></a>([h_a, to_bbox_grid, reverse])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.estimate_lens_position.html#pyorc.CameraConfig.estimate_lens_position" title="pyorc.CameraConfig.estimate_lens_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.estimate_lens_position</span></code></a>()</p></td>
+<td><p>Estimate lens position from distortion and intrinsec/extrinsic matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.get_M.html#pyorc.CameraConfig.get_M" title="pyorc.CameraConfig.get_M"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.get_M</span></code></a>([h_a, to_bbox_grid, reverse])</p></td>
 <td><p>Establish a transformation matrix for a certain actual water level <cite>h_a</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.get_bbox.html#pyorc.CameraConfig.get_bbox" title="pyorc.CameraConfig.get_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.get_bbox</span></code></a>([camera, h_a, z_a, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.get_bbox.html#pyorc.CameraConfig.get_bbox" title="pyorc.CameraConfig.get_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.get_bbox</span></code></a>([camera, mode, h_a, ...])</p></td>
 <td><p>Get bounding box.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.get_camera_coords.html#pyorc.CameraConfig.get_camera_coords" title="pyorc.CameraConfig.get_camera_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.get_camera_coords</span></code></a>(points)</p></td>
-<td><p>Convert real-world coordinates into camera coordinates.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.get_dist_shore.html#pyorc.CameraConfig.get_dist_shore" title="pyorc.CameraConfig.get_dist_shore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.get_dist_shore</span></code></a>(x, y, z[, h_a])</p></td>
 <td><p>Retrieve depth for measured bathymetry points.</p></td>
@@ -698,8 +729,126 @@ how to effectively work with the <a class="reference external" href="https://doc
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.plot.html#pyorc.CameraConfig.plot" title="pyorc.CameraConfig.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.plot</span></code></a>([figsize, ax, tiles, ...])</p></td>
 <td><p>Plot geographical situation of the CameraConfig.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.plot_bbox.html#pyorc.CameraConfig.plot_bbox" title="pyorc.CameraConfig.plot_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.plot_bbox</span></code></a>([ax, camera, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.plot_bbox.html#pyorc.CameraConfig.plot_bbox" title="pyorc.CameraConfig.plot_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.plot_bbox</span></code></a>([ax, camera, mode, ...])</p></td>
 <td><p>Plot bounding box.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="crosssection-class">
+<span id="cross-section"></span><h2>CrossSection class<a class="headerlink" href="#crosssection-class" title="Permalink to this heading">#</a></h2>
+<p>The <cite>CrossSection</cite> class is made to facilitate geometrical operations with cross sections.
+It can be used to guide water line detection methods, estimate the water level and
+possibly other optical methods conceived by the user, that require understanding of the
+perspective, jointly with a measured cross section.</p>
+<p>To facilitate geometric operations, most of the geometric properties are returned as
+<cite>shapely.geometry</cite> objects such as <cite>Point</cite>, <cite>LineString</cite> and <cite>Polygon</cite>.</p>
+<p>This makes it easy to derive important flow properties such as wetted surface [m2] and
+wetted perimeter [m].</p>
+<section id="id1">
+<h3>Class and properties<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.html#pyorc.CrossSection" title="pyorc.CrossSection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection</span></code></a>(camera_config, cross_section)</p></td>
+<td><p>Water Level functionality.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.cs_points.html#pyorc.CrossSection.cs_points" title="pyorc.CrossSection.cs_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.cs_points</span></code></a></p></td>
+<td><p>Return cross-section as list of shapely.geometry.Point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.cs_points_sz.html#pyorc.CrossSection.cs_points_sz" title="pyorc.CrossSection.cs_points_sz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.cs_points_sz</span></code></a></p></td>
+<td><p>Return cross-section perpendicular to flow direction (SZ) as list of shapely.geometry.Point.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.cs_linestring.html#pyorc.CrossSection.cs_linestring" title="pyorc.CrossSection.cs_linestring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.cs_linestring</span></code></a></p></td>
+<td><p>Return cross-section as shapely.geometry.Linestring.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.cs_linestring_sz.html#pyorc.CrossSection.cs_linestring_sz" title="pyorc.CrossSection.cs_linestring_sz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.cs_linestring_sz</span></code></a></p></td>
+<td><p>Return cross-section perpendicular to flow direction (SZ) as shapely.geometry.Linestring.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.cs_angle.html#pyorc.CrossSection.cs_angle" title="pyorc.CrossSection.cs_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.cs_angle</span></code></a></p></td>
+<td><p>Average angle orientation that cross-section makes in geographical space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.idx_closest_point.html#pyorc.CrossSection.idx_closest_point" title="pyorc.CrossSection.idx_closest_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.idx_closest_point</span></code></a></p></td>
+<td><p>Determine index of point in cross-section, closest to the camera.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.idx_farthest_point.html#pyorc.CrossSection.idx_farthest_point" title="pyorc.CrossSection.idx_farthest_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.idx_farthest_point</span></code></a></p></td>
+<td><p>Determine index of point in cross-section, farthest from the camera.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="getting-cross-section-geometries">
+<h3>Getting cross section geometries<a class="headerlink" href="#getting-cross-section-geometries" title="Permalink to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_cs_waterlevel.html#pyorc.CrossSection.get_cs_waterlevel" title="pyorc.CrossSection.get_cs_waterlevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_cs_waterlevel</span></code></a>(h[, sz])</p></td>
+<td><p>Retrieve LineString of water surface at cross-section at a given water level.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_csl_point.html#pyorc.CrossSection.get_csl_point" title="pyorc.CrossSection.get_csl_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_csl_point</span></code></a>([h, l, camera, ...])</p></td>
+<td><p>Retrieve list of points, where cross-section (cs) touches the land (l).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_csl_line.html#pyorc.CrossSection.get_csl_line" title="pyorc.CrossSection.get_csl_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_csl_line</span></code></a>([h, l, length, ...])</p></td>
+<td><p>Retrieve waterlines over the cross-section, perpendicular to the orientation of the cross-section.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_csl_pol.html#pyorc.CrossSection.get_csl_pol" title="pyorc.CrossSection.get_csl_pol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_csl_pol</span></code></a>([h, l, length, ...])</p></td>
+<td><p>Get horizontal polygon from cross-section land-line towards water or towards land.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_bottom_surface.html#pyorc.CrossSection.get_bottom_surface" title="pyorc.CrossSection.get_bottom_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_bottom_surface</span></code></a>([length, ...])</p></td>
+<td><p>Retrieve a bottom surface polygon for the entire cross section, expanded over a length.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_planar_surface.html#pyorc.CrossSection.get_planar_surface" title="pyorc.CrossSection.get_planar_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_planar_surface</span></code></a>(h[, length, ...])</p></td>
+<td><p>Retrieve a planar water surface for a given water level, as a geometry.Polygon.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface.html#pyorc.CrossSection.get_wetted_surface" title="pyorc.CrossSection.get_wetted_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_wetted_surface</span></code></a>(h[, camera, ...])</p></td>
+<td><p>Retrieve a wetted surface for a given water level, as a geometry.Polygon.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface_sz.html#pyorc.CrossSection.get_wetted_surface_sz" title="pyorc.CrossSection.get_wetted_surface_sz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_wetted_surface_sz</span></code></a>(h)</p></td>
+<td><p>Retrieve a wetted surface perpendicular to flow direction (SZ) for a water level, as a geometry.Polygon.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_line_of_interest.html#pyorc.CrossSection.get_line_of_interest" title="pyorc.CrossSection.get_line_of_interest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_line_of_interest</span></code></a>([bank])</p></td>
+<td><p>Retrieve the points of interest within the cross-section for water level detection.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id2">
+<h3>Plotting methods<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<p>The plotting methods consist of a number of smaller methods, as well as one
+overarching <cite>CrossSection.plot</cite> method, that combines the smaller methods.
+The plotting functions are meant to provide the user insight in the situation
+on a site. All methods can be combined with the parallel plotting method
+for camera configurations <cite>CameraConfig.plot</cite>.</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.plot.html#pyorc.CrossSection.plot" title="pyorc.CrossSection.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.plot</span></code></a>([h, length, offset, ...])</p></td>
+<td><p>Plot the cross-section situation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.plot_cs.html#pyorc.CrossSection.plot_cs" title="pyorc.CrossSection.plot_cs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.plot_cs</span></code></a>([ax, camera, swap_y_coords])</p></td>
+<td><p>Plot the cross section.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.plot_planar_surface.html#pyorc.CrossSection.plot_planar_surface" title="pyorc.CrossSection.plot_planar_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.plot_planar_surface</span></code></a>(h[, ...])</p></td>
+<td><p>Plot the planar surface for a given water level.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.plot_bottom_surface.html#pyorc.CrossSection.plot_bottom_surface" title="pyorc.CrossSection.plot_bottom_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.plot_bottom_surface</span></code></a>([length, ...])</p></td>
+<td><p>Plot the bottom surface for a given water level.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.plot_wetted_surface.html#pyorc.CrossSection.plot_wetted_surface" title="pyorc.CrossSection.plot_wetted_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.plot_wetted_surface</span></code></a>(h[, ...])</p></td>
+<td><p>Plot the wetted surface for a given water level.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="water-level-detection">
+<h3>Water level detection<a class="headerlink" href="#water-level-detection" title="Permalink to this heading">#</a></h3>
+<p>Combined with a preprocessed image from e.g. a video file, a water level can be detected.</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.detect_water_level.html#pyorc.CrossSection.detect_water_level" title="pyorc.CrossSection.detect_water_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.detect_water_level</span></code></a>(img[, bank, ...])</p></td>
+<td><p>Detect water level optically from provided image.</p></td>
 </tr>
 </tbody>
 </table>
@@ -708,8 +857,8 @@ how to effectively work with the <a class="reference external" href="https://doc
 </section>
 <section id="video-class">
 <span id="video"></span><h2>Video class<a class="headerlink" href="#video-class" title="Permalink to this heading">#</a></h2>
-<section id="id1">
-<h3>Class and properties<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
+<section id="id3">
+<h3>Class and properties<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Video.html#pyorc.Video" title="pyorc.Video"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Video</span></code></a>(fn[, camera_config, h_a, start_frame, ...])</p></td>
@@ -790,8 +939,8 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="frames-subclass">
 <span id="frames"></span><h2>Frames subclass<a class="headerlink" href="#frames-subclass" title="Permalink to this heading">#</a></h2>
 <p>These methods can be called from an <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code> that is generated using <code class="docutils literal notranslate"><span class="pre">pyorc.Video.get_frames</span></code>.</p>
-<section id="id2">
-<h3>Class and properties<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<section id="id4">
+<h3>Class and properties<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.html#pyorc.Frames" title="pyorc.Frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames</span></code></a>(xarray_obj)</p></td>
@@ -868,7 +1017,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.to_ani.html#pyorc.Frames.to_ani" title="pyorc.Frames.to_ani"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.to_ani</span></code></a>(fn[, figure_kwargs, ...])</p></td>
 <td><p>Store an animation of the frames in the object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.to_video.html#pyorc.Frames.to_video" title="pyorc.Frames.to_video"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.to_video</span></code></a>(fn[, video_format, fps])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.to_video.html#pyorc.Frames.to_video" title="pyorc.Frames.to_video"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.to_video</span></code></a>(fn[, video_format, fps, ...])</p></td>
 <td><p>Write frames to a video file without any layout.</p></td>
 </tr>
 </tbody>
@@ -879,12 +1028,12 @@ how to effectively work with the <a class="reference external" href="https://doc
 <section id="velocimetry-subclass">
 <span id="velocimetry"></span><h2>Velocimetry subclass<a class="headerlink" href="#velocimetry-subclass" title="Permalink to this heading">#</a></h2>
 <p>These methods can be called from an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> that is generated using <code class="docutils literal notranslate"><span class="pre">pyorc.Frames.get_piv</span></code>.</p>
-<section id="id3">
-<h3>Class and properties<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
+<section id="id5">
+<h3>Class and properties<a class="headerlink" href="#id5" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.html#pyorc.Velocimetry" title="pyorc.Velocimetry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry</span></code></a>(xarray_obj)</p></td>
-<td><p>Velocimetry functionalities that can be applied on <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></p></td>
+<td><p>Velocimetry functionalities that can be applied on <cite>xarray.Dataset</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.camera_config.html#pyorc.Velocimetry.camera_config" title="pyorc.Velocimetry.camera_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.camera_config</span></code></a></p></td>
 <td><p>Camera configuration belonging to the processed video.</p></td>
@@ -896,7 +1045,7 @@ how to effectively work with the <a class="reference external" href="https://doc
 <td><p>Actual water level belonging to the processed video.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.is_velocimetry.html#pyorc.Velocimetry.is_velocimetry" title="pyorc.Velocimetry.is_velocimetry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.is_velocimetry</span></code></a></p></td>
-<td><p>Checks if the data contained in the object seems to be velocimetry data by checking naming of dims and available variables.</p></td>
+<td><p>Check if the data contained in the object seems to be velocimetry data.</p></td>
 </tr>
 </tbody>
 </table>
@@ -965,7 +1114,7 @@ on a full time series and will then mask out grid cells over its full time span 
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.get_transect.html#pyorc.Velocimetry.get_transect" title="pyorc.Velocimetry.get_transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.get_transect</span></code></a>(x, y[, z, s, crs, ...])</p></td>
-<td><p>Interpolate all variables to supplied x and y coordinates of a cross section.</p></td>
+<td><p>Interpolate all variables to supplied x and y coordinates of a cross-section.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.set_encoding.html#pyorc.Velocimetry.set_encoding" title="pyorc.Velocimetry.set_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.set_encoding</span></code></a>([enc_pars])</p></td>
 <td><p>Set encoding parameters for all typical variables in a velocimetry dataset.</p></td>
@@ -974,8 +1123,8 @@ on a full time series and will then mask out grid cells over its full time span 
 </table>
 </div>
 </section>
-<section id="id4">
-<h3>Plotting methods<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h3>
+<section id="id6">
+<h3>Plotting methods<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.plot.html#pyorc.Velocimetry.plot" title="pyorc.Velocimetry.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.plot</span></code></a></p></td>
@@ -1001,8 +1150,8 @@ on a full time series and will then mask out grid cells over its full time span 
 <section id="transect-subclass">
 <span id="transect"></span><h2>Transect subclass<a class="headerlink" href="#transect-subclass" title="Permalink to this heading">#</a></h2>
 <p>These methods can be called from an <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> that is generated using <code class="docutils literal notranslate"><span class="pre">pyorc.Velocimetry.get_transect</span></code>.</p>
-<section id="id5">
-<h3>Class and properties<a class="headerlink" href="#id5" title="Permalink to this heading">#</a></h3>
+<section id="id7">
+<h3>Class and properties<a class="headerlink" href="#id7" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.html#pyorc.Transect" title="pyorc.Transect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect</span></code></a>(xarray_obj)</p></td>
@@ -1061,8 +1210,8 @@ on a full time series and will then mask out grid cells over its full time span 
 </table>
 </div>
 </section>
-<section id="id6">
-<h3>Plotting methods<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h3>
+<section id="id8">
+<h3>Plotting methods<a class="headerlink" href="#id8" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.plot.html#pyorc.Transect.plot" title="pyorc.Transect.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.plot</span></code></a></p></td>
@@ -1092,12 +1241,12 @@ on a full time series and will then mask out grid cells over its full time span 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="_examples/05_Camera_calibration.html"
+       href="_examples/06_Estimating_water_levels_optically.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Camera calibration</p>
+        <p class="prev-next-title">Estimating a water level optically using the camera configuration and a cross section</p>
       </div>
     </a>
     <a class="right-next"
@@ -1135,14 +1284,21 @@ on a full time series and will then mask out grid cells over its full time span 
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-methods">Plotting methods</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#video-class">Video class</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crosssection-class">CrossSection class</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-cross-section-geometries">Getting cross section geometries</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Plotting methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#water-level-detection">Water level detection</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#video-class">Video class</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Class and properties</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-properties">Setting properties</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-frames-from-video-objects">Getting frames from video objects</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#frames-subclass">Frames subclass</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Class and properties</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#enhancing-frames">Enhancing frames</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#projecting-frames-to-planar-views">Projecting frames to planar views</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieving-surface-velocities-from-frames">Retrieving surface velocities from frames</a></li>
@@ -1150,19 +1306,19 @@ on a full time series and will then mask out grid cells over its full time span 
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#velocimetry-subclass">Velocimetry subclass</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Class and properties</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#temporal-masking-methods">Temporal masking methods</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#spatial-masking-methods">Spatial masking methods</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-infilling">Data infilling</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-data-over-transects">Getting data over transects</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Plotting methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Plotting methods</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transect-subclass">Transect subclass</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Class and properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Class and properties</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#derivatives">Derivatives</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#river-flow-methods">River flow methods</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Plotting methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Plotting methods</a></li>
 </ul>
 </li>
 </ul>
@@ -1202,7 +1358,7 @@ on a full time series and will then mask out grid cells over its full time span 
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>

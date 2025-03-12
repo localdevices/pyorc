@@ -1,0 +1,859 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Estimating a water level optically using the camera configuration and a cross section &#8212; pyorc 0.8.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-localdevices.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_examples/06_Estimating_water_levels_optically';</script>
+    <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API reference" href="../api.html" />
+    <link rel="prev" title="Camera calibration" href="05_Camera_calibration.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/orc_logo_color.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../intro.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../quickstart.html">
+    Quick start for programmers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://localdevices.org" title="Local Devices" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/logo.svg" class="icon-link-image" alt="Local Devices"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Content</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01_Camera_Configuration_single_video.html">Setup a camera configuration for processing a single video</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="02_Process_velocimetry.html">Analyze surface velocities of a video with velocimetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_Plotting_and_masking_velocimetry_results.html">Immersive plotting and analyzing results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_Extracting_crosssection_velocities_and_discharge.html">Obtain a discharge measurement over a cross section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_Camera_calibration.html">Camera calibration with chessboard pattern</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Optical water level detection with a cross section</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../quickstart.html" class="nav-link">Quick start for programmers</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Estimating...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Estimating-a-water-level-optically-using-the-camera-configuration-and-a-cross-section">
+<h1>Estimating a water level optically using the camera configuration and a cross section<a class="headerlink" href="#Estimating-a-water-level-optically-using-the-camera-configuration-and-a-cross-section" title="Permalink to this heading">#</a></h1>
+<p>If you do not have the means to measure a water level from incoming new videos of a scene, but you do have a fully configured camera configuration and a <em>in situ</em> measured cross section, you may assess the water level by automatic optical inference of the water level along the cross section. In this notebook we demonstrate how you can use these methods.</p>
+<p>Before you dive into this notebook, we recommend to first look at <strong>notebook 01</strong>, how to establish a camera configuration.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normalize</span>
+</pre></div>
+</div>
+</div>
+<p>The starting point for measuring a water level in an incoming video is an existing camera configuration, which provides the information on the camera’s perspective.</p>
+<p>Also, we require a cross section. The way the water level measurement approach works is roughly as follows:</p>
+<ul class="simple">
+<li><p>the algorithm hypothesizes a randomly chosen possible location in the cross section as being the location where the cross section is exactly on the edge of the water surface.</p></li>
+<li><p>At that location, the algorithm draws a line, perpendicular to the cross-section as a hypothesis of being the water line.</p></li>
+<li><p>The algorithm then creates horizontally oriented rectangles, left and right of the hypothesized water line, projects these to the image, and samples intensities from a derived image of the incoming video.</p></li>
+<li><p>The intensity distributions of both rectangles are compared. If the distributions are very different it is more likely that the drawn line indeed represented the water line, if they are quite similar it is less likely.</p></li>
+<li><p>The algorithm uses a search method to repeatedly do this analysis and find the location where the intensity distribution function are the most dissimilar. The vertical level belonging to this cross-section location is retrieved and returned to the user.</p></li>
+</ul>
+<p>Below we show what the cross section object contains, and show how it can be used to estimate the water level.</p>
+<p>First we load in a cross section, a video, and a camera configuration. Note:</p>
+<ul class="simple">
+<li><p>we use here the same video as before, but you can use any video with any water level as long as it belongs to the same camera configuration and the cross section reaches far enough into the banks to be able to detect it crossing the water surface.</p></li>
+<li><p>we only use a single frame from the video as we don’t need to interpret movements.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">load_camera_config</span><span class="p">(</span><span class="s2">&quot;ngwerere/ngwerere.json&quot;</span><span class="p">)</span>
+<span class="c1"># cs_file = &quot;ngwerere_cross_section_new.csv&quot;</span>
+<span class="n">cs_file</span> <span class="o">=</span> <span class="s2">&quot;ngwerere/cross_section2.geojson&quot;</span>
+<span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;ngwerere/ngwerere_20191103.mp4&quot;</span>
+
+<span class="c1"># we load the video as before</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span>
+    <span class="n">video_file</span><span class="p">,</span>
+    <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span>
+    <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">end_frame</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">h_a</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># the cross section is stored in a simple geojson point (x, y, z) file</span>
+<span class="n">cs_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cs_file</span><span class="p">)</span>
+<span class="n">cross_section</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CrossSection</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">cs_gdf</span><span class="p">)</span>
+<span class="n">cross_section</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Scanning video: 100%|██████████| 2/2 [00:00&lt;00:00, 18.43it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+LINESTRING Z (642732.4200000002 8304297.063 1182.3, 642732.5810000001 8304297.032 1182.15, 642732.741 8304297.001 1182.1, 642732.8780000003 8304296.974 1182.1, 642733.0150000001 8304296.948 1182.1, 642733.152 8304296.922 1182.1, 642733.3050000002 8304296.892000001 1182.05, 642733.458 8304296.862 1182, 642733.635 8304296.828 1181.967, 642733.812 8304296.794 1181.933, 642733.99 8304296.76 1181.9, 642734.1429999999 8304296.73 1181.85, 642734.2959999999 8304296.7 1181.8, 642734.4370000002 8304296.673 1181.867, 642734.5770000005 8304296.646 1181.933, 642734.7180000003 8304296.619 1182, 642734.871 8304296.589 1182, 642735.0230000004 8304296.56 1182, 642735.176 8304296.53 1182, 642735.34 8304296.499 1182.033, 642735.5040000002 8304296.467 1182.2, 642735.6690000005 8304296.435 1182.3, 642735.8349999998 8304296.403 1182.3, 642736.0010000002 8304296.371 1182.3, 642736.1660000001 8304296.339 1182.3)
+</pre></div></div>
+</div>
+<p>We see a linestring representation of the cross section points. You can clearly see that the linestring contains our x, y and z real-world coordinates. But we want to see a more clear picture. Let’s plot this in 3D</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_4374/3994297915.py:1: UserWarning: No water level is provided. Camera configuration reference water level is used.
+  ax = cross_section.plot()
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_06_Estimating_water_levels_optically_5_1.png" src="../_images/_examples_06_Estimating_water_levels_optically_5_1.png" />
+</div>
+</div>
+<p>Interesting plot, but it would also be good to see what it looks like from the camera perspective. Let’s plot both in 2 different subplots. The first subplot is a simple 2D axes with a RGB frame from our video. But we add an augmented reality of the cross section with <code class="docutils literal notranslate"><span class="pre">camera=True</span></code>. We can control what we exactly want to see with the <code class="docutils literal notranslate"><span class="pre">bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">planar</span></code> and <code class="docutils literal notranslate"><span class="pre">wetted</span></code> flags. We can also control the plot keyword arguments like line width, alpha level, and so on for all through
+<code class="docutils literal notranslate"><span class="pre">bottom_kwargs</span></code>, <code class="docutils literal notranslate"><span class="pre">planar_kwargs</span></code> and <code class="docutils literal notranslate"><span class="pre">wetted_kwargs</span></code>We also add the camera configuration to both.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># for the 3D plot, we need to explicitly define a 3d projection</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="c1"># now plot an image on the first</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get_frames</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;rgb&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>  <span class="c1"># .frames.plot(ax=ax1)</span>
+<span class="c1"># on top of this, plot the cross section WITH camera=True, we skip the planar surface and make the bottom look a bit stronger.</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">planar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;brown&quot;</span><span class="p">})</span>
+<span class="c1"># and add the camera config too!</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+
+<span class="c1"># and do the 3d plot also</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_4374/1485782648.py:9: UserWarning: No water level is provided. Camera configuration reference water level is used.
+  cross_section.plot(camera=True, ax=ax1, planar=False, bottom_kwargs={&#34;alpha&#34;: 0.6, &#34;color&#34;: &#34;brown&#34;})
+/tmp/ipykernel_4374/1485782648.py:14: UserWarning: No water level is provided. Camera configuration reference water level is used.
+  cross_section.plot(ax=ax2)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_06_Estimating_water_levels_optically_7_1.png" src="../_images/_examples_06_Estimating_water_levels_optically_7_1.png" />
+</div>
+</div>
+<p>Now we have a slightly better impression of the situation at the site and how our cross section fits with the camera configuration. Remember from the first notebook, that as this video is only one snapshot, we have set <code class="docutils literal notranslate"><span class="pre">h_ref</span></code> to 0.0 meters. This means that our optical measurement method should give us about 0.0 meters as water level. Let’s exxtract one grayscale image and see how this goes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">img</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># we use &quot;values&quot; as we need a raw numpy array</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The optimized water level is </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2"> meters&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The optimized water level is 0.054263535063000745 meters
+</pre></div></div>
+</div>
+<p>You should see something near 0.055 meters. As this is from an optmization algorithm the exact value may vary a little bit. Not bad at all as this is only about 5cm from the known water level! We can now also make a plot, that shows the wetted cross section at this level</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># plot the rgb image</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>  <span class="c1"># .frames.plot(ax=ax1)</span>
+<span class="c1"># on top of this, plot our new water level, with also the water line, using 2 plot methods</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">planar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;brown&quot;</span><span class="p">})</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot_water_level</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="c1"># and add the camera config too!</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+
+<span class="c1"># and do the 3d plot also</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_4374/1530537871.py:6: UserWarning: No water level is provided. Camera configuration reference water level is used.
+  cross_section.plot(camera=True, ax=ax, planar=False, bottom_kwargs={&#34;alpha&#34;: 0.4, &#34;color&#34;: &#34;brown&#34;})
+/tmp/ipykernel_4374/1530537871.py:12: UserWarning: No water level is provided. Camera configuration reference water level is used.
+  cross_section.plot(ax=ax2)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_06_Estimating_water_levels_optically_11_1.png" src="../_images/_examples_06_Estimating_water_levels_optically_11_1.png" />
+</div>
+</div>
+<p>Note that the bank here, is quite clearly defined with the much more bright-colored grass. The grass is also not too short. Let’s also have a look at the caveats here. We have another example video on <a class="reference external" href="https://zenodo.org/records/15002591">https://zenodo.org/records/15002591</a>.</p>
+<p>We know that during this event the water level was <strong>93.345 meter</strong> in the local datum.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vid_file</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">sample_data</span><span class="o">.</span><span class="n">get_hommerich_dataset</span><span class="p">()</span>
+<span class="n">vid_path</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">sample_data</span><span class="o">.</span><span class="n">get_hommerich_pyorc_files</span><span class="p">()</span>
+<span class="n">cam_config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">vid_path</span><span class="p">,</span> <span class="s2">&quot;cam_config_gcp1.json&quot;</span><span class="p">)</span>
+<span class="n">cross_section_fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">vid_path</span><span class="p">,</span> <span class="s2">&quot;cs1_ordered.geojson&quot;</span><span class="p">)</span>
+
+<span class="c1"># get a new video object</span>
+<span class="n">cam_config</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">load_camera_config</span><span class="p">(</span><span class="n">cam_config_file</span><span class="p">)</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">vid_file</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">)</span>
+
+<span class="c1"># get a new cross section object</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cross_section_fn</span><span class="p">)</span>
+<span class="n">cross_section</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">CrossSection</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="n">cam_config</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">gdf</span><span class="p">)</span>
+
+<span class="c1"># plot together</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get_frames</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;rgb&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="c1"># we plot with the actual water level during the video now.</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">93.345</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot_water_level</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">93.345</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="c1"># switch off axis labelling</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">ModuleNotFoundError</span>                       Traceback (most recent call last)
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/sample_data.py:10</span>, in <span class="ansi-cyan-fg">get_hommerich_dataset</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-intense-fg ansi-bold">      9</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">---&gt; 10</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">import</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">pooch</span>
+<span class="ansi-green-intense-fg ansi-bold">     11</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
+
+<span class="ansi-red-fg">ModuleNotFoundError</span>: No module named &#39;pooch&#39;
+
+During handling of the above exception, another exception occurred:
+
+<span class="ansi-red-fg">ImportError</span>                               Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[7], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> vid_file <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">pyorc</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">sample_data</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">get_hommerich_dataset</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> vid_path <span style="color: rgb(98,98,98)">=</span> pyorc<span style="color: rgb(98,98,98)">.</span>sample_data<span style="color: rgb(98,98,98)">.</span>get_hommerich_pyorc_files()
+<span class="ansi-green-intense-fg ansi-bold">      3</span> cam_config_file <span style="color: rgb(98,98,98)">=</span> os<span style="color: rgb(98,98,98)">.</span>path<span style="color: rgb(98,98,98)">.</span>join(vid_path, <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">cam_config_gcp1.json</span><span style="color: rgb(175,0,0)">&#34;</span>)
+
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/sample_data.py:12</span>, in <span class="ansi-cyan-fg">get_hommerich_dataset</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-intense-fg ansi-bold">     10</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">import</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">pooch</span>
+<span class="ansi-green-intense-fg ansi-bold">     11</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
+<span class="ansi-green-fg">---&gt; 12</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">This function needs pooch. Install pyorc with pip install pyopenrivercam[extra]</span><span style="color: rgb(175,0,0)">&#34;</span>)
+<span class="ansi-green-intense-fg ansi-bold">     14</span> <span style="color: rgb(95,135,135)"># Define the DOI link</span>
+<span class="ansi-green-intense-fg ansi-bold">     15</span> filename <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">20241010_081717.mp4</span><span style="color: rgb(175,0,0)">&#34;</span>
+
+<span class="ansi-red-fg">ImportError</span>: This function needs pooch. Install pyorc with pip install pyopenrivercam[extra]
+</pre></div></div>
+</div>
+<p>Ok, we have a new dataset, with a video taken during a high flow event. It can clearly be seen that the real wetted cross section (see left) is partly obscured by vegetation that grows over the water in the direction of the camera position. This in fact happens at both sides of the stream. That might become problematic. Let’s see what happens if we extract a grayscale image, and try our best luck.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">img</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The optimized water level is </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2"> meters&quot;</span><span class="p">)</span>
+
+<span class="c1"># and also make a plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="c1"># we plot with the actual water level during the video now.</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">cross_section</span><span class="o">.</span><span class="n">plot_water_level</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The optimized water level is 0.056087741669216484 meters
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_06_Estimating_water_levels_optically_15_1.png" src="../_images/_examples_06_Estimating_water_levels_optically_15_1.png" />
+</div>
+</div>
+<p>Indeed you can see that the water level is guessed to be more or less on the edge of the vegetation - water line resulting in a (much) lower water level. The land - water line is somewhere hidden under the foliage. The message is <strong>use common sense if the situation allows for water level detection with this method</strong>. Known circumstances where things may not work are:</p>
+<ul class="simple">
+<li><p>dark sand looking like water</p></li>
+<li><p>shaded areas</p></li>
+<li><p>non-moving water with mirroring reflections</p></li>
+<li><p>overhanging vegetation, growing towards the camera</p></li>
+</ul>
+<p>And on the happy side, situations where this may work very well:</p>
+<ul class="simple">
+<li><p>if you have one or several staff gauges in view: simply draw a couple of connected points from the bottom to top of the first staff gauge, then moving horizontally to the second higher one, then the third, and so on. Just ensure that the <code class="docutils literal notranslate"><span class="pre">length</span></code> parameter is set smaller, approximately to the width of the staff gauge, and you’ll have a very good contrasting cross section.</p></li>
+<li><p>if you have a concrete straight bridge pier or concrete channel or embankment. Easy to measure a cross section!</p></li>
+<li><p>arid areas with flash floods in sandy streams. Fast flowing water will have serious contrast against the much lighter sand.</p></li>
+</ul>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="05_Camera_calibration.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Camera calibration</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/_examples/06_Estimating_water_levels_optically.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Rainbow Sensing.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Videos &#8212; pyorc 0.7.0 documentation</title>
+    <title>Videos &#8212; pyorc 0.8.0 documentation</title>
   
   
   
@@ -50,7 +50,7 @@
     <link rel="shortcut icon" href="../../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Frames" href="../frames/index.html" />
+    <link rel="next" title="Cross Sections and water level detection" href="../cross_section/index.html" />
     <link rel="prev" title="Camera configurations" href="../camera_config/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.7.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
   
 </a></div>
     
@@ -368,6 +368,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="../api.html">Application Programming Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../camera_config/index.html">Camera configurations</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross_section/index.html">Cross sections and water level detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../frames/index.html">Frames</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../velocimetry/index.html">Velocimetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../transect/index.html">Transects</a></li>
@@ -548,7 +549,7 @@ out the current water level.</p>
 API</label><div class="sd-tab-content docutils">
 <p>The “current” water level (i.e. commensurate with the situation in the video you are currently processing) can
 be set by passing the argument <code class="docutils literal notranslate"><span class="pre">h_a</span></code> upon creating a <code class="docutils literal notranslate"><span class="pre">Video</span></code> object, e.g.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
 <span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;../examples/ngwerere/ngwerere_20191103.mp4&quot;</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">video_file</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_conf_file</span><span class="p">,</span> <span class="n">h_a</span><span class="o">=</span><span class="mf">92.23</span><span class="p">)</span>
 </pre></div>
@@ -619,7 +620,7 @@ instance rotates clockwise by 90 degrees.</p>
 API</label><div class="sd-tab-content docutils">
 <p>You can set a rotation by providing <code class="docutils literal notranslate"><span class="pre">rotation</span></code> in the <code class="docutils literal notranslate"><span class="pre">Video</span></code> instance. Only values 90, 180, or 270
 degrees (clockwise) are accepted. E.g.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
 <span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;some_portrait_video_file.mp4&quot;</span>
 <span class="n">cam_conf_file</span> <span class="o">=</span> <span class="s2">&quot;some_cam_config.json&quot;</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">pyorc</span><span class="o">.</span><span class="n">Video</span><span class="p">(</span><span class="n">video_file</span><span class="p">,</span> <span class="n">camera_config</span><span class="o">=</span><span class="n">cam_conf_file</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
@@ -685,7 +686,7 @@ full example is provided including a set of coordinates that bounds the water su
 <label class="sd-tab-label" for="sd-tab-item-11">
 API</label><div class="sd-tab-content docutils">
 <p>A working example to obtain a stabilized video from our example section is provided below.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyorc</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyorc</span>
 
 <span class="c1"># set a video filename below, change to your own local file location</span>
 <span class="n">video_file</span> <span class="o">=</span> <span class="s2">&quot;examples/ngwerere/ngwerere_20191103.mp4&quot;</span>
@@ -762,11 +763,11 @@ therefore, methods that work on sets of frames can be applied, as described in t
       </div>
     </a>
     <a class="right-next"
-       href="../frames/index.html"
+       href="../cross_section/index.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Frames</p>
+        <p class="prev-next-title">Cross Sections and water level detection</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -831,7 +832,7 @@ therefore, methods that work on sets of frames can be applied, as described in t
 
   <p class="copyright">
     
-      © Copyright 2024, Rainbow Sensing.
+      © Copyright 2025, Rainbow Sensing.
       <br/>
     
   </p>
