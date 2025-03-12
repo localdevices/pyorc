@@ -34,7 +34,7 @@ jobs:
           sudo apt install libegl1 libopengl0 pandoc -y
 
       - name: Install pyorc
-        run: pip install .
+        run: pip install .[full]
 
       - name: Install docs requirements
         run: pip install -r docs/requirements.txt
