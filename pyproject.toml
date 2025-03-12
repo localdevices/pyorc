@@ -106,7 +106,9 @@ filterwarnings = [
     "ignore:invalid value encountered*:RuntimeWarning", # linestrings issue with plotting transects.
     "ignore:Degrees of freedom *:RuntimeWarning",   # not fully clear why this appears in user interfacing, test with future updates.
     "ignore:numpy.ndarray size changed, may indicate binary incompatibility:RuntimeWarning",    # likely caused by incompatibility in used numpy version across libraries. May resolve with future updates.
-    "ignore:\"openpiv\" is currently the default engine, but it will be replaced by \"numba\" in a future release:DeprecationWarning",  # must be removed when openpiv is removed as dependency
+    "ignore:\"openpiv\" is deprecated, please use \"numba\" or \"numpy\" as engine:DeprecationWarning",  # must be removed when openpiv is removed as dependency
+    "ignore:No water level is provided*:UserWarning",  # normal warning, which should be returned in case a water level is expected but not provided
+    "ignore:The detected water level is on the edge*:UserWarning",  # the near bank test should show this warning
     "ignore:Memory availability*:UserWarning",  # memory availability may be small during test, not problematic
 ]
 
