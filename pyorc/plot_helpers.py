@@ -27,6 +27,15 @@ def plot_polygon(polygon, ax=None, **kwargs):
     return p
 
 
+def plot_3d_line(line, ax=None, **kwargs):
+    """Plot a shapely.geometry.LineString on matplotlib ax."""
+    if ax is None:
+        ax = plt.axes(projection="3d")
+    x, y, z = zip(*line.coords, strict=False)
+    p = ax.plot(x, y, z, **kwargs)
+    return p
+
+
 def plot_line(line, ax=None, **kwargs):
     """Plot a shapely.geometry.LineString on matplotlib ax."""
     if ax is None:

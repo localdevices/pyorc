@@ -106,7 +106,7 @@ class Frames(ORCBase):
         self,
         window_size: Optional[tuple[int, int]] = None,
         overlap: Optional[tuple[int, int]] = None,
-        engine: str = "openpiv",
+        engine: str = "numba",
         **kwargs,
     ) -> xr.Dataset:
         """Perform PIV computation on projected frames.
@@ -165,7 +165,7 @@ class Frames(ORCBase):
             import warnings
 
             warnings.warn(
-                '"openpiv" is currently the default engine, but it will be replaced by "numba" in a future release.',
+                '"openpiv" is deprecated, please use "numba" or "numpy" as engine',
                 DeprecationWarning,
                 stacklevel=2,
             )

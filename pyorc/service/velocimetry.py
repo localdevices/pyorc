@@ -5,20 +5,49 @@ import functools
 import logging
 import os.path
 import subprocess
-from typing import Dict
+from typing import Dict, Optional
 
 import click
+import geopandas as gpd
+import numpy as np
 import xarray as xr
 import yaml
 from dask.diagnostics import ProgressBar
 from matplotlib.colors import Normalize
 
-from pyorc import CameraConfig, Video, const
+import pyorc
+from pyorc import CameraConfig, CrossSection, Video, const
 from pyorc.cli import cli_utils
 
-__all__ = ["velocity_flow", "velocity_flow_subprocess"]
+__all__ = ["velocity_flow"]  # , "velocity_flow_subprocess"]
 
 logger = logging.getLogger(__name__)
+
+
+def get_water_level(
+    video: Video,
+    cross_section: CrossSection,
+    n_start: int = 0,
+    n_end: int = 1,
+    method: const.ALLOWED_COLOR_METHODS_WATER_LEVEL = "grayscale",
+    frames_options: Optional[Dict] = None,
+    water_level_options: Optional[Dict] = None,
+):
+    water_level_options = {} if water_level_options is None else water_level_options
+    frames_options = {} if frames_options is None else frames_options
+
+    if method not in ["grayscale", "hue", "sat", "val"]:
+        raise ValueError(
+            f"Method {method} not supported for water level detection, choose one"
+            f" of {const.ALLOWED_COLOR_METHODS_WATER_LEVEL}"
+        )
+    da_frames = video.get_frames(method=method)[n_start:n_end]
+    # preprocess
+    da_frames = apply_methods(da_frames, "frames", logger=logger, skip_args=["to_video"], **frames_options)
+    # extract the image
+    img = np.uint8(da_frames.mean(dim="time").values)
+    h_a = cross_section.detect_water_level(img, **water_level_options)
+    return h_a
 
 
 def vmin_vmax_to_norm(opts):
@@ -182,13 +211,14 @@ class VelocityFlowProcessor(object):
         cameraconfig: Dict,
         prefix: str,
         output: str,
-        h_a: float = None,
+        h_a: Optional[float] = None,
+        cross: Optional[str] = None,
         update: bool = False,
-        concurrency=True,
-        fn_piv="piv.nc",
-        fn_piv_mask="piv_mask.nc",
-        fn_transect_template="transect_{:s}.nc",
-        logger=logger,
+        concurrency: bool = True,
+        fn_piv: str = "piv.nc",
+        fn_piv_mask: str = "piv_mask.nc",
+        fn_transect_template: str = "transect_{:s}.nc",
+        logger: logging.Logger = logging,
     ):
         """Initialize processor with settings and files.
 
@@ -206,6 +236,9 @@ class VelocityFlowProcessor(object):
             path to output file
         h_a : float, optional
             Current water level in meters
+        cross : str, optional
+            path to cross-section coordinates and crs file in GeoJSON or other readible by geopandas
+            to be used for water level detection.
         update : bool, optional
             if set, only update components with changed inputs and configurations
         concurrency : bool, optional
@@ -220,6 +253,8 @@ class VelocityFlowProcessor(object):
             reference to logger instance
 
         """
+        cross_section = None
+        camera_config = CameraConfig(**cameraconfig)
         if h_a is not None:
             if abs(h_a - cameraconfig["gcps"]["h_ref"]) > const.WATER_LEVEL_MAX_DIFF:
                 logger.warning(
@@ -227,7 +262,25 @@ class VelocityFlowProcessor(object):
                     f" meter. Check if your water level, units and/or datum are correct. This difference may result in "
                     "no projected pixels inside area of interest."
                 )
+        if h_a is None and recipe["video"].get("h_a") is None and cross is None:
+            raise click.UsageError(
+                "No actual water level is found, and no water level available in recipe. Either provide a water level,"
+                " or provide a valid cross section with `--cross` to estimate water level optically. See"
+                " pyorc velocimetry --help for more information."
+            )
+        if h_a is not None:
             recipe["video"]["h_a"] = h_a
+        elif cross is not None:
+            logger.info("Cross section provided, and no water level set, water level will be estimated optically.")
+            gdf = gpd.read_file(cross)
+            cross_section = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
+            if "water_level" not in recipe:
+                # make sure water_level is represented
+                recipe["water_level"] = {}
+        else:
+            logger.warning(
+                "No water level provided on CLI and no cross section provided. Using default water level in recipe."
+            )
         # check what projection method is used, use throughout
         self.proj_method = "cv"
         proj = recipe["frames"].get("project")
@@ -239,6 +292,10 @@ class VelocityFlowProcessor(object):
         self.output = output
         self.concurrency = concurrency
         self.prefix = prefix
+        # set cross section for water levels
+        self.cross_section_wl = cross_section
+        # for now also provide a cross section for flow extraction, use the same.
+        self.cross_section_fn = cross  # TODO use this property to extract velocity transects.
         self.fn_piv = os.path.join(self.output, prefix + fn_piv)
         self.fn_piv_mask = os.path.join(self.output, prefix + fn_piv_mask) if "mask" in recipe else self.fn_piv
         self.fn_transect_template = (
@@ -249,7 +306,7 @@ class VelocityFlowProcessor(object):
         self.read = True
         self.write = False
         self.fn_video = videofile
-        self.cam_config = CameraConfig(**cameraconfig)
+        self.cam_config = camera_config
         self.logger = logger
         # TODO: perform checks, minimum steps required
         self.logger.info("pyorc velocimetry processor initialized")
@@ -307,6 +364,9 @@ class VelocityFlowProcessor(object):
         # dask.config.set(pool=Pool(4))
         # dask.config.set(scheduler='processes')
         self.video(**self.recipe["video"])
+        # if cross_section is set, then water levels are missing and must be obtained
+        if self.cross_section_wl is not None:
+            self.water_level(**self.recipe["water_level"])
         self.frames(**self.recipe["frames"])
         self.velocimetry(**self.recipe["velocimetry"])
         if "mask" in self.recipe:
@@ -315,10 +375,10 @@ class VelocityFlowProcessor(object):
             # no masking so use non-masked velocimetry as masked
             self.velocimetry_mask_obj = self.velocimetry_obj
         if "transect" in self.recipe:
+            if self.cross_section_fn is not None:
+                # ensure that the cross section is available for transect measurements
+                self.recipe["transect"]["transect_1"]["shapefile"] = self.cross_section_fn
             self.transect(**self.recipe["transect"])
-        # else:
-        #     # no masking so use non-masked velocimetry as masked
-        #     self.velocimetry_mask_obj = self.velocimetry_obj
         if "plot" in self.recipe:
             self.plot(**self.recipe["plot"])
         # remove all potentially memory consumptive attributes
@@ -343,12 +403,21 @@ class VelocityFlowProcessor(object):
         self.video_obj = Video(self.fn_video, camera_config=self.cam_config, **kwargs)
         # some checks ...
         self.logger.info(f"Video successfully read from {self.fn_video}")
-        # at the end
-        self.da_frames = self.video_obj.get_frames()
-        self.logger.debug(f"{len(self.da_frames)} frames retrieved from video")
+
+    def water_level(self, **kwargs):
+        self.logger.debug("Estimating water level from video by crossing water line with cross section.")
+        h_a = get_water_level(self.video_obj, cross_section=self.cross_section_wl, **kwargs)
+        if h_a is None:
+            self.logger.error("Water level could not be estimated from video. Please set a water level with --h_a.")
+            raise click.Abort()
+        # set the found water level on video
+        self.logger.info("Water level estimated to be {:1.3f} meters in local datum.".format(h_a))
+        self.video_obj.h_a = h_a
 
     def frames(self, **kwargs):
-        # TODO: preprocess steps
+        # start with extracting frames
+        self.da_frames = self.video_obj.get_frames()
+        self.logger.debug(f"{len(self.da_frames)} frames retrieved from video")
         if "project" not in kwargs:
             kwargs["project"] = {}
         # iterate over steps in processing
@@ -422,7 +491,8 @@ class VelocityFlowProcessor(object):
             if not ("shapefile" in transect_grp or "geojson" in transect_grp):
                 raise click.UsageError(
                     f'Transect with name "{transect_name}" does not have a "shapefile" or '
-                    f'"geojson". Please add "shapefile" in the recipe file'
+                    f'"geojson". Please add "shapefile" in the recipe file or provide a '
+                    f'shapefile or geojson file with the "--cross" option.'
                 )
             # read geojson or shapefile (as alternative
             if "geojson" in transect_grp:
@@ -556,6 +626,8 @@ def velocity_flow_subprocess(
     logger=logging,
 ):
     """Write the requirements to temporary files and run velocimetry from a separate CLI instance.
+
+    This is used for automated running of velocimetry on videos from other applications.
 
     Parameters
     ----------

@@ -1,18 +1,26 @@
-## [0.x.x] = yyyy-mm-dd
+## [0.8.0] = yyyy-mm-dd
 ### Added
+- Through a new class `CrossSection`, a user can perform water level detection on a provided image frame.
+- Plot functionalities of `CrossSection` are extended.
+- Documentation of new `CrossSection` class with user guide and API description.
+- New `mode="3d"` option for plotting `CameraConfig` objects. This gives a 3d rotatable perspective plot of the situation.
+  3d plots of `CrossSection` objects are default, and can be combined with `CameraConfig.plot(mode="3d")`
+
 ### Changed
-- class CrossSection interpolates all coordinates over the length of the cross section, not over the left-right 
-  width. This ensures that also if entirely vertical profile parts are found, unique coordinates are returned from 
-  selected locations in the cross section. 
+- class `CrossSection` interpolates all coordinates over the length of the cross section, not over the left-right
+  width. This ensures that also if entirely vertical profile parts are found, unique coordinates are returned from
+  selected locations in the cross section.
 
 ### Deprecated
+- `pyorc.Frames.get_piv` option `engine=openpiv` is now deprecated.
+
 ### Removed
 ### Fixed
-- rvec and tvec can now be immutable properties of CameraConfig. This makes the solution more stable and prevents
+- `CameraConfig.rvec` and `CameraConfig.tvec` can now be immutable properties. This makes the solution more stable and prevents
   unnecessary iterations in estimating rvec and tvec.
-- rvec and tvec are now always defined in the coordinate system of the camera configuration, not in coordinates
-  relative to the ground control point mean. This makes rvec and tvec directly usable without knowledge of the 
-  original control points.
+- `CameraConfig.rvec` and `CameraConfig.tvec` are now always defined in the coordinate system of the camera
+  configuration, not in coordinates relative to the ground control point mean. This makes rvec and tvec directly
+  usable without knowledge of the original control points.
 
 ### Security
 

@@ -38,7 +38,7 @@ video_opt = click.option(
 )
 
 
-@click.group()
+@click.group(context_settings={"max_content_width": 120})
 @click.version_option(__version__, message="PyOpenRiverCam version: %(version)s")
 @click.option(
     "--info",
@@ -293,6 +293,15 @@ def camera_config(
     help="Water level in local vertical datum (e.g. staff or pressure gauge) belonging to video.",
 )
 @click.option(
+    "--cross",
+    type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
+    help="Cross section file (*.geojson). If you provide this, you may add water level retrieval settings to the"
+    " recipe section video: water_level: For more information see"
+    " https://localdevices.github.io/pyorc/user-guide/video/index.html",
+    callback=cli_utils.parse_cross_section_gdf,
+    required=False,
+)
+@click.option(
     "-u",
     "--update",
     is_flag=True,
@@ -307,7 +316,7 @@ def camera_config(
 )
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, update, lowmem, verbose):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, cross, update, lowmem, verbose):
     """CLI subcommand for velocimetry."""
     log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
@@ -318,6 +327,7 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, updat
         videofile=videofile,
         cameraconfig=cameraconfig,
         h_a=h_a,
+        cross=cross,
         prefix=prefix,
         output=output,
         update=update,
@@ -326,6 +336,9 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, updat
     )
     pass
 
+
+# ensure help texts span a reasonable space
+# velocimetry(max_content_width=120)
 
 if __name__ == "__main__":
     # if getattr(sys, 'frozen', False):

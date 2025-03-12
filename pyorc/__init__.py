@@ -1,10 +1,10 @@
 """pyorc: free and open-source image-based surface velocity and discharge."""
 
-__version__ = "0.7.2"
+__version__ = "0.8.0"
 
-from .api import CameraConfig, Frames, Transect, Velocimetry, Video, CrossSection, get_camera_config, load_camera_config  # noqa
+from .api import CameraConfig, CrossSection, Frames, Transect, Velocimetry, Video, get_camera_config, load_camera_config  # noqa
 from .project import *  # noqa
-from . import cli, service  # noqa
+from . import cli, service, sample_data  # noqa
 
 __all__ = [
     "CameraConfig",
@@ -17,4 +17,5 @@ __all__ = [
     "CrossSection",
     "service",
     "cli",
+    "sample_data",
 ]

@@ -7,7 +7,9 @@ import pytest
 from pyproj import CRS
 from shapely import geometry, wkt
 
-from pyorc import CameraConfig, CrossSection
+from pyorc import CameraConfig, CrossSection, Video, plot_helpers, sample_data
+
+# from tests.conftest import EXAMPLE_DATA_DIR
 
 
 @pytest.fixture()
@@ -116,7 +118,7 @@ def gdf(xs, ys, zs):
 
 @pytest.fixture()
 def xyz(gdf, crs):
-    """Sample cross section xyz list for Geul river (real data). Must be returned in CameraConfig set up."""
+    """Sample cross-section xyz list for Geul river (real data). Must be returned in CameraConfig set up."""
     gdf.to_crs(crs, inplace=True)
     g = gdf.geometry
     x, y, z = g.x, g.y, g.z
@@ -156,6 +158,23 @@ def camera_config():
 
 
 @pytest.fixture()
+def vid_file():
+    return sample_data.get_hommerich_dataset()  # os.path.join(EXAMPLE_DATA_DIR, "hommerich", "20240718_162737.mp4")
+
+
+@pytest.fixture()
+def img(vid_file):
+    vid = Video(vid_file, start_frame=0, end_frame=1)
+    return vid.get_frame(0)
+
+
+@pytest.fixture()
+def img_rgb(vid_file):
+    vid = Video(vid_file, start_frame=0, end_frame=1)
+    return vid.get_frame(0, method="rgb")
+
+
+@pytest.fixture()
 def cs(xyz, camera_config):
     return CrossSection(camera_config=camera_config, cross_section=xyz)
 
@@ -169,120 +188,94 @@ def test_init_water_level_from_gdf(gdf, camera_config):
     cs = CrossSection(camera_config=camera_config, cross_section=gdf)
     assert isinstance(cs, CrossSection)
 
-    # get coordinates
+
+def test_cs_str(cs):
+    assert isinstance(cs.__str__(), str)
+
+
+def test_cs_repr(cs):
+    assert isinstance(cs.__repr__(), str)
+
+
+def test_get_cs_waterlevel(cs):
+    line = cs.get_cs_waterlevel(h=93.0)
+    assert isinstance(line, geometry.LineString)
+    assert line.has_z
+
+
+def test_get_cs_waterlevel_sz(cs):
+    line = cs.get_cs_waterlevel(h=93.0, sz=True)
+    assert isinstance(line, geometry.LineString)
+    assert line.has_z == False
 
 
 def test_get_csl_point(cs):
     h1 = 92.5
     h2 = 93.0
-    # both should get two points back
-    _ = cs.get_csl_point(h=h1)
-    __ = cs.get_csl_point(h=h2)
-    # ax = plt.axes(projection="3d")
-    #
-    # for cross in cross1:
-    #     ax.plot(*cross.coords[0], "bo", label="cross 1")
-    # for cross in cross2:
-    #     ax.plot(*cross.coords[0], "ro", label="cross 2")
-    # cs.plot_cs(ax=ax, marker=".", color="c")
-    # ax.legend()
-    # plt.show()
+    # both should get two points back as we are seeking at a vertical level that crosses twice
+    p1 = cs.get_csl_point(h=h1)
+    p2 = cs.get_csl_point(h=h2)
+    assert len(p1) == 2
+    assert len(p2) == 2
+    # points must be 3d
+    assert p1[0].has_z
+    assert p2[0].has_z
 
 
 def test_get_csl_point_camera(cs):
     h1 = 92.5
     h2 = 93.0
-    # both should get two points back
-    _ = cs.get_csl_point(h=h1, camera=True)
-    __ = cs.get_csl_point(h=h2, camera=True)
-    # ax = plt.axes()
-    #
-    # for cross in cross1:
-    #     ax.plot(*cross.coords[0], "bo")
-    # for cross in cross2:
-    #     ax.plot(*cross.coords[0], "ro")
-    # cs.plot_cs(ax=ax, camera=True)
-    # ax.axis("equal")
-    # ax.set_xlim([0, cs.camera_config.width])
-    # ax.set_ylim([0, cs.camera_config.height])
-    # plt.show()
+    # both should get two points back as we are seeking at a vertical level that crosses twice
+    p1 = cs.get_csl_point(h=h1, camera=True)
+    p2 = cs.get_csl_point(h=h2, camera=True)
+    assert len(p1) == 2
+    assert len(p2) == 2
 
 
-def test_get_csl_point_s(cs):
+def test_get_csl_point_l(cs):
     l1 = 5.0
     l2 = 8.0
-    # both should get two points back
-    _ = cs.get_csl_point(l=l1)
-    __ = cs.get_csl_point(l=l2)
-    # ax = plt.axes(projection="3d")
-    #
-    # for cross in cross1:
-    #     ax.plot(*cross.coords[0], "bo", label="cross 1")
-    # for cross in cross2:
-    #     ax.plot(*cross.coords[0], "ro", label="cross 2")
-    # cs.plot_cs(ax=ax, marker=".", color="c")
-    # ax.legend()
-    # plt.show()
+    # both should get one point back as we are seeking a certain point left to right
+    p1 = cs.get_csl_point(l=l1)
+    p2 = cs.get_csl_point(l=l2)
+    assert len(p1) == 1
+    assert len(p2) == 1
+
+
+def test_get_csl_point_no_h_l(cs):
+    with pytest.raises(ValueError, match="One of h or l"):
+        cs.get_csl_point()
+
+
+def test_get_csl_point_both_h_l(cs):
+    with pytest.raises(ValueError, match="Only one of h or l"):
+        cs.get_csl_point(h=93.0, l=5.0)
 
 
 def test_get_csl_line(cs):
     h1 = 92.5
     h2 = 93.0
-
     cross1 = cs.get_csl_line(h=h1, offset=0.0, length=4)
     cross2 = cs.get_csl_line(h=h2, offset=0.0, length=4)
     assert len(cross1) == 2
     assert len(cross2) == 2
 
-    # ax = plt.axes(projection="3d")
-    # for cross in cross1:
-    #     ax.plot(*cross.xy, cs.camera_config.h_to_z(h1), "b-o", label="cross 1")
-    # for cross in cross2:
-    #     ax.plot(*cross.xy, cs.camera_config.h_to_z(h2), "r-o", label="cross 2")
-    # cs.plot_cs(ax=ax, marker=".", color="c")
-    # ax.axis("equal")
-    # ax.legend()
-    # plt.show()
-
 
 def test_get_csl_line_s(cs):
     l1 = 5.0
     l2 = 8.0
-
     cross1 = cs.get_csl_line(l=l1, offset=0.0, length=4)
     cross2 = cs.get_csl_line(l=l2, offset=0.0, length=4)
     assert len(cross1) == 1
     assert len(cross2) == 1
 
-    # ax = plt.axes(projection="3d")
-    # for cross in cross1:
-    #     ax.plot(*cross.xy, cross.coords[0][-1], "b-o", label="cross 1")
-    # for cross in cross2:
-    #     ax.plot(*cross.xy, cross.coords[0][-1], "r-o", label="cross 2")
-    # cs.plot_cs(ax=ax, marker=".", color="c")
-    # ax.axis("equal")
-    # ax.legend()
-    # plt.show()
-
 
 def test_get_csl_camera(cs):
     h1 = 92.5
-
     cross1 = cs.get_csl_line(h=h1, offset=2.0, camera=True)
     cross2 = cs.get_csl_line(h=h1, offset=0.0, camera=True)
     assert len(cross1) == 2
     assert len(cross2) == 2
-    # ax = plt.axes()
-    # for cross in cross1:
-    #     ax.plot(*cross.xy, "b-o", label="cross 1")
-    # for cross in cross2:
-    #     ax.plot(*cross.xy, "r-o", label="cross 2")
-    # cs.plot_cs(ax=ax, camera=True, marker=".", color="c")
-    # ax.axis("equal")
-    # ax.set_xlim([0, cs.camera_config.width])
-    # ax.set_ylim([0, cs.camera_config.height])
-    # ax.legend()
-    # plt.show()
 
 
 def test_get_csl_line_above_first_bank(cs):
@@ -293,54 +286,25 @@ def test_get_csl_line_above_first_bank(cs):
 
 
 def test_get_csl_pol(cs):
-    h1 = 92.25
-    _ = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0)
-    __ = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0)
-
-    # ax = plt.axes(projection="3d")
-    # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
-    # p1_1, p_1_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
-    # p2_1, p_2_2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
-    # cs.plot_planar_surface(h=h1, ax=ax, alpha=0.5, color="c", length=20)
-    # cs.plot_bottom_surface(ax=ax, alpha=0.1, color="brown", length=20)
-    # cs.plot(h=h1, ax=ax)
-    # cs.camera_config.plot(ax=ax, mode="3d", pose_length=3.0)
-    # ax.axis("equal")
-    # ax.legend()
-    # plt.show()
-
-
-# def test_get_csl_pol(cs):
-#     l1 = 5.0
-#     pols1 = cs.get_csl_pol(l=l1, offset=0.0, padding=(-2, 0), length=4.0)
-#     pols2 = cs.get_csl_pol(l=l1, offset=0.0, padding=(0, 2), length=4.0)
-
-# ax = plt.axes(projection="3d")
-# cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
-# p1 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
-# p2 = [plot_helpers.plot_3d_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
-# ax.axis("equal")
-# ax.legend()
-# plt.show()
+    h1 = 93.25
+    pol1 = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0)
+    pol2 = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0)
+    assert isinstance(pol1, list)
+    assert isinstance(pol1, list)
+    assert isinstance(pol1[0], geometry.Polygon)
+    assert isinstance(pol2[0], geometry.Polygon)
+    assert pol1[0].has_z
+    assert pol2[0].has_z
 
 
 def test_get_csl_pol_camera(cs):
-    h1 = 92.5
-    _ = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0, camera=True)
-    __ = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0, camera=True)
-
-    ax = plt.axes()
-    cs.plot_cs(ax=ax, marker=".", color="c", label="cross section", camera=True)
-    # p1_1, p_1_2 = [plot_helpers.plot_polygon(pol, ax=ax, alpha=0.3, label="h=92.5", color="r") for pol in pols1]
-    # p2_1, p_2_2 = [plot_helpers.plot_polygon(pol, ax=ax, alpha=0.3, label="h=93.0", color="g") for pol in pols2]
-    cs.plot_bottom_surface(ax=ax, alpha=0.1, color="brown", length=20, camera=True)
-    ax.axis("equal")
-    ax.set_xlabel("Camera pixel column [-]")
-    ax.set_ylabel("Camera pixel row [-]")
-    ax.set_xlim([0, cs.camera_config.width])
-    ax.set_ylim([0, cs.camera_config.height])
-    ax.legend()
-    plt.show()
+    h1 = 93.25
+    pol1 = cs.get_csl_pol(h=h1, offset=0.0, padding=(-2, 0), length=4.0, camera=True)
+    pol2 = cs.get_csl_pol(h=h1, offset=0.0, padding=(0, 2), length=4.0, camera=True)
+    assert isinstance(pol1, list)
+    assert isinstance(pol1, list)
+    assert isinstance(pol1[0], geometry.Polygon)
+    assert isinstance(pol2[0], geometry.Polygon)
 
 
 def test_get_planar_surface(cs):
@@ -351,14 +315,6 @@ def test_get_planar_surface(cs):
     __ = cs.get_planar_surface(h=h2, length=5, offset=2.5)
     with pytest.raises(ValueError, match="must be 2 for"):
         cs.get_planar_surface(h=h3)
-    # ax = plt.axes(projection="3d")
-    # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
-    #
-    # _ = plot_helpers.plot_3d_polygon(pol1, ax=ax, alpha=0.3, label="h=92.5", color="r")
-    # _ = plot_helpers.plot_3d_polygon(pol2, ax=ax, alpha=0.3, label="h=93.0", color="g")
-    # ax.axis("equal")
-    # ax.legend()
-    # plt.show()
 
 
 def test_get_planar_surface_camera(cs):
@@ -366,15 +322,11 @@ def test_get_planar_surface_camera(cs):
     h2 = 93.0
     _ = cs.get_planar_surface(h=h1, length=10.0, camera=True)
     __ = cs.get_planar_surface(h=h2, length=5, offset=2.5, camera=True)
-    # ax = plt.axes()
-    # _ = plot_helpers.plot_polygon(pol1, ax=ax, alpha=0.3, label="h=92.5", color="r")
-    # _ = plot_helpers.plot_polygon(pol2, ax=ax, alpha=0.3, label="h=93.0", color="g")
-    # ax.axis("equal")
-    # cs.plot_cs(ax=ax, camera=True, marker=".", color="c", label="cross section")
-    # ax.set_xlim([0, cs.camera_config.width])
-    # ax.set_ylim([0, cs.camera_config.height])
-    # ax.legend()
-    # plt.show()
+    ax = plt.axes()
+    _ = plot_helpers.plot_polygon(_, ax=ax, alpha=0.3, label="h=92.5", color="r")
+    _ = plot_helpers.plot_polygon(__, ax=ax, alpha=0.3, label="h=93.0", color="g")
+    ax.axis("equal")
+    assert ax.has_data()
 
 
 def test_get_wetted_surface(cs):
@@ -389,19 +341,55 @@ def test_get_wetted_surface(cs):
 
     with pytest.raises(ValueError, match="Water level is not crossed"):
         cs.get_wetted_surface(h=h3)
-    #
-    # ax = plt.axes(projection="3d")
-    # cs.plot_cs(ax=ax, marker=".", color="c", label="cross section")
-    # _ = plot_helpers.plot_3d_polygon(pol1, ax=ax, alpha=0.3, label="h=92.5", color="r")
-    # _ = plot_helpers.plot_3d_polygon(pol2, ax=ax, alpha=0.3, label="h=93.0", color="g")
-    # ax.axis("equal")
-    # ax.legend()
-    # plt.show()
 
 
-def test_plot_cs(cs):
-    ax = plt.axes()
+def test_detect_wl(cs, img):
+    h = cs.detect_water_level(img, bank="far", length=1.0)
+    print(f"Water level: {h}")
+    assert h is not None
+    assert isinstance(h, float)
+
+
+def test_detect_wl_near_bank(cs, img):
+    h = cs.detect_water_level(img, bank="near", length=2.0)
+    print(f"Water level near bank: {h}")
+    assert h is not None
+    assert isinstance(h, float)
+
+
+def test_detect_wl_no_bank_specified(cs, img, bank="both"):
+    h = cs.detect_water_level(img, length=2.0, bank=bank)
+    print(f"Water level with both banks specified: {h}")
+
+
+def test_plot_cs_camera(cs):
+    ax = cs.plot(h=93, camera=True)
     cs.plot_cs(ax=ax, camera=True, marker=".", color="c", label="cross section")
     ax.set_xlim([0, cs.camera_config.width])
     ax.set_ylim([0, cs.camera_config.height])
+    assert ax.has_data()
+
+
+def test_plot_cs(cs):
+    ax = plt.axes(projection="3d")
+    cs.plot_cs(ax=ax, camera=False, marker=".", color="c", label="cross section")
+    cs.plot(h=93, ax=ax, camera=False)
+    assert ax.has_data()
+
+
+def test_plot_no_h_no_ax(cs):
+    ax = cs.plot()
+    assert ax.has_data()
+
+
+def test_plot_water_level_camera(cs):
+    p = cs.plot_cs(camera=True, marker=".", color="c", label="cross section")
+    ax = p[0].axes
+    cs.plot_water_level(h=93.0, length=2.0, ax=ax, camera=True, color="r", label="water level")
+    assert ax.has_data()
+
+
+def test_plot_water_level(cs):
+    ax = plt.axes(projection="3d")
+    cs.plot_water_level(h=93.0, ax=ax, camera=False, color="c", label="water level")
     assert ax.has_data()

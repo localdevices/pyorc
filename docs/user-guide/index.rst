@@ -91,6 +91,7 @@ river flow over a transect.
     Application Programming Interface <api>
     Camera configurations <camera_config/index>
     Videos <video/index>
+    Cross sections and water level detection <cross_section/index>
     Frames <frames/index>
     Velocimetry <velocimetry/index>
     Transects <transect/index>

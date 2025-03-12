@@ -6,6 +6,7 @@ from xarray.core import utils
 
 from pyorc import helpers
 
+from .cross_section import CrossSection
 from .orcbase import ORCBase
 from .plot import _Transect_PlotMethods
 
@@ -24,6 +25,16 @@ class Transect(ORCBase):
 
         """
         super(Transect, self).__init__(xarray_obj)
+
+    @property
+    def cross_section(self):
+        """Return cross-sectional coordinates as `CrossSection` object."""
+        if not hasattr(self._obj, "zcoords"):
+            return None
+        coords = [
+            [_x, _y, _z] for _x, _y, _z in zip(self._obj.xcoords, self._obj.ycoords, self._obj.zcoords, strict=False)
+        ]
+        return CrossSection(camera_config=self.camera_config, cross_section=coords)
 
     def vector_to_scalar(self, v_x="v_x", v_y="v_y"):
         """Set "v_eff" and "v_dir" variables as effective velocities over cross-section, and its angle.

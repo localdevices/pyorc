@@ -1,8 +1,10 @@
 import numpy as np
 import pytest
 
+from pyorc import CrossSection
+
 try:
-    import cartopy  # Try to import cartopy
+    import cartopy  # noqa: F401
 
     CARTOPY_AVAILABLE = True
 except ImportError:
@@ -41,6 +43,11 @@ def test_get_wetted_perspective(piv_transect):
     piv_transect.load()
     f = piv_transect.transect.get_q()
     f.transect.get_wetted_perspective(h=0.0)
+
+
+def test_get_cross_section(piv_transect):
+    piv_transect.load()
+    assert isinstance(piv_transect.transect.cross_section, CrossSection)
 
 
 @pytest.mark.parametrize(

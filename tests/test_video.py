@@ -53,6 +53,9 @@ def test_get_frame(video, method, result, request):
         ("vid_cam_config", "grayscale"),
         ("vid_cam_config", "rgb"),
         ("vid_cam_config", "hsv"),
+        ("vid_cam_config", "hue"),
+        ("vid_cam_config", "sat"),
+        ("vid_cam_config", "val"),
     ],
 )
 def test_get_frames(video, method, request):

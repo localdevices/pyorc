@@ -80,9 +80,9 @@ def _base_plot(plot_func):
         add_text : boolean, optional
             if True, add a text label in the axes displaying information about the video's transect
         text_prefix : str, optional
-            string to add in front of standard text on transect plot. Only used if ``add_text=True``
+            string to add in front of standard text on transect plot. Only used if `add_text=True`
         text_suffix : str, optional
-            String to add after standard text on transect plot. Only used if ``add_text=True``
+            String to add after standard text on transect plot. Only used if `add_text=True`
         kwargs_line : dict, optional
             additional keyword arguments passed to matplotlib.pyplot.plot for plotting cross-section.
             (Default value = {})
@@ -176,24 +176,27 @@ def _base_plot(plot_func):
             if add_cross_section:
                 if mode == "camera":
                     # # lens position is needed, so check this
-                    # if hasattr(ref._obj.camera_config, "lens_position"):
-                    # x_bottom, y_bottom = ref._obj.transect.get_xyz_perspective()
-                    points = ref._obj.transect.get_wetted_perspective(h=ref._obj.transect.h_a)
-                    ax.add_patch(
-                        plt.Polygon(
-                            points,
-                            alpha=0.15,
-                            linewidth=2.0,
-                            facecolor=LINE_COLOR,  # "#00FF88",
-                            path_effects=path_effects,
-                            edgecolor="w",
-                            zorder=1,
-                        )
+                    ref._obj.transect.cross_section.plot(
+                        h=ref._obj.transect.h_a,
+                        ax=ax,
+                        camera=True,
+                        swap_y_coords=True,
+                        wetted=True,
+                        planar=False,
+                        bottom=False,
+                    )
+                    ref._obj.transect.cross_section.plot_water_level(
+                        h=ref._obj.transect.h_a,
+                        length=2.0,
+                        linewidth=3.0,
+                        ax=ax,
+                        camera=True,
+                        swap_y_coords=True,
+                        color="r",
+                        label="water level",
                     )
 
-                    # get cross section points in camera perspective
-                    points_cross = ref._obj.transect.get_transect_perspective()
-
+                    # draw some depth lines for better visual interpretation.
                     depth_lines = ref._obj.transect.get_depth_perspective(h=ref._obj.transect.h_a)
                     for l in depth_lines:
                         line = np.array(l)
@@ -206,16 +209,6 @@ def _base_plot(plot_func):
                             zorder=1,
                             # path_effects=path_effects
                         )
-                    ax.plot(
-                        points_cross[:, 0],
-                        points_cross[:, 1],
-                        color=LINE_COLOR,
-                        linewidth=4.0,
-                        # path_effects=path_effects,
-                        alpha=0.5,
-                        zorder=1,
-                        **kwargs_line,
-                    )
                 else:
                     ax.plot(x, y, LINE_COLOR, path_effects=path_effects, alpha=0.7, **kwargs_line)
                 if add_text:

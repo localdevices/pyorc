@@ -1,6 +1,7 @@
 import json
 import os.path
 
+import click
 import matplotlib.pyplot as plt
 import pytest
 from matplotlib import backend_bases
@@ -10,6 +11,22 @@ from pyorc.cli import cli_utils
 from pyorc.cli.cli_elements import AoiSelect, GcpSelect, StabilizeSelect
 from pyorc.cli.main import cli
 from pyorc.helpers import xyz_transform
+
+from .conftest import EXAMPLE_DATA_DIR
+
+
+@pytest.fixture()
+def cross_section_2_geojson_fn():
+    return os.path.join(EXAMPLE_DATA_DIR, "ngwerere", "cross_section2.geojson")
+
+
+@pytest.fixture()
+def recipe_no_waterlevel(recipe_yml):
+    from pyorc.cli import cli_utils
+
+    r = cli_utils.parse_recipe("a", "b", recipe_yml)
+    del r["video"]["h_a"]
+    return r
 
 
 def test_cli_info(cli_obj):
@@ -89,6 +106,21 @@ def test_service_video(recipe_, vid_file, cam_config, cli_prefix, cli_output_dir
     os.chdir(os.path.dirname(__file__))
     pyorc.service.velocity_flow(
         recipe=recipe_, videofile=vid_file, cameraconfig=cam_config.to_dict(), prefix=cli_prefix, output=cli_output_dir
+    )
+
+
+def test_service_video_no_waterlevel(
+    recipe_no_waterlevel, vid_file, cam_config, cli_prefix, cli_output_dir, cross_section_2_geojson_fn
+):
+    print(f"current file is: {os.path.dirname(__file__)}")
+    os.chdir(os.path.dirname(__file__))
+    pyorc.service.velocity_flow(
+        recipe=recipe_no_waterlevel,
+        videofile=vid_file,
+        cameraconfig=cam_config.to_dict(),
+        prefix=cli_prefix,
+        output=cli_output_dir,
+        cross=cross_section_2_geojson_fn,
     )
 
 
@@ -174,3 +206,13 @@ def test_read_shape(gcps_fn):
     coords, wkt = cli_utils.read_shape(gcps_fn)
     assert isinstance(wkt, str)
     assert isinstance(coords, list)
+
+
+def test_parse_cross_section_file_missing():
+    with pytest.raises(click.FileError, match="unknown"):
+        cli_utils.parse_cross_section_gdf("", "", "missing_file")
+
+
+def test_parse_cross_section(gcps_fn):
+    fn = cli_utils.parse_cross_section_gdf("", "", gcps_fn)
+    assert os.path.isfile(fn)
