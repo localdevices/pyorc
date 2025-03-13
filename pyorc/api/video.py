@@ -164,12 +164,14 @@ Camera configuration: {:s}
         )
         self.frames = frames
         # check if end_frame changed
-        if frame_number[-1] != end_frame:
-            warnings.warn(
-                f"End frame {end_frame} cannot be read from file. End frame is adapted to {frame_number[-1]}",
-                stacklevel=2,
-            )
-            end_frame = frame_number[-1]
+        if len(frame_number) > 0:
+            if frame_number[-1] != end_frame:
+                warnings.warn(
+                    f"End frame {end_frame} cannot be read from file. End frame is adapted to {frame_number[-1]}",
+                    stacklevel=2,
+                )
+                end_frame = frame_number[-1]
+        # apparently we are reading an image instead of a video
 
         self.end_frame = end_frame
         self.freq = freq
