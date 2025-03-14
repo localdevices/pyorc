@@ -6,8 +6,8 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 def plot_3d_polygon(polygon, ax=None, **kwargs):
     """Plot a shapely.geometry.Polygon on matplotlib 3d ax."""
-    x, y, z = zip(*polygon.exterior.coords, strict=False)
-    verts = [list(zip(x, y, z, strict=False))]
+    x, y, z = zip(*polygon.exterior.coords)
+    verts = [list(zip(x, y, z))]
 
     if ax is None:
         ax = plt.axes(projection="3d")
@@ -31,7 +31,7 @@ def plot_3d_line(line, ax=None, **kwargs):
     """Plot a shapely.geometry.LineString on matplotlib ax."""
     if ax is None:
         ax = plt.axes(projection="3d")
-    x, y, z = zip(*line.coords, strict=False)
+    x, y, z = zip(*line.coords)
     p = ax.plot(x, y, z, **kwargs)
     return p
 
@@ -40,6 +40,6 @@ def plot_line(line, ax=None, **kwargs):
     """Plot a shapely.geometry.LineString on matplotlib ax."""
     if ax is None:
         ax = plt.axes()
-    x, y = zip(*line.coords, strict=False)
+    x, y = zip(*line.coords)
     p = ax.plot(x, y, **kwargs)
     return p

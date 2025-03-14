@@ -49,9 +49,7 @@ def _make_angle_lines(csl_points, angle_perp, length, offset):
         for p in csl_points
     ]
     # rotate in counter-clockwise perpendicular direction to the orientation of the cross section itself
-    csl_lines = [
-        affinity.rotate(l, angle_perp, origin=p, use_radians=True) for l, p in zip(csl_lines, csl_points, strict=False)
-    ]
+    csl_lines = [affinity.rotate(l, angle_perp, origin=p, use_radians=True) for l, p in zip(csl_lines, csl_points)]
     return csl_lines
 
 
@@ -155,7 +153,7 @@ class CrossSection:
             g = cross_section.geometry
             x, y, z = g.x, g.y, g.z
         else:
-            x, y, z = list(map(list, zip(*cross_section, strict=False)))
+            x, y, z = list(map(list, zip(*cross_section)))
 
         x_diff = np.concatenate((np.array([0]), np.diff(x)))
         y_diff = np.concatenate((np.array([0]), np.diff(y)))
@@ -218,12 +216,12 @@ class CrossSection:
     @property
     def cs_points(self) -> List[geometry.Point]:
         """Return cross-section as list of shapely.geometry.Point."""
-        return [geometry.Point(_x, _y, _z) for _x, _y, _z in zip(self.x, self.y, self.z, strict=False)]
+        return [geometry.Point(_x, _y, _z) for _x, _y, _z in zip(self.x, self.y, self.z)]
 
     @property
     def cs_points_sz(self) -> List[geometry.Point]:
         """Return cross-section perpendicular to flow direction (SZ) as list of shapely.geometry.Point."""
-        return [geometry.Point(_s, _z) for _s, _z in zip(self.s, self.z, strict=False)]
+        return [geometry.Point(_s, _z) for _s, _z in zip(self.s, self.z)]
 
     @property
     def cs_linestring(self) -> geometry.LineString:
@@ -275,8 +273,8 @@ class CrossSection:
         # get water level in camera config vertical datum
         z = self.camera_config.h_to_z(h)
         if sz:
-            return geometry.LineString(zip(self.s, [z] * len(self.s), strict=False))
-        return geometry.LineString(zip(self.x, self.y, [z] * len(self.x), strict=False))
+            return geometry.LineString(zip(self.s, [z] * len(self.s)))
+        return geometry.LineString(zip(self.x, self.y, [z] * len(self.x)))
 
     def get_csl_point(
         self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False, swap_y_coords: bool = False
@@ -513,7 +511,7 @@ class CrossSection:
         csl_lines = _make_angle_lines(csl_points, self.cs_angle + np.pi / 2, length, offset)
         csl_line_points = [
             [geometry.Point(_x, _y, z) for _x, _y in l.coords]
-            for l, z in zip(csl_lines, [self.cs_points[0].z, self.cs_points[-1].z], strict=False)
+            for l, z in zip(csl_lines, [self.cs_points[0].z, self.cs_points[-1].z])
         ]
         # retrieve lines of displaced cross sections
         csl_displaced = [
@@ -775,7 +773,7 @@ class CrossSection:
             )
         if wetted:
             self.plot_wetted_surface(h=h, camera=camera, ax=ax, swap_y_coords=swap_y_coords, **wetted_kwargs)
-        self.plot_cs(ax=ax, camera=camera, **cs_kwargs)
+        self.plot_cs(ax=ax, camera=camera, swap_y_coords=swap_y_coords, **cs_kwargs)
         ax.set_aspect("equal")
         return ax
 
@@ -807,7 +805,7 @@ class CrossSection:
                 ax = plt.axes(projection="3d")
         if ax.name == "3d" and not camera:
             # map 3d coordinates to x, y, z
-            x, y, z = zip(*[(c[0], c[1], c[2]) for c in self.cs_linestring.coords], strict=False)
+            x, y, z = zip(*[(c[0], c[1], c[2]) for c in self.cs_linestring.coords])
             p = ax.plot(x, y, z, **kwargs)
         else:
             if camera:
@@ -816,9 +814,9 @@ class CrossSection:
                     list(map(list, self.cs_linestring.coords)), within_image=True, swap_y_coords=swap_y_coords
                 )
                 # map to x and y arrays
-                x, y = zip(*[(c[0], c[1]) for c in pix if np.isfinite(c[0])], strict=False)
+                x, y = zip(*[(c[0], c[1]) for c in pix if np.isfinite(c[0])])
             else:
-                x, y = zip(*[(c[0], c[1]) for c in self.cs_linestring_sz.coords], strict=False)
+                x, y = zip(*[(c[0], c[1]) for c in self.cs_linestring_sz.coords])
             p = ax.plot(x, y, **kwargs)
         return p
 
@@ -987,7 +985,7 @@ class CrossSection:
             points = self.get_csl_point(h=h, camera=False)  # find real-world points
             lens_position_xy = self.camera_config.estimate_lens_position()[0:2]
             dists = [((p.x - lens_position_xy[0]) ** 2 + (p.y - lens_position_xy[1]) ** 2) ** 0.5 for p in points]
-            points = self.get_csl_point(h=h, camera=True)  # find camera positions
+            points = self.get_csl_point(h=h, camera=True, swap_y_coords=swap_y_coords)  # find camera positions
             x, y = points[np.argmax(dists)].xy
             x, y = float(x[0]), float(y[0])
 

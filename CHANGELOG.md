@@ -1,4 +1,16 @@
-## [0.8.0] = yyyy-mm-dd
+## [0.8.1] = 2025-03-14
+### Added
+- One can now also use a single image as input on the command-line interface for camera calibration.
+
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Problem with using `zip(..., strict=False)`. This is a default ruff correction but breaks many functions in
+  Python 3.9, still used a lot on Raspberry Pi.
+- Water level plot in transect plot sections would plot up-side-down. This is now corrected.
+
+## [0.8.0] = 2025-03-13
 ### Added
 - Through a new class `CrossSection`, a user can perform water level detection on a provided image frame.
 - Plot functionalities of `CrossSection` are extended.

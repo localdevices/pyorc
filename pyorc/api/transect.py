@@ -31,9 +31,7 @@ class Transect(ORCBase):
         """Return cross-sectional coordinates as `CrossSection` object."""
         if not hasattr(self._obj, "zcoords"):
             return None
-        coords = [
-            [_x, _y, _z] for _x, _y, _z in zip(self._obj.xcoords, self._obj.ycoords, self._obj.zcoords, strict=False)
-        ]
+        coords = [[_x, _y, _z] for _x, _y, _z in zip(self._obj.xcoords, self._obj.ycoords, self._obj.zcoords)]
         return CrossSection(camera_config=self.camera_config, cross_section=coords)
 
     def vector_to_scalar(self, v_x="v_x", v_y="v_y"):
@@ -126,7 +124,7 @@ class Transect(ORCBase):
             # retrieve coordinates at the surface
         else:
             z = self._obj.zcoords  # retrieve the bottom coordinates
-        points = [[_x, _y, _z] for _x, _y, _z in zip(x, y, z, strict=False)]
+        points = [[_x, _y, _z] for _x, _y, _z in zip(x, y, z)]
         # ensure that y coordinates are in the right direction
         points_proj = self.camera_config.project_points(points, within_image=within_image, swap_y_coords=True)
         return points_proj
@@ -177,7 +175,7 @@ class Transect(ORCBase):
             h=h, sample_size=sample_size, interval=interval
         )
         # make line pairs
-        return list(zip(bottom_points, surface_points, strict=False))
+        return list(zip(bottom_points, surface_points))
 
     def get_xyz_perspective(self, trans_mat=None, xs=None, ys=None, mask_outside=True):
         """Get camera-perspective column, row coordinates from cross-section locations.
@@ -224,11 +222,9 @@ class Transect(ORCBase):
                 helpers.xy_to_perspective(
                     x, y, self.camera_config.resolution, trans_mat, reverse_y=self.camera_config.shape[0]
                 )
-                for x, y, trans_mat in zip(xs, ys, ms, strict=False)
+                for x, y, trans_mat in zip(xs, ys, ms)
             ],
-            strict=False,
         )
-
         # ensure y coordinates start at the top in the right orientation
         shape_y, shape_x = self.camera_shape
         rows = shape_y - np.array(rows)

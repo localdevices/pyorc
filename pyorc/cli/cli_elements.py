@@ -83,7 +83,7 @@ class BaseSelect:
                 kwargs["transform"] = ccrs.PlateCarree()
                 transform = ccrs.PlateCarree()._as_mpl_transform(ax_geo)
                 kwargs_text["xycoords"] = transform
-            self.p_geo = ax_geo.plot(*list(zip(*dst, strict=False))[0:2], "o", **kwargs)
+            self.p_geo = ax_geo.plot(*list(zip(*dst))[0:2], "o", **kwargs)
             for n, _pt in enumerate(dst):
                 _ = ax_geo.annotate(n + 1, xy=_pt[0:2], **kwargs_text)
         self.fig = fig
@@ -178,7 +178,7 @@ class BaseSelect:
         if event.xdata is not None:
             self.logger.debug(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
             self.src.append([int(np.round(event.xdata)), int(np.round(event.ydata))])
-            self.p.set_data(*list(zip(*self.src, strict=False)))
+            self.p.set_data(*list(zip(*self.src)))
             pt = self.ax.annotate(
                 len(self.src),
                 xytext=(6, 6),
@@ -209,7 +209,7 @@ class BaseSelect:
         if len(self.src) > 0:
             del self.src[-1]
             if len(self.src) > 0:
-                self.p.set_data(*list(zip(*self.src, strict=False)))
+                self.p.set_data(*list(zip(*self.src)))
             else:
                 self.p.set_data([], [])
 
@@ -246,7 +246,7 @@ class AoiSelect(BaseSelect):
         # make empty plot
         self.camera_config = camera_config
         (self.p_gcps,) = self.ax.plot(
-            *list(zip(*src, strict=False)), "o", color="w", markeredgecolor="k", markersize=10, zorder=3, label="GCPs"
+            *list(zip(*src)), "o", color="w", markeredgecolor="k", markersize=10, zorder=3, label="GCPs"
         )
         self.pts_t_gcps = [
             self.ax.annotate(
@@ -307,7 +307,7 @@ class AoiSelect(BaseSelect):
         if event.xdata is not None:
             self.logger.debug(f"Storing coordinate x: {event.xdata} y: {event.ydata} to src")
             self.src.append([int(np.round(event.xdata)), int(np.round(event.ydata))])
-            self.p.set_data(*list(zip(*self.src, strict=False)))
+            self.p.set_data(*list(zip(*self.src)))
             pt = self.ax.annotate(
                 corner_labels[len(self.src) - 1],
                 xytext=(6, 6),
@@ -329,13 +329,11 @@ class AoiSelect(BaseSelect):
                             *self.camera_config.get_bbox(
                                 mode="camera", expand_exterior=True, within_image=True
                             ).exterior.xy,
-                            strict=False,
                         )
                     )
                     bbox_geo = list(
                         zip(
                             *self.camera_config.get_bbox(expand_exterior=False, within_image=True).exterior.xy,
-                            strict=False,
                         )
                     )
                     if hasattr(self.camera_config, "crs") and use_cartopy:
@@ -411,7 +409,7 @@ class GcpSelect(BaseSelect):
                 src_fit, dst_fit, camera_matrix, dist_coeffs, rvec, tvec, err = cli_utils.get_gcps_optimized_fit(
                     self.src, self.dst_crs, self.height, self.width, c=2.0, lens_position=self.lens_position
                 )
-                self.p_fit.set_data(*list(zip(*src_fit, strict=False)))
+                self.p_fit.set_data(*list(zip(*src_fit)))
                 self.camera_matrix = camera_matrix
                 self.dist_coeffs = dist_coeffs
                 new_text = (
@@ -440,7 +438,7 @@ class GcpSelect(BaseSelect):
         # update selected dst points
         dst_sel = self.dst[: len(self.src)]
         if len(dst_sel) > 0:
-            self.p_geo_selected.set_data(*list(zip(*dst_sel, strict=False))[0:2])
+            self.p_geo_selected.set_data(*list(zip(*dst_sel))[0:2])
         else:
             self.p_geo_selected.set_data([], [])
 
