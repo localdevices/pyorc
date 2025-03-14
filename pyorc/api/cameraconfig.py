@@ -915,14 +915,14 @@ class CameraConfig:
         # points_back = cv.unproject_points(src=points_proj, z=points[:, -1], )
         if within_image:
             # also filter points outside edges of image
-            # points_proj[points_proj[:, 0] < 0, 0] = -1.0
-            # points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width
-            # points_proj[points_proj[:, 1] < 0, 1] = -1.0
-            # points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height
-            points_proj[points_proj[:, 0] < 0, 0] = np.nan
-            points_proj[points_proj[:, 0] > self.width - 1, 0] = np.nan  # self.width
-            points_proj[points_proj[:, 1] < 0, 1] = np.nan  # -1.0
-            points_proj[points_proj[:, 1] > self.height - 1, 1] = np.nan  # self.height
+            points_proj[points_proj[:, 0] < 0, 0] = -1.0
+            points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width
+            points_proj[points_proj[:, 1] < 0, 1] = -1.0
+            points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height
+            # points_proj[points_proj[:, 0] < 0, 0] = np.nan
+            # points_proj[points_proj[:, 0] > self.width - 1, 0] = np.nan  # self.width
+            # points_proj[points_proj[:, 1] < 0, 1] = np.nan  # -1.0
+            # points_proj[points_proj[:, 1] > self.height - 1, 1] = np.nan  # self.height
 
             # check which points lie behind the camera
             R, _ = cv2.Rodrigues(rvec)
