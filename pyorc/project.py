@@ -144,7 +144,7 @@ def project_numpy(
     # make a large list of coordinates of target grid.
     xs, ys = helpers.pixel_to_map(cols.flatten(), rows.flatten(), cc.transform)
     # back-project real-world coordinates to camera coordinates
-    points_cam = cc.project_points(list(zip(xs, ys, np.ones(len(xs)) * z, strict=False)))
+    points_cam = cc.project_points(list(zip(xs, ys, np.ones(len(xs)) * z)))
     # round cam coordinates to pixels
     points_cam = np.int64(np.round(points_cam))
     # find locations that lie within the camera objective, rest should remain missing value
@@ -186,7 +186,7 @@ def project_numpy(
             # attrs=da.attrs
         )
         # retrieve only the pixels within mask
-        src_pix = list(zip(coli[mask], rowi[mask], strict=False))
+        src_pix = list(zip(coli[mask], rowi[mask]))
         # orthoproject pixels
         dst_pix = cc.unproject_points(src_pix, z)
         x_pix, y_pix, z_pix = dst_pix.T

@@ -148,10 +148,7 @@ class Velocimetry(ORCBase):
         if crs is not None:
             # transform coordinates of cross-section
             x, y = zip(
-                *helpers.xyz_transform(
-                    list(zip(*(x, y), strict=False)), crs_from=crs, crs_to=CRS.from_wkt(self.camera_config.crs)
-                ),
-                strict=False,
+                *helpers.xyz_transform(list(zip(*(x, y))), crs_from=crs, crs_to=CRS.from_wkt(self.camera_config.crs)),
             )
             x, y = list(x), list(y)
         if s is None:

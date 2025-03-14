@@ -513,7 +513,7 @@ class CameraConfig:
         corners = corners[np.isfinite(corners[:, 0])]
         if not mode == "camera":
             # project back to real-world coordinates after possibly cutting at edges of visibility
-            corners = self.unproject_points(np.array(np.array(list(zip(*corners, strict=False))).T), z_a)
+            corners = self.unproject_points(np.array(np.array(list(zip(*corners))).T), z_a)
         if mode == "3d":
             return Polygon(corners[np.isfinite(corners[:, 0])])
         return Polygon(corners[np.isfinite(corners[:, 0])][:, 0:2])
@@ -580,9 +580,7 @@ class CameraConfig:
         z_dry = depth <= 0
         z_dry[[0, -1]] = True
         # compute distance to nearest dry points with Pythagoras
-        dist_shore = np.array(
-            [(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y in zip(x, y, strict=False)]
-        )
+        dist_shore = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y in zip(x, y)])
         return dist_shore
 
     def get_dist_wall(self, x: List[float], y: List[float], z: List[float], h_a: Optional[float] = None) -> List[float]:
@@ -917,10 +915,14 @@ class CameraConfig:
         # points_back = cv.unproject_points(src=points_proj, z=points[:, -1], )
         if within_image:
             # also filter points outside edges of image
-            points_proj[points_proj[:, 0] < 0, 0] = -1.0
-            points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width
-            points_proj[points_proj[:, 1] < 0, 1] = -1.0
-            points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height
+            # points_proj[points_proj[:, 0] < 0, 0] = -1.0
+            # points_proj[points_proj[:, 0] > self.width - 1, 0] = self.width
+            # points_proj[points_proj[:, 1] < 0, 1] = -1.0
+            # points_proj[points_proj[:, 1] > self.height - 1, 1] = self.height
+            points_proj[points_proj[:, 0] < 0, 0] = np.nan
+            points_proj[points_proj[:, 0] > self.width - 1, 0] = np.nan  # self.width
+            points_proj[points_proj[:, 1] < 0, 1] = np.nan  # -1.0
+            points_proj[points_proj[:, 1] > self.height - 1, 1] = np.nan  # self.height
 
             # check which points lie behind the camera
             R, _ = cv2.Rodrigues(rvec)
@@ -958,7 +960,7 @@ class CameraConfig:
             list of row coordinates of image objective
 
         """
-        points = list(zip(xs.flatten(), ys.flatten(), zs.flatten(), strict=False))
+        points = list(zip(xs.flatten(), ys.flatten(), zs.flatten()))
         points_proj = np.array(self.project_points(points, swap_y_coords=swap_y_coords))
         xp, yp = points_proj[:, 0], points_proj[:, 1]
         # reshape back
@@ -1248,12 +1250,6 @@ class CameraConfig:
         if mode == "3d":
             return plot_helpers.plot_3d_polygon(bbox, ax=ax, **kwargs)
         return plot_helpers.plot_polygon(bbox, ax=ax, **kwargs)
-        #
-        # bbox_x, bbox_y = bbox.exterior.xy
-        # bbox_coords = list(zip(bbox_x, bbox_y, strict=False))
-        # patch = patches.Polygon(bbox_coords, **kwargs)
-        # p = ax.add_patch(patch)
-        # return p
 
     def plot_3d_pose(self, ax=None, length=1):
         """Plot 3D pose of a camera using its rotation and translation vectors.
@@ -1295,9 +1291,7 @@ class CameraConfig:
         # Plot the origin of the camera
         ps = []
         # Plot the camera axes
-        for i, (color, label) in enumerate(
-            zip(["r", "g", "b"], ["right-pose", "down-pose", "forward-pose"], strict=False)
-        ):
+        for i, (color, label) in enumerate(zip(["r", "g", "b"], ["right-pose", "down-pose", "forward-pose"])):
             # if i == 2:
             xx = [world_axes_translated[0, 0], world_axes_translated[i + 1, 0]]
             yy = [world_axes_translated[0, 1], world_axes_translated[i + 1, 1]]

@@ -1059,8 +1059,10 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
         bnds_k2 = (-0.0, 0.0)
     else:
         # bnds_k1 = (-0.2501, -0.25)
-        bnds_k1 = (-0.9, 0.9)
-        bnds_k2 = (-0.5, 0.5)
+        # bnds_k1 = (-0.9, 0.9)
+        # bnds_k2 = (-0.5, 0.5)
+        bnds_k1 = (-0.0, 0.0)
+        bnds_k2 = (-0.0, 0.0)
     opt = optimize.differential_evolution(
         error_intrinsic,
         # bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
@@ -1102,11 +1104,11 @@ def transform_to_bbox(coords, bbox, resolution):
     # first assemble x and y coordinates
     transform = _get_transform(bbox, resolution)
     if len(coords[0]) == 3:
-        xs, ys, zs = zip(*coords, strict=False)
+        xs, ys, zs = zip(*coords)
     else:
-        xs, ys = zip(*coords, strict=False)
+        xs, ys = zip(*coords)
     rows, cols = rasterio.transform.rowcol(transform, xs, ys, op=float)
-    return list(zip(cols, rows, strict=False)) if len(coords[0]) == 2 else list(zip(cols, rows, zs, strict=False))
+    return list(zip(cols, rows)) if len(coords[0]) == 2 else list(zip(cols, rows, zs))
 
 
 def undistort_img(img, camera_matrix, dist_coeffs):
@@ -1172,7 +1174,7 @@ def unproject_points(src, z, rvec, tvec, camera_matrix, dist_coeffs):
         assert len(z) == len(
             src
         ), f"Amount of src points {len(src)} is not equal to amount of vertical levels z {len(z)}"
-        for pt, _z in zip(src, z, strict=False):
+        for pt, _z in zip(src, z):
             M = _Rt_to_M(rvec, tvec, camera_matrix, z=_z, reverse=False)
             x, y = list(cv2.perspectiveTransform(pt[None, None, ...], M)[0][0])
             dst.append([x, y, _z])

@@ -188,7 +188,7 @@ def run_func_hash_io(
                     f'Configuration, dependencies, input and output files for section "{func_name}" have not changed '
                     f"since last run, skipping..."
                 )
-                for attr, output in zip(attrs, outputs, strict=False):
+                for attr, output in zip(attrs, outputs):
                     if attr is not None:
                         fn = getattr(ref, output)
                         ref.logger.info(
@@ -507,7 +507,7 @@ class VelocityFlowProcessor(object):
                     f'Transect in {os.path.abspath(transect_grp["shapefile"])} only contains x, y, but no '
                     f'z-coordinates.'
                 )
-            x, y, z = zip(*coords, strict=False)
+            x, y, z = zip(*coords)
             self.logger.debug(f"Sampling transect {transect_name}")
             # sample the coordinates
             if "get_transect" not in transect_grp:

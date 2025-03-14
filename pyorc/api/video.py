@@ -478,9 +478,7 @@ Camera configuration: {:s}
             # apply stabilisation
             if self.ms is not None:
                 # da_stack = np.array([cv.transform(img, m) for img, m in zip(da_stack, self.ms)])
-                da_stack = np.array(
-                    [cv.transform(cv.color_scale(img, method), m) for img, m in zip(da_stack, self.ms, strict=False)]
-                )
+                da_stack = np.array([cv.transform(cv.color_scale(img, method), m) for img, m in zip(da_stack, self.ms)])
             else:
                 # only color transform
                 da_stack = np.array([cv.color_scale(img, method) for img in da_stack])
