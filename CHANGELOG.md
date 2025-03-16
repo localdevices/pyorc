@@ -1,3 +1,11 @@
+## [0.8.2] = 2025-03-16
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- fixed problem with plotting under shallow angles in `mode="camera"`
+
 ## [0.8.1] = 2025-03-14
 ### Added
 - One can now also use a single image as input on the command-line interface for camera calibration.
