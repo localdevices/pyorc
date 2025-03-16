@@ -19,7 +19,7 @@ import pyorc
 from pyorc import CameraConfig, CrossSection, Video, const
 from pyorc.cli import cli_utils
 
-__all__ = ["velocity_flow"]  # , "velocity_flow_subprocess"]
+__all__ = ["velocity_flow", "velocity_flow_subprocess"]
 
 logger = logging.getLogger(__name__)
 
