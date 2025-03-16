@@ -3,6 +3,7 @@
 import copy
 import json
 import os
+import warnings
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import cv2
@@ -11,6 +12,7 @@ import numpy as np
 import shapely.geometry
 from pyproj import CRS, Transformer
 from pyproj.exceptions import CRSError
+from rasterio.features import rasterize
 from shapely import ops, wkt
 from shapely.geometry import LineString, Point, Polygon
 
@@ -706,6 +708,129 @@ class CameraConfig:
             return self.gcps["z_0"]
         else:
             return self.gcps["z_0"] + (h_a - self.gcps["h_ref"])
+
+    def map_idx_img_ortho(self, x, y, z):
+        """Map pixel indices from the image to an orthographic projection for nearest resampling.
+
+        Can be used independently, or (when mean resampling is used) with `map_idx_img_ortho_mean`.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            1D array representing the x-coordinates of the target orthographic grid.
+        y : np.ndarray
+            1D array representing the y-coordinates of the target orthographic grid.
+        z : float
+            The z-coordinate (elevation) value to compute the transformation.
+
+        Returns
+        -------
+        idx_img : np.ndarray
+            1D array of flattened indices of the source image pixels that correspond
+            to selected orthographic grid pixels.
+        idx_ortho : np.ndarray
+            1D array of flattened indices of the destination ortho image pixels that correspond
+            to the source pixels in idx_img.
+
+        """
+        # make a large flattened list of coordinates of target grid.
+        cols, rows = np.meshgrid(np.arange(len(x)), np.arange(len(y)))
+        xs, ys = helpers.pixel_to_map(cols.flatten(), rows.flatten(), self.transform)
+        # back-project real-world coordinates to camera coordinates
+        points_cam = self.project_points(list(zip(xs, ys, np.ones(len(xs)) * z)))
+        # round cam coordinates to pixels
+        points_cam = np.int64(np.round(points_cam))
+        # find locations that lie within the camera objective, rest should remain missing value
+        idx_ortho = np.all(
+            [
+                points_cam[:, 0] > 0,
+                points_cam[:, 0] < self.width,
+                points_cam[:, 1] > 0,
+                points_cam[:, 1] < self.height,
+            ],
+            axis=0,
+        )
+        # check if there are values inside the objective. If not raise a warning
+        if idx_ortho.sum() == 0:
+            warnings.warn(
+                f"The water level is either very low or high compared to the reference water level. "
+                f"As a result, there are no pixels in the objective that fit in the area of interest. "
+                f"Difference in water level and reference water level is {z - self.gcps['z_0']}. You will get "
+                f"missing values only.",
+                stacklevel=2,
+            )
+        # coerce 2D idxs to 1D idxs
+        idx_img = np.array(points_cam[idx_ortho, 1]) * self.width + np.array(points_cam[idx_ortho, 0])
+        return idx_img, idx_ortho
+
+    def map_mean_idx_img_ortho(self, x, y, z):
+        """Map pixel indices from the image to an orthographic projection for mean resampling.
+
+        This function performs a mapping of pixel indices from one coordinate
+        system (e.g., camera coordinate system) to another orthographic grid,
+        with additional filtering based on specified constraints. It calculates
+        the target pixel locations on the orthographic grid, checks which pixels
+        reside inside the area of interest, and returns indexes and index groups
+        for use in a mean resampling. undersampled areas will not be fully covered,
+        hence this method should be used in conjunction with `map_idx_img_ortho`.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            1D array representing the x-coordinates of the target orthographic grid.
+        y : np.ndarray
+            1D array representing the y-coordinates of the target orthographic grid.
+        z : float
+            The z-coordinate (elevation) value to compute the transformation.
+
+        Returns
+        -------
+        src_idx : np.ndarray
+            1D array of flattened indices of the source image pixels that correspond
+            to selected orthographic grid pixels.
+        uidx : np.ndarray
+            Sorted unique indices of the filtered orthographic grid pixels.
+        norm_idx : np.ndarray
+            Normalized indices corresponding to their positions in the unique
+            filtered orthographic grid pixels.
+
+        """
+        # mapping of pixels from image to ortho
+        coli, rowi = np.meshgrid(np.arange(self.width), np.arange(self.height))
+        # first exclude pixels not within the area of interest, can save a lot of time
+        poly = self.get_bbox(mode="camera", z_a=z)
+        mask = rasterize([poly], out_shape=(self.height, self.width)) == 1
+        src_pix = list(zip(coli[mask], rowi[mask]))
+
+        # orthoproject pixels
+        dst_pix = self.unproject_points(src_pix, z)
+        x_pix, y_pix, z_pix = dst_pix.T
+        idx_y, idx_x = helpers.map_to_pixel(x_pix, y_pix, self.transform)
+        # ensure no pixels outside of target grid (can be in case of edges)
+        # idx_inside contains False/True which pixels are within AOI from selected
+        idx_inside = np.all([idx_y >= 0, idx_y < len(y), idx_x >= 0, idx_x < len(x)], axis=0)
+        idx_x = idx_x[idx_inside]
+        idx_y = idx_y[idx_inside]
+        # get 1D flat array indexes
+        idx = np.array(idx_y) * len(x) + np.array(idx_x)
+        src_pix_sel = np.array(src_pix)[idx_inside]
+
+        uidx, counts = np.unique(idx, return_counts=True)
+
+        # Filter out indices that occur only once (covered by nearest-neighbour)
+        valid_idx = uidx[counts > 1]
+        mask = np.isin(idx, valid_idx)  # Mask to filter data and indices
+        src_pix_sel = src_pix_sel[mask]
+
+        # flattened indexes of source img to read
+        src_idx = src_pix_sel[:, 1] * self.width + src_pix_sel[:, 0]
+
+        # Apply the mask to both data and indices
+        # filtered_data = data[mask]
+        filtered_idx = idx[mask]
+        # convert into a ascending lists of indexes, which are easier to process in numba
+        uidx, norm_idx = np.unique(filtered_idx, return_inverse=True)
+        return src_idx, uidx, norm_idx
 
     def set_bbox_from_corners(self, corners: List[List[float]]):
         """Establish bbox based on a set of camera perspective corner points.
