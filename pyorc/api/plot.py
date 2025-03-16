@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib import patheffects
 from matplotlib.collections import QuadMesh
 
-from pyorc import cv, helpers
+from pyorc import helpers
 
 path_effects = [
     patheffects.Stroke(linewidth=3, foreground="w"),
@@ -366,28 +366,36 @@ class _Transect_PlotMethods:
         # retrieve the backward transformation array
         transect = self._obj.transect
         camera_config = transect.camera_config
-        # M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
-        src = camera_config.get_bbox(mode="camera", h_a=transect.h_a, expand_exterior=False).exterior.coords[0:4]
-        dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
-        # get geographic coordinates bbox corners
-        # get geographic coordinates bbox corners
-        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
-        trans_mat = cv.get_M_2D(src, dst, reverse=True)
-
         x, y = self._obj.x, self._obj.y
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
         _v = self._obj[v_eff] * np.cos(self._obj[v_dir])
         s = np.abs(self._obj[v_eff].values)
         x_moved, y_moved = x + _u * dt, y + _v * dt
-        xp, yp = transect.get_xyz_perspective(trans_mat=trans_mat, xs=x.values, ys=y.values)
-        xp_moved, yp_moved = transect.get_xyz_perspective(trans_mat=trans_mat, xs=x_moved.values, ys=y_moved.values)
-        # remove vectors that have nan on moved pixels
-        xp_moved[np.isnan(x_moved)] = np.nan
-        yp_moved[np.isnan(y_moved)] = np.nan
 
-        self._obj["xp"][:] = xp[:]
-        self._obj["yp"][:] = yp[:]
-        u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
+        # transform to real-world
+        cols_moved, rows_moved = x_moved / camera_config.resolution, y_moved / camera_config.resolution
+        xs_moved, ys_moved = helpers.get_xs_ys(cols_moved, rows_moved, camera_config.transform)
+        cols, rows = x / camera_config.resolution, y / camera_config.resolution
+        xs, ys = helpers.get_xs_ys(cols, rows, camera_config.transform)
+        # project the found displacement points to camera projection
+        xp_moved, yp_moved = camera_config.project_grid(
+            xs_moved, ys_moved, np.ones(x.shape) * camera_config.h_to_z(transect.h_a), swap_y_coords=True
+        )
+        xp, yp = camera_config.project_grid(
+            xs, ys, np.ones(x.shape) * camera_config.h_to_z(transect.h_a), swap_y_coords=True
+        )
+
+        #
+        # # make point collection
+        # xp, yp = transect.get_xyz_perspective(trans_mat=trans_mat, xs=x.values, ys=y.values)
+        # xp_moved, yp_moved = transect.get_xyz_perspective(trans_mat=trans_mat, xs=x_moved.values, ys=y_moved.values)
+        # # remove vectors that have nan on moved pixels
+        # xp_moved[np.isnan(x_moved)] = np.nan
+        # yp_moved[np.isnan(y_moved)] = np.nan
+
+        self._obj["xp"][:] = xp[:].flatten()
+        self._obj["yp"][:] = yp[:].flatten()
+        u, v = xp_moved.flatten() - self._obj["xp"], yp_moved.flatten() - self._obj["yp"]
         return u, v, s
 
     def get_uv_geographical(self):
@@ -530,13 +538,6 @@ class _Velocimetry_PlotMethods:
         # retrieve the backward transformation array from x, y to persective row column
         velocimetry = self._obj.velocimetry
         camera_config = velocimetry.camera_config
-        # M = velocimetry.camera_config.get_M(velocimetry.h_a, to_bbox_grid=True, reverse=True)
-        src = camera_config.get_bbox(mode="camera", h_a=velocimetry.h_a, expand_exterior=False).exterior.coords[0:4]
-        dst_xy = camera_config.get_bbox(expand_exterior=False).exterior.coords[0:4]
-        # get geographic coordinates bbox corners
-        dst = cv.transform_to_bbox(dst_xy, camera_config.bbox, camera_config.resolution)
-        M = cv.get_M_2D(src, dst, reverse=True)
-
         # get the shape of the original frames
         shape_y, shape_x = velocimetry.camera_shape
         xi, yi = np.meshgrid(self._obj.x, self._obj.y)
@@ -545,14 +546,19 @@ class _Velocimetry_PlotMethods:
 
         # follow the velocity vector over a short distance (dt*velocity)
         x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
+        # transform to real-world
+        cols_moved, rows_moved = x_moved / camera_config.resolution, y_moved / camera_config.resolution
+        xs_moved, ys_moved = helpers.get_xs_ys(cols_moved, rows_moved, camera_config.transform)
+        cols, rows = xi / camera_config.resolution, yi / camera_config.resolution
+        xs, ys = helpers.get_xs_ys(cols, rows, camera_config.transform)
         # project the found displacement points to camera projection
-        xp_moved, yp_moved = helpers.xy_to_perspective(
-            x_moved.values, y_moved.values, velocimetry.camera_config.resolution, M
+        xp_moved, yp_moved = camera_config.project_grid(
+            xs_moved, ys_moved, np.ones(xi.shape) * camera_config.h_to_z(velocimetry.h_a), swap_y_coords=True
         )
-        xp, yp = helpers.xy_to_perspective(xi, yi, velocimetry.camera_config.resolution, M)
-        # convert row counts to start at the top of the frame instead of bottom
-        yp_moved = shape_y - yp_moved
-        yp = shape_y - yp
+        xp, yp = camera_config.project_grid(
+            xs, ys, np.ones(xi.shape) * camera_config.h_to_z(velocimetry.h_a), swap_y_coords=True
+        )
+
         # missing values end up at the top-left, replace these with nan
         yp_moved[yp_moved == shape_y] = np.nan  # ds["yp"].values[yp_moved == shape_y]
         xp_moved[xp_moved == 0] = np.nan  # ds["xp"].values[xp_moved == 0]

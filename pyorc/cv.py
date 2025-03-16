@@ -1059,10 +1059,10 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
         bnds_k2 = (-0.0, 0.0)
     else:
         # bnds_k1 = (-0.2501, -0.25)
-        # bnds_k1 = (-0.9, 0.9)
-        # bnds_k2 = (-0.5, 0.5)
-        bnds_k1 = (-0.0, 0.0)
-        bnds_k2 = (-0.0, 0.0)
+        bnds_k1 = (-0.9, 0.9)
+        bnds_k2 = (-0.5, 0.5)
+        # bnds_k1 = (-0.0, 0.0)
+        # bnds_k2 = (-0.0, 0.0)
     opt = optimize.differential_evolution(
         error_intrinsic,
         # bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
