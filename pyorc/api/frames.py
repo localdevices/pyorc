@@ -201,7 +201,10 @@ class Frames(ORCBase):
         return ds
 
     def project(
-        self, method: Literal["cv", "numpy"] = "cv", resolution: Optional[float] = None, reducer: Optional[str] = "mean"
+        self,
+        method: Literal["cv", "numpy"] = "numpy",
+        resolution: Optional[float] = None,
+        reducer: Optional[str] = "mean",
     ):
         """Project frames into a projected frames object, with information from the camera_config attr.
 
@@ -211,14 +214,14 @@ class Frames(ORCBase):
         Parameters
         ----------
         method : str, optional
-            can be `numpy` or `cv`. Currently `cv` is still default but this may change in a future release.
-            With `cv` (opencv) resampling is performed by first undistorting images, and then by resampling to the
+            can be `numpy` or `cv` (default `numpy`).
+            With `numpy` each individual orthoprojected grid cell is mapped to the image pixels space. For oversampled
+            areas, this is also done vice versa. Undersampled areas result in nearest-neighbour interpolations, whilst
+            for oversampled, this results in a mean value (if the user uses `mean` as reducer). With `cv` (opencv)
+            resampling is performed by first undistorting images, and then by resampling to the
             desired grid. With heavily distorted images and part of the area of interest outside of the field
-            of view, the orthoprojection of the corners may end up in the wrong space. With `numpy` each individual
-            orthoprojected grid cell is mapped to the image pixels space. For oversampled areas, this is also done vice
-            versa. Undersampled areas result in nearest-neighbour interpolations, whilst for oversampled, this results
-            in a reduced value (which can be defined by the user).
-            We recommend switching to `numpy` if you experience strange results with `cv`.
+            of view, the orthoprojection of the corners may end up in the wrong space.
+            We recommend using `numpy` and only use cv with simple cases such as nadir-looking videos.
         resolution : float, optional
             resolution to project to. If not provided, this will be taken from the camera config in the metadata
              (Default value = None)
