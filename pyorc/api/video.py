@@ -509,7 +509,7 @@ Camera configuration: {:s}
             coords=coords,
             attrs=attrs,
         )[:: self.freq]
-        frames = frames.chunk({"time": 1})  # set chunks over time dimension
+        frames = frames.chunk({"time": 20})  # set chunks over time dimension
         del coords["time"]
         if len(sample.shape) == 3:
             del coords["rgb"]

@@ -2,21 +2,42 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import Any, Optional
 
 import cv2
-import dask
+import numba as nb
 import numpy as np
 import xarray as xr
-from flox.xarray import xarray_reduce
-from rasterio.features import rasterize
 
-from . import cv, helpers
+from . import cv
 
 # from . import CameraConfig
 
 __all__ = ["project_numpy", "project_cv"]
+
+
+@nb.njit(
+    nb.float32[:](nb.float32[:], nb.int64[:], nb.int64),
+    nogil=True,
+    parallel=False,
+    cache=True,
+)
+def _group_average(data, idx, num_groups):
+    # Arrays to hold the sum and count for each group
+    group_sums = np.zeros(num_groups, dtype=np.float32)
+    group_counts = np.zeros(num_groups, dtype=np.int64)
+
+    # Accumulate sums and counts for each group
+    for i in range(len(data)):
+        group_sums[idx[i]] += data[i]
+        group_counts[idx[i]] += 1
+
+    # Compute the averages
+    averages = np.zeros(num_groups, dtype=np.float32)
+    for group in range(num_groups):
+        # if group_counts[group] > 0:  # Avoid division by zero
+        averages[group] = group_sums[group] / group_counts[group]
+    return averages
 
 
 def project_cv(da: xr.DataArray, cc: Any, x: np.ndarray, y: np.ndarray, z: np.ndarray, reducer: str):
@@ -86,6 +107,20 @@ def project_cv(da: xr.DataArray, cc: Any, x: np.ndarray, y: np.ndarray, z: np.nd
     return da_proj
 
 
+def img_to_ortho(img, x, y, idx_img, idx_ortho, src_idx=None, uidx=None, norm_idx=None):
+    img = np.float32(img.flatten())
+    # first make new flattened image
+    new_arr = np.zeros((len(y) * len(x)))
+    new_arr[idx_ortho] = img[idx_img]
+    if src_idx is not None:
+        samples_for_mean = img[src_idx]
+        # Compute Group Averages
+        averages = _group_average(samples_for_mean, norm_idx, len(uidx))
+        new_arr[uidx] = averages
+    # reshape to original grid
+    return new_arr.reshape(len(y), -1)
+
+
 def project_numpy(
     da: xr.DataArray,
     cc: Any,
@@ -103,9 +138,9 @@ def project_numpy(
     cc : pyorc.CameraConfig
         pyorc CameraConfig object
     x : np.ndarray
-        x-axis
+        x-axis of target ortho image
     y : np.ndarray
-        y-axis
+        y-axis of target ortho image
     z : float
         vertical level value in real-world coordinates
     reducer : str, optional
@@ -121,106 +156,35 @@ def project_numpy(
 
     """
     # create coordinate system for target grid
-    coords = {"time": da.time, "y": y, "x": x}
-    if "rgb" in da.coords:
-        chunks = (1, None, None, None)
-        coords["rgb"] = da.rgb
-        shape = (len(da), len(y), len(x), 3)
+    idx_img_nn, idx_ortho_nn = cc.map_idx_img_ortho(x, y, z)
+    if reducer == "mean":
+        src_idx_mean, uidx_mean, norm_idx_mean = cc.map_mean_idx_img_ortho(x, y, z)
     else:
-        chunks = (1, None, None)
-        shape = (
-            len(da),
-            len(y),
-            len(x),
-        )
-    da_new = xr.DataArray(
-        dask.array.zeros(shape, chunks=chunks, dtype=da.dtype) * np.nan,
-        coords=coords,
-        name="project_frames",
-        attrs=da.attrs,
-    ).stack(group=("y", "x"))  # stack to one dimension for all pixels
-    #
-    cols, rows = np.meshgrid(np.arange(len(x)), np.arange(len(y)))
-    # make a large list of coordinates of target grid.
-    xs, ys = helpers.pixel_to_map(cols.flatten(), rows.flatten(), cc.transform)
-    # back-project real-world coordinates to camera coordinates
-    points_cam = cc.project_points(list(zip(xs, ys, np.ones(len(xs)) * z)))
-    # round cam coordinates to pixels
-    points_cam = np.int64(np.round(points_cam))
-    # find locations that lie within the camera objective, rest should remain missing value
-    idx_in = np.all(
-        [
-            points_cam[:, 0] > 0,
-            points_cam[:, 0] < len(da.x),
-            points_cam[:, 1] > 0,
-            points_cam[:, 1] < len(da.y),
-        ],
-        axis=0,
-    )
-    # check if there are values inside the objective. If not raise a warning
-    if idx_in.sum() == 0:
-        warnings.warn(
-            f"The water level is either very low or high compared to the reference water level. As a result, there are"
-            f"no pixels in the objective that fit in the area of interest. Difference in water level and reference "
-            f"water level is {z - cc.gcps['z_0']}. You will get missing values only.",
-            stacklevel=2,
-        )
-        return da_new.unstack()
-
-    # coerce 2D idxs to 1D idxs
-    idx_back = np.array(points_cam[idx_in, 1]) * len(da.x) + np.array(points_cam[idx_in, 0])
-    vals = da.stack(group=("y", "x")).isel(group=idx_back)
-    # overwrite the values group coordinates
-    vals = vals.drop_vars(["group", "y", "x"])
-    vals["group"] = da_new.group[idx_in]
-    da_new[..., idx_in] = vals
-
-    if reducer != "nearest":
-        # also fill in the parts that have valid averaged pixels
-        coli, rowi = np.meshgrid(np.arange(len(da.x)), np.arange(len(da.y)))
-        poly = cc.get_bbox(mode="camera", z_a=z)
-        mask = xr.DataArray(
-            rasterize([poly], out_shape=(cc.height, cc.width)) == 1,
-            coords={"y": da.y, "x": da.x},
-            name="mask",
-            # attrs=da.attrs
-        )
-        # retrieve only the pixels within mask
-        src_pix = list(zip(coli[mask], rowi[mask]))
-        # orthoproject pixels
-        dst_pix = cc.unproject_points(src_pix, z)
-        x_pix, y_pix, z_pix = dst_pix.T
-        idx_y, idx_x = helpers.map_to_pixel(x_pix, y_pix, cc.transform)
-        # ensure no pixels outside of target grid (can be in case of edges)
-        idx_inside = np.all([idx_y >= 0, idx_y < len(y), idx_x >= 0, idx_x < len(x)], axis=0)
-        idx_x = idx_x[idx_inside]
-        idx_y = idx_y[idx_inside]
-        # get 1D flat array indexes
-        idx = np.array(idx_y) * len(x) + np.array(idx_x)
-
-        # flatten points within mask
-        da_point = da.stack(points=("y", "x")).where(mask.stack(points=("y", "x")), drop=True)
-        # da_point = da.where(mask, drop=True).stack(points=("y", "x"))
-        da_point["points_idx"] = "points", np.where(mask.values.flatten())[0]
-        # ensure any values that may be outside of target grid are dropped
-        da_point = da_point.isel(points=idx_inside)
-
-        # create a data array with relevant indexes
-        da_idx = xr.DataArray(
-            idx,
-            dims=("points"),
-            name="group",
-            coords={
-                "points": da_point.points.values,
-            },
-        )
-        # retrieve unique values from this
-        classes = np.unique(da_idx)
-        # group unique values and reduce with average
-        da_point = xarray_reduce(
-            da_point.drop_vars(["y", "x", "points"]), da_idx, func=reducer, expected_groups=classes, engine="numba"
-        )
-        # replace the nearest by mean values where relevant
-        da_point["group"] = da_new.group[classes]
-        da_new[..., classes] = da_point
-    return da_new.unstack()
+        src_idx_mean, uidx_mean, norm_idx_mean = None, None, None
+    # da.load()
+    da_proj = xr.apply_ufunc(
+        img_to_ortho,
+        da,
+        kwargs={
+            "x": x,
+            "y": y,
+            "idx_img": idx_img_nn,
+            "idx_ortho": idx_ortho_nn,
+            "src_idx": src_idx_mean,
+            "uidx": uidx_mean,
+            "norm_idx": norm_idx_mean,
+        },
+        input_core_dims=[["y", "x"]],
+        output_core_dims=[["new_y", "new_x"]],
+        dask_gufunc_kwargs={
+            "output_sizes": {"new_y": len(y), "new_x": len(x)},
+        },
+        output_dtypes=[da.dtype],
+        vectorize=True,
+        exclude_dims=set(("y", "x")),
+        dask="parallelized",
+        keep_attrs=True,
+    ).rename({"new_y": "y", "new_x": "x"})
+    da_proj["y"] = y
+    da_proj["x"] = x
+    return da_proj
