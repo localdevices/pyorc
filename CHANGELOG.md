@@ -1,3 +1,23 @@
+## [0.8.4] = 2025-03-17
+### Added
+### Changed
+- modified the `Frames.project(method="numpy")` to only map indices once.
+  This severely reduces the resources required for the method and accelerates
+  the workflow when little resources are available. `method="numpy"` is now the
+  recommended method and therefore now also the default. Results are identical to
+  the original numpy-based method.
+### Deprecated
+### Removed
+### Fixed
+
+## [0.8.3] = 2025-03-16
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- hotfix with missing "velocity_flow_subprocess" in service module
+
 ## [0.8.2] = 2025-03-16
 ### Added
 ### Changed
