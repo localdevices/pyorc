@@ -23,6 +23,19 @@ __all__ = ["project_numpy", "project_cv"]
     cache=True,
 )
 def _group_average(data, idx, num_groups):
+    """Compute group averages on sampled data, using unique values in idx as group indices.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        1d-array containing values sampled from the original data
+    idx : np.ndarray
+        1d-array containing indices of the original data that correspond to the values in data.
+        idx has the same size as data
+    num_groups : int
+        the amount of groups to average over. I.e. result of np.unique(idx).size
+
+    """
     # Arrays to hold the sum and count for each group
     group_sums = np.zeros(num_groups, dtype=np.float32)
     group_counts = np.zeros(num_groups, dtype=np.int64)
@@ -54,9 +67,9 @@ def project_cv(da: xr.DataArray, cc: Any, x: np.ndarray, y: np.ndarray, z: np.nd
     cc : pyorc.CameraConfig
         pyorc CameraConfig object
     x : np.ndarray
-        x-axis
+        x-axis of target ortho image
     y : np.ndarray
-        y-axis
+        y-axis of target ortho image
     z : float
         vertical level value in real-world coordinates
     reducer : str
@@ -108,6 +121,33 @@ def project_cv(da: xr.DataArray, cc: Any, x: np.ndarray, y: np.ndarray, z: np.nd
 
 
 def img_to_ortho(img, x, y, idx_img, idx_ortho, src_idx=None, uidx=None, norm_idx=None):
+    """Project from original image to ortho image using pre-calculated index mapping.
+
+    This function can use nearest neighbour (for undersampled areas)  as well as averages (in oversampled areas).
+    If `src_idx` is provided, then the averages are computed using the values in `src_idx` as group indices.
+
+    Parameters
+    ----------
+    img : np.ndarray
+        2d array containing the original image
+    x : np.ndarray
+        x-axis of target ortho image
+    y : np.ndarray
+        y-axis of target ortho image
+    idx_img : np.ndarray[int]
+        indices of the original image that correspond to the values in img. Used for nearest neighbour.
+    idx_ortho : np.ndarray[int]
+        indixes of the target ortho image that correspond to the values in img. Used for nearest neighbour.
+    src_idx : np.ndarray
+        1D array of flattened indices of the source image pixels that correspond
+        to selected orthographic grid pixels.
+    uidx : np.ndarray
+        Sorted unique indices of the filtered orthographic grid pixels.
+    norm_idx : np.ndarray
+        Normalized indices corresponding to their positions in the unique
+        filtered orthographic grid pixels. Used for averaging.
+
+    """
     img = np.float32(img.flatten())
     # first make new flattened image
     new_arr = np.zeros((len(y) * len(x)))
