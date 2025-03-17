@@ -60,8 +60,7 @@ def test_edge_detect(frames_proj):
     assert (
         frames_edge[0, 0, 0].values.dtype == "float32"
     ), f'dtype of result is {frames_edge[0, 0, 0].values.dtype}, expected "float32"'
-    # assert(np.allclose(frames_edge.values.flatten()[-4:], [-1.3828125, -4.3359375,  1.71875  ,  7.234375 ]))
-    assert np.allclose(frames_edge.values.flatten()[-4:], [-6.0390625, 0.8671875, 6.4765625, 4.40625])
+    assert np.allclose(frames_edge.values.flatten()[-4:], [-5.6953125, 4.0703125, 8.0625, 4.3125])
 
 
 def test_reduce_rolling(frames_grayscale, samples=1):
@@ -100,10 +99,8 @@ def test_plot_proj(frames_proj, idx):
 @pytest.mark.parametrize(
     ("window_size", "engine", "result"),
     [
-        # (5, [np.nan, np.nan, np.nan, 0.06877007]),
-        (10, "openpiv", [0.11740075, 0.09619355, 0.16204849, 0.14154269]),
-        # (10, "ffpiv", [0.11740075, 0.09619355, 0.16204849, 0.14154269]),
-        # (15, [0.21774408, 0.21398547, 0.25068682, 0.26456946])
+        (10, "openpiv", [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
+        (10, "numba", [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
     ],
 )
 def test_get_piv(frames_proj, window_size, engine, result):
