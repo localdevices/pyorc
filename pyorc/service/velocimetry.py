@@ -2,6 +2,7 @@
 
 import copy
 import functools
+import json
 import logging
 import os.path
 import subprocess
@@ -621,6 +622,7 @@ def velocity_flow_subprocess(
     output,
     prefix=None,
     h_a: float = None,
+    cross: str = None,
     update: bool = False,
     concurrency=True,
     logger=logging,
@@ -641,6 +643,8 @@ def velocity_flow_subprocess(
         prefix of produced output files
     h_a : float, optional
         Current water level in meters (default None)
+    cross : dict, optional
+        Cross-section profile as geojson dict, to use for optical water level detection if provided and h_a is None,
     output : str
         path to output file
     update : bool, optional
@@ -670,7 +674,14 @@ def velocity_flow_subprocess(
     if h_a is not None:
         cmd.append("-h")
         cmd.append(str(h_a))
-    if concurrency == False:
+    if h_a is None and cross is not None:
+        cross_fn = os.path.join(output, "cross.geojson")
+        # write cross-section to file
+        with open(cross_fn, "w") as f:
+            json.dump(cross, f, indent=4)
+        cmd.append("--cross")
+        cmd.append(cross_fn)
+    if not concurrency:
         cmd.append("--lowmem")
     if update:
         cmd.append("-u")
