@@ -1109,7 +1109,7 @@ class CameraConfig:
             unprojected points as list of [x, y, z] coordinates
 
         """
-        rvec, tvec = self.rvec, self.tvec
+        rvec, tvec = np.array(self.rvec), np.array(self.tvec)
         # reduce zs by the mean of the gcps
         dst = cv.unproject_points(
             np.array(points, dtype=np.float64),
@@ -1193,10 +1193,11 @@ class CameraConfig:
             points = [Point(p[0], p[1]) for p in self.gcps["dst"]]
         else:
             # 3d points are needed
-            if len(self.gcps["dst"]) == 3:
-                points = [Point(*p) for p in self.gcps["dst"]]
-            else:
-                points = [Point(p[0], p[1], self.gcps["z_0"]) for p in self.gcps["dst"]]
+            if hasattr(self, "gcps"):
+                if len(self.gcps["dst"]) == 3:
+                    points = [Point(*p) for p in self.gcps["dst"]]
+                else:
+                    points = [Point(p[0], p[1], self.gcps["z_0"]) for p in self.gcps["dst"]]
         if mode != "camera":
             if self.lens_position is not None:
                 lens_position = self.lens_position
@@ -1235,61 +1236,62 @@ class CameraConfig:
             plot_kwargs = dict(transform=ccrs.PlateCarree())
         else:
             plot_kwargs = {}
-        if mode == "3d":
-            ax.plot(
-                x[0 : len(self.gcps["dst"])],
-                y[0 : len(self.gcps["dst"])],
-                z[0 : len(self.gcps["dst"])],
-                "o",
-                label="Control points",
-                markersize=12,
-                markeredgecolor="w",
-                zorder=2,
-                **plot_kwargs,
-            )
-        else:
-            ax.plot(
-                x[0 : len(self.gcps["dst"])],
-                y[0 : len(self.gcps["dst"])],
-                ".",
-                label="Control points",
-                markersize=12,
-                markeredgecolor="w",
-                zorder=2,
-                **plot_kwargs,
-            )
-        if len(x) > len(self.gcps["dst"]):
+        if hasattr(self, "gcps"):
             if mode == "3d":
                 ax.plot(
-                    x[-1],
-                    y[-1],
-                    z[-1],
+                    x[0 : len(self.gcps["dst"])],
+                    y[0 : len(self.gcps["dst"])],
+                    z[0 : len(self.gcps["dst"])],
                     "o",
-                    label="Lens position",
+                    label="Control points",
                     markersize=12,
-                    zorder=2,
                     markeredgecolor="w",
+                    zorder=2,
                     **plot_kwargs,
                 )
-                # add pose
-                _ = self.plot_3d_pose(ax=ax, length=pose_length)
-                if hasattr(self, "bbox"):
-                    # also plot dashed lines from cam to bbox
-                    for xy in self.bbox.exterior.coords:
-                        ax.plot([x[-1], xy[0]], [y[-1], xy[1]], [z[-1], self.gcps["z_0"]], linestyle="--", color="gray")
-                    # plot bbox exterior
-                    ax.plot(*self.bbox.exterior.xy, [self.gcps["z_0"]] * 5, color="k", label="bbox exterior")
             else:
                 ax.plot(
-                    x[-1],
-                    y[-1],
+                    x[0 : len(self.gcps["dst"])],
+                    y[0 : len(self.gcps["dst"])],
                     ".",
-                    label="Lens position",
+                    label="Control points",
                     markersize=12,
-                    zorder=2,
                     markeredgecolor="w",
+                    zorder=2,
                     **plot_kwargs,
                 )
+        # if len(x) > len(self.gcps["dst"]):
+        if mode == "3d":
+            ax.plot(
+                x[-1],
+                y[-1],
+                z[-1],
+                "o",
+                label="Lens position",
+                markersize=12,
+                zorder=2,
+                markeredgecolor="w",
+                **plot_kwargs,
+            )
+            # add pose
+            _ = self.plot_3d_pose(ax=ax, length=pose_length)
+            if hasattr(self, "bbox"):
+                # also plot dashed lines from cam to bbox
+                for xy in self.bbox.exterior.coords:
+                    ax.plot([x[-1], xy[0]], [y[-1], xy[1]], [z[-1], self.gcps["z_0"]], linestyle="--", color="gray")
+                # plot bbox exterior
+                ax.plot(*self.bbox.exterior.xy, [self.gcps["z_0"]] * 5, color="k", label="bbox exterior")
+        else:
+            ax.plot(
+                x[-1],
+                y[-1],
+                ".",
+                label="Lens position",
+                markersize=12,
+                zorder=2,
+                markeredgecolor="w",
+                **plot_kwargs,
+            )
         patch_kwargs = {
             **plot_kwargs,
             "alpha": 0.5,
