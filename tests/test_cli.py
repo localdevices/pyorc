@@ -124,6 +124,26 @@ def test_service_video_no_waterlevel(
     )
 
 
+def test_service_video_no_waterlevel_subprocess(
+    recipe_no_waterlevel, vid_file, cam_config, cli_prefix, cli_output_dir, cross_section_2_geojson_fn
+):
+    with open(cross_section_2_geojson_fn, "r") as f:
+        cross_section_2 = json.load(f)
+    cameraconfig = cam_config.to_dict()
+    # alter the recipe to get the cross section out
+
+    print(f"current file is: {os.path.dirname(__file__)}")
+    os.chdir(os.path.dirname(__file__))
+    pyorc.service.velocity_flow_subprocess(
+        videofile=vid_file,
+        recipe=recipe_no_waterlevel,
+        cameraconfig=cameraconfig,
+        output=cli_output_dir,
+        prefix="subprocess_",
+        cross=cross_section_2,
+    )
+
+
 def test_gcps_interact(gcps_dst, frame_rgb):
     import matplotlib.pyplot as plt
 

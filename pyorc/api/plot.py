@@ -367,35 +367,42 @@ class _Transect_PlotMethods:
         transect = self._obj.transect
         camera_config = transect.camera_config
         x, y = self._obj.x, self._obj.y
+
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
         _v = self._obj[v_eff] * np.cos(self._obj[v_dir])
         s = np.abs(self._obj[v_eff].values)
         x_moved, y_moved = x + _u * dt, y + _v * dt
-
         # transform to real-world
         cols_moved, rows_moved = x_moved / camera_config.resolution, y_moved / camera_config.resolution
+        rows_moved = camera_config.shape[0] - rows_moved
         xs_moved, ys_moved = helpers.get_xs_ys(cols_moved, rows_moved, camera_config.transform)
         cols, rows = x / camera_config.resolution, y / camera_config.resolution
+        rows = camera_config.shape[0] - rows
         xs, ys = helpers.get_xs_ys(cols, rows, camera_config.transform)
-        # project the found displacement points to camera projection
-        xp_moved, yp_moved = camera_config.project_grid(
-            xs_moved, ys_moved, np.ones(x.shape) * camera_config.h_to_z(transect.h_a), swap_y_coords=True
+        xp_moved, yp_moved = list(
+            zip(
+                *camera_config.project_points(
+                    list(map(list, zip(xs_moved, ys_moved, np.ones(x.shape) * camera_config.h_to_z(transect.h_a)))),
+                    swap_y_coords=True,
+                )
+            )
         )
-        xp, yp = camera_config.project_grid(
-            xs, ys, np.ones(x.shape) * camera_config.h_to_z(transect.h_a), swap_y_coords=True
+        xp, yp = list(
+            zip(
+                *camera_config.project_points(
+                    list(map(list, zip(xs, ys, np.ones(x.shape) * camera_config.h_to_z(transect.h_a)))),
+                    swap_y_coords=True,
+                )
+            )
         )
+        xp, yp, xp_moved, yp_moved = np.array(xp), np.array(yp), np.array(xp_moved), np.array(yp_moved)
+        # remove vectors that have nan on moved pixels
+        xp_moved[np.isnan(x_moved)] = np.nan
+        yp_moved[np.isnan(y_moved)] = np.nan
 
-        #
-        # # make point collection
-        # xp, yp = transect.get_xyz_perspective(trans_mat=trans_mat, xs=x.values, ys=y.values)
-        # xp_moved, yp_moved = transect.get_xyz_perspective(trans_mat=trans_mat, xs=x_moved.values, ys=y_moved.values)
-        # # remove vectors that have nan on moved pixels
-        # xp_moved[np.isnan(x_moved)] = np.nan
-        # yp_moved[np.isnan(y_moved)] = np.nan
-
-        self._obj["xp"][:] = xp[:].flatten()
-        self._obj["yp"][:] = yp[:].flatten()
-        u, v = xp_moved.flatten() - self._obj["xp"], yp_moved.flatten() - self._obj["yp"]
+        self._obj["xp"][:] = xp  # [:].flatten()
+        self._obj["yp"][:] = yp  # [:].flatten()
+        u, v = xp_moved - self._obj["xp"], yp_moved - self._obj["yp"]
         return u, v, s
 
     def get_uv_geographical(self):
