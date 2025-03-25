@@ -1,3 +1,14 @@
+## [0.8.5] = 2025-03-25
+### Added
+- option `--cross` can now also be provided at service level. Only relevant
+  for applications that want to run pyorc command line programmatically.
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Small bug fix in plotting routines, causing `mode="camera"` to result in flipped results
+  over the y-axis of the local projection.
+
 ## [0.8.4] = 2025-03-17
 ### Added
 ### Changed
