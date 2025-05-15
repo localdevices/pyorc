@@ -986,7 +986,7 @@ class CrossSection:
             lens_position_xy = self.camera_config.estimate_lens_position()[0:2]
             dists = [((p.x - lens_position_xy[0]) ** 2 + (p.y - lens_position_xy[1]) ** 2) ** 0.5 for p in points]
             points = self.get_csl_point(h=h, camera=True, swap_y_coords=swap_y_coords)  # find camera positions
-            x, y = points[np.argmin(dists)].xy
+            x, y = points[np.argmax(dists)].xy
             x, y = float(x[0]), float(y[0])
 
             # only plot text in 2D camera perspective at farthest point
