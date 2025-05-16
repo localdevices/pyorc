@@ -93,7 +93,7 @@ middle of the FOV, then velocities at the edges are likely to be overestimated.
     optimize the radial distortion. Therefore we strongly recommend that you measure 6 or more control points in case
     you use a lens with significant radial distortion.
 
-You can also provide a camera intrinsic matrix and distortion coefficients in the API if you have these, or optimize
+You can also provide a camera intrinsic matrix and distortion coefficients in the CLI or API if you have these, or optimize
 the intrinsic matrix and distortion coefficients using a checkerboard pattern. More on this is described below.
 
 Preparing a video for camera calibration
@@ -142,7 +142,13 @@ Lens calibration method
         .. note::
 
             At the moment, manual lens calibration is only available at API level. If you require a command-line option
-            for lens calibration, then please contact us at info@rainbowsensing.com.
+            for lens calibration, then please contact us at info@rainbowsensing.com. If you have the focal length, and
+            k1 and k2 radial distortion parameters available, then you can enter these in the command line interface
+            using the `--focal_length`, `--k1`, `--k2` parameters. The units of the focal length should be in pixels.
+            For focal length, and distortion parameters, we use the OpenCV methods, so please ensure you use
+            the same as input here. For more information please read:
+            `the OpenCV instructions <https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html>`_
+
 
     .. tab-item:: API
 
