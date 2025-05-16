@@ -1,3 +1,18 @@
+## [0.8.6] = 2025-05-16
+### Added
+- added options `--k1`, `--k2` and `--focal_length` to command line interface for cases where
+  focal length, and distortion coefficients are already known
+### Changed
+- optimization of intrinsics can now also be done with partly already known data. If k1 and k2 are known
+  these can be passed as camera
+### Deprecated
+### Removed
+### Fixed
+- Small bug fix in plotting routines, causing `mode="camera"` to result in flipped results
+  over the y-axis of the local projection.
+
+
+
 ## [0.8.5] = 2025-03-25
 ### Added
 - option `--cross` can now also be provided at service level. Only relevant
