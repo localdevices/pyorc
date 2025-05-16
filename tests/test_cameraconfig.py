@@ -196,13 +196,15 @@ def test_estimate_lens_position(cam_config):
     assert np.allclose(lens_pos, [6.42731099e05, 8.30429131e06, 1.18996749e03])
 
 
-def test_optimize_intrinsic(cam_config):
+@pytest.mark.parametrize("cur_cam_config", ["cam_config", "cam_config_6gcps"])
+def test_optimize_intrinsic(cur_cam_config, request):
+    cur_cam_config = request.getfixturevalue(cur_cam_config)
     camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
-        cam_config.gcps["src"],
-        cam_config.gcps_dest,
-        cam_config.height,
-        cam_config.width,
-        lens_position=cam_config.lens_position,
+        cur_cam_config.gcps["src"],
+        cur_cam_config.gcps_dest,
+        cur_cam_config.height,
+        cur_cam_config.width,
+        lens_position=cur_cam_config.lens_position,
     )
     print(camera_matrix, dist_coeffs, err)
 

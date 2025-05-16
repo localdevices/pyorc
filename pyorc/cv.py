@@ -2,6 +2,7 @@
 
 import copy
 import os
+import warnings
 
 import cv2
 import numpy as np
@@ -994,7 +995,7 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
 
     """
 
-    def error_intrinsic(x, src, dst, height, width, c=2.0, lens_position=None, dist_coeffs=DIST_COEFFS):
+    def error_intrinsic(x, src, dst, height, width, c=2.0, lens_position=None, camera_matrix=None, dist_coeffs=None):
         """Compute the reprojection error for the intrinsic parameters of a camera model.
 
         This function optimizes for the focal length and first two distortion coefficients based on the source and
@@ -1019,6 +1020,8 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
             center parameter of camera matrix.
         lens_position : array_like, optional
             The assumed position of the lens in the 3D space.
+        camera_matrix : array_like, optional
+            camera matrix [3x3]
         dist_coeffs : array_like, optional
             Distortion coefficients.
 
@@ -1029,11 +1032,32 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
             the camera position error if the lens position is provided.
 
         """
+        param_nr = 0
+        # set the parameters
+        if not camera_matrix:
+            f = x[param_nr] * width
+            camera_matrix_sample = _get_cam_mtx(height, width, c=c, focal_length=f)
+            param_nr += 1
+        else:
+            # take the existing camera matrix
+            camera_matrix_sample = camera_matrix.copy()
+        if not dist_coeffs:
+            dist_coeffs_sample = DIST_COEFFS.copy()
+            k1 = x[param_nr]
+            k2 = x[param_nr + 1]
+            dist_coeffs_sample[0][0] = k1
+            dist_coeffs_sample[1][0] = k2
+        else:
+            # take the existing distortion coefficients
+            dist_coeffs_sample = dist_coeffs.copy()
+            k1 = dist_coeffs_sample[0]
+            k2 = dist_coeffs_sample[1]
+
         err = 100
         cam_err = None
-        f = x[0] * width  # only one parameter to optimize for now, can easily be extended!
-        dist_coeffs[0][0] = float(x[1])
-        dist_coeffs[1][0] = float(x[2])
+        # f = x[0] * width  # only one parameter to optimize for now, can easily be extended!
+        # dist_coeffs[0][0] = float(x[1])
+        # dist_coeffs[1][0] = float(x[2])
         # dist_coeffs[4][0] = float(x[3])
         # dist_coeffs[3][0] = float(x[4])
         coord_mean = np.array(dst).mean(axis=0)
@@ -1042,11 +1066,11 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
         if lens_position is not None:
             _lens_pos = np.array(lens_position) - coord_mean
 
-        camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
-        success, rvec, tvec = solvepnp(_dst, src, camera_matrix, dist_coeffs)
+        # camera_matrix = _get_cam_mtx(height, width, c=c, focal_length=f)
+        success, rvec, tvec = solvepnp(_dst, src, camera_matrix_sample, dist_coeffs_sample)
         if success:
             # estimate destination locations from pose
-            dst_est = unproject_points(src, zs, rvec, tvec, camera_matrix, dist_coeffs)
+            dst_est = unproject_points(src, zs, rvec, tvec, camera_matrix_sample, dist_coeffs_sample)
             # src_est = np.array([list(point[0]) for point in src_est])
             dist_xy = np.array(_dst)[:, 0:2] - np.array(dst_est)[:, 0:2]
             dist = (dist_xy**2).sum(axis=1) ** 0.5
@@ -1059,27 +1083,51 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
             err = float(0.1 * cam_err + gcp_err) if cam_err is not None else gcp_err
         return err  # assuming gcp pixel distance is about 5 cm
 
-    if len(dst) == 4:
-        bnds_k1 = (-0.0, 0.0)
-        bnds_k2 = (-0.0, 0.0)
+    # determine optimization bounds
+    bounds = []
+    if camera_matrix and dist_coeffs:
+        # both are already known, so nothing to do
+        return camera_matrix, dist_coeffs, None
+    if not camera_matrix:
+        bounds.append([float(0.25), float(2)])
+    if len(dst) > 4 and not dist_coeffs:
+        bounds.append([-0.9, 0.9])  # k1
+        bounds.append([-0.5, 0.5])  # k2
     else:
-        # bnds_k1 = (-0.2501, -0.25)
-        bnds_k1 = (-0.9, 0.9)
-        bnds_k2 = (-0.5, 0.5)
-        # bnds_k1 = (-0.0, 0.0)
-        # bnds_k2 = (-0.0, 0.0)
+        # set a warning if dist_coeffs is provided without sufficient ground control
+        if dist_coeffs:
+            warnings.warn(
+                "You are trying to optimize distortion coefficients with only 4 GCPs. "
+                "This would lead to overfitting, setting distortion coefficients to zero.",
+                stacklevel=2,
+            )
+        dist_coeffs = DIST_COEFFS.copy()
+    # if len(dst) == 4:
+    #     bnds_k1 = (-0.0, 0.0)
+    #     bnds_k2 = (-0.0, 0.0)
+    # else:
+    #     # bnds_k1 = (-0.2501, -0.25)
+    #     bnds_k1 = (-0.9, 0.9)
+    #     bnds_k2 = (-0.5, 0.5)
+    # bnds_k1 = (-0.0, 0.0)
+    # bnds_k2 = (-0.0, 0.0)
     opt = optimize.differential_evolution(
         error_intrinsic,
         # bounds=[(float(0.25), float(2)), bnds_k1],#, (-0.5, 0.5)],
-        bounds=[(float(0.25), float(2)), bnds_k1, bnds_k2],
+        bounds=bounds,
         # bounds=[(1710./width, 1714./width), bnds_k1, bnds_k2],
-        args=(src, dst, height, width, c, lens_position, DIST_COEFFS),
+        args=(src, dst, height, width, c, lens_position, camera_matrix, dist_coeffs),
         atol=0.001,  # one mm
     )
-    camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[0] * width)
-    dist_coeffs = DIST_COEFFS
-    dist_coeffs[0][0] = opt.x[1]
-    dist_coeffs[1][0] = opt.x[2]
+    param_nr = 0
+    if camera_matrix is None:
+        camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[param_nr] * width)
+        # move to next parameter
+        param_nr += 1
+    if dist_coeffs is None:
+        dist_coeffs = DIST_COEFFS
+        dist_coeffs[0][0] = opt.x[param_nr]
+        dist_coeffs[1][0] = opt.x[param_nr + 1]
     # dist_coeffs[4][0] = opt.x[3]
     # dist_coeffs[3][0] = opt.x[4]
     # print(f"CAMERA MATRIX: {camera_matrix}")
