@@ -8,9 +8,6 @@
 ### Deprecated
 ### Removed
 ### Fixed
-- Small bug fix in plotting routines, causing `mode="camera"` to result in flipped results
-  over the y-axis of the local projection.
-
 
 
 ## [0.8.5] = 2025-03-25
