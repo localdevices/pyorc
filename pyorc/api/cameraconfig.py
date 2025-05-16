@@ -47,7 +47,6 @@ class CameraConfig:
         lens_position: Optional[List[float]] = None,
         corners: Optional[List[List[float]]] = None,
         gcps: Optional[Dict[str, Union[List, float]]] = None,
-        lens_pars: Optional[Dict[str, float]] = None,
         calibration_video: Optional[str] = None,
         is_nadir: Optional[bool] = False,
         stabilize: Optional[List[List]] = None,
@@ -90,10 +89,6 @@ class CameraConfig:
             the same vertical reference as the measured bathymetry and other survey points,
             "crs": int, str or CRS object, CRS in which "dst" points are measured. If None, a local coordinate system is
             assumed (e.g. from spirit level).
-        lens_pars : dict, optional
-            Lens parameters, containing: "k1": float, barrel lens distortion parameter (default: 0.),
-            "c": float, optical center (default: 2.),
-            "focal_length": float, focal length (default: width of image frame)
         calibration_video : str, optional
             local path to video file containing a checkerboard pattern. Must be 9x6 if called directly, otherwise use
             ``.calibrate_camera`` explicitly and provide ``chessboard_size`` explicitly. When used, an automated camera
@@ -145,9 +140,9 @@ class CameraConfig:
                 self.dist_coeffs = cv.DIST_COEFFS
             # camera pars are incomplete and need to be derived
             else:
-                self.set_intrinsic(camera_matrix=camera_matrix, lens_pars=lens_pars)
+                self.set_intrinsic(camera_matrix=camera_matrix)
         else:
-            # camera matrix and dist coeffs can also be set hard, this overrules the lens_pars option
+            # camera matrix and dist coeffs can also be set hard
             self.camera_matrix = camera_matrix
             self.dist_coeffs = dist_coeffs
         if calibration_video is not None:
@@ -855,7 +850,6 @@ class CameraConfig:
         self,
         camera_matrix: Optional[List[List]] = None,
         dist_coeffs: Optional[List[List]] = None,
-        lens_pars: Optional[Dict[str, float]] = None,
     ):
         """Set lens and distortion parameters.
 
@@ -871,12 +865,13 @@ class CameraConfig:
             Distortion coefficients to be used for the camera. If not provided, it will use default values or those
             derived from GCPs if available.
 
-        lens_pars : Optional[Dict[str, float]]
-            Lens parameters to be set. These will override any default settings or those derived from GCPs if provided.
-
         """
-        # first set a default estimate from pose if 3D gcps are available
-        self.set_lens_pars()  # default parameters use width of frame
+        if camera_matrix is not None and dist_coeffs is not None:
+            # both are provided by user, so no fitting needed
+            self.camera_matrix = camera_matrix
+            self.dist_coeffs = dist_coeffs
+            return
+
         if hasattr(self, "gcps"):
             if len(self.gcps["src"]) >= 4:
                 self.camera_matrix, self.dist_coeffs, err = cv.optimize_intrinsic(
@@ -886,36 +881,9 @@ class CameraConfig:
                     self.height,
                     self.width,
                     lens_position=self.lens_position,
+                    camera_matrix=camera_matrix,
+                    dist_coeffs=dist_coeffs,
                 )
-            if lens_pars is not None:
-                # override with lens parameter set by user
-                self.set_lens_pars(**lens_pars)
-            if camera_matrix is not None and dist_coeffs is not None:
-                # override with
-                self.camera_matrix = camera_matrix
-                self.dist_coeffs = dist_coeffs
-
-    def set_lens_pars(self, k1: Optional[float] = 0.0, c: Optional[float] = 2.0, focal_length: Optional[float] = None):
-        """Set the lens parameters of the given CameraConfig.
-
-        Parameters
-        ----------
-        k1 : float, optional
-            lens curvature [-], zero (default) means no curvature
-        c : float, optional
-            optical centre [1/n], where n is the fraction of the lens diameter, 2.0 (default) means in the
-            centre.
-        focal_length : float, optional
-            focal length [mm], typical values could be 2.8, or 4 (default).
-
-
-        """
-        assert isinstance(k1, (int, float)), "k1 must be a float"
-        assert isinstance(c, (int, float)), "c must be a float"
-        if focal_length is not None:
-            assert isinstance(focal_length, (int, float, None)), "f must be a float"
-        self.dist_coeffs = cv._get_dist_coefs(k1)
-        self.camera_matrix = cv._get_cam_mtx(self.height, self.width, c=c, focal_length=focal_length)
 
     def set_gcps(
         self, src: List[List], dst: List[List], z_0: float, h_ref: Optional[float] = None, crs: Optional[Any] = None

@@ -958,7 +958,7 @@ def get_polygon_pixels(img, pol, reverse_y=False):
     return img[mask == 255]
 
 
-def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
+def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camera_matrix=None, dist_coeffs=None):
     """Optimize the intrinsic parameters of a camera model.
 
     The function finds optimal intrinsic camera parameters, including focal length and distortion coefficients, by
@@ -980,6 +980,11 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None):
         Center parameter of the camera matrix.
     lens_position : array_like, optional
         The assumed position of the lens in the 3D space.
+    camera_matrix : Optional[List[List]]
+        Predefined camera matrix. If not provided focal length will be fitted and camera matrix returned
+    dist_coeffs : Optional[List[List]]
+        Distortion coefficients to be used for the camera. If not provided, the first two (k1, k2)
+        distortion coefficients are fitted on data.
 
     Returns
     -------

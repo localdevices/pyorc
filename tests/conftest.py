@@ -166,13 +166,14 @@ def camera_matrix():
 
 
 @pytest.fixture()
-def cam_config(gcps, lens_position, lens_pars, corners):
+def cam_config(gcps, lens_position, dist_coeffs, camera_matrix, corners):
     return pyorc.CameraConfig(
         height=1080,
         width=1920,
         gcps=gcps,
         lens_position=lens_position,
-        lens_pars=lens_pars,
+        dist_coeffs=dist_coeffs,
+        camera_matrix=camera_matrix,
         corners=corners,
         window_size=25,
         resolution=0.01,

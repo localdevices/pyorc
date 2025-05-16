@@ -175,13 +175,6 @@ def test_set_bbox_from_corners(cur_cam_config, cur_corners, cur_bbox, request):
     assert np.allclose(cur_cam_config.bbox.bounds, cur_bbox.bounds)
 
 
-def test_set_lens_pars(cam_config, lens_pars, camera_matrix, dist_coeffs):
-    # check if this works
-    cam_config.set_lens_pars(**lens_pars)
-    assert np.allclose(cam_config.camera_matrix, camera_matrix)
-    assert np.allclose(cam_config.dist_coeffs, dist_coeffs)
-
-
 def test_set_gcps(cam_config, gcps):
     cam_config.set_gcps(**gcps)
     assert cam_config.gcps == gcps
