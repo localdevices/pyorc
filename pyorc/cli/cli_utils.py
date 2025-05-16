@@ -283,6 +283,13 @@ def read_shape_as_gdf(fn=None, geojson=None, gdf=None):
     else:
         gdf = gpd.read_file(fn)
         crs = gdf.crs if hasattr(gdf, "crs") else None
+        # also read raw json, and check if crs attribute exists
+        with open(fn, "r") as f:
+            raw_json = json.load(f)
+        if "crs" not in raw_json:
+            # override the crs
+            crs = None
+            gdf = gdf.set_crs(None, allow_override=True)
     # check if all geometries are points
     assert all([isinstance(geom, Point) for geom in gdf.geometry]), (
         "shapefile may only contain geometries of type " '"Point"'
