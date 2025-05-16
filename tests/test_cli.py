@@ -65,6 +65,8 @@ def test_cli_cam_config_video(cli_obj, vid_file, gcps_src, gcps_dst, lens_positi
             json.dumps(lens_position),
             "--resolution",
             "0.03",
+            "--focal_length",
+            "1500",
             "--window_size",
             "25",
             "--corners",

@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import os
+from typing import Optional
 
 import click
 import cv2
@@ -57,15 +58,39 @@ def get_corners_interactive(
 
 
 def get_gcps_interactive(
-    fn, dst, crs=None, crs_gcps=None, frame_sample=0, lens_position=None, rotation=None, logger=logging
+    fn,
+    dst,
+    crs=None,
+    crs_gcps=None,
+    frame_sample=0,
+    focal_length=None,
+    k1=None,
+    k2=None,
+    lens_position=None,
+    rotation=None,
+    logger=logging,
 ):
     """Select GCP points in interactive display using first selected video frame."""
     vid = Video(fn, start_frame=frame_sample, end_frame=frame_sample + 1, rotation=rotation)
     # get first frame
     frame = vid.get_frame(0, method="rgb")
+    # construct camera matrix and distortion coefficients
+    # parse items
+    camera_matrix, dist_coeffs = parse_lens_params(
+        height=frame.shape[0], width=frame.shape[1], focal_length=focal_length, k1=k1, k2=k2
+    )
+
     if crs_gcps is not None:
         dst = helpers.xyz_transform(dst, crs_from=crs_gcps, crs_to=4326)
-    selector = GcpSelect(frame, dst, crs=crs, lens_position=lens_position, logger=logger)
+    selector = GcpSelect(
+        frame,
+        dst,
+        crs=crs,
+        camera_matrix=camera_matrix,
+        dist_coeffs=dist_coeffs,
+        lens_position=lens_position,
+        logger=logger,
+    )
     plt.show(block=True)
     return selector.src, selector.camera_matrix, selector.dist_coeffs
 
@@ -90,21 +115,16 @@ def get_file_hash(fn):
     return hash256
 
 
-def get_gcps_optimized_fit(src, dst, height, width, c=2.0, lens_position=None):
+def get_gcps_optimized_fit(src, dst, height, width, c=2.0, camera_matrix=None, dist_coeffs=None, lens_position=None):
     """Fit intrinsic and extrinsic parameters on provided set of src and dst points."""
     # optimize cam matrix and dist coeffs with provided control points
     if np.array(dst).shape == (4, 2):
         _dst = np.c_[np.array(dst), np.zeros(4)]
     else:
         _dst = np.array(dst)
+    print(camera_matrix)
     camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
-        src,
-        _dst,
-        height,
-        width,
-        c=c,
-        lens_position=lens_position,
-        # dist_coeffs=cv.DIST_COEFFS
+        src, _dst, height, width, c=c, lens_position=lens_position, camera_matrix=camera_matrix, dist_coeffs=dist_coeffs
     )
     # once optimized, solve the perspective, and estimate the GCP locations with the perspective rot/trans
     coord_mean = np.array(_dst).mean(axis=0)
@@ -150,6 +170,29 @@ def parse_corners(ctx, param, value):
             len(val) == 2
         ), f"--corners value {n} must contain row, column coordinate but consists of {len(val)} numbers"
     return [[int(x), int(y)] for x, y in corners]
+
+
+def parse_lens_params(
+    height: int,
+    width: int,
+    focal_length: Optional[float] = None,
+    k1: Optional[float] = None,
+    k2: Optional[float] = None,
+):
+    """Parse lens parameters to camera matrix and distortion coefficients vector."""
+    if focal_length is not None:
+        camera_matrix = cv.get_cam_mtx(height, width, c=2.0, focal_length=focal_length)
+    else:
+        camera_matrix = None
+    if k1 is not None or k2 is not None:
+        dist_coeffs = cv.DIST_COEFFS.copy()
+        if k1 is not None:
+            dist_coeffs[0][0] = k1
+        if k2 is not None:
+            dist_coeffs[1][0] = k2
+    else:
+        dist_coeffs = None
+    return camera_matrix, dist_coeffs
 
 
 def validate_file(ctx, param, value):

@@ -360,7 +360,7 @@ class AoiSelect(BaseSelect):
 class GcpSelect(BaseSelect):
     """Selector tool to provide source GCP coordinates to pyOpenRiverCam."""
 
-    def __init__(self, img, dst, crs=None, lens_position=None, logger=logging):
+    def __init__(self, img, dst, crs=None, camera_matrix=None, dist_coeffs=None, lens_position=None, logger=logging):
         """Set up interactive GCP selection plot."""
         super(GcpSelect, self).__init__(img, dst, crs=crs, logger=logger)
         # make empty plot
@@ -389,6 +389,8 @@ class GcpSelect(BaseSelect):
         self.ax_geo.legend()
         self.ax.legend()
         self.lens_position = lens_position
+        self.camera_matrix_input = camera_matrix
+        self.dist_coeffs_input = dist_coeffs
         # add dst coords in the intended CRS
         if crs is not None and use_cartopy:
             self.dst_crs = helpers.xyz_transform(self.dst, 4326, crs)
@@ -407,7 +409,14 @@ class GcpSelect(BaseSelect):
                 self.title.set_text("Fitting pose and camera parameters...")
                 self.ax.figure.canvas.draw()
                 src_fit, dst_fit, camera_matrix, dist_coeffs, rvec, tvec, err = cli_utils.get_gcps_optimized_fit(
-                    self.src, self.dst_crs, self.height, self.width, c=2.0, lens_position=self.lens_position
+                    self.src,
+                    self.dst_crs,
+                    self.height,
+                    self.width,
+                    c=2.0,
+                    camera_matrix=self.camera_matrix_input,
+                    dist_coeffs=self.dist_coeffs_input,
+                    lens_position=self.lens_position,
                 )
                 self.p_fit.set_data(*list(zip(*src_fit)))
                 self.camera_matrix = camera_matrix

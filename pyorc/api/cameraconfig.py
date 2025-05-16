@@ -136,7 +136,7 @@ class CameraConfig:
             if self.is_nadir:
                 # with nadir, no perspective can be constructed, hence, camera matrix and dist coeffs will be set
                 # to default values
-                self.camera_matrix = cv._get_cam_mtx(self.height, self.width)
+                self.camera_matrix = cv.get_cam_mtx(self.height, self.width)
                 self.dist_coeffs = cv.DIST_COEFFS
             # camera pars are incomplete and need to be derived
             else:
@@ -195,6 +195,27 @@ class CameraConfig:
     @dist_coeffs.setter
     def dist_coeffs(self, dist_coeffs):
         self._dist_coeffs = dist_coeffs.tolist() if isinstance(dist_coeffs, np.ndarray) else dist_coeffs
+
+    @property
+    def focal_length(self):
+        """Get focal length."""
+        if not self.camera_matrix:
+            return None
+        return self.camera_matrix[0][0]
+
+    @property
+    def k1(self):
+        """Get first distortion coefficient."""
+        if not self.dist_coeffs:
+            return None
+        return self.dist_coeffs[0]
+
+    @property
+    def k2(self):
+        """Get second distortion coefficient."""
+        if not self.dist_coeffs:
+            return None
+        return self.dist_coeffs[1]
 
     @property
     def gcps_dest(self):

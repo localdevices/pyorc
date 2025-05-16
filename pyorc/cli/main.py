@@ -99,6 +99,17 @@ def cli(ctx, info, license):
     help="Coordinate reference system in which destination GCP points (--dst) are measured",
 )
 @click.option("--resolution", type=float, help="Target resolution [m] for ortho-projection.")
+@click.option("--focal_length", type=float, help="Focal length [pix] of lens.")
+@click.option(
+    "--k1",
+    type=float,
+    help="First lens radial distortion coefficient k1 [-]. See also https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html",
+)
+@click.option(
+    "--k2",
+    type=float,
+    help="Second lens radial distortion coefficient k2 [-]. See also https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html",
+)
 @click.option(
     "--window_size", type=int, help="Target window size [px] for interrogation window for Particle Image Velocimetry"
 )
@@ -148,6 +159,9 @@ def camera_config(
     z_0: Optional[float],
     h_ref: Optional[float],
     crs_gcps: Optional[Union[str, int]],
+    focal_length: Optional[float],
+    k1: Optional[float],
+    k2: Optional[float],
     resolution: Optional[float],
     window_size: Optional[int],
     lens_position: Optional[List[float]],
@@ -207,6 +221,9 @@ def camera_config(
                 crs=crs,
                 crs_gcps=crs_gcps,
                 frame_sample=frame_sample,
+                focal_length=focal_length,
+                k1=k1,
+                k2=k2,
                 lens_position=lens_position,
                 rotation=rotation,
                 logger=logger,
@@ -297,7 +314,7 @@ def camera_config(
     type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="Cross section file (*.geojson). If you provide this, you may add water level retrieval settings to the"
     " recipe section video: water_level: For more information see"
-    " https://localdevices.github.io/pyorc/user-guide/video/index.html",
+    " [PyORC docs](https://localdevices.github.io/pyorc/user-guide/video/index.html)",
     callback=cli_utils.parse_cross_section_gdf,
     required=False,
 )

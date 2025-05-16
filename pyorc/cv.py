@@ -152,7 +152,7 @@ def _get_dist_coefs(k1):
     return dist
 
 
-def _get_cam_mtx(height, width, c=2.0, focal_length=None):
+def get_cam_mtx(height, width, c=2.0, focal_length=None):
     """Compute camera matrix based on the given parameters for height, width, scaling factor, and focal length.
 
     Parameters
@@ -1034,14 +1034,14 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
         """
         param_nr = 0
         # set the parameters
-        if not camera_matrix:
+        if camera_matrix is None:
             f = x[param_nr] * width
-            camera_matrix_sample = _get_cam_mtx(height, width, c=c, focal_length=f)
+            camera_matrix_sample = get_cam_mtx(height, width, c=c, focal_length=f)
             param_nr += 1
         else:
             # take the existing camera matrix
             camera_matrix_sample = camera_matrix.copy()
-        if not dist_coeffs:
+        if dist_coeffs is None:
             dist_coeffs_sample = DIST_COEFFS.copy()
             k1 = x[param_nr]
             k2 = x[param_nr + 1]
@@ -1050,16 +1050,14 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
         else:
             # take the existing distortion coefficients
             dist_coeffs_sample = dist_coeffs.copy()
-            k1 = dist_coeffs_sample[0]
-            k2 = dist_coeffs_sample[1]
+            k1 = dist_coeffs_sample[0][0]
+            k2 = dist_coeffs_sample[1][0]
 
+        # initialize error
         err = 100
         cam_err = None
-        # f = x[0] * width  # only one parameter to optimize for now, can easily be extended!
-        # dist_coeffs[0][0] = float(x[1])
-        # dist_coeffs[1][0] = float(x[2])
-        # dist_coeffs[4][0] = float(x[3])
-        # dist_coeffs[3][0] = float(x[4])
+
+        # reduce problem space to centered around gcp average
         coord_mean = np.array(dst).mean(axis=0)
         _dst = np.float64(np.array(dst) - coord_mean)
         zs = np.zeros(4) if len(_dst[0]) == 2 else np.array(_dst)[:, -1]
@@ -1085,12 +1083,12 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
 
     # determine optimization bounds
     bounds = []
-    if camera_matrix and dist_coeffs:
+    if camera_matrix is not None and dist_coeffs is not None:
         # both are already known, so nothing to do
         return camera_matrix, dist_coeffs, None
-    if not camera_matrix:
+    if camera_matrix is None:
         bounds.append([float(0.25), float(2)])
-    if len(dst) > 4 and not dist_coeffs:
+    if len(dst) > 4 and dist_coeffs is None:
         bounds.append([-0.9, 0.9])  # k1
         bounds.append([-0.5, 0.5])  # k2
     else:
@@ -1121,7 +1119,7 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
     )
     param_nr = 0
     if camera_matrix is None:
-        camera_matrix = _get_cam_mtx(height, width, focal_length=opt.x[param_nr] * width)
+        camera_matrix = get_cam_mtx(height, width, focal_length=opt.x[param_nr] * width)
         # move to next parameter
         param_nr += 1
     if dist_coeffs is None:
