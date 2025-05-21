@@ -279,48 +279,6 @@ class Frames(ORCBase):
         da_proj.attrs.update(camera_config=cc.to_json())
         return da_proj
 
-    def landmask(self, dilate_iter=10, samples=15):
-        """Attempt to mask out land from water.
-
-        This is done by assuming that the time standard deviation over mean of land is much
-        higher than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation
-        operation is used to make the land mask slightly larger than the exact defined pixels.
-
-        Parameters
-        ----------
-        dilate_iter : int, optional
-            number of dilation iterations to use, to dilate land mask (Default value = 10)
-        samples : int, optional
-            amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower
-            number to speed up calculation (Default value = 15)
-
-        Returns
-        -------
-        da : xr.DataArray
-            filtered frames
-
-        """
-        time_interval = round(len(self._obj) / samples)
-        assert time_interval != 0, f"Amount of frames is too small to provide {samples} samples"
-        # ensure attributes are kept
-        xr.set_options(keep_attrs=True)
-        # compute standard deviation over mean, assuming this value is low over water, and high over land
-        std_norm = (self._obj[::time_interval].std(axis=0) / self._obj[::time_interval].mean(axis=0)).load()
-        # retrieve a simple 3x3 equal weight kernel
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        # dilate the std_norm by some dilation iterations
-        dilate_std_norm = cv2.dilate(std_norm.values, kernel, iterations=dilate_iter)
-        # rescale result to typical uint8 0-255 range
-        img = cv2.normalize(
-            dilate_std_norm, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F
-        ).astype(np.uint8)
-        # threshold with Otsu thresholding
-        ret, thres = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        # mask is where thres is
-        mask = thres != 255
-        # make mask 3-dimensional
-        return self._obj * mask
-
     def normalize(self, samples=15):
         """Remove the temporal mean of sampled frames.
 
@@ -601,21 +559,6 @@ class Frames(ORCBase):
 
                     out.write(img)
                     pbar.update(1)
-        #
-        # pbar = tqdm(self._obj, position=0, leave=True)
-        # pbar.set_description("Writing frames")
-        # for n, f in enumerate(pbar):
-        #     if len(f.shape) == 3:
-        #         img = cv2.cvtColor(np.uint8(f.values), cv2.COLOR_RGB2BGR)
-        #     else:
-        #         img = f.values
-        #         if n == 0:
-        #             # make a scale between 0 and 255, only with first frame
-        #             img_min = img.min(axis=0).min(axis=0)
-        #             img_max = img.max(axis=0).max(axis=0)
-        #         img = np.uint8(255 * ((img - img_min) / (img_max - img_min)))
-        #         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        #     out.write(img)
         out.release()
 
     plot = _frames_plot

@@ -279,23 +279,47 @@ def _frames_plot(ref, ax=None, mode="local", **kwargs):
         x = "xp"
         y = "yp"
     assert all(v in ref._obj.coords for v in [x, y]), f'required coordinates "{x}" and/or "{y}" are not available'
+    if x == "x":
+        # use a simple imshow, much faster
+        dx = abs(float(ref._obj[x][1] - ref._obj[x][0]))  # x grid cell size
+        dy = abs(float(ref._obj[y][1] - ref._obj[y][0]))  # y grid cell size
+        # Calculate extent with half grid cell expansion
+        extent = [
+            ref._obj[x].min().item() - 0.5 * dx,
+            ref._obj[x].max().item() + 0.5 * dx,
+            ref._obj[y].min().item() - 0.5 * dy,
+            ref._obj[y].max().item() + 0.5 * dy,
+        ]
+
     if len(ref._obj.shape) == 3 and ref._obj.shape[-1] == 3:
         # looking at an rgb image
         facecolors = ref._obj.values.reshape(ref._obj.shape[0] * ref._obj.shape[1], 3) / 255
         facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
-        primitive = ax.pcolormesh(
-            ref._obj[x],
-            ref._obj[y],
-            ref._obj.mean(dim="rgb"),
-            shading="nearest",
-            facecolors=facecolors,
-            **kwargs,
-        )
-        # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if
-        # array has dims
-        QuadMesh.set_array(primitive, None)
+        if x != "x":
+            primitive = ax.pcolormesh(
+                ref._obj[x],
+                ref._obj[y],
+                ref._obj.mean(dim="rgb"),
+                shading="nearest",
+                facecolors=facecolors,
+                **kwargs,
+            )
+            # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if
+            # array has dims
+            QuadMesh.set_array(primitive, None)
+        else:
+            primitive = ax.imshow(
+                facecolors,  # ref._obj.mean(dim="rgb"),
+                origin="lower",
+                extent=extent,
+                aspect="auto",
+            )
+
     else:
-        primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj, **kwargs)
+        if x != "x":
+            primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj, **kwargs)
+        else:
+            primitive = ax.imshow(ref._obj, origin="lower", extent=extent, aspect="auto")
     # fix axis limits to min and max of extent of frames
     if mode == "geographical":
         ax.set_extent(
