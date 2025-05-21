@@ -184,8 +184,8 @@ def cam_config(gcps, lens_position, dist_coeffs, camera_matrix, corners):
 @pytest.fixture()
 def cam_config_rvec_tvec(cam_config):
     # fix rvec and tvec
-    cam_config.rvec = cam_config.pnp[1].tolist()
-    cam_config.tvec = cam_config.pnp[2].tolist()
+    cam_config.rvec = cam_config.pnp[0].tolist()
+    cam_config.tvec = cam_config.pnp[1].tolist()
 
     return cam_config
 

@@ -115,6 +115,8 @@ class CameraConfig:
         self.height = height
         self.width = width
         self.is_nadir = is_nadir
+        self.camera_matrix = camera_matrix
+        self.dist_coeffs = dist_coeffs
         self.rvec = rvec
         self.tvec = tvec
         if crs is not None:
@@ -132,19 +134,14 @@ class CameraConfig:
             self.lens_position = None
         if gcps is not None:
             self.set_gcps(**gcps)
-        if camera_matrix is None or dist_coeffs is None:
-            if self.is_nadir:
-                # with nadir, no perspective can be constructed, hence, camera matrix and dist coeffs will be set
-                # to default values
-                self.camera_matrix = cv.get_cam_mtx(self.height, self.width)
-                self.dist_coeffs = cv.DIST_COEFFS
-            # camera pars are incomplete and need to be derived
-            else:
-                self.set_intrinsic(camera_matrix=camera_matrix)
+        if self.is_nadir:
+            # with nadir, no perspective can be constructed, hence, camera matrix and dist coeffs will be set
+            # to default values
+            self.camera_matrix = cv.get_cam_mtx(self.height, self.width)
+            self.dist_coeffs = cv.DIST_COEFFS
+        # camera pars are incomplete and need to be derived
         else:
-            # camera matrix and dist coeffs can also be set hard
-            self.camera_matrix = camera_matrix
-            self.dist_coeffs = dist_coeffs
+            self.calibrate()
         if calibration_video is not None:
             self.set_lens_calibration(calibration_video, plot=False)
         if bbox is not None:
@@ -324,12 +321,12 @@ class CameraConfig:
         tvec_cam += self.gcps_mean
         # transform back to world
         rvec, tvec = cv.pose_world_to_camera(rvec_cam, tvec_cam)
-        return _, rvec, tvec
+        return rvec, tvec
 
     @property
     def rvec(self):
         """Return rvec from precise N point solution."""
-        return self.pnp[1].tolist() if self._rvec is None else self._rvec
+        return self.pnp[0].tolist() if self._rvec is None else self._rvec
 
     @rvec.setter
     def rvec(self, _rvec):
@@ -399,11 +396,11 @@ class CameraConfig:
     @property
     def tvec(self):
         """Return tvec from precise N point solution."""
-        return self.pnp[2].tolist() if self._tvec is None else self._tvec
+        return self.pnp[1].tolist() if self._tvec is None else self._tvec
 
     @tvec.setter
     def tvec(self, _tvec):
-        self._tvec = _tvec.tolist if isinstance(_tvec, np.ndarray) else _tvec
+        self._tvec = _tvec.tolist() if isinstance(_tvec, np.ndarray) else _tvec
 
     def set_lens_calibration(
         self,
@@ -628,6 +625,17 @@ class CameraConfig:
         dist_shore = self.get_dist_shore(x, y, z, h_a=h_a)
         dist_wall = (dist_shore**2 + depth**2) ** 0.5
         return dist_wall
+
+    def get_extrinsic(self):
+        """Return rotation and translation vector based on control points and intrinsic parameters."""
+        # solve rvec and tvec with reduced coordinates, this ensure that the solvepnp solution is stable.
+        _, rvec, tvec = cv.solvepnp(self.gcps_reduced, self.gcps["src"], self.camera_matrix, self.dist_coeffs)
+        # ensure that rvec and tvec are corrected for the fact that mean gcp location was subtracted
+        rvec_cam, tvec_cam = cv.pose_world_to_camera(rvec, tvec)
+        tvec_cam += self.gcps_mean
+        # transform back to world
+        rvec, tvec = cv.pose_world_to_camera(rvec_cam, tvec_cam)
+        return rvec, tvec
 
     def z_to_h(self, z: float) -> float:
         """Convert z coordinates of bathymetry to height coordinates in local reference (e.g. staff gauge).
@@ -867,33 +875,25 @@ class CameraConfig:
         bbox = cv.get_aoi(corners_xyz, resolution=self.resolution)
         self.bbox = bbox
 
-    def set_intrinsic(
+    def calibrate(
         self,
-        camera_matrix: Optional[List[List]] = None,
-        dist_coeffs: Optional[List[List]] = None,
     ):
-        """Set lens and distortion parameters.
+        """Calibrate camera parameters using ground control.
 
-        If not provided, they are derived by optimizing pnp fitting together with optimizing the focal length.
+        If nothing provided, they are derived by optimizing pnp fitting together with optimizing the focal length
+        and two radial distortion coefficients (k1, k2).
 
-        Parameters
-        ----------
-        camera_matrix : Optional[List[List]]
-            A defined camera matrix to set as intrinsic parameters. If not provided, it will use default values or
-            those derived from ground control points (GCPs) if available.
+        You may also provide camera matrix or distortion coefficients, which will only optimize
+        the remainder parameters.
 
-        dist_coeffs : Optional[List[List]]
-            Distortion coefficients to be used for the camera. If not provided, it will use default values or those
-            derived from GCPs if available.
-
+        As a result, the following is updated on the CameraConfig instance:
+        - camera_matrix: the 3x3 camera matrix
+        - dist_coeffs: the 5x1 distortion coefficients
+        - rvec: the 3x1 rotation vector
+        - tvec: the 3x1 translation vector
         """
-        if camera_matrix is not None and dist_coeffs is not None:
-            # both are provided by user, so no fitting needed
-            self.camera_matrix = camera_matrix
-            self.dist_coeffs = dist_coeffs
-            return
-
-        if hasattr(self, "gcps"):
+        if hasattr(self, "gcps") and (self.camera_matrix is None or self.dist_coeffs is None):
+            # some calibration is needed, and there are GCPs available for it
             if len(self.gcps["src"]) >= 4:
                 self.camera_matrix, self.dist_coeffs, err = cv.optimize_intrinsic(
                     self.gcps["src"],
@@ -902,9 +902,14 @@ class CameraConfig:
                     self.height,
                     self.width,
                     lens_position=self.lens_position,
-                    camera_matrix=camera_matrix,
-                    dist_coeffs=dist_coeffs,
+                    camera_matrix=self.camera_matrix,
+                    dist_coeffs=self.dist_coeffs,
                 )
+        # finally, also derive the rvec and tvec if camera matrix and distortion coefficients are known
+        if self.camera_matrix is not None and self.dist_coeffs is not None:
+            rvec, tvec = self.get_extrinsic()
+            self.rvec = rvec
+            self.tvec = tvec
 
     def set_gcps(
         self, src: List[List], dst: List[List], z_0: float, h_ref: Optional[float] = None, crs: Optional[Any] = None
