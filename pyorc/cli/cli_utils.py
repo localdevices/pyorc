@@ -136,7 +136,12 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2.0, camera_matrix=None, d
     src_est, jacobian = cv2.projectPoints(_dst, rvec, tvec, camera_matrix, np.array(dist_coeffs))
     src_est = np.array([list(point[0]) for point in src_est])
     dst_est = cv.unproject_points(_src, _dst[:, -1], rvec, tvec, camera_matrix, dist_coeffs)
+    # add mean coordinates to estimated locations
     dst_est = np.array(dst_est)[:, 0 : len(coord_mean)] + coord_mean
+    # also reverse rvec and tvec to real-world (rw), add mean coordinate, and reverse again.
+    rvec_cam, tvec_cam = cv.pose_world_to_camera(rvec, tvec)
+    tvec_cam += coord_mean
+    rvec, tvec = cv.pose_world_to_camera(rvec_cam, tvec_cam)
     return src_est, dst_est, camera_matrix, dist_coeffs, rvec, tvec, err
 
 
@@ -327,8 +332,13 @@ def read_shape_as_gdf(fn=None, geojson=None, gdf=None):
         gdf = gpd.read_file(fn)
         crs = gdf.crs if hasattr(gdf, "crs") else None
         # also read raw json, and check if crs attribute exists
-        with open(fn, "r") as f:
-            raw_json = json.load(f)
+        if isinstance(fn, str):
+            with open(fn, "r") as f:
+                raw_json = json.load(f)
+        else:
+            # apparently a file object was provided
+            fn.seek(0)
+            raw_json = json.load(fn)
         if "crs" not in raw_json:
             # override the crs
             crs = None
