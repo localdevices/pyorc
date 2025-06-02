@@ -906,16 +906,16 @@ class CameraConfig:
         bbox = cv.get_aoi(points_xyz, resolution=self.resolution, method="width_length")
         self.bbox = bbox
 
-    def rotate_translate_bbox(self, angle: float = None, translation_x: float = None, translation_y: float = None):
+    def rotate_translate_bbox(self, angle: float = None, xoff: float = None, yoff: float = None):
         """Rotate and translate the bounding box.
 
         Parameters
         ----------
         angle : float, optional
             Rotation angle in radians (anti-clockwise) around the center of the bounding box
-        translation_x : float, optional
+        xoff : float, optional
             Translation distance in x direction in CRS units
-        translation_y : float, optional
+        yoff : float, optional
             Translation distance in y direction in CRS units
 
         Returns
@@ -961,11 +961,11 @@ class CameraConfig:
         x_vec = x_vec / np.linalg.norm(x_vec)
         y_vec = y_vec / np.linalg.norm(y_vec)
         # Project translations onto these vectors
-        dx = 0 if translation_x is None else translation_x * x_vec[0]
-        dy = 0 if translation_x is None else translation_x * x_vec[1]
+        dx = 0 if xoff is None else xoff * x_vec[0]
+        dy = 0 if xoff is None else xoff * x_vec[1]
 
-        dx -= 0 if translation_y is None else translation_y * y_vec[0]
-        dy -= 0 if translation_y is None else translation_y * y_vec[1]
+        dx -= 0 if yoff is None else yoff * y_vec[0]
+        dy -= 0 if yoff is None else yoff * y_vec[1]
 
         # Apply translation
         bbox = shapely.affinity.translate(bbox, xoff=dx, yoff=dy)

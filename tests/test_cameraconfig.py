@@ -175,10 +175,10 @@ def test_set_bbox_from_corners(cur_cam_config, cur_corners, cur_bbox, request):
     assert np.allclose(cur_cam_config.bbox.bounds, cur_bbox.bounds)
 
 
-def test_rotate_translate_bbox(cam_config_6gcps, bbox_6gcps):
-    bbox_rotated = cam_config_6gcps.rotate_translate_bbox(bbox_6gcps, angle=45, translate=(10, 10)).bbox
+def test_rotate_translate_bbox(cam_config_6gcps):
+    bbox_rotated = cam_config_6gcps.rotate_translate_bbox(angle=0.25 * np.pi, xoff=10, yoff=10).bbox
     # assert if the surface remains equal
-    assert np.isclose(bbox_rotated.area, bbox_6gcps.area)
+    assert np.isclose(bbox_rotated.area, cam_config_6gcps.bbox.area)
 
 
 def test_set_bbox_from_3points(cam_config_6gcps, corners_length_width, bbox_length_width):
