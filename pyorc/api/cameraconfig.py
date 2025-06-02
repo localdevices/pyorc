@@ -875,6 +875,103 @@ class CameraConfig:
         bbox = cv.get_aoi(corners_xyz, resolution=self.resolution)
         self.bbox = bbox
 
+    def set_bbox_from_width_length(self, points: List[List[float]]):
+        """Establish bbox based on three provided points.
+
+        The points are provided in the original camera perspective as [col, row] and require that a water level
+        has already been set in order to project them in a feasible way.
+
+        first point : left bank (seen in downstream direction)
+        second point : right bank
+        third point : selected upstream or downstream of the two points.
+
+        The last point defines how large the bounding box is in up-to-downstream direction. A user should attempt to
+        choose the first two points roughly in the middle of the intended bounding box. The last point is then
+        used to estimate the length perpendicular to the line between the first two points. The bounding box is
+        extended in the downstream direction with the same length.
+
+        Parameters
+        ----------
+        points : list of lists (3)
+            [columns, row] coordinates in original camera perspective without any undistortion applied
+
+        """
+        assert np.array(points).shape == (3, 2), (
+            f"a list of lists of 3 coordinates must be given, resulting in (3, "
+            f"2) shape. Current shape is {np.array(points).shape} "
+        )
+
+        # get homography
+        points_xyz = self.unproject_points(points, np.ones(3) * self.gcps["z_0"])
+        bbox = cv.get_aoi(points_xyz, resolution=self.resolution, method="width_length")
+        self.bbox = bbox
+
+    def rotate_translate_bbox(self, rotation: float = None, translation_x: float = None, translation_y: float = None):
+        """Rotate and translate the bounding box.
+
+        Parameters
+        ----------
+        rotation : float, optional
+            Rotation angle in degrees (clockwise) around the center of the bounding box
+        translation_x : float, optional
+            Translation distance in x direction in CRS units
+        translation_y : float, optional
+            Translation distance in y direction in CRS units
+
+        Returns
+        -------
+        CameraConfig
+            New CameraConfig instance with rotated and translated bounding box
+
+        """
+        # Make a deep copy of current config
+        new_config = copy.deepcopy(self)
+
+        # Get the current bbox
+        bbox = new_config.bbox
+        if bbox is None:
+            return new_config
+
+        # Apply rotation if specified
+        if rotation is not None:
+            # Convert to radians
+            angle = np.radians(rotation)
+            # Get centroid as origin
+            centroid = bbox.centroid
+            # Apply rotation around centroid
+            bbox = shapely.affinity.rotate(
+                bbox,
+                angle,
+                origin=centroid,
+                use_radians=True,
+            )
+
+        # Now perform translation. Get coordinates of corners
+        coords = list(bbox.exterior.coords)
+
+        # Get unit vectors of x and y directions
+        p1 = np.array(coords[0])
+        p2 = np.array(coords[1])  # second point
+        p3 = np.array(coords[2])  # third point
+
+        x_vec = p2 - p1
+        y_vec = p3 - p2
+
+        x_vec = x_vec / np.linalg.norm(x_vec)
+        y_vec = y_vec / np.linalg.norm(y_vec)
+        print(x_vec)
+        # Project translations onto these vectors
+        dx = 0 if translation_x is None else translation_x * x_vec[0]
+        dy = 0 if translation_x is None else translation_x * x_vec[1]
+
+        dx -= 0 if translation_y is None else translation_y * y_vec[0]
+        dy -= 0 if translation_y is None else translation_y * y_vec[1]
+
+        # Apply translation
+        bbox = shapely.affinity.translate(bbox, xoff=dx, yoff=dy)
+        new_config.bbox = bbox
+        return new_config
+
     def calibrate(
         self,
     ):
