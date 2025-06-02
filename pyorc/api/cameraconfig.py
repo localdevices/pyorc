@@ -906,13 +906,13 @@ class CameraConfig:
         bbox = cv.get_aoi(points_xyz, resolution=self.resolution, method="width_length")
         self.bbox = bbox
 
-    def rotate_translate_bbox(self, rotation: float = None, translation_x: float = None, translation_y: float = None):
+    def rotate_translate_bbox(self, angle: float = None, translation_x: float = None, translation_y: float = None):
         """Rotate and translate the bounding box.
 
         Parameters
         ----------
-        rotation : float, optional
-            Rotation angle in degrees (clockwise) around the center of the bounding box
+        angle : float, optional
+            Rotation angle in radians (anti-clockwise) around the center of the bounding box
         translation_x : float, optional
             Translation distance in x direction in CRS units
         translation_y : float, optional
@@ -933,9 +933,10 @@ class CameraConfig:
             return new_config
 
         # Apply rotation if specified
-        if rotation is not None:
-            # Convert to radians
-            angle = np.radians(rotation)
+        if angle is not None:
+            print(angle)
+            # # Convert to radians
+            # angle = np.radians(rotation)
             # Get centroid as origin
             centroid = bbox.centroid
             # Apply rotation around centroid
@@ -959,7 +960,6 @@ class CameraConfig:
 
         x_vec = x_vec / np.linalg.norm(x_vec)
         y_vec = y_vec / np.linalg.norm(y_vec)
-        print(x_vec)
         # Project translations onto these vectors
         dx = 0 if translation_x is None else translation_x * x_vec[0]
         dy = 0 if translation_x is None else translation_x * x_vec[1]
