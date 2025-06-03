@@ -137,6 +137,13 @@ def bbox_6gcps():
 
 
 @pytest.fixture()
+def bbox_length_width():
+    return wkt.loads(
+        "POLYGON ((192103.0488307946 313151.4171117912, 192098.26477193346 313161.19585627265, 192106.68147560649 313165.31356339395, 192111.46553446763 313155.5348189125, 192103.0488307946 313151.4171117912))"  # noqa: E501
+    )
+
+
+@pytest.fixture()
 def corners():
     return [
         [500, 800],
@@ -153,6 +160,12 @@ def corners():
 @pytest.fixture()
 def corners_6gcps():
     return [[390, 440], [1060, 160], [1800, 270], [1500, 880]]
+
+
+@pytest.fixture()
+def corners_length_width():
+    """Return points for 3-point length-width bounding box selection."""
+    return [[250, 450], [1500, 1050], [1060, 160]]
 
 
 @pytest.fixture()

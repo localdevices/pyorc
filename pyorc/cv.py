@@ -9,7 +9,7 @@ import numpy as np
 import rasterio
 from scipy import optimize
 from shapely.affinity import rotate
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, Point, Polygon
 from tqdm import tqdm
 
 from . import helpers
@@ -88,6 +88,55 @@ def _combine_m(m1, m2):
     return m_combi
 
 
+def _get_aoi_corners(dst_corners, resolution=None):
+    polygon = Polygon(dst_corners)
+    coords = np.array(polygon.exterior.coords)
+    # estimate the angle of the bounding box
+    # retrieve average line across AOI
+    point1 = (coords[0] + coords[3]) / 2
+    point2 = (coords[1] + coords[2]) / 2
+    diff = point2 - point1
+    angle = np.arctan2(diff[1], diff[0])
+    # rotate the polygon over this angle to get a proper bounding box
+    polygon_rotate = rotate(polygon, -angle, origin=tuple(dst_corners[0]), use_radians=True)
+
+    xmin, ymin, xmax, ymax = polygon_rotate.bounds
+    if resolution is not None:
+        xmin = helpers.round_to_multiple(xmin, resolution)
+        xmax = helpers.round_to_multiple(xmax, resolution)
+        ymin = helpers.round_to_multiple(ymin, resolution)
+        ymax = helpers.round_to_multiple(ymax, resolution)
+
+    bbox_coords = [(xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax)]
+    bbox = Polygon(bbox_coords)
+    # now rotate back
+    bbox = rotate(bbox, angle, origin=tuple(dst_corners[0]), use_radians=True)
+    return bbox
+
+
+def _get_aoi_width_length(dst_corners):
+    points = [Point(x, y) for x, y, _ in dst_corners]
+    linecross = LineString([points[0], points[1]])
+    # linecross = LineString(dst_corners[0:2])
+    length = _get_perpendicular_distance(points[-1], linecross)
+    point1 = np.array(dst_corners[0][0:2])
+    point2 = np.array(dst_corners[1][0:2])
+    diff = np.array(point2 - point1)
+    angle = np.arctan2(diff[1], diff[0])
+
+    # compute xy distance from line to other line making up the bounding box
+    xy_diff = np.array([np.sin(-angle) * length, np.cos(angle) * length])
+
+    # always make sure the order of the points of upstream-left, downstream-left, downstream-right, upstream-right
+    if length <= 0:
+        # negative length means the selected length is selected upstream of left-right cross section
+        points_pol = np.array([point1 + xy_diff, point1, point2, point2 + xy_diff])
+    else:
+        # postive means it is selected downstream of left-right cross section
+        points_pol = np.array([point1, point1 + xy_diff, point2 + xy_diff, point2])
+    return Polygon(points_pol)
+
+
 def _smooth(img, stride):
     """Blur image through gaussian smoothing.
 
@@ -150,6 +199,52 @@ def _get_dist_coefs(k1):
     dist = np.zeros((4, 1), np.float64)
     dist[0, 0] = k1
     return dist
+
+
+def _get_perpendicular_distance(point, line):
+    """Calculate perpendicular distance from point to line.
+
+    Line is extended if perpendicular distance is larger than the distance to the endpoints.
+
+    Parameters
+    ----------
+    point : shapely.geometry.Point
+        x, y coordinates of point
+    line : shapely.geometry.LineString
+        line to calculate distance to
+
+    Returns
+    -------
+    float
+        perpendicular distance from point to line
+
+    """
+    # Get coordinates of line endpoints
+    p1 = np.array(line.coords[0])
+    p2 = np.array(line.coords[1])
+    # Convert point to numpy array
+    p3 = np.array(point.coords[0])
+
+    # Calculate line vector
+    line_vector = p2 - p1
+    # Calculate vector from point to line start
+    point_vector = p3 - p1
+
+    # Calculate unit vector of line
+    unit_line = line_vector / np.linalg.norm(line_vector)
+
+    # Calculate projection length
+    projection_length = np.dot(point_vector, unit_line)
+
+    # Calculate perpendicular vector
+    perpendicular_vector = point_vector - projection_length * unit_line
+    perpendicular_distance = np.linalg.norm(perpendicular_vector)
+
+    # Use cross product to calculate side
+    cross_product = np.cross(line_vector, point_vector)
+
+    # Determine the sign of the perpendicular distance
+    return perpendicular_distance if cross_product > 0 else -perpendicular_distance
 
 
 def get_cam_mtx(height, width, c=2.0, focal_length=None):
@@ -907,15 +1002,19 @@ def get_ortho(img, M, shape, flags=cv2.INTER_AREA):
     return cv2.warpPerspective(img, M, shape, flags=flags)
 
 
-def get_aoi(dst_corners, resolution=None):
-    """Get rectangular AOI from 4 user defined points within frames.
+def get_aoi(dst_corners, resolution=None, method="corners"):
+    """Get rectangular AOI from 3 or 4 user defined points within frames.
 
     Parameters
     ----------
     dst_corners : np.ndarray
-        corners of aoi, in order: upstream-left, downstream-left, downstream-right, upstream-right
+        corners of aoi, with `method="width_length"` in order: left-bank, right-bank, up/downstream point,
+        with `method="corners"` in order: upstream-left, downstream-left, downstream-right, upstream-right.
     resolution : float
         resolution of intended reprojection, used to round the bbox to a whole number of intended pixels
+    method : str
+        can be "corners" or "width_length". With "corners", the AOI is defined by the four corners of the rectangle.
+        With "width" length, the AOI is defined by the width (2 points) and length (1 point) of the rectangle.
 
     Returns
     -------
@@ -923,27 +1022,14 @@ def get_aoi(dst_corners, resolution=None):
         bounding box of aoi (with rotated affine)
 
     """
-    polygon = Polygon(dst_corners)
-    coords = np.array(polygon.exterior.coords)
-    # estimate the angle of the bounding box
-    # retrieve average line across AOI
-    point1 = (coords[0] + coords[3]) / 2
-    point2 = (coords[1] + coords[2]) / 2
-    diff = point2 - point1
-    angle = np.arctan2(diff[1], diff[0])
-    # rotate the polygon over this angle to get a proper bounding box
-    polygon_rotate = rotate(polygon, -angle, origin=tuple(dst_corners[0]), use_radians=True)
-    xmin, ymin, xmax, ymax = polygon_rotate.bounds
-    if resolution is not None:
-        xmin = helpers.round_to_multiple(xmin, resolution)
-        xmax = helpers.round_to_multiple(xmax, resolution)
-        ymin = helpers.round_to_multiple(ymin, resolution)
-        ymax = helpers.round_to_multiple(ymax, resolution)
+    if method == "corners":
+        bbox = _get_aoi_corners(dst_corners, resolution)
+    elif method == "width_length":
+        bbox = _get_aoi_width_length(dst_corners)
 
-    bbox_coords = [(xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax)]
-    bbox = Polygon(bbox_coords)
-    # now rotate back
-    bbox = rotate(bbox, angle, origin=tuple(dst_corners[0]), use_radians=True)
+    else:
+        raise ValueError("method must be 'corners' or 'width_length'")
+
     return bbox
 
 
