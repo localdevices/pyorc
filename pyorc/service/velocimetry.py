@@ -254,6 +254,7 @@ class VelocityFlowProcessor(object):
             reference to logger instance
 
         """
+        logger.debug("Initializing Velocity Flow Processor")
         cross_section = None
         camera_config = CameraConfig(**cameraconfig)
         if h_a is not None:
@@ -310,7 +311,7 @@ class VelocityFlowProcessor(object):
         self.cam_config = camera_config
         self.logger = logger
         # TODO: perform checks, minimum steps required
-        self.logger.info("pyorc velocimetry processor initialized")
+        self.logger.info("Velocity Flow Processor initialized")
 
     @property
     def output(self):
@@ -357,6 +358,7 @@ class VelocityFlowProcessor(object):
 
         The process also checks for compulsory steps.
         """
+        self.logger.info("Starting velocimetry processing pipeline")
         if not self.concurrency:
             import dask
 
@@ -390,6 +392,7 @@ class VelocityFlowProcessor(object):
         delattr(self, "velocimetry_obj")
         delattr(self, "velocimetry_mask_obj")
         delattr(self, "da_frames")
+        self.logger.info("Velocimetry processing pipeline completed :-)")
         return None
         # TODO .get_transect and check if it contains data,
 
@@ -401,33 +404,47 @@ class VelocityFlowProcessor(object):
     # -y is provided, do with user intervention if stale file is present or -y is not provided
 
     def video(self, **kwargs):
-        self.video_obj = Video(self.fn_video, camera_config=self.cam_config, **kwargs)
-        # some checks ...
-        self.logger.info(f"Video successfully read from {self.fn_video}")
+        try:
+            self.logger.debug(f"Reading video {self.fn_video} from file")
+            self.video_obj = Video(self.fn_video, camera_config=self.cam_config, **kwargs)
+            # some checks ...
+            self.logger.info(f"Video successfully read from {self.fn_video}")
+        except Exception as e:
+            self.logger.error(f"Could not read video from {self.fn_video}. Error: {e}")
+            raise Exception(f"Could not read video from {self.fn_video}. Error: {e}")
 
     def water_level(self, **kwargs):
-        self.logger.debug("Estimating water level from video by crossing water line with cross section.")
-        h_a = get_water_level(self.video_obj, cross_section=self.cross_section_wl, **kwargs)
-        if h_a is None:
-            self.logger.error("Water level could not be estimated from video. Please set a water level with --h_a.")
-            raise click.Abort()
-        # set the found water level on video
-        self.logger.info("Water level estimated to be {:1.3f} meters in local datum.".format(h_a))
-        self.video_obj.h_a = h_a
+        try:
+            self.logger.debug("Estimating water level from video by crossing water line with cross section.")
+            h_a = get_water_level(self.video_obj, cross_section=self.cross_section_wl, **kwargs)
+            if h_a is None:
+                self.logger.error("Water level could not be estimated from video. Please set a water level with --h_a.")
+                raise click.Abort()
+            # set the found water level on video
+            self.logger.info("Water level estimated to be {:1.3f} meters in local datum.".format(h_a))
+            self.video_obj.h_a = h_a
+        except Exception as e:
+            self.logger.error(f"Could not estimate water level from video. Error: {e}")
+            raise Exception(f"Could not estimate water level from video. Error: {e}")
 
     def frames(self, **kwargs):
         # start with extracting frames
-        self.da_frames = self.video_obj.get_frames()
-        self.logger.debug(f"{len(self.da_frames)} frames retrieved from video")
-        if "project" not in kwargs:
-            kwargs["project"] = {}
-        # iterate over steps in processing
-        self.da_frames = apply_methods(self.da_frames, "frames", logger=self.logger, skip_args=["to_video"], **kwargs)
-        if "to_video" in kwargs:
-            kwargs_video = kwargs["to_video"]
-            self.logger.info(f"Writing video of processed frames to {kwargs_video['fn']}")
-            self.da_frames.frames.to_video(**kwargs_video)
-        self.logger.info("Frames are preprocessed")
+        try:
+            self.logger.debug(f"Retrieving frames from video.")
+            self.da_frames = self.video_obj.get_frames()
+            self.logger.debug(f"Retrieved {len(self.da_frames)} from video.")
+            if "project" not in kwargs:
+                kwargs["project"] = {}
+            # iterate over steps in processing
+            self.da_frames = apply_methods(self.da_frames, "frames", logger=self.logger, skip_args=["to_video"], **kwargs)
+            if "to_video" in kwargs:
+                kwargs_video = kwargs["to_video"]
+                self.logger.info(f"Writing video of processed frames to {kwargs_video['fn']}")
+                self.da_frames.frames.to_video(**kwargs_video)
+            self.logger.info("Frames retrieved and preprocessed.")
+        except Exception as e:
+            self.logger.error(f"Could not extract frames from video. Error: {e}")
+            raise Exception(f"Could not extract frames from video. Error: {e}")
 
     @run_func_hash_io(
         attrs=["velocimetry_obj"],
@@ -437,23 +454,29 @@ class VelocityFlowProcessor(object):
         outputs=["fn_piv"],
     )
     def velocimetry(self, method="get_piv", write=False, **kwargs):
-        if len(kwargs) > 1:
-            raise OverflowError(f"Too many arguments under velocimetry, only one allowed, but {len(kwargs)} given.")
-        kwargs[method] = kwargs.get(method, {}) if len(kwargs) == 0 else kwargs[method]
-        # get velocimetry results
-        self.velocimetry_obj = apply_methods(self.da_frames, "frames", logger=self.logger, **kwargs)
-        m = list(kwargs.keys())[0]
-        parameters = kwargs[m]
-        self.logger.info(f"Velocimetry derived with method {m} with parameters {parameters}")
-        if write:
-            delayed_obj = self.velocimetry_obj.to_netcdf(self.fn_piv, compute=False)
-            with ProgressBar():
-                delayed_obj.compute()
-            del delayed_obj
-            self.logger.info(f"Velocimetry written to {self.fn_piv}")
-            # Load the velocimetry into memory to prevent re-writes in next steps
-            delattr(self, "velocimetry_obj")
-            self.velocimetry_obj = xr.open_dataset(self.fn_piv)
+        self.logger.debug(f"Performing velocimetry with {method}.")
+        try:
+            if len(kwargs) > 1:
+                raise OverflowError(f"Too many arguments under velocimetry, only one allowed, but {len(kwargs)} given.")
+            kwargs[method] = kwargs.get(method, {}) if len(kwargs) == 0 else kwargs[method]
+            # get velocimetry results
+            self.velocimetry_obj = apply_methods(self.da_frames, "frames", logger=self.logger, **kwargs)
+            m = list(kwargs.keys())[0]
+            parameters = kwargs[m]
+            self.logger.info(f"Velocimetry derived with method {m} with parameters {parameters}")
+            if write:
+                delayed_obj = self.velocimetry_obj.to_netcdf(self.fn_piv, compute=False)
+                with ProgressBar():
+                    delayed_obj.compute()
+                del delayed_obj
+                self.logger.info(f"Velocimetry written to {self.fn_piv}")
+                # Load the velocimetry into memory to prevent re-writes in next steps
+                delattr(self, "velocimetry_obj")
+                self.velocimetry_obj = xr.open_dataset(self.fn_piv)
+            self.logger.info("Velocimetry successfully derived.")
+        except Exception as e:
+            self.logger.error(f"Could not derive velocimetry from frames. Error: {e}")
+            raise Exception(f"Could not derive velocimetry from frames. Error: {e}")
 
     @run_func_hash_io(
         attrs=["velocimetry_mask_obj"],
@@ -463,84 +486,95 @@ class VelocityFlowProcessor(object):
         outputs=["fn_piv_mask"],
     )
     def mask(self, write=False, **kwargs):
-        # TODO go through several masking groups
-        self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
-        for mask_name, mask_grp in kwargs.items():
-            self.logger.debug(f'Applying "{mask_name}" with parameters {mask_grp}')
-            masks = get_masks(self.velocimetry_mask_obj, **mask_grp)
-            # apply found masks on velocimetry object
-            self.velocimetry_mask_obj.velocimetry.mask(masks, inplace=True)
-        self.logger.info("Velocimetry masks applied")
-        # set the encoding to a good compression level
-        self.velocimetry_mask_obj.velocimetry.set_encoding()
-        # store results to file
-        if write:
-            delayed_obj = self.velocimetry_mask_obj.to_netcdf(self.fn_piv_mask, compute=False)
-            with ProgressBar():
-                delayed_obj.compute()
-            del delayed_obj
+        try:
+            self.logger.debug(f"Applying masks to velocimetry.")
+            self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
+            for mask_name, mask_grp in kwargs.items():
+                self.logger.debug(f'Applying "{mask_name}" with parameters {mask_grp}')
+                masks = get_masks(self.velocimetry_mask_obj, **mask_grp)
+                # apply found masks on velocimetry object
+                self.velocimetry_mask_obj.velocimetry.mask(masks, inplace=True)
+            self.logger.info("Velocimetry masks applied")
+            # set the encoding to a good compression level
+            self.velocimetry_mask_obj.velocimetry.set_encoding()
+            # store results to file
+            if write:
+                delayed_obj = self.velocimetry_mask_obj.to_netcdf(self.fn_piv_mask, compute=False)
+                with ProgressBar():
+                    delayed_obj.compute()
+                del delayed_obj
+            self.logger.info(f"Velocimetry masked written to {self.fn_piv_mask}.")
+        except Exception as e:
+            self.logger.error(f"Could not apply masks to velocimetry. Error: {e}")
+            raise Exception(f"Could not apply masks to velocimetry. Error: {e}")
 
     @run_func_hash_io(check=False, configs=["transect"], inputs=["fn_piv_mask"])
     def transect(self, write=False, **kwargs):
-        self.transects = {}
-        # keep integrity of original kwargs
-        _kwargs = copy.deepcopy(kwargs)
-        for transect_name, transect_grp in _kwargs.items():
-            self.logger.debug(f'Processing transect "{transect_name}"')
-            # check if there are coordinates provided
+        try:
+            self.logger.debug(f"Deriving transects from velocimetry.")
+            self.transects = {}
+            # keep integrity of original kwargs
+            _kwargs = copy.deepcopy(kwargs)
+            for transect_name, transect_grp in _kwargs.items():
+                self.logger.debug(f'Processing transect "{transect_name}"')
+                # check if there are coordinates provided
 
-            if not ("shapefile" in transect_grp or "geojson" in transect_grp):
-                raise click.UsageError(
-                    f'Transect with name "{transect_name}" does not have a "shapefile" or '
-                    f'"geojson". Please add "shapefile" in the recipe file or provide a '
-                    f'shapefile or geojson file with the "--cross" option.'
-                )
-            # read geojson or shapefile (as alternative
-            if "geojson" in transect_grp:
-                # read directly from geojson
-                coords, crs = cli_utils.read_shape(geojson=transect_grp["geojson"])
-            elif "shapefile" in transect_grp:
-                coords, crs = cli_utils.read_shape(fn=transect_grp["shapefile"])
-            self.logger.debug(f"Coordinates read for transect {transect_name}")
-            # check if coords have z coordinates
-            if len(coords[0]) == 2:
-                raise click.UsageError(
-                    f'Transect in {os.path.abspath(transect_grp["shapefile"])} only contains x, y, but no '
-                    f'z-coordinates.'
-                )
-            x, y, z = zip(*coords)
-            self.logger.debug(f"Sampling transect {transect_name}")
-            # sample the coordinates
-            if "get_transect" not in transect_grp:
-                transect_grp["get_transect"] = {}
-            if transect_grp["get_transect"] is None:
-                transect_grp["get_transect"] = {}
-            self.transects[transect_name] = self.velocimetry_mask_obj.velocimetry.get_transect(
-                x=x, y=y, z=z, crs=crs, **transect_grp["get_transect"]
-            )
-            if "get_q" in transect_grp:
-                if transect_grp["get_q"] is None:
-                    transect_grp["get_q"] = {}
-                # add q
-                self.transects[transect_name] = self.transects[transect_name].transect.get_q(**transect_grp["get_q"])
-            if "get_river_flow" in transect_grp:
-                if "get_q" not in transect_grp:
+                if not ("shapefile" in transect_grp or "geojson" in transect_grp):
                     raise click.UsageError(
-                        f'"get_river_flow" found in {transect_name} but no "get_q" found, which is a requirement for'
-                        f' "get_river_flow"'
+                        f'Transect with name "{transect_name}" does not have a "shapefile" or '
+                        f'"geojson". Please add "shapefile" in the recipe file or provide a '
+                        f'shapefile or geojson file with the "--cross" option.'
                     )
-                if transect_grp["get_river_flow"] is None:
-                    transect_grp["get_river_flow"] = {}
-                # add q
-                self.transects[transect_name].transect.get_river_flow(**transect_grp["get_river_flow"])
-            if write:
-                # output file
-                fn_transect = os.path.abspath(self.fn_transect_template(transect_name))
-                self.logger.debug(f'Writing transect "{transect_name}" to {fn_transect}')
-                delayed_obj = self.transects[transect_name].to_netcdf(fn_transect, compute=False)
-                with ProgressBar():
-                    delayed_obj.compute()
-                self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
+                # read geojson or shapefile (as alternative
+                if "geojson" in transect_grp:
+                    # read directly from geojson
+                    coords, crs = cli_utils.read_shape(geojson=transect_grp["geojson"])
+                elif "shapefile" in transect_grp:
+                    coords, crs = cli_utils.read_shape(fn=transect_grp["shapefile"])
+                self.logger.debug(f"Coordinates read for transect {transect_name}")
+                # check if coords have z coordinates
+                if len(coords[0]) == 2:
+                    raise click.UsageError(
+                        f'Transect in {os.path.abspath(transect_grp["shapefile"])} only contains x, y, but no '
+                        f'z-coordinates.'
+                    )
+                x, y, z = zip(*coords)
+                self.logger.debug(f"Sampling transect {transect_name}")
+                # sample the coordinates
+                if "get_transect" not in transect_grp:
+                    transect_grp["get_transect"] = {}
+                if transect_grp["get_transect"] is None:
+                    transect_grp["get_transect"] = {}
+                self.transects[transect_name] = self.velocimetry_mask_obj.velocimetry.get_transect(
+                    x=x, y=y, z=z, crs=crs, **transect_grp["get_transect"]
+                )
+                if "get_q" in transect_grp:
+                    if transect_grp["get_q"] is None:
+                        transect_grp["get_q"] = {}
+                    # add q
+                    self.transects[transect_name] = self.transects[transect_name].transect.get_q(**transect_grp["get_q"])
+                if "get_river_flow" in transect_grp:
+                    if "get_q" not in transect_grp:
+                        raise click.UsageError(
+                            f'"get_river_flow" found in {transect_name} but no "get_q" found, which is a requirement for'
+                            f' "get_river_flow"'
+                        )
+                    if transect_grp["get_river_flow"] is None:
+                        transect_grp["get_river_flow"] = {}
+                    # add q
+                    self.transects[transect_name].transect.get_river_flow(**transect_grp["get_river_flow"])
+                if write:
+                    # output file
+                    fn_transect = os.path.abspath(self.fn_transect_template(transect_name))
+                    self.logger.debug(f'Writing transect "{transect_name}" to {fn_transect}')
+                    delayed_obj = self.transects[transect_name].to_netcdf(fn_transect, compute=False)
+                    with ProgressBar():
+                        delayed_obj.compute()
+                    self.logger.info(f'Transect "{transect_name}" written to {fn_transect}')
+            self.logger.info("Transects derived.")
+        except Exception as e:
+            self.logger.error(f"Could not derive transects from velocimetry. Error: {e}")
+            raise Exception(f"Could not derive transects from velocimetry. Error: {e}")
 
     @run_func_hash_io(
         check=False,
@@ -549,61 +583,67 @@ class VelocityFlowProcessor(object):
         outputs=[],
     )
     def plot(self, **plot_recipes):
-        _plot_recipes = copy.deepcopy(plot_recipes)
-        for name, plot_params in _plot_recipes.items():
-            self.logger.debug(f'Processing plot "{name}"')
-            fn_jpg = os.path.join(self.output, self.prefix + name + ".jpg")
-            mode = plot_params["mode"]
-            ax = None
-            # look for inputs
-            if "frames" in plot_params:
-                if "frame_number" in plot_params:
-                    n = plot_params["frame_number"]
-                else:
-                    n = 0
-                opts = plot_params["frames"] if plot_params["frames"] is not None else {}
-                f = self.video_obj.get_frames(method="rgb")
-                if mode != "camera":
-                    f = f[n : n + 1].frames.project(method=self.proj_method)[0]
-                else:
-                    f = f[n]
-                p = f.frames.plot(ax=ax, mode=mode, **opts)
-                # continue with axes of p
-                ax = p.axes
-            if "velocimetry" in plot_params:
-                opts = plot_params["velocimetry"]
-                opts = vmin_vmax_to_norm(opts)
-                # select the time reducer. If not defined, choose mean
-                reducer = plot_params["reducer"] if "reducer" in plot_params else "mean"
-                reducer_params = plot_params["reducer_params"] if "reducer_params" in plot_params else {}
-                # reduce the velocimetry over time for plotting purposes
-                velocimetry_reduced = getattr(self.velocimetry_mask_obj, reducer)(
-                    dim="time", keep_attrs=True, **reducer_params
-                )
-                p = velocimetry_reduced.velocimetry.plot(ax=ax, mode=mode, **opts)
-                ax = p.axes
-                del velocimetry_reduced
-            if "transect" in plot_params:
-                for transect_name, opts in plot_params["transect"].items():
-                    opts = vmin_vmax_to_norm(opts)
-                    # read file
-                    fn_transect = self.fn_transect_template(transect_name)
-                    ds_trans = xr.open_dataset(fn_transect)
-                    # default quantile is 2 (50%), otherwise choose from list
-                    quantile = 2 if ("quantile") not in opts else opts["quantile"]
-                    ds_trans_q = ds_trans.isel(quantile=quantile)
-                    # add to plot
-                    p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
+        try:
+            self.logger.debug(f"Plotting velocimetry.")
+            _plot_recipes = copy.deepcopy(plot_recipes)
+            for name, plot_params in _plot_recipes.items():
+                self.logger.debug(f'Processing plot "{name}"')
+                fn_jpg = os.path.join(self.output, self.prefix + name + ".jpg")
+                mode = plot_params["mode"]
+                ax = None
+                # look for inputs
+                if "frames" in plot_params:
+                    if "frame_number" in plot_params:
+                        n = plot_params["frame_number"]
+                    else:
+                        n = 0
+                    opts = plot_params["frames"] if plot_params["frames"] is not None else {}
+                    f = self.video_obj.get_frames(method="rgb")
+                    if mode != "camera":
+                        f = f[n : n + 1].frames.project(method=self.proj_method)[0]
+                    else:
+                        f = f[n]
+                    p = f.frames.plot(ax=ax, mode=mode, **opts)
+                    # continue with axes of p
                     ax = p.axes
-                    # done with transect, remove from memory
-                    ds_trans.close()
-                    del ds_trans
-            # if mode == "camera":
-            #     ax.axis("equal")
-            write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
-            self.logger.debug(f'Writing plot "{name}" to {fn_jpg}')
-            ax.figure.savefig(fn_jpg, **write_pars)
-            self.logger.info(f'Plot "{name}" written to {fn_jpg}')
+                if "velocimetry" in plot_params:
+                    opts = plot_params["velocimetry"]
+                    opts = vmin_vmax_to_norm(opts)
+                    # select the time reducer. If not defined, choose mean
+                    reducer = plot_params["reducer"] if "reducer" in plot_params else "mean"
+                    reducer_params = plot_params["reducer_params"] if "reducer_params" in plot_params else {}
+                    # reduce the velocimetry over time for plotting purposes
+                    velocimetry_reduced = getattr(self.velocimetry_mask_obj, reducer)(
+                        dim="time", keep_attrs=True, **reducer_params
+                    )
+                    p = velocimetry_reduced.velocimetry.plot(ax=ax, mode=mode, **opts)
+                    ax = p.axes
+                    del velocimetry_reduced
+                if "transect" in plot_params:
+                    for transect_name, opts in plot_params["transect"].items():
+                        opts = vmin_vmax_to_norm(opts)
+                        # read file
+                        fn_transect = self.fn_transect_template(transect_name)
+                        ds_trans = xr.open_dataset(fn_transect)
+                        # default quantile is 2 (50%), otherwise choose from list
+                        quantile = 2 if ("quantile") not in opts else opts["quantile"]
+                        ds_trans_q = ds_trans.isel(quantile=quantile)
+                        # add to plot
+                        p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
+                        ax = p.axes
+                        # done with transect, remove from memory
+                        ds_trans.close()
+                        del ds_trans
+                # if mode == "camera":
+                #     ax.axis("equal")
+                write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
+                self.logger.debug(f'Writing plot "{name}" to {fn_jpg}')
+                ax.figure.savefig(fn_jpg, **write_pars)
+                self.logger.info(f'Plot "{name}" written to {fn_jpg}')
+            self.logger.info("Plot procedure done.")
+        except Exception as e:
+            self.logger.error(f"Could not plot velocimetry. Error: {e}")
+            raise Exception(f"Could not plot velocimetry. Error: {e}")
 
 
 def velocity_flow(**kwargs):
