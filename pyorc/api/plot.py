@@ -6,7 +6,8 @@ import functools
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
-from matplotlib import patheffects
+
+from matplotlib import patheffects, colors
 from matplotlib.collections import QuadMesh
 
 from pyorc import helpers
@@ -365,6 +366,7 @@ class _Transect_PlotMethods:
             mappable of wrapped matplotlib function
 
         """
+        # kwargs = set_default_kwargs(kwargs, method=method)
         return getattr(self, method)(**kwargs)
 
     def get_uv_camera(self, dt=0.1):
@@ -503,6 +505,8 @@ class _Velocimetry_PlotMethods:
             mappable of wrapped matplotlib function
 
         """
+        # set several default kwargs where applicable
+        # kwargs = set_default_kwargs(kwargs, method=method)
         return getattr(self, method)(**kwargs)
 
     def get_uv_geographical(self):
@@ -601,6 +605,24 @@ class _Velocimetry_PlotMethods:
         s = ((self._obj["v_x"] ** 2 + self._obj["v_y"] ** 2) ** 0.5).values
         return u, v, s
 
+
+def set_default_kwargs(kwargs, method="quiver"):
+    """Set color mapping default kwargs if no vmin and/or vmax is supplied."""
+
+    if "cmap" not in kwargs:
+        kwargs["cmap"] = "gist_ncar"
+    if "vmin" not in kwargs and "vmax" not in kwargs:
+        # set a normalization array
+        norm = [0, 0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0]
+        kwargs["norm"] = colors.BoundaryNorm(norm, ncolors=256, extend="max")
+    if method == "quiver":
+        if "scale" not in kwargs:
+            kwargs["scale"] = 4
+        if "units" not in kwargs:
+            kwargs["units"] = "xy"
+
+
+    return kwargs
 
 @_base_plot
 def quiver(_, x, y, u, v, s=None, ax=None, **kwargs):

@@ -37,6 +37,6 @@ def test_plot(piv, mode, method):
             # skipping the test, because streamplot only works local
             plot = False
     if plot:
-        piv.mean(dim="time", keep_attrs=True).velocimetry.plot(method=method, mode=mode)
-        plt.show(block=False)
+        piv.mean(dim="time", keep_attrs=True).velocimetry.plot(method=method, mode=mode, add_colorbar=True)
+        plt.show(block=True)
     plt.close("all")
