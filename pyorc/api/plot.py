@@ -133,7 +133,7 @@ def _base_plot(plot_func):
 
         # check if dataset is a transect or not
         is_transect = True if "points" in ref._obj.dims else False
-
+        kwargs = set_default_kwargs(kwargs, method=plot_func.__name__, is_transect=is_transect)
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
         if mode == "local":
             x = ref._obj["x"].values
@@ -292,35 +292,35 @@ def _frames_plot(ref, ax=None, mode="local", **kwargs):
             ref._obj[y].max().item() + 0.5 * dy,
         ]
 
-    if len(ref._obj.shape) == 3 and ref._obj.shape[-1] == 3:
-        # looking at an rgb image
-        facecolors = ref._obj.values.reshape(ref._obj.shape[0] * ref._obj.shape[1], 3) / 255
-        facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
-        if x != "x":
-            primitive = ax.pcolormesh(
-                ref._obj[x],
-                ref._obj[y],
-                ref._obj.mean(dim="rgb"),
-                shading="nearest",
-                facecolors=facecolors,
-                **kwargs,
-            )
-            # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if
-            # array has dims
-            QuadMesh.set_array(primitive, None)
-        else:
-            primitive = ax.imshow(
-                facecolors,  # ref._obj.mean(dim="rgb"),
-                origin="lower",
-                extent=extent,
-                aspect="auto",
-            )
-
+    # if len(ref._obj.shape) == 3 and ref._obj.shape[-1] == 3:
+    #     # looking at an rgb image
+    #     facecolors = ref._obj.values.reshape(ref._obj.shape[0] * ref._obj.shape[1], 3) / 255
+    #     facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
+    #     if x != "x":
+    #         primitive = ax.pcolormesh(
+    #             ref._obj[x],
+    #             ref._obj[y],
+    #             ref._obj.mean(dim="rgb"),
+    #             shading="nearest",
+    #             facecolors=facecolors,
+    #             **kwargs,
+    #         )
+    #         # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if
+    #         # array has dims
+    #         QuadMesh.set_array(primitive, None)
+    #     else:
+    #         primitive = ax.imshow(
+    #             facecolors,  # ref._obj.mean(dim="rgb"),
+    #             origin="lower",
+    #             extent=extent,
+    #             aspect="auto",
+    #         )
+    #
+    # else:
+    if x != "x":
+        primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj, **kwargs)
     else:
-        if x != "x":
-            primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj, **kwargs)
-        else:
-            primitive = ax.imshow(ref._obj, origin="lower", extent=extent, aspect="auto")
+        primitive = ax.imshow(ref._obj, origin="upper", extent=extent, aspect="auto")
     # fix axis limits to min and max of extent of frames
     if mode == "geographical":
         ax.set_extent(
@@ -366,7 +366,7 @@ class _Transect_PlotMethods:
             mappable of wrapped matplotlib function
 
         """
-        # kwargs = set_default_kwargs(kwargs, method=method)
+        kwargs = set_default_kwargs(kwargs, method=method)
         return getattr(self, method)(**kwargs)
 
     def get_uv_camera(self, dt=0.1):
@@ -506,7 +506,7 @@ class _Velocimetry_PlotMethods:
 
         """
         # set several default kwargs where applicable
-        # kwargs = set_default_kwargs(kwargs, method=method)
+        kwargs = set_default_kwargs(kwargs, method=method)
         return getattr(self, method)(**kwargs)
 
     def get_uv_geographical(self):
@@ -606,22 +606,23 @@ class _Velocimetry_PlotMethods:
         return u, v, s
 
 
-def set_default_kwargs(kwargs, method="quiver"):
+def set_default_kwargs(kwargs, method="quiver", is_transect=False):
     """Set color mapping default kwargs if no vmin and/or vmax is supplied."""
 
     if "cmap" not in kwargs:
-        kwargs["cmap"] = "gist_ncar"
-    if "vmin" not in kwargs and "vmax" not in kwargs:
+        kwargs["cmap"] = "rainbow"
+    if "vmin" not in kwargs and "vmax" not in kwargs and "norm" not in kwargs:
         # set a normalization array
-        norm = [0, 0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0]
+        norm = [0, 0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
         kwargs["norm"] = colors.BoundaryNorm(norm, ncolors=256, extend="max")
     if method == "quiver":
         if "scale" not in kwargs:
-            kwargs["scale"] = 4
+            if is_transect:
+                kwargs["scale"] = 2  # larger quiver arrows
+            else:
+                kwargs["scale"] = 4  # smaller quiver arrows
         if "units" not in kwargs:
             kwargs["units"] = "xy"
-
-
     return kwargs
 
 @_base_plot

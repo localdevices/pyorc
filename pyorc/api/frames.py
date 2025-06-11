@@ -273,8 +273,9 @@ class Frames(ORCBase):
             {"xs": xs, "ys": ys, "lon": lons, "lat": lats}, coords, const.GEOGRAPHICAL_ATTRS
         )
         if "rgb" in da_proj.dims and len(da_proj.dims) == 4:
-            # ensure that "rgb" is the last dimension
+            # ensure that "rgb" is the last dimension and dtype is int
             da_proj = da_proj.transpose("time", "y", "x", "rgb")
+            da_proj = da_proj.astype("uint8")
         # in case resolution was changed, overrule the camera_config attribute
         da_proj.attrs.update(camera_config=cc.to_json())
         return da_proj
