@@ -6,9 +6,7 @@ import functools
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
-
-from matplotlib import patheffects, colors
-from matplotlib.collections import QuadMesh
+from matplotlib import colors, patheffects
 
 from pyorc import helpers
 
@@ -524,9 +522,11 @@ class _Velocimetry_PlotMethods:
         """
         # select lon and lat variables as coordinates
         velocimetry = self._obj.velocimetry
-        u = self._obj["v_x"]
-        v = -self._obj["v_y"]
-        s = (u**2 + v**2) ** 0.5
+        v_x = self._obj["v_x"].values
+        v_y = self._obj["v_y"].values
+        u = v_x / (2 * 1e5)  # 1e5 is aobut the amount of meters per degree
+        v = -v_y / (2 * 1e5)
+        s = (v_x**2 + v_y**2) ** 0.5
         aff = velocimetry.camera_config.transform
         theta = np.arctan2(aff.d, aff.a)
         # rotate velocity vectors along angle theta to match the requested projection. this only changes values
@@ -547,9 +547,14 @@ class _Velocimetry_PlotMethods:
             scalar velocity
 
         """
-        u = self._obj["v_x"].values
-        v = -self._obj["v_y"].values
-        s = (u**2 + v**2) ** 0.5
+        # u and v should be scaled to a nice proportionality for local plots. This is typically about 2x smaller
+        # than the m/s values
+        v_x = self._obj["v_x"].values
+        v_y = self._obj["v_y"].values
+
+        u = v_x / 2
+        v = -v_y / 2
+        s = (v_x**2 + v_y**2) ** 0.5
         return u, v, s
 
     def get_uv_camera(self, dt=0.1):
@@ -580,7 +585,8 @@ class _Velocimetry_PlotMethods:
         yi = np.flipud(yi)
 
         # follow the velocity vector over a short distance (dt*velocity)
-        x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
+        # x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
+        x_moved, y_moved = xi + self._obj["v_x"] / 2, yi + self._obj["v_y"] / 2
         # transform to real-world
         cols_moved, rows_moved = x_moved / camera_config.resolution, y_moved / camera_config.resolution
         xs_moved, ys_moved = helpers.get_xs_ys(cols_moved, rows_moved, camera_config.transform)
@@ -608,7 +614,6 @@ class _Velocimetry_PlotMethods:
 
 def set_default_kwargs(kwargs, method="quiver", is_transect=False):
     """Set color mapping default kwargs if no vmin and/or vmax is supplied."""
-
     if "cmap" not in kwargs:
         kwargs["cmap"] = "rainbow"
     if "vmin" not in kwargs and "vmax" not in kwargs and "norm" not in kwargs:
@@ -617,17 +622,29 @@ def set_default_kwargs(kwargs, method="quiver", is_transect=False):
         kwargs["norm"] = colors.BoundaryNorm(norm, ncolors=256, extend="max")
     if method == "quiver":
         if "scale" not in kwargs:
-            if is_transect:
-                kwargs["scale"] = 2  # larger quiver arrows
-            else:
-                kwargs["scale"] = 4  # smaller quiver arrows
+            kwargs["scale"] = 1  # larger quiver arrows
         if "units" not in kwargs:
             kwargs["units"] = "xy"
+            kwargs["scale_units"] = "xy"
     return kwargs
+
 
 @_base_plot
 def quiver(_, x, y, u, v, s=None, ax=None, **kwargs):
     """Create quiver plot from velocimetry results on new or existing axes.
+
+    Note that the `width` parameter is always in the scale of the axes and
+    the default value is usually very nice. If you do want to change:
+
+    - with `mode="geographical", the width is in degrees. Therefore
+      likely you want a very small width (e.g. 0.000002 degrees).
+    - with `mode="local", the width is in meters. Therefore, a `width=1.0` would
+      result in a hugely thick arrow. Likely, you'll want it to be 0.02 - 0.05.
+    - with `mode="camera", the width is in pixels. Therefore, a `width=1.0` would
+      result in a thin arrow, dependent on the resolution of the camera.
+
+    The `scale` parameter defaults to 1, with a smaller value, quivers will
+    become longer. With a larger value, they become shorter.
 
     Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
     """

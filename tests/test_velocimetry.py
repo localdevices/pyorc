@@ -3,11 +3,13 @@ import numpy as np
 import pytest
 
 try:
-    import cartopy  # Try to import cartopy
+    # Try to import cartopy
+    import cartopy  # noqa: F401
 
     CARTOPY_AVAILABLE = True
 except ImportError:
     CARTOPY_AVAILABLE = False
+
 
 @pytest.mark.parametrize(("distance", "nr_points"), [(None, 36), (0.1, 50), (0.3, 17)])
 def test_get_transect(piv, cross_section, distance, nr_points):
@@ -38,5 +40,4 @@ def test_plot(piv, mode, method):
             plot = False
     if plot:
         piv.mean(dim="time", keep_attrs=True).velocimetry.plot(method=method, mode=mode, add_colorbar=True)
-        plt.show(block=True)
     plt.close("all")
