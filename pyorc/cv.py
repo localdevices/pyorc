@@ -118,7 +118,7 @@ def _get_aoi_width_length(dst_corners):
     points = [Point(x, y) for x, y, _ in dst_corners]
     linecross = LineString([points[0], points[1]])
     # linecross = LineString(dst_corners[0:2])
-    length = _get_perpendicular_distance(points[-1], linecross)
+    length = np.abs(_get_perpendicular_distance(points[-1], linecross))
     point1 = np.array(dst_corners[0][0:2])
     point2 = np.array(dst_corners[1][0:2])
     diff = np.array(point2 - point1)
@@ -126,14 +126,15 @@ def _get_aoi_width_length(dst_corners):
 
     # compute xy distance from line to other line making up the bounding box
     xy_diff = np.array([np.sin(-angle) * length, np.cos(angle) * length])
-
+    points_pol = np.array([point1 - xy_diff, point1 + xy_diff, point2 + xy_diff, point2 - xy_diff])
     # always make sure the order of the points of upstream-left, downstream-left, downstream-right, upstream-right
-    if length <= 0:
-        # negative length means the selected length is selected upstream of left-right cross section
-        points_pol = np.array([point1 + xy_diff, point1, point2, point2 + xy_diff])
-    else:
-        # postive means it is selected downstream of left-right cross section
-        points_pol = np.array([point1, point1 + xy_diff, point2 + xy_diff, point2])
+    # if length <= 0:
+    #     # negative length means the selected length is selected upstream of left-right cross section
+    #     points_pol = np.array([point1 + xy_diff, point1, point2, point2 + xy_diff])
+    # else:
+    #     # postive means it is selected downstream of left-right cross section
+    #     points_pol = np.array([point1, point1 + xy_diff, point2 + xy_diff, point2])
+
     return Polygon(points_pol)
 
 
