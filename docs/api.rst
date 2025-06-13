@@ -45,9 +45,7 @@ Setting of properties and attributes
     :toctree: _generated
 
     CameraConfig.set_bbox_from_corners
-    CameraConfig.set_gcps
-    CameraConfig.set_lens_pars
-    CameraConfig.set_intrinsic
+    CameraConfig.set_bbox_from_width_length
     CameraConfig.set_lens_calibration
     CameraConfig.set_lens_position
 

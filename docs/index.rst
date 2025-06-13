@@ -56,7 +56,6 @@ We are seeking funding for the following frequently requested functionalities:
 * Exports to simple text formats and GIS-compatible layers
 * Exports to augmented reality videos
 * Implementation of additional processing algorithms (STIV and LSPTV)
-* Implementation of several optical methods for reading water levels
 * Improved nighttime / poor weather conditions processing through learning approaches
 
 Please contact us at info@rainbowsensing.com for further information.
