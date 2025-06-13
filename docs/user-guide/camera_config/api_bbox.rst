@@ -48,3 +48,18 @@ You can see that the rectangular area is chosen such that the chosen corner poin
 and the orientation is chosen such that it follows the middle line between the chosen points as closely as possible.
 
 .. image:: ../../_images/wark_cam_config_persp.jpg
+
+An alternative approach is to use ``set_bbox_from_width_length``. This works much better in case where a strong oblique
+angle is used. You provide three points. The first two define the left-to-right width, and the last the length of the
+bounding box in up- and downstream direction. This method makes it a lot easier to ensure that the chosen bounding box
+is aligned with the flow direction. The approach to calling is the same as the previous, except you only supply 3
+points.
+
+.. code-block::
+
+    points = [
+        [255, 118],
+        [1536, 265],
+        [1381, 1019],
+    ]
+    cam_config.set_bbox_from_width_length(points)

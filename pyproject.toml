@@ -94,6 +94,13 @@ pyorc = "pyorc.cli.main:cli"
 
 [tool.flit.sdist]
 include = ["pyorc"]
+exclude = [
+    "docs",
+    "envs",
+    "examples",
+    "tests",
+    ".github"
+]
 
 [tool.flit.module]
 name = "pyorc"

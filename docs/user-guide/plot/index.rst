@@ -85,7 +85,7 @@ respective web pages where the input parameters may be found (x and y being supp
 supply these). For all methods, you can supply the parameters ``vmin`` and ``vmax``, which indicate the minimum and
 maximum value you wish to show on a color scale. Furthermore, you may add an option ``add_colorbar: True`` to establish
 a colorbar in the lower left corner. This colorbar will be bounded by the values supplied with ``vmin`` and ``vmax``.
-If you do not supply ``vmin`` and ``vmax``, then the lowest and highest velocity value found will be used instead.
+If you do not supply ``vmin`` and ``vmax``, then a standard colorbar with limits of 0 and 3 with pretty breaks is used.
 Note that any parameter added is not mandatory! If you leave the parameters out, then default values will be used
 instead.
 
@@ -97,6 +97,11 @@ instead.
   |scatter|.
 * streamplot: this only works on local mode and shows lines how particles would move over the surface. See
   |streamplot|.
+
+Specific default values for quiver plots include the ``width`` and ``scale`` parameters. These are set such that
+they always look pretty on all plot modes. A width of 1 results in the default width. Smaller (larger) than 1
+in thinner (thicker) quivers. A ``scale`` of 0.5 (2.0) means the quiver length will be twice as large (small)
+as default.
 
 .. tab-set::
 

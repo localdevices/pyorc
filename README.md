@@ -37,7 +37,6 @@ We are seeking funding for the following frequently requested functionalities:
 * Exports to simple text formats and GIS-compatible layers
 * Exports to augmented reality videos
 * Implementation of additional processing algorithms (STIV and LSPTV)
-* Implementation of several optical methods for reading water levels
 * Improved nighttime / poor weather conditions processing through learning approaches
 
 If you wish to fund this or other work on features, please contact us at info@rainbowsensing.com.
@@ -86,7 +85,7 @@ dependencies as follows:
 pip install pyopenrivercam[extra]
 ```
 The `[extra]` section ensures that also geographical plotting is supported, which we recommend especially for the
-set up of a camera configuration.
+set up of a camera configuration with RTK-GPS measured control points.
 
 ### Upgrading from pypi with pip
 

@@ -869,6 +869,7 @@ class CameraConfig:
             f"a list of lists of 4 coordinates must be given, resulting in (4, "
             f"2) shape. Current shape is {corners.shape} "
         )
+        assert self.gcps["z_0"] is not None, "The water level must be set before the bounding box can be established."
 
         # get homography
         corners_xyz = self.unproject_points(corners, np.ones(4) * self.gcps["z_0"])
@@ -885,10 +886,10 @@ class CameraConfig:
         second point : right bank
         third point : selected upstream or downstream of the two points.
 
-        The last point defines how large the bounding box is in up-to-downstream direction. A user should attempt to
+        The last point defines how large the bounding box is in up-and-downstream direction. A user should attempt to
         choose the first two points roughly in the middle of the intended bounding box. The last point is then
         used to estimate the length perpendicular to the line between the first two points. The bounding box is
-        extended in the downstream direction with the same length.
+        extended in both directions with the same length.
 
         Parameters
         ----------
@@ -900,7 +901,7 @@ class CameraConfig:
             f"a list of lists of 3 coordinates must be given, resulting in (3, "
             f"2) shape. Current shape is {np.array(points).shape} "
         )
-
+        assert self.gcps["z_0"] is not None, "The water level must be set before the bounding box can be established."
         # get homography
         points_xyz = self.unproject_points(points, np.ones(3) * self.gcps["z_0"])
         bbox = cv.get_aoi(points_xyz, resolution=self.resolution, method="width_length")

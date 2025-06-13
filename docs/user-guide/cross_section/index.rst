@@ -47,8 +47,9 @@ as the closer side is obscured by the concrete wall. Furthermore, the concrete h
 intensity, compared to the water.
 
 The manner in which our computer vision algorithm determines the water level is as follows:
+
 - the cross section coordinates can be interpreted in both real-world coordinates (i.e. as provided by you, measured
-  in the field, but also as camera coordinates, i.e. through the camera configuration.
+  in the field), but also as camera coordinates, i.e. through the camera configuration.
 - the cross section is made "smart" by enabling all sorts of geometric operations on the cross section. You can for
   instance see in the top-right figure, that the cross section is extended left and right so that you can better see the
   channel shape. Also in the top-left (camera view), you can see that same extension in brown colored polygon

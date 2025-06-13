@@ -245,6 +245,12 @@ class CrossSection:
         return np.arctan2(diff_xy[1], diff_xy[0])
 
     @property
+    def distance_camera(self):
+        """Estimate distance of mean coordinate of cross section to camera position."""
+        coord_mean = np.mean(self.cs_linestring.coords, axis=0)
+        return np.sum((self.camera_config.estimate_lens_position() - coord_mean) ** 2) ** 0.5
+
+    @property
     def idx_closest_point(self):
         """Determine index of point in cross-section, closest to the camera."""
         return self.d.argmin()
@@ -253,6 +259,16 @@ class CrossSection:
     def idx_farthest_point(self):
         """Determine index of point in cross-section, farthest from the camera."""
         return self.d.argmax()
+
+    @property
+    def within_image(self):
+        """Check if any of the points of the cross section fall inside the image objective."""
+        # check if cross section is visible within the image objective
+        pix = self.camera_config.project_points(np.array(list(map(list, self.cs_linestring.coords))), within_image=True)
+        # check which points fall within the image objective
+        within_image = np.all([pix[:, 0] >= 0, pix[:, 0] < 1920, pix[:, 1] >= 0, pix[:, 1] < 1080], axis=0)
+        # check if there are any points within the image objective and return result
+        return bool(np.any(within_image))
 
     def get_cs_waterlevel(self, h: float, sz=False) -> geometry.LineString:
         """Retrieve LineString of water surface at cross-section at a given water level.

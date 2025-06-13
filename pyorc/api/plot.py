@@ -6,8 +6,7 @@ import functools
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
-from matplotlib import patheffects
-from matplotlib.collections import QuadMesh
+from matplotlib import colors, patheffects
 
 from pyorc import helpers
 
@@ -132,7 +131,7 @@ def _base_plot(plot_func):
 
         # check if dataset is a transect or not
         is_transect = True if "points" in ref._obj.dims else False
-
+        kwargs = set_default_kwargs(kwargs, method=plot_func.__name__, mode=mode)
         assert mode in ["local", "geographical", "camera"], 'Mode must be "local", "geographical" or "camera"'
         if mode == "local":
             x = ref._obj["x"].values
@@ -291,35 +290,10 @@ def _frames_plot(ref, ax=None, mode="local", **kwargs):
             ref._obj[y].max().item() + 0.5 * dy,
         ]
 
-    if len(ref._obj.shape) == 3 and ref._obj.shape[-1] == 3:
-        # looking at an rgb image
-        facecolors = ref._obj.values.reshape(ref._obj.shape[0] * ref._obj.shape[1], 3) / 255
-        facecolors = np.hstack([facecolors, np.ones((len(facecolors), 1))])
-        if x != "x":
-            primitive = ax.pcolormesh(
-                ref._obj[x],
-                ref._obj[y],
-                ref._obj.mean(dim="rgb"),
-                shading="nearest",
-                facecolors=facecolors,
-                **kwargs,
-            )
-            # remove array values, override .set_array, needed in case GeoAxes is provided, because GeoAxes asserts if
-            # array has dims
-            QuadMesh.set_array(primitive, None)
-        else:
-            primitive = ax.imshow(
-                facecolors,  # ref._obj.mean(dim="rgb"),
-                origin="lower",
-                extent=extent,
-                aspect="auto",
-            )
-
+    if x != "x":
+        primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj, **kwargs)
     else:
-        if x != "x":
-            primitive = ax.pcolormesh(ref._obj[x], ref._obj[y], ref._obj, **kwargs)
-        else:
-            primitive = ax.imshow(ref._obj, origin="lower", extent=extent, aspect="auto")
+        primitive = ax.imshow(ref._obj, origin="upper", extent=extent, aspect="auto", **kwargs)
     # fix axis limits to min and max of extent of frames
     if mode == "geographical":
         ax.set_extent(
@@ -395,7 +369,8 @@ class _Transect_PlotMethods:
         _u = self._obj[v_eff] * np.sin(self._obj[v_dir])
         _v = self._obj[v_eff] * np.cos(self._obj[v_dir])
         s = np.abs(self._obj[v_eff].values)
-        x_moved, y_moved = x + _u * dt, y + _v * dt
+        # x_moved, y_moved = x + _u * dt, y + _v * dt
+        x_moved, y_moved = x + _u, y + _v
         # transform to real-world
         cols_moved, rows_moved = x_moved / camera_config.resolution, y_moved / camera_config.resolution
         rows_moved = camera_config.shape[0] - rows_moved
@@ -520,9 +495,11 @@ class _Velocimetry_PlotMethods:
         """
         # select lon and lat variables as coordinates
         velocimetry = self._obj.velocimetry
-        u = self._obj["v_x"]
-        v = -self._obj["v_y"]
-        s = (u**2 + v**2) ** 0.5
+        v_x = self._obj["v_x"].values
+        v_y = self._obj["v_y"].values
+        u = v_x / (2 * 1e5)  # 1e5 is aobut the amount of meters per degree
+        v = -v_y / (2 * 1e5)
+        s = (v_x**2 + v_y**2) ** 0.5
         aff = velocimetry.camera_config.transform
         theta = np.arctan2(aff.d, aff.a)
         # rotate velocity vectors along angle theta to match the requested projection. this only changes values
@@ -543,9 +520,14 @@ class _Velocimetry_PlotMethods:
             scalar velocity
 
         """
-        u = self._obj["v_x"].values
-        v = -self._obj["v_y"].values
-        s = (u**2 + v**2) ** 0.5
+        # u and v should be scaled to a nice proportionality for local plots. This is typically about 2x smaller
+        # than the m/s values
+        v_x = self._obj["v_x"].values
+        v_y = self._obj["v_y"].values
+
+        u = v_x / 2
+        v = -v_y / 2
+        s = (v_x**2 + v_y**2) ** 0.5
         return u, v, s
 
     def get_uv_camera(self, dt=0.1):
@@ -576,7 +558,8 @@ class _Velocimetry_PlotMethods:
         yi = np.flipud(yi)
 
         # follow the velocity vector over a short distance (dt*velocity)
-        x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
+        # x_moved, y_moved = xi + self._obj["v_x"] * dt, yi + self._obj["v_y"] * dt
+        x_moved, y_moved = xi + self._obj["v_x"] / 2, yi + self._obj["v_y"] / 2
         # transform to real-world
         cols_moved, rows_moved = x_moved / camera_config.resolution, y_moved / camera_config.resolution
         xs_moved, ys_moved = helpers.get_xs_ys(cols_moved, rows_moved, camera_config.transform)
@@ -602,9 +585,50 @@ class _Velocimetry_PlotMethods:
         return u, v, s
 
 
+def set_default_kwargs(kwargs, method="quiver", mode="local"):
+    """Set color mapping default kwargs if no vmin and/or vmax is supplied."""
+    if mode == "local":
+        # width scale is in cm
+        width_scale = 0.02
+    elif mode == "geographical":
+        # widths are in degrees
+        width_scale = 0.00000025
+    elif mode == "camera":
+        # widths in pixels
+        width_scale = 3.0
+    else:
+        raise ValueError("mode must be one of 'local', 'geographical' or 'camera'")
+    if "cmap" not in kwargs:
+        kwargs["cmap"] = "rainbow"  # the famous rainbow colormap!
+    if "vmin" not in kwargs and "vmax" not in kwargs and "norm" not in kwargs:
+        # set a normalization array
+        norm = [0, 0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+        kwargs["norm"] = colors.BoundaryNorm(norm, ncolors=256, extend="max")
+    if method == "quiver":
+        if "scale" not in kwargs:
+            kwargs["scale"] = 1  # larger quiver arrows
+        if "units" not in kwargs:
+            kwargs["units"] = "xy"
+        # for width, it will matter a lot what mode is used, width should be a dimensionless number
+        if "width" not in kwargs:
+            kwargs["width"] = width_scale
+        else:
+            kwargs["width"] *= width_scale  # multiply
+
+    return kwargs
+
+
 @_base_plot
 def quiver(_, x, y, u, v, s=None, ax=None, **kwargs):
     """Create quiver plot from velocimetry results on new or existing axes.
+
+    Note that the `width` parameter is always in a unitless scale, with `1` providing a nice-looking default value
+    for all plot modes. The default value is usually very nice. If you do want to change:
+
+    The `scale` parameter defaults to 1, providing a nice looking arrow length. With a smaller (larger) value,
+    quivers will become longer (shorter).
+
+    The `width` parameter is in a unitless scale, with `1` providing a nice-looking default value.
 
     Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
     """
