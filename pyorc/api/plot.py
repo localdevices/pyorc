@@ -622,18 +622,13 @@ def set_default_kwargs(kwargs, method="quiver", mode="local"):
 def quiver(_, x, y, u, v, s=None, ax=None, **kwargs):
     """Create quiver plot from velocimetry results on new or existing axes.
 
-    Note that the `width` parameter is always in the scale of the axes and
-    the default value is usually very nice. If you do want to change:
+    Note that the `width` parameter is always in a unitless scale, with `1` providing a nice-looking default value
+    for all plot modes. The default value is usually very nice. If you do want to change:
 
-    - with `mode="geographical", the width is in degrees. Therefore
-      likely you want a very small width (e.g. 0.000002 degrees).
-    - with `mode="local", the width is in meters. Therefore, a `width=1.0` would
-      result in a hugely thick arrow. Likely, you'll want it to be 0.02 - 0.05.
-    - with `mode="camera", the width is in pixels. Therefore, a `width=1.0` would
-      result in a thin arrow, dependent on the resolution of the camera.
+    The `scale` parameter defaults to 1, providing a nice looking arrow length. With a smaller (larger) value,
+    quivers will become longer (shorter).
 
-    The `scale` parameter defaults to 1, with a smaller value, quivers will
-    become longer. With a larger value, they become shorter.
+    The `width` parameter is in a unitless scale, with `1` providing a nice-looking default value.
 
     Wraps :py:func:`matplotlib:matplotlib.pyplot.quiver`.
     """

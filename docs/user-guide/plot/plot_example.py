@@ -38,8 +38,6 @@ ds.mean(dim="time", keep_attrs=True).velocimetry.plot(
     ax=p.axes,  # use the axes already created with the first mappable
     mode="camera",  # show camera perspective
     cmap="rainbow",  # choose a colormap
-    scale=200,  # quiver scale (larger means smaller arrow lengths)
-    width=0.001,  # width of quiver arrows
     alpha=0.3,  # transparency (smaller is more transparent)
     norm=norm,  # color scale
 )
@@ -49,8 +47,6 @@ ds_points_q.isel(quantile=2).transect.plot(
     ax=p.axes,  # refer to the axes already created
     mode="camera",  # show camera perspective
     cmap="rainbow",  # choose a colormap
-    scale=100,  # quiver scale (larger means smaller arrow lengths)
-    width=0.003,  # width of quiver arrows
     norm=norm,  # color scale
     add_colorbar=True  # as final touch, add a colorbar
 )

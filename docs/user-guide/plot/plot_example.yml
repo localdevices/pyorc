@@ -7,15 +7,13 @@ plot:
     velocimetry:
       alpha: 0.4
       cmap: rainbow
-      scale: 400
-      width: 0.0015
       vmax: 0.6
     transect:
       transect_1:
         cmap: rainbow
         add_colorbar: True
-        scale: 100
-        width: 0.003
+        # width: 2  # uncommenting woul make the arrows 2x thicker than default
+        # scale: 0.5  # uncommenting would make the arrows twice as long as default
         vmin: 0
         vmax: 0.6
     mode: camera
@@ -23,4 +21,3 @@ plot:
     write_pars:
       dpi: 100
       bbox_inches: tight
-
