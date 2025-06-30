@@ -45,6 +45,13 @@ def test_normalize(frames, samples, request):
     ), f'dtype of result is {frames_norm[0, 0, 0].values.dtype}, expected "uint8"'
 
 
+def test_range(frames_grayscale):
+    frames_range = frames_grayscale.frames.range()
+    assert len(frames_range.shape) == 2, "shape of result is not 2D"
+    assert frames_range.dtype == frames_grayscale.dtype, f'dtype of result is {frames_range.dtype}, expected "uint8"'
+    assert np.allclose(frames_range.values.flatten()[-4:], [22, 27, 22, 31]), "last 4 values are not as expected"
+
+
 def test_smooth(frames_grayscale):
     frames_smooth = frames_grayscale.frames.smooth()
     assert frames_smooth.shape == frames_grayscale.shape
