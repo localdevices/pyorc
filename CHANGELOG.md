@@ -1,3 +1,22 @@
+## [0.8.7] = 2025-06-30
+### Added
+- CLI option `--cross_wl`
+- A new 3-point bounding box estimation, ideal for selecting a bounding box in strongly oblique cases. First select left
+  bank, then right bank, then a point up- or downstream from the selected line for the size of the bounding box.
+- `rvec` and `tvec` are written to camera configuration after fitting.
+### Changed
+- CLI option `--cross_wl` now replaces `--cross` for optical water level estimation. `--cross` is only used for
+  discharge calculation
+- Plotting in camera objective is accelerated
+- Pose fitting can now be performed with a pre-defined camera matrix and set of distortion coefficients. This is very
+  useful when a user has al;ready pre-calibrated these parameters. It will improve the fit of the `rvec` and `tvec`,
+  i.e. rotation and translation vectors.
+### Deprecated
+### Removed
+### Fixed
+- incorrect estimation of optical water level if `bank="near"` was used. This resulted in only a smaller portion of the
+  cross section being used. Now the full nearby side is used.
+
 ## [0.8.6] = 2025-05-16
 ### Added
 - added options `--k1`, `--k2` and `--focal_length` to command line interface for cases where
@@ -5,6 +24,7 @@
 ### Changed
 - optimization of intrinsics can now also be done with partly already known data. If k1 and k2 are known
   these can be passed as camera
+- Debug messaging increased in `service.velocimetry`.
 ### Deprecated
 ### Removed
 ### Fixed
