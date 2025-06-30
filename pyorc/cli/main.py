@@ -312,9 +312,17 @@ def camera_config(
 @click.option(
     "--cross",
     type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
+    help="Cross section file (*.geojson). This will be used for discharge estimation if the `transect` "
+    " section is provided in your recipe.",
+    callback=cli_utils.parse_cross_section_gdf,
+    required=False,
+)
+@click.option(
+    "--cross_wl",
+    type=click.Path(exists=True, resolve_path=True, dir_okay=False, file_okay=True),
     help="Cross section file (*.geojson). If you provide this, you may add water level retrieval settings to the"
-    " recipe section video: water_level: For more information see"
-    " [PyORC docs](https://localdevices.github.io/pyorc/user-guide/video/index.html)",
+    " recipe in the section `water_level`. For more information see"
+    " [PyORC docs](https://localdevices.github.io/pyorc/user-guide/cross_section/index.html)",
     callback=cli_utils.parse_cross_section_gdf,
     required=False,
 )
@@ -333,7 +341,7 @@ def camera_config(
 )
 @verbose_opt
 @click.pass_context
-def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, cross, update, lowmem, verbose):
+def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, cross, cross_wl, update, lowmem, verbose):
     """CLI subcommand for velocimetry."""
     log_level = max(10, 20 - 10 * verbose)
     logger = log.setuplog("velocimetry", os.path.abspath("pyorc.log"), append=False, log_level=log_level)
@@ -345,6 +353,7 @@ def velocimetry(ctx, output, videofile, recipe, cameraconfig, prefix, h_a, cross
         cameraconfig=cameraconfig,
         h_a=h_a,
         cross=cross,
+        cross_wl=cross_wl,
         prefix=prefix,
         output=output,
         update=update,

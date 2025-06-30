@@ -219,6 +219,7 @@ class VelocityFlowProcessor(object):
         output: str,
         h_a: Optional[float] = None,
         cross: Optional[str] = None,
+        cross_wl: Optional[str] = None,
         update: bool = False,
         concurrency: bool = True,
         fn_piv: str = "piv.nc",
@@ -244,6 +245,9 @@ class VelocityFlowProcessor(object):
             Current water level in meters
         cross : str, optional
             path to cross-section coordinates and crs file in GeoJSON or other readible by geopandas
+            to be used for discharge estimation.
+        cross_wl : str, optional
+            path to cross-section coordinates and crs file in GeoJSON or other readible by geopandas
             to be used for water level detection.
         update : bool, optional
             if set, only update components with changed inputs and configurations
@@ -260,7 +264,7 @@ class VelocityFlowProcessor(object):
 
         """
         logger.debug("Initializing Velocity Flow Processor")
-        cross_section = None
+        cross_section_wl = None
         camera_config = CameraConfig(**cameraconfig)
         if h_a is not None:
             if abs(h_a - cameraconfig["gcps"]["h_ref"]) > const.WATER_LEVEL_MAX_DIFF:
@@ -277,17 +281,26 @@ class VelocityFlowProcessor(object):
             )
         if h_a is not None:
             recipe["video"]["h_a"] = h_a
-        elif cross is not None:
-            logger.info("Cross section provided, and no water level set, water level will be estimated optically.")
+            logger.info(f"Water level provided as argument: h = {h_a} m.")  # cross section wl will NOT be used!
+        elif cross_wl is not None:
+            logger.info(
+                "Cross section for water level detection provided, and no water level set, "
+                " water level will be estimated optically."
+            )
             gdf = gpd.read_file(cross)
-            cross_section = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
+            cross_section_wl = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
             if "water_level" not in recipe:
                 # make sure water_level is represented
                 recipe["water_level"] = {}
+        elif recipe["video"].get("h_a") is not None:
+            logger.info(f"Water level provided in recipe: h = {recipe['video']['h_a']} m.")
         else:
-            logger.warning(
-                "No water level provided on CLI and no cross section provided. Using default water level in recipe."
+            logger.error(
+                "No water level provided on CLI and no cross section provided. If you only process one video, use the "
+                "same value as h_ref in your camera config, by changing your command as follows: "
+                f"pyorc velocimetry ... <repeat as before> --h_a {camera_config.gcps['h_ref']}"
             )
+            raise click.Abort()
         # check what projection method is used, use throughout
         self.proj_method = "cv"
         proj = recipe["frames"].get("project")
@@ -300,7 +313,7 @@ class VelocityFlowProcessor(object):
         self.concurrency = concurrency
         self.prefix = prefix
         # set cross section for water levels
-        self.cross_section_wl = cross_section
+        self.cross_section_wl = cross_section_wl
         # for now also provide a cross section for flow extraction, use the same.
         self.cross_section_fn = cross  # TODO use this property to extract velocity transects.
         self.fn_piv = os.path.join(self.output, prefix + fn_piv)
@@ -421,13 +434,12 @@ class VelocityFlowProcessor(object):
     def water_level(self, **kwargs):
         try:
             self.logger.debug("Estimating water level from video by crossing water line with cross section.")
-            print(kwargs)
             h_a = get_water_level(self.video_obj, cross_section=self.cross_section_wl, **kwargs)
             if h_a is None:
                 self.logger.error("Water level could not be estimated from video. Please set a water level with --h_a.")
                 raise click.Abort()
             # set the found water level on video
-            self.logger.info("Water level estimated to be {:1.3f} meters in local datum.".format(h_a))
+            self.logger.info("Water level estimated optically h = {:1.3f} m. in local datum.".format(h_a))
             self.video_obj.h_a = h_a
         except Exception as e:
             self.logger.error(f"Could not estimate water level from video. Error: {e}")

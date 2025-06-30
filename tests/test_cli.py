@@ -123,6 +123,7 @@ def test_service_video_no_waterlevel(
         prefix=cli_prefix,
         output=cli_output_dir,
         cross=cross_section_2_geojson_fn,
+        cross_wl=cross_section_2_geojson_fn,
     )
 
 
