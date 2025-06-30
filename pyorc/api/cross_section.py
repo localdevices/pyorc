@@ -151,7 +151,7 @@ class CrossSection:
             elif cross_section.crs is not None or camera_config.crs is not None:
                 raise ValueError("if a CRS is used, then both camera_config and cross_section must have a CRS.")
             g = cross_section.geometry
-            x, y, z = g.x, g.y, g.z
+            x, y, z = g.x.values, g.y.values, g.z.values
         else:
             x, y, z = list(map(list, zip(*cross_section)))
 
@@ -253,12 +253,12 @@ class CrossSection:
     @property
     def idx_closest_point(self):
         """Determine index of point in cross-section, closest to the camera."""
-        return self.d.argmin()
+        return 0 if self.d[0] < self.d[-1] else len(self.d) - 1
 
     @property
     def idx_farthest_point(self):
         """Determine index of point in cross-section, farthest from the camera."""
-        return self.d.argmax()
+        return 0 if self.d[0] > self.d[-1] else len(self.d) - 1
 
     @property
     def within_image(self):
@@ -686,18 +686,26 @@ class CrossSection:
         offset: float = 0.0,
         padding: float = 0.5,
         length: float = 2.0,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
         min_samples: int = 50,
     ):
         """Retrieve a histogram score for a given l-value."""
         l = x[0]
-        # print(l)
+        if min_z is not None:
+            if self.interp_z(l) < min_z:
+                # return worst score
+                return 2.0 + np.abs(self.interp_z(l) - min_z)
+        elif max_z is not None:
+            if self.interp_z(l) > max_z:
+                return 2.0 + np.abs(self.interp_z(l) - max_z)
         pol1 = self.get_csl_pol(l=l, offset=offset, padding=(0, padding), length=length, camera=True)[0]
         pol2 = self.get_csl_pol(l=l, offset=offset, padding=(-padding, 0), length=length, camera=True)[0]
         # get intensity values within polygons
         ints1 = cv.get_polygon_pixels(img, pol1)
         ints2 = cv.get_polygon_pixels(img, pol2)
         if ints1.size < min_samples or ints2.size < min_samples:
-            # return a strong penalty score value
+            # return a strong penalty score value if there are too few samples
             return 2.0
         _, _, norm_counts1 = _histogram(ints1, normalize=True, bin_size=bin_size)
         bin_centers, bin_edges, norm_counts2 = _histogram(ints2, normalize=True, bin_size=bin_size)
@@ -1019,6 +1027,8 @@ class CrossSection:
         length: float = 2.0,
         padding: float = 0.5,
         offset: float = 0.0,
+        min_h: Optional[float] = None,
+        max_h: Optional[float] = None,
     ) -> float:
         """Detect water level optically from provided image.
 
@@ -1046,11 +1056,30 @@ class CrossSection:
             left and right of hypothesized water line at -padding and +padding.
         offset : float, optional
             perpendicular offset of the waterline from the cross-section [m], by default 0.0
+        min_h : float, optional
+            minimum water level to try detection [m]. If not provided, the minimum water level is taken from the
+            cross section.
+        max_h : float, optional
+            maximum water level to try detection [m]. If not provided, the maximum water level is taken from the
+            cross section.
 
         """
-        """Attempt to detect the water line level along the cross-section, using a provided pre-treated image."""
+        if min_h is not None:
+            min_z = self.camera_config.h_to_z(min_h)
+            min_z = np.maximum(min_z, self.z.min())
+        else:
+            min_z = None
+        if max_h is not None:
+            max_z = self.camera_config.h_to_z(max_h)
+            max_z = np.minimum(max_z, self.z.max())
+        else:
+            max_z = None
+        if min_z and max_z:
+            if min_z > max_z:
+                raise ValueError("Minimum water level is higher than maximum water level.")
+
         if len(img.shape) == 3:
-            # flatten image first
+            # flatten image first if it his a time dimension
             img = img.mean(axis=2)
         assert (
             img.shape[0] == self.camera_config.height
@@ -1059,12 +1088,13 @@ class CrossSection:
             img.shape[1] == self.camera_config.width
         ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
         # determine the relevant start point if only one is used
+        # import pdb;pdb.set_trace()
         l_min, l_max = self.get_line_of_interest(bank=bank)
         opt = differential_evolution(
             self.get_histogram_score,
             popsize=50,
             bounds=[(l_min, l_max)],
-            args=(img, bin_size, offset, padding, length),
+            args=(img, bin_size, offset, padding, length, min_z, max_z),
             atol=0.01,  # one mm
         )
         z = self.interp_z(opt.x[0])

@@ -174,9 +174,8 @@ How to work with cross sections
               method: "hue"  # we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.
               bank: "near"  # in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose "both" for seeking the optimal on both banks
               frames_options:  # we add preprocessing methods from the frames methods. You can extend this similar to the frames section.
-                minmax:
-                  max: 150  # we maximize intensities to 150
-                ... # other preprocessing after minmax, remove this line if not used.
+                range: {}  # range (with empty arguments) extracts the difference between min and max in time, revealing moving water, opposed to non-moving land. Better non use with hue channel
+                ... # other preprocessing after range, remove this line if not used.
               water_level_options:
                 length: 10  # meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.
                 padding: 1.0  # make the polygons wider than the default 0.5 meters.
@@ -310,15 +309,37 @@ How to work with cross sections
             h = cs.detect_water_level(img)
 
         If you want to manipulate the shape of the polygons over which intensities are sampled, you can alter the
-        ``lenth``, ``padding`` and ``offset`` parameters. For instance, if you have a very straight rectangular concrete
+        ``length``, ``padding`` and ``offset`` parameters. For instance, if you have a very straight rectangular concrete
         aligned channel, and perfectly identified intrinsic and extrinsic parameters, using a longer polygon shape
         can help to improve the water level detection. Assuming you want a 10 meters long polygon and displace it
         slightly upstream by 2 meters for better camera coverage, change the above to:
 
         .. code-block:: python
 
-            vid.get_frames()  # without arguments this retrieves greyscale lazily.
-            # extract one (the first) frame, and convert to a numpy array.
-            img = vid[0].values
+            da = vid.get_frames()  # without arguments this retrieves greyscale lazily.
+            # extract the mean of your frames (reduces noise on changing water pixels a lot)
+            img = da.mean(dim="time").values
             h = cs.detect_water_level(img, length=10.0, offset=-2.0)  # adjust the polygon shape to better match the situation
             # you could also have added `padding=1.0` to make the polygon wider, but we generally don't recommend that.
+
+        It may also be worthwhile to consider changing the frame. In the above example, we merely retrieve the mean.
+        However, to distinguish moving water from non-moving land, it may make sense to consider the fact that moving
+        pixels are changing in intensity constantly, while non-moving banks are not. Extracting the range in time
+        between pixel intensities may then reveal a lot of contrast between land and water. You can then use our frames
+        method ``range``:
+
+        .. code-block:: python
+
+            da = vid.get_frames()  # retrieve a significant number of frames
+            da_range = da.frames.range()  # this extracts the range of pixels and returns a 2-D data-array (without time)
+            img = da_range.values
+            h = cs.detect_water_level(img, length=10.0, offset=-2.0)
+
+        Another approach can be to retrieve color values, if colors are distinctly different between land and water.
+        In this case, the ``hue`` value may be useful to retrieve.
+
+        .. code-block:: python
+
+            da = vid.get_frames(method="hue")  # retrieve frames with hue channel instead of greyscale
+            img = da.mean(dim="time").values  # get the mean again and retrieve the values
+            h = cs.detect_water_level(img, length=10.0, offset=-2.0)
