@@ -350,6 +350,14 @@ def test_detect_wl(cs, img):
     assert isinstance(h, float)
 
 
+def test_detect_wl_min_h(cs, img, min_h=93.3):
+    h = cs.detect_water_level(img, bank="far", length=1.0, min_h=min_h)
+    print(f"Water level near bank: {h}")
+    assert h is not None, "h must have valid value"
+    assert h >= min_h, f"h must be above or equal to min_h {h} < {min_h}"
+    assert isinstance(h, float)
+
+
 def test_detect_wl_near_bank(cs, img):
     h = cs.detect_water_level(img, bank="near", length=2.0)
     print(f"Water level near bank: {h}")

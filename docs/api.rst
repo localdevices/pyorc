@@ -236,6 +236,7 @@ Enhancing frames
     Frames.edge_detect
     Frames.minmax
     Frames.normalize
+    Frames.range
     Frames.reduce_rolling
     Frames.smooth
     Frames.time_diff

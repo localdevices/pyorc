@@ -8,7 +8,10 @@ width=100 align="right">
 
 [![PyPI](https://badge.fury.io/py/pyopenrivercam.svg)](https://pypi.org/project/pyopenrivercam)
 [![Conda-Forge](https://anaconda.org/conda-forge/pyopenrivercam/badges/version.svg)](https://anaconda.org/conda-forge/pyopenrivercam)
-[![codecov](https://codecov.io/gh/localdevices/pyorc/branch/main/graph/badge.svg?token=0740LBNK6J)](https://codecov.io/gh/localdevices/pyorc)
+
+[//]: # ([![codecov]&#40;https://codecov.io/gh/localdevices/pyorc/branch/main/graph/badge.svg?token=0740LBNK6J&#41;]&#40;https://codecov.io/gh/localdevices/pyorc&#41;)
+[//]: # (Remove codecov badge because codecov is not tracking our coverage properly)
+[![python](https://img.shields.io/pypi/pyversions/pyopenrivercam?color=%2376519B)](https://pypi.org/project/pyopenrivercam/)
 [![docs_latest](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://localdevices.github.io/pyorc/latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/localdevices/pyorc.git/main?labpath=examples)
 [![License](https://img.shields.io/github/license/localdevices/pyorc?style=flat)](https://github.com/localdevices/pyorc/blob/main/LICENSE)

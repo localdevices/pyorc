@@ -45,8 +45,13 @@ def get_water_level(
     da_frames = video.get_frames(method=method)[n_start:n_end]
     # preprocess
     da_frames = apply_methods(da_frames, "frames", logger=logger, skip_args=["to_video"], **frames_options)
+    # if preprocessing still results in a time dim, average in time
+    if "time" in da_frames.dims:
+        da_mean = da_frames.mean(dim="time")
+    else:
+        da_mean = da_frames
     # extract the image
-    img = np.uint8(da_frames.mean(dim="time").values)
+    img = np.uint8(da_mean.values)
     h_a = cross_section.detect_water_level(img, **water_level_options)
     return h_a
 
@@ -214,6 +219,7 @@ class VelocityFlowProcessor(object):
         output: str,
         h_a: Optional[float] = None,
         cross: Optional[str] = None,
+        cross_wl: Optional[str] = None,
         update: bool = False,
         concurrency: bool = True,
         fn_piv: str = "piv.nc",
@@ -239,6 +245,9 @@ class VelocityFlowProcessor(object):
             Current water level in meters
         cross : str, optional
             path to cross-section coordinates and crs file in GeoJSON or other readible by geopandas
+            to be used for discharge estimation.
+        cross_wl : str, optional
+            path to cross-section coordinates and crs file in GeoJSON or other readible by geopandas
             to be used for water level detection.
         update : bool, optional
             if set, only update components with changed inputs and configurations
@@ -255,7 +264,7 @@ class VelocityFlowProcessor(object):
 
         """
         logger.debug("Initializing Velocity Flow Processor")
-        cross_section = None
+        cross_section_wl = None
         camera_config = CameraConfig(**cameraconfig)
         if h_a is not None:
             if abs(h_a - cameraconfig["gcps"]["h_ref"]) > const.WATER_LEVEL_MAX_DIFF:
@@ -272,17 +281,26 @@ class VelocityFlowProcessor(object):
             )
         if h_a is not None:
             recipe["video"]["h_a"] = h_a
-        elif cross is not None:
-            logger.info("Cross section provided, and no water level set, water level will be estimated optically.")
+            logger.info(f"Water level provided as argument: h = {h_a} m.")  # cross section wl will NOT be used!
+        elif cross_wl is not None:
+            logger.info(
+                "Cross section for water level detection provided, and no water level set, "
+                " water level will be estimated optically."
+            )
             gdf = gpd.read_file(cross)
-            cross_section = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
+            cross_section_wl = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
             if "water_level" not in recipe:
                 # make sure water_level is represented
                 recipe["water_level"] = {}
+        elif recipe["video"].get("h_a") is not None:
+            logger.info(f"Water level provided in recipe: h = {recipe['video']['h_a']} m.")
         else:
-            logger.warning(
-                "No water level provided on CLI and no cross section provided. Using default water level in recipe."
+            logger.error(
+                "No water level provided on CLI and no cross section provided. If you only process one video, use the "
+                "same value as h_ref in your camera config, by changing your command as follows: "
+                f"pyorc velocimetry ... <repeat as before> --h_a {camera_config.gcps['h_ref']}"
             )
+            raise click.Abort()
         # check what projection method is used, use throughout
         self.proj_method = "cv"
         proj = recipe["frames"].get("project")
@@ -295,7 +313,7 @@ class VelocityFlowProcessor(object):
         self.concurrency = concurrency
         self.prefix = prefix
         # set cross section for water levels
-        self.cross_section_wl = cross_section
+        self.cross_section_wl = cross_section_wl
         # for now also provide a cross section for flow extraction, use the same.
         self.cross_section_fn = cross  # TODO use this property to extract velocity transects.
         self.fn_piv = os.path.join(self.output, prefix + fn_piv)
@@ -421,7 +439,7 @@ class VelocityFlowProcessor(object):
                 self.logger.error("Water level could not be estimated from video. Please set a water level with --h_a.")
                 raise click.Abort()
             # set the found water level on video
-            self.logger.info("Water level estimated to be {:1.3f} meters in local datum.".format(h_a))
+            self.logger.info("Water level estimated optically h = {:1.3f} m. in local datum.".format(h_a))
             self.video_obj.h_a = h_a
         except Exception as e:
             self.logger.error(f"Could not estimate water level from video. Error: {e}")
@@ -430,13 +448,15 @@ class VelocityFlowProcessor(object):
     def frames(self, **kwargs):
         # start with extracting frames
         try:
-            self.logger.debug(f"Retrieving frames from video.")
+            self.logger.debug("Retrieving frames from video.")
             self.da_frames = self.video_obj.get_frames()
             self.logger.debug(f"Retrieved {len(self.da_frames)} from video.")
             if "project" not in kwargs:
                 kwargs["project"] = {}
             # iterate over steps in processing
-            self.da_frames = apply_methods(self.da_frames, "frames", logger=self.logger, skip_args=["to_video"], **kwargs)
+            self.da_frames = apply_methods(
+                self.da_frames, "frames", logger=self.logger, skip_args=["to_video"], **kwargs
+            )
             if "to_video" in kwargs:
                 kwargs_video = kwargs["to_video"]
                 self.logger.info(f"Writing video of processed frames to {kwargs_video['fn']}")
@@ -487,7 +507,7 @@ class VelocityFlowProcessor(object):
     )
     def mask(self, write=False, **kwargs):
         try:
-            self.logger.debug(f"Applying masks to velocimetry.")
+            self.logger.debug("Applying masks to velocimetry.")
             self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
             for mask_name, mask_grp in kwargs.items():
                 self.logger.debug(f'Applying "{mask_name}" with parameters {mask_grp}')
@@ -511,7 +531,7 @@ class VelocityFlowProcessor(object):
     @run_func_hash_io(check=False, configs=["transect"], inputs=["fn_piv_mask"])
     def transect(self, write=False, **kwargs):
         try:
-            self.logger.debug(f"Deriving transects from velocimetry.")
+            self.logger.debug("Deriving transects from velocimetry.")
             self.transects = {}
             # keep integrity of original kwargs
             _kwargs = copy.deepcopy(kwargs)
@@ -552,12 +572,14 @@ class VelocityFlowProcessor(object):
                     if transect_grp["get_q"] is None:
                         transect_grp["get_q"] = {}
                     # add q
-                    self.transects[transect_name] = self.transects[transect_name].transect.get_q(**transect_grp["get_q"])
+                    self.transects[transect_name] = self.transects[transect_name].transect.get_q(
+                        **transect_grp["get_q"]
+                    )
                 if "get_river_flow" in transect_grp:
                     if "get_q" not in transect_grp:
                         raise click.UsageError(
-                            f'"get_river_flow" found in {transect_name} but no "get_q" found, which is a requirement for'
-                            f' "get_river_flow"'
+                            f'"get_river_flow" found in {transect_name} but no '
+                            f'"get_q" found, which is a requirement for "get_river_flow"'
                         )
                     if transect_grp["get_river_flow"] is None:
                         transect_grp["get_river_flow"] = {}
@@ -584,7 +606,7 @@ class VelocityFlowProcessor(object):
     )
     def plot(self, **plot_recipes):
         try:
-            self.logger.debug(f"Plotting velocimetry.")
+            self.logger.debug("Plotting velocimetry.")
             _plot_recipes = copy.deepcopy(plot_recipes)
             for name, plot_params in _plot_recipes.items():
                 self.logger.debug(f'Processing plot "{name}"')

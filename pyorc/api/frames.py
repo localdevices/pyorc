@@ -365,6 +365,23 @@ class Frames(ORCBase):
         """
         return np.maximum(np.minimum(self._obj, max), min)
 
+    def range(self):
+        """Return the range of pixel values through time.
+
+        Returned array does not have a time dimension. This filter is typically used to detect
+        widely changing pixels, e.g. to distinguish moving water from land.
+
+        Returns
+        -------
+        xr.DataArray
+            Single image (with coordinates) with minimum-maximum range in time [x, y]
+
+        """
+        range_da = (self._obj.max(dim="time", keep_attrs=True) - self._obj.min(dim="time", keep_attrs=True)).astype(
+            self._obj.dtype
+        )  # ensure dtype out is same as dtype in
+        return range_da
+
     def reduce_rolling(self, samples=25):
         """Remove a rolling mean from the frames.
 
