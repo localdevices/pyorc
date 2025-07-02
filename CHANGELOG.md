@@ -8,9 +8,14 @@
 - CLI option `--cross_wl` now replaces `--cross` for optical water level estimation. `--cross` is only used for
   discharge calculation
 - Plotting in camera objective is accelerated
+- water level detection with `CrossSection.detect_water_level` can now consume either `min_z` and `max_z` (for levels
+  in the original coordinate system) or `min_h` and `max_h` (for levels using the local `h_ref` datum if provided).
+  These minimum and maximum levels can be used to pre-condition the level range that the algoithm will seek in.
 - Pose fitting can now be performed with a pre-defined camera matrix and set of distortion coefficients. This is very
-  useful when a user has al;ready pre-calibrated these parameters. It will improve the fit of the `rvec` and `tvec`,
+  useful when a user has already pre-calibrated these parameters. It will improve the fit of the `rvec` and `tvec`,
   i.e. rotation and translation vectors.
+- Changed code coverage reporting from Codecov to sonarqube for code coverage reports. Codecov caused issues with
+  numba code.
 ### Deprecated
 ### Removed
 ### Fixed

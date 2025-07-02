@@ -1029,6 +1029,8 @@ class CrossSection:
         offset: float = 0.0,
         min_h: Optional[float] = None,
         max_h: Optional[float] = None,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
     ) -> float:
         """Detect water level optically from provided image.
 
@@ -1062,18 +1064,20 @@ class CrossSection:
         max_h : float, optional
             maximum water level to try detection [m]. If not provided, the maximum water level is taken from the
             cross section.
+        min_z : float, optional
+            same as min_h but using z-coordinates instead of local datum, min_z overrules min_h
+        max_z : float, optional
+            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
 
         """
-        if min_h is not None:
-            min_z = self.camera_config.h_to_z(min_h)
-            min_z = np.maximum(min_z, self.z.min())
-        else:
-            min_z = None
-        if max_h is not None:
-            max_z = self.camera_config.h_to_z(max_h)
-            max_z = np.minimum(max_z, self.z.max())
-        else:
-            max_z = None
+        if min_z is None:
+            if min_h is not None:
+                min_z = self.camera_config.h_to_z(min_h)
+                min_z = np.maximum(min_z, self.z.min())
+        if max_z is None:
+            if max_h is not None:
+                max_z = self.camera_config.h_to_z(max_h)
+                max_z = np.minimum(max_z, self.z.max())
         if min_z and max_z:
             if min_z > max_z:
                 raise ValueError("Minimum water level is higher than maximum water level.")

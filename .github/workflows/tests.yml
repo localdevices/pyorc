@@ -29,7 +29,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v4
         id: pysetup
         with:
@@ -54,8 +55,11 @@ jobs:
       # run all tests
       - name: Test
         run: python -m pytest --verbose --cov=pyorc --cov-report xml
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v5
+#        env:
+#          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
