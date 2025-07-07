@@ -335,7 +335,7 @@ def test_get_wetted_surface(cs):
     h3 = 94.9
     pol1 = cs.get_wetted_surface(h=h1)
     pol2 = cs.get_wetted_surface(h=h2)
-    assert isinstance(pol1, geometry.Polygon)
+    assert isinstance(pol1, geometry.MultiPolygon)
     assert pol1.has_z
     assert pol2.has_z
 
