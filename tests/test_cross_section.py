@@ -344,8 +344,10 @@ def test_get_wetted_surface(cs):
     assert pol1.has_z
     assert pol2.has_z
 
-    with pytest.raises(ValueError, match="Water level is not crossed"):
-        cs.get_wetted_surface(h=h3)
+    # h3 is above cross section, should still resolve one polygon
+    pol3 = cs.get_wetted_surface(h=h3)
+    assert isinstance(pol3, geometry.MultiPolygon)
+    assert len(pol3.geoms) == 1
 
 
 def test_detect_wl(cs, img):
