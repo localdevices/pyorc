@@ -104,14 +104,15 @@ def test_plot_proj(frames_proj, idx):
 
 
 @pytest.mark.parametrize(
-    ("window_size", "engine", "result"),
+    ("window_size", "engine", "ensemble_corr", "result"),
     [
         (10, "openpiv", [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
-        (10, "numba", [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
+        (10, "numba", True, [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
+        (10, "numba", False, [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
     ],
 )
-def test_get_piv(frames_proj, window_size, engine, result):
-    piv = frames_proj.frames.get_piv(window_size=window_size, engine=engine)
+def test_get_piv(frames_proj, window_size, engine, corr_mean, result):
+    piv = frames_proj.frames.get_piv(window_size=window_size, corr_mean=corr_mean, engine=engine)
     print(piv["v_x"].shape)
     piv_mean = piv.mean(dim="time", keep_attrs=True)
     # check if results are stable
