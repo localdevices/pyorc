@@ -1,3 +1,11 @@
+## [0.8.X] = XXXX-XX-XX
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- issues with plotting cross sections in edge cases with water levels equal to lowest point or above highest point
+
 ## [0.8.7] = 2025-06-30
 ### Added
 - CLI option `--cross_wl`
