@@ -270,7 +270,7 @@ class CrossSection:
         # check if there are any points within the image objective and return result
         return bool(np.any(within_image))
 
-    def get_cs_waterlevel(self, h: float, sz=False) -> geometry.LineString:
+    def get_cs_waterlevel(self, h: float, sz=False, extend_by=None) -> geometry.LineString:
         """Retrieve LineString of water surface at cross-section at a given water level.
 
         Parameters
@@ -279,6 +279,8 @@ class CrossSection:
             water level [m]
         sz : bool, optional
             If set, return water level line in y-z projection, by default False.
+        extend_by : float, optional
+            If set, the line will be extended left and right using the defined float in meters
 
         Returns
         -------
@@ -289,8 +291,32 @@ class CrossSection:
         # get water level in camera config vertical datum
         z = self.camera_config.h_to_z(h)
         if sz:
-            return geometry.LineString(zip(self.s, [z] * len(self.s)))
-        return geometry.LineString(zip(self.x, self.y, [z] * len(self.x)))
+            if extend_by is None:
+                s_coords = self.s
+            else:
+                s_coords = np.concatenate([[-np.abs(extend_by)], self.s, [self.s[-1] + np.abs(extend_by)]])
+            return geometry.LineString(zip(s_coords, [z] * len(s_coords)))
+        if extend_by is not None:
+            alpha = np.arctan((self.x[1] - self.x[0]) / (self.y[1] - self.y[0]))
+            x_coords = np.concatenate(
+                [
+                    [self.x[0] - np.cos(alpha) * np.abs(extend_by)],
+                    self.x,
+                    [self.x[-1] + np.cos(alpha) * np.abs(extend_by)],
+                ]
+            )
+            y_coords = np.concatenate(
+                [
+                    [self.y[0] - np.sin(alpha) * np.abs(extend_by)],
+                    self.y,
+                    [self.y[-1] + np.sin(alpha) * np.abs(extend_by)],
+                ]
+            )
+        else:
+            x_coords = self.x
+            y_coords = self.y
+
+        return geometry.LineString(zip(x_coords, y_coords, [z] * len(x_coords)))
 
     def get_csl_point(
         self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False, swap_y_coords: bool = False
@@ -602,12 +628,25 @@ class CrossSection:
             Wetted surface as a polygon, in Y-Z projection.
 
         """
-        wl = self.get_cs_waterlevel(h=h, sz=True)
+        wl = self.get_cs_waterlevel(
+            h=h, sz=True, extend_by=0.1
+        )  # extend a small bit to guarantee crossing with the bottom coordinates
         zl = wl.xy[1][0]
         # create polygon by making a union
-        pol = list(polygonize(wl.union(self.cs_linestring_sz)))
+        bottom_points = self.cs_points_sz
+        # add a point left and right slightly above the level if the level is below the water level
+        if bottom_points[0].y < zl:
+            bottom_points.insert(0, geometry.Point(bottom_points[0].x, zl + 0.1))
+        if bottom_points[-1].y < zl:
+            bottom_points.append(geometry.Point(bottom_points[-1].x, zl + 0.1))
+        bottom_line = geometry.LineString(bottom_points)
+        pol = list(polygonize(wl.union(bottom_line)))
         if len(pol) == 0:
-            raise ValueError("Water level is not crossed by cross section and therefore undefined.")
+            # create infinitely small polygon at lowest z coordinate
+            lowest_z = min(self.z)
+            lowest_s = self.s[list(self.z).index(lowest_z)]
+            # make an infinitely small polygon around the lowest point in the cross section
+            pol = [geometry.Polygon([(lowest_s, lowest_z)] * 3)]
         elif len(pol) > 1:
             # detect which polygons have their average z coordinate below the defined water level
             pol = [p for p in pol if p.centroid.xy[1][0] < zl]

@@ -201,12 +201,17 @@ def test_get_cs_waterlevel(cs):
     line = cs.get_cs_waterlevel(h=93.0)
     assert isinstance(line, geometry.LineString)
     assert line.has_z
+    # also try with extend
+    line_extend = cs.get_cs_waterlevel(h=93.0, extend_by=0.2)
+    assert np.isclose(line_extend.length - line.length, 0.2 * 2)
 
 
 def test_get_cs_waterlevel_sz(cs):
     line = cs.get_cs_waterlevel(h=93.0, sz=True)
     assert isinstance(line, geometry.LineString)
     assert line.has_z == False
+    line_extend = cs.get_cs_waterlevel(h=93.0, sz=True, extend_by=0.2)
+    assert np.isclose(line_extend.length - line.length, 0.2 * 2)
 
 
 def test_get_csl_point(cs):
