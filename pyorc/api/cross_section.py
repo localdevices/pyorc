@@ -146,9 +146,11 @@ class CrossSection:
         """
         # if cross_section is a GeoDataFrame, check if it has a CRS, if yes, convert coordinates to crs of CameraConfig
         if isinstance(cross_section, gpd.GeoDataFrame):
-            if cross_section.crs is not None and camera_config.crs is not None:
+            crs_cs = getattr(cross_section, "crs", None)
+            crs_cam = getattr(camera_config, "crs", None)
+            if crs_cs is not None and crs_cam is not None:
                 cross_section.to_crs(camera_config.crs, inplace=True)
-            elif cross_section.crs is not None or camera_config.crs is not None:
+            elif crs_cs is not None or crs_cam is not None:
                 raise ValueError("if a CRS is used, then both camera_config and cross_section must have a CRS.")
             g = cross_section.geometry
             x, y, z = g.x.values, g.y.values, g.z.values

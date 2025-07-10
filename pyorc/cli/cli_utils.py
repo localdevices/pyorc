@@ -329,20 +329,8 @@ def read_shape_as_gdf(fn=None, geojson=None, gdf=None):
             crs = None
         gdf = gpd.GeoDataFrame().from_features(geojson, crs=crs)
     else:
-        gdf = gpd.read_file(fn)
-        crs = gdf.crs if hasattr(gdf, "crs") else None
-        # also read raw json, and check if crs attribute exists
-        if isinstance(fn, str):
-            with open(fn, "r") as f:
-                raw_json = json.load(f)
-        else:
-            # apparently a file object was provided
-            fn.seek(0)
-            raw_json = json.load(fn)
-        if "crs" not in raw_json:
-            # override the crs
-            crs = None
-            gdf = gdf.set_crs(None, allow_override=True)
+        gdf = helpers.read_shape_safe_crs(fn)
+        crs = gdf.crs
     # check if all geometries are points
     assert all([isinstance(geom, Point) for geom in gdf.geometry]), (
         "shapefile may only contain geometries of type " '"Point"'

@@ -2,8 +2,10 @@
 
 import copy
 import importlib.util
+import json
 
 import cv2
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -580,6 +582,27 @@ def optimize_log_profile(
     # unravel parameters
     z0, k_max, s0, s1 = result.x
     return {"z0": z0, "k_max": k_max, "s0": s0, "s1": s1}
+
+
+def read_shape_safe_crs(fn):
+    """Read a shapefile with geopandas, but ensure that CRS is set to None when not available.
+
+    This function is required in cases where geometries must be read that do not have a specified CRS. Geopandas
+    defaults to WGS84 EPSG 4326 if the CRS is not specified.
+    """
+    gdf = gpd.read_file(fn)
+    # also read raw json, and check if crs attribute exists
+    if isinstance(fn, str):
+        with open(fn, "r") as f:
+            raw_json = json.load(f)
+    else:
+        # apparently a file object was provided
+        fn.seek(0)
+        raw_json = json.load(fn)
+    if "crs" not in raw_json:
+        # override the crs
+        gdf = gdf.set_crs(None, allow_override=True)
+    return gdf
 
 
 def rotate_u_v(u, v, theta, deg=False):
