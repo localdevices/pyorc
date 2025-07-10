@@ -1,3 +1,13 @@
+## [0.8.X] = XXXX-XX-XX
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- issues with plotting cross sections in edge cases with water levels equal to lowest point or above highest point
+- fixed problem with situations where either the cross section data from a shapefile or the camera configuration
+  did not contain CRS information. This is now correctly parsed when creating a `CrossSection` instance.
+
 ## [0.8.7] = 2025-06-30
 ### Added
 - CLI option `--cross_wl`

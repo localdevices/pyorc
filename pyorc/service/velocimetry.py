@@ -9,7 +9,6 @@ import subprocess
 from typing import Dict, Optional
 
 import click
-import geopandas as gpd
 import numpy as np
 import xarray as xr
 import yaml
@@ -19,6 +18,7 @@ from matplotlib.colors import Normalize
 import pyorc
 from pyorc import CameraConfig, CrossSection, Video, const
 from pyorc.cli import cli_utils
+from pyorc.helpers import read_shape_safe_crs
 
 __all__ = ["velocity_flow", "velocity_flow_subprocess"]
 
@@ -287,7 +287,7 @@ class VelocityFlowProcessor(object):
                 "Cross section for water level detection provided, and no water level set, "
                 " water level will be estimated optically."
             )
-            gdf = gpd.read_file(cross)
+            gdf = read_shape_safe_crs(cross_wl)
             cross_section_wl = pyorc.CrossSection(camera_config=camera_config, cross_section=gdf)
             if "water_level" not in recipe:
                 # make sure water_level is represented

@@ -2,10 +2,11 @@
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from shapely import geometry
 
 
-def plot_3d_polygon(polygon, ax=None, **kwargs):
-    """Plot a shapely.geometry.Polygon on matplotlib 3d ax."""
+def _plot_3d_pol(polygon, ax=None, **kwargs):
+    """Plot single polygon on matplotlib 3d ax."""
     x, y, z = zip(*polygon.exterior.coords)
     verts = [list(zip(x, y, z))]
 
@@ -17,13 +18,27 @@ def plot_3d_polygon(polygon, ax=None, **kwargs):
     return p
 
 
+def plot_3d_polygon(polygon, ax=None, **kwargs):
+    """Plot a shapely.geometry.Polygon or MultiPolygon on matplotlib 3d ax."""
+    if isinstance(polygon, geometry.MultiPolygon):
+        for pol in polygon.geoms:
+            p = _plot_3d_pol(pol, ax=ax, **kwargs)
+    else:
+        p = _plot_3d_pol(polygon, ax=ax, **kwargs)
+    return p
+
+
 def plot_polygon(polygon, ax=None, **kwargs):
-    """Plot a shapely.geometry.Polygon on matplotlib ax."""
-    # x, y = zip(*polygon.exterior.coords)
+    """Plot a shapely.geometry.Polygon or MultiPolygon on matplotlib ax."""
     if ax is None:
         ax = plt.axes()
-    patch = plt.Polygon(polygon.exterior.coords, **kwargs)
-    p = ax.add_patch(patch)
+    if isinstance(polygon, geometry.MultiPolygon):
+        for pol in polygon.geoms:
+            patch = plt.Polygon(pol.exterior.coords, **kwargs)
+            p = ax.add_patch(patch)
+    else:
+        patch = plt.Polygon(polygon.exterior.coords, **kwargs)
+        p = ax.add_patch(patch)
     return p
 
 

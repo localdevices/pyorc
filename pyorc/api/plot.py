@@ -184,16 +184,26 @@ def _base_plot(plot_func):
                         planar=False,
                         bottom=False,
                     )
-                    ref._obj.transect.cross_section.plot_water_level(
-                        h=ref._obj.transect.h_a,
-                        length=2.0,
-                        linewidth=3.0,
-                        ax=ax,
-                        camera=True,
-                        swap_y_coords=True,
-                        color="r",
-                        label="water level",
+                    # check if water level is above the lowest level
+                    check_low = (
+                        ref._obj.transect.camera_config.h_to_z(ref._obj.transect.h_a)
+                        > ref._obj.transect.cross_section.z.min()
                     )
+                    check_high = (
+                        ref._obj.transect.camera_config.h_to_z(ref._obj.transect.h_a)
+                        < ref._obj.transect.cross_section.z.max()
+                    )
+                    if check_low and check_high:
+                        ref._obj.transect.cross_section.plot_water_level(
+                            h=ref._obj.transect.h_a,
+                            length=2.0,
+                            linewidth=3.0,
+                            ax=ax,
+                            camera=True,
+                            swap_y_coords=True,
+                            color="r",
+                            label="water level",
+                        )
 
                     # draw some depth lines for better visual interpretation.
                     depth_lines = ref._obj.transect.get_depth_perspective(h=ref._obj.transect.h_a)

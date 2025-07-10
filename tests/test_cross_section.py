@@ -201,12 +201,17 @@ def test_get_cs_waterlevel(cs):
     line = cs.get_cs_waterlevel(h=93.0)
     assert isinstance(line, geometry.LineString)
     assert line.has_z
+    # also try with extend
+    line_extend = cs.get_cs_waterlevel(h=93.0, extend_by=0.2)
+    assert np.isclose(line_extend.length - line.length, 0.2 * 2)
 
 
 def test_get_cs_waterlevel_sz(cs):
     line = cs.get_cs_waterlevel(h=93.0, sz=True)
     assert isinstance(line, geometry.LineString)
     assert line.has_z == False
+    line_extend = cs.get_cs_waterlevel(h=93.0, sz=True, extend_by=0.2)
+    assert np.isclose(line_extend.length - line.length, 0.2 * 2)
 
 
 def test_get_csl_point(cs):
@@ -335,12 +340,14 @@ def test_get_wetted_surface(cs):
     h3 = 94.9
     pol1 = cs.get_wetted_surface(h=h1)
     pol2 = cs.get_wetted_surface(h=h2)
-    assert isinstance(pol1, geometry.Polygon)
+    assert isinstance(pol1, geometry.MultiPolygon)
     assert pol1.has_z
     assert pol2.has_z
 
-    with pytest.raises(ValueError, match="Water level is not crossed"):
-        cs.get_wetted_surface(h=h3)
+    # h3 is above cross section, should still resolve one polygon
+    pol3 = cs.get_wetted_surface(h=h3)
+    assert isinstance(pol3, geometry.MultiPolygon)
+    assert len(pol3.geoms) == 1
 
 
 def test_detect_wl(cs, img):

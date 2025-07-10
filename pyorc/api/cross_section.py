@@ -146,9 +146,11 @@ class CrossSection:
         """
         # if cross_section is a GeoDataFrame, check if it has a CRS, if yes, convert coordinates to crs of CameraConfig
         if isinstance(cross_section, gpd.GeoDataFrame):
-            if cross_section.crs is not None and camera_config.crs is not None:
+            crs_cs = getattr(cross_section, "crs", None)
+            crs_cam = getattr(camera_config, "crs", None)
+            if crs_cs is not None and crs_cam is not None:
                 cross_section.to_crs(camera_config.crs, inplace=True)
-            elif cross_section.crs is not None or camera_config.crs is not None:
+            elif crs_cs is not None or crs_cam is not None:
                 raise ValueError("if a CRS is used, then both camera_config and cross_section must have a CRS.")
             g = cross_section.geometry
             x, y, z = g.x.values, g.y.values, g.z.values
@@ -270,7 +272,7 @@ class CrossSection:
         # check if there are any points within the image objective and return result
         return bool(np.any(within_image))
 
-    def get_cs_waterlevel(self, h: float, sz=False) -> geometry.LineString:
+    def get_cs_waterlevel(self, h: float, sz=False, extend_by=None) -> geometry.LineString:
         """Retrieve LineString of water surface at cross-section at a given water level.
 
         Parameters
@@ -279,18 +281,44 @@ class CrossSection:
             water level [m]
         sz : bool, optional
             If set, return water level line in y-z projection, by default False.
+        extend_by : float, optional
+            If set, the line will be extended left and right using the defined float in meters
 
         Returns
         -------
         geometry.LineString
-            horizontal line at water level (2d if sz=True, 3d if yz=False)
+            horizontal line at water level (2d if `sz`=True, 3d if `yz`=False)
 
         """
         # get water level in camera config vertical datum
         z = self.camera_config.h_to_z(h)
         if sz:
-            return geometry.LineString(zip(self.s, [z] * len(self.s)))
-        return geometry.LineString(zip(self.x, self.y, [z] * len(self.x)))
+            if extend_by is None:
+                s_coords = self.s
+            else:
+                s_coords = np.concatenate([[-np.abs(extend_by)], self.s, [self.s[-1] + np.abs(extend_by)]])
+            return geometry.LineString(zip(s_coords, [z] * len(s_coords)))
+        if extend_by is not None:
+            alpha = np.arctan((self.x[1] - self.x[0]) / (self.y[1] - self.y[0]))
+            x_coords = np.concatenate(
+                [
+                    [self.x[0] - np.cos(alpha) * np.abs(extend_by)],
+                    self.x,
+                    [self.x[-1] + np.cos(alpha) * np.abs(extend_by)],
+                ]
+            )
+            y_coords = np.concatenate(
+                [
+                    [self.y[0] - np.sin(alpha) * np.abs(extend_by)],
+                    self.y,
+                    [self.y[-1] + np.sin(alpha) * np.abs(extend_by)],
+                ]
+            )
+        else:
+            x_coords = self.x
+            y_coords = self.y
+
+        return geometry.LineString(zip(x_coords, y_coords, [z] * len(x_coords)))
 
     def get_csl_point(
         self, h: Optional[float] = None, l: Optional[float] = None, camera: bool = False, swap_y_coords: bool = False
@@ -602,16 +630,32 @@ class CrossSection:
             Wetted surface as a polygon, in Y-Z projection.
 
         """
-        wl = self.get_cs_waterlevel(h=h, sz=True)
+        wl = self.get_cs_waterlevel(
+            h=h, sz=True, extend_by=0.1
+        )  # extend a small bit to guarantee crossing with the bottom coordinates
+        zl = wl.xy[1][0]
         # create polygon by making a union
-        pol = list(polygonize(wl.union(self.cs_linestring_sz)))
+        bottom_points = self.cs_points_sz
+        # add a point left and right slightly above the level if the level is below the water level
+        if bottom_points[0].y < zl:
+            bottom_points.insert(0, geometry.Point(bottom_points[0].x, zl + 0.1))
+        if bottom_points[-1].y < zl:
+            bottom_points.append(geometry.Point(bottom_points[-1].x, zl + 0.1))
+        bottom_line = geometry.LineString(bottom_points)
+        pol = list(polygonize(wl.union(bottom_line)))
         if len(pol) == 0:
-            raise ValueError("Water level is not crossed by cross section and therefore undefined.")
+            # create infinitely small polygon at lowest z coordinate
+            lowest_z = min(self.z)
+            lowest_s = self.s[list(self.z).index(lowest_z)]
+            # make an infinitely small polygon around the lowest point in the cross section
+            pol = [geometry.Polygon([(lowest_s, lowest_z)] * 3)]
         elif len(pol) > 1:
-            raise ValueError("Water level is crossed by multiple polygons.")
-        else:
-            pol = pol[0]
-        return pol
+            # detect which polygons have their average z coordinate below the defined water level
+            pol = [p for p in pol if p.centroid.xy[1][0] < zl]
+            # raise ValueError("Water level is crossed by multiple polygons.")
+        # else:
+        #     pol = pol[0]
+        return geometry.MultiPolygon(pol)
 
     def get_wetted_surface(self, h: float, camera: bool = False, swap_y_coords=False) -> geometry.Polygon:
         """Retrieve a wetted surface for a given water level, as a geometry.Polygon.
@@ -633,13 +677,16 @@ class CrossSection:
 
 
         """
-        pol = self.get_wetted_surface_sz(h=h)
-        coords = [[self.interp_x_from_s(p[0]), self.interp_y_from_s(p[0]), p[1]] for p in pol.exterior.coords]
-        if camera:
-            coords_proj = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords)
-            return geometry.Polygon(coords_proj)
-        else:
-            return geometry.Polygon(coords)
+        pols = self.get_wetted_surface_sz(h=h)
+        pols_proj = []
+        for pol in pols.geoms:
+            coords = [[self.interp_x_from_s(p[0]), self.interp_y_from_s(p[0]), p[1]] for p in pol.exterior.coords]
+            if camera:
+                coords_proj = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords)
+                pols_proj.append(geometry.Polygon(coords_proj))
+            else:
+                pols_proj.append(geometry.Polygon(coords))
+        return geometry.MultiPolygon(pols_proj)
 
     def get_line_of_interest(self, bank: BANK_OPTIONS = "far") -> List[float]:
         """Retrieve the points of interest within the cross-section for water level detection.
@@ -881,12 +928,20 @@ class CrossSection:
         plt.axes
 
         """
-        surf = self.get_planar_surface(h=h, length=length, offset=offset, swap_y_coords=swap_y_coords, camera=camera)
-        if camera:
-            p = plot_helpers.plot_polygon(surf, ax=ax, label="surface", **kwargs)
-        else:
-            p = plot_helpers.plot_3d_polygon(surf, ax=ax, label="surface", **kwargs)
-        return p.axes
+        try:
+            surf = self.get_planar_surface(
+                h=h, length=length, offset=offset, swap_y_coords=swap_y_coords, camera=camera
+            )
+            if camera:
+                p = plot_helpers.plot_polygon(surf, ax=ax, label="surface", **kwargs)
+            else:
+                p = plot_helpers.plot_3d_polygon(surf, ax=ax, label="surface", **kwargs)
+            return p.axes
+        except Exception:
+            warnings.warn(
+                "Cannot plot planar surface as there are too many crossings",
+                stacklevel=2,
+            )
 
     def plot_bottom_surface(
         self, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, swap_y_coords=False, **kwargs
