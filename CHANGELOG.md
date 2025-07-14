@@ -1,4 +1,4 @@
-## [0.8.X] = XXXX-XX-XX
+## [0.8.8] = 2025-07-14
 ### Added
 ### Changed
 ### Deprecated
