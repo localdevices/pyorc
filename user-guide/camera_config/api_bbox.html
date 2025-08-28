@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>&lt;no title&gt; &#8212; pyorc 0.8.0 documentation</title>
+    <title>&lt;no title&gt; &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -133,7 +133,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -451,6 +451,19 @@ to make the area of interest flow direction aware, ensure to provide the points 
 You can see that the rectangular area is chosen such that the chosen corner points at least fit in the bounding box,
 and the orientation is chosen such that it follows the middle line between the chosen points as closely as possible.</p>
 <img alt="../../_images/wark_cam_config_persp.jpg" src="../../_images/wark_cam_config_persp.jpg" />
+<p>An alternative approach is to use <code class="docutils literal notranslate"><span class="pre">set_bbox_from_width_length</span></code>. This works much better in case where a strong oblique
+angle is used. You provide three points. The first two define the left-to-right width, and the last the length of the
+bounding box in up- and downstream direction. This method makes it a lot easier to ensure that the chosen bounding box
+is aligned with the flow direction. The approach to calling is the same as the previous, except you only supply 3
+points.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1536</span><span class="p">,</span> <span class="mi">265</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1381</span><span class="p">,</span> <span class="mi">1019</span><span class="p">],</span>
+<span class="p">]</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">set_bbox_from_width_length</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+</pre></div>
+</div>
 
 
                 </article>

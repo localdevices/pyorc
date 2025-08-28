@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.CameraConfig.set_gcps &#8212; pyorc 0.8.0 documentation</title>
+    <title>pyorc.CameraConfig.set_bbox_from_width_length &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -46,11 +46,11 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CameraConfig.set_gcps';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CameraConfig.set_bbox_from_width_length';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyorc.CameraConfig.set_lens_pars" href="pyorc.CameraConfig.set_lens_pars.html" />
+    <link rel="next" title="pyorc.CameraConfig.set_lens_calibration" href="pyorc.CameraConfig.set_lens_calibration.html" />
     <link rel="prev" title="pyorc.CameraConfig.set_bbox_from_corners" href="pyorc.CameraConfig.set_bbox_from_corners.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -370,9 +370,7 @@ document.write(`
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html">pyorc.CameraConfig.set_bbox_from_corners</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CameraConfig.set_gcps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">pyorc.CameraConfig.set_lens_pars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_intrinsic.html">pyorc.CameraConfig.set_intrinsic</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CameraConfig.set_bbox_from_width_length</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html">pyorc.CameraConfig.set_lens_calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">pyorc.CameraConfig.set_lens_position</a></li>
 </ul>
@@ -466,6 +464,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.minmax.html">pyorc.Frames.minmax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.range.html">pyorc.Frames.range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
@@ -594,28 +593,24 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="pyorc-cameraconfig-set-gcps">
-<h1>pyorc.CameraConfig.set_gcps<a class="headerlink" href="#pyorc-cameraconfig-set-gcps" title="Permalink to this heading">#</a></h1>
+  <section id="pyorc-cameraconfig-set-bbox-from-width-length">
+<h1>pyorc.CameraConfig.set_bbox_from_width_length<a class="headerlink" href="#pyorc-cameraconfig-set-bbox-from-width-length" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
-<dt class="sig sig-object py" id="pyorc.CameraConfig.set_gcps">
-<span class="sig-prename descclassname"><span class="pre">CameraConfig.</span></span><span class="sig-name descname"><span class="pre">set_gcps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/cameraconfig.html#CameraConfig.set_gcps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CameraConfig.set_gcps" title="Permalink to this definition">#</a></dt>
-<dd><p>Set ground control points for the given CameraConfig.</p>
+<dt class="sig sig-object py" id="pyorc.CameraConfig.set_bbox_from_width_length">
+<span class="sig-prename descclassname"><span class="pre">CameraConfig.</span></span><span class="sig-name descname"><span class="pre">set_bbox_from_width_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/cameraconfig.html#CameraConfig.set_bbox_from_width_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CameraConfig.set_bbox_from_width_length" title="Permalink to this definition">#</a></dt>
+<dd><p>Establish bbox based on three provided points.</p>
+<p>The points are provided in the original camera perspective as [col, row] and require that a water level
+has already been set in order to project them in a feasible way.</p>
+<p>first point : left bank (seen in downstream direction)
+second point : right bank
+third point : selected upstream or downstream of the two points.</p>
+<p>The last point defines how large the bounding box is in up-and-downstream direction. A user should attempt to
+choose the first two points roughly in the middle of the intended bounding box. The last point is then
+used to estimate the length perpendicular to the line between the first two points. The bounding box is
+extended in both directions with the same length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>src</strong> (<em>list</em><em> of </em><em>lists</em><em> (</em><em>2</em><em>, </em><em>4</em><em> or </em><em>6+</em><em>)</em>) – [x, y] pairs of columns and rows in the frames of the original video</p></li>
-<li><p><strong>dst</strong> (<em>list</em><em> of </em><em>lists</em><em> (</em><em>2</em><em>, </em><em>4</em><em> or </em><em>6+</em><em>)</em>) – [x, y] or [x, y, z] pairs of real world coordinates in the given coordinate reference system.</p></li>
-<li><p><strong>z_0</strong> (<em>float</em>) – Water level measured in global reference system such as a geoid or ellipsoid used
-by a GPS device. All other surveyed points (lens position and cross section) must have the same vertical
-reference.</p></li>
-<li><p><strong>h_ref</strong> (<em>float</em><em>, </em><em>optional</em>) – Water level, belonging to the 4 control points in <cite>dst</cite>. This is the water level
-as measured by a local reference (e.g. gauge plate) during the surveying of the control points. Control
-points must be taken on the water surface. If a single movie is processed, h_ref can be left out.
-(Default: None)</p></li>
-<li><p><strong>crs</strong> (<em>int</em><em>, </em><em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Coordinate Reference System. Accepts EPSG codes (int or str) proj (str or dict) or wkt (str). CRS used to
-measure the control points (e.g. 4326 for WGS84 lat-lon). Destination control points will automatically be
-reprojected to the local crs of the CameraConfig. (Default: None)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>points</strong> (<em>list</em><em> of </em><em>lists</em><em> (</em><em>3</em><em>)</em>) – [columns, row] coordinates in original camera perspective without any undistortion applied</p>
 </dd>
 </dl>
 </dd></dl>
@@ -642,11 +637,11 @@ reprojected to the local crs of the CameraConfig. (Default: None)</p></li>
       </div>
     </a>
     <a class="right-next"
-       href="pyorc.CameraConfig.set_lens_pars.html"
+       href="pyorc.CameraConfig.set_lens_calibration.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyorc.CameraConfig.set_lens_pars</p>
+        <p class="prev-next-title">pyorc.CameraConfig.set_lens_calibration</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -668,14 +663,14 @@ reprojected to the local crs of the CameraConfig. (Default: None)</p></li>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.CameraConfig.set_gcps"><code class="docutils literal notranslate"><span class="pre">CameraConfig.set_gcps()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.CameraConfig.set_bbox_from_width_length"><code class="docutils literal notranslate"><span class="pre">CameraConfig.set_bbox_from_width_length()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/_generated/pyorc.CameraConfig.set_gcps.rst.txt">
+    <a href="../_sources/_generated/pyorc.CameraConfig.set_bbox_from_width_length.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

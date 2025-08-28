@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Estimating a water level optically using the camera configuration and a cross section &#8212; pyorc 0.8.0 documentation</title>
+    <title>Estimating a water level optically using the camera configuration and a cross section &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -138,7 +138,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -495,7 +495,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Scanning video: 100%|██████████| 2/2 [00:00&lt;00:00, 17.98it/s]
+Scanning video: 100%|██████████| 2/2 [00:00&lt;00:00, 17.72it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -521,7 +521,7 @@ LINESTRING Z (642732.4200000002 8304297.063 1182.3, 642732.5810000001 8304297.03
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4346/3994297915.py:1: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4503/3994297915.py:1: UserWarning: No water level is provided. Camera configuration reference water level is used.
   ax = cross_section.plot()
 </pre></div></div>
 </div>
@@ -562,9 +562,9 @@ LINESTRING Z (642732.4200000002 8304297.063 1182.3, 642732.5810000001 8304297.03
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4346/1485782648.py:9: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4503/1485782648.py:9: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(camera=True, ax=ax1, planar=False, bottom_kwargs={&#34;alpha&#34;: 0.6, &#34;color&#34;: &#34;brown&#34;})
-/tmp/ipykernel_4346/1485782648.py:14: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4503/1485782648.py:14: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(ax=ax2)
 </pre></div></div>
 </div>
@@ -591,7 +591,7 @@ LINESTRING Z (642732.4200000002 8304297.063 1182.3, 642732.5810000001 8304297.03
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The optimized water level is 0.05549822552166006 meters
+The optimized water level is 0.055059201082030995 meters
 </pre></div></div>
 </div>
 <p>You should see something near 0.055 meters. As this is from an optmization algorithm the exact value may vary a little bit. Not bad at all as this is only about 5cm from the known water level! We can now also make a plot, that shows the wetted cross section at this level</p>
@@ -621,9 +621,9 @@ The optimized water level is 0.05549822552166006 meters
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4346/1530537871.py:6: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4503/1530537871.py:6: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(camera=True, ax=ax, planar=False, bottom_kwargs={&#34;alpha&#34;: 0.4, &#34;color&#34;: &#34;brown&#34;})
-/tmp/ipykernel_4346/1530537871.py:12: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4503/1530537871.py:12: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(ax=ax2)
 </pre></div></div>
 </div>
@@ -692,7 +692,7 @@ Retrieving or providing cached version of dataset from doi:10.5281/zenodo.150025
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|█████████████████████████████████████| 1.48M/1.48M [00:00&lt;00:00, 3.22GB/s]
+100%|█████████████████████████████████████| 1.48M/1.48M [00:00&lt;00:00, 2.65GB/s]
 Downloading file &#39;hommerich_20241010_081717_pyorc_data.zip.zip&#39; from &#39;doi:10.5281/zenodo.15002591/hommerich_20241010_081717_pyorc_data.zip.zip&#39; to &#39;/home/runner/.cache/pyorc&#39;.
 </pre></div></div>
 </div>
@@ -710,7 +710,7 @@ Retrieving or providing cached version of dataset from doi:10.5281/zenodo.150025
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|█████████████████████████████████████| 5.09k/5.09k [00:00&lt;00:00, 7.30MB/s]
+100%|█████████████████████████████████████| 5.09k/5.09k [00:00&lt;00:00, 6.21MB/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -727,8 +727,8 @@ Unzipping sample data...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Scanning video: 100%|██████████| 122/122 [00:00&lt;00:00, 246.10it/s]
-/tmp/ipykernel_4346/1198332640.py:24: UserWarning: No water level is provided. Camera configuration reference water level is used.
+Scanning video: 100%|██████████| 122/122 [00:00&lt;00:00, 248.97it/s]
+/tmp/ipykernel_4503/1198332640.py:24: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(ax=ax2)
 </pre></div></div>
 </div>
@@ -756,7 +756,7 @@ Scanning video: 100%|██████████| 122/122 [00:00&lt;00:00, 24
 <span class="n">cross_section</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">cross_section</span><span class="o">.</span><span class="n">plot_water_level</span><span class="p">(</span><span class="n">camera</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -764,7 +764,7 @@ Scanning video: 100%|██████████| 122/122 [00:00&lt;00:00, 24
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The optimized water level is 93.03085536735188 meters
+The optimized water level is 93.03072925766162 meters
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -787,6 +787,14 @@ The optimized water level is 93.03085536735188 meters
 <li><p>if you have a concrete straight bridge pier or concrete channel or embankment. Easy to measure a cross section!</p></li>
 <li><p>arid areas with flash floods in sandy streams. Fast flowing water will have serious contrast against the much lighter sand.</p></li>
 </ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
 </section>
 
 

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>&lt;no title&gt; &#8212; pyorc 0.8.0 documentation</title>
+    <title>&lt;no title&gt; &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -133,7 +133,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -435,6 +435,15 @@ Options:
   --crs_gcps TEXT             Coordinate reference system in which destination
                               GCP points (--dst) are measured
   --resolution FLOAT          Target resolution [m] for ortho-projection.
+  --focal_length FLOAT        Focal length [pix] of lens.
+  --k1 FLOAT                  First lens radial distortion coefficient k1 [-].
+                              See also https://docs.opencv.org/2.4/modules/cal
+                              ib3d/doc/camera_calibration_and_3d_reconstructio
+                              n.html
+  --k2 FLOAT                  Second lens radial distortion coefficient k2
+                              [-]. See also https://docs.opencv.org/2.4/module
+                              s/calib3d/doc/camera_calibration_and_3d_reconstr
+                              uction.html
   --window_size INTEGER       Target window size [px] for interrogation window
                               for Particle Image Velocimetry
   --shapefile FILE            Shapefile or other GDAL compatible vector file

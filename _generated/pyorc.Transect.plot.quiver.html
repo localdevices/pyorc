@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Transect.plot.quiver &#8212; pyorc 0.8.0 documentation</title>
+    <title>pyorc.Transect.plot.quiver &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -370,9 +370,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html">pyorc.CameraConfig.set_bbox_from_corners</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_gcps.html">pyorc.CameraConfig.set_gcps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">pyorc.CameraConfig.set_lens_pars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_intrinsic.html">pyorc.CameraConfig.set_intrinsic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_width_length.html">pyorc.CameraConfig.set_bbox_from_width_length</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html">pyorc.CameraConfig.set_lens_calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">pyorc.CameraConfig.set_lens_position</a></li>
 </ul>
@@ -466,6 +464,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.minmax.html">pyorc.Frames.minmax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.range.html">pyorc.Frames.range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
@@ -600,6 +599,11 @@ document.write(`
 <dt class="sig sig-object py" id="pyorc.Transect.plot.quiver">
 <span class="sig-prename descclassname"><span class="pre">Transect.plot.</span></span><span class="sig-name descname"><span class="pre">quiver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Transect.plot.quiver" title="Permalink to this definition">#</a></dt>
 <dd><p>Create quiver plot from velocimetry results on new or existing axes.</p>
+<p>Note that the <cite>width</cite> parameter is always in a unitless scale, with <cite>1</cite> providing a nice-looking default value
+for all plot modes. The default value is usually very nice. If you do want to change:</p>
+<p>The <cite>scale</cite> parameter defaults to 1, providing a nice looking arrow length. With a smaller (larger) value,
+quivers will become longer (shorter).</p>
+<p>The <cite>width</cite> parameter is in a unitless scale, with <cite>1</cite> providing a nice-looking default value.</p>
 <p>Wraps <code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib:matplotlib.pyplot.quiver()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

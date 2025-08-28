@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>API reference &#8212; pyorc 0.8.0 documentation</title>
+    <title>API reference &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -370,9 +370,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.set_bbox_from_corners.html">pyorc.CameraConfig.set_bbox_from_corners</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.set_gcps.html">pyorc.CameraConfig.set_gcps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_pars.html">pyorc.CameraConfig.set_lens_pars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.set_intrinsic.html">pyorc.CameraConfig.set_intrinsic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.set_bbox_from_width_length.html">pyorc.CameraConfig.set_bbox_from_width_length</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_calibration.html">pyorc.CameraConfig.set_lens_calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_position.html">pyorc.CameraConfig.set_lens_position</a></li>
 </ul>
@@ -466,6 +464,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.minmax.html">pyorc.Frames.minmax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.range.html">pyorc.Frames.range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
@@ -636,14 +635,8 @@ how to effectively work with the <a class="reference external" href="https://doc
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners" title="pyorc.CameraConfig.set_bbox_from_corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_bbox_from_corners</span></code></a>(corners)</p></td>
 <td><p>Establish bbox based on a set of camera perspective corner points.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_gcps.html#pyorc.CameraConfig.set_gcps" title="pyorc.CameraConfig.set_gcps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_gcps</span></code></a>(src, dst, z_0[, ...])</p></td>
-<td><p>Set ground control points for the given CameraConfig.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_pars.html#pyorc.CameraConfig.set_lens_pars" title="pyorc.CameraConfig.set_lens_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_lens_pars</span></code></a>([k1, c, focal_length])</p></td>
-<td><p>Set the lens parameters of the given CameraConfig.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_intrinsic.html#pyorc.CameraConfig.set_intrinsic" title="pyorc.CameraConfig.set_intrinsic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_intrinsic</span></code></a>([camera_matrix, ...])</p></td>
-<td><p>Set lens and distortion parameters.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_bbox_from_width_length.html#pyorc.CameraConfig.set_bbox_from_width_length" title="pyorc.CameraConfig.set_bbox_from_width_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_bbox_from_width_length</span></code></a>(points)</p></td>
+<td><p>Establish bbox based on three provided points.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CameraConfig.set_lens_calibration.html#pyorc.CameraConfig.set_lens_calibration" title="pyorc.CameraConfig.set_lens_calibration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CameraConfig.set_lens_calibration</span></code></a>(fn[, ...])</p></td>
 <td><p>Calibrate and set the properties <cite>camera_matrix</cite> and <cite>dist_coeffs</cite> using a video of a chessboard pattern.</p></td>
@@ -783,7 +776,7 @@ wetted perimeter [m].</p>
 <h3>Getting cross section geometries<a class="headerlink" href="#getting-cross-section-geometries" title="Permalink to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_cs_waterlevel.html#pyorc.CrossSection.get_cs_waterlevel" title="pyorc.CrossSection.get_cs_waterlevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_cs_waterlevel</span></code></a>(h[, sz])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_cs_waterlevel.html#pyorc.CrossSection.get_cs_waterlevel" title="pyorc.CrossSection.get_cs_waterlevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_cs_waterlevel</span></code></a>(h[, sz, ...])</p></td>
 <td><p>Retrieve LineString of water surface at cross-section at a given water level.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_csl_point.html#pyorc.CrossSection.get_csl_point" title="pyorc.CrossSection.get_csl_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_csl_point</span></code></a>([h, l, camera, ...])</p></td>
@@ -972,13 +965,16 @@ for camera configurations <cite>CameraConfig.plot</cite>.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.normalize.html#pyorc.Frames.normalize" title="pyorc.Frames.normalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.normalize</span></code></a>([samples])</p></td>
 <td><p>Remove the temporal mean of sampled frames.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling" title="pyorc.Frames.reduce_rolling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.reduce_rolling</span></code></a>([samples])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.range.html#pyorc.Frames.range" title="pyorc.Frames.range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.range</span></code></a>()</p></td>
+<td><p>Return the range of pixel values through time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling" title="pyorc.Frames.reduce_rolling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.reduce_rolling</span></code></a>([samples])</p></td>
 <td><p>Remove a rolling mean from the frames.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.smooth.html#pyorc.Frames.smooth" title="pyorc.Frames.smooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.smooth</span></code></a>([wdw])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.smooth.html#pyorc.Frames.smooth" title="pyorc.Frames.smooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.smooth</span></code></a>([wdw])</p></td>
 <td><p>Smooth each frame with a Gaussian kernel.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Frames.time_diff.html#pyorc.Frames.time_diff" title="pyorc.Frames.time_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.time_diff</span></code></a>([thres, abs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Frames.time_diff.html#pyorc.Frames.time_diff" title="pyorc.Frames.time_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frames.time_diff</span></code></a>([thres, abs])</p></td>
 <td><p>Apply a difference over time.</p></td>
 </tr>
 </tbody>

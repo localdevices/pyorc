@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Immersive plotting and analyzing results &#8212; pyorc 0.8.0 documentation</title>
+    <title>Immersive plotting and analyzing results &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -138,7 +138,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -503,7 +503,6 @@ this process, the <code class="docutils literal notranslate"><span class="pre">k
     <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span>
 <span class="p">)</span>
 <br/></pre></div>
 </div>
@@ -513,7 +512,7 @@ this process, the <code class="docutils literal notranslate"><span class="pre">k
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 71.75it/s]
+Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 71.82it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -522,7 +521,7 @@ Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 71
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f6800786200&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fc82e172c20&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -570,9 +569,6 @@ variance over time for each location will likely already be lower, because you m
 <span class="n">ds_mean_mask</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
     <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>
-    <span class="n">scale</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span>
     <span class="n">norm</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="n">add_colorbar</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
@@ -596,7 +592,7 @@ variance over time for each location will likely already be lower, because you m
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f680d5bea70&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fc7e68cf760&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -630,8 +626,6 @@ mean) is very different, the value at that location will be excluded.</p>
 <span class="c1"># Now first average in time before applying any filter that only works in space.</span>
 <span class="n">ds_mean_mask2</span> <span class="o">=</span> <span class="n">ds_mask2</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-
-
 <span class="c1"># apply the plot again</span>
 <span class="c1"># again the rgb frame first</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">da_rgb_proj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
@@ -640,9 +634,6 @@ mean) is very different, the value at that location will be excluded.</p>
 <span class="n">ds_mean_mask2</span><span class="o">.</span><span class="n">velocimetry</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
     <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>
-    <span class="n">scale</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span>
     <span class="n">norm</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="n">add_colorbar</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
@@ -666,7 +657,7 @@ mean) is very different, the value at that location will be excluded.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f680d17d000&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fc7f10536d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -689,9 +680,6 @@ mean) is very different, the value at that location will be excluded.</p>
     <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;geographical&quot;</span><span class="p">,</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>
-    <span class="n">scale</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span>
     <span class="n">norm</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="n">add_colorbar</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
@@ -736,9 +724,6 @@ mean) is very different, the value at that location will be excluded.</p>
     <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">,</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>
-    <span class="n">scale</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span>
     <span class="n">norm</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="n">add_colorbar</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
@@ -751,7 +736,7 @@ mean) is very different, the value at that location will be excluded.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7f680c9123b0&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fc825282800&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

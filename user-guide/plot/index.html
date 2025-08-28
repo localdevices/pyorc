@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting &#8212; pyorc 0.8.0 documentation</title>
+    <title>Plotting &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -467,15 +467,13 @@ filename will be constructed by <em>pyorc</em> and has the naming convention <co
 <span class="w">    </span><span class="nt">velocimetry</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
 <span class="w">      </span><span class="nt">cmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rainbow</span>
-<span class="w">      </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">400</span>
-<span class="w">      </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0015</span>
 <span class="w">      </span><span class="nt">vmax</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
 <span class="w">    </span><span class="nt">transect</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">transect_1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">cmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rainbow</span>
 <span class="w">        </span><span class="nt">add_colorbar</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">        </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="w">        </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.003</span>
+<span class="w">        </span><span class="c1"># width: 2  # uncommenting woul make the arrows 2x thicker than default</span>
+<span class="w">        </span><span class="c1"># scale: 0.5  # uncommenting would make the arrows twice as long as default</span>
 <span class="w">        </span><span class="nt">vmin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">        </span><span class="nt">vmax</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
 <span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
@@ -535,8 +533,6 @@ specifics are explained after that.</p>
     <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>  <span class="c1"># use the axes already created with the first mappable</span>
     <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">,</span>  <span class="c1"># show camera perspective</span>
     <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>  <span class="c1"># choose a colormap</span>
-    <span class="n">scale</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>  <span class="c1"># quiver scale (larger means smaller arrow lengths)</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>  <span class="c1"># width of quiver arrows</span>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>  <span class="c1"># transparency (smaller is more transparent)</span>
     <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>  <span class="c1"># color scale</span>
 <span class="p">)</span>
@@ -546,8 +542,6 @@ specifics are explained after that.</p>
     <span class="n">ax</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span>  <span class="c1"># refer to the axes already created</span>
     <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;camera&quot;</span><span class="p">,</span>  <span class="c1"># show camera perspective</span>
     <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span>  <span class="c1"># choose a colormap</span>
-    <span class="n">scale</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># quiver scale (larger means smaller arrow lengths)</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.003</span><span class="p">,</span>  <span class="c1"># width of quiver arrows</span>
     <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>  <span class="c1"># color scale</span>
     <span class="n">add_colorbar</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># as final touch, add a colorbar</span>
 <span class="p">)</span>
@@ -594,7 +588,7 @@ respective web pages where the input parameters may be found (x and y being supp
 supply these). For all methods, you can supply the parameters <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>, which indicate the minimum and
 maximum value you wish to show on a color scale. Furthermore, you may add an option <code class="docutils literal notranslate"><span class="pre">add_colorbar:</span> <span class="pre">True</span></code> to establish
 a colorbar in the lower left corner. This colorbar will be bounded by the values supplied with <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>.
-If you do not supply <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>, then the lowest and highest velocity value found will be used instead.
+If you do not supply <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>, then a standard colorbar with limits of 0 and 3 with pretty breaks is used.
 Note that any parameter added is not mandatory! If you leave the parameters out, then default values will be used
 instead.</p>
 <ul class="simple">
@@ -607,6 +601,10 @@ intuitive. A <strong>larger</strong> value results in <strong>smaller</strong> a
 <li><p>streamplot: this only works on local mode and shows lines how particles would move over the surface. See
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.streamplot.html" target="_blank">this page</a>.</p></li>
 </ul>
+<p>Specific default values for quiver plots include the <code class="docutils literal notranslate"><span class="pre">width</span></code> and <code class="docutils literal notranslate"><span class="pre">scale</span></code> parameters. These are set such that
+they always look pretty on all plot modes. A width of 1 results in the default width. Smaller (larger) than 1
+in thinner (thicker) quivers. A <code class="docutils literal notranslate"><span class="pre">scale</span></code> of 0.5 (2.0) means the quiver length will be twice as large (small)
+as default.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-4">

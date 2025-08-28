@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.frames &#8212; pyorc 0.8.0 documentation</title>
+    <title>pyorc.api.frames &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -608,7 +608,10 @@ document.write(`
         <span class="k">return</span> <span class="n">ds</span></div>
 
 <div class="viewcode-block" id="Frames.project"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.project.html#pyorc.Frames.project">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">project</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="s2">&quot;numpy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reducer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;cv&quot;</span><span class="p">,</span> <span class="s2">&quot;numpy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">reducer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Project frames into a projected frames object, with information from the camera_config attr.</span>
 
@@ -618,14 +621,14 @@ document.write(`
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        method : str, optional</span>
-<span class="sd">            can be `numpy` or `cv`. Currently `cv` is still default but this may change in a future release.</span>
-<span class="sd">            With `cv` (opencv) resampling is performed by first undistorting images, and then by resampling to the</span>
+<span class="sd">            can be `numpy` or `cv` (default `numpy`).</span>
+<span class="sd">            With `numpy` each individual orthoprojected grid cell is mapped to the image pixels space. For oversampled</span>
+<span class="sd">            areas, this is also done vice versa. Undersampled areas result in nearest-neighbour interpolations, whilst</span>
+<span class="sd">            for oversampled, this results in a mean value (if the user uses `mean` as reducer). With `cv` (opencv)</span>
+<span class="sd">            resampling is performed by first undistorting images, and then by resampling to the</span>
 <span class="sd">            desired grid. With heavily distorted images and part of the area of interest outside of the field</span>
-<span class="sd">            of view, the orthoprojection of the corners may end up in the wrong space. With `numpy` each individual</span>
-<span class="sd">            orthoprojected grid cell is mapped to the image pixels space. For oversampled areas, this is also done vice</span>
-<span class="sd">            versa. Undersampled areas result in nearest-neighbour interpolations, whilst for oversampled, this results</span>
-<span class="sd">            in a reduced value (which can be defined by the user).</span>
-<span class="sd">            We recommend switching to `numpy` if you experience strange results with `cv`.</span>
+<span class="sd">            of view, the orthoprojection of the corners may end up in the wrong space.</span>
+<span class="sd">            We recommend using `numpy` and only use cv with simple cases such as nadir-looking videos.</span>
 <span class="sd">        resolution : float, optional</span>
 <span class="sd">            resolution to project to. If not provided, this will be taken from the camera config in the metadata</span>
 <span class="sd">             (Default value = None)</span>
@@ -677,53 +680,12 @@ document.write(`
             <span class="p">{</span><span class="s2">&quot;xs&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="p">,</span> <span class="s2">&quot;ys&quot;</span><span class="p">:</span> <span class="n">ys</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">lons</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">lats</span><span class="p">},</span> <span class="n">coords</span><span class="p">,</span> <span class="n">const</span><span class="o">.</span><span class="n">GEOGRAPHICAL_ATTRS</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;rgb&quot;</span> <span class="ow">in</span> <span class="n">da_proj</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">da_proj</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="c1"># ensure that &quot;rgb&quot; is the last dimension</span>
+            <span class="c1"># ensure that &quot;rgb&quot; is the last dimension and dtype is int</span>
             <span class="n">da_proj</span> <span class="o">=</span> <span class="n">da_proj</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;rgb&quot;</span><span class="p">)</span>
+            <span class="n">da_proj</span> <span class="o">=</span> <span class="n">da_proj</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
         <span class="c1"># in case resolution was changed, overrule the camera_config attribute</span>
         <span class="n">da_proj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="n">cc</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">da_proj</span></div>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">landmask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dilate_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attempt to mask out land from water.</span>
-
-<span class="sd">        This is done by assuming that the time standard deviation over mean of land is much</span>
-<span class="sd">        higher than that of water. An automatic threshold using Otsu thresholding is used to separate and a dilation</span>
-<span class="sd">        operation is used to make the land mask slightly larger than the exact defined pixels.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        dilate_iter : int, optional</span>
-<span class="sd">            number of dilation iterations to use, to dilate land mask (Default value = 10)</span>
-<span class="sd">        samples : int, optional</span>
-<span class="sd">            amount of samples to retrieve from frames for estimating standard deviation and mean. Set to a lower</span>
-<span class="sd">            number to speed up calculation (Default value = 15)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        da : xr.DataArray</span>
-<span class="sd">            filtered frames</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">time_interval</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span> <span class="o">/</span> <span class="n">samples</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">time_interval</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Amount of frames is too small to provide </span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s2"> samples&quot;</span>
-        <span class="c1"># ensure attributes are kept</span>
-        <span class="n">xr</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="c1"># compute standard deviation over mean, assuming this value is low over water, and high over land</span>
-        <span class="n">std_norm</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[::</span><span class="n">time_interval</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[::</span><span class="n">time_interval</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-        <span class="c1"># retrieve a simple 3x3 equal weight kernel</span>
-        <span class="n">kernel</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">getStructuringElement</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">MORPH_RECT</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-        <span class="c1"># dilate the std_norm by some dilation iterations</span>
-        <span class="n">dilate_std_norm</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">std_norm</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">dilate_iter</span><span class="p">)</span>
-        <span class="c1"># rescale result to typical uint8 0-255 range</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span>
-            <span class="n">dilate_std_norm</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">NORM_MINMAX</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">CV_32F</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-        <span class="c1"># threshold with Otsu thresholding</span>
-        <span class="n">ret</span><span class="p">,</span> <span class="n">thres</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_BINARY</span> <span class="o">+</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_OTSU</span><span class="p">)</span>
-        <span class="c1"># mask is where thres is</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">thres</span> <span class="o">!=</span> <span class="mi">255</span>
-        <span class="c1"># make mask 3-dimensional</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">*</span> <span class="n">mask</span>
 
 <div class="viewcode-block" id="Frames.normalize"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.normalize.html#pyorc.Frames.normalize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove the temporal mean of sampled frames.</span>
@@ -809,6 +771,23 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="nb">max</span><span class="p">),</span> <span class="nb">min</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Frames.range"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.range.html#pyorc.Frames.range">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the range of pixel values through time.</span>
+
+<span class="sd">        Returned array does not have a time dimension. This filter is typically used to detect</span>
+<span class="sd">        widely changing pixels, e.g. to distinguish moving water from land.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        xr.DataArray</span>
+<span class="sd">            Single image (with coordinates) with minimum-maximum range in time [x, y]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">range_da</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="p">)</span>  <span class="c1"># ensure dtype out is same as dtype in</span>
+        <span class="k">return</span> <span class="n">range_da</span></div>
 
 <div class="viewcode-block" id="Frames.reduce_rolling"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.reduce_rolling.html#pyorc.Frames.reduce_rolling">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reduce_rolling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a rolling mean from the frames.</span>
@@ -1005,21 +984,6 @@ document.write(`
 
                     <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
                     <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1">#</span>
-        <span class="c1"># pbar = tqdm(self._obj, position=0, leave=True)</span>
-        <span class="c1"># pbar.set_description(&quot;Writing frames&quot;)</span>
-        <span class="c1"># for n, f in enumerate(pbar):</span>
-        <span class="c1">#     if len(f.shape) == 3:</span>
-        <span class="c1">#         img = cv2.cvtColor(np.uint8(f.values), cv2.COLOR_RGB2BGR)</span>
-        <span class="c1">#     else:</span>
-        <span class="c1">#         img = f.values</span>
-        <span class="c1">#         if n == 0:</span>
-        <span class="c1">#             # make a scale between 0 and 255, only with first frame</span>
-        <span class="c1">#             img_min = img.min(axis=0).min(axis=0)</span>
-        <span class="c1">#             img_max = img.max(axis=0).max(axis=0)</span>
-        <span class="c1">#         img = np.uint8(255 * ((img - img_min) / (img_max - img_min)))</span>
-        <span class="c1">#         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)</span>
-        <span class="c1">#     out.write(img)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
 
     <span class="n">plot</span> <span class="o">=</span> <span class="n">_frames_plot</span></div>

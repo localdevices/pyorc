@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Cross Sections and water level detection &#8212; pyorc 0.8.0 documentation</title>
+    <title>Cross Sections and water level detection &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -468,12 +468,10 @@ of a small concrete channel.</p>
 <p>Here, you can clearly distinguish the water line with your eyes: you can only see the water level on the far side
 as the closer side is obscured by the concrete wall. Furthermore, the concrete has a notable different color and
 intensity, compared to the water.</p>
-<p>The manner in which our computer vision algorithm determines the water level is as follows:
-- the cross section coordinates can be interpreted in both real-world coordinates (i.e. as provided by you, measured</p>
-<blockquote>
-<div><p>in the field, but also as camera coordinates, i.e. through the camera configuration.</p>
-</div></blockquote>
+<p>The manner in which our computer vision algorithm determines the water level is as follows:</p>
 <ul class="simple">
+<li><p>the cross section coordinates can be interpreted in both real-world coordinates (i.e. as provided by you, measured
+in the field), but also as camera coordinates, i.e. through the camera configuration.</p></li>
 <li><p>the cross section is made “smart” by enabling all sorts of geometric operations on the cross section. You can for
 instance see in the top-right figure, that the cross section is extended left and right so that you can better see the
 channel shape. Also in the top-left (camera view), you can see that same extension in brown colored polygon</p></li>
@@ -586,9 +584,8 @@ example:</p>
 <span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hue&quot;</span><span class="w">  </span><span class="c1"># we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.</span>
 <span class="w">  </span><span class="nt">bank</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;near&quot;</span><span class="w">  </span><span class="c1"># in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose &quot;both&quot; for seeking the optimal on both banks</span>
 <span class="w">  </span><span class="nt">frames_options</span><span class="p">:</span><span class="w">  </span><span class="c1"># we add preprocessing methods from the frames methods. You can extend this similar to the frames section.</span>
-<span class="w">    </span><span class="nt">minmax</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span><span class="w">  </span><span class="c1"># we maximize intensities to 150</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"> </span><span class="c1"># other preprocessing after minmax, remove this line if not used.</span>
+<span class="w">    </span><span class="nt">range</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w">  </span><span class="c1"># range (with empty arguments) extracts the difference between min and max in time, revealing moving water, opposed to non-moving land. Better non use with hue channel</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"> </span><span class="c1"># other preprocessing after range, remove this line if not used.</span>
 <span class="w">  </span><span class="nt">water_level_options</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.</span>
 <span class="w">    </span><span class="nt">padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">  </span><span class="c1"># make the polygons wider than the default 0.5 meters.</span>
@@ -724,15 +721,33 @@ method as follows, using the earlier defined <code class="docutils literal notra
 </pre></div>
 </div>
 <p>If you want to manipulate the shape of the polygons over which intensities are sampled, you can alter the
-<code class="docutils literal notranslate"><span class="pre">lenth</span></code>, <code class="docutils literal notranslate"><span class="pre">padding</span></code> and <code class="docutils literal notranslate"><span class="pre">offset</span></code> parameters. For instance, if you have a very straight rectangular concrete
+<code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">padding</span></code> and <code class="docutils literal notranslate"><span class="pre">offset</span></code> parameters. For instance, if you have a very straight rectangular concrete
 aligned channel, and perfectly identified intrinsic and extrinsic parameters, using a longer polygon shape
 can help to improve the water level detection. Assuming you want a 10 meters long polygon and displace it
 slightly upstream by 2 meters for better camera coverage, change the above to:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vid</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()</span>  <span class="c1"># without arguments this retrieves greyscale lazily.</span>
-<span class="c1"># extract one (the first) frame, and convert to a numpy array.</span>
-<span class="n">img</span> <span class="o">=</span> <span class="n">vid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">da</span> <span class="o">=</span> <span class="n">vid</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()</span>  <span class="c1"># without arguments this retrieves greyscale lazily.</span>
+<span class="c1"># extract the mean of your frames (reduces noise on changing water pixels a lot)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># adjust the polygon shape to better match the situation</span>
 <span class="c1"># you could also have added `padding=1.0` to make the polygon wider, but we generally don&#39;t recommend that.</span>
+</pre></div>
+</div>
+<p>It may also be worthwhile to consider changing the frame. In the above example, we merely retrieve the mean.
+However, to distinguish moving water from non-moving land, it may make sense to consider the fact that moving
+pixels are changing in intensity constantly, while non-moving banks are not. Extracting the range in time
+between pixel intensities may then reveal a lot of contrast between land and water. You can then use our frames
+method <code class="docutils literal notranslate"><span class="pre">range</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">da</span> <span class="o">=</span> <span class="n">vid</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()</span>  <span class="c1"># retrieve a significant number of frames</span>
+<span class="n">da_range</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">frames</span><span class="o">.</span><span class="n">range</span><span class="p">()</span>  <span class="c1"># this extracts the range of pixels and returns a 2-D data-array (without time)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">da_range</span><span class="o">.</span><span class="n">values</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Another approach can be to retrieve color values, if colors are distinctly different between land and water.
+In this case, the <code class="docutils literal notranslate"><span class="pre">hue</span></code> value may be useful to retrieve.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">da</span> <span class="o">=</span> <span class="n">vid</span><span class="o">.</span><span class="n">get_frames</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;hue&quot;</span><span class="p">)</span>  <span class="c1"># retrieve frames with hue channel instead of greyscale</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># get the mean again and retrieve the values</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

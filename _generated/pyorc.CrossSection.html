@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.CrossSection &#8212; pyorc 0.8.0 documentation</title>
+    <title>pyorc.CrossSection &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -370,9 +370,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html">pyorc.CameraConfig.set_bbox_from_corners</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_gcps.html">pyorc.CameraConfig.set_gcps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_pars.html">pyorc.CameraConfig.set_lens_pars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_intrinsic.html">pyorc.CameraConfig.set_intrinsic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_width_length.html">pyorc.CameraConfig.set_bbox_from_width_length</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html">pyorc.CameraConfig.set_lens_calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html">pyorc.CameraConfig.set_lens_position</a></li>
 </ul>
@@ -466,6 +464,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.minmax.html">pyorc.Frames.minmax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.normalize.html">pyorc.Frames.normalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.range.html">pyorc.Frames.range</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.reduce_rolling.html">pyorc.Frames.reduce_rolling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
@@ -807,7 +806,7 @@ to handle projection and compatibility with cross-section data.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CrossSection.get_bottom_surface.html#pyorc.CrossSection.get_bottom_surface" title="pyorc.CrossSection.get_bottom_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bottom_surface</span></code></a>([length, offset, camera, ...])</p></td>
 <td><p>Retrieve a bottom surface polygon for the entire cross section, expanded over a length.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CrossSection.get_cs_waterlevel.html#pyorc.CrossSection.get_cs_waterlevel" title="pyorc.CrossSection.get_cs_waterlevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cs_waterlevel</span></code></a>(h[, sz])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CrossSection.get_cs_waterlevel.html#pyorc.CrossSection.get_cs_waterlevel" title="pyorc.CrossSection.get_cs_waterlevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cs_waterlevel</span></code></a>(h[, sz, extend_by])</p></td>
 <td><p>Retrieve LineString of water surface at cross-section at a given water level.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CrossSection.get_csl_line.html#pyorc.CrossSection.get_csl_line" title="pyorc.CrossSection.get_csl_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_csl_line</span></code></a>([h, l, length, offset, camera, ...])</p></td>
@@ -873,35 +872,41 @@ to handle projection and compatibility with cross-section data.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CrossSection.cs_points_sz.html#pyorc.CrossSection.cs_points_sz" title="pyorc.CrossSection.cs_points_sz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cs_points_sz</span></code></a></p></td>
 <td><p>Return cross-section perpendicular to flow direction (SZ) as list of shapely.geometry.Point.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CrossSection.idx_closest_point.html#pyorc.CrossSection.idx_closest_point" title="pyorc.CrossSection.idx_closest_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx_closest_point</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">distance_camera</span></code></p></td>
+<td><p>Estimate distance of mean coordinate of cross section to camera position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CrossSection.idx_closest_point.html#pyorc.CrossSection.idx_closest_point" title="pyorc.CrossSection.idx_closest_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx_closest_point</span></code></a></p></td>
 <td><p>Determine index of point in cross-section, closest to the camera.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CrossSection.idx_farthest_point.html#pyorc.CrossSection.idx_farthest_point" title="pyorc.CrossSection.idx_farthest_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx_farthest_point</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CrossSection.idx_farthest_point.html#pyorc.CrossSection.idx_farthest_point" title="pyorc.CrossSection.idx_farthest_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx_farthest_point</span></code></a></p></td>
 <td><p>Determine index of point in cross-section, farthest from the camera.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_d</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_d</span></code></p></td>
 <td><p>Linear interpolation function for distances (d) to lens, using l as input.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_s_from_l</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_s_from_l</span></code></p></td>
 <td><p>Linear interpolation function for s-coordinates, from left to right bank, using l as input.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_x</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_x</span></code></p></td>
 <td><p>Linear interpolation function for x-coordinates, using l as input.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_x_from_s</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_x_from_s</span></code></p></td>
 <td><p>Linear interpolation function for x-coordinates, using s as input.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_y</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_y</span></code></p></td>
 <td><p>Linear interpolation function for y-coordinates, using l as input.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_y_from_s</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_y_from_s</span></code></p></td>
 <td><p>Linear interpolation function for y-coordinates, using s as input..</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_z</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_z</span></code></p></td>
 <td><p>Linear interpolation function for z-coordinates, using l as input.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_z_from_s</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_z_from_s</span></code></p></td>
 <td><p>Linear interpolation function for z-coordinates, using s as input..</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">within_image</span></code></p></td>
+<td><p>Check if any of the points of the cross section fall inside the image objective.</p></td>
 </tr>
 </tbody>
 </table>

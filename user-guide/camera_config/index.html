@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Camera configurations &#8212; pyorc 0.8.0 documentation</title>
+    <title>Camera configurations &#8212; pyorc 0.8.8 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.0</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
   
 </a></div>
     
@@ -473,6 +473,15 @@ Options:
   --crs_gcps TEXT             Coordinate reference system in which destination
                               GCP points (--dst) are measured
   --resolution FLOAT          Target resolution [m] for ortho-projection.
+  --focal_length FLOAT        Focal length [pix] of lens.
+  --k1 FLOAT                  First lens radial distortion coefficient k1 [-].
+                              See also https://docs.opencv.org/2.4/modules/cal
+                              ib3d/doc/camera_calibration_and_3d_reconstructio
+                              n.html
+  --k2 FLOAT                  Second lens radial distortion coefficient k2
+                              [-]. See also https://docs.opencv.org/2.4/module
+                              s/calib3d/doc/camera_calibration_and_3d_reconstr
+                              uction.html
   --window_size INTEGER       Target window size [px] for interrogation window
                               for Particle Image Velocimetry
   --shapefile FILE            Shapefile or other GDAL compatible vector file
@@ -719,7 +728,7 @@ In case you provide 6 or more ground control points with varying vertical levels
 optimize the radial distortion. Therefore we strongly recommend that you measure 6 or more control points in case
 you use a lens with significant radial distortion.</p>
 </div>
-<p>You can also provide a camera intrinsic matrix and distortion coefficients in the API if you have these, or optimize
+<p>You can also provide a camera intrinsic matrix and distortion coefficients in the CLI or API if you have these, or optimize
 the intrinsic matrix and distortion coefficients using a checkerboard pattern. More on this is described below.</p>
 <section id="preparing-a-video-for-camera-calibration">
 <h3>Preparing a video for camera calibration<a class="headerlink" href="#preparing-a-video-for-camera-calibration" title="Permalink to this heading">#</a></h3>
@@ -765,7 +774,12 @@ Command-line</label><div class="sd-tab-content docutils">
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>At the moment, manual lens calibration is only available at API level. If you require a command-line option
-for lens calibration, then please contact us at <a class="reference external" href="mailto:info&#37;&#52;&#48;rainbowsensing&#46;com">info<span>&#64;</span>rainbowsensing<span>&#46;</span>com</a>.</p>
+for lens calibration, then please contact us at <a class="reference external" href="mailto:info&#37;&#52;&#48;rainbowsensing&#46;com">info<span>&#64;</span>rainbowsensing<span>&#46;</span>com</a>. If you have the focal length, and
+k1 and k2 radial distortion parameters available, then you can enter these in the command line interface
+using the <cite>–focal_length</cite>, <cite>–k1</cite>, <cite>–k2</cite> parameters. The units of the focal length should be in pixels.
+For focal length, and distortion parameters, we use the OpenCV methods, so please ensure you use
+the same as input here. For more information please read:
+<a class="reference external" href="https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html">the OpenCV instructions</a></p>
 </div>
 </div>
 <input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
@@ -1159,6 +1173,19 @@ to make the area of interest flow direction aware, ensure to provide the points 
 You can see that the rectangular area is chosen such that the chosen corner points at least fit in the bounding box,
 and the orientation is chosen such that it follows the middle line between the chosen points as closely as possible.</p>
 <img alt="../../_images/wark_cam_config_persp.jpg" src="../../_images/wark_cam_config_persp.jpg" />
+<p>An alternative approach is to use <code class="docutils literal notranslate"><span class="pre">set_bbox_from_width_length</span></code>. This works much better in case where a strong oblique
+angle is used. You provide three points. The first two define the left-to-right width, and the last the length of the
+bounding box in up- and downstream direction. This method makes it a lot easier to ensure that the chosen bounding box
+is aligned with the flow direction. The approach to calling is the same as the previous, except you only supply 3
+points.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1536</span><span class="p">,</span> <span class="mi">265</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1381</span><span class="p">,</span> <span class="mi">1019</span><span class="p">],</span>
+<span class="p">]</span>
+<span class="n">cam_config</span><span class="o">.</span><span class="n">set_bbox_from_width_length</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </div>
 </section>
