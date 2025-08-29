@@ -1,3 +1,11 @@
+## [0.8.9] = 2025-08-29
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- issue with water level plot on a perfect flat plane. Solved by not plotting water level in this case.
+
 ## [0.8.8] = 2025-07-14
 ### Added
 ### Changed
