@@ -6,6 +6,8 @@ import functools
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+import warnings
+
 from matplotlib import colors, patheffects
 
 from pyorc import helpers
@@ -194,16 +196,22 @@ def _base_plot(plot_func):
                         < ref._obj.transect.cross_section.z.max()
                     )
                     if check_low and check_high:
-                        ref._obj.transect.cross_section.plot_water_level(
-                            h=ref._obj.transect.h_a,
-                            length=2.0,
-                            linewidth=3.0,
-                            ax=ax,
-                            camera=True,
-                            swap_y_coords=True,
-                            color="r",
-                            label="water level",
-                        )
+                        try:
+                            ref._obj.transect.cross_section.plot_water_level(
+                                h=ref._obj.transect.h_a,
+                                length=2.0,
+                                linewidth=3.0,
+                                ax=ax,
+                                camera=True,
+                                swap_y_coords=True,
+                                color="r",
+                                label="water level",
+                            )
+                        except:
+                            warnings.warn(
+                                "Not able to find a unique location for plotting of water level",
+                                stacklevel=2
+                            )
 
                     # draw some depth lines for better visual interpretation.
                     depth_lines = ref._obj.transect.get_depth_perspective(h=ref._obj.transect.h_a)
