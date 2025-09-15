@@ -106,14 +106,18 @@ def test_plot_proj(frames_proj, idx):
 @pytest.mark.parametrize(
     ("window_size", "engine", "ensemble_corr", "result"),
     [
-        (10, "openpiv", [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
-        (10, "numba", True, [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
-        (10, "numba", False, [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
+        (10, "openpiv", False, [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
+        (10, "numba", True, [0.10917795, 0.10898168, 0.11020568, np.nan]),  # filtering occurs within piv process
+        (
+            10,
+            "numba",
+            False,
+            [0.10837663, 0.11250661, 0.11100861, 0.1231317],
+        ),  # ffpiv gives different result from openpiv because of removal of clip function
     ],
 )
-def test_get_piv(frames_proj, window_size, engine, corr_mean, result):
-    piv = frames_proj.frames.get_piv(window_size=window_size, corr_mean=corr_mean, engine=engine)
-    print(piv["v_x"].shape)
+def test_get_piv(frames_proj, window_size, engine, ensemble_corr, result):
+    piv = frames_proj.frames.get_piv(window_size=window_size, ensemble_corr=ensemble_corr, engine=engine)
     piv_mean = piv.mean(dim="time", keep_attrs=True)
     # check if results are stable
     assert np.allclose(piv_mean["v_x"].values.flatten()[-4:], result, equal_nan=True)
@@ -126,7 +130,7 @@ def test_get_piv(frames_proj, window_size, engine, corr_mean, result):
     ],
 )
 def test_compare_piv(frames_proj, window_size):
-    piv = frames_proj.frames.get_piv(window_size=window_size, engine="openpiv")
+    piv = frames_proj.frames.get_piv(window_size=window_size, engine="numpy")
     piv.load()
     u1, v1 = piv["v_x"].mean(dim="time").values, piv["v_y"].mean(dim="time").values
     piv2 = frames_proj.frames.get_piv(window_size=window_size, engine="numba")

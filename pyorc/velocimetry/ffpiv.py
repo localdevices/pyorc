@@ -1,8 +1,8 @@
 """PIV processing wrappers for FF-PIV."""
 
 import gc
-from typing import Literal, Optional, Tuple
 import warnings
+from typing import Literal, Optional, Tuple
 
 import numpy as np
 import xarray as xr
@@ -36,7 +36,7 @@ def get_ffpiv(
     engine: Literal["numba", "numpy", "openpiv"] = "numba",
     ensemble_corr: bool = False,
     corr_min: float = 0.2,
-    s2n_min: float = 10,
+    s2n_min: float = 3,
     count_min: float = 0.5,
 ):
     """Compute time-resolved Particle Image Velocimetry (PIV) using Fast Fourier Transform (FFT) within FF-PIV.
@@ -83,12 +83,12 @@ def get_ffpiv(
         In cases with background not removed, you may increase this value to reduce noise but preferred is to
         perform preprocessing in order to reduce background noise.
     s2n_min : float, optional
-        Minimum signal-to-noise ratio to accept for velocity detection. Default is 10.
+        Minimum signal-to-noise ratio to accept for velocity detection. Default is 3.
         A value of 1.0 means there is no signal at all, so velocities are entirely
         random. If you get very little velocities back, you may try to reduce this.
     count_min : float, optional
-        Minimum amount of frame pairs that result in accepted correlation values after filtering on `corr_min` and `s2n_min`.
-        Default 0.5. If less frame pairs are available, the velocity is filtered out.
+        Minimum amount of frame pairs that result in accepted correlation values after filtering on `corr_min` and
+        `s2n_min`. Default 0.5. If less frame pairs are available, the velocity is filtered out.
 
     Returns
     -------
@@ -136,101 +136,221 @@ def get_ffpiv(
     frames_chunks = [frames_chunk for frames_chunk in frames_chunks if len(frames_chunk) >= 2]
     n_rows, n_cols = len(y), len(x)
     if ensemble_corr:
-        ds = _get_ffpiv_mean(frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine, corr_min, s2n_min, count_min)
+        ds = _get_ffpiv_mean(
+            frames_chunks,
+            y,
+            x,
+            dt,
+            res_y,
+            res_x,
+            n_cols,
+            n_rows,
+            window_size,
+            overlap,
+            search_area_size,
+            engine,
+            corr_min,
+            s2n_min,
+            count_min,
+        )
     else:
-        ds = _get_ffpiv_timestep(frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap,
-                                     search_area_size, engine)
+        ds = _get_ffpiv_timestep(
+            frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine
+        )
     return ds
 
+
 def _get_ffpiv_mean(
-    frames_chunks,y, x, dt,  res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine, corr_min, s2n_min, count_min):
+    frames_chunks,
+    y,
+    x,
+    dt,
+    res_y,
+    res_x,
+    n_cols,
+    n_rows,
+    window_size,
+    overlap,
+    search_area_size,
+    engine,
+    corr_min,
+    s2n_min,
+    count_min,
+):
+    def process_frame_chunk(frame_chunk, corr_min, s2n_min):
+        """Process a single frame chunk to compute correlation and signal-to-noise.
+
+        Parameters
+        ----------
+        frame_chunk : xr.DataArray
+            subset of all frames, manageable in memory size.
+        corr_min : float, optional
+            Minimum correlation value to accept for velocity detection.
+        s2n_min : float, optional
+            Minimum signal-to-noise ratio to accept for velocity detection.
+
+        Returns
+        -------
+        corr : np.ndarray
+            correlation windows, filtered for minimum correlation and signal-to-noise.
+        corr_max : np.ndarray
+            maximum correlation per interrogation window
+        s2n : np.ndarray
+            signal-to-noise ratio per interrogation window, computed as max(corr) / mean(corr) per window
+
+        """
+        x_, y_, corr = cross_corr(
+            frame_chunk.values,
+            window_size=window_size,
+            overlap=overlap,
+            search_area_size=search_area_size,
+            normalize=False,
+            engine=engine,
+            verbose=False,
+        )
+        # Suppress RuntimeWarnings and calculate required metrics
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            corr_max = np.nanmax(corr, axis=(-1, -2))
+            s2n = corr_max / np.nanmean(corr, axis=(-1, -2))
+
+        # Apply thresholds
+        masks = (corr_max >= corr_min) & (s2n >= s2n_min)
+        corr[~masks] = corr_max[~masks] = s2n[~masks] = np.nan
+        return corr, corr_max, s2n
+
+    def aggregate_results(corr_chunks, s2n_chunks, corr_count, corr_sum, n_frames):
+        """Aggregate correlation and signal-to-noise data from multiple chunks into average statistics.
+
+        This function processes correlation and signal-to-noise data chunks to calculate
+        mean correlation, mean maximum correlation, and mean signal-to-noise values after
+        handling missing data and refining input arrays. Final results are reshaped
+        into their respective dimensions for further analysis.
+
+        Parameters
+        ----------
+        corr_chunks: list of numpy.ndarray
+            List of correlation data chunks to be concatenated and processed.
+        s2n_chunks: list of numpy.ndarray
+            List of signal-to-noise ratio chunks to be concatenated and processed.
+        corr_count: numpy.ndarray
+            Array representing the count of non-missing correlation values across frames, this is used for averaging.
+        corr_sum: numpy.ndarray
+            Array representing the sum of correlation values across frames (ex NaN values), this is used for averaging.
+        n_frames: int
+            Total number of frames to normalize and process the data.
+
+        Returns
+        -------
+        tuple of (numpy.ndarray, numpy.ndarray, numpy.ndarray)
+            - corr_mean: Mean correlation values across chunks and frames.
+            - corr_max_mean: Mean maximum correlation values reshaped to fit data dimensions.
+            - s2n_mean: Mean signal-to-noise ratio values reshaped to fit data dimensions.
+
+        """
+        s2n_concat = np.concatenate(s2n_chunks, axis=0)
+        corr_max_concat = np.concatenate(corr_chunks, axis=0)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            corr_sum[corr_count < count_min * n_frames] = np.nan
+            corr_mean = corr_sum / corr_count
+            corr_max_mean = np.nanmean(corr_max_concat, axis=0).reshape(-1, n_rows, n_cols)
+            s2n_mean = np.nanmean(s2n_concat, axis=0).reshape(-1, n_rows, n_cols)
+
+        return corr_mean, corr_max_mean, s2n_mean
+
+    def finalize_ds(corr_mean, corr_max, s2n, res_x, res_y, dt_av, y, x):
+        """Finalize the dataset by computing displacements, normalizing values, and assembling an `xr.Dataset`.
+
+        Computes displacements from correlation data using pre-defined parameters, normalizes
+        these displacements with the given spatial and temporal resolutions, and returns the results as an
+        `xr.Dataset`. The resulting Dataset contains signal-to-noise ratio data, maximum correlation values,
+        and displacement vectors.
+
+        Parameters
+        ----------
+        corr_mean: numpy.ndarray
+            Array containing mean correlation values.
+        corr_max: numpy.ndarray
+            Array containing maximum correlation values.
+        s2n: numpy.ndarray
+            Signal-to-noise ratio data array.
+        res_x: float
+            Spatial resolution in the x-direction used to convert pix/s into m/s.
+        res_y: float
+            Spatial resolution in the y-direction used to convert pix/s into m/s.
+        dt_av: float
+            Temporal resolution used to convert pix/s into m/s.
+        y: numpy.ndarray
+            Array of spatial coordinates in the y-dimension.
+        x: numpy.ndarray
+            Array of spatial coordinates in the x-dimension.
+
+        Returns
+        -------
+        xarray.Dataset
+            Contains signal-to-noise ratio data, correlation values, and displacement
+            components in the x and y directions in m/s.
+
+        """
+        u, v = u_v_displacement(corr_mean, n_rows, n_cols, engine=engine)
+        u = (u * res_x / dt_av).astype(np.float32)
+        v = (v * res_y / dt_av).astype(np.float32)
+
+        # Build xarray Dataset
+        ds = xr.Dataset(
+            {
+                "s2n": (["time", "y", "x"], s2n),
+                "corr": (["time", "y", "x"], corr_max),
+                "v_x": (["time", "y", "x"], u),
+                "v_y": (["time", "y", "x"], v),
+            },
+            coords={"time": time[0:1], "y": y, "x": x},
+        )
+        return ds
+
     # make progress bar
     pbar = tqdm(range(len(frames_chunks)), position=0, leave=True)
     pbar.set_description("Computing PIV per chunk")
-    corr_chunks = []
-    s2n_chunks = []
-    corr_sum = 0.  # initialize the sum of the correlation windows by a zero
-    corr_count = 0  # initialize as integer. Used to divide over at the end of calculations
-    corr_max_chunks = []
+    # predefine empty lists for processed chunks
+    corr_chunks, s2n_chunks = [], []
+    corr_sum, corr_count = 0.0, 0.0  # initialize the sum of the correlation windows by a zero
+
+    # loop through frame chunks
     for n in pbar:
         da = frames_chunks[n]
         # get time slice
         da = load_frame_chunk(da)
         time = da.time[1:]
-        dt_av = dt.values.mean()
         # dt_chunk = dt.sel(time=time)
         # we need at least one image-pair to do PIV
-        if len(da) >= 2:
-            # check length again, only if ge 2, assess velocities
-            # perform cross correlation analysis yielding correlations for each interrogation window
-            x_, y_, corr = cross_corr(
-                da.values,
-                window_size=window_size,
-                overlap=overlap,
-                search_area_size=search_area_size,
-                normalize=False,
-                engine=engine,
-                verbose=False,
-            )
-            # remove chunk safely from memory ASAP
-            frames_chunks[n] = None
-            del da
-            gc.collect()
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=RuntimeWarning)
-                # get the maximum correlation per interrogation window, ignore NaN
+        if len(da) < 2:
+            continue
 
-                corr_max = np.nanmax(corr, axis=(-1, -2))
-                # get signal-to-noise, whilst suppressing nanmean over empty slice warnings
-                s2n = corr_max / np.nanmean(corr, axis=(-1, -2))
+        # perform cross correlation analysis yielding masked correlations for each interrogation window
+        corr, corr_max, s2n = process_frame_chunk(da, corr_min, s2n_min)
+        # housekeeping
+        corr_sum += np.nansum(corr, axis=0, keepdims=True)
+        corr_count += np.nansum(~np.isnan(corr), axis=0, keepdims=True)
+        corr_chunks.append(corr_max)
+        s2n_chunks.append(s2n)
 
-            # reshape corr / s2n to the amount of expected rows and columns
-            # s2n = (s2n.reshape(-1, n_rows, n_cols)).astype(np.float32)
-            corr[corr_max < corr_min] = np.nan
-            corr[s2n < s2n_min] = np.nan
-            corr_max[corr_max < corr_min] = np.nan
-            corr_max[s2n < s2n_min] = np.nan
-            s2n[corr_max < corr_min] = np.nan
-            s2n[s2n < s2n_min] = np.nan
-            corr_sum += np.nansum(corr, axis=0, keepdims=True)
-            corr_count += np.nansum(~np.isnan(corr), axis=0, keepdims=True)
-            corr_max_chunks.append(corr_max)
-            s2n_chunks.append(s2n)
-    s2n_concat = np.concatenate(s2n_chunks, axis=0)
-    corr_max_concat = np.concatenate(corr_max_chunks, axis=0)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        # first we remove very low counts
-        n_frames = len(corr_max_concat)  # get total nr of frames
-        corr_sum[corr_count < count_min * n_frames] = np.nan
-        corr_mean = corr_sum / corr_count
-        corr_max = np.nanmean(corr_max_concat, axis=0, keepdims=True).reshape(-1, n_rows, n_cols)
-        s2n = np.nanmean(s2n_concat, axis=0, keepdims=True).reshape(-1, n_rows, n_cols)
-    u, v = u_v_displacement(corr_mean, n_rows, n_cols, engine=engine)
-    # make sure u is in m/s and has a time axis
-    u = (u * res_x / dt_av).astype(np.float32)
-    v = (v * res_y / dt_av).astype(np.float32)
-
-    # put s2n, corr_max, u and v in one xarray dataset, with coordinates time, y and x
-    ds = xr.Dataset(
-        {
-            "s2n": (["time", "y", "x"], s2n),
-            "corr": (["time", "y", "x"], corr_max),
-            "v_x": (["time", "y", "x"], u),
-            "v_y": (["time", "y", "x"], v),
-        },
-        # only the first time step as we only have one time step after averaging
-        coords={
-            "time": time[0:1],
-            "y": y,
-            "x": x,
-        },
-    )
-    return ds
-    # return u, v, corr_max, s2n
+        # remove chunk safely from memory ASAP
+        frames_chunks[n] = None
+        del da
+        gc.collect()
+    # concatenate results
+    dt_av = dt.values.mean()
+    n_frames = len(corr_chunks)
+    corr_mean, corr_max_mean, s2n_mean = aggregate_results(corr_chunks, s2n_chunks, corr_count, corr_sum, n_frames)
+    # create final dataset
+    return finalize_ds(corr_mean, corr_max_mean, s2n_mean, res_x, res_y, dt_av, y, x)
 
 
-def _get_ffpiv_timestep(frames_chunks, y, x, dt,  res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine):
+def _get_ffpiv_timestep(
+    frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine
+):
     # make progress bar
     pbar = tqdm(range(len(frames_chunks)), position=0, leave=True)
     pbar.set_description("Computing PIV per chunk")
@@ -244,13 +364,7 @@ def _get_ffpiv_timestep(frames_chunks, y, x, dt,  res_y, res_x, n_cols, n_rows, 
         # we need at least one image-pair to do PIV
         if len(da) >= 2:
             u, v, corr_max, s2n = _get_uv_timestep(
-                frames_chunks[n],
-                n_cols,
-                n_rows,
-                window_size,
-                overlap,
-                search_area_size,
-                engine=engine
+                frames_chunks[n], n_cols, n_rows, window_size, overlap, search_area_size, engine=engine
             )
             u = (u * res_x / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
             v = (v * res_y / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
@@ -280,15 +394,7 @@ def _get_ffpiv_timestep(frames_chunks, y, x, dt,  res_y, res_x, n_cols, n_rows, 
     return ds
 
 
-def _get_uv_timestep(
-    da,
-    n_cols,
-    n_rows,
-    window_size,
-    overlap,
-    search_area_size,
-    engine="numba"
-):
+def _get_uv_timestep(da, n_cols, n_rows, window_size, overlap, search_area_size, engine="numba"):
     # perform cross correlation analysis yielding correlations for each interrogation window
     x_, y_, corr = cross_corr(
         da.values,
