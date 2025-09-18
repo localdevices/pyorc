@@ -37,7 +37,7 @@ def get_ffpiv(
     ensemble_corr: bool = False,
     corr_min: float = 0.2,
     s2n_min: float = 3,
-    count_min: float = 0.5,
+    count_min: float = 0.2,
 ):
     """Compute time-resolved Particle Image Velocimetry (PIV) using Fast Fourier Transform (FFT) within FF-PIV.
 
@@ -211,12 +211,16 @@ def _get_ffpiv_mean(
         # Suppress RuntimeWarnings and calculate required metrics
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            corr_max = np.nanmax(corr, axis=(-1, -2))
-            s2n = corr_max / np.nanmean(corr, axis=(-1, -2))
-
+            corr_max = np.max(corr, axis=(-1, -2))
+            # corr_max2 = np.nanmax(corr, axis=(-1, -2))
+            s2n = corr_max / np.mean(corr, axis=(-1, -2))
+            # s2n_2 = corr_max2 / np.nanmean(corr, axis=(-1, -2))
         # Apply thresholds
-        masks = (corr_max >= corr_min) & (s2n >= s2n_min)
-        corr[~masks] = corr_max[~masks] = s2n[~masks] = np.nan
+        masks = (corr_max >= corr_min) & (s2n >= s2n_min) & (np.isfinite(corr_max))
+        corr[~masks] = corr_max[~masks] = s2n[~masks] = 0.0
+        # masks = (corr_max >= corr_min) & (s2n >= s2n_min)
+        # corr[~masks] = corr_max[~masks] = s2n[~masks] = np.nan
+
         return corr, corr_max, s2n
 
     def aggregate_results(corr_chunks, s2n_chunks, corr_count, corr_sum, n_frames):
@@ -331,8 +335,10 @@ def _get_ffpiv_mean(
         # perform cross correlation analysis yielding masked correlations for each interrogation window
         corr, corr_max, s2n = process_frame_chunk(da, corr_min, s2n_min)
         # housekeeping
-        corr_sum += np.nansum(corr, axis=0, keepdims=True)
-        corr_count += np.nansum(~np.isnan(corr), axis=0, keepdims=True)
+        corr_sum += np.sum(corr, axis=0, keepdims=True)
+        corr_count += np.sum(~np.isclose(corr, 0.0), axis=0, keepdims=True)
+        # corr_sum += np.nansum(corr, axis=0, keepdims=True)
+        # corr_count += np.nansum(~np.isnan(corr), axis=0, keepdims=True)
         corr_chunks.append(corr_max)
         s2n_chunks.append(s2n)
 
