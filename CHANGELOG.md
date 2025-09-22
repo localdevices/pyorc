@@ -1,3 +1,18 @@
+## [0.8.10] = 2025-09-22
+### Added
+- option `ensemble_corr` with `frames.get_piv`. This performs ensemble correlation averaging on cross-correlation and
+  results in a less noisy estimate of surface velocities, albeit only one single time stamp. With this option, also a
+  number additional thresholds can be defined:
+  - `corr_min` (default: 0.2): minimum correlation accepted in the cross-correlation results.
+  - `s2n_min` (default: 3): minimum signal=to-noise ratio accepted in the cross-correlation results.
+  - `count_min` (default: 0.2) minimum valid correlation results after masking on `corr_min` and `s2n_min` to accept
+    results over the interrogation window.
+### Changed
+### Deprecated
+### Removed
+### Fixed
+
+
 ## [0.8.9] = 2025-08-29
 ### Added
 ### Changed

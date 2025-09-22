@@ -89,10 +89,10 @@ in :ref:`frames_ug`.
         frames, and correlation are averaged per interrogation window, before extracting displacements and estimating
         velocity. You can control that certain frame-to-frame correlation estimates are discarded by adding
         ``s2n_min`` and provide a signal-to-noise ratio as described above. This value defaults to 3. You can also set
-        ``corr_min`` (default 0.3) to a desired value. This simply ignores frame pairs that show a maximum correlation
+        ``corr_min`` (default 0.2) to a desired value. This simply ignores frame pairs that show a maximum correlation
         lower than ``corr_min``. ``count_min`` is the minimum fraction of frame-to-frame pairs that yields a valid
         correlation value after filtering on ``s2n_min`` and ``corr_min``. Any windows that yield lower amounts are
-        set to missing and will not yield any velocity.
+        set to missing and will not yield any velocity. Default for this value is 0.2.
 
         .. note::
 
