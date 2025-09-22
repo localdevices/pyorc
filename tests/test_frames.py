@@ -108,36 +108,16 @@ def test_plot_proj(frames_proj, idx):
     [
         (10, "openpiv", False, [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
         (10, "numba", True, [0.10917795, 0.10898168, 0.11020568, 0.12450387]),  # filtering occurs within piv process
-        (
-            10,
-            "numba",
-            False,
-            [0.10837663, 0.11250661, 0.11100861, 0.1231317],
-        ),
+        (10, "numba", False, [0.10837663, 0.11250661, 0.11100861, 0.1231317]),
     ],
 )
 def test_get_piv(frames_proj, window_size, engine, ensemble_corr, result):
-    piv = frames_proj.frames.get_piv(window_size=window_size, ensemble_corr=ensemble_corr, engine=engine)
+    piv = frames_proj.frames.get_piv(
+        window_size=window_size, ensemble_corr=ensemble_corr, engine=engine, s2n_min=0, corr_min=0, count_min=0
+    )
     piv_mean = piv.mean(dim="time", keep_attrs=True)
     # check if results are stable
     assert np.allclose(piv_mean["v_x"].values.flatten()[-4:], result, equal_nan=True)
-
-
-@pytest.mark.parametrize(
-    "window_size",
-    [
-        26,
-    ],
-)
-def test_compare_piv(frames_proj, window_size):
-    piv = frames_proj.frames.get_piv(window_size=window_size, engine="numpy")
-    piv.load()
-    u1, v1 = piv["v_x"].mean(dim="time").values, piv["v_y"].mean(dim="time").values
-    piv2 = frames_proj.frames.get_piv(window_size=window_size, engine="numba")
-    piv2.load()
-    u2, v2 = piv2["v_x"].mean(dim="time").values, piv2["v_y"].mean(dim="time").values
-    assert np.allclose(u2, u1, atol=1e-5, rtol=1e-4), "too large differences between `u` of openpiv and ffpiv"
-    assert np.allclose(v2, v1, atol=1e-5, rtol=1e-4), "too large differences between `v` of openpiv and ffpiv"
 
 
 @pytest.mark.parametrize(

@@ -88,7 +88,7 @@ def get_ffpiv(
         random. If you get very little velocities back, you may try to reduce this.
     count_min : float, optional
         Minimum amount of frame pairs that result in accepted correlation values after filtering on `corr_min` and
-        `s2n_min`. Default 0.5. If less frame pairs are available, the velocity is filtered out.
+        `s2n_min`. Default 0.2. If less frame pairs are available, the velocity is filtered out.
 
     Returns
     -------
@@ -215,7 +215,8 @@ def _get_ffpiv_mean(
             s2n = corr_max / np.mean(corr, axis=(-1, -2))
         # Apply thresholds
         masks = (corr_max >= corr_min) & (s2n >= s2n_min) & (np.isfinite(corr_max))
-        corr[~masks] = corr_max[~masks] = s2n[~masks] = 0.0
+        corr[~masks] = 0.0
+        corr_max[~masks] = s2n[~masks] = 0.0
 
         return corr, corr_max, s2n
 
@@ -253,9 +254,13 @@ def _get_ffpiv_mean(
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
+            # apply count filter. Very low amounts of found valid correlations are entirely filtered out.
             corr_sum[corr_count < count_min * n_frames] = np.nan
-            corr_mean = corr_sum / corr_count
+            corr_max_concat[:, corr_count.flatten() < count_min * n_frames] = np.nan
+            corr_mean = np.divide(corr_sum, corr_count[..., None, None])  # expand dimensions and divide by count
+            # time average of maxima for output
             corr_max_mean = np.nanmean(corr_max_concat, axis=0).reshape(-1, n_rows, n_cols)
+            # time averaging of s2n for output
             s2n_mean = np.nanmean(s2n_concat, axis=0).reshape(-1, n_rows, n_cols)
 
         return corr_mean, corr_max_mean, s2n_mean
@@ -332,7 +337,8 @@ def _get_ffpiv_mean(
         corr, corr_max, s2n = process_frame_chunk(da, corr_min, s2n_min)
         # housekeeping
         corr_sum += np.sum(corr, axis=0, keepdims=True)
-        corr_count += np.sum(corr > 1e-6, axis=0, keepdims=True)
+        # add found correlations > 0. these are the valid ones
+        corr_count += np.sum(corr_max > 1e-6, axis=0, keepdims=True)
         corr_chunks.append(corr_max)
         s2n_chunks.append(s2n)
 
@@ -349,7 +355,7 @@ def _get_ffpiv_mean(
 
 
 def _get_ffpiv_timestep(
-    frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine
+    frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine, **kwargs
 ):
     # make progress bar
     pbar = tqdm(range(len(frames_chunks)), position=0, leave=True)
@@ -364,7 +370,7 @@ def _get_ffpiv_timestep(
         # we need at least one image-pair to do PIV
         if len(da) >= 2:
             u, v, corr_max, s2n = _get_uv_timestep(
-                frames_chunks[n], n_cols, n_rows, window_size, overlap, search_area_size, engine=engine
+                frames_chunks[n], n_cols, n_rows, window_size, overlap, search_area_size, engine=engine, **kwargs
             )
             u = (u * res_x / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
             v = (v * res_y / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
