@@ -5,18 +5,37 @@ Velocimetry
 
 Estimating surface velocity is one of the core methods of *pyorc*. Typically surface velocity is derived from a set
 of frames, by analyzing frame to frame movements in time. This can be done with several methods. *pyorc* currently
-has implemented one of these methods called "Particle Image Velocimetry".
-
+has implemented one of these methods called "Particle Image Velocimetry" (PIV).
 Particle Image Velocimetry
 --------------------------
 
-Particle Image Velocimetry (PIV) uses cross-correlation methods to estimate the most likely position of an observed pattern
-from frame to frame. Therefore there is no interdependency over more than 2 frames. To observe patterns, the total area
-of interest is subdivided into small blocks of pixels with overlap, also called "interrogation windows". Currently the
-overlap is fixed in *pyorc* on 50% of each block. Say that you have reprojected your data to a 0.02 m resolution
-and you select an interrogation window of 20 pixels, then each interrogation window will be
-0.02 * 20 = 0.4 m in size in both x- and y-direction. The next window will share 10 pixels with its neighbouring window
-and hence a velocity will be resolved for each 0.2 x 0.2 meters.
+Particle Image Velocimetry (PIV) uses cross-correlation methods to estimate the most likely position of an observed
+surface deformation pattern from frame to frame. Therefore there is no interdependency over more than 2 frames.
+To observe patterns, the total area of interest is subdivided into small blocks of pixels with overlap, also called
+"interrogation windows".
+
+PIV may be applied in two ways within *pyorc*:
+
+* frame-by-frame basis, yielding one velocity estimate for each frame pair in a video. This results in a time series
+  of velocity estimates, and reveals variance due to noise or real-world variations. This is of interest for cases where
+  variations in velocities are interesting, e.g. changes in velocities around infrastructure during ship passages,
+  sluice opening changes, turbulent motion investigations, where the variation is real and caused by turbulence, or
+  other cases with highly varying velocity fields.
+* ensemble correlation averaging approach, in which cross-correlation per frame pair is averaged over all frames. This
+  reduces noise but does not provide any information on changes in the velocities throughout the video. This approach
+  is often used to estimate river discharge, assuming that velocities are stable throughout the video, or other cases
+  where velocities may be assumed to be stable. With this approach, a user can also set a minimum correlation value to
+  accept and a minimal signal-to-noise ratio to accept. Any interrogation window with any frame pair that is lower than
+  the set values will be regarded too noisy and therefore discarded. This helps reducing noise from e.g. areas that are
+  not water, moments where no significant surface deformations are visible, and getting rid of spurious information
+  from frames that are not focused well. Signal-to-noise is computed as the maximum correlation found divided by
+  the average correlation found in an interrogation window for a single frame pair. Interrogation windows that
+  yield too few valid correlation fields after filtering onthese two criteria can also be entirely set to missing.
+
+Currently the overlap in interrogation windows is fixed in *pyorc* on 50% of each block. Say that you have reprojected
+your data to a 0.02 m resolution and you select an interrogation window of 20 pixels, then each interrogation window
+will be 0.02 * 20 = 0.4 m in size in both x- and y-direction. The next window will share 10 pixels with its
+neighbouring window and hence a velocity will be resolved for each 0.2 x 0.2 meters.
 
 .. tab-set::
 
@@ -35,8 +54,8 @@ and hence a velocity will be resolved for each 0.2 x 0.2 meters.
 
 We implemented several engines to compute PIV. The default is ``openpiv`` which uses the OpenPIV library to
 perform computations. The alternatives are ``numba`` or ``numpy`` which use the numba and numpy libraries for
-the computations, as provided in the underlying FF-PIV library. ``numba`` is by far the fastest option, and likely
-will become the default in the future.
+the computations, as provided in the underlying FF-PIV library. ``numba`` is by far the fastest option, and is currently
+the default.
 
 Naturally, before orthorectification you may decide to apply one or several preprocessing methods as described in
 :ref:`frames_ug` to improve the visibility of tracers. We highly recommend that in many cases, as shown in the snippets
@@ -58,12 +77,22 @@ in :ref:`frames_ug`.
                     window_size: 64
                     engine: numba
 
-        Here the ``engine: numba`` ensures that the much faster numba implementation is used. ``window_size: 64``
-        overrides any window size provided in the camera configuration and sets it to 64. When using the engine
-        parameter with ``numba`` or ``numpy``, you can also provide memory safety margins by manually adjusting the
-        chunk size with the ``chunksize`` parameter. If you notice a memory warning is given, and ``chunksize`` is
-        set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we hope you never
-        have to touch this parameter at all :-) unless you process very very large videos with very large objectives.
+        Here the ``engine: numba`` ensures that the much faster numba implementation is used (default).
+        ``window_size: 64`` overrides any window size provided in the camera configuration and sets it to 64. When
+        using the engine parameter with ``numba`` or ``numpy``, you can also provide memory safety margins by manually
+        adjusting the chunk size with the ``chunksize`` parameter. If you notice a memory warning is given, and
+        ``chunksize`` is set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we
+        hope you never have to touch this parameter at all :-) unless you process very very large videos with very
+        large objectives.
+
+        You can also set ``ensemble_corr`` to ``true``.  With this option, cross correlation will be computed for all
+        frames, and correlation are averaged per interrogation window, before extracting displacements and estimating
+        velocity. You can control that certain frame-to-frame correlation estimates are discarded by adding
+        ``s2n_min`` and provide a signal-to-noise ratio as described above. This value defaults to 3. You can also set
+        ``corr_min`` (default 0.3) to a desired value. This simply ignores frame pairs that show a maximum correlation
+        lower than ``corr_min``. ``count_min`` is the minimum fraction of frame-to-frame pairs that yields a valid
+        correlation value after filtering on ``s2n_min`` and ``corr_min``. Any windows that yield lower amounts are
+        set to missing and will not yield any velocity.
 
         .. note::
 
@@ -74,7 +103,8 @@ in :ref:`frames_ug`.
 
     .. tab-item:: API
 
-        Getting surface velocity from the orthoprojected set of frames stored in object ``frames_proj`` is as easy as calling
+        Getting surface velocity from the orthoprojected set of frames stored in object ``frames_proj`` is as easy as
+        calling
 
         .. code:: python
 
@@ -95,7 +125,12 @@ in :ref:`frames_ug`.
         You may also set ``memory_factor`` to a higher amount than the default (2). ``memory_factor``
         decides on the fraction of the memory reserved for one entire chunk of computation. E.g. by setting it to 4 only
         1/4th of the available memory is assumed to be available. In practice, for large problems, more temporary
-        memory storage is needed within the subprocessing.
+        memory storage is needed within the subprocessing. Passing ``ensemble_corr=True`` uses ensemble correlation
+        averaging. This provides additional control for tuning of the signal-to-noise ratio with ``corr_min``
+        (default: 0.3) which is the minimum correlation value accepted, and ``s2n_min`` (default=3) which controls
+        the minimum signal-to-noise ratio accepted. Finally a ``count_min`` (default=0.2) can be provided, which
+        controls when a interrogation window should be discarded based on the fraction of missing values after
+        filtering for ``s2n_min`` and ``corr_min``.
 
 Interrogating and storing PIV results
 -------------------------------------
