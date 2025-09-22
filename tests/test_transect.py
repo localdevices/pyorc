@@ -19,7 +19,7 @@ def test_get_river_flow(piv_transect):
     assert np.allclose(
         # piv_transect.river_flow.values, [0.0821733, 0.08626413, 0.09137767, 0.09649121, 0.10058204], atol=0.001
         piv_transect.river_flow.values,
-        [0.09134876, 0.09304505, 0.09516542, 0.09728579, 0.09898209],
+        [0.07832181, 0.07917073, 0.08023188, 0.08129303, 0.08214195],
         atol=0.001,
     )
 

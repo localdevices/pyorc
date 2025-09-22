@@ -168,6 +168,8 @@ class Frames(ORCBase):
         coords, mesh_coords = self.get_piv_coords(window_size, search_area_size, overlap)
         # provide kwargs for OpenPIV analysis
         if engine == "openpiv":
+            # thresholds are not used.
+
             import warnings
 
             warnings.warn(
@@ -175,6 +177,10 @@ class Frames(ORCBase):
                 DeprecationWarning,
                 stacklevel=2,
             )
+            # Remove threshold parameters from kwargs
+            kwargs.pop("corr_min", None)
+            kwargs.pop("s2n_min", None)
+            kwargs.pop("count_min", None)
             kwargs = {
                 **kwargs,
                 "search_area_size": search_area_size[0],
@@ -193,7 +199,9 @@ class Frames(ORCBase):
                 "res_x": camera_config.resolution,
                 "res_y": camera_config.resolution,
             }
-            ds = ffpiv.get_ffpiv(self._obj, coords["y"], coords["x"], dt, engine=engine, ensemble_corr=ensemble_corr, **kwargs)
+            ds = ffpiv.get_ffpiv(
+                self._obj, coords["y"], coords["x"], dt, engine=engine, ensemble_corr=ensemble_corr, **kwargs
+            )
         else:
             raise ValueError(f"Selected PIV engine {engine} does not exist.")
         # add all 2D-coordinates
