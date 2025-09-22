@@ -107,6 +107,7 @@ class Frames(ORCBase):
         window_size: Optional[tuple[int, int]] = None,
         overlap: Optional[tuple[int, int]] = None,
         engine: str = "numba",
+        ensemble_corr: bool = False,
         **kwargs,
     ) -> xr.Dataset:
         """Perform PIV computation on projected frames.
@@ -126,6 +127,11 @@ class Frames(ORCBase):
             select the compute engine, can be "openpiv" (default), "numba", or "numpy". "numba" will give the fastest
             performance but is still experimental. It can boost performance by almost an order of magnitude compared
             to openpiv or numpy. both "numba" and "numpy" use the FF-PIV library as back-end.
+        ensemble_corr : bool, optional
+            only used with `engine="numba"` or `engine="numpy"`.
+            If True, performs PIV by first averaging cross-correlations across all frames and then deriving velocities.
+            If False, computes velocities for each frame pair separately. Default is True.
+
         **kwargs : dict
             keyword arguments to pass to the piv engine. For "numba" and "numpy" the argument `chunks` can be provided
             with an integer defining in how many batches of work the total velocimetry problem should be subdivided.
@@ -162,6 +168,8 @@ class Frames(ORCBase):
         coords, mesh_coords = self.get_piv_coords(window_size, search_area_size, overlap)
         # provide kwargs for OpenPIV analysis
         if engine == "openpiv":
+            # thresholds are not used.
+
             import warnings
 
             warnings.warn(
@@ -169,6 +177,10 @@ class Frames(ORCBase):
                 DeprecationWarning,
                 stacklevel=2,
             )
+            # Remove threshold parameters from kwargs
+            kwargs.pop("corr_min", None)
+            kwargs.pop("s2n_min", None)
+            kwargs.pop("count_min", None)
             kwargs = {
                 **kwargs,
                 "search_area_size": search_area_size[0],
@@ -187,7 +199,9 @@ class Frames(ORCBase):
                 "res_x": camera_config.resolution,
                 "res_y": camera_config.resolution,
             }
-            ds = ffpiv.get_ffpiv(self._obj, coords["y"], coords["x"], dt, engine=engine, **kwargs)
+            ds = ffpiv.get_ffpiv(
+                self._obj, coords["y"], coords["x"], dt, engine=engine, ensemble_corr=ensemble_corr, **kwargs
+            )
         else:
             raise ValueError(f"Selected PIV engine {engine} does not exist.")
         # add all 2D-coordinates

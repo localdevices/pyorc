@@ -1,3 +1,8 @@
+"""Tests for masks at API level."""
+
+import pytest
+
+
 def test_mask_angle(piv):
     # check if the method runs
     piv.velocimetry.mask.angle(inplace=True)
@@ -32,7 +37,7 @@ def test_mask_outliers(piv):
 
 def test_mask_variance(piv):
     # check if the method runs
-    piv.velocimetry.mask.variance(inplace=True, tolerance=1., mode="or")
+    piv.velocimetry.mask.variance(inplace=True, tolerance=1.0, mode="or")
 
 
 def test_mask_window_nan(piv):
@@ -57,3 +62,17 @@ def test_mask(piv):
     piv.velocimetry.mask([mask1, mask2])
     piv.velocimetry.mask([mask1, mask2], inplace=True)
 
+
+# also test if error messages appear correctly
+def test_error_no_time(piv):
+    piv_mean = piv.mean(dim="time", keep_attrs=True)
+    # now test if an error is raised when no time is present
+    with pytest.raises(AssertionError, match='This mask requires dimension "time"'):
+        piv_mean.velocimetry.mask.variance()
+
+
+def test_error_single_time_step(piv):
+    piv_sel = piv.isel(time=slice(0, 1))
+    # now test if an error is raised when no time is present
+    with pytest.raises(AssertionError, match="This mask requires multiple timesteps"):
+        piv_sel.velocimetry.mask.variance()
