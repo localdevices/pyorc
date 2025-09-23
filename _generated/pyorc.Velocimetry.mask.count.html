@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Velocimetry.mask.count &#8212; pyorc 0.8.8 documentation</title>
+    <title>pyorc.Velocimetry.mask.count &#8212; pyorc 0.8.10 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
   
 </a></div>
     
@@ -598,19 +598,22 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Velocimetry.mask.count">
 <span class="sig-prename descclassname"><span class="pre">Velocimetry.mask.</span></span><span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.33</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Velocimetry.mask.count" title="Permalink to this definition">#</a></dt>
-<dd><p>Masks locations with a too low amount of valid velocities in time, measured by fraction with <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>.
-Usually applied <em>after</em> having applied several other filters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tolerance</strong> (<em>float</em><em> (</em><em>0-1</em><em>)</em>) – tolerance for fractional amount of valid velocities after all filters. If less than the fraction is
+<dd><p>Mask locations with a too low amount of valid velocities in time, measured by fraction with <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>.</p>
+<blockquote>
+<div><p>Usually applied <em>after</em> having applied several other filters.</p>
+<dl class="simple">
+<dt>tolerance<span class="classifier">float (0-1)</span></dt><dd><p>tolerance for fractional amount of valid velocities after all filters. If less than the fraction is
 available, the entire velocity will be set to missings.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>mask</strong> – mask applicable to input dataset with <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.filter(mask)</span></code>.
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mask</strong> – mask applicable to input dataset with <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.filter(mask)</span></code>.
 If <code class="docutils literal notranslate"><span class="pre">inplace=True</span></code>, the dataset will be returned masked with <code class="docutils literal notranslate"><span class="pre">mask</span></code>.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>xr.DataArray</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>

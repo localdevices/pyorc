@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Velocimetry.mask.window_replace &#8212; pyorc 0.8.8 documentation</title>
+    <title>pyorc.Velocimetry.mask.window_replace &#8212; pyorc 0.8.10 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
   
 </a></div>
     
@@ -598,18 +598,25 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.Velocimetry.mask.window_replace">
 <span class="sig-prename descclassname"><span class="pre">Velocimetry.mask.</span></span><span class="sig-name descname"><span class="pre">window_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wdw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Velocimetry.mask.window_replace" title="Permalink to this definition">#</a></dt>
-<dd><p>Replaces values in a certain window size with mean of their neighbours. Returns a Dataset instead of a mask.
-NOTE: This functionality may be moved to a different subclass in later releases.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wdw</strong> (<em>int</em><em>, </em><em>optional</em>) – window used to determine relevant neighbours</p>
+<dd><p>Replace values in a certain window size with mean of their neighbours. Returns a Dataset instead of a mask.</p>
+<blockquote>
+<div><p>NOTE: This functionality may be moved to a different subclass in later releases.</p>
+<dl class="simple">
+<dt>wdw<span class="classifier">int, optional</span></dt><dd><p>window used to determine relevant neighbours</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>mask</strong> – mask applicable to input dataset with <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.filter(mask)</span></code>.
+<dt>iter<span class="classifier">int, optional</span></dt><dd><p>amount of times to repeat window operator</p>
+</dd>
+<dt>kwargs<span class="classifier">dict</span></dt><dd><p>keyword arguments to pass to <code class="docutils literal notranslate"><span class="pre">helpers.stack_window</span></code></p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mask</strong> – mask applicable to input dataset with <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.filter(mask)</span></code>.
 If <code class="docutils literal notranslate"><span class="pre">inplace=True</span></code>, the dataset will be returned masked with <code class="docutils literal notranslate"><span class="pre">mask</span></code>.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>xr.DataArray</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>

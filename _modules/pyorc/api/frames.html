@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.frames &#8212; pyorc 0.8.8 documentation</title>
+    <title>pyorc.api.frames &#8212; pyorc 0.8.10 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
   
 </a></div>
     
@@ -514,6 +514,7 @@ document.write(`
         <span class="n">window_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overlap</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">engine</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;numba&quot;</span><span class="p">,</span>
+        <span class="n">ensemble_corr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform PIV computation on projected frames.</span>
@@ -533,6 +534,11 @@ document.write(`
 <span class="sd">            select the compute engine, can be &quot;openpiv&quot; (default), &quot;numba&quot;, or &quot;numpy&quot;. &quot;numba&quot; will give the fastest</span>
 <span class="sd">            performance but is still experimental. It can boost performance by almost an order of magnitude compared</span>
 <span class="sd">            to openpiv or numpy. both &quot;numba&quot; and &quot;numpy&quot; use the FF-PIV library as back-end.</span>
+<span class="sd">        ensemble_corr : bool, optional</span>
+<span class="sd">            only used with `engine=&quot;numba&quot;` or `engine=&quot;numpy&quot;`.</span>
+<span class="sd">            If True, performs PIV by first averaging cross-correlations across all frames and then deriving velocities.</span>
+<span class="sd">            If False, computes velocities for each frame pair separately. Default is True.</span>
+
 <span class="sd">        **kwargs : dict</span>
 <span class="sd">            keyword arguments to pass to the piv engine. For &quot;numba&quot; and &quot;numpy&quot; the argument `chunks` can be provided</span>
 <span class="sd">            with an integer defining in how many batches of work the total velocimetry problem should be subdivided.</span>
@@ -569,6 +575,8 @@ document.write(`
         <span class="n">coords</span><span class="p">,</span> <span class="n">mesh_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_piv_coords</span><span class="p">(</span><span class="n">window_size</span><span class="p">,</span> <span class="n">search_area_size</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span>
         <span class="c1"># provide kwargs for OpenPIV analysis</span>
         <span class="k">if</span> <span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;openpiv&quot;</span><span class="p">:</span>
+            <span class="c1"># thresholds are not used.</span>
+
             <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -576,6 +584,10 @@ document.write(`
                 <span class="ne">DeprecationWarning</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="c1"># Remove threshold parameters from kwargs</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;corr_min&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;s2n_min&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;count_min&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="s2">&quot;search_area_size&quot;</span><span class="p">:</span> <span class="n">search_area_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -594,7 +606,9 @@ document.write(`
                 <span class="s2">&quot;res_x&quot;</span><span class="p">:</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
                 <span class="s2">&quot;res_y&quot;</span><span class="p">:</span> <span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">ffpiv</span><span class="o">.</span><span class="n">get_ffpiv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">dt</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ffpiv</span><span class="o">.</span><span class="n">get_ffpiv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">dt</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="n">ensemble_corr</span><span class="o">=</span><span class="n">ensemble_corr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected PIV engine </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s2"> does not exist.&quot;</span><span class="p">)</span>
         <span class="c1"># add all 2D-coordinates</span>

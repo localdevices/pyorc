@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Velocimetry &#8212; pyorc 0.8.8 documentation</title>
+    <title>Velocimetry &#8212; pyorc 0.8.10 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.8</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
   
 </a></div>
     
@@ -434,16 +434,35 @@ document.write(`
 <span id="velocimetry-ug"></span><h1>Velocimetry<a class="headerlink" href="#velocimetry" title="Permalink to this heading">#</a></h1>
 <p>Estimating surface velocity is one of the core methods of <em>pyorc</em>. Typically surface velocity is derived from a set
 of frames, by analyzing frame to frame movements in time. This can be done with several methods. <em>pyorc</em> currently
-has implemented one of these methods called “Particle Image Velocimetry”.</p>
-<section id="particle-image-velocimetry">
-<h2>Particle Image Velocimetry<a class="headerlink" href="#particle-image-velocimetry" title="Permalink to this heading">#</a></h2>
-<p>Particle Image Velocimetry (PIV) uses cross-correlation methods to estimate the most likely position of an observed pattern
-from frame to frame. Therefore there is no interdependency over more than 2 frames. To observe patterns, the total area
-of interest is subdivided into small blocks of pixels with overlap, also called “interrogation windows”. Currently the
-overlap is fixed in <em>pyorc</em> on 50% of each block. Say that you have reprojected your data to a 0.02 m resolution
-and you select an interrogation window of 20 pixels, then each interrogation window will be
-0.02 * 20 = 0.4 m in size in both x- and y-direction. The next window will share 10 pixels with its neighbouring window
-and hence a velocity will be resolved for each 0.2 x 0.2 meters.</p>
+has implemented one of these methods called “Particle Image Velocimetry” (PIV).
+Particle Image Velocimetry
+————————–</p>
+<p>Particle Image Velocimetry (PIV) uses cross-correlation methods to estimate the most likely position of an observed
+surface deformation pattern from frame to frame. Therefore there is no interdependency over more than 2 frames.
+To observe patterns, the total area of interest is subdivided into small blocks of pixels with overlap, also called
+“interrogation windows”.</p>
+<p>PIV may be applied in two ways within <em>pyorc</em>:</p>
+<ul class="simple">
+<li><p>frame-by-frame basis, yielding one velocity estimate for each frame pair in a video. This results in a time series
+of velocity estimates, and reveals variance due to noise or real-world variations. This is of interest for cases where
+variations in velocities are interesting, e.g. changes in velocities around infrastructure during ship passages,
+sluice opening changes, turbulent motion investigations, where the variation is real and caused by turbulence, or
+other cases with highly varying velocity fields.</p></li>
+<li><p>ensemble correlation averaging approach, in which cross-correlation per frame pair is averaged over all frames. This
+reduces noise but does not provide any information on changes in the velocities throughout the video. This approach
+is often used to estimate river discharge, assuming that velocities are stable throughout the video, or other cases
+where velocities may be assumed to be stable. With this approach, a user can also set a minimum correlation value to
+accept and a minimal signal-to-noise ratio to accept. Any interrogation window with any frame pair that is lower than
+the set values will be regarded too noisy and therefore discarded. This helps reducing noise from e.g. areas that are
+not water, moments where no significant surface deformations are visible, and getting rid of spurious information
+from frames that are not focused well. Signal-to-noise is computed as the maximum correlation found divided by
+the average correlation found in an interrogation window for a single frame pair. Interrogation windows that
+yield too few valid correlation fields after filtering onthese two criteria can also be entirely set to missing.</p></li>
+</ul>
+<p>Currently the overlap in interrogation windows is fixed in <em>pyorc</em> on 50% of each block. Say that you have reprojected
+your data to a 0.02 m resolution and you select an interrogation window of 20 pixels, then each interrogation window
+will be 0.02 * 20 = 0.4 m in size in both x- and y-direction. The next window will share 10 pixels with its
+neighbouring window and hence a velocity will be resolved for each 0.2 x 0.2 meters.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-0">
@@ -464,8 +483,8 @@ API</label><div class="sd-tab-content docutils">
 </div>
 <p>We implemented several engines to compute PIV. The default is <code class="docutils literal notranslate"><span class="pre">openpiv</span></code> which uses the OpenPIV library to
 perform computations. The alternatives are <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code> which use the numba and numpy libraries for
-the computations, as provided in the underlying FF-PIV library. <code class="docutils literal notranslate"><span class="pre">numba</span></code> is by far the fastest option, and likely
-will become the default in the future.</p>
+the computations, as provided in the underlying FF-PIV library. <code class="docutils literal notranslate"><span class="pre">numba</span></code> is by far the fastest option, and is currently
+the default.</p>
 <p>Naturally, before orthorectification you may decide to apply one or several preprocessing methods as described in
 <a class="reference internal" href="../frames/index.html#frames-ug"><span class="std std-ref">Frames</span></a> to improve the visibility of tracers. We highly recommend that in many cases, as shown in the snippets
 in <a class="reference internal" href="../frames/index.html#frames-ug"><span class="std std-ref">Frames</span></a>.</p>
@@ -483,12 +502,21 @@ supply an extra section in the recipe as follows:</p>
 <span class="w">        </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">numba</span>
 </pre></div>
 </div>
-<p>Here the <code class="docutils literal notranslate"><span class="pre">engine:</span> <span class="pre">numba</span></code> ensures that the much faster numba implementation is used. <code class="docutils literal notranslate"><span class="pre">window_size:</span> <span class="pre">64</span></code>
-overrides any window size provided in the camera configuration and sets it to 64. When using the engine
-parameter with <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, you can also provide memory safety margins by manually adjusting the
-chunk size with the <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> parameter. If you notice a memory warning is given, and <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> is
-set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we hope you never
-have to touch this parameter at all :-) unless you process very very large videos with very large objectives.</p>
+<p>Here the <code class="docutils literal notranslate"><span class="pre">engine:</span> <span class="pre">numba</span></code> ensures that the much faster numba implementation is used (default).
+<code class="docutils literal notranslate"><span class="pre">window_size:</span> <span class="pre">64</span></code> overrides any window size provided in the camera configuration and sets it to 64. When
+using the engine parameter with <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, you can also provide memory safety margins by manually
+adjusting the chunk size with the <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> parameter. If you notice a memory warning is given, and
+<code class="docutils literal notranslate"><span class="pre">chunksize</span></code> is set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we
+hope you never have to touch this parameter at all :-) unless you process very very large videos with very
+large objectives.</p>
+<p>You can also set <code class="docutils literal notranslate"><span class="pre">ensemble_corr</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code>.  With this option, cross correlation will be computed for all
+frames, and correlation are averaged per interrogation window, before extracting displacements and estimating
+velocity. You can control that certain frame-to-frame correlation estimates are discarded by adding
+<code class="docutils literal notranslate"><span class="pre">s2n_min</span></code> and provide a signal-to-noise ratio as described above. This value defaults to 3. You can also set
+<code class="docutils literal notranslate"><span class="pre">corr_min</span></code> (default 0.2) to a desired value. This simply ignores frame pairs that show a maximum correlation
+lower than <code class="docutils literal notranslate"><span class="pre">corr_min</span></code>. <code class="docutils literal notranslate"><span class="pre">count_min</span></code> is the minimum fraction of frame-to-frame pairs that yields a valid
+correlation value after filtering on <code class="docutils literal notranslate"><span class="pre">s2n_min</span></code> and <code class="docutils literal notranslate"><span class="pre">corr_min</span></code>. Any windows that yield lower amounts are
+set to missing and will not yield any velocity. Default for this value is 0.2.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>It seems a little superfluous to have a section called <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code>, then a subsection <code class="docutils literal notranslate"><span class="pre">get_piv</span></code> and then
@@ -500,7 +528,8 @@ instead of Partical Image Velocimetry. This method follows particles instead of 
 <input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-3">
 API</label><div class="sd-tab-content docutils">
-<p>Getting surface velocity from the orthoprojected set of frames stored in object <code class="docutils literal notranslate"><span class="pre">frames_proj</span></code> is as easy as calling</p>
+<p>Getting surface velocity from the orthoprojected set of frames stored in object <code class="docutils literal notranslate"><span class="pre">frames_proj</span></code> is as easy as
+calling</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">piv</span> <span class="o">=</span> <span class="n">frames_proj</span><span class="o">.</span><span class="n">get_piv</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -517,10 +546,14 @@ override automatically computed chunk amounts by setting <code class="docutils l
 You may also set <code class="docutils literal notranslate"><span class="pre">memory_factor</span></code> to a higher amount than the default (2). <code class="docutils literal notranslate"><span class="pre">memory_factor</span></code>
 decides on the fraction of the memory reserved for one entire chunk of computation. E.g. by setting it to 4 only
 1/4th of the available memory is assumed to be available. In practice, for large problems, more temporary
-memory storage is needed within the subprocessing.</p>
+memory storage is needed within the subprocessing. Passing <code class="docutils literal notranslate"><span class="pre">ensemble_corr=True</span></code> uses ensemble correlation
+averaging. This provides additional control for tuning of the signal-to-noise ratio with <code class="docutils literal notranslate"><span class="pre">corr_min</span></code>
+(default: 0.3) which is the minimum correlation value accepted, and <code class="docutils literal notranslate"><span class="pre">s2n_min</span></code> (default=3) which controls
+the minimum signal-to-noise ratio accepted. Finally a <code class="docutils literal notranslate"><span class="pre">count_min</span></code> (default=0.2) can be provided, which
+controls when a interrogation window should be discarded based on the fraction of missing values after
+filtering for <code class="docutils literal notranslate"><span class="pre">s2n_min</span></code> and <code class="docutils literal notranslate"><span class="pre">corr_min</span></code>.</p>
 </div>
 </div>
-</section>
 <section id="interrogating-and-storing-piv-results">
 <h2>Interrogating and storing PIV results<a class="headerlink" href="#interrogating-and-storing-piv-results" title="Permalink to this heading">#</a></h2>
 <p>The results of the velocimetry processing will contain grids for each frame (minus one because frame pairs are needed).
@@ -849,7 +882,6 @@ is also removed. This is meant to remove isolated values. Also described in <a c
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#particle-image-velocimetry">Particle Image Velocimetry</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interrogating-and-storing-piv-results">Interrogating and storing PIV results</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#masking-spurious-velocities">Masking spurious velocities</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#independent-masks">Independent masks</a></li>
