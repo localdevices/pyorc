@@ -48,12 +48,6 @@ def test_get_q(piv_transect, fill_method):
     # assert if filled values are more complete than non-filled
 
 
-def test_get_wetted_perspective(piv_transect):
-    piv_transect.load()
-    f = piv_transect.transect.get_q()
-    f.transect.get_wetted_perspective(h=0.0)
-
-
 def test_get_cross_section(piv_transect):
     piv_transect.load()
     assert isinstance(piv_transect.transect.cross_section, CrossSection)

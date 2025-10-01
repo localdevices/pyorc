@@ -150,29 +150,6 @@ class Transect(ORCBase):
         points_proj = self.camera_config.project_points(points, within_image=within_image, swap_y_coords=True)
         return points_proj
 
-    def get_wetted_perspective(self, h, sample_size=1000):
-        """Get wetted polygon in camera perspective.
-
-        Parameters
-        ----------
-        h : float
-            The water level value to calculate the surface perspective.
-        sample_size : int, optional
-            The number of points to densify the transect with, by default 1000
-
-        Returns
-        -------
-        ndarray
-            A numpy array containing the points forming the wetted polygon perspective.
-
-        """
-        bottom_points, surface_points = self.get_bottom_surface_z_perspective(h=h, sample_size=sample_size)
-        # concatenate points reversing one set for preps of a polygon
-        pol_points = np.concatenate([bottom_points, np.flipud(surface_points)], axis=0)
-
-        # add the first point at the end to close the polygon
-        pol_points = np.concatenate([pol_points, pol_points[0:1]], axis=0)
-        return pol_points
 
     def get_depth_perspective(self, h, sample_size=1000, interval=25):
         """Get line (x, y) pairs that show the depth over several intervals in the wetted part of the cross section.
@@ -198,64 +175,6 @@ class Transect(ORCBase):
         # make line pairs
         return list(zip(bottom_points, surface_points))
 
-    def get_xyz_perspective(self, trans_mat=None, xs=None, ys=None, mask_outside=True):
-        """Get camera-perspective column, row coordinates from cross-section locations.
-
-        Parameters
-        ----------
-        trans_mat : np.ndarray, optional
-             perspective transform matrix (Default value = None)
-        xs : np.array, optional
-            x-coordinates to transform, derived from self.x if not provided (Default value = None)
-        ys :
-            y-coordinates to transform, derived from self.y if not provided (Default value = None)
-        mask_outside :
-            values not fitting in the original camera frame are set to NaN (Default value = True)
-
-        Returns
-        -------
-        cols : list of ints
-            columns of locations in original camera perspective
-        rows : list of ints
-            rows of locations in original camera perspective
-
-
-        """
-        if xs is None:
-            xs = self._obj.x.values
-        if ys is None:
-            ys = self._obj.y.values
-        # compute bathymetry as measured in local height reference (such as staff gauge)
-        # if self.camera_config.gcps["h_ref"] is None:
-        #     h_ref = 0.0
-        # else:
-        #     h_ref = self.camera_config.gcps["h_ref"]
-        hs = self.camera_config.z_to_h(self._obj.zcoords).values
-        # zs = (self._obj.zcoords - self.camera_config.gcps["z_0"] + h_ref).values
-        if trans_mat is None:
-            ms = [self.camera_config.get_M(h, reverse=True, to_bbox_grid=True) for h in hs]
-        else:
-            # use user defined M instead
-            ms = [trans_mat for _ in hs]
-        # compute row and column position of vectors in original reprojected background image col/row coordinates
-        cols, rows = zip(
-            *[
-                helpers.xy_to_perspective(
-                    x, y, self.camera_config.resolution, trans_mat, reverse_y=self.camera_config.shape[0]
-                )
-                for x, y, trans_mat in zip(xs, ys, ms)
-            ],
-        )
-        # ensure y coordinates start at the top in the right orientation
-        shape_y, shape_x = self.camera_shape
-        rows = shape_y - np.array(rows)
-        cols = np.array(cols)
-        if mask_outside:
-            # remove values that do not fit in the frames
-            cols[np.any([cols < 0, cols > self.camera_shape[1]], axis=0)] = np.nan
-            rows[np.any([rows < 0, rows > self.camera_shape[0]], axis=0)] = np.nan
-
-        return cols, rows
 
     def get_v_surf(self, v_name="v_eff"):
         ## Mean velocity over entire profile
