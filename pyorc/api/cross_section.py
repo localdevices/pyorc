@@ -13,7 +13,7 @@ from matplotlib import patheffects
 from scipy.interpolate import interp1d
 from scipy.optimize import differential_evolution
 from shapely import affinity, geometry
-from shapely.ops import polygonize
+from shapely.ops import polygonize, split
 
 from pyorc import cv, plot_helpers
 
@@ -613,16 +613,21 @@ class CrossSection:
             raise ValueError("Amount of water line crossings must be 2 for a planar surface estimate.")
         return geometry.Polygon(list(wls[0].coords) + list(wls[1].coords[::-1]))
 
-    def get_wetted_surface_sz(self, h: float) -> geometry.Polygon:
-        """Retrieve a wetted surface perpendicular to flow direction (SZ) for a water level, as a geometry.Polygon.
+    def get_wetted_surface_sz(self, h: float, perimeter: bool = False) -> Union[geometry.MultiPolygon, geometry.MultiLineString]:
+        """Retrieve a wetted surface or perimeter perpendicular to flow direction (SZ) for a water level.
 
-        This is a useful method for instance to estimate m2 wetted surface for a given water level in the cross
-        section.
+        This returns a `geometry.MultiPolygon` when a surface is requested (`perimeter=False`), and
+        `geometry.MultiLineString` when a perimeter is requested (`perimeter=True`).
+
+        This is a useful method for instance to estimate m2 wetted surface or m wetted perimeter length for a given
+        water level in the cross section.
 
         Parameters
         ----------
         h : float
             water level [m]
+        perimeter : bool, optional
+            If set to True, return a linestring with the wetted perimeter instead.
 
         Returns
         -------
@@ -630,6 +635,12 @@ class CrossSection:
             Wetted surface as a polygon, in Y-Z projection.
 
         """
+
+        def avg_y(line):
+            """Compute average y-coordinate of a line."""
+            ys = [p[1] for p in line.coords]
+            return sum(ys) / len(ys)
+
         wl = self.get_cs_waterlevel(
             h=h, sz=True, extend_by=0.1
         )  # extend a small bit to guarantee crossing with the bottom coordinates
@@ -642,6 +653,18 @@ class CrossSection:
         if bottom_points[-1].y < zl:
             bottom_points.append(geometry.Point(bottom_points[-1].x, zl + 0.1))
         bottom_line = geometry.LineString(bottom_points)
+        if perimeter:
+            wl_z = wl.coords[0][-1]
+            split_segments = split(bottom_line, wl)
+            filtered = []
+            for seg in split_segments.geoms:
+                seg_z = avg_y(seg)
+                if seg_z < wl_z:
+                    # segment is below water level, add to perimeter
+                    filtered.append(seg)
+
+            return geometry.MultiLineString(filtered)
+            # return wetted_perim
         pol = list(polygonize(wl.union(bottom_line)))
         if len(pol) == 0:
             # create infinitely small polygon at lowest z coordinate

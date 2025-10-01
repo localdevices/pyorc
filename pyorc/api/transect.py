@@ -4,6 +4,8 @@ import numpy as np
 import xarray as xr
 from xarray.core import utils
 
+from shapely import geometry
+
 from pyorc import helpers
 
 from .cross_section import CrossSection
@@ -33,6 +35,25 @@ class Transect(ORCBase):
             return None
         coords = [[_x, _y, _z] for _x, _y, _z in zip(self._obj.xcoords, self._obj.ycoords, self._obj.zcoords)]
         return CrossSection(camera_config=self.camera_config, cross_section=coords)
+
+    @property
+    def wetted_surface_polygon(self) -> geometry.MultiPolygon:
+        """Return wetted surface as `shapely.geometry.MultiPolygon` object."""
+        return self.cross_section.get_wetted_surface_sz(self.h_a)
+
+    @property
+    def wetted_perimeter_linestring(self) -> geometry.MultiLineString:
+        """Return wetted perimeter as `shapely.geometry.MultiLineString` object."""
+
+    @property
+    def wetted_surface(self) -> float:
+        """Return wetted surface as float."""
+        return self.wetted_surface_polygon.area
+
+    @property
+    def wetted_perimeter(self) -> float:
+        """Return wetted perimeter as float."""
+        return self.wetted_perimeter_linestring.length
 
     def vector_to_scalar(self, v_x="v_x", v_y="v_y"):
         """Set "v_eff" and "v_dir" variables as effective velocities over cross-section, and its angle.
@@ -235,6 +256,36 @@ class Transect(ORCBase):
             rows[np.any([rows < 0, rows > self.camera_shape[0]], axis=0)] = np.nan
 
         return cols, rows
+
+    def get_v_surf(self, v_name="v_eff"):
+        ## Mean velocity over entire profile
+        z_a = self.camera_config.h_to_z(self.h_a)
+
+        depth = (z_a - self._obj.zcoords)
+        depth[depth < 0] = 0.0
+
+        # ds.transect.camera_config.get_depth(ds.zcoords, ds.transect.h_a)
+        wet_scoords = self._obj.scoords[depth > 0].values
+        if len(wet_scoords) == 0:
+            # no wet points found. Velocity can only be missing
+            v_av = np.nan
+        if len(wet_scoords) > 1:
+            velocity_int = self._obj[v_name].fillna(0.0).integrate(coord="scoords")  # m2/s
+            width = (
+                        wet_scoords[-1] + (wet_scoords[-1] - wet_scoords[-2]) * 0.5
+                    ) - (
+                        wet_scoords[0] - (wet_scoords[1] - wet_scoords[0]) * 0.5
+            )
+            v_av = velocity_int / width
+        else:
+            v_av = self._obj[v_name][:, depth > 0]
+        return v_av
+
+    def get_v_bulk(self, q_name="q"):
+        discharge = self._obj[q_name].fillna(0.0).integrate(coord="scoords")
+        wet_surf = self.wetted_surface
+        v_bulk = discharge / wet_surf
+        return v_bulk
 
     def get_river_flow(self, q_name="q", discharge_name="river_flow"):
         """Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1].
