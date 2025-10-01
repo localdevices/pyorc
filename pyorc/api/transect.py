@@ -2,9 +2,8 @@
 
 import numpy as np
 import xarray as xr
-from xarray.core import utils
-
 from shapely import geometry
+from xarray.core import utils
 
 from pyorc import helpers
 
@@ -44,6 +43,7 @@ class Transect(ORCBase):
     @property
     def wetted_perimeter_linestring(self) -> geometry.MultiLineString:
         """Return wetted perimeter as `shapely.geometry.MultiLineString` object."""
+        return self.cross_section.get_wetted_surface_sz(self.h_a, perimeter=True)
 
     @property
     def wetted_surface(self) -> float:
@@ -150,7 +150,6 @@ class Transect(ORCBase):
         points_proj = self.camera_config.project_points(points, within_image=within_image, swap_y_coords=True)
         return points_proj
 
-
     def get_depth_perspective(self, h, sample_size=1000, interval=25):
         """Get line (x, y) pairs that show the depth over several intervals in the wetted part of the cross section.
 
@@ -175,12 +174,24 @@ class Transect(ORCBase):
         # make line pairs
         return list(zip(bottom_points, surface_points))
 
-
     def get_v_surf(self, v_name="v_eff"):
+        """Compute mean surface velocity in locations that are below water level.
+
+        Parameters
+        ----------
+        v_name : str, optional
+             name of variable where surface velocities [m s-1] are stored (Default value = "v_eff")
+
+        Returns
+        -------
+        xr.DataArray
+            mean surface velocities for all provided quantiles or time steps
+
+        """
         ## Mean velocity over entire profile
         z_a = self.camera_config.h_to_z(self.h_a)
 
-        depth = (z_a - self._obj.zcoords)
+        depth = z_a - self._obj.zcoords
         depth[depth < 0] = 0.0
 
         # ds.transect.camera_config.get_depth(ds.zcoords, ds.transect.h_a)
@@ -190,10 +201,8 @@ class Transect(ORCBase):
             v_av = np.nan
         if len(wet_scoords) > 1:
             velocity_int = self._obj[v_name].fillna(0.0).integrate(coord="scoords")  # m2/s
-            width = (
-                        wet_scoords[-1] + (wet_scoords[-1] - wet_scoords[-2]) * 0.5
-                    ) - (
-                        wet_scoords[0] - (wet_scoords[1] - wet_scoords[0]) * 0.5
+            width = (wet_scoords[-1] + (wet_scoords[-1] - wet_scoords[-2]) * 0.5) - (
+                wet_scoords[0] - (wet_scoords[1] - wet_scoords[0]) * 0.5
             )
             v_av = velocity_int / width
         else:
@@ -201,6 +210,19 @@ class Transect(ORCBase):
         return v_av
 
     def get_v_bulk(self, q_name="q"):
+        """Compute the bulk velocity.
+
+        Parameters
+        ----------
+        q_name : str, optional
+            name of variable where depth integrated velocities [m2 s-1] are stored (Default value = "q")
+
+        Returns
+        -------
+        xr.DataArray
+            bulk velocities for all provided quantiles or time steps
+
+        """
         discharge = self._obj[q_name].fillna(0.0).integrate(coord="scoords")
         wet_surf = self.wetted_surface
         v_bulk = discharge / wet_surf
