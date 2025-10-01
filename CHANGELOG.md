@@ -1,3 +1,15 @@
+## [0.8.11] = 2025-10-01
+### Added
+- Derivation of transect properties surface area and wetted perimeter.
+- Added method `transect.get_v_surf` for average surface velocity, and `transect.get_v_bulk` for bulk velocity.
+### Changed
+- Using `add_text=True` in `transect.plot` now also displays average surface and bulk velocity.  
+### Deprecated
+### Removed
+- `transect.get_wetted_perspective` is no longer required as this can be derived from `transect.cross_section`.
+- `transect.get_xyz_perspective` is no longer required as this can be derived from `transect.cross_section`.
+### Fixed
+
 ## [0.8.10] = 2025-09-22
 ### Added
 - option `ensemble_corr` with `frames.get_piv`. This performs ensemble correlation averaging on cross-correlation and

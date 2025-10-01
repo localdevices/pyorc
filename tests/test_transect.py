@@ -17,11 +17,20 @@ def test_get_river_flow(piv_transect):
     piv_transect.transect.get_river_flow()
     # we allow for 0.001 m3/s deviation for differences in versions of libs
     assert np.allclose(
-        # piv_transect.river_flow.values, [0.0821733, 0.08626413, 0.09137767, 0.09649121, 0.10058204], atol=0.001
         piv_transect.river_flow.values,
         [0.07832181, 0.07917073, 0.08023188, 0.08129303, 0.08214195],
         atol=0.001,
     )
+    v_surf = piv_transect.transect.get_v_surf()
+    assert np.allclose(
+        v_surf.values,
+        [0.14660551, 0.14832331, 0.15047056, 0.15261781, 0.15433561],
+        atol=0.001,
+    )
+
+    # also get bulk and average velocities and check if the values are logical
+    v_bulk = piv_transect.transect.get_v_bulk()
+    assert np.allclose(piv_transect.river_flow.values / piv_transect.transect.wetted_surface, v_bulk.values)
 
 
 @pytest.mark.parametrize(
@@ -37,12 +46,6 @@ def test_get_q(piv_transect, fill_method):
     piv_transect.load()
     piv_transect.transect.get_q(fill_method=fill_method)
     # assert if filled values are more complete than non-filled
-
-
-def test_get_wetted_perspective(piv_transect):
-    piv_transect.load()
-    f = piv_transect.transect.get_q()
-    f.transect.get_wetted_perspective(h=0.0)
 
 
 def test_get_cross_section(piv_transect):

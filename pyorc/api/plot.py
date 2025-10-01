@@ -752,8 +752,10 @@ def plot_text(ax, ds, prefix, suffix):
     yloc = 0.95
     _ds.transect.get_river_flow(q_name="q")
     Q = np.abs(_ds.river_flow)
+    v_surf = _ds.transect.get_v_surf()
+    v_bulk = _ds.transect.get_v_bulk()
     string = prefix
-    string += "Water level: {:1.2f} m\nDischarge: {:1.2f} m3/s".format(_ds.transect.h_a, Q.values)
+    string += f"$h_a$: {_ds.transect.h_a:1.2f} m | $v_{{surf}}$: {v_surf.values:1.2f} m/s | $\overline{{v}}$: {v_bulk.values:1.2f} m/s\n$Q$: {Q.values:1.2f} m3/s" # .format(_ds.transect.h_a, Q.values)
     if "q_nofill" in ds:
         _ds.transect.get_river_flow(q_name="q_nofill")
         Q_nofill = np.abs(_ds.river_flow)
@@ -765,7 +767,7 @@ def plot_text(ax, ds, prefix, suffix):
         xloc,
         yloc,
         string,
-        size=24,
+        size=18,
         horizontalalignment="right",
         verticalalignment="top",
         path_effects=path_effects,

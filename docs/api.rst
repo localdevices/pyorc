@@ -371,6 +371,11 @@ Class and properties
     Transect.camera_config
     Transect.camera_shape
     Transect.h_a
+    Transect.wetted_surface_polygon
+    Transect.wetted_perimeter_linestring
+    Transect.wetted_surface
+    Transect.wetted_perimeter
+
 
 Derivatives
 -----------
@@ -384,6 +389,8 @@ Derivatives
     Transect.get_bottom_surface_z_perspective
     Transect.get_transect_perspective
     Transect.get_wetted_perspective
+    Transect.get_v_surf
+    Transect.get_v_bulk
 
 .. _river_flow:
 

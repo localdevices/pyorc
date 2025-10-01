@@ -2,6 +2,7 @@
 
 import numpy as np
 import xarray as xr
+from shapely import geometry
 from xarray.core import utils
 
 from pyorc import helpers
@@ -33,6 +34,26 @@ class Transect(ORCBase):
             return None
         coords = [[_x, _y, _z] for _x, _y, _z in zip(self._obj.xcoords, self._obj.ycoords, self._obj.zcoords)]
         return CrossSection(camera_config=self.camera_config, cross_section=coords)
+
+    @property
+    def wetted_surface_polygon(self) -> geometry.MultiPolygon:
+        """Return wetted surface as `shapely.geometry.MultiPolygon` object."""
+        return self.cross_section.get_wetted_surface_sz(self.h_a)
+
+    @property
+    def wetted_perimeter_linestring(self) -> geometry.MultiLineString:
+        """Return wetted perimeter as `shapely.geometry.MultiLineString` object."""
+        return self.cross_section.get_wetted_surface_sz(self.h_a, perimeter=True)
+
+    @property
+    def wetted_surface(self) -> float:
+        """Return wetted surface as float."""
+        return self.wetted_surface_polygon.area
+
+    @property
+    def wetted_perimeter(self) -> float:
+        """Return wetted perimeter as float."""
+        return self.wetted_perimeter_linestring.length
 
     def vector_to_scalar(self, v_x="v_x", v_y="v_y"):
         """Set "v_eff" and "v_dir" variables as effective velocities over cross-section, and its angle.
@@ -129,30 +150,6 @@ class Transect(ORCBase):
         points_proj = self.camera_config.project_points(points, within_image=within_image, swap_y_coords=True)
         return points_proj
 
-    def get_wetted_perspective(self, h, sample_size=1000):
-        """Get wetted polygon in camera perspective.
-
-        Parameters
-        ----------
-        h : float
-            The water level value to calculate the surface perspective.
-        sample_size : int, optional
-            The number of points to densify the transect with, by default 1000
-
-        Returns
-        -------
-        ndarray
-            A numpy array containing the points forming the wetted polygon perspective.
-
-        """
-        bottom_points, surface_points = self.get_bottom_surface_z_perspective(h=h, sample_size=sample_size)
-        # concatenate points reversing one set for preps of a polygon
-        pol_points = np.concatenate([bottom_points, np.flipud(surface_points)], axis=0)
-
-        # add the first point at the end to close the polygon
-        pol_points = np.concatenate([pol_points, pol_points[0:1]], axis=0)
-        return pol_points
-
     def get_depth_perspective(self, h, sample_size=1000, interval=25):
         """Get line (x, y) pairs that show the depth over several intervals in the wetted part of the cross section.
 
@@ -177,64 +174,59 @@ class Transect(ORCBase):
         # make line pairs
         return list(zip(bottom_points, surface_points))
 
-    def get_xyz_perspective(self, trans_mat=None, xs=None, ys=None, mask_outside=True):
-        """Get camera-perspective column, row coordinates from cross-section locations.
+    def get_v_surf(self, v_name="v_eff"):
+        """Compute mean surface velocity in locations that are below water level.
 
         Parameters
         ----------
-        trans_mat : np.ndarray, optional
-             perspective transform matrix (Default value = None)
-        xs : np.array, optional
-            x-coordinates to transform, derived from self.x if not provided (Default value = None)
-        ys :
-            y-coordinates to transform, derived from self.y if not provided (Default value = None)
-        mask_outside :
-            values not fitting in the original camera frame are set to NaN (Default value = True)
+        v_name : str, optional
+             name of variable where surface velocities [m s-1] are stored (Default value = "v_eff")
 
         Returns
         -------
-        cols : list of ints
-            columns of locations in original camera perspective
-        rows : list of ints
-            rows of locations in original camera perspective
-
+        xr.DataArray
+            mean surface velocities for all provided quantiles or time steps
 
         """
-        if xs is None:
-            xs = self._obj.x.values
-        if ys is None:
-            ys = self._obj.y.values
-        # compute bathymetry as measured in local height reference (such as staff gauge)
-        # if self.camera_config.gcps["h_ref"] is None:
-        #     h_ref = 0.0
-        # else:
-        #     h_ref = self.camera_config.gcps["h_ref"]
-        hs = self.camera_config.z_to_h(self._obj.zcoords).values
-        # zs = (self._obj.zcoords - self.camera_config.gcps["z_0"] + h_ref).values
-        if trans_mat is None:
-            ms = [self.camera_config.get_M(h, reverse=True, to_bbox_grid=True) for h in hs]
-        else:
-            # use user defined M instead
-            ms = [trans_mat for _ in hs]
-        # compute row and column position of vectors in original reprojected background image col/row coordinates
-        cols, rows = zip(
-            *[
-                helpers.xy_to_perspective(
-                    x, y, self.camera_config.resolution, trans_mat, reverse_y=self.camera_config.shape[0]
-                )
-                for x, y, trans_mat in zip(xs, ys, ms)
-            ],
-        )
-        # ensure y coordinates start at the top in the right orientation
-        shape_y, shape_x = self.camera_shape
-        rows = shape_y - np.array(rows)
-        cols = np.array(cols)
-        if mask_outside:
-            # remove values that do not fit in the frames
-            cols[np.any([cols < 0, cols > self.camera_shape[1]], axis=0)] = np.nan
-            rows[np.any([rows < 0, rows > self.camera_shape[0]], axis=0)] = np.nan
+        ## Mean velocity over entire profile
+        z_a = self.camera_config.h_to_z(self.h_a)
 
-        return cols, rows
+        depth = z_a - self._obj.zcoords
+        depth[depth < 0] = 0.0
+
+        # ds.transect.camera_config.get_depth(ds.zcoords, ds.transect.h_a)
+        wet_scoords = self._obj.scoords[depth > 0].values
+        if len(wet_scoords) == 0:
+            # no wet points found. Velocity can only be missing
+            v_av = np.nan
+        if len(wet_scoords) > 1:
+            velocity_int = self._obj[v_name].fillna(0.0).integrate(coord="scoords")  # m2/s
+            width = (wet_scoords[-1] + (wet_scoords[-1] - wet_scoords[-2]) * 0.5) - (
+                wet_scoords[0] - (wet_scoords[1] - wet_scoords[0]) * 0.5
+            )
+            v_av = velocity_int / width
+        else:
+            v_av = self._obj[v_name][:, depth > 0]
+        return v_av
+
+    def get_v_bulk(self, q_name="q"):
+        """Compute the bulk velocity.
+
+        Parameters
+        ----------
+        q_name : str, optional
+            name of variable where depth integrated velocities [m2 s-1] are stored (Default value = "q")
+
+        Returns
+        -------
+        xr.DataArray
+            bulk velocities for all provided quantiles or time steps
+
+        """
+        discharge = self._obj[q_name].fillna(0.0).integrate(coord="scoords")
+        wet_surf = self.wetted_surface
+        v_bulk = discharge / wet_surf
+        return v_bulk
 
     def get_river_flow(self, q_name="q", discharge_name="river_flow"):
         """Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1].

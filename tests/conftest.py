@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -12,6 +13,9 @@ from matplotlib import backend_bases
 from shapely import wkt
 
 import pyorc
+
+# suppress output of plots
+matplotlib.use("Agg")
 
 EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples")
 
