@@ -3,6 +3,7 @@
 import copy
 import os
 import warnings
+from typing import List, Optional, Union
 
 import cv2
 import numpy as np
@@ -500,73 +501,81 @@ def _gftt_split(img, split, n_pts, mask=None):
     return pts
 
 
-def solvepnp(dst, src, camera_matrix, dist_coeffs):
-    """Solve p-n-p problem.
+def calibrate(
+    dst: Union[np.array, List],
+    src: Union[np.array, List],
+    rvec: Optional[Union[np.array, List]] = None,
+    tvec: Optional[Union[np.array, List]] = None,
+    camera_position: Optional[Union[np.array, List]] = None,
+    camera_matrix: Optional[Union[np.array, List]] = None,
+    dist_coeffs: Optional[Union[np.array, List]] = None,
+):
+    """Calibrate extrinsic and intrinsic transformation parameters between two coordinate systems.
 
-    Wrapper for cv2.SolvePnP with pre-processing of the input data and selection of the correct flags.
-
-    Parameters
-    ----------
-    src : list of lists
-        [x, y] with source coordinates, typically cols and rows in image
-    dst : list of lists
-        [x, y] (in case of 4 planar points) or [x, y, z] (in case of 6+ 3D points) with target coordinates after
-        reprojection, can e.g. be in crs [m]
-    camera_matrix : np.ndarray (3x3)
-        Camera intrinsic matrix
-    dist_coeffs : p.ndarray, optional
-        1xN array with distortion coefficients (N = 4, 5 or 8)
-
-    Returns
-    -------
-    succes : int
-        0, 1 for succes or no succes
-    rvec : np.array
-        rotation vector
-    tvec : np.array
-        translation vector
-
-    """
-    # set points to float32
-    _src = np.float64(src)
-    _dst = np.float64(dst)
-
-    if len(_dst) == 4:
-        flags = cv2.SOLVEPNP_P3P
-        # if 4 x, y points are provided, add a column with zeros
-        # _dst = np.c_[_dst, np.zeros(4)]
-    else:
-        flags = cv2.SOLVEPNP_ITERATIVE
-
-    camera_matrix = np.float32(camera_matrix)
-    dist_coeffs = np.float32(dist_coeffs)
-    # define transformation matrix based on GCPs
-    return cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs, flags=flags)
-
-
-def transform(img, m):
-    """Affine-transform image using specified affine transform matrix.
-
-    Typically the transformation is derived for image stabilization purposes.
+    Dependent on provided information, this function calibrates rotation and translation vectors (extrinsic)
+    and focal length and distortion parameters (extrinsic) if required.
 
     Parameters
     ----------
-    img : np.ndarray 2D [MxN] or 3D [MxNx3] if RGB image
-        Image used as input
-    m : np.ndarray [2x3]
-        Affine transformation
+    dst : array-like
+        The destination points in the real-world (x, y, z) coordinate system.
+    src : array-like
+        The source points (col, row) that need to be transformed to align with the
+        destination points.
+    rvec : array-like, optional
+        Rotation vector (cv2-compatible). Estimated if not provided
+    tvec : array-like, optional
+        Translation vector (cv2-compatible). Estimated if not provided.
+    camera_position : array-like, optional
+        Position of lens in real-world coordinates.
+    camera_matrix : array-like, optional
+        Camera matrix (cv2-compatible). Estimated (only focal length) if not provided.
+    dist_coeffs : array-like, optional
+        Distortion coefficients (cv2-compatible). Estimated (only k1 and k2) if not provided.
 
     Returns
     -------
-    img_transform : np.ndarray 2D [MxN] or 3D [MxNx3] if RGB image
-        Image after affine transform applied
+    tuple[dict, dict]
+        - dict: A dictionary containing the extrinsic and intrinsic transformation parameters.
+        - dict: A dictionary containing the optimization results including error in real-world and pixel space.
+
+    Raises
+    ------
+    ValueError
+        If the provided points are insufficient, mismatched, or cannot
+        be used for calibration calculations.
+    TypeError
+        If the input arguments are of a format or type that is not
+        supported.
 
     """
-    h = img.shape[0]
-    w = img.shape[1]
-    # Apply affine wrapping to the given frame
-    img_transform = cv2.warpAffine(img, m, (w, h))
-    return img_transform
+    # def _evaluate_inputs(rvec, tvec, camera_position, camera_matrix, dist_coeffs):
+    #     """Evaluate what case for intrinsic or extrinsic calibration is required."""
+    #     # with minimum inputs, we must evaluate everything
+    #     eval_func = err_no_constraints  # compute error without additional constraints
+    #     required_points = 6
+    #     if camera_position is not None:
+    #         if dist_coeffs is not None:
+    #             required_points = 3  # only 3 are required when camera position is known and dist coeffs are known
+    #             if camera_matrix is not None:
+    #                 eval_func = err_len_pos_intrinsics  # error with lens position and intrinsics pre-defined
+    #             else:
+    #                 # error with lens position and only distortion coefficients pre-defined
+    #                 eval_func = err_lens_pos_dist_coeffs
+    #         else:
+    #             # case iwth camera position known but no intrinsics known
+    #             eval_func = err_lens_pos
+    #     else:
+    #         # no lens position known, intrinsics could be known
+    #         if dist_coeffs is not None:
+    #             required_points = 2
+    #             eval_func =
+    #     if camera_position is not None:
+    #         if
+    #
+    #
+    # eval_func, required_points = _evaluate_inputs(rvec, tvec, camera_position, camera_matrix, dist_coeffs)
+    pass
 
 
 def calibrate_camera(
@@ -1218,6 +1227,75 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
     # print(f"CAMERA MATRIX: {camera_matrix}")
     # print(f"DIST COEFFS: {dist_coeffs}")
     return camera_matrix, dist_coeffs, opt.fun
+
+
+def solvepnp(dst, src, camera_matrix, dist_coeffs):
+    """Solve p-n-p problem.
+
+    Wrapper for cv2.SolvePnP with pre-processing of the input data and selection of the correct flags.
+
+    Parameters
+    ----------
+    src : list of lists
+        [x, y] with source coordinates, typically cols and rows in image
+    dst : list of lists
+        [x, y] (in case of 4 planar points) or [x, y, z] (in case of 6+ 3D points) with target coordinates after
+        reprojection, can e.g. be in crs [m]
+    camera_matrix : np.ndarray (3x3)
+        Camera intrinsic matrix
+    dist_coeffs : p.ndarray, optional
+        1xN array with distortion coefficients (N = 4, 5 or 8)
+
+    Returns
+    -------
+    succes : int
+        0, 1 for succes or no succes
+    rvec : np.array
+        rotation vector
+    tvec : np.array
+        translation vector
+
+    """
+    # set points to float32
+    _src = np.float64(src)
+    _dst = np.float64(dst)
+
+    if len(_dst) == 4:
+        flags = cv2.SOLVEPNP_P3P
+        # if 4 x, y points are provided, add a column with zeros
+        # _dst = np.c_[_dst, np.zeros(4)]
+    else:
+        flags = cv2.SOLVEPNP_ITERATIVE
+
+    camera_matrix = np.float32(camera_matrix)
+    dist_coeffs = np.float32(dist_coeffs)
+    # define transformation matrix based on GCPs
+    return cv2.solvePnP(_dst, _src, camera_matrix, dist_coeffs, flags=flags)
+
+
+def transform(img, m):
+    """Affine-transform image using specified affine transform matrix.
+
+    Typically the transformation is derived for image stabilization purposes.
+
+    Parameters
+    ----------
+    img : np.ndarray 2D [MxN] or 3D [MxNx3] if RGB image
+        Image used as input
+    m : np.ndarray [2x3]
+        Affine transformation
+
+    Returns
+    -------
+    img_transform : np.ndarray 2D [MxN] or 3D [MxNx3] if RGB image
+        Image after affine transform applied
+
+    """
+    h = img.shape[0]
+    w = img.shape[1]
+    # Apply affine wrapping to the given frame
+    img_transform = cv2.warpAffine(img, m, (w, h))
+    return img_transform
 
 
 def transform_to_bbox(coords, bbox, resolution):
