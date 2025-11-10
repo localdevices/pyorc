@@ -613,7 +613,9 @@ class CrossSection:
             raise ValueError("Amount of water line crossings must be 2 for a planar surface estimate.")
         return geometry.Polygon(list(wls[0].coords) + list(wls[1].coords[::-1]))
 
-    def get_wetted_surface_sz(self, h: float, perimeter: bool = False) -> Union[geometry.MultiPolygon, geometry.MultiLineString]:
+    def get_wetted_surface_sz(
+        self, h: float, perimeter: bool = False
+    ) -> Union[geometry.MultiPolygon, geometry.MultiLineString]:
         """Retrieve a wetted surface or perimeter perpendicular to flow direction (SZ) for a water level.
 
         This returns a `geometry.MultiPolygon` when a surface is requested (`perimeter=False`), and
@@ -1097,6 +1099,80 @@ class CrossSection:
             )
         return ax
 
+    def _preprocess_water_level(
+        self,
+        bank: BANK_OPTIONS = "far",
+        min_h: Optional[float] = None,
+        max_h: Optional[float] = None,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
+    ):
+        """Preprocess the selection of coordinates for water level evaluation."""
+        if min_z is None:
+            if min_h is not None:
+                min_z = self.camera_config.h_to_z(min_h)
+                min_z = np.maximum(min_z, self.z.min())
+        if max_z is None:
+            if max_h is not None:
+                max_z = self.camera_config.h_to_z(max_h)
+                max_z = np.minimum(max_z, self.z.max())
+        if min_z and max_z:
+            if min_z > max_z:
+                raise ValueError("Minimum water level is higher than maximum water level.")
+        return self.get_line_of_interest(bank=bank)
+
+    def _preprocess_l_range(self, l_min: float, l_max: float) -> List[float]:
+        """Generate a list of evaluation points between l_min and l_max for water level detection.
+
+        Controls on evaluation are that vertically (using `self.z`), points are at least 0.02 meters apart and
+        horizontally (using `self.s`), points are included if the distance between them exceeds 0.1 meters.
+
+        Parameters
+        ----------
+        l_min: float
+            Minimum l value for evaluation.
+        l_max: float
+            Maximum l value for evaluation.
+
+        Returns
+        -------
+        List[float]
+            A list of coordinates (x, y, z) for evaluation.
+
+        """
+        # Initial list of evaluation points
+        l_range = []
+        z_range = []
+        # Start with the first point within the range
+        current_l = l_min
+        last_z = None
+        last_s = None
+
+        # Iterate over the self.l values by interpolating within the range
+        while current_l <= l_max:
+            # Interpolate x, y, z, and s using the available properties
+            # x = self.interp_x(current_l)
+            # y = self.interp_y(current_l)
+            z = self.interp_z(current_l)
+            s = self.interp_s_from_l(current_l)
+
+            # Append the point if it satisfies the required criteria
+            if last_z is None or last_s is None or abs(z - last_z) >= 0.03 or abs(s - last_s) >= 0.5:
+                l_range.append(current_l)
+                z_range.append(z)
+                last_z = z
+                last_s = s
+
+            # Increment l
+            current_l += 0.02  # Increment in steps small enough to meet any constraint
+
+        # add the final l
+        if current_l > l_max:
+            l_range.append(l_max)
+            z_range.append(self.interp_z(l_max))
+
+        return l_range, z_range
+
     def detect_water_level(
         self,
         img: np.ndarray,
@@ -1148,18 +1224,7 @@ class CrossSection:
             same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
 
         """
-        if min_z is None:
-            if min_h is not None:
-                min_z = self.camera_config.h_to_z(min_h)
-                min_z = np.maximum(min_z, self.z.min())
-        if max_z is None:
-            if max_h is not None:
-                max_z = self.camera_config.h_to_z(max_h)
-                max_z = np.minimum(max_z, self.z.max())
-        if min_z and max_z:
-            if min_z > max_z:
-                raise ValueError("Minimum water level is higher than maximum water level.")
-
+        l_min, l_max = self._preprocess_water_level(bank=bank, min_h=min_h, max_h=max_h, min_z=min_z, max_z=max_z)
         if len(img.shape) == 3:
             # flatten image first if it his a time dimension
             img = img.mean(axis=2)
@@ -1169,9 +1234,7 @@ class CrossSection:
         assert (
             img.shape[1] == self.camera_config.width
         ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
-        # determine the relevant start point if only one is used
-        # import pdb;pdb.set_trace()
-        l_min, l_max = self.get_line_of_interest(bank=bank)
+
         opt = differential_evolution(
             self.get_histogram_score,
             popsize=50,
@@ -1179,6 +1242,9 @@ class CrossSection:
             args=(img, bin_size, offset, padding, length, min_z, max_z),
             atol=0.01,  # one mm
         )
+        # gridded results
+        # l_range = np.arange(l_min, l_max, 0.02)
+        print(opt)
         z = self.interp_z(opt.x[0])
         h = self.camera_config.z_to_h(z)
         # warning if the optimum is on the edge of the search space for l
@@ -1190,3 +1256,102 @@ class CrossSection:
                 stacklevel=2,
             )
         return h
+
+    def evaluate_water_level(
+        self,
+        img: np.ndarray,
+        bank: BANK_OPTIONS = "far",
+        bin_size: int = 5,
+        length: float = 2.0,
+        padding: float = 0.5,
+        offset: float = 0.0,
+        min_h: Optional[float] = None,
+        max_h: Optional[float] = None,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
+    ) -> float:
+        """Detect water level optically from provided image.
+
+        Water level detection is done by first detecting the water line along the cross-section by comparisons
+        of distribution functions left and right of hypothesized water lines, and then looking up the water level
+        associated with the water line location.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            image (uint8) used to estimate water level from.
+        bank: Literal["far", "near", "both"], optional
+            select from which bank to detect the water level. Use this if camera is positioned in a way that only
+            one shore is clearly distinguishable and not obscured. Typically you will use "far" if the camera is
+            positioned on one bank, aimed perpendicular to the flow. Use "near" if not the full cross section is
+            visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and
+            approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based
+            on the best estimate from both banks.
+        bin_size : int, optional
+            Size of bins for histogram calculation of the provided image intensities, default 5.
+        length : float, optional
+            length of the waterline [m], by default 2.0
+        padding : float, optional
+            amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn
+            left and right of hypothesized water line at -padding and +padding.
+        offset : float, optional
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0
+        min_h : float, optional
+            minimum water level to try detection [m]. If not provided, the minimum water level is taken from the
+            cross section.
+        max_h : float, optional
+            maximum water level to try detection [m]. If not provided, the maximum water level is taken from the
+            cross section.
+        min_z : float, optional
+            same as min_h but using z-coordinates instead of local datum, min_z overrules min_h
+        max_z : float, optional
+            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
+
+        """
+        l_min, l_max = self._preprocess_water_level(bank=bank, min_h=min_h, max_h=max_h, min_z=min_z, max_z=max_z)
+        l_range, z_range = self._preprocess_l_range(l_min=l_min, l_max=l_max)
+        if len(img.shape) == 3:
+            # flatten image first if it his a time dimension
+            img = img.mean(axis=2)
+        assert (
+            img.shape[0] == self.camera_config.height
+        ), f"Image height {img.shape[0]} is not the same as camera_config height {self.camera_config.height}"
+        assert (
+            img.shape[1] == self.camera_config.width
+        ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
+
+        # opt = differential_evolution(
+        #     self.get_histogram_score,
+        #     popsize=50,
+        #     bounds=[(l_min, l_max)],
+        #     args=(img, bin_size, offset, padding, length, min_z, max_z),
+        #     atol=0.01,  # one mm
+        # )
+        # gridded results
+        results = [
+            self.get_histogram_score(
+                x=[l],
+                img=img,
+                bin_size=bin_size,
+                offset=offset,
+                padding=padding,
+                length=length,
+                min_z=min_z,
+                max_z=max_z,
+            )
+            for l in l_range
+        ]
+        return l_range, z_range, results
+
+        #
+        # z = self.interp_z(opt.x[0])
+        # h = self.camera_config.z_to_h(z)
+        # # warning if the optimum is on the edge of the search space for l
+        # if np.isclose(opt.x[0], l_min) or np.isclose(opt.x[0], l_max):
+        #     warnings.warn(
+        #         f"The detected water level is on the edge of the search space and may be wrong. "
+        #         f"Water level is {h} m. at cross-section length {opt.x[0]}.",
+        #         UserWarning,
+        #         stacklevel=2,
+        #     )
+        # return h
