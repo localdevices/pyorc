@@ -1171,7 +1171,7 @@ class CrossSection:
             l_range.append(l_max)
             z_range.append(self.interp_z(l_max))
 
-        return l_range, z_range
+        return np.array(l_range), np.array(z_range)
 
     def detect_water_level(
         self,
@@ -1310,6 +1310,7 @@ class CrossSection:
         """
         l_min, l_max = self._preprocess_water_level(bank=bank, min_h=min_h, max_h=max_h, min_z=min_z, max_z=max_z)
         l_range, z_range = self._preprocess_l_range(l_min=l_min, l_max=l_max)
+
         if len(img.shape) == 3:
             # flatten image first if it his a time dimension
             img = img.mean(axis=2)
@@ -1320,13 +1321,6 @@ class CrossSection:
             img.shape[1] == self.camera_config.width
         ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
 
-        # opt = differential_evolution(
-        #     self.get_histogram_score,
-        #     popsize=50,
-        #     bounds=[(l_min, l_max)],
-        #     args=(img, bin_size, offset, padding, length, min_z, max_z),
-        #     atol=0.01,  # one mm
-        # )
         # gridded results
         results = [
             self.get_histogram_score(
@@ -1342,16 +1336,3 @@ class CrossSection:
             for l in l_range
         ]
         return l_range, z_range, results
-
-        #
-        # z = self.interp_z(opt.x[0])
-        # h = self.camera_config.z_to_h(z)
-        # # warning if the optimum is on the edge of the search space for l
-        # if np.isclose(opt.x[0], l_min) or np.isclose(opt.x[0], l_max):
-        #     warnings.warn(
-        #         f"The detected water level is on the edge of the search space and may be wrong. "
-        #         f"Water level is {h} m. at cross-section length {opt.x[0]}.",
-        #         UserWarning,
-        #         stacklevel=2,
-        #     )
-        # return h
