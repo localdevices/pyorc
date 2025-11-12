@@ -31,29 +31,46 @@ def get_water_level(
     n_start: int = 0,
     n_end: int = 1,
     method: const.ALLOWED_COLOR_METHODS_WATER_LEVEL = "grayscale",
+    s2n_thres: float = 3.0,
     frames_options: Optional[Dict] = None,
     water_level_options: Optional[Dict] = None,
+    logger: logging.Logger = logger,
 ):
     water_level_options = {} if water_level_options is None else water_level_options
     frames_options = {} if frames_options is None else frames_options
+    # if frames_options is list of dict then continue, if not then make list of dict
+    if not isinstance(frames_options, list):
+        frames_options = [frames_options]
+    for frames_options_ in frames_options:
+        # get method from frames_options if available, otherwise use the parent or default one
+        method_ = frames_options_.pop("method", method)
+        s2n_thres_ = frames_options_.pop("s2n_thres", s2n_thres)
 
-    if method not in ["grayscale", "hue", "sat", "val"]:
-        raise ValueError(
-            f"Method {method} not supported for water level detection, choose one"
-            f" of {const.ALLOWED_COLOR_METHODS_WATER_LEVEL}"
-        )
-    da_frames = video.get_frames(method=method)[n_start:n_end]
-    # preprocess
-    da_frames = apply_methods(da_frames, "frames", logger=logger, skip_args=["to_video"], **frames_options)
-    # if preprocessing still results in a time dim, average in time
-    if "time" in da_frames.dims:
-        da_mean = da_frames.mean(dim="time")
-    else:
-        da_mean = da_frames
-    # extract the image
-    img = np.uint8(da_mean.values)
-    h_a = cross_section.detect_water_level(img, **water_level_options)
-    return h_a
+        if method_ not in ["grayscale", "hue", "sat", "val"]:
+            raise ValueError(
+                f"Method {method} not supported for water level detection, choose one"
+                f" of {const.ALLOWED_COLOR_METHODS_WATER_LEVEL}"
+            )
+        da_frames = video.get_frames(method=method_)[n_start:n_end]
+        # preprocess
+        logger.debug(f"Applying preprocessing methods {frames_options_}")
+        da_frames = apply_methods(da_frames, "frames", logger=logger, skip_args=["to_video"], **frames_options_)
+        # if preprocessing still results in a time dim, average in time
+        if "time" in da_frames.dims:
+            da_mean = da_frames.mean(dim="time")
+        else:
+            da_mean = da_frames
+        # extract the image
+        img = np.uint8(da_mean.values)
+        h_a, s2n = cross_section.detect_water_level_s2n(img, **water_level_options)
+        if s2n > s2n_thres_:
+            # high enough signal-to-noise ratio, so return, otherwise continue with next frame treatment set
+            logger.debug(f"Found significant water level at h: {h_a:.3f} m with signal-to-noise: {s2n} > {s2n_thres_}")
+            return h_a
+        else:
+            logger.debug(f"Found water level at h: {h_a:.3f} m with too low signal-to-noise: {s2n} < {s2n_thres_}")
+    # if none of frame treatments gives a satisfactory h_a, return None
+    return
 
 
 def vmin_vmax_to_norm(opts):
@@ -434,7 +451,8 @@ class VelocityFlowProcessor(object):
     def water_level(self, **kwargs):
         try:
             self.logger.debug("Estimating water level from video by crossing water line with cross section.")
-            h_a = get_water_level(self.video_obj, cross_section=self.cross_section_wl, **kwargs)
+
+            h_a = get_water_level(self.video_obj, cross_section=self.cross_section_wl, logger=self.logger, **kwargs)
             if h_a is None:
                 self.logger.error("Water level could not be estimated from video. Please set a water level with --h_a.")
                 raise click.Abort()

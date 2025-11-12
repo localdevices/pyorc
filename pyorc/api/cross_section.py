@@ -1102,23 +1102,8 @@ class CrossSection:
     def _preprocess_water_level(
         self,
         bank: BANK_OPTIONS = "far",
-        min_h: Optional[float] = None,
-        max_h: Optional[float] = None,
-        min_z: Optional[float] = None,
-        max_z: Optional[float] = None,
     ):
         """Preprocess the selection of coordinates for water level evaluation."""
-        if min_z is None:
-            if min_h is not None:
-                min_z = self.camera_config.h_to_z(min_h)
-                min_z = np.maximum(min_z, self.z.min())
-        if max_z is None:
-            if max_h is not None:
-                max_z = self.camera_config.h_to_z(max_h)
-                max_z = np.minimum(max_z, self.z.max())
-        if min_z and max_z:
-            if min_z > max_z:
-                raise ValueError("Minimum water level is higher than maximum water level.")
         return self.get_line_of_interest(bank=bank)
 
     def _preprocess_l_range(self, l_min: float, l_max: float, ds_max=0.5, dz_max=0.02) -> List[float]:
@@ -1186,6 +1171,94 @@ class CrossSection:
         z_range = np.array(z_range)[sorted_indices]
 
         return l_range, z_range
+
+    def _water_level_score_range(
+        self,
+        img: np.ndarray,
+        bank: BANK_OPTIONS = "far",
+        bin_size: int = 5,
+        length: float = 2.0,
+        padding: float = 0.5,
+        offset: float = 0.0,
+        ds_max: Optional[float] = 0.5,
+        dz_max: Optional[float] = 0.02,
+        min_h: Optional[float] = None,
+        max_h: Optional[float] = None,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
+    ) -> float:
+        """Evaluate a range of scores for water level detection.
+
+        This computes the histogram score for a range of l values and returns all scores for further evaluation.
+        The histogram score is a measure of dissimilarity (low means very dissimilar) of pixel intensity distributions
+        left and right of hypothesized water lines. The evaluation points along the cross section (l-values) are
+        determined by two parameters max_ds (maximum step in horizontal direction) and max_dz (maximum step in vertical
+        direction).
+
+        Parameters
+        ----------
+        img : np.ndarray
+            image (uint8) used to estimate water level from.
+        bank: Literal["far", "near", "both"], optional
+            select from which bank to detect the water level. Use this if camera is positioned in a way that only
+            one shore is clearly distinguishable and not obscured. Typically you will use "far" if the camera is
+            positioned on one bank, aimed perpendicular to the flow. Use "near" if not the full cross section is
+            visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and
+            approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based
+            on the best estimate from both banks.
+        bin_size : int, optional
+            Size of bins for histogram calculation of the provided image intensities, default 5.
+        length : float, optional
+            length of the waterline [m], by default 2.0
+        padding : float, optional
+            amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn
+            left and right of hypothesized water line at -padding and +padding.
+        offset : float, optional
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0
+        ds_max : float, optional
+            maximum step size between evaluation points in horizontal direction, by default 0.5.
+        dz_max : float, optional
+            maximum step size between evaluation points in vertical direction, by default 0.02.
+        min_h : float, optional
+            minimum water level to try detection [m]. If not provided, the minimum water level is taken from the
+            cross section.
+        max_h : float, optional
+            maximum water level to try detection [m]. If not provided, the maximum water level is taken from the
+            cross section.
+        min_z : float, optional
+            same as min_h but using z-coordinates instead of local datum, min_z overrules min_h
+        max_z : float, optional
+            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
+
+        """
+        l_min, l_max = self._preprocess_water_level(bank=bank)
+        l_range, z_range = self._preprocess_l_range(l_min=l_min, l_max=l_max, ds_max=ds_max, dz_max=dz_max)
+
+        if len(img.shape) == 3:
+            # flatten image first if it his a time dimension
+            img = img.mean(axis=2)
+        assert (
+            img.shape[0] == self.camera_config.height
+        ), f"Image height {img.shape[0]} is not the same as camera_config height {self.camera_config.height}"
+        assert (
+            img.shape[1] == self.camera_config.width
+        ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
+
+        # gridded results
+        results = [
+            self.get_histogram_score(
+                x=[l],
+                img=img,
+                bin_size=bin_size,
+                offset=offset,
+                padding=padding,
+                length=length,
+                min_z=min_z,
+                max_z=max_z,
+            )
+            for l in l_range
+        ]
+        return l_range, z_range, results
 
     def detect_water_level(
         self,
@@ -1268,7 +1341,7 @@ class CrossSection:
             )
         return h
 
-    def _water_level_score_range(
+    def detect_water_level_s2n(
         self,
         img: np.ndarray,
         bank: BANK_OPTIONS = "far",
@@ -1283,13 +1356,11 @@ class CrossSection:
         min_z: Optional[float] = None,
         max_z: Optional[float] = None,
     ) -> float:
-        """Evaluate a range of scores for water level detection.
+        """Detect water level optically from provided image.
 
-        This computes the histogram score for a range of l values and returns all scores for further evaluation.
-        The histogram score is a measure of dissimilarity (low means very dissimilar) of pixel intensity distributions
-        left and right of hypothesized water lines. The evaluation points along the cross section (l-values) are
-        determined by two parameters max_ds (maximum step in horizontal direction) and max_dz (maximum step in vertical
-        direction).
+        Water level detection is done by first detecting the water line along the cross-section by comparisons
+        of distribution functions left and right of hypothesized water lines, and then looking up the water level
+        associated with the water line location.
 
         Parameters
         ----------
@@ -1327,31 +1398,24 @@ class CrossSection:
             same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
 
         """
-        l_min, l_max = self._preprocess_water_level(bank=bank, min_h=min_h, max_h=max_h, min_z=min_z, max_z=max_z)
-        l_range, z_range = self._preprocess_l_range(l_min=l_min, l_max=l_max, ds_max=ds_max, dz_max=dz_max)
-
-        if len(img.shape) == 3:
-            # flatten image first if it his a time dimension
-            img = img.mean(axis=2)
-        assert (
-            img.shape[0] == self.camera_config.height
-        ), f"Image height {img.shape[0]} is not the same as camera_config height {self.camera_config.height}"
-        assert (
-            img.shape[1] == self.camera_config.width
-        ), f"Image width {img.shape[1]} is not the same as camera_config width {self.camera_config.width}"
-
-        # gridded results
-        results = [
-            self.get_histogram_score(
-                x=[l],
-                img=img,
-                bin_size=bin_size,
-                offset=offset,
-                padding=padding,
-                length=length,
-                min_z=min_z,
-                max_z=max_z,
-            )
-            for l in l_range
-        ]
-        return l_range, z_range, results
+        l_range, z_range, results = self._water_level_score_range(
+            img=img,
+            bank=bank,
+            bin_size=bin_size,
+            length=length,
+            padding=padding,
+            offset=offset,
+            ds_max=ds_max,
+            dz_max=dz_max,
+            min_h=min_h,
+            max_h=max_h,
+            min_z=min_z,
+            max_z=max_z,
+        )
+        # find optimum (minimum score)
+        idx = np.argmin(results)
+        s2n = np.mean(results) / results[idx]
+        z = z_range[idx]
+        h = self.camera_config.z_to_h(z)
+        # warning if the optimum is on the edge of the search space for l
+        return h, s2n
