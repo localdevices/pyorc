@@ -1061,7 +1061,7 @@ def get_polygon_pixels(img, pol, reverse_y=False):
     if reverse_y:
         img = np.flipud(img)
 
-    # Step 2: Crop the image based on the bounding box
+    # Crop the image based on the bounding box
     cropped_img = img[min_y:max_y, min_x:max_x]
     # reduce polygon coordinates to ensure compatibility with cropped_img
     cropped_polygon_coords = [(x - min_x, y - min_y) for x, y in pol.exterior.coords]

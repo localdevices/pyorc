@@ -1121,11 +1121,11 @@ class CrossSection:
                 raise ValueError("Minimum water level is higher than maximum water level.")
         return self.get_line_of_interest(bank=bank)
 
-    def _preprocess_l_range(self, l_min: float, l_max: float) -> List[float]:
+    def _preprocess_l_range(self, l_min: float, l_max: float, ds_max=0.5, dz_max=0.02) -> List[float]:
         """Generate a list of evaluation points between l_min and l_max for water level detection.
 
-        Controls on evaluation are that vertically (using `self.z`), points are at least 0.02 meters apart and
-        horizontally (using `self.s`), points are included if the distance between them exceeds 0.1 meters.
+        Controls on evaluation are that vertically (using `self.z`), points are at least `dz_max` meters apart and
+        horizontally (using `self.s`), points are included if the distance between them exceeds `dz_min` meters.
 
         Parameters
         ----------
@@ -1133,20 +1133,29 @@ class CrossSection:
             Minimum l value for evaluation.
         l_max: float
             Maximum l value for evaluation.
+        ds_max : float, optional
+            maximum step size between evaluation points in horizontal direction, by default 0.5.
+        dz_max : float, optional
+            maximum step size between evaluation points in vertical direction, by default 0.02.
 
         Returns
         -------
-        List[float]
-            A list of coordinates (x, y, z) for evaluation.
+        Tuple[List[float], List[float]]
+            lists of l-coordinates and associated z-coordinates for evaluation.
 
         """
-        # Initial list of evaluation points
-        l_range = []
-        z_range = []
+        # # Initial list of evaluation points
+        # l_range = []
+        # z_range = []
         # Start with the first point within the range
         current_l = l_min
         last_z = None
         last_s = None
+
+        # Add all points from self.l that lie within [l_min, l_max]
+        valid_l_indices = (self.l >= l_min) & (self.l <= l_max)  # Logical filter
+        l_range = list(self.l[valid_l_indices])
+        z_range = list(self.z[valid_l_indices])
 
         # Iterate over the self.l values by interpolating within the range
         while current_l <= l_max:
@@ -1157,21 +1166,26 @@ class CrossSection:
             s = self.interp_s_from_l(current_l)
 
             # Append the point if it satisfies the required criteria
-            if last_z is None or last_s is None or abs(z - last_z) >= 0.03 or abs(s - last_s) >= 0.5:
+            if last_z is None or last_s is None or abs(z - last_z) >= dz_max or abs(s - last_s) >= ds_max:
                 l_range.append(current_l)
                 z_range.append(z)
                 last_z = z
                 last_s = s
 
             # Increment l
-            current_l += 0.02  # Increment in steps small enough to meet any constraint
+            current_l += 0.01  # Increment in steps small enough to meet any constraint
 
         # add the final l
         if current_l > l_max:
             l_range.append(l_max)
             z_range.append(self.interp_z(l_max))
 
-        return np.array(l_range), np.array(z_range)
+        # sort l_range and z_range by incremental l_range
+        sorted_indices = np.argsort(l_range)
+        l_range = np.array(l_range)[sorted_indices]
+        z_range = np.array(z_range)[sorted_indices]
+
+        return l_range, z_range
 
     def detect_water_level(
         self,
@@ -1242,9 +1256,6 @@ class CrossSection:
             args=(img, bin_size, offset, padding, length, min_z, max_z),
             atol=0.01,  # one mm
         )
-        # gridded results
-        # l_range = np.arange(l_min, l_max, 0.02)
-        print(opt)
         z = self.interp_z(opt.x[0])
         h = self.camera_config.z_to_h(z)
         # warning if the optimum is on the edge of the search space for l
@@ -1257,7 +1268,7 @@ class CrossSection:
             )
         return h
 
-    def evaluate_water_level(
+    def _water_level_score_range(
         self,
         img: np.ndarray,
         bank: BANK_OPTIONS = "far",
@@ -1265,16 +1276,20 @@ class CrossSection:
         length: float = 2.0,
         padding: float = 0.5,
         offset: float = 0.0,
+        ds_max: Optional[float] = 0.5,
+        dz_max: Optional[float] = 0.02,
         min_h: Optional[float] = None,
         max_h: Optional[float] = None,
         min_z: Optional[float] = None,
         max_z: Optional[float] = None,
     ) -> float:
-        """Detect water level optically from provided image.
+        """Evaluate a range of scores for water level detection.
 
-        Water level detection is done by first detecting the water line along the cross-section by comparisons
-        of distribution functions left and right of hypothesized water lines, and then looking up the water level
-        associated with the water line location.
+        This computes the histogram score for a range of l values and returns all scores for further evaluation.
+        The histogram score is a measure of dissimilarity (low means very dissimilar) of pixel intensity distributions
+        left and right of hypothesized water lines. The evaluation points along the cross section (l-values) are
+        determined by two parameters max_ds (maximum step in horizontal direction) and max_dz (maximum step in vertical
+        direction).
 
         Parameters
         ----------
@@ -1296,6 +1311,10 @@ class CrossSection:
             left and right of hypothesized water line at -padding and +padding.
         offset : float, optional
             perpendicular offset of the waterline from the cross-section [m], by default 0.0
+        ds_max : float, optional
+            maximum step size between evaluation points in horizontal direction, by default 0.5.
+        dz_max : float, optional
+            maximum step size between evaluation points in vertical direction, by default 0.02.
         min_h : float, optional
             minimum water level to try detection [m]. If not provided, the minimum water level is taken from the
             cross section.
@@ -1309,7 +1328,7 @@ class CrossSection:
 
         """
         l_min, l_max = self._preprocess_water_level(bank=bank, min_h=min_h, max_h=max_h, min_z=min_z, max_z=max_z)
-        l_range, z_range = self._preprocess_l_range(l_min=l_min, l_max=l_max)
+        l_range, z_range = self._preprocess_l_range(l_min=l_min, l_max=l_max, ds_max=ds_max, dz_max=dz_max)
 
         if len(img.shape) == 3:
             # flatten image first if it his a time dimension
