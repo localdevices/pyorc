@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Transect.get_xyz_perspective &#8212; pyorc 0.8.10 documentation</title>
+    <title>pyorc.Transect.wetted_perimeter_linestring &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -46,12 +46,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Transect.get_xyz_perspective';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Transect.wetted_perimeter_linestring';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyorc.Transect.get_depth_perspective" href="pyorc.Transect.get_depth_perspective.html" />
-    <link rel="prev" title="pyorc.Transect.vector_to_scalar" href="pyorc.Transect.vector_to_scalar.html" />
+    <link rel="next" title="pyorc.Transect.wetted_surface" href="pyorc.Transect.wetted_surface.html" />
+    <link rel="prev" title="pyorc.Transect.wetted_surface_polygon" href="pyorc.Transect.wetted_surface_polygon.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
   
 </a></div>
     
@@ -429,6 +429,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level_s2n.html">pyorc.CrossSection.detect_water_level_s2n</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
@@ -514,19 +515,23 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.streamplot.html">pyorc.Velocimetry.plot.streamplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.quiver.html">pyorc.Velocimetry.plot.quiver</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.html">pyorc.Transect</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_config.html">pyorc.Transect.camera_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_shape.html">pyorc.Transect.camera_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.h_a.html">pyorc.Transect.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_surface_polygon.html">pyorc.Transect.wetted_surface_polygon</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Transect.wetted_perimeter_linestring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_surface.html">pyorc.Transect.wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_perimeter.html">pyorc.Transect.wetted_perimeter</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">pyorc.Transect.vector_to_scalar</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Transect.get_xyz_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_depth_perspective.html">pyorc.Transect.get_depth_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_bottom_surface_z_perspective.html">pyorc.Transect.get_bottom_surface_z_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_transect_perspective.html">pyorc.Transect.get_transect_perspective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_wetted_perspective.html">pyorc.Transect.get_wetted_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_v_surf.html">pyorc.Transect.get_v_surf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_v_bulk.html">pyorc.Transect.get_v_bulk</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_river_flow.html">pyorc.Transect.get_river_flow</a></li>
@@ -593,29 +598,12 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="pyorc-transect-get-xyz-perspective">
-<h1>pyorc.Transect.get_xyz_perspective<a class="headerlink" href="#pyorc-transect-get-xyz-perspective" title="Permalink to this heading">#</a></h1>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyorc.Transect.get_xyz_perspective">
-<span class="sig-prename descclassname"><span class="pre">Transect.</span></span><span class="sig-name descname"><span class="pre">get_xyz_perspective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trans_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_outside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/transect.html#Transect.get_xyz_perspective"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Transect.get_xyz_perspective" title="Permalink to this definition">#</a></dt>
-<dd><p>Get camera-perspective column, row coordinates from cross-section locations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>trans_mat</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – perspective transform matrix (Default value = None)</p></li>
-<li><p><strong>xs</strong> (<em>np.array</em><em>, </em><em>optional</em>) – x-coordinates to transform, derived from self.x if not provided (Default value = None)</p></li>
-<li><p><strong>ys</strong> – y-coordinates to transform, derived from self.y if not provided (Default value = None)</p></li>
-<li><p><strong>mask_outside</strong> – values not fitting in the original camera frame are set to NaN (Default value = True)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>cols</strong> (<em>list of ints</em>) – columns of locations in original camera perspective</p></li>
-<li><p><strong>rows</strong> (<em>list of ints</em>) – rows of locations in original camera perspective</p></li>
-</ul>
-</p>
-</dd>
-</dl>
+  <section id="pyorc-transect-wetted-perimeter-linestring">
+<h1>pyorc.Transect.wetted_perimeter_linestring<a class="headerlink" href="#pyorc-transect-wetted-perimeter-linestring" title="Permalink to this heading">#</a></h1>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyorc.Transect.wetted_perimeter_linestring">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Transect.</span></span><span class="sig-name descname"><span class="pre">wetted_perimeter_linestring</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">MultiLineString</span></em><a class="headerlink" href="#pyorc.Transect.wetted_perimeter_linestring" title="Permalink to this definition">#</a></dt>
+<dd><p>Return wetted perimeter as <cite>shapely.geometry.MultiLineString</cite> object.</p>
 </dd></dl>
 
 </section>
@@ -631,20 +619,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pyorc.Transect.vector_to_scalar.html"
+       href="pyorc.Transect.wetted_surface_polygon.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pyorc.Transect.vector_to_scalar</p>
+        <p class="prev-next-title">pyorc.Transect.wetted_surface_polygon</p>
       </div>
     </a>
     <a class="right-next"
-       href="pyorc.Transect.get_depth_perspective.html"
+       href="pyorc.Transect.wetted_surface.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyorc.Transect.get_depth_perspective</p>
+        <p class="prev-next-title">pyorc.Transect.wetted_surface</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -666,14 +654,14 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.Transect.get_xyz_perspective"><code class="docutils literal notranslate"><span class="pre">Transect.get_xyz_perspective()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.Transect.wetted_perimeter_linestring"><code class="docutils literal notranslate"><span class="pre">Transect.wetted_perimeter_linestring</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/_generated/pyorc.Transect.get_xyz_perspective.rst.txt">
+    <a href="../_sources/_generated/pyorc.Transect.wetted_perimeter_linestring.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

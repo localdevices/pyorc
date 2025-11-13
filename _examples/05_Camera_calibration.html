@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Camera calibration &#8212; pyorc 0.8.10 documentation</title>
+    <title>Camera calibration &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -138,7 +138,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
   
 </a></div>
     
@@ -471,8 +471,8 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Scanning video:  88%|████████▊ | 353/401 [00:00&lt;00:00, 632.44it/s]
-/tmp/ipykernel_4359/2266880649.py:2: UserWarning: End frame 400 cannot be read from file. End frame is adapted to 352
+Scanning video:  88%|████████▊ | 353/401 [00:00&lt;00:00, 614.57it/s]
+/tmp/ipykernel_4360/2266880649.py:2: UserWarning: End frame 400 cannot be read from file. End frame is adapted to 352
   vid = pyorc.Video(fn)
 </pre></div></div>
 </div>
@@ -482,7 +482,7 @@ Scanning video:  88%|████████▊ | 353/401 [00:00&lt;00:00, 632.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fd4d84db8e0&gt;
+&lt;matplotlib.image.AxesImage at 0x7fb50ee82530&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -538,7 +538,7 @@ Scanning video:  88%|████████▊ | 353/401 [00:00&lt;00:00, 632.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 50/50 [00:04&lt;00:00, 11.03it/s]
+100%|██████████| 50/50 [00:04&lt;00:00, 10.49it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -563,15 +563,15 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 <span class="ansi-green-intense-fg ansi-bold">    443</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>camera_matrix <span style="color: rgb(98,98,98)">=</span> camera_matrix
 <span class="ansi-green-intense-fg ansi-bold">    444</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>dist_coeffs <span style="color: rgb(98,98,98)">=</span> dist_coeffs
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/cv.py:647</span>, in <span class="ansi-cyan-fg">calibrate_camera</span><span class="ansi-blue-fg">(fn, chessboard_size, max_imgs, plot, progress_bar, criteria, to_file, frame_limit, tolerance)</span>
-<span class="ansi-green-intense-fg ansi-bold">    645</span> cv2<span style="color: rgb(98,98,98)">.</span>destroyAllWindows()
-<span class="ansi-green-intense-fg ansi-bold">    646</span> <span style="color: rgb(95,135,135)"># do calibration</span>
-<span class="ansi-green-fg">--&gt; 647</span> <span class="ansi-bold" style="color: rgb(0,135,0)">assert</span> <span style="color: rgb(0,135,0)">len</span>(obj_pts) <span style="color: rgb(98,98,98)">&gt;</span><span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">5</span>, (
-<span class="ansi-green-intense-fg ansi-bold">    648</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">A minimum of 5 frames with chessboard patterns must be available, only </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">len</span>(obj_pts)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> found. Please check </span><span style="color: rgb(175,0,0)">&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    649</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">if the video contains chessboard patterns of size </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>chessboard_size<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> </span><span style="color: rgb(175,0,0)">&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    650</span> )
-<span class="ansi-green-intense-fg ansi-bold">    651</span> ret, camera_matrix, dist_coeffs, rvecs, tvecs <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>calibrateCamera(obj_pts, img_pts, frame_size, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>)
-<span class="ansi-green-intense-fg ansi-bold">    652</span> <span style="color: rgb(95,135,135)"># remove badly performing images and recalibrate</span>
+File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/cv.py:648</span>, in <span class="ansi-cyan-fg">calibrate_camera</span><span class="ansi-blue-fg">(fn, chessboard_size, max_imgs, plot, progress_bar, criteria, to_file, frame_limit, tolerance)</span>
+<span class="ansi-green-intense-fg ansi-bold">    646</span> cv2<span style="color: rgb(98,98,98)">.</span>destroyAllWindows()
+<span class="ansi-green-intense-fg ansi-bold">    647</span> <span style="color: rgb(95,135,135)"># do calibration</span>
+<span class="ansi-green-fg">--&gt; 648</span> <span class="ansi-bold" style="color: rgb(0,135,0)">assert</span> <span style="color: rgb(0,135,0)">len</span>(obj_pts) <span style="color: rgb(98,98,98)">&gt;</span><span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">5</span>, (
+<span class="ansi-green-intense-fg ansi-bold">    649</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">A minimum of 5 frames with chessboard patterns must be available, only </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span><span style="color: rgb(0,135,0)">len</span>(obj_pts)<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> found. Please check </span><span style="color: rgb(175,0,0)">&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    650</span>     <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">if the video contains chessboard patterns of size </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>chessboard_size<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)"> </span><span style="color: rgb(175,0,0)">&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    651</span> )
+<span class="ansi-green-intense-fg ansi-bold">    652</span> ret, camera_matrix, dist_coeffs, rvecs, tvecs <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>calibrateCamera(obj_pts, img_pts, frame_size, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>)
+<span class="ansi-green-intense-fg ansi-bold">    653</span> <span style="color: rgb(95,135,135)"># remove badly performing images and recalibrate</span>
 
 <span class="ansi-red-fg">AssertionError</span>: A minimum of 5 frames with chessboard patterns must be available, only 0 found. Please check if the video contains chessboard patterns of size (11, 8)
 </pre></div></div>
@@ -591,7 +591,7 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-  9%|▉         | 38/401 [00:03&lt;00:34, 10.62it/s]
+  9%|▉         | 38/401 [00:03&lt;00:35, 10.35it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -706,8 +706,8 @@ Distortion coefficients: [[0.04231165921949027, -0.14818710068402868, -0.0079242
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Scanning video:  88%|████████▊ | 353/401 [00:00&lt;00:00, 638.10it/s]
-/tmp/ipykernel_4359/2173192625.py:7: UserWarning: End frame 400 cannot be read from file. End frame is adapted to 352
+Scanning video:  88%|████████▊ | 353/401 [00:00&lt;00:00, 619.69it/s]
+/tmp/ipykernel_4360/2173192625.py:7: UserWarning: End frame 400 cannot be read from file. End frame is adapted to 352
   vid = pyorc.Video(fn)
 </pre></div></div>
 </div>
@@ -717,7 +717,7 @@ Scanning video:  88%|████████▊ | 353/401 [00:00&lt;00:00, 638.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fd4d8327790&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7fb504ca1120&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

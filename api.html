@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>API reference &#8212; pyorc 0.8.10 documentation</title>
+    <title>API reference &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
   
 </a></div>
     
@@ -429,6 +429,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.detect_water_level_s2n.html">pyorc.CrossSection.detect_water_level_s2n</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Video.html">pyorc.Video</a></li>
@@ -519,14 +520,18 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.camera_config.html">pyorc.Transect.camera_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.camera_shape.html">pyorc.Transect.camera_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.h_a.html">pyorc.Transect.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.wetted_surface_polygon.html">pyorc.Transect.wetted_surface_polygon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.wetted_perimeter_linestring.html">pyorc.Transect.wetted_perimeter_linestring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.wetted_surface.html">pyorc.Transect.wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.wetted_perimeter.html">pyorc.Transect.wetted_perimeter</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.vector_to_scalar.html">pyorc.Transect.vector_to_scalar</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_xyz_perspective.html">pyorc.Transect.get_xyz_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_depth_perspective.html">pyorc.Transect.get_depth_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_bottom_surface_z_perspective.html">pyorc.Transect.get_bottom_surface_z_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_transect_perspective.html">pyorc.Transect.get_transect_perspective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_wetted_perspective.html">pyorc.Transect.get_wetted_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_v_surf.html">pyorc.Transect.get_v_surf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_v_bulk.html">pyorc.Transect.get_v_bulk</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.Transect.get_river_flow.html">pyorc.Transect.get_river_flow</a></li>
@@ -797,8 +802,8 @@ wetted perimeter [m].</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface.html#pyorc.CrossSection.get_wetted_surface" title="pyorc.CrossSection.get_wetted_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_wetted_surface</span></code></a>(h[, camera, ...])</p></td>
 <td><p>Retrieve a wetted surface for a given water level, as a geometry.Polygon.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface_sz.html#pyorc.CrossSection.get_wetted_surface_sz" title="pyorc.CrossSection.get_wetted_surface_sz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_wetted_surface_sz</span></code></a>(h)</p></td>
-<td><p>Retrieve a wetted surface perpendicular to flow direction (SZ) for a water level, as a geometry.Polygon.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface_sz.html#pyorc.CrossSection.get_wetted_surface_sz" title="pyorc.CrossSection.get_wetted_surface_sz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_wetted_surface_sz</span></code></a>(h[, ...])</p></td>
+<td><p>Retrieve a wetted surface or perimeter perpendicular to flow direction (SZ) for a water level.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_line_of_interest.html#pyorc.CrossSection.get_line_of_interest" title="pyorc.CrossSection.get_line_of_interest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_line_of_interest</span></code></a>([bank])</p></td>
 <td><p>Retrieve the points of interest within the cross-section for water level detection.</p></td>
@@ -841,7 +846,10 @@ for camera configurations <cite>CameraConfig.plot</cite>.</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.detect_water_level.html#pyorc.CrossSection.detect_water_level" title="pyorc.CrossSection.detect_water_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.detect_water_level</span></code></a>(img[, bank, ...])</p></td>
-<td><p>Detect water level optically from provided image.</p></td>
+<td><p>Detect water level from provided image through optimization.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.detect_water_level_s2n.html#pyorc.CrossSection.detect_water_level_s2n" title="pyorc.CrossSection.detect_water_level_s2n"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.detect_water_level_s2n</span></code></a>(img[, ...])</p></td>
+<td><p>Detect water level optically from provided image, through evaluation of a vector of locations.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1057,7 +1065,7 @@ applied before doing any reducing over time.</p>
 <td><p>Masks values if the velocity scalar lies outside a user-defined valid range.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.mask.corr.html#pyorc.Velocimetry.mask.corr" title="pyorc.Velocimetry.mask.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.mask.corr</span></code></a>([tolerance])</p></td>
-<td><p>Mass values with too low correlation.</p></td>
+<td><p>Mask values with too low correlation.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Velocimetry.mask.angle.html#pyorc.Velocimetry.mask.angle" title="pyorc.Velocimetry.mask.angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocimetry.mask.angle</span></code></a>([angle_expected, ...])</p></td>
 <td><p>Mask values that are outside expected direction with angle tolerance.</p></td>
@@ -1162,6 +1170,18 @@ on a full time series and will then mask out grid cells over its full time span 
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.h_a.html#pyorc.Transect.h_a" title="pyorc.Transect.h_a"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.h_a</span></code></a></p></td>
 <td><p>Actual water level belonging to the processed video.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.wetted_surface_polygon.html#pyorc.Transect.wetted_surface_polygon" title="pyorc.Transect.wetted_surface_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.wetted_surface_polygon</span></code></a></p></td>
+<td><p>Return wetted surface as <cite>shapely.geometry.MultiPolygon</cite> object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.wetted_perimeter_linestring.html#pyorc.Transect.wetted_perimeter_linestring" title="pyorc.Transect.wetted_perimeter_linestring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.wetted_perimeter_linestring</span></code></a></p></td>
+<td><p>Return wetted perimeter as <cite>shapely.geometry.MultiLineString</cite> object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.wetted_surface.html#pyorc.Transect.wetted_surface" title="pyorc.Transect.wetted_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.wetted_surface</span></code></a></p></td>
+<td><p>Return wetted surface as float.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.wetted_perimeter.html#pyorc.Transect.wetted_perimeter" title="pyorc.Transect.wetted_perimeter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.wetted_perimeter</span></code></a></p></td>
+<td><p>Return wetted perimeter as float.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1173,20 +1193,20 @@ on a full time series and will then mask out grid cells over its full time span 
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar" title="pyorc.Transect.vector_to_scalar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.vector_to_scalar</span></code></a>([v_x, v_y])</p></td>
 <td><p>Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective" title="pyorc.Transect.get_xyz_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_xyz_perspective</span></code></a>([trans_mat, ...])</p></td>
-<td><p>Get camera-perspective column, row coordinates from cross-section locations.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_depth_perspective.html#pyorc.Transect.get_depth_perspective" title="pyorc.Transect.get_depth_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_depth_perspective</span></code></a>(h[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_depth_perspective.html#pyorc.Transect.get_depth_perspective" title="pyorc.Transect.get_depth_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_depth_perspective</span></code></a>(h[, ...])</p></td>
 <td><p>Get line (x, y) pairs that show the depth over several intervals in the wetted part of the cross section.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_bottom_surface_z_perspective.html#pyorc.Transect.get_bottom_surface_z_perspective" title="pyorc.Transect.get_bottom_surface_z_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_bottom_surface_z_perspective</span></code></a>(h)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_bottom_surface_z_perspective.html#pyorc.Transect.get_bottom_surface_z_perspective" title="pyorc.Transect.get_bottom_surface_z_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_bottom_surface_z_perspective</span></code></a>(h)</p></td>
 <td><p>Return densified bottom and surface points, warped to image perspective.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_transect_perspective.html#pyorc.Transect.get_transect_perspective" title="pyorc.Transect.get_transect_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_transect_perspective</span></code></a>([h, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_transect_perspective.html#pyorc.Transect.get_transect_perspective" title="pyorc.Transect.get_transect_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_transect_perspective</span></code></a>([h, ...])</p></td>
 <td><p>Get row, col locations of the transect coordinates.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_wetted_perspective.html#pyorc.Transect.get_wetted_perspective" title="pyorc.Transect.get_wetted_perspective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_wetted_perspective</span></code></a>(h[, sample_size])</p></td>
-<td><p>Get wetted polygon in camera perspective.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_v_surf.html#pyorc.Transect.get_v_surf" title="pyorc.Transect.get_v_surf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_v_surf</span></code></a>([v_name])</p></td>
+<td><p>Compute mean surface velocity in locations that are below water level.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.Transect.get_v_bulk.html#pyorc.Transect.get_v_bulk" title="pyorc.Transect.get_v_bulk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transect.get_v_bulk</span></code></a>([q_name])</p></td>
+<td><p>Compute the bulk velocity.</p></td>
 </tr>
 </tbody>
 </table>

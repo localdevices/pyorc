@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Cross Sections and water level detection &#8212; pyorc 0.8.10 documentation</title>
+    <title>Cross Sections and water level detection &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -46,6 +46,8 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/cross_section/index';</script>
     <link rel="shortcut icon" href="../../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -135,7 +137,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
   
 </a></div>
     
@@ -459,9 +461,13 @@ judged if the model will likely work or not work.</p></li>
 <p>To ensure that operational use of the method is possible, without collecting training datasets and training, we decided
 to start with a fully computer vision based approach. In essence the method work as follows:</p>
 <p>You need:</p>
-<p>1) a camera configuration (i.e. containing all perspective information)
-1) an image from the camera of interest, that fits with the established camera configuration
-3) a cross section, e.g. stored in a shapefile as 3d (x, y, z) points.</p>
+<ol class="arabic simple">
+<li><p>a camera configuration (i.e. containing all perspective information)</p></li>
+<li><p>an image from the camera of interest, that fits with the established camera configuration. This image can also be
+derived through processing a video, e.g. taking the mean (to reduce background noise), or the intensity range
+(increasing visibility of moving/changing pixels, i.e. moving water).</p></li>
+<li><p>a cross section, e.g. stored in a shapefile or csv file as 3d (x, y, z) points.</p></li>
+</ol>
 <p>If you are able to use the API within python, you can easily visualize these all together. We’ll use here an example
 of a small concrete channel.</p>
 <img alt="../../_images/cross_section.jpg" src="../../_images/cross_section.jpg" />
@@ -473,11 +479,12 @@ intensity, compared to the water.</p>
 <li><p>the cross section coordinates can be interpreted in both real-world coordinates (i.e. as provided by you, measured
 in the field), but also as camera coordinates, i.e. through the camera configuration.</p></li>
 <li><p>the cross section is made “smart” by enabling all sorts of geometric operations on the cross section. You can for
-instance see in the top-right figure, that the cross section is extended left and right so that you can better see the
-channel shape. Also in the top-left (camera view), you can see that same extension in brown colored polygon</p></li>
+instance see in the right figure, that the cross section is extended up- and downstream so that you can better see
+the channel shape.</p></li>
 <li><p>with this “smart” cross section, we draw two polygon on a cross section point, extending left and right of the
 cross section. We can do this at any random point in the cross section.</p></li>
-<li><p>we then extract pixel intensities, here from a grayscale image, and compare the intensity distribution functions.</p></li>
+<li><p>we then extract pixel intensities within both polygons, here from a grayscale image, and compare their intensity
+distribution functions (PDF).</p></li>
 <li><p>if the distributions are very similar, it is likely that left and right of the point in the cross section, we are
 looking at similar “stuff”. We see that in the left-side below, where both polygons lie over water.</p></li>
 <li><p>In the right-hand-side figure below, we see that the polygons are drawn at the opposite side, exactly at the water
@@ -487,11 +494,15 @@ candidate point of the water line.</p></li>
 this water line.</p></li>
 </ul>
 <p>In the figure below you can see
-a “score” of 0.82 and 0.21 for the different levels. The lower the score the more likely we have found the water level.
+a “score” of 0.83 and 0.21 for the different levels. The lower the score the more likely we have found the water level.
 A value of one means the distribution functions are identical, a value of zero means the distribution functions have
-no overlap at all. Naturally the methods works with an optimization algorithm, that efficiently seeks the location in
-the cross section where the two polygons provide the most difference in intensity distribution functions. This
-is fully automated. You only need to provide a cross section file.</p>
+no overlap at all. The methods can be applied with an optimization algorithm, that efficiently seeks the location in
+the cross section where the two polygons provide the most difference in intensity distribution functions
+(<code class="docutils literal notranslate"><span class="pre">CrossSection.detect_water_level</span></code>). The method can also be applied by setting up a vector of evaluation points.
+This results in many scores, which then can be used to both return the optimum and a signal-to-noise ratio using all
+other found scores (<code class="docutils literal notranslate"><span class="pre">CrossSection.detect_water_level_s2n</span></code>). This has the added advantage that one can judge how
+trustworthy the result is. The evaluations are fully automated. You only need to provide a cross section file and a
+(pre-processed) image.</p>
 <img alt="../../_images/polygon_samples.jpg" src="../../_images/polygon_samples.jpg" />
 <p>Hopefully this explanation helps to better understand the water level detection approach. This hopefully also
 clarifies the limitations. Please note the following two limitations:</p>
@@ -503,7 +514,8 @@ easily mistake the shade line as the water line.</p></li>
 <li><p>strong seasonal changes in the banks are problematic. For instance, overhanging growth of vegetation during spring
 and summer will likely cause the waterline to be detected at the edge of the vegetation rather than the real bank.
 Also in this case you will most likely underestimate the water level, as the water line is estimated to be somewhere
-in the water, rather than the real bank.</p></li>
+in the water, rather than the real bank. Erosion of your cross section can also lead to strong mis-detections of
+the water level.</p></li>
 </ul>
 <p>Note for instance the example below. We have neatly identified the optimum in this vegetated bank, but it is too far on
 the water because of the floating grassy vegetation on the water. As a result we have underestimated the water level
@@ -531,22 +543,18 @@ sense to reduce the length to a much smaller size, covering the staff gauge widt
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-0">
 Command-line</label><div class="sd-tab-content docutils">
-<p>A cross section must be provided on the command line by using the <code class="docutils literal notranslate"><span class="pre">--cross</span></code> parameter and a reference
+<p>A cross section must be provided on the command line by using the <code class="docutils literal notranslate"><span class="pre">--cross_wl</span></code> parameter and a reference
 to a GeoJSON or shapefile containing x, y, z Point geometries only! If the file contains a coordinate reference
 system (CRS), that will also be interpreted and used to ensure coordinates are (if necessary) transformed to
-the same CRS as the <a class="reference internal" href="../camera_config/index.html#camera-config-ug"><span class="std std-ref">camera configuration</span></a>. This file is then used in two places.</p>
-<ul class="simple">
-<li><p>If no external water level is provided (on the CLI using the <code class="docutils literal notranslate"><span class="pre">--h_a</span></code> option, or by directly inserting
-a water level in the recipe under the <a class="reference internal" href="../video/index.html#video-ug"><span class="std std-ref">video section</span></a> the <code class="docutils literal notranslate"><span class="pre">--cross</span></code> Points,
+the same CRS as the <a class="reference internal" href="../camera_config/index.html#camera-config-ug"><span class="std std-ref">camera configuration</span></a>.</p>
+<p>If no external water level is provided (on the CLI using the <code class="docutils literal notranslate"><span class="pre">--h_a</span></code> option, or by directly inserting
+a water level in the recipe under the <a class="reference internal" href="../video/index.html#video-ug"><span class="std std-ref">video section</span></a> the <code class="docutils literal notranslate"><span class="pre">--cross_wl</span></code> Points,
 will be used by <strong>pyorc</strong>  to estimate the water level optically from an image (see below) derived from the
-video.</p></li>
-<li><p>If your recipe file contains a <code class="docutils literal notranslate"><span class="pre">transect</span></code> section, the coordinates will be extracted and used to extract
-a transect of velocities, and perform further processing as configured under <code class="docutils literal notranslate"><span class="pre">transect</span></code>. Note that the
-<code class="docutils literal notranslate"><span class="pre">transect</span></code> section also allows you to provide a geojson string as input, or a shapefile as input directly.
-If you do that, the shapefile provided at <code class="docutils literal notranslate"><span class="pre">--cross</span></code> will be ignored.</p></li>
-</ul>
-<p>The cross section points are also used to produce a plot of the wetted surface area in any camera perspective
-plot you may generate in the recipe. See the <a class="reference internal" href="../plot/index.html#plot-ug"><span class="std std-ref">plot</span></a> for further information.</p>
+video.</p>
+<p>Note that the CLI option <code class="docutils literal notranslate"><span class="pre">--cross</span></code> is meant to provide a cross section for estimating the wetted cross
+cross section, extract velocities and estimating discharge. These can be the same, but in many cases
+the <code class="docutils literal notranslate"><span class="pre">cross_wl</span></code> cross section may be different, e.g. a line that follows a concrete structure on the bank or
+a staff gauge.</p>
 <p>For further fine tuning, you can add a <code class="docutils literal notranslate"><span class="pre">water_level</span></code> section below the <code class="docutils literal notranslate"><span class="pre">video</span></code> section in your recipe.
 Changing the polygon size and location as described, can be done through a subsection <code class="docutils literal notranslate"><span class="pre">water_level_options</span></code>
 e.g. as follows</p>
@@ -581,11 +589,36 @@ example:</p>
 <span class="nt">water_level</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">n_start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># use the 10th frame of the extracted video frames...</span>
 <span class="w">  </span><span class="nt">n_end</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">  </span><span class="c1"># ...until the 20th frame. The average of the extracted and preprocessed frames is used.</span>
-<span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hue&quot;</span><span class="w">  </span><span class="c1"># we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.</span>
 <span class="w">  </span><span class="nt">bank</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;near&quot;</span><span class="w">  </span><span class="c1"># in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose &quot;both&quot; for seeking the optimal on both banks</span>
 <span class="w">  </span><span class="nt">frames_options</span><span class="p">:</span><span class="w">  </span><span class="c1"># we add preprocessing methods from the frames methods. You can extend this similar to the frames section.</span>
+<span class="w">    </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hue&quot;</span><span class="w">  </span><span class="c1"># we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.</span>
 <span class="w">    </span><span class="nt">range</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w">  </span><span class="c1"># range (with empty arguments) extracts the difference between min and max in time, revealing moving water, opposed to non-moving land. Better non use with hue channel</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"> </span><span class="c1"># other preprocessing after range, remove this line if not used.</span>
+<span class="w">  </span><span class="nt">water_level_options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.</span>
+<span class="w">    </span><span class="nt">padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">  </span><span class="c1"># make the polygons wider than the default 0.5 meters.</span>
+</pre></div>
+</div>
+<p>Finally, you can also supply a signal-to-noise threshold (<code class="docutils literal notranslate"><span class="pre">s2n_thres</span></code>) to judge whether the detected water
+level is distinct enough. By default this value is 3.0 meaning that the optimal minimum score must be at least
+3 x lower than the mean of all computed scores. If youj lower this value, you may more easily find a detected
+water level but this can also lead to noisy water levels being accepted. You can also stack
+<code class="docutils literal notranslate"><span class="pre">frames_options</span></code> so that when the first preprocessing does not lead to a high enough signal to noise ratio,
+the second preprocessing is tried afterwards. This is useful e.g. in situations where during low flows, other
+preprocessing leads to good results than during high flows. An example is provided below.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">video</span><span class="p">:</span><span class="w">  </span><span class="c1"># this is from the earlier example</span>
+<span class="w">  </span><span class="nt">start_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">  </span><span class="nt">end_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
+<span class="w">  </span><span class="nt">h_a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">92.23</span>
+
+<span class="nt">water_level</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">n_start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># use the 10th frame of the extracted video frames...</span>
+<span class="w">  </span><span class="nt">n_end</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">  </span><span class="c1"># ...until the 20th frame. The average of the extracted and preprocessed frames is used.</span>
+<span class="w">  </span><span class="nt">bank</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;near&quot;</span><span class="w">  </span><span class="c1"># in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose &quot;both&quot; for seeking the optimal on both banks</span>
+<span class="w">  </span><span class="nt">frames_options</span><span class="p">:</span><span class="w">  </span><span class="c1"># we add two preprocessing methods. In case 1 fails detection, we try the second.</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;grayscale&quot;</span><span class="w">  </span><span class="c1"># low flows are within a small mountainous channel, mostly detectable by intensity changes</span>
+<span class="w">      </span><span class="nt">range</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;grayscale&quot;</span><span class="w">  </span><span class="c1"># for higher flows, water looks very dark, so pure grayscale works better</span>
 <span class="w">  </span><span class="nt">water_level_options</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.</span>
 <span class="w">    </span><span class="nt">padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">  </span><span class="c1"># make the polygons wider than the default 0.5 meters.</span>
@@ -750,6 +783,14 @@ In this case, the <code class="docutils literal notranslate"><span class="pre">h
 <span class="n">h</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">detect_water_level</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Instead of <code class="docutils literal notranslate"><span class="pre">detect_water_level</span></code>, you can also use <code class="docutils literal notranslate"><span class="pre">detect_water_level_s2n</span></code>. This evaluates the score on
+a vector of possible locations instead of optimizing. The full vector of results is then used to compute a
+signal to noise ratio using</p>
+<div class="math notranslate nohighlight">
+\[r_{s2n} = \frac{\sum_n{\gamma_n}}{\gamma_{min}}\]</div>
+<p>where $n$ is the amount of points for evaluation, $gamma$ is the score (minimum is optimum). The evaluation
+points are defined along the l-coordinates, such that the maximum vertical distance between two points
+is equal to a parameter <code class="docutils literal notranslate"><span class="pre">dz_max</span></code> and the maximum horizontal distance is equal to parameter <code class="docutils literal notranslate"><span class="pre">ds_max</span></code>.</p>
 </div>
 </div>
 </section>

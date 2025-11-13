@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.transect &#8212; pyorc 0.8.10 documentation</title>
+    <title>pyorc.api.transect &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
   
 </a></div>
     
@@ -409,6 +409,7 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">geometry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">helpers</span>
@@ -440,6 +441,26 @@ document.write(`
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="p">[[</span><span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">_z</span><span class="p">]</span> <span class="k">for</span> <span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">_z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">xcoords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">ycoords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">zcoords</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">CrossSection</span><span class="p">(</span><span class="n">camera_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wetted_surface_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">MultiPolygon</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return wetted surface as `shapely.geometry.MultiPolygon` object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get_wetted_surface_sz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wetted_perimeter_linestring</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">MultiLineString</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return wetted perimeter as `shapely.geometry.MultiLineString` object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get_wetted_surface_sz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">,</span> <span class="n">perimeter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wetted_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return wetted surface as float.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wetted_surface_polygon</span><span class="o">.</span><span class="n">area</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wetted_perimeter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return wetted perimeter as float.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wetted_perimeter_linestring</span><span class="o">.</span><span class="n">length</span>
 
 <div class="viewcode-block" id="Transect.vector_to_scalar"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.vector_to_scalar.html#pyorc.Transect.vector_to_scalar">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">vector_to_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_x</span><span class="o">=</span><span class="s2">&quot;v_x&quot;</span><span class="p">,</span> <span class="n">v_y</span><span class="o">=</span><span class="s2">&quot;v_y&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set &quot;v_eff&quot; and &quot;v_dir&quot; variables as effective velocities over cross-section, and its angle.</span>
@@ -536,30 +557,6 @@ document.write(`
         <span class="n">points_proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">project_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">within_image</span><span class="o">=</span><span class="n">within_image</span><span class="p">,</span> <span class="n">swap_y_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">points_proj</span></div>
 
-<div class="viewcode-block" id="Transect.get_wetted_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_wetted_perspective.html#pyorc.Transect.get_wetted_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_wetted_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get wetted polygon in camera perspective.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        h : float</span>
-<span class="sd">            The water level value to calculate the surface perspective.</span>
-<span class="sd">        sample_size : int, optional</span>
-<span class="sd">            The number of points to densify the transect with, by default 1000</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        ndarray</span>
-<span class="sd">            A numpy array containing the points forming the wetted polygon perspective.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">bottom_points</span><span class="p">,</span> <span class="n">surface_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bottom_surface_z_perspective</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="n">sample_size</span><span class="p">)</span>
-        <span class="c1"># concatenate points reversing one set for preps of a polygon</span>
-        <span class="n">pol_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">bottom_points</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">surface_points</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="c1"># add the first point at the end to close the polygon</span>
-        <span class="n">pol_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">pol_points</span><span class="p">,</span> <span class="n">pol_points</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">pol_points</span></div>
-
 <div class="viewcode-block" id="Transect.get_depth_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_depth_perspective.html#pyorc.Transect.get_depth_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_depth_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get line (x, y) pairs that show the depth over several intervals in the wetted part of the cross section.</span>
 
@@ -584,64 +581,59 @@ document.write(`
         <span class="c1"># make line pairs</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">bottom_points</span><span class="p">,</span> <span class="n">surface_points</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Transect.get_xyz_perspective"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_xyz_perspective.html#pyorc.Transect.get_xyz_perspective">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_xyz_perspective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trans_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_outside</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get camera-perspective column, row coordinates from cross-section locations.</span>
+<div class="viewcode-block" id="Transect.get_v_surf"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_v_surf.html#pyorc.Transect.get_v_surf">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_v_surf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_name</span><span class="o">=</span><span class="s2">&quot;v_eff&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute mean surface velocity in locations that are below water level.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        trans_mat : np.ndarray, optional</span>
-<span class="sd">             perspective transform matrix (Default value = None)</span>
-<span class="sd">        xs : np.array, optional</span>
-<span class="sd">            x-coordinates to transform, derived from self.x if not provided (Default value = None)</span>
-<span class="sd">        ys :</span>
-<span class="sd">            y-coordinates to transform, derived from self.y if not provided (Default value = None)</span>
-<span class="sd">        mask_outside :</span>
-<span class="sd">            values not fitting in the original camera frame are set to NaN (Default value = True)</span>
+<span class="sd">        v_name : str, optional</span>
+<span class="sd">             name of variable where surface velocities [m s-1] are stored (Default value = &quot;v_eff&quot;)</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        cols : list of ints</span>
-<span class="sd">            columns of locations in original camera perspective</span>
-<span class="sd">        rows : list of ints</span>
-<span class="sd">            rows of locations in original camera perspective</span>
-
+<span class="sd">        xr.DataArray</span>
+<span class="sd">            mean surface velocities for all provided quantiles or time steps</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">xs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span>
-        <span class="k">if</span> <span class="n">ys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span>
-        <span class="c1"># compute bathymetry as measured in local height reference (such as staff gauge)</span>
-        <span class="c1"># if self.camera_config.gcps[&quot;h_ref&quot;] is None:</span>
-        <span class="c1">#     h_ref = 0.0</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     h_ref = self.camera_config.gcps[&quot;h_ref&quot;]</span>
-        <span class="n">hs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">z_to_h</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">zcoords</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="c1"># zs = (self._obj.zcoords - self.camera_config.gcps[&quot;z_0&quot;] + h_ref).values</span>
-        <span class="k">if</span> <span class="n">trans_mat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">get_M</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">to_bbox_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hs</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># use user defined M instead</span>
-            <span class="n">ms</span> <span class="o">=</span> <span class="p">[</span><span class="n">trans_mat</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs</span><span class="p">]</span>
-        <span class="c1"># compute row and column position of vectors in original reprojected background image col/row coordinates</span>
-        <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
-            <span class="o">*</span><span class="p">[</span>
-                <span class="n">helpers</span><span class="o">.</span><span class="n">xy_to_perspective</span><span class="p">(</span>
-                    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">trans_mat</span><span class="p">,</span> <span class="n">reverse_y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">trans_mat</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">ms</span><span class="p">)</span>
-            <span class="p">],</span>
-        <span class="p">)</span>
-        <span class="c1"># ensure y coordinates start at the top in the right orientation</span>
-        <span class="n">shape_y</span><span class="p">,</span> <span class="n">shape_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span>
-        <span class="n">rows</span> <span class="o">=</span> <span class="n">shape_y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">mask_outside</span><span class="p">:</span>
-            <span class="c1"># remove values that do not fit in the frames</span>
-            <span class="n">cols</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">cols</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cols</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-            <span class="n">rows</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">rows</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rows</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1">## Mean velocity over entire profile</span>
+        <span class="n">z_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">h_to_z</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_a</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span></div>
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">z_a</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">zcoords</span>
+        <span class="n">depth</span><span class="p">[</span><span class="n">depth</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># ds.transect.camera_config.get_depth(ds.zcoords, ds.transect.h_a)</span>
+        <span class="n">wet_scoords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">scoords</span><span class="p">[</span><span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wet_scoords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># no wet points found. Velocity can only be missing</span>
+            <span class="n">v_av</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wet_scoords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">velocity_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_name</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="s2">&quot;scoords&quot;</span><span class="p">)</span>  <span class="c1"># m2/s</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="p">(</span><span class="n">wet_scoords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">wet_scoords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">wet_scoords</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span>
+                <span class="n">wet_scoords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">wet_scoords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">wet_scoords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.5</span>
+            <span class="p">)</span>
+            <span class="n">v_av</span> <span class="o">=</span> <span class="n">velocity_int</span> <span class="o">/</span> <span class="n">width</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v_av</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">v_name</span><span class="p">][:,</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">v_av</span></div>
+
+<div class="viewcode-block" id="Transect.get_v_bulk"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_v_bulk.html#pyorc.Transect.get_v_bulk">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_v_bulk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the bulk velocity.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        q_name : str, optional</span>
+<span class="sd">            name of variable where depth integrated velocities [m2 s-1] are stored (Default value = &quot;q&quot;)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        xr.DataArray</span>
+<span class="sd">            bulk velocities for all provided quantiles or time steps</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">discharge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">q_name</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="s2">&quot;scoords&quot;</span><span class="p">)</span>
+        <span class="n">wet_surf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wetted_surface</span>
+        <span class="n">v_bulk</span> <span class="o">=</span> <span class="n">discharge</span> <span class="o">/</span> <span class="n">wet_surf</span>
+        <span class="k">return</span> <span class="n">v_bulk</span></div>
 
 <div class="viewcode-block" id="Transect.get_river_flow"><a class="viewcode-back" href="../../../_generated/pyorc.Transect.get_river_flow.html#pyorc.Transect.get_river_flow">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_river_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">discharge_name</span><span class="o">=</span><span class="s2">&quot;river_flow&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Integrate time series of depth averaged velocities [m2 s-1] into cross-section integrated flow [m3 s-1].</span>

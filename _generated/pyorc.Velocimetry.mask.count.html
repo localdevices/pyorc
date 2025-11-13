@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Velocimetry.mask.count &#8212; pyorc 0.8.10 documentation</title>
+    <title>pyorc.Velocimetry.mask.count &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -135,7 +135,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
   
 </a></div>
     
@@ -429,6 +429,7 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level_s2n.html">pyorc.CrossSection.detect_water_level_s2n</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
@@ -519,14 +520,18 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_config.html">pyorc.Transect.camera_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.camera_shape.html">pyorc.Transect.camera_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.h_a.html">pyorc.Transect.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_surface_polygon.html">pyorc.Transect.wetted_surface_polygon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_perimeter_linestring.html">pyorc.Transect.wetted_perimeter_linestring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_surface.html">pyorc.Transect.wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_perimeter.html">pyorc.Transect.wetted_perimeter</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">pyorc.Transect.vector_to_scalar</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_xyz_perspective.html">pyorc.Transect.get_xyz_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_depth_perspective.html">pyorc.Transect.get_depth_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_bottom_surface_z_perspective.html">pyorc.Transect.get_bottom_surface_z_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_transect_perspective.html">pyorc.Transect.get_transect_perspective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_wetted_perspective.html">pyorc.Transect.get_wetted_perspective</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_v_surf.html">pyorc.Transect.get_v_surf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_v_bulk.html">pyorc.Transect.get_v_bulk</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_river_flow.html">pyorc.Transect.get_river_flow</a></li>
@@ -599,21 +604,18 @@ document.write(`
 <dt class="sig sig-object py" id="pyorc.Velocimetry.mask.count">
 <span class="sig-prename descclassname"><span class="pre">Velocimetry.mask.</span></span><span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.33</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyorc.Velocimetry.mask.count" title="Permalink to this definition">#</a></dt>
 <dd><p>Mask locations with a too low amount of valid velocities in time, measured by fraction with <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>.</p>
-<blockquote>
-<div><p>Usually applied <em>after</em> having applied several other filters.</p>
-<dl class="simple">
-<dt>tolerance<span class="classifier">float (0-1)</span></dt><dd><p>tolerance for fractional amount of valid velocities after all filters. If less than the fraction is
+<p>Usually applied <em>after</em> having applied several other filters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tolerance</strong> (<em>float</em><em> (</em><em>0-1</em><em>)</em>) – tolerance for fractional amount of valid velocities after all filters. If less than the fraction is
 available, the entire velocity will be set to missings.</p>
 </dd>
-</dl>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>mask</strong> – mask applicable to input dataset with <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.filter(mask)</span></code>.
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mask</strong> – mask applicable to input dataset with <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.filter(mask)</span></code>.
 If <code class="docutils literal notranslate"><span class="pre">inplace=True</span></code>, the dataset will be returned masked with <code class="docutils literal notranslate"><span class="pre">mask</span></code>.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>xr.DataArray</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xr.DataArray</p>
 </dd>
 </dl>
 </dd></dl>

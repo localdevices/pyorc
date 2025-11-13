@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Frames.project &#8212; pyorc 0.8.12 documentation</title>
+    <title>pyorc.Transect.get_v_surf &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -46,12 +46,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Frames.project';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Transect.get_v_surf';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyorc.Frames.get_piv" href="pyorc.Frames.get_piv.html" />
-    <link rel="prev" title="pyorc.Frames.time_diff" href="pyorc.Frames.time_diff.html" />
+    <link rel="next" title="pyorc.Transect.get_v_bulk" href="pyorc.Transect.get_v_bulk.html" />
+    <link rel="prev" title="pyorc.Transect.get_transect_perspective" href="pyorc.Transect.get_transect_perspective.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -470,8 +470,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Frames.project</a></li>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.project.html">pyorc.Frames.project</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.get_piv.html">pyorc.Frames.get_piv</a></li>
@@ -525,12 +525,12 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_surface.html">pyorc.Transect.wetted_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.wetted_perimeter.html">pyorc.Transect.wetted_perimeter</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.vector_to_scalar.html">pyorc.Transect.vector_to_scalar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_depth_perspective.html">pyorc.Transect.get_depth_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_bottom_surface_z_perspective.html">pyorc.Transect.get_bottom_surface_z_perspective</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_transect_perspective.html">pyorc.Transect.get_transect_perspective</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_v_surf.html">pyorc.Transect.get_v_surf</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Transect.get_v_surf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Transect.get_v_bulk.html">pyorc.Transect.get_v_bulk</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -581,7 +581,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">pyorc.Frames.project</li>
+    <li class="breadcrumb-item active" aria-current="page">pyorc.Transe...</li>
   </ul>
 </nav>
 </div>
@@ -598,36 +598,18 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="pyorc-frames-project">
-<h1>pyorc.Frames.project<a class="headerlink" href="#pyorc-frames-project" title="Permalink to this heading">#</a></h1>
+  <section id="pyorc-transect-get-v-surf">
+<h1>pyorc.Transect.get_v_surf<a class="headerlink" href="#pyorc-transect-get-v-surf" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
-<dt class="sig sig-object py" id="pyorc.Frames.project">
-<span class="sig-prename descclassname"><span class="pre">Frames.</span></span><span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'cv'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'numpy'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'numpy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reducer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/frames.html#Frames.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Frames.project" title="Permalink to this definition">#</a></dt>
-<dd><p>Project frames into a projected frames object, with information from the camera_config attr.</p>
-<p>This requires that the CameraConfig contains full gcp information. If a CRS is provided, also “lat” and “lon”
-variables will be added to the output, containing geographical latitude and longitude coordinates.</p>
+<dt class="sig sig-object py" id="pyorc.Transect.get_v_surf">
+<span class="sig-prename descclassname"><span class="pre">Transect.</span></span><span class="sig-name descname"><span class="pre">get_v_surf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v_eff'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/transect.html#Transect.get_v_surf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Transect.get_v_surf" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute mean surface velocity in locations that are below water level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – can be <cite>numpy</cite> or <cite>cv</cite> (default <cite>numpy</cite>).
-With <cite>numpy</cite> each individual orthoprojected grid cell is mapped to the image pixels space. For oversampled
-areas, this is also done vice versa. Undersampled areas result in nearest-neighbour interpolations, whilst
-for oversampled, this results in a mean value (if the user uses <cite>mean</cite> as reducer). With <cite>cv</cite> (opencv)
-resampling is performed by first undistorting images, and then by resampling to the
-desired grid. With heavily distorted images and part of the area of interest outside of the field
-of view, the orthoprojection of the corners may end up in the wrong space.
-We recommend using <cite>numpy</cite> and only use cv with simple cases such as nadir-looking videos.</p></li>
-<li><p><strong>resolution</strong> (<em>float</em><em>, </em><em>optional</em>) – <dl class="simple">
-<dt>resolution to project to. If not provided, this will be taken from the camera config in the metadata</dt><dd><p>(Default value = None)</p>
-</dd>
-</dl>
-</p></li>
-<li><p><strong>reducer</strong> (<em>str</em><em>, </em><em>optional</em>) – Currently only used when <cite>method=”numpy”</cite>. Default “mean”, resulting in averaging of oversampled grid cells.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>v_name</strong> (<em>str</em><em>, </em><em>optional</em>) – name of variable where surface velocities [m s-1] are stored (Default value = “v_eff”)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>frames</strong> – projected frames and x and y in local coordinate system (origin: top-left), lat and lon if a crs was
-provided.</p>
+<dd class="field-even"><p>mean surface velocities for all provided quantiles or time steps</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>xr.DataArray</p>
@@ -648,20 +630,20 @@ provided.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pyorc.Frames.time_diff.html"
+       href="pyorc.Transect.get_transect_perspective.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pyorc.Frames.time_diff</p>
+        <p class="prev-next-title">pyorc.Transect.get_transect_perspective</p>
       </div>
     </a>
     <a class="right-next"
-       href="pyorc.Frames.get_piv.html"
+       href="pyorc.Transect.get_v_bulk.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyorc.Frames.get_piv</p>
+        <p class="prev-next-title">pyorc.Transect.get_v_bulk</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -683,14 +665,14 @@ provided.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.Frames.project"><code class="docutils literal notranslate"><span class="pre">Frames.project()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.Transect.get_v_surf"><code class="docutils literal notranslate"><span class="pre">Transect.get_v_surf()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/_generated/pyorc.Frames.project.rst.txt">
+    <a href="../_sources/_generated/pyorc.Transect.get_v_surf.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

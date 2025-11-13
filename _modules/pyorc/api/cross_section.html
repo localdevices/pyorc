@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.cross_section &#8212; pyorc 0.8.10 documentation</title>
+    <title>pyorc.api.cross_section &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -132,7 +132,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.10</p>
+    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
   
 </a></div>
     
@@ -420,7 +420,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">differential_evolution</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">affinity</span><span class="p">,</span> <span class="n">geometry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">polygonize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">polygonize</span><span class="p">,</span> <span class="n">split</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">cv</span><span class="p">,</span> <span class="n">plot_helpers</span>
 
@@ -685,7 +685,7 @@ document.write(`
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        h : float</span>
-<span class="sd">            water level [m]</span>
+<span class="sd">            water level [m].</span>
 <span class="sd">        sz : bool, optional</span>
 <span class="sd">            If set, return water level line in y-z projection, by default False.</span>
 <span class="sd">        extend_by : float, optional</span>
@@ -1020,16 +1020,23 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Amount of water line crossings must be 2 for a planar surface estimate.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">wls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">wls</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
 
-<div class="viewcode-block" id="CrossSection.get_wetted_surface_sz"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.get_wetted_surface_sz.html#pyorc.CrossSection.get_wetted_surface_sz">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_wetted_surface_sz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve a wetted surface perpendicular to flow direction (SZ) for a water level, as a geometry.Polygon.</span>
+<div class="viewcode-block" id="CrossSection.get_wetted_surface_sz"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.get_wetted_surface_sz.html#pyorc.CrossSection.get_wetted_surface_sz">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_wetted_surface_sz</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">perimeter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">geometry</span><span class="o">.</span><span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">geometry</span><span class="o">.</span><span class="n">MultiLineString</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve a wetted surface or perimeter perpendicular to flow direction (SZ) for a water level.</span>
 
-<span class="sd">        This is a useful method for instance to estimate m2 wetted surface for a given water level in the cross</span>
-<span class="sd">        section.</span>
+<span class="sd">        This returns a `geometry.MultiPolygon` when a surface is requested (`perimeter=False`), and</span>
+<span class="sd">        `geometry.MultiLineString` when a perimeter is requested (`perimeter=True`).</span>
+
+<span class="sd">        This is a useful method for instance to estimate m2 wetted surface or m wetted perimeter length for a given</span>
+<span class="sd">        water level in the cross section.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        h : float</span>
 <span class="sd">            water level [m]</span>
+<span class="sd">        perimeter : bool, optional</span>
+<span class="sd">            If set to True, return a linestring with the wetted perimeter instead.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1037,6 +1044,12 @@ document.write(`
 <span class="sd">            Wetted surface as a polygon, in Y-Z projection.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">avg_y</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Compute average y-coordinate of a line.&quot;&quot;&quot;</span>
+            <span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+
         <span class="n">wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cs_waterlevel</span><span class="p">(</span>
             <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">sz</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extend_by</span><span class="o">=</span><span class="mf">0.1</span>
         <span class="p">)</span>  <span class="c1"># extend a small bit to guarantee crossing with the bottom coordinates</span>
@@ -1049,6 +1062,18 @@ document.write(`
         <span class="k">if</span> <span class="n">bottom_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">zl</span><span class="p">:</span>
             <span class="n">bottom_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geometry</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">bottom_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">zl</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">))</span>
         <span class="n">bottom_line</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">LineString</span><span class="p">(</span><span class="n">bottom_points</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">perimeter</span><span class="p">:</span>
+            <span class="n">wl_z</span> <span class="o">=</span> <span class="n">wl</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">split_segments</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">bottom_line</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+            <span class="n">filtered</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">split_segments</span><span class="o">.</span><span class="n">geoms</span><span class="p">:</span>
+                <span class="n">seg_z</span> <span class="o">=</span> <span class="n">avg_y</span><span class="p">(</span><span class="n">seg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">seg_z</span> <span class="o">&lt;</span> <span class="n">wl_z</span><span class="p">:</span>
+                    <span class="c1"># segment is below water level, add to perimeter</span>
+                    <span class="n">filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seg</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">geometry</span><span class="o">.</span><span class="n">MultiLineString</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span>
+            <span class="c1"># return wetted_perim</span>
         <span class="n">pol</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">polygonize</span><span class="p">(</span><span class="n">wl</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">bottom_line</span><span class="p">)))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pol</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># create infinitely small polygon at lowest z coordinate</span>
@@ -1481,6 +1506,182 @@ document.write(`
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_preprocess_level_range</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">min_h</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_h</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set minimum and maximum z-levels (if not provided) based on the camera config.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">min_z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">min_h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">min_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">h_to_z</span><span class="p">(</span><span class="n">min_h</span><span class="p">)</span>
+                <span class="n">min_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">min_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">max_z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">max_h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">max_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">h_to_z</span><span class="p">(</span><span class="n">max_h</span><span class="p">)</span>
+                <span class="n">max_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">max_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">min_z</span> <span class="ow">and</span> <span class="n">max_z</span><span class="p">:</span>
+            <span class="c1"># check for z_min &lt; z_max</span>
+            <span class="k">if</span> <span class="n">min_z</span> <span class="o">&gt;</span> <span class="n">max_z</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Minimum water level is higher than maximum water level.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">min_z</span><span class="p">,</span> <span class="n">max_z</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_preprocess_l_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">l_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ds_max</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">dz_max</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a list of evaluation points between l_min and l_max for water level detection.</span>
+
+<span class="sd">        Controls on evaluation are that vertically (using `self.z`), points are at least `dz_max` meters apart and</span>
+<span class="sd">        horizontally (using `self.s`), points are included if the distance between them exceeds `dz_min` meters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        l_min: float</span>
+<span class="sd">            Minimum l value for evaluation.</span>
+<span class="sd">        l_max: float</span>
+<span class="sd">            Maximum l value for evaluation.</span>
+<span class="sd">        ds_max : float, optional</span>
+<span class="sd">            maximum step size between evaluation points in horizontal direction, by default 0.5.</span>
+<span class="sd">        dz_max : float, optional</span>
+<span class="sd">            maximum step size between evaluation points in vertical direction, by default 0.02.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[List[float], List[float]]</span>
+<span class="sd">            lists of l-coordinates and associated z-coordinates for evaluation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># # Initial list of evaluation points</span>
+        <span class="c1"># l_range = []</span>
+        <span class="c1"># z_range = []</span>
+        <span class="c1"># Start with the first point within the range</span>
+        <span class="n">current_l</span> <span class="o">=</span> <span class="n">l_min</span>
+        <span class="n">last_z</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">last_s</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Add all points from self.l that lie within [l_min, l_max]</span>
+        <span class="n">valid_l_indices</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="o">&gt;=</span> <span class="n">l_min</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="o">&lt;=</span> <span class="n">l_max</span><span class="p">)</span>  <span class="c1"># Logical filter</span>
+        <span class="n">l_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l</span><span class="p">[</span><span class="n">valid_l_indices</span><span class="p">])</span>
+        <span class="n">z_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">[</span><span class="n">valid_l_indices</span><span class="p">])</span>
+
+        <span class="c1"># Iterate over the self.l values by interpolating within the range</span>
+        <span class="k">while</span> <span class="n">current_l</span> <span class="o">&lt;=</span> <span class="n">l_max</span><span class="p">:</span>
+            <span class="c1"># Interpolate x, y, z, and s using the available properties</span>
+            <span class="c1"># x = self.interp_x(current_l)</span>
+            <span class="c1"># y = self.interp_y(current_l)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp_z</span><span class="p">(</span><span class="n">current_l</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp_s_from_l</span><span class="p">(</span><span class="n">current_l</span><span class="p">)</span>
+
+            <span class="c1"># Append the point if it satisfies the required criteria</span>
+            <span class="k">if</span> <span class="n">last_z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">last_s</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">last_z</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">dz_max</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="n">last_s</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">ds_max</span><span class="p">:</span>
+                <span class="n">l_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_l</span><span class="p">)</span>
+                <span class="n">z_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+                <span class="n">last_z</span> <span class="o">=</span> <span class="n">z</span>
+                <span class="n">last_s</span> <span class="o">=</span> <span class="n">s</span>
+
+            <span class="c1"># Increment l</span>
+            <span class="n">current_l</span> <span class="o">+=</span> <span class="mf">0.01</span>  <span class="c1"># Increment in steps small enough to meet any constraint</span>
+
+        <span class="c1"># add the final l</span>
+        <span class="k">if</span> <span class="n">current_l</span> <span class="o">&gt;</span> <span class="n">l_max</span><span class="p">:</span>
+            <span class="n">l_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_max</span><span class="p">)</span>
+            <span class="n">z_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp_z</span><span class="p">(</span><span class="n">l_max</span><span class="p">))</span>
+
+        <span class="c1"># sort l_range and z_range by incremental l_range</span>
+        <span class="n">sorted_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">l_range</span><span class="p">)</span>
+        <span class="n">l_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">l_range</span><span class="p">)[</span><span class="n">sorted_indices</span><span class="p">]</span>
+        <span class="n">z_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z_range</span><span class="p">)[</span><span class="n">sorted_indices</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">l_range</span><span class="p">,</span> <span class="n">z_range</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_water_level_score_range</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">bank</span><span class="p">:</span> <span class="n">BANK_OPTIONS</span> <span class="o">=</span> <span class="s2">&quot;far&quot;</span><span class="p">,</span>
+        <span class="n">bin_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">ds_max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">dz_max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">min_h</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_h</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate a range of scores for water level detection.</span>
+
+<span class="sd">        This computes the histogram score for a range of l values and returns all scores for further evaluation.</span>
+<span class="sd">        The histogram score is a measure of dissimilarity (low means very dissimilar) of pixel intensity distributions</span>
+<span class="sd">        left and right of hypothesized water lines. The evaluation points along the cross section (l-values) are</span>
+<span class="sd">        determined by two parameters max_ds (maximum step in horizontal direction) and max_dz (maximum step in vertical</span>
+<span class="sd">        direction).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        img : np.ndarray</span>
+<span class="sd">            image (uint8) used to estimate water level from.</span>
+<span class="sd">        bank: Literal[&quot;far&quot;, &quot;near&quot;, &quot;both&quot;], optional</span>
+<span class="sd">            select from which bank to detect the water level. Use this if camera is positioned in a way that only</span>
+<span class="sd">            one shore is clearly distinguishable and not obscured. Typically you will use &quot;far&quot; if the camera is</span>
+<span class="sd">            positioned on one bank, aimed perpendicular to the flow. Use &quot;near&quot; if not the full cross section is</span>
+<span class="sd">            visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and</span>
+<span class="sd">            approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based</span>
+<span class="sd">            on the best estimate from both banks.</span>
+<span class="sd">        bin_size : int, optional</span>
+<span class="sd">            Size of bins for histogram calculation of the provided image intensities, default 5.</span>
+<span class="sd">        length : float, optional</span>
+<span class="sd">            length of the waterline [m], by default 2.0</span>
+<span class="sd">        padding : float, optional</span>
+<span class="sd">            amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn</span>
+<span class="sd">            left and right of hypothesized water line at -padding and +padding.</span>
+<span class="sd">        offset : float, optional</span>
+<span class="sd">            perpendicular offset of the waterline from the cross-section [m], by default 0.0</span>
+<span class="sd">        ds_max : float, optional</span>
+<span class="sd">            maximum step size between evaluation points in horizontal direction, by default 0.5.</span>
+<span class="sd">        dz_max : float, optional</span>
+<span class="sd">            maximum step size between evaluation points in vertical direction, by default 0.02.</span>
+<span class="sd">        min_h : float, optional</span>
+<span class="sd">            minimum water level to try detection [m]. If not provided, the minimum water level is taken from the</span>
+<span class="sd">            cross section.</span>
+<span class="sd">        max_h : float, optional</span>
+<span class="sd">            maximum water level to try detection [m]. If not provided, the maximum water level is taken from the</span>
+<span class="sd">            cross section.</span>
+<span class="sd">        min_z : float, optional</span>
+<span class="sd">            same as min_h but using z-coordinates instead of local datum, min_z overrules min_h</span>
+<span class="sd">        max_z : float, optional</span>
+<span class="sd">            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">l_min</span><span class="p">,</span> <span class="n">l_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_line_of_interest</span><span class="p">(</span><span class="n">bank</span><span class="o">=</span><span class="n">bank</span><span class="p">)</span>
+        <span class="n">min_z</span><span class="p">,</span> <span class="n">max_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_level_range</span><span class="p">(</span><span class="n">min_h</span><span class="p">,</span> <span class="n">max_h</span><span class="p">,</span> <span class="n">min_z</span><span class="p">,</span> <span class="n">max_z</span><span class="p">)</span>
+        <span class="n">l_range</span><span class="p">,</span> <span class="n">z_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_l_range</span><span class="p">(</span><span class="n">l_min</span><span class="o">=</span><span class="n">l_min</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">,</span> <span class="n">ds_max</span><span class="o">=</span><span class="n">ds_max</span><span class="p">,</span> <span class="n">dz_max</span><span class="o">=</span><span class="n">dz_max</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># flatten image first if it his a time dimension</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">height</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Image height </span><span class="si">{</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not the same as camera_config height </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">height</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">width</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Image width </span><span class="si">{</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not the same as camera_config width </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># gridded results</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_histogram_score</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">l</span><span class="p">],</span>
+                <span class="n">img</span><span class="o">=</span><span class="n">img</span><span class="p">,</span>
+                <span class="n">bin_size</span><span class="o">=</span><span class="n">bin_size</span><span class="p">,</span>
+                <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+                <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+                <span class="n">min_z</span><span class="o">=</span><span class="n">min_z</span><span class="p">,</span>
+                <span class="n">max_z</span><span class="o">=</span><span class="n">max_z</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">l_range</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">l_range</span><span class="p">,</span> <span class="n">z_range</span><span class="p">,</span> <span class="n">results</span>
+
 <div class="viewcode-block" id="CrossSection.detect_water_level"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.detect_water_level.html#pyorc.CrossSection.detect_water_level">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">detect_water_level</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -1494,11 +1695,11 @@ document.write(`
         <span class="n">min_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">max_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect water level optically from provided image.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect water level from provided image through optimization.</span>
 
 <span class="sd">        Water level detection is done by first detecting the water line along the cross-section by comparisons</span>
 <span class="sd">        of distribution functions left and right of hypothesized water lines, and then looking up the water level</span>
-<span class="sd">        associated with the water line location.</span>
+<span class="sd">        associated with the water line location. A differential evolution optimization is used to find the optimum.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1531,19 +1732,14 @@ document.write(`
 <span class="sd">        max_z : float, optional</span>
 <span class="sd">            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">min_z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">min_h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">min_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">h_to_z</span><span class="p">(</span><span class="n">min_h</span><span class="p">)</span>
-                <span class="n">min_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">min_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">max_z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">max_h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">max_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">h_to_z</span><span class="p">(</span><span class="n">max_h</span><span class="p">)</span>
-                <span class="n">max_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">max_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">min_z</span> <span class="ow">and</span> <span class="n">max_z</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">min_z</span> <span class="o">&gt;</span> <span class="n">max_z</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Minimum water level is higher than maximum water level.&quot;</span><span class="p">)</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Most likely water level, according to optimization and scoring (most distinct intensity PDF)</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">l_min</span><span class="p">,</span> <span class="n">l_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_line_of_interest</span><span class="p">(</span><span class="n">bank</span><span class="o">=</span><span class="n">bank</span><span class="p">)</span>
+        <span class="n">min_z</span><span class="p">,</span> <span class="n">max_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_level_range</span><span class="p">(</span><span class="n">min_h</span><span class="p">,</span> <span class="n">max_h</span><span class="p">,</span> <span class="n">min_z</span><span class="p">,</span> <span class="n">max_z</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="c1"># flatten image first if it his a time dimension</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -1553,9 +1749,7 @@ document.write(`
         <span class="k">assert</span> <span class="p">(</span>
             <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">width</span>
         <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Image width </span><span class="si">{</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not the same as camera_config width </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="c1"># determine the relevant start point if only one is used</span>
-        <span class="c1"># import pdb;pdb.set_trace()</span>
-        <span class="n">l_min</span><span class="p">,</span> <span class="n">l_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_line_of_interest</span><span class="p">(</span><span class="n">bank</span><span class="o">=</span><span class="n">bank</span><span class="p">)</span>
+
         <span class="n">opt</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_histogram_score</span><span class="p">,</span>
             <span class="n">popsize</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
@@ -1573,7 +1767,97 @@ document.write(`
                 <span class="ne">UserWarning</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">h</span></div></div>
+        <span class="k">return</span> <span class="n">h</span></div>
+
+<div class="viewcode-block" id="CrossSection.detect_water_level_s2n"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.detect_water_level_s2n.html#pyorc.CrossSection.detect_water_level_s2n">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">detect_water_level_s2n</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">bank</span><span class="p">:</span> <span class="n">BANK_OPTIONS</span> <span class="o">=</span> <span class="s2">&quot;far&quot;</span><span class="p">,</span>
+        <span class="n">bin_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">ds_max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">dz_max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">min_h</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_h</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect water level optically from provided image, through evaluation of a vector of locations.</span>
+
+<span class="sd">        Water level detection is done by first detecting the water line along the cross-section by comparisons</span>
+<span class="sd">        of distribution functions left and right of hypothesized water lines, and then looking up the water level</span>
+<span class="sd">        associated with the water line location. Because a full vector of results is evaluated, the signal to noise</span>
+<span class="sd">        ratio can be evaluated and used to understand the quality of the water level detection. Two parameters are used</span>
+<span class="sd">        to control the spacing between l (location) coordinates: `ds_max` controls the maximum step size in horizontal</span>
+<span class="sd">        direction, `dz_max` controls the maximum step size in vertical direction.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        img : np.ndarray</span>
+<span class="sd">            image (uint8) used to estimate water level from.</span>
+<span class="sd">        bank: Literal[&quot;far&quot;, &quot;near&quot;, &quot;both&quot;], optional</span>
+<span class="sd">            select from which bank to detect the water level. Use this if camera is positioned in a way that only</span>
+<span class="sd">            one shore is clearly distinguishable and not obscured. Typically you will use &quot;far&quot; if the camera is</span>
+<span class="sd">            positioned on one bank, aimed perpendicular to the flow. Use &quot;near&quot; if not the full cross section is</span>
+<span class="sd">            visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and</span>
+<span class="sd">            approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based</span>
+<span class="sd">            on the best estimate from both banks.</span>
+<span class="sd">        bin_size : int, optional</span>
+<span class="sd">            Size of bins for histogram calculation of the provided image intensities, default 5.</span>
+<span class="sd">        length : float, optional</span>
+<span class="sd">            length of the waterline [m], by default 2.0.</span>
+<span class="sd">        padding : float, optional</span>
+<span class="sd">            amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn</span>
+<span class="sd">            left and right of hypothesized water line at -padding and +padding.</span>
+<span class="sd">        offset : float, optional</span>
+<span class="sd">            perpendicular offset of the waterline from the cross-section [m], by default 0.0.</span>
+<span class="sd">        ds_max : float, optional</span>
+<span class="sd">            maximum step size between evaluation points in horizontal direction, by default 0.5.</span>
+<span class="sd">        dz_max : float, optional</span>
+<span class="sd">            maximum step size between evaluation points in vertical direction, by default 0.02.</span>
+<span class="sd">        min_h : float, optional</span>
+<span class="sd">            minimum water level to try detection [m]. If not provided, the minimum water level is taken from the</span>
+<span class="sd">            cross section.</span>
+<span class="sd">        max_h : float, optional</span>
+<span class="sd">            maximum water level to try detection [m]. If not provided, the maximum water level is taken from the</span>
+<span class="sd">            cross section.</span>
+<span class="sd">        min_z : float, optional</span>
+<span class="sd">            same as min_h but using z-coordinates instead of local datum, min_z overrules min_h.</span>
+<span class="sd">        max_z : float, optional</span>
+<span class="sd">            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Most likely water level, according to optimization and scoring (most distinct intensity PDF).</span>
+<span class="sd">        float</span>
+<span class="sd">            Signal to noise ratio, calculated as the mean of all computed scores divided by the optimum (lowest) score</span>
+<span class="sd">            found in the entire l-range.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">l_range</span><span class="p">,</span> <span class="n">z_range</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_water_level_score_range</span><span class="p">(</span>
+            <span class="n">img</span><span class="o">=</span><span class="n">img</span><span class="p">,</span>
+            <span class="n">bank</span><span class="o">=</span><span class="n">bank</span><span class="p">,</span>
+            <span class="n">bin_size</span><span class="o">=</span><span class="n">bin_size</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">ds_max</span><span class="o">=</span><span class="n">ds_max</span><span class="p">,</span>
+            <span class="n">dz_max</span><span class="o">=</span><span class="n">dz_max</span><span class="p">,</span>
+            <span class="n">min_h</span><span class="o">=</span><span class="n">min_h</span><span class="p">,</span>
+            <span class="n">max_h</span><span class="o">=</span><span class="n">max_h</span><span class="p">,</span>
+            <span class="n">min_z</span><span class="o">=</span><span class="n">min_z</span><span class="p">,</span>
+            <span class="n">max_z</span><span class="o">=</span><span class="n">max_z</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># find optimum (minimum score)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="n">s2n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">/</span> <span class="n">results</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z_range</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">z_to_h</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="c1"># warning if the optimum is on the edge of the search space for l</span>
+        <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">s2n</span></div></div>
 </pre></div>
 
                 </article>

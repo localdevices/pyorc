@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Frames.project &#8212; pyorc 0.8.12 documentation</title>
+    <title>pyorc.CrossSection.detect_water_level_s2n &#8212; pyorc 0.8.12 documentation</title>
   
   
   
@@ -46,12 +46,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Frames.project';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CrossSection.detect_water_level_s2n';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyorc.Frames.get_piv" href="pyorc.Frames.get_piv.html" />
-    <link rel="prev" title="pyorc.Frames.time_diff" href="pyorc.Frames.time_diff.html" />
+    <link rel="next" title="pyorc.Video" href="pyorc.Video.html" />
+    <link rel="prev" title="pyorc.CrossSection.detect_water_level" href="pyorc.CrossSection.detect_water_level.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -427,9 +427,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
 </ul>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level_s2n.html">pyorc.CrossSection.detect_water_level_s2n</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CrossSection.detect_water_level_s2n</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Video.html">pyorc.Video</a></li>
@@ -470,8 +470,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.smooth.html">pyorc.Frames.smooth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.time_diff.html">pyorc.Frames.time_diff</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.Frames.project</a></li>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.project.html">pyorc.Frames.project</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.get_piv.html">pyorc.Frames.get_piv</a></li>
@@ -581,7 +581,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">pyorc.Frames.project</li>
+    <li class="breadcrumb-item active" aria-current="page">pyorc.CrossS...</li>
   </ul>
 </nav>
 </div>
@@ -598,39 +598,50 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="pyorc-frames-project">
-<h1>pyorc.Frames.project<a class="headerlink" href="#pyorc-frames-project" title="Permalink to this heading">#</a></h1>
+  <section id="pyorc-crosssection-detect-water-level-s2n">
+<h1>pyorc.CrossSection.detect_water_level_s2n<a class="headerlink" href="#pyorc-crosssection-detect-water-level-s2n" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
-<dt class="sig sig-object py" id="pyorc.Frames.project">
-<span class="sig-prename descclassname"><span class="pre">Frames.</span></span><span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'cv'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'numpy'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'numpy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reducer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyorc/api/frames.html#Frames.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.Frames.project" title="Permalink to this definition">#</a></dt>
-<dd><p>Project frames into a projected frames object, with information from the camera_config attr.</p>
-<p>This requires that the CameraConfig contains full gcp information. If a CRS is provided, also “lat” and “lon”
-variables will be added to the output, containing geographical latitude and longitude coordinates.</p>
+<dt class="sig sig-object py" id="pyorc.CrossSection.detect_water_level_s2n">
+<span class="sig-prename descclassname"><span class="pre">CrossSection.</span></span><span class="sig-name descname"><span class="pre">detect_water_level_s2n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BANK_OPTIONS</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'far'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/pyorc/api/cross_section.html#CrossSection.detect_water_level_s2n"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CrossSection.detect_water_level_s2n" title="Permalink to this definition">#</a></dt>
+<dd><p>Detect water level optically from provided image, through evaluation of a vector of locations.</p>
+<p>Water level detection is done by first detecting the water line along the cross-section by comparisons
+of distribution functions left and right of hypothesized water lines, and then looking up the water level
+associated with the water line location. Because a full vector of results is evaluated, the signal to noise
+ratio can be evaluated and used to understand the quality of the water level detection. Two parameters are used
+to control the spacing between l (location) coordinates: <cite>ds_max</cite> controls the maximum step size in horizontal
+direction, <cite>dz_max</cite> controls the maximum step size in vertical direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – can be <cite>numpy</cite> or <cite>cv</cite> (default <cite>numpy</cite>).
-With <cite>numpy</cite> each individual orthoprojected grid cell is mapped to the image pixels space. For oversampled
-areas, this is also done vice versa. Undersampled areas result in nearest-neighbour interpolations, whilst
-for oversampled, this results in a mean value (if the user uses <cite>mean</cite> as reducer). With <cite>cv</cite> (opencv)
-resampling is performed by first undistorting images, and then by resampling to the
-desired grid. With heavily distorted images and part of the area of interest outside of the field
-of view, the orthoprojection of the corners may end up in the wrong space.
-We recommend using <cite>numpy</cite> and only use cv with simple cases such as nadir-looking videos.</p></li>
-<li><p><strong>resolution</strong> (<em>float</em><em>, </em><em>optional</em>) – <dl class="simple">
-<dt>resolution to project to. If not provided, this will be taken from the camera config in the metadata</dt><dd><p>(Default value = None)</p>
-</dd>
-</dl>
-</p></li>
-<li><p><strong>reducer</strong> (<em>str</em><em>, </em><em>optional</em>) – Currently only used when <cite>method=”numpy”</cite>. Default “mean”, resulting in averaging of oversampled grid cells.</p></li>
+<li><p><strong>img</strong> (<em>np.ndarray</em>) – image (uint8) used to estimate water level from.</p></li>
+<li><p><strong>bank</strong> (<em>Literal</em><em>[</em><em>&quot;far&quot;</em><em>, </em><em>&quot;near&quot;</em><em>, </em><em>&quot;both&quot;</em><em>]</em><em>, </em><em>optional</em>) – select from which bank to detect the water level. Use this if camera is positioned in a way that only
+one shore is clearly distinguishable and not obscured. Typically you will use “far” if the camera is
+positioned on one bank, aimed perpendicular to the flow. Use “near” if not the full cross section is
+visible, but only the part nearest the camera. And leave empty when both banks are clearly visible and
+approximately the same in distance (e.g. middle of a bridge). If not provided, the bank is detected based
+on the best estimate from both banks.</p></li>
+<li><p><strong>bin_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of bins for histogram calculation of the provided image intensities, default 5.</p></li>
+<li><p><strong>length</strong> (<em>float</em><em>, </em><em>optional</em>) – length of the waterline [m], by default 2.0.</p></li>
+<li><p><strong>padding</strong> (<em>float</em><em>, </em><em>optional</em>) – amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn
+left and right of hypothesized water line at -padding and +padding.</p></li>
+<li><p><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – perpendicular offset of the waterline from the cross-section [m], by default 0.0.</p></li>
+<li><p><strong>ds_max</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum step size between evaluation points in horizontal direction, by default 0.5.</p></li>
+<li><p><strong>dz_max</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum step size between evaluation points in vertical direction, by default 0.02.</p></li>
+<li><p><strong>min_h</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum water level to try detection [m]. If not provided, the minimum water level is taken from the
+cross section.</p></li>
+<li><p><strong>max_h</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum water level to try detection [m]. If not provided, the maximum water level is taken from the
+cross section.</p></li>
+<li><p><strong>min_z</strong> (<em>float</em><em>, </em><em>optional</em>) – same as min_h but using z-coordinates instead of local datum, min_z overrules min_h.</p></li>
+<li><p><strong>max_z</strong> (<em>float</em><em>, </em><em>optional</em>) – same as max_z but using z-coordinates instead of local datum, max_z overrules max_h.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>frames</strong> – projected frames and x and y in local coordinate system (origin: top-left), lat and lon if a crs was
-provided.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>xr.DataArray</p>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>float</em> – Most likely water level, according to optimization and scoring (most distinct intensity PDF).</p></li>
+<li><p><em>float</em> – Signal to noise ratio, calculated as the mean of all computed scores divided by the optimum (lowest) score
+found in the entire l-range.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -648,20 +659,20 @@ provided.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pyorc.Frames.time_diff.html"
+       href="pyorc.CrossSection.detect_water_level.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pyorc.Frames.time_diff</p>
+        <p class="prev-next-title">pyorc.CrossSection.detect_water_level</p>
       </div>
     </a>
     <a class="right-next"
-       href="pyorc.Frames.get_piv.html"
+       href="pyorc.Video.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyorc.Frames.get_piv</p>
+        <p class="prev-next-title">pyorc.Video</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -683,14 +694,14 @@ provided.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.Frames.project"><code class="docutils literal notranslate"><span class="pre">Frames.project()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyorc.CrossSection.detect_water_level_s2n"><code class="docutils literal notranslate"><span class="pre">CrossSection.detect_water_level_s2n()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/_generated/pyorc.Frames.project.rst.txt">
+    <a href="../_sources/_generated/pyorc.CrossSection.detect_water_level_s2n.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
