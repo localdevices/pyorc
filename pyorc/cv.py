@@ -1067,7 +1067,15 @@ def get_polygon_pixels(img, pol, reverse_y=False):
     cropped_polygon_coords = [(x - min_x, y - min_y) for x, y in pol.exterior.coords]
 
     mask = np.zeros_like(cropped_img, dtype=np.uint8)
-    cv2.fillPoly(mask, [np.array(cropped_polygon_coords, dtype=np.int32)], color=255)
+    if 0 in mask.shape:
+        # no shape in mask, so return empty array instantly
+        return np.array([], dtype=np.uint8)
+    try:
+        cv2.fillPoly(mask, [np.array(cropped_polygon_coords, dtype=np.int32)], color=255)
+    except Exception:
+        import pdb
+
+        pdb.set_trace()
     return numba_extract_pixels(cropped_img, mask)
 
 

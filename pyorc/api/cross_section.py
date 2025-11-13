@@ -1099,12 +1099,27 @@ class CrossSection:
             )
         return ax
 
-    def _preprocess_water_level(
+    def _preprocess_level_range(
         self,
-        bank: BANK_OPTIONS = "far",
+        min_h: Optional[float] = None,
+        max_h: Optional[float] = None,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
     ):
-        """Preprocess the selection of coordinates for water level evaluation."""
-        return self.get_line_of_interest(bank=bank)
+        """Set minimum and maximum z-levels (if not provided) based on the camera config."""
+        if min_z is None:
+            if min_h is not None:
+                min_z = self.camera_config.h_to_z(min_h)
+                min_z = np.maximum(min_z, self.z.min())
+        if max_z is None:
+            if max_h is not None:
+                max_z = self.camera_config.h_to_z(max_h)
+                max_z = np.minimum(max_z, self.z.max())
+        if min_z and max_z:
+            # check for z_min < z_max
+            if min_z > max_z:
+                raise ValueError("Minimum water level is higher than maximum water level.")
+        return min_z, max_z
 
     def _preprocess_l_range(self, l_min: float, l_max: float, ds_max=0.5, dz_max=0.02) -> List[float]:
         """Generate a list of evaluation points between l_min and l_max for water level detection.
@@ -1231,9 +1246,9 @@ class CrossSection:
             same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
 
         """
-        l_min, l_max = self._preprocess_water_level(bank=bank)
+        l_min, l_max = self.get_line_of_interest(bank=bank)
+        min_z, max_z = self._preprocess_level_range(min_h, max_h, min_z, max_z)
         l_range, z_range = self._preprocess_l_range(l_min=l_min, l_max=l_max, ds_max=ds_max, dz_max=dz_max)
-
         if len(img.shape) == 3:
             # flatten image first if it his a time dimension
             img = img.mean(axis=2)
@@ -1311,7 +1326,8 @@ class CrossSection:
             same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
 
         """
-        l_min, l_max = self._preprocess_water_level(bank=bank, min_h=min_h, max_h=max_h, min_z=min_z, max_z=max_z)
+        l_min, l_max = self.get_line_of_interest(bank=bank)
+        min_z, max_z = self._preprocess_level_range(min_h, max_h, min_z, max_z)
         if len(img.shape) == 3:
             # flatten image first if it his a time dimension
             img = img.mean(axis=2)
