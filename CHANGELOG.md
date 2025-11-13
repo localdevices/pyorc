@@ -1,9 +1,25 @@
+## [0.8.12] = 2025-11-13
+### Added
+- Added `CrossSection.detect_water_level_s2n` for signal to noise ratios.
+### Changed
+- The CLI recipe .yml can now handle lists in `water_level.frames_options` and usage of a signal to noise acceptance
+  threshold in each `frames_options` to control if a water level is accepted. If the signal to noise is lower than
+  set threshold, the next `frames_options` will be used to attempt resolving a water level with a higher signal to
+  noise ratio. This allows for treatment of videos under varying conditions, in which water level detection may
+  profit from different video treatments.
+### Deprecated
+### Removed
+### Fixed
+- docstring of masks indentation issue
+- CrossSection docstring Sphinx repetition removed.
+
+
 ## [0.8.11] = 2025-10-01
 ### Added
 - Derivation of transect properties surface area and wetted perimeter.
 - Added method `transect.get_v_surf` for average surface velocity, and `transect.get_v_bulk` for bulk velocity.
 ### Changed
-- Using `add_text=True` in `transect.plot` now also displays average surface and bulk velocity.  
+- Using `add_text=True` in `transect.plot` now also displays average surface and bulk velocity.
 ### Deprecated
 ### Removed
 - `transect.get_wetted_perspective` is no longer required as this can be derived from `transect.cross_section`.

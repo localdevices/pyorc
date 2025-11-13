@@ -26,6 +26,15 @@ def recipe_no_waterlevel(recipe_yml):
 
     r = cli_utils.parse_recipe("a", "b", recipe_yml)
     del r["video"]["h_a"]
+    # add options
+    r["water_level"] = {
+        "method": "sat",
+        "water_level_options": {"bank": "far"},
+        "frames_options": [
+            {"method": "grayscale", "s2n_thres": 3},
+            {"method": "sat"},
+        ],
+    }
     return r
 
 

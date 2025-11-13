@@ -10,12 +10,11 @@ from pyorc import helpers
 from pyorc.const import corr, s2n, v_x, v_y
 
 commondoc = """
-    Returns
-    -------
-    mask : xr.DataArray
-        mask applicable to input dataset with ``ds.velocimetry.filter(mask)``.
-        If ``inplace=True``, the dataset will be returned masked with ``mask``.
-
+        Returns
+        -------
+        mask : xr.DataArray
+            mask applicable to input dataset with ``ds.velocimetry.filter(mask)``.
+            If ``inplace=True``, the dataset will be returned masked with ``mask``.
 """
 
 
@@ -203,7 +202,7 @@ class _Velocimetry_MaskMethods:
 
     @_base_mask(time_allowed=True)
     def corr(self, tolerance=0.1):
-        """Mass values with too low correlation.
+        """Mask values with too low correlation.
 
         Parameters
         ----------
@@ -304,16 +303,17 @@ class _Velocimetry_MaskMethods:
             (default: 1) wdw is used to fill wdw_x_min and wdwd_y_min with its negative (-wdw) value, and wdw_y_min and
         kwargs : dict
             keyword arguments to pass to ``helpers.stack_window``. These can be:
-            wdw_x_min : int, optional
-                window size in negative x-direction of grid (must be negative), overrules wdw in negative x-direction
-                if set.
-            wdw_x_max : int, optional
-                window size in positive x-direction of grid, overrules wdw in positive x-direction if set
-            wdw_y_min : int, optional
-                window size in negative y-direction of grid (must be negative), overrules wdw in negative y-direction
-                if set.
-            wdw_y_max : int, optional
-                window size in positive y-direction of grid, overrules wdw in positive x-direction if set.
+
+            - ``wdw_x_min`` : int, optional
+              window size in negative x-direction of grid (must be negative), overrules wdw in negative x-direction if
+              set.
+            - ``wdw_x_max`` : int, optional
+              window size in positive x-direction of grid, overrules wdw in positive x-direction if set.
+            - ``wdw_y_min`` : int, optional
+              window size in negative y-direction of grid (must be negative), overrules wdw in negative y-direction if
+              set.
+            - ``wdw_y_max`` : int, optional
+              window size in positive y-direction of grid, overrules wdw in positive x-direction if set.
 
         """
         # collect points within a stride, collate and analyze for nan fraction
@@ -326,7 +326,7 @@ class _Velocimetry_MaskMethods:
     def window_mean(self, tolerance=0.7, wdw=1, mode="or", **kwargs):
         """Mask values when their value deviates significantly from mean.
 
-        This is computed as relative fraction from the mean of its  neighbours (inc. itself).
+        This is computed as relative fraction from the mean of its neighbours (inc. itself).
 
         Parameters
         ----------
@@ -339,16 +339,17 @@ class _Velocimetry_MaskMethods:
             be within tolerance.
         kwargs : dict
             keyword arguments to pass to ``helpers.stack_window``. These can be:
-            wdw_x_min : int, optional
-                window size in negative x-direction of grid (must be negative), overrules wdw in negative x-direction
-                if set.
-            wdw_x_max : int, optional
-                window size in positive x-direction of grid, overrules wdw in positive x-direction if set.
-            wdw_y_min : int, optional
-                window size in negative y-direction of grid (must be negative), overrules wdw in negative y-direction
-                if set.
-            wdw_y_max : int, optional
-                window size in positive y-direction of grid, overrules wdw in positive x-direction if set.
+
+            - ``wdw_x_min`` : int, optional
+              window size in negative x-direction of grid (must be negative), overrules wdw in negative x-direction
+              if set.
+            - ``wdw_x_max`` : int, optional
+              window size in positive x-direction of grid, overrules wdw in positive x-direction if set.
+            - ``wdw_y_min`` : int, optional
+              window size in negative y-direction of grid (must be negative), overrules wdw in negative y-direction
+              if set.
+            - ``wdw_y_max`` : int, optional
+              window size in positive y-direction of grid, overrules wdw in positive x-direction if set.
 
         """
         # collect points within a stride, collate and analyze for median value and deviation

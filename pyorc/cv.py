@@ -7,6 +7,7 @@ import warnings
 import cv2
 import numpy as np
 import rasterio
+from numba import jit, prange
 from scipy import optimize
 from shapely.affinity import rotate
 from shapely.geometry import LineString, Point, Polygon
@@ -1034,16 +1035,48 @@ def get_aoi(dst_corners, resolution=None, method="corners"):
     return bbox
 
 
+@jit(nopython=True, cache=True, nogil=True)
+def numba_extract_pixels(img, mask):
+    """Optimized pixel extraction within a polygon-defined mask."""
+    pixel_values = []
+    rows, cols = img.shape
+    for i in prange(rows):
+        for j in prange(cols):
+            if mask[i, j] == 255:
+                pixel_values.append(img[i, j])
+    return np.array(pixel_values)
+
+
 def get_polygon_pixels(img, pol, reverse_y=False):
     """Get pixel intensities within a polygon."""
     if pol.is_empty:
         return np.array([np.nan])
-    polygon_coords = list(pol.exterior.coords)
-    mask = np.zeros_like(img, dtype=np.uint8)
-    cv2.fillPoly(mask, np.array([polygon_coords], np.int32), color=255)
+    min_x, min_y, max_x, max_y = map(int, pol.bounds)
+    # Ensure bounding box remains within the image dimensions
+    min_x = max(min_x, 0)
+    min_y = max(min_y, 0)
+    max_x = min(max_x, img.shape[1])
+    max_y = min(max_y, img.shape[0])
+
     if reverse_y:
-        return np.flipud(img)[mask == 255]
-    return img[mask == 255]
+        img = np.flipud(img)
+
+    # Crop the image based on the bounding box
+    cropped_img = img[min_y:max_y, min_x:max_x]
+    # reduce polygon coordinates to ensure compatibility with cropped_img
+    cropped_polygon_coords = [(x - min_x, y - min_y) for x, y in pol.exterior.coords]
+
+    mask = np.zeros_like(cropped_img, dtype=np.uint8)
+    if 0 in mask.shape:
+        # no shape in mask, so return empty array instantly
+        return np.array([], dtype=np.uint8)
+    try:
+        cv2.fillPoly(mask, [np.array(cropped_polygon_coords, dtype=np.int32)], color=255)
+    except Exception:
+        import pdb
+
+        pdb.set_trace()
+    return numba_extract_pixels(cropped_img, mask)
 
 
 def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camera_matrix=None, dist_coeffs=None):

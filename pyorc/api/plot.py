@@ -2,12 +2,11 @@
 
 import copy
 import functools
+import warnings
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
-import warnings
-
 from matplotlib import colors, patheffects
 
 from pyorc import helpers
@@ -207,10 +206,9 @@ def _base_plot(plot_func):
                                 color="r",
                                 label="water level",
                             )
-                        except:
+                        except Exception:
                             warnings.warn(
-                                "Not able to find a unique location for plotting of water level",
-                                stacklevel=2
+                                "Not able to find a unique location for plotting of water level", stacklevel=2
                             )
 
                     # draw some depth lines for better visual interpretation.
@@ -620,7 +618,7 @@ def set_default_kwargs(kwargs, method="quiver", mode="local"):
         kwargs["cmap"] = "rainbow"  # the famous rainbow colormap!
     if "vmin" not in kwargs and "vmax" not in kwargs and "norm" not in kwargs:
         # set a normalization array
-        norm = [0, 0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+        norm = [0, 0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 5.0, 10.0]
         kwargs["norm"] = colors.BoundaryNorm(norm, ncolors=256, extend="max")
     if method == "quiver":
         if "scale" not in kwargs:
@@ -755,7 +753,13 @@ def plot_text(ax, ds, prefix, suffix):
     v_surf = _ds.transect.get_v_surf()
     v_bulk = _ds.transect.get_v_bulk()
     string = prefix
-    string += f"$h_a$: {_ds.transect.h_a:1.2f} m | $v_{{surf}}$: {v_surf.values:1.2f} m/s | $\overline{{v}}$: {v_bulk.values:1.2f} m/s\n$Q$: {Q.values:1.2f} m3/s" # .format(_ds.transect.h_a, Q.values)
+    string += (
+        f"$h_a$: {_ds.transect.h_a:1.2f} m | "
+        f"$v_{{surf}}$: {v_surf.values:1.2f} m/s | "
+        f"$\\overline{{v}}$: {v_bulk.values:1.2f} m/s\n"
+        f"$Q$: {Q.values:1.2f} m3/s"
+    )
+
     if "q_nofill" in ds:
         _ds.transect.get_river_flow(q_name="q_nofill")
         Q_nofill = np.abs(_ds.river_flow)

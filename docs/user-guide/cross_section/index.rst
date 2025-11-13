@@ -33,9 +33,11 @@ to start with a fully computer vision based approach. In essence the method work
 
 You need:
 
-1) a camera configuration (i.e. containing all perspective information)
-1) an image from the camera of interest, that fits with the established camera configuration
-3) a cross section, e.g. stored in a shapefile as 3d (x, y, z) points.
+1. a camera configuration (i.e. containing all perspective information)
+2. an image from the camera of interest, that fits with the established camera configuration. This image can also be
+   derived through processing a video, e.g. taking the mean (to reduce background noise), or the intensity range
+   (increasing visibility of moving/changing pixels, i.e. moving water).
+3. a cross section, e.g. stored in a shapefile or csv file as 3d (x, y, z) points.
 
 If you are able to use the API within python, you can easily visualize these all together. We'll use here an example
 of a small concrete channel.
@@ -51,11 +53,12 @@ The manner in which our computer vision algorithm determines the water level is 
 - the cross section coordinates can be interpreted in both real-world coordinates (i.e. as provided by you, measured
   in the field), but also as camera coordinates, i.e. through the camera configuration.
 - the cross section is made "smart" by enabling all sorts of geometric operations on the cross section. You can for
-  instance see in the top-right figure, that the cross section is extended left and right so that you can better see the
-  channel shape. Also in the top-left (camera view), you can see that same extension in brown colored polygon
+  instance see in the right figure, that the cross section is extended up- and downstream so that you can better see
+  the channel shape.
 - with this "smart" cross section, we draw two polygon on a cross section point, extending left and right of the
   cross section. We can do this at any random point in the cross section.
-- we then extract pixel intensities, here from a grayscale image, and compare the intensity distribution functions.
+- we then extract pixel intensities within both polygons, here from a grayscale image, and compare their intensity
+  distribution functions (PDF).
 - if the distributions are very similar, it is likely that left and right of the point in the cross section, we are
   looking at similar "stuff". We see that in the left-side below, where both polygons lie over water.
 - In the right-hand-side figure below, we see that the polygons are drawn at the opposite side, exactly at the water
@@ -65,11 +68,15 @@ The manner in which our computer vision algorithm determines the water level is 
   this water line.
 
 In the figure below you can see
-a "score" of 0.82 and 0.21 for the different levels. The lower the score the more likely we have found the water level.
+a "score" of 0.83 and 0.21 for the different levels. The lower the score the more likely we have found the water level.
 A value of one means the distribution functions are identical, a value of zero means the distribution functions have
-no overlap at all. Naturally the methods works with an optimization algorithm, that efficiently seeks the location in
-the cross section where the two polygons provide the most difference in intensity distribution functions. This
-is fully automated. You only need to provide a cross section file.
+no overlap at all. The methods can be applied with an optimization algorithm, that efficiently seeks the location in
+the cross section where the two polygons provide the most difference in intensity distribution functions
+(``CrossSection.detect_water_level``). The method can also be applied by setting up a vector of evaluation points.
+This results in many scores, which then can be used to both return the optimum and a signal-to-noise ratio using all
+other found scores (``CrossSection.detect_water_level_s2n``). This has the added advantage that one can judge how
+trustworthy the result is. The evaluations are fully automated. You only need to provide a cross section file and a
+(pre-processed) image.
 
 .. image:: polygon_samples.jpg
 
@@ -83,7 +90,8 @@ clarifies the limitations. Please note the following two limitations:
 * strong seasonal changes in the banks are problematic. For instance, overhanging growth of vegetation during spring
   and summer will likely cause the waterline to be detected at the edge of the vegetation rather than the real bank.
   Also in this case you will most likely underestimate the water level, as the water line is estimated to be somewhere
-  in the water, rather than the real bank.
+  in the water, rather than the real bank. Erosion of your cross section can also lead to strong mis-detections of
+  the water level.
 
 Note for instance the example below. We have neatly identified the optimum in this vegetated bank, but it is too far on
 the water because of the floating grassy vegetation on the water. As a result we have underestimated the water level
@@ -115,22 +123,20 @@ How to work with cross sections
 
     .. tab-item:: Command-line
 
-        A cross section must be provided on the command line by using the ``--cross`` parameter and a reference
+        A cross section must be provided on the command line by using the ``--cross_wl`` parameter and a reference
         to a GeoJSON or shapefile containing x, y, z Point geometries only! If the file contains a coordinate reference
         system (CRS), that will also be interpreted and used to ensure coordinates are (if necessary) transformed to
-        the same CRS as the :ref:`camera configuration <camera_config_ug>`. This file is then used in two places.
+        the same CRS as the :ref:`camera configuration <camera_config_ug>`.
 
-        * If no external water level is provided (on the CLI using the ``--h_a`` option, or by directly inserting
-          a water level in the recipe under the :ref:`video section <video_ug>` the ``--cross`` Points,
-          will be used by **pyorc**  to estimate the water level optically from an image (see below) derived from the
-          video.
-        * If your recipe file contains a ``transect`` section, the coordinates will be extracted and used to extract
-          a transect of velocities, and perform further processing as configured under ``transect``. Note that the
-          ``transect`` section also allows you to provide a geojson string as input, or a shapefile as input directly.
-          If you do that, the shapefile provided at ``--cross`` will be ignored.
+        If no external water level is provided (on the CLI using the ``--h_a`` option, or by directly inserting
+        a water level in the recipe under the :ref:`video section <video_ug>` the ``--cross_wl`` Points,
+        will be used by **pyorc**  to estimate the water level optically from an image (see below) derived from the
+        video.
 
-        The cross section points are also used to produce a plot of the wetted surface area in any camera perspective
-        plot you may generate in the recipe. See the :ref:`plot <plot_ug>` for further information.
+        Note that the CLI option ``--cross`` is meant to provide a cross section for estimating the wetted cross
+        cross section, extract velocities and estimating discharge. These can be the same, but in many cases
+        the ``cross_wl`` cross section may be different, e.g. a line that follows a concrete structure on the bank or
+        a staff gauge.
 
         For further fine tuning, you can add a ``water_level`` section below the ``video`` section in your recipe.
         Changing the polygon size and location as described, can be done through a subsection ``water_level_options``
@@ -171,11 +177,39 @@ How to work with cross sections
             water_level:
               n_start: 10  # use the 10th frame of the extracted video frames...
               n_end: 20  # ...until the 20th frame. The average of the extracted and preprocessed frames is used.
-              method: "hue"  # we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.
               bank: "near"  # in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose "both" for seeking the optimal on both banks
               frames_options:  # we add preprocessing methods from the frames methods. You can extend this similar to the frames section.
+                method: "hue"  # we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.
                 range: {}  # range (with empty arguments) extracts the difference between min and max in time, revealing moving water, opposed to non-moving land. Better non use with hue channel
                 ... # other preprocessing after range, remove this line if not used.
+              water_level_options:
+                length: 10  # meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.
+                padding: 1.0  # make the polygons wider than the default 0.5 meters.
+
+
+        Finally, you can also supply a signal-to-noise threshold (``s2n_thres``) to judge whether the detected water
+        level is distinct enough. By default this value is 3.0 meaning that the optimal minimum score must be at least
+        3 x lower than the mean of all computed scores. If youj lower this value, you may more easily find a detected
+        water level but this can also lead to noisy water levels being accepted. You can also stack
+        ``frames_options`` so that when the first preprocessing does not lead to a high enough signal to noise ratio,
+        the second preprocessing is tried afterwards. This is useful e.g. in situations where during low flows, other
+        preprocessing leads to good results than during high flows. An example is provided below.
+
+        .. code-block:: yaml
+
+            video:  # this is from the earlier example
+              start_frame: 150
+              end_frame: 250
+              h_a: 92.23
+
+            water_level:
+              n_start: 10  # use the 10th frame of the extracted video frames...
+              n_end: 20  # ...until the 20th frame. The average of the extracted and preprocessed frames is used.
+              bank: "near"  # in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose "both" for seeking the optimal on both banks
+              frames_options:  # we add two preprocessing methods. In case 1 fails detection, we try the second.
+                - method: "grayscale"  # low flows are within a small mountainous channel, mostly detectable by intensity changes
+                  range: {}
+                - method: "grayscale"  # for higher flows, water looks very dark, so pure grayscale works better
               water_level_options:
                 length: 10  # meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.
                 padding: 1.0  # make the polygons wider than the default 0.5 meters.
@@ -343,3 +377,15 @@ How to work with cross sections
             da = vid.get_frames(method="hue")  # retrieve frames with hue channel instead of greyscale
             img = da.mean(dim="time").values  # get the mean again and retrieve the values
             h = cs.detect_water_level(img, length=10.0, offset=-2.0)
+
+        Instead of ``detect_water_level``, you can also use ``detect_water_level_s2n``. This evaluates the score on
+        a vector of possible locations instead of optimizing. The full vector of results is then used to compute a
+        signal to noise ratio using
+
+        .. math::
+
+            r_{s2n} = \frac{\sum_n{\gamma_n}}{\gamma_{min}}
+
+        where $n$ is the amount of points for evaluation, $\gamma$ is the score (minimum is optimum). The evaluation
+        points are defined along the l-coordinates, such that the maximum vertical distance between two points
+        is equal to a parameter ``dz_max`` and the maximum horizontal distance is equal to parameter ``ds_max``.

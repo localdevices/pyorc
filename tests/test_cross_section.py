@@ -349,8 +349,9 @@ def test_get_wetted_surface(cs):
     assert isinstance(pol3, geometry.MultiPolygon)
     assert len(pol3.geoms) == 1
 
+
 def test_get_wetted_surface_sz_perimeter(cs):
-    """Test get_wetted_surface with `perimeter=True`"""
+    """Test get_wetted_surface with `perimeter=True`."""
     line1 = cs.get_wetted_surface_sz(h=93.0, perimeter=True)
     line2 = cs.get_wetted_surface_sz(h=94.9, perimeter=True)
 
@@ -359,6 +360,7 @@ def test_get_wetted_surface_sz_perimeter(cs):
     assert isinstance(line2, geometry.MultiLineString)
     assert line2.has_z == False
     assert line2.length > line1.length
+
 
 def test_detect_wl(cs, img):
     h = cs.detect_water_level(img, bank="far", length=1.0)
@@ -385,6 +387,14 @@ def test_detect_wl_near_bank(cs, img):
 def test_detect_wl_no_bank_specified(cs, img, bank="both"):
     h = cs.detect_water_level(img, length=2.0, bank=bank)
     print(f"Water level with both banks specified: {h}")
+
+
+def test_water_level_score_range(cs, img):
+    h, s2n = cs.detect_water_level_s2n(img, bank="far", length=1.0)
+    assert h is not None
+    assert h > 93.0
+    assert s2n > 8
+    assert isinstance(h, float)
 
 
 def test_plot_cs_camera(cs):

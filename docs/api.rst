@@ -163,6 +163,7 @@ Combined with a preprocessed image from e.g. a video file, a water level can be 
     :toctree: _generated
 
     CrossSection.detect_water_level
+    CrossSection.detect_water_level_s2n
 
 .. _video:
 
@@ -384,11 +385,9 @@ Derivatives
     :toctree: _generated
 
     Transect.vector_to_scalar
-    Transect.get_xyz_perspective
     Transect.get_depth_perspective
     Transect.get_bottom_surface_z_perspective
     Transect.get_transect_perspective
-    Transect.get_wetted_perspective
     Transect.get_v_surf
     Transect.get_v_bulk
 
