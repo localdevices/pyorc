@@ -278,7 +278,7 @@ class CrossSection:
         Parameters
         ----------
         h : float
-            water level [m]
+            water level [m].
         sz : bool, optional
             If set, return water level line in y-z projection, by default False.
         extend_by : float, optional
@@ -1288,11 +1288,11 @@ class CrossSection:
         min_z: Optional[float] = None,
         max_z: Optional[float] = None,
     ) -> float:
-        """Detect water level optically from provided image.
+        """Detect water level from provided image through optimization.
 
         Water level detection is done by first detecting the water line along the cross-section by comparisons
         of distribution functions left and right of hypothesized water lines, and then looking up the water level
-        associated with the water line location.
+        associated with the water line location. A differential evolution optimization is used to find the optimum.
 
         Parameters
         ----------
@@ -1324,6 +1324,11 @@ class CrossSection:
             same as min_h but using z-coordinates instead of local datum, min_z overrules min_h
         max_z : float, optional
             same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
+
+        Returns
+        -------
+        float
+            Most likely water level, according to optimization and scoring (most distinct intensity PDF)
 
         """
         l_min, l_max = self.get_line_of_interest(bank=bank)
@@ -1372,11 +1377,14 @@ class CrossSection:
         min_z: Optional[float] = None,
         max_z: Optional[float] = None,
     ) -> float:
-        """Detect water level optically from provided image.
+        """Detect water level optically from provided image, through evaluation of a vector of locations.
 
         Water level detection is done by first detecting the water line along the cross-section by comparisons
         of distribution functions left and right of hypothesized water lines, and then looking up the water level
-        associated with the water line location.
+        associated with the water line location. Because a full vector of results is evaluated, the signal to noise
+        ratio can be evaluated and used to understand the quality of the water level detection. Two parameters are used
+        to control the spacing between l (location) coordinates: `ds_max` controls the maximum step size in horizontal
+        direction, `dz_max` controls the maximum step size in vertical direction.
 
         Parameters
         ----------
@@ -1392,12 +1400,12 @@ class CrossSection:
         bin_size : int, optional
             Size of bins for histogram calculation of the provided image intensities, default 5.
         length : float, optional
-            length of the waterline [m], by default 2.0
+            length of the waterline [m], by default 2.0.
         padding : float, optional
             amount of distance [m] to extend the polygon beyond the waterline, by default 0.5. Two polygons are drawn
             left and right of hypothesized water line at -padding and +padding.
         offset : float, optional
-            perpendicular offset of the waterline from the cross-section [m], by default 0.0
+            perpendicular offset of the waterline from the cross-section [m], by default 0.0.
         ds_max : float, optional
             maximum step size between evaluation points in horizontal direction, by default 0.5.
         dz_max : float, optional
@@ -1409,9 +1417,17 @@ class CrossSection:
             maximum water level to try detection [m]. If not provided, the maximum water level is taken from the
             cross section.
         min_z : float, optional
-            same as min_h but using z-coordinates instead of local datum, min_z overrules min_h
+            same as min_h but using z-coordinates instead of local datum, min_z overrules min_h.
         max_z : float, optional
-            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h
+            same as max_z but using z-coordinates instead of local datum, max_z overrules max_h.
+
+        Returns
+        -------
+        float
+            Most likely water level, according to optimization and scoring (most distinct intensity PDF).
+        float
+            Signal to noise ratio, calculated as the mean of all computed scores divided by the optimum (lowest) score
+            found in the entire l-range.
 
         """
         l_range, z_range, results = self._water_level_score_range(
