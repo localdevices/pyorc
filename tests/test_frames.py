@@ -1,6 +1,28 @@
+import platform
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+
+
+def get_tolerance_int():
+    """Tolerance for checking returned image intensity values.
+
+    Tolerance is needed because arm / aarch64 processors use slightly different decoding methods.
+    """
+    if platform.machine().startswith("arm") or platform.machine() == "aarch64":
+        return 5  # More lenient on ARM
+    return 0
+
+
+def get_tolerance_float():
+    """Tolerance for checking returned image intensity values.
+
+    Tolerance is needed because arm / aarch64 processors use slightly different decoding methods.
+    """
+    if platform.machine().startswith("arm") or platform.machine() == "aarch64":
+        return 0.2  # More lenient on ARM
+    return 0
 
 
 @pytest.mark.parametrize(
@@ -47,27 +69,32 @@ def test_normalize(frames, samples, request):
 
 def test_range(frames_grayscale):
     frames_range = frames_grayscale.frames.range()
+    tolerance = get_tolerance_int()
     assert len(frames_range.shape) == 2, "shape of result is not 2D"
     assert frames_range.dtype == frames_grayscale.dtype, f'dtype of result is {frames_range.dtype}, expected "uint8"'
-    assert np.allclose(frames_range.values.flatten()[-4:], [22, 27, 22, 31]), "last 4 values are not as expected"
+    assert np.allclose(
+        frames_range.values.flatten()[-4:], [22, 27, 22, 31], atol=tolerance
+    ), "last 4 values are not as expected"
 
 
 def test_smooth(frames_grayscale):
     frames_smooth = frames_grayscale.frames.smooth()
+    tolerance = get_tolerance_int()
     assert frames_smooth.shape == frames_grayscale.shape
     assert (
         frames_smooth[0, 0, 0].values.dtype == "float32"
     ), f'dtype of result is {frames_smooth[0, 0, 0].values.dtype}, expected "float32"'
-    assert np.allclose(frames_smooth.values.flatten()[-4:], [158.125, 153.5, 151.375, 151.0])
+    assert np.allclose(frames_smooth.values.flatten()[-4:], [158.125, 153.5, 151.375, 151.0], atol=tolerance)
 
 
 def test_edge_detect(frames_proj):
     frames_edge = frames_proj.frames.edge_detect()
+    tolerance = get_tolerance_float()
     assert frames_edge.shape == frames_proj.shape
     assert (
         frames_edge[0, 0, 0].values.dtype == "float32"
     ), f'dtype of result is {frames_edge[0, 0, 0].values.dtype}, expected "float32"'
-    assert np.allclose(frames_edge.values.flatten()[-4:], [-5.6953125, 4.0703125, 8.0625, 4.3125])
+    assert np.allclose(frames_edge.values.flatten()[-4:], [-5.6953125, 4.0703125, 8.0625, 4.3125], atol=tolerance)
 
 
 def test_reduce_rolling(frames_grayscale, samples=1):
@@ -111,12 +138,13 @@ def test_plot_proj(frames_proj, idx):
     ],
 )
 def test_get_piv(frames_proj, window_size, engine, ensemble_corr, result):
+    tolerance = get_tolerance_float() / 10
     piv = frames_proj.frames.get_piv(
         window_size=window_size, ensemble_corr=ensemble_corr, engine=engine, s2n_min=0, corr_min=0, count_min=0
     )
     piv_mean = piv.mean(dim="time", keep_attrs=True)
     # check if results are stable
-    assert np.allclose(piv_mean["v_x"].values.flatten()[-4:], result, equal_nan=True)
+    assert np.allclose(piv_mean["v_x"].values.flatten()[-4:], result, equal_nan=True, atol=tolerance)
 
 
 @pytest.mark.parametrize(
