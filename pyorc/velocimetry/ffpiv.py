@@ -412,12 +412,11 @@ def _get_uv_timestep(da, n_cols, n_rows, window_size, overlap, search_area_size,
         verbose=False,
     )
 
-    # get the maximum correlation per interrogation window
-    corr_max = np.nanmax(corr, axis=(-1, -2))
-
     # get signal-to-noise, whilst suppressing nanmean over empty slice warnings
     with warnings.catch_warnings():
+        # get the maximum correlation per interrogation window
         warnings.simplefilter("ignore", category=RuntimeWarning)
+        corr_max = np.nanmax(corr, axis=(-1, -2))
         s2n = corr_max / np.nanmean(corr, axis=(-1, -2))
 
     # reshape corr / s2n to the amount of expected rows and columns

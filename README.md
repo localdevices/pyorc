@@ -88,6 +88,18 @@ pip install pyopenrivercam[extra]
 The `[extra]` section ensures that also geographical plotting is supported, which we recommend especially for the
 set up of a camera configuration with RTK-GPS measured control points.
 
+> [!NOTE]
+>
+> Most of the heavy lifting is done while deriving cross-correlations for estimation of velocity vectors with Particle
+> Image Velocimetry. You can speed up this process (x2) by installing `rocket-fft`. With `python <= 3.12` this
+> is automatically included. With higher versions, you need, for the moment, to install it separately as follows:
+>
+> ```shell
+> pip install git+https://github.com/localdevices/rocket-fft.git
+> ```
+>
+> Once rocket-fft gets updated in PyPi you will no longer need this separate installation procedure.
+
 ### Upgrading from pypi with pip
 
 Did you read about a new version and you want to upgrade? Simply activate your virtual environment, type

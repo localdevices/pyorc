@@ -243,7 +243,8 @@ def _get_perpendicular_distance(point, line):
     perpendicular_distance = np.linalg.norm(perpendicular_vector)
 
     # Use cross product to calculate side
-    cross_product = np.cross(line_vector, point_vector)
+    # cross_product = np.cross(line_vector, point_vector)
+    cross_product = line_vector[0] * point_vector[1] - line_vector[1] * point_vector[0]
 
     # Determine the sign of the perpendicular distance
     return perpendicular_distance if cross_product > 0 else -perpendicular_distance

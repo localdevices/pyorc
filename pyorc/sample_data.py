@@ -13,7 +13,7 @@ def get_hommerich_dataset():
 
     # Define the DOI link
     filename = "20241010_081717.mp4"
-    base_url = "doi:10.5281/zenodo.15002591"
+    base_url = "https://zenodo.org/records/15002591/files"
     url = base_url + "/" + filename
     print(f"Retrieving or providing cached version of dataset from {url}")
     # Create a Pooch registry to manage downloads
@@ -40,7 +40,7 @@ def get_hommerich_pyorc_zip():
 
     # Define the DOI link
     filename = "hommerich_20241010_081717_pyorc_data.zip.zip"
-    base_url = "doi:10.5281/zenodo.15002591"
+    base_url = "https://zenodo.org/records/15002591/files"
     url = base_url + "/" + filename
     print(f"Retrieving or providing cached version of dataset from {url}")
     # Create a Pooch registry to manage downloads

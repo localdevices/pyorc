@@ -1,3 +1,14 @@
+## [0.9.0] = 2025-12-22
+### Added
+### Changed
+- Updated documentation to remove OpenPIV as possible engine for PIV.
+### Deprecated
+### Removed
+- `Frames.get_piv(engine="openpiv")` has now been removed. Use `Frames.get_piv(engine="numba")` instead. This is also
+  the default engine.
+### Fixed
+
+
 ## [0.8.12] = 2025-11-13
 ### Added
 - Added `CrossSection.detect_water_level_s2n` for signal to noise ratios.

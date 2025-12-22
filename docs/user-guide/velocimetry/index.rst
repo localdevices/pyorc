@@ -52,10 +52,9 @@ neighbouring window and hence a velocity will be resolved for each 0.2 x 0.2 met
         - retrieved frames from it using ``video.get_frames`` (e.g. into a ``DataArray`` called ``frames``);
         - orthorectified the frames using ``frames.project`` (e.g. into ``frames_proj``).
 
-We implemented several engines to compute PIV. The default is ``openpiv`` which uses the OpenPIV library to
-perform computations. The alternatives are ``numba`` or ``numpy`` which use the numba and numpy libraries for
-the computations, as provided in the underlying FF-PIV library. ``numba`` is by far the fastest option, and is currently
-the default.
+We implemented several engines to compute PIV. These are ``numba`` or ``numpy`` which use the numba and numpy libraries
+for the computations, as provided in the underlying FF-PIV library. ``numba`` is by far the fastest option, and is
+currently the default.
 
 Naturally, before orthorectification you may decide to apply one or several preprocessing methods as described in
 :ref:`frames_ug` to improve the visibility of tracers. We highly recommend that in many cases, as shown in the snippets

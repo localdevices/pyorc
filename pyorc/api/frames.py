@@ -12,7 +12,7 @@ from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
 from pyorc import const, cv, helpers, project
-from pyorc.velocimetry import ffpiv, openpiv
+from pyorc.velocimetry import ffpiv
 
 from .orcbase import ORCBase
 from .plot import _frames_plot
@@ -124,14 +124,12 @@ class Frames(ORCBase):
         overlap : (int, int), optional
             amount of overlap between interrogation windows in pixels (y, x)
         engine : str, optional
-            select the compute engine, can be "openpiv" (default), "numba", or "numpy". "numba" will give the fastest
-            performance but is still experimental. It can boost performance by almost an order of magnitude compared
-            to openpiv or numpy. both "numba" and "numpy" use the FF-PIV library as back-end.
+            select the compute engine, can be "numba" (default), or "numpy". "numba" will give the fastest
+            performance. It can boost performance by almost an order of magnitude compared
+            to numpy. both "numba" and "numpy" use the FF-PIV library as back-end.
         ensemble_corr : bool, optional
-            only used with `engine="numba"` or `engine="numpy"`.
             If True, performs PIV by first averaging cross-correlations across all frames and then deriving velocities.
             If False, computes velocities for each frame pair separately. Default is True.
-
         **kwargs : dict
             keyword arguments to pass to the piv engine. For "numba" and "numpy" the argument `chunks` can be provided
             with an integer defining in how many batches of work the total velocimetry problem should be subdivided.
@@ -143,7 +141,6 @@ class Frames(ORCBase):
 
         See Also
         --------
-        OpenPIV project: https://github.com/OpenPIV/openpiv-python
         FF-PIV project: https://github.com/localdevices/ffpiv
 
         """
@@ -167,43 +164,19 @@ class Frames(ORCBase):
         # get all required coordinates for the PIV result
         coords, mesh_coords = self.get_piv_coords(window_size, search_area_size, overlap)
         # provide kwargs for OpenPIV analysis
-        if engine == "openpiv":
-            # thresholds are not used.
-
-            import warnings
-
-            warnings.warn(
-                '"openpiv" is deprecated, please use "numba" or "numpy" as engine',
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            # Remove threshold parameters from kwargs
-            kwargs.pop("corr_min", None)
-            kwargs.pop("s2n_min", None)
-            kwargs.pop("count_min", None)
-            kwargs = {
-                **kwargs,
-                "search_area_size": search_area_size[0],
-                "window_size": window_size[0],
-                "overlap": overlap[0],
-                "res_x": camera_config.resolution,
-                "res_y": camera_config.resolution,
-            }
-            ds = openpiv.get_openpiv(self._obj, coords["y"], coords["x"], dt, **kwargs)
-        elif engine in ["numba", "numpy"]:
-            kwargs = {
-                **kwargs,
-                "search_area_size": search_area_size,
-                "window_size": window_size,
-                "overlap": overlap,
-                "res_x": camera_config.resolution,
-                "res_y": camera_config.resolution,
-            }
-            ds = ffpiv.get_ffpiv(
-                self._obj, coords["y"], coords["x"], dt, engine=engine, ensemble_corr=ensemble_corr, **kwargs
-            )
-        else:
+        if engine not in ["numba", "numpy"]:
             raise ValueError(f"Selected PIV engine {engine} does not exist.")
+        kwargs = {
+            **kwargs,
+            "search_area_size": search_area_size,
+            "window_size": window_size,
+            "overlap": overlap,
+            "res_x": camera_config.resolution,
+            "res_y": camera_config.resolution,
+        }
+        ds = ffpiv.get_ffpiv(
+            self._obj, coords["y"], coords["x"], dt, engine=engine, ensemble_corr=ensemble_corr, **kwargs
+        )
         # add all 2D-coordinates
         ds = ds.velocimetry.add_xy_coords(mesh_coords, coords, {**const.PERSPECTIVE_ATTRS, **const.GEOGRAPHICAL_ATTRS})
         # ensure all metadata is transferred
@@ -359,7 +332,7 @@ class Frames(ORCBase):
             keep_attrs=True,
         )
 
-    def minmax(self, min=-np.Inf, max=np.Inf):
+    def minmax(self, min=-np.inf, max=np.inf):
         """Minimum / maximum intensity filter.
 
         All pixels will be thresholded to a minimum and maximum value.

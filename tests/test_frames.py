@@ -93,12 +93,12 @@ def test_plot(frames, idx, request):
 @pytest.mark.parametrize("idx", [0, -1])
 def test_plot_proj(frames_proj, idx):
     frames_proj[idx].frames.plot()
-    plt.show(block=False)
-    plt.close("all")
+    # plt.show(block=False)
+    # plt.close("all")
     try:
         frames_proj[idx].frames.plot(mode="geographical")
-        plt.show(block=False)
-        plt.close("all")
+        # plt.show(block=False)
+        # plt.close("all")
     except ImportError:
         print("Cartopy is missing, skipping cartopy dependent test")
 
@@ -106,7 +106,6 @@ def test_plot_proj(frames_proj, idx):
 @pytest.mark.parametrize(
     ("window_size", "engine", "ensemble_corr", "result"),
     [
-        (10, "openpiv", False, [0.08245023, 0.06594574, 0.11719926, 0.10809214]),
         (10, "numba", True, [0.10917795, 0.10898168, 0.11020568, 0.12450387]),  # filtering occurs within piv process
         (10, "numba", False, [0.10837663, 0.11250661, 0.11100861, 0.1231317]),
     ],
