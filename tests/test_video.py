@@ -1,7 +1,19 @@
+import platform
+
 import numpy as np
 import pytest
 
 import pyorc
+
+
+def get_tolerance():
+    """Tolerance for checking returned image intensity values.
+
+    Tolerance is needed because arm / aarch64 processors use slightly different decoding methods.
+    """
+    if platform.machine().startswith("arm") or platform.machine() == "aarch64":
+        return 5  # More lenient on ARM
+    return 0
 
 
 def test_camera_config(vid_cam_config):
@@ -41,9 +53,10 @@ def test_fps(vid):
     ],
 )
 def test_get_frame(video, method, result, request):
+    tolerance = get_tolerance()
     video = request.getfixturevalue(video)
     frame = video.get_frame(1, method=method)
-    assert np.allclose(frame.flatten()[0:4], result)
+    assert np.allclose(frame.flatten()[0:4], result, atol=tolerance)
 
 
 @pytest.mark.parametrize(

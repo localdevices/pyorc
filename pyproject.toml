@@ -24,7 +24,6 @@ dependencies = [
     "netCDF4",
     "numba>0.56",
     "numpy>2",
-#    "numpy>=1.23, <2",  # pin version to ensure compatibility with C-headers
     "opencv-python",
     "packaging; platform_machine == 'armv7l'",
     "pip",
@@ -33,7 +32,6 @@ dependencies = [
     "pyyaml",
     "rasterio<1.4.0; python_version <= '3.12'",
     "rasterio; python_version > '3.12'",
-    "scikit-image",
     "scipy",
     "shapely",
     "tqdm",
