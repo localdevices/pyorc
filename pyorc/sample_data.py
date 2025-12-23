@@ -1,6 +1,7 @@
 """Retrieval of sample dataset."""
 
 import os
+import time
 import zipfile
 
 
@@ -26,7 +27,16 @@ def get_hommerich_dataset():
         registry={filename: None},
     )
     # Fetch the dataset
-    file_path = registry.fetch(filename, progressbar=True)
+    for attempt in range(5):
+        try:
+            file_path = registry.fetch(filename, progressbar=True)
+            break
+        except Exception as e:
+            if attempt == 4:
+                raise f"Download failed with error: {e}."
+            else:
+                print(f"Download failed with error: {e}. Retrying...")
+                time.sleep(1)
     print(f"Hommerich video is available in {file_path}")
     return file_path
 
