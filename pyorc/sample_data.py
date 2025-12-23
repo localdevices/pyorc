@@ -1,6 +1,7 @@
 """Retrieval of sample dataset."""
 
 import os
+import time
 import zipfile
 
 
@@ -13,7 +14,7 @@ def get_hommerich_dataset():
 
     # Define the DOI link
     filename = "20241010_081717.mp4"
-    base_url = "doi:10.5281/zenodo.15002591"
+    base_url = "https://zenodo.org/records/15002591/files"
     url = base_url + "/" + filename
     print(f"Retrieving or providing cached version of dataset from {url}")
     # Create a Pooch registry to manage downloads
@@ -26,7 +27,16 @@ def get_hommerich_dataset():
         registry={filename: None},
     )
     # Fetch the dataset
-    file_path = registry.fetch(filename, progressbar=True)
+    for attempt in range(5):
+        try:
+            file_path = registry.fetch(filename, progressbar=True)
+            break
+        except Exception as e:
+            if attempt == 4:
+                raise f"Download failed with error: {e}."
+            else:
+                print(f"Download failed with error: {e}. Retrying...")
+                time.sleep(1)
     print(f"Hommerich video is available in {file_path}")
     return file_path
 
@@ -40,7 +50,7 @@ def get_hommerich_pyorc_zip():
 
     # Define the DOI link
     filename = "hommerich_20241010_081717_pyorc_data.zip.zip"
-    base_url = "doi:10.5281/zenodo.15002591"
+    base_url = "https://zenodo.org/records/15002591/files"
     url = base_url + "/" + filename
     print(f"Retrieving or providing cached version of dataset from {url}")
     # Create a Pooch registry to manage downloads
@@ -54,6 +64,17 @@ def get_hommerich_pyorc_zip():
     )
     # Fetch the dataset
     file_path = registry.fetch(filename, progressbar=True)
+    # Fetch the dataset
+    for attempt in range(5):
+        try:
+            file_path = registry.fetch(filename, progressbar=True)
+            break
+        except Exception as e:
+            if attempt == 4:
+                raise f"Download failed with error: {e}."
+            else:
+                print(f"Download failed with error: {e}. Retrying...")
+                time.sleep(1)
     print(f"Hommerich video is available in {file_path}")
     return file_path
 

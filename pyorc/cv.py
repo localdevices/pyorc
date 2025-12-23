@@ -243,7 +243,8 @@ def _get_perpendicular_distance(point, line):
     perpendicular_distance = np.linalg.norm(perpendicular_vector)
 
     # Use cross product to calculate side
-    cross_product = np.cross(line_vector, point_vector)
+    # cross_product = np.cross(line_vector, point_vector)
+    cross_product = line_vector[0] * point_vector[1] - line_vector[1] * point_vector[0]
 
     # Determine the sign of the perpendicular distance
     return perpendicular_distance if cross_product > 0 else -perpendicular_distance
@@ -1070,12 +1071,7 @@ def get_polygon_pixels(img, pol, reverse_y=False):
     if 0 in mask.shape:
         # no shape in mask, so return empty array instantly
         return np.array([], dtype=np.uint8)
-    try:
-        cv2.fillPoly(mask, [np.array(cropped_polygon_coords, dtype=np.int32)], color=255)
-    except Exception:
-        import pdb
-
-        pdb.set_trace()
+    cv2.fillPoly(mask, [np.array(cropped_polygon_coords, dtype=np.int32)], color=255)
     return numba_extract_pixels(cropped_img, mask)
 
 

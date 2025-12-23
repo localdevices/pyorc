@@ -156,8 +156,10 @@ def test_service_video_no_waterlevel_subprocess(
     )
 
 
-def test_gcps_interact(gcps_dst, frame_rgb):
+def test_gcps_interact(gcps_dst, frame_rgb, monkeypatch):
     import matplotlib.pyplot as plt
+
+    monkeypatch.setattr(plt, "show", lambda *args, **kwargs: None)
 
     # convert dst to
     crs = 32735
@@ -185,9 +187,11 @@ def test_gcps_interact(gcps_dst, frame_rgb):
     plt.close("all")
 
 
-def test_aoi_interact(frame_rgb, cam_config_without_aoi):
+def test_aoi_interact(frame_rgb, cam_config_without_aoi, monkeypatch):
     # convert dst to
     # del cam_config_without_aoi.crs
+    monkeypatch.setattr(plt, "show", lambda *args, **kwargs: None)
+
     src = cam_config_without_aoi.gcps["src"]
     if hasattr(cam_config_without_aoi, "crs"):
         dst = xyz_transform(cam_config_without_aoi.gcps["dst"], crs_from=cam_config_without_aoi.crs, crs_to=4326)
@@ -212,7 +216,8 @@ def test_aoi_interact(frame_rgb, cam_config_without_aoi):
     plt.close("all")
 
 
-def test_stabilize_interact(frame_rgb):
+def test_stabilize_interact(frame_rgb, monkeypatch):
+    monkeypatch.setattr(plt, "show", lambda *args, **kwargs: None)
     selector = StabilizeSelect(frame_rgb)
     event = backend_bases.MouseEvent(
         name="click",

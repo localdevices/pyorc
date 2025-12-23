@@ -25,7 +25,6 @@ dependencies:
   - python
   - rasterio
   - requests
-  - scikit-image
   - scipy
   - shapely
   - tqdm
@@ -33,6 +32,5 @@ dependencies:
   - xarray
   - yaml
   - pip:
-    - openpiv
     - git+https://github.com/localdevices/pyorc.git
-
+    - git+https://github.com/localdevices/rocket-fft.git

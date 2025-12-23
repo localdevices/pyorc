@@ -42,11 +42,15 @@ We are seeking funding for the following frequently requested functionalities:
 
 If you wish to fund this or other work on features, please contact us at info@rainbowsensing.com.
 
-> **_note:_**  For instructions how to get Anaconda (with lots of pre-installed libraries) or Miniconda (light weight) installed, please go to https://docs.conda.io/projects/conda/en/latest/
+> [!NOTE]
+> For instructions how to get Anaconda (with lots of pre-installed libraries) or Miniconda (light weight) installed,
+> please go to https://docs.conda.io/projects/conda/en/latest/
 
-> **_manual:_** Please go to https://localdevices.github.io/pyorc for the latest documentation
+> [!TIP]
+> Please go to https://localdevices.github.io/pyorc for the latest documentation
 
-> **_compatibility:_** At this moment **pyorc** works with any video compatible with OpenCV as long as it has proper metadata.
+> [!IMPORTANT]
+> At this moment **pyorc** works with any video compatible with OpenCV as long as it has proper metadata.
 
 ## Installation
 You need a python environment. We recommend using the Miniforge project. Download
@@ -88,6 +92,18 @@ pip install pyopenrivercam[extra]
 The `[extra]` section ensures that also geographical plotting is supported, which we recommend especially for the
 set up of a camera configuration with RTK-GPS measured control points.
 
+> [!NOTE]
+>
+> Most of the heavy lifting is done while deriving cross-correlations for estimation of velocity vectors with Particle
+> Image Velocimetry. You can speed up this process (x2) by installing `rocket-fft`. With `python <= 3.12` this
+> is automatically included. With higher versions, you need, for the moment, to install it separately as follows:
+>
+> ```shell
+> pip install git+https://github.com/localdevices/rocket-fft.git
+> ```
+>
+> Once rocket-fft gets updated in PyPi you will no longer need this separate installation procedure.
+
 ### Upgrading from pypi with pip
 
 Did you read about a new version and you want to upgrade? Simply activate your virtual environment, type
@@ -105,6 +121,8 @@ If you use `mamba` as a package manager, then the steps are the same, except for
 ```shell
 mamba install pyopenrivercam
 ```
+The version installed may not have the latest underlying libraries and therefore may be slower than the latest PyPi
+version. We therefore recommend using `pip` for installation (see above).
 
 ### Installation from latest code base
 

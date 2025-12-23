@@ -254,14 +254,17 @@ class _Velocimetry_MaskMethods:
             be within tolerance.
 
         """
-        x_std = self[v_x].std(dim="time")
-        y_std = self[v_y].std(dim="time")
-        x_mean = np.maximum(self[v_x].mean(dim="time"), 1e30)
-        y_mean = np.maximum(self[v_y].mean(dim="time"), 1e30)
-        x_var = np.abs(x_std / x_mean)
-        y_var = np.abs(y_std / y_mean)
-        x_condition = x_var < tolerance
-        y_condition = y_var < tolerance
+        with warnings.catch_warnings():
+            # suppress warnings on all-NaN slices
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            x_std = self[v_x].std(dim="time")
+            y_std = self[v_y].std(dim="time")
+            x_mean = np.maximum(self[v_x].mean(dim="time"), 1e30)
+            y_mean = np.maximum(self[v_y].mean(dim="time"), 1e30)
+            x_var = np.abs(x_std / x_mean)
+            y_var = np.abs(y_std / y_mean)
+            x_condition = x_var < tolerance
+            y_condition = y_var < tolerance
         if mode == "or":
             mask = x_condition | y_condition
         else:

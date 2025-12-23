@@ -189,15 +189,6 @@ def get_geo_axes(tiles=None, extent=None, zoom_level=19, **kwargs):
 
     """
     _check_cartopy_installed()
-    #
-    # try:
-    #     import cartopy
-    #     import cartopy.crs as ccrs
-    #     import cartopy.io.img_tiles as cimgt
-    # except ModuleNotFoundError:
-    #     raise ModuleNotFoundError(
-    #         'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try ' "again."
-    #     )
     ccrs, cimgt = _import_cartopy_modules()
     if tiles is not None:
         tiler = getattr(cimgt, tiles)(**kwargs)
@@ -299,6 +290,9 @@ def get_xs_ys(cols, rows, transform):
     """
     xs, ys = xy(transform, rows, cols)
     xs, ys = np.array(xs), np.array(ys)
+    # Ensure data is reshaped (later versions of rasterio return a 1D array only)
+    xs = xs.reshape(rows.shape)
+    ys = ys.reshape(rows.shape)
     return xs, ys
 
 

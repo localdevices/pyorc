@@ -1,3 +1,4 @@
+import importlib.util
 import os
 
 import numpy as np
@@ -6,9 +7,13 @@ from rasterio import Affine
 from shapely.geometry import Polygon
 
 import pyorc
-
-# from cartopy.mpl.geoaxes import GeoAxesSubplot
 from pyorc import cv, helpers
+
+# check presence of cartopy
+if importlib.util.find_spec("cartopy"):
+    HAS_CARTOPY = True
+else:
+    HAS_CARTOPY = False
 
 
 def test_str(cam_config):
@@ -245,7 +250,7 @@ def test_load_camera_config(cam_config_fn, cam_config, lens_position):
 
 @pytest.mark.parametrize(
     "mode",
-    ["camera", "geographical", "3d"],
+    ["camera", "3d"],
 )
 def test_plot(cam_config, vid, mode):
     import matplotlib as mpl
@@ -253,6 +258,11 @@ def test_plot(cam_config, vid, mode):
     ax = cam_config.plot(mode=mode)
     if mode == "camera":
         assert isinstance(ax, mpl.axes.Axes)
+
+
+@pytest.mark.skipif(not HAS_CARTOPY, reason="requires cartopy")
+def test_plot_geo(cam_config, vid):
+    _ = cam_config.plot(mode="geographical")
 
 
 def test_cv_undistort_points(cam_config):

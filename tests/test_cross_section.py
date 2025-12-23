@@ -9,8 +9,6 @@ from shapely import geometry, wkt
 
 from pyorc import CameraConfig, CrossSection, Video, plot_helpers, sample_data
 
-# from tests.conftest import EXAMPLE_DATA_DIR
-
 
 @pytest.fixture()
 def zs():
@@ -122,7 +120,7 @@ def xyz(gdf, crs):
     gdf.to_crs(crs, inplace=True)
     g = gdf.geometry
     x, y, z = g.x, g.y, g.z
-    return list(map(list, zip(x, y, z, strict=False)))
+    return list(map(list, zip(x, y, z)))
 
 
 @pytest.fixture()
