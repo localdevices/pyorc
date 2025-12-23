@@ -42,11 +42,15 @@ We are seeking funding for the following frequently requested functionalities:
 
 If you wish to fund this or other work on features, please contact us at info@rainbowsensing.com.
 
-> **_note:_**  For instructions how to get Anaconda (with lots of pre-installed libraries) or Miniconda (light weight) installed, please go to https://docs.conda.io/projects/conda/en/latest/
+> [!NOTE]
+> For instructions how to get Anaconda (with lots of pre-installed libraries) or Miniconda (light weight) installed,
+> please go to https://docs.conda.io/projects/conda/en/latest/
 
-> **_manual:_** Please go to https://localdevices.github.io/pyorc for the latest documentation
+> [!TIP]
+> Please go to https://localdevices.github.io/pyorc for the latest documentation
 
-> **_compatibility:_** At this moment **pyorc** works with any video compatible with OpenCV as long as it has proper metadata.
+> [!IMPORTANT]
+> At this moment **pyorc** works with any video compatible with OpenCV as long as it has proper metadata.
 
 ## Installation
 You need a python environment. We recommend using the Miniforge project. Download
