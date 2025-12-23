@@ -1,4 +1,4 @@
-## [0.9.0] = 2025-12-22
+## [0.9.0] = 2025-12-23
 ### Added
 ### Changed
 - Updated documentation to remove OpenPIV as possible engine for PIV.
@@ -7,6 +7,7 @@
 - `Frames.get_piv(engine="openpiv")` has now been removed. Use `Frames.get_piv(engine="numba")` instead. This is also
   the default engine.
 ### Fixed
+- fixed unnecessary warning in `Velocimetry.Mask.variances` related to all-NaN slices
 
 
 ## [0.8.12] = 2025-11-13

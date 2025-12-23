@@ -117,6 +117,8 @@ If you use `mamba` as a package manager, then the steps are the same, except for
 ```shell
 mamba install pyopenrivercam
 ```
+The version installed may not have the latest underlying libraries and therefore may be slower than the latest PyPi
+version. We therefore recommend using `pip` for installation (see above).
 
 ### Installation from latest code base
 
