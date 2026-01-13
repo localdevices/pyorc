@@ -1,3 +1,11 @@
+## [0.9.1] = 2026-01-13
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- fixed python<3.10 compatibility
+
 ## [0.9.0] = 2025-12-23
 ### Added
 ### Changed
