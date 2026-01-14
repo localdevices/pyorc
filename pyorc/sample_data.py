@@ -4,78 +4,84 @@ import os
 import time
 import zipfile
 
+import platformdirs
+import requests
 
-def get_hommerich_dataset():
-    """Retrieve and cache sample dataset of Sheaf river."""
+cache_dir = platformdirs.user_cache_dir("pyorc")
+
+
+def zenodo_pooch(record_id, cache_name):
+    """Retrieve files from Zenodo record."""
     try:
         import pooch
     except ImportError:
         raise ImportError("This function needs pooch. Install pyorc with pip install pyopenrivercam[extra]")
+    r = requests.get(
+        f"https://zenodo.org/api/records/{record_id}",
+        timeout=30,
+        # headers=headers
+    )
+    if r.status_code != 200:
+        raise RuntimeError(f"Failed to fetch metadata for record {record_id}. {r.status_code} {r.text}")
+    meta = r.json()
+    urls = {f["key"]: f["links"]["self"] for f in meta["files"]}
 
+    return pooch.create(
+        path=pooch.os_cache(cache_name),
+        base_url="",
+        urls=urls,
+        registry={name: None for name in urls},
+    )
+
+
+def get_hommerich_dataset():
+    """Retrieve and cache sample dataset of Sheaf river."""
     # Define the DOI link
     filename = "20241010_081717.mp4"
-    base_url = "https://zenodo.org/records/15002591/files"
-    url = base_url + "/" + filename
-    print(f"Retrieving or providing cached version of dataset from {url}")
-    # Create a Pooch registry to manage downloads
-    registry = pooch.create(
-        # Define the cache directory
-        path=pooch.os_cache("pyorc"),
-        # Define the base URL for fetching data
-        base_url=base_url,
-        # Define the registry with the file we're expecting to download
-        registry={filename: None},
-    )
+    file_path = os.path.join(cache_dir, filename)
     # Fetch the dataset
-    for attempt in range(5):
-        try:
-            file_path = registry.fetch(filename, progressbar=True)
-            break
-        except Exception as e:
-            if attempt == 4:
-                raise f"Download failed with error: {e}."
-            else:
-                print(f"Download failed with error: {e}. Retrying...")
-                time.sleep(1)
-    print(f"Hommerich video is available in {file_path}")
+    if not os.path.exists(file_path):
+        for attempt in range(5):
+            registry = zenodo_pooch(
+                record_id=15002591,
+                cache_name="pyorc",
+            )
+            try:
+                file_path = registry.fetch(filename, progressbar=True)
+                break
+            except Exception as e:
+                if attempt == 4:
+                    raise f"Download failed with error: {e}."
+                else:
+                    print(f"Download failed with error: {e}. Retrying...")
+                    time.sleep(1)
+        print(f"Hommerich video is available in {file_path}")
     return file_path
 
 
 def get_hommerich_pyorc_zip():
     """Retrieve and cache sample dataset of Sheaf river."""
-    try:
-        import pooch
-    except ImportError:
-        raise ImportError("This function needs pooch. Install pyorc with pip install pyopenrivercam[extra]")
-
-    # Define the DOI link
+    #
+    # # Define the DOI link
     filename = "hommerich_20241010_081717_pyorc_data.zip.zip"
-    base_url = "https://zenodo.org/records/15002591/files"
-    url = base_url + "/" + filename
-    print(f"Retrieving or providing cached version of dataset from {url}")
-    # Create a Pooch registry to manage downloads
-    registry = pooch.create(
-        # Define the cache directory
-        path=pooch.os_cache("pyorc"),
-        # Define the base URL for fetching data
-        base_url=base_url,
-        # Define the registry with the file we're expecting to download
-        registry={filename: None},
-    )
+    file_path = os.path.join(cache_dir, filename)
     # Fetch the dataset
-    file_path = registry.fetch(filename, progressbar=True)
-    # Fetch the dataset
-    for attempt in range(5):
-        try:
-            file_path = registry.fetch(filename, progressbar=True)
-            break
-        except Exception as e:
-            if attempt == 4:
-                raise f"Download failed with error: {e}."
-            else:
-                print(f"Download failed with error: {e}. Retrying...")
-                time.sleep(1)
-    print(f"Hommerich video is available in {file_path}")
+    if not os.path.exists(file_path):
+        for attempt in range(5):
+            registry = zenodo_pooch(
+                record_id=15002591,
+                cache_name="pyorc",
+            )
+            try:
+                file_path = registry.fetch(filename, progressbar=True)
+                break
+            except Exception as e:
+                if attempt == 4:
+                    raise f"Download failed with error: {e}."
+                else:
+                    print(f"Download failed with error: {e}. Retrying...")
+                    time.sleep(1)
+        print(f"Hommerich video is available in {file_path}")
     return file_path
 
 

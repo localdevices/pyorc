@@ -1,3 +1,22 @@
+## [0.9.2] = 2026-01-14
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- fixed python<3.10 compatibility
+
+## [0.9.0] = 2025-12-23
+### Added
+### Changed
+- Updated documentation to remove OpenPIV as possible engine for PIV.
+### Deprecated
+### Removed
+- `Frames.get_piv(engine="openpiv")` has now been removed. Use `Frames.get_piv(engine="numba")` instead. This is also
+  the default engine.
+### Fixed
+- fixed unnecessary warning in `Velocimetry.Mask.variances` related to all-NaN slices
+
 ## [0.9.1] = 2026-01-13
 ### Added
 ### Changed
