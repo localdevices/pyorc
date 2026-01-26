@@ -383,6 +383,8 @@ class CrossSection:
                 raise ValueError(
                     "Cross section is not crossed by water level. Check if water level is within the cross section."
                 )
+            # sort the cross_sz points to go from s=0 to s max.
+            cross_sz = sorted(cross_sz, key=lambda p: p.x)
             # find xyz real-world coordinates and turn in to POINT Z list
             cross = [
                 geometry.Point(self.interp_x_from_s(c.xy[0]), self.interp_y_from_s(c.xy[0]), c.xy[1]) for c in cross_sz

@@ -199,6 +199,11 @@ def test_cs_repr(cs):
 
 
 def test_get_bbox_dry_wet(cs):
+    # check also what happens with a double geom in wet part
+    bbox_wet = cs.get_bbox_dry_or_wet(h=92.09)  # just below local peak of 92.1 in bathymetry
+    bbox_dry = cs.get_bbox_dry_or_wet(h=92.09, dry=True)
+    assert len(bbox_wet.geoms) == 2
+    assert len(bbox_dry.geoms) == 3
     bbox_dry = cs.get_bbox_dry_or_wet(h=93.0, dry=True)
     bbox_wet = cs.get_bbox_dry_or_wet(h=93.0)
     assert isinstance(bbox_wet, geometry.MultiPolygon)
@@ -214,11 +219,6 @@ def test_get_bbox_dry_wet(cs):
     assert isinstance(bbox_dry, geometry.MultiPolygon)
     assert bbox_wet.has_z == False
     assert bbox_dry.has_z == False
-    # check also what happens with a double geom in wet part
-    bbox_wet = cs.get_bbox_dry_or_wet(h=92.09)  # just below local peak of 92.1 in bathymetry
-    bbox_dry = cs.get_bbox_dry_or_wet(h=92.09, dry=True)
-    assert len(bbox_wet.geoms) == 2
-    assert len(bbox_dry.geoms) == 3
 
 
 def test_get_cs_waterlevel(cs):
@@ -342,7 +342,7 @@ def test_get_planar_surface(cs):
     h3 = 94.9
     _ = cs.get_planar_surface(h=h1, length=10.0)
     __ = cs.get_planar_surface(h=h2, length=5, offset=2.5)
-    with pytest.raises(ValueError, match="must be 2 for"):
+    with pytest.raises(ValueError, match="must have at least two"):
         cs.get_planar_surface(h=h3)
 
 
