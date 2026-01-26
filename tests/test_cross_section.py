@@ -1,6 +1,9 @@
 """Tests for water level functionalities."""
 
 import geopandas as gpd
+
+# import matplotlib
+# matplotlib.use('TkAgg')  # Before importing pyplot
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -193,6 +196,29 @@ def test_cs_str(cs):
 
 def test_cs_repr(cs):
     assert isinstance(cs.__repr__(), str)
+
+
+def test_get_bbox_dry_wet(cs):
+    bbox_dry = cs.get_bbox_dry_or_wet(h=93.0, dry=True)
+    bbox_wet = cs.get_bbox_dry_or_wet(h=93.0)
+    assert isinstance(bbox_wet, geometry.MultiPolygon)
+    assert isinstance(bbox_dry, geometry.MultiPolygon)
+    assert len(bbox_wet.geoms) == 1
+    assert len(bbox_dry.geoms) == 2
+    assert bbox_wet.has_z
+    assert bbox_dry.has_z
+    # now retrieve with camera = True
+    bbox_dry = cs.get_bbox_dry_or_wet(h=93.0, camera=True, dry=True)
+    bbox_wet = cs.get_bbox_dry_or_wet(h=93.0, camera=True)
+    assert isinstance(bbox_wet, geometry.MultiPolygon)
+    assert isinstance(bbox_dry, geometry.MultiPolygon)
+    assert bbox_wet.has_z == False
+    assert bbox_dry.has_z == False
+    # check also what happens with a double geom in wet part
+    bbox_wet = cs.get_bbox_dry_or_wet(h=92.09)  # just below local peak of 92.1 in bathymetry
+    bbox_dry = cs.get_bbox_dry_or_wet(h=92.09, dry=True)
+    assert len(bbox_wet.geoms) == 2
+    assert len(bbox_dry.geoms) == 3
 
 
 def test_get_cs_waterlevel(cs):
@@ -425,4 +451,23 @@ def test_plot_water_level_camera(cs):
 def test_plot_water_level(cs):
     ax = plt.axes(projection="3d")
     cs.plot_water_level(h=93.0, ax=ax, camera=False, color="c", label="water level")
+    # plt.show()
+    assert ax.has_data()
+
+
+def test_plot_bbox(cs):
+    ax = plt.axes(projection="3d")
+    cs.plot(ax=ax)
+    cs.plot_bbox_dry_wet(h=92.09, ax=ax)
+    # ax.legend()
+    # plt.show()
+    assert ax.has_data()
+
+
+def test_plot_bbox_camera(cs):
+    ax = plt.axes()
+    cs.plot(ax=ax, camera=True, swap_y_coords=True)
+    cs.plot_bbox_dry_wet(h=92.09, camera=True, ax=ax, swap_y_coords=True)
+    # ax.legend()
+    # plt.show()
     assert ax.has_data()
