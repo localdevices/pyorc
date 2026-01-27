@@ -531,7 +531,7 @@ class CrossSection:
         polygons = [geometry.Polygon(coords) for coords in csl_pol_coords]
         return polygons
 
-    def get_bbox_dry_or_wet(self, h: float, camera: bool = False, swap_y_coords: bool = False, dry: bool = False):
+    def get_bbox_dry_wet(self, h: float, camera: bool = False, swap_y_coords: bool = False, dry: bool = False):
         """Get dry part of bounding box, by extending the water line perpendicular to the cross section.
 
         Parameters
@@ -1096,8 +1096,8 @@ class CrossSection:
                 ax = plt.axes()
             else:
                 ax = plt.axes(projection="3d")
-        dry_pols = self.get_bbox_dry_or_wet(h=h, dry=True, camera=camera, swap_y_coords=swap_y_coords)
-        wet_pols = self.get_bbox_dry_or_wet(h=h, dry=False, camera=camera, swap_y_coords=swap_y_coords)
+        dry_pols = self.get_bbox_dry_wet(h=h, dry=True, camera=camera, swap_y_coords=swap_y_coords)
+        wet_pols = self.get_bbox_dry_wet(h=h, dry=False, camera=camera, swap_y_coords=swap_y_coords)
         if camera:
             _ = plot_helpers.plot_polygon(wet_pols, ax=ax, **kwargs_wet)
             p = plot_helpers.plot_polygon(dry_pols, ax=ax, **kwargs_dry)
@@ -1251,6 +1251,11 @@ class CrossSection:
         zoff : float, optional
             Translation distance in z direction in m.
 
+        Returns
+        -------
+        CrossSection
+            New transformed cross section instance.
+
         """
         # Apply rotation if specified
         if angle is not None:
@@ -1269,6 +1274,66 @@ class CrossSection:
         new_line = translate(new_line, xoff=xoff, yoff=yoff, zoff=zoff)
         # create a new cross section object
         return CrossSection(self.camera_config, list(new_line.coords))
+
+    def linearize(self):
+        """Snap cross-section points to a best-fit straight line while preserving Z values.
+
+        The points are projected onto the line, maintaining their relative positions along it.
+
+        Returns
+        -------
+        CrossSection
+            New straightened cross section instance.
+
+        """
+
+        def _fit_line(x, y):
+            """Fit straight (xy direction) line to points in a LineString.
+
+            Parameters
+            ----------
+            x : list[float]
+                x-coordinates of points forming a line
+            y : list[float]
+                y-coordinates of points forming a line
+
+            Returns
+            -------
+            slope, intercept, angle: float, float, float
+                line characteristics, angle is in radians
+
+            """
+            # Use PCA to fit the best line
+            ps = np.column_stack([x, y])
+            centr = ps.mean(axis=0)
+            ps_centered = ps - centr
+
+            # SVD to find principal direction
+            _, _, vh = np.linalg.svd(ps_centered)
+            direc = vh[0]  # First principal component is the line direction
+
+            # Calculate angle of the line
+            ang = np.arctan2(direc[1], direc[0])
+
+            return centr, direc, ang
+
+        # Fit straight line
+        centroid, direction, angle = _fit_line(self.x, self.y)
+
+        # Project each point onto the line closest-distance
+        coords = np.column_stack([self.x, self.y])
+        coords_centered = coords - centroid
+
+        # Project onto the line direction
+        projections = np.dot(coords_centered, direction)
+
+        # Calculate new coordinates on the line
+        new_x = centroid[0] + projections * direction[0]
+        new_y = centroid[1] + projections * direction[1]
+
+        # Create new geometries with Z preserved
+        new_points = [[_x, _y, _z] for _x, _y, _z in zip(new_x, new_y, self.z)]
+        return CrossSection(self.camera_config, new_points)
 
     def _preprocess_level_range(
         self,

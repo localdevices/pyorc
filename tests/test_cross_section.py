@@ -1,6 +1,9 @@
 """Tests for water level functionalities."""
 
 import geopandas as gpd
+import matplotlib as mpl
+
+mpl.use("tkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -197,12 +200,12 @@ def test_cs_repr(cs):
 
 def test_get_bbox_dry_wet(cs):
     # check also what happens with a double geom in wet part
-    bbox_wet = cs.get_bbox_dry_or_wet(h=92.09)  # just below local peak of 92.1 in bathymetry
-    bbox_dry = cs.get_bbox_dry_or_wet(h=92.09, dry=True)
+    bbox_wet = cs.get_bbox_dry_wet(h=92.09)  # just below local peak of 92.1 in bathymetry
+    bbox_dry = cs.get_bbox_dry_wet(h=92.09, dry=True)
     assert len(bbox_wet.geoms) == 2
     assert len(bbox_dry.geoms) == 3
-    bbox_dry = cs.get_bbox_dry_or_wet(h=93.0, dry=True)
-    bbox_wet = cs.get_bbox_dry_or_wet(h=93.0)
+    bbox_dry = cs.get_bbox_dry_wet(h=93.0, dry=True)
+    bbox_wet = cs.get_bbox_dry_wet(h=93.0)
     assert isinstance(bbox_wet, geometry.MultiPolygon)
     assert isinstance(bbox_dry, geometry.MultiPolygon)
     assert len(bbox_wet.geoms) == 1
@@ -210,8 +213,8 @@ def test_get_bbox_dry_wet(cs):
     assert bbox_wet.has_z
     assert bbox_dry.has_z
     # now retrieve with camera = True
-    bbox_dry = cs.get_bbox_dry_or_wet(h=93.0, camera=True, dry=True)
-    bbox_wet = cs.get_bbox_dry_or_wet(h=93.0, camera=True)
+    bbox_dry = cs.get_bbox_dry_wet(h=93.0, camera=True, dry=True)
+    bbox_wet = cs.get_bbox_dry_wet(h=93.0, camera=True)
     assert isinstance(bbox_wet, geometry.MultiPolygon)
     assert isinstance(bbox_dry, geometry.MultiPolygon)
     assert bbox_wet.has_z == False
@@ -381,6 +384,16 @@ def test_get_wetted_surface_sz_perimeter(cs):
     assert isinstance(line2, geometry.MultiLineString)
     assert line2.has_z == False
     assert line2.length > line1.length
+
+
+def test_linearize(cs):
+    cs_straight = cs.linearize()
+    ax = plt.axes(projection="3d")
+    cs_straight.plot_cs(ax=ax, color="r", label="linearized cross section")
+    cs.plot_cs(ax=ax, color="b", label="original cross section")
+    ax.legend()
+    plt.show()
+    assert ax.has_data()
 
 
 def test_detect_wl(cs, img):
