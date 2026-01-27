@@ -1,9 +1,6 @@
 """Tests for water level functionalities."""
 
 import geopandas as gpd
-
-# import matplotlib
-# matplotlib.use('TkAgg')  # Before importing pyplot
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -471,3 +468,18 @@ def test_plot_bbox_camera(cs):
     # ax.legend()
     # plt.show()
     assert ax.has_data()
+
+
+def test_rotate_translate(cs):
+    cs2 = cs.rotate_translate(angle=0, xoff=10)
+    assert np.allclose(cs.y, cs2.y)  # y-coordinates should not have changed
+    assert not np.allclose(cs.x, cs2.x)
+    cs3 = cs.rotate_translate(angle=20 / 180 * np.pi, xoff=10)
+    # check location of centroid. Should be same as cs2
+    assert np.isclose(cs2.cs_linestring.centroid.x, cs3.cs_linestring.centroid.x)
+    assert np.isclose(cs2.cs_linestring.centroid.y, cs3.cs_linestring.centroid.y)
+    cs4 = cs.rotate_translate(angle=0, zoff=10)
+    assert not np.allclose(cs.z, cs4.z)
+    assert np.allclose(cs.x, cs4.x)
+    assert np.allclose(cs.y, cs4.y)
+    assert np.allclose(cs.z, cs4.z - 10)

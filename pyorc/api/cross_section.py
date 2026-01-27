@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import warnings
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
@@ -13,6 +14,7 @@ from matplotlib import patheffects
 from scipy.interpolate import interp1d
 from scipy.optimize import differential_evolution
 from shapely import affinity, force_2d, force_3d, geometry
+from shapely.affinity import rotate, translate
 from shapely.ops import polygonize, split
 
 from .cameraconfig import CameraConfig, cv, plot_helpers
@@ -1234,6 +1236,39 @@ class CrossSection:
                 x, y, "{:1.3f} m.".format(h), path_effects=PATH_EFFECTS, ha="center", va="bottom", size=12, zorder=2
             )
         return ax
+
+    def rotate_translate(self, angle: Optional[float] = None, xoff: float = 0.0, yoff: float = 0.0, zoff: float = 0.0):
+        """Rotate and translate cross section to match config.
+
+        Parameters
+        ----------
+        angle : float, optional
+            Rotation angle in radians (anti-clockwise) around the center of the bounding box
+        xoff : float, optional
+            Translation distance in x direction in m.
+        yoff : float, optional
+            Translation distance in y direction in m.
+        zoff : float, optional
+            Translation distance in z direction in m.
+
+        """
+        # Apply rotation if specified
+        if angle is not None:
+            # Get centroid as origin
+            centroid = self.cs_linestring.centroid
+            # Apply rotation around centroid
+            new_line = rotate(
+                self.cs_linestring,
+                angle,
+                origin=centroid,
+                use_radians=True,
+            )
+        else:
+            new_line = copy.deepcopy(self.cs_linestring)
+        # now translate
+        new_line = translate(new_line, xoff=xoff, yoff=yoff, zoff=zoff)
+        # create a new cross section object
+        return CrossSection(self.camera_config, list(new_line.coords))
 
     def _preprocess_level_range(
         self,

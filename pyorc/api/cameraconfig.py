@@ -915,9 +915,9 @@ class CameraConfig:
         angle : float, optional
             Rotation angle in radians (anti-clockwise) around the center of the bounding box
         xoff : float, optional
-            Translation distance in x direction in CRS units
+            Translation distance in x direction in m.
         yoff : float, optional
-            Translation distance in y direction in CRS units
+            Translation distance in y direction in m.
 
         Returns
         -------
@@ -935,9 +935,6 @@ class CameraConfig:
 
         # Apply rotation if specified
         if angle is not None:
-            print(angle)
-            # # Convert to radians
-            # angle = np.radians(rotation)
             # Get centroid as origin
             centroid = bbox.centroid
             # Apply rotation around centroid
