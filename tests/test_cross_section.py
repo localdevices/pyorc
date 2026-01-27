@@ -1,9 +1,10 @@
 """Tests for water level functionalities."""
 
 import geopandas as gpd
-import matplotlib as mpl
 
-mpl.use("tkAgg")
+# import matplotlib as mpl
+#
+# mpl.use("tkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -388,12 +389,9 @@ def test_get_wetted_surface_sz_perimeter(cs):
 
 def test_linearize(cs):
     cs_straight = cs.linearize()
-    ax = plt.axes(projection="3d")
-    cs_straight.plot_cs(ax=ax, color="r", label="linearized cross section")
-    cs.plot_cs(ax=ax, color="b", label="original cross section")
-    ax.legend()
-    plt.show()
-    assert ax.has_data()
+    # A straight line simplified to 2 points should have same length
+    simplified = cs_straight.cs_linestring.simplify(tolerance=1e-9)
+    assert len(simplified.coords) == 2
 
 
 def test_detect_wl(cs, img):
