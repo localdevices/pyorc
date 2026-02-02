@@ -579,7 +579,7 @@ class CrossSection:
         for pol in pols:
             # coords = [[self.interp_x_from_s(p[0]), self.interp_y_from_s(p[0]), p[1]] for p in pol.exterior.coords]
             coords = [[*p] for p in pol.exterior.coords]
-            if camera:
+            if camera and len(coords) > 0:
                 coords_proj = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords, within_image=True)
                 pols_proj.append(geometry.Polygon(coords_proj))
             else:
