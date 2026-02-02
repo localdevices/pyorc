@@ -459,6 +459,7 @@ class CameraConfig:
         z_a: Optional[float] = None,
         within_image: Optional[bool] = False,
         expand_exterior=True,
+        exterior_split=400,
     ) -> Polygon:
         """Get bounding box.
 
@@ -485,6 +486,8 @@ class CameraConfig:
             Set to True to make an attempt to remove parts of the polygon that lie outside of the image field of view
         expand_exterior : bool, optional
             Set to True to expand the corner points to more points. This is particularly useful for plotting purposes.
+        exterior_split : int, optional
+            Amount of subline segments to split bounding box in
 
         Returns
         -------
@@ -516,7 +519,7 @@ class CameraConfig:
             # distortion on image frame, and to plot partial coverage in the real-world coordinates
             coords_expand = np.zeros((0, 2))
             for n in range(0, len(coords) - 1):
-                new_coords = np.linspace(coords[n], coords[n + 1], 100)
+                new_coords = np.linspace(coords[n], coords[n + 1], exterior_split // 4)
                 coords_expand = np.r_[coords_expand, new_coords]
             coords = coords_expand
         if not z_a:
