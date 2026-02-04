@@ -38,6 +38,37 @@ WETTED_KWARGS = {
 }
 
 
+def _fit_line(x, y):
+    """Fit straight (xy direction) line to points in a LineString.
+
+    Parameters
+    ----------
+    x : list[float]
+        x-coordinates of points forming a line
+    y : list[float]
+        y-coordinates of points forming a line
+
+    Returns
+    -------
+    slope, intercept, angle: float, float, float
+        line characteristics, angle is in radians
+
+    """
+    # Use PCA to fit the best line
+    ps = np.column_stack([x, y])
+    centr = ps.mean(axis=0)
+    ps_centered = ps - centr
+
+    # SVD to find principal direction
+    _, _, vh = np.linalg.svd(ps_centered)
+    direc = vh[0]  # First principal component is the line direction
+
+    # Calculate angle of the line
+    ang = np.arctan2(direc[1], direc[0])
+
+    return centr, direc, ang
+
+
 def _make_angle_lines(csl_points, angle_perp, length, offset):
     """Make lines at cross section points, perpendicular to cross section orientation using angle and offset."""
     # move points
@@ -531,8 +562,16 @@ class CrossSection:
         polygons = [geometry.Polygon(coords) for coords in csl_pol_coords]
         return polygons
 
-    def get_bbox_dry_wet(self, h: float, camera: bool = False, swap_y_coords: bool = False, dry: bool = False):
-        """Get dry part of bounding box, by extending the water line perpendicular to the cross section.
+    def get_bbox_dry_wet(
+        self,
+        h: float,
+        camera: bool = False,
+        swap_y_coords: bool = False,
+        dry: bool = False,
+        expand_exterior: bool = True,
+        exterior_split: int = 100,
+    ):
+        """Get wet (or dry) part of bounding box, by extending the water line perpendicular to the cross section.
 
         Parameters
         ----------
@@ -546,6 +585,10 @@ class CrossSection:
             in case you plot on ascending y-coordinate axis background images (default: False)
         dry : bool, optional
             If set, the dry parts will be returned, by default False, thus returning wet.
+        expand_exterior : bool, optional
+            Set to True to expand the corner points to more points. This is particularly useful for plotting purposes.
+        exterior_split : int, optional
+            Amount of subline segments to split bounding box in
 
         Returns
         -------
@@ -577,9 +620,17 @@ class CrossSection:
             pols = [pols]
         pols_proj = []
         for pol in pols:
-            # coords = [[self.interp_x_from_s(p[0]), self.interp_y_from_s(p[0]), p[1]] for p in pol.exterior.coords]
             coords = [[*p] for p in pol.exterior.coords]
             if camera and len(coords) > 0:
+                # also split if required
+                if expand_exterior:
+                    coords_expand = np.zeros((0, 3))
+                    for n in range(0, len(coords) - 1):
+                        new_coords = np.linspace(coords[n], coords[n + 1], exterior_split // 4)
+                        coords_expand = np.r_[coords_expand, new_coords]
+                    # set expanded coords to original variable
+                    coords = coords_expand
+
                 coords_proj = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords, within_image=True)
                 pols_proj.append(geometry.Polygon(coords_proj))
             else:
@@ -1286,37 +1337,6 @@ class CrossSection:
             New straightened cross section instance.
 
         """
-
-        def _fit_line(x, y):
-            """Fit straight (xy direction) line to points in a LineString.
-
-            Parameters
-            ----------
-            x : list[float]
-                x-coordinates of points forming a line
-            y : list[float]
-                y-coordinates of points forming a line
-
-            Returns
-            -------
-            slope, intercept, angle: float, float, float
-                line characteristics, angle is in radians
-
-            """
-            # Use PCA to fit the best line
-            ps = np.column_stack([x, y])
-            centr = ps.mean(axis=0)
-            ps_centered = ps - centr
-
-            # SVD to find principal direction
-            _, _, vh = np.linalg.svd(ps_centered)
-            direc = vh[0]  # First principal component is the line direction
-
-            # Calculate angle of the line
-            ang = np.arctan2(direc[1], direc[0])
-
-            return centr, direc, ang
-
         # Fit straight line
         centroid, direction, angle = _fit_line(self.x, self.y)
 
