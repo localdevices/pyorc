@@ -1,4 +1,4 @@
-## [0.9.3] = 2026-xx-xx
+## [0.9.3] = 2026-02-05
 ### Added
 - Cross sections can be linearized with `CrossSection.linearize`, and rotated and translated with
   `CrossSection.rotate_translate`.
@@ -8,6 +8,9 @@
 ### Deprecated
 ### Removed
 ### Fixed
+- during optimization of camera pose with `CameraConfig.calibrate` unrealistic combinations of `k1` and `k2`
+  barrel distortion coefficients were sometimes returned. This is fixed by checking monotonic increase of distortion
+  from the center to the edges.
 
 
 ## [0.9.2] = 2026-01-15
