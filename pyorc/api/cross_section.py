@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import warnings
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
@@ -12,10 +13,11 @@ import numpy as np
 from matplotlib import patheffects
 from scipy.interpolate import interp1d
 from scipy.optimize import differential_evolution
-from shapely import affinity, geometry
+from shapely import affinity, force_2d, force_3d, geometry
+from shapely.affinity import rotate, translate
 from shapely.ops import polygonize, split
 
-from pyorc import cv, plot_helpers
+from .cameraconfig import CameraConfig, cv, plot_helpers
 
 MODES = Literal["camera", "geographic", "cross_section"]
 PATH_EFFECTS = [
@@ -34,6 +36,37 @@ WETTED_KWARGS = {
     "edgecolor": "w",
     "zorder": 1,
 }
+
+
+def _fit_line(x, y):
+    """Fit straight (xy direction) line to points in a LineString.
+
+    Parameters
+    ----------
+    x : list[float]
+        x-coordinates of points forming a line
+    y : list[float]
+        y-coordinates of points forming a line
+
+    Returns
+    -------
+    slope, intercept, angle: float, float, float
+        line characteristics, angle is in radians
+
+    """
+    # Use PCA to fit the best line
+    ps = np.column_stack([x, y])
+    centr = ps.mean(axis=0)
+    ps_centered = ps - centr
+
+    # SVD to find principal direction
+    _, _, vh = np.linalg.svd(ps_centered)
+    direc = vh[0]  # First principal component is the line direction
+
+    # Calculate angle of the line
+    ang = np.arctan2(direc[1], direc[0])
+
+    return centr, direc, ang
 
 
 def _make_angle_lines(csl_points, angle_perp, length, offset):
@@ -98,7 +131,7 @@ class CrossSection:
     def __repr__(self):
         return str(self.cs_linestring)
 
-    def __init__(self, camera_config, cross_section: Union[gpd.GeoDataFrame, List[List]]):
+    def __init__(self, camera_config: CameraConfig, cross_section: Union[gpd.GeoDataFrame, List[List]]):
         """Initialize a cross-section representation.
 
         The object is geographically aware through the camera configuration.
@@ -107,7 +140,7 @@ class CrossSection:
 
         Parameters
         ----------
-        camera_config : object
+        camera_config : pyorc.CameraConfig
             Defines the camera configuration, including potential CRS used for processing
             geographic data consistency.
         cross_section : GeoDataFrame or list of lists
@@ -268,7 +301,15 @@ class CrossSection:
         # check if cross section is visible within the image objective
         pix = self.camera_config.project_points(np.array(list(map(list, self.cs_linestring.coords))), within_image=True)
         # check which points fall within the image objective
-        within_image = np.all([pix[:, 0] >= 0, pix[:, 0] < 1920, pix[:, 1] >= 0, pix[:, 1] < 1080], axis=0)
+        within_image = np.all(
+            [
+                pix[:, 0] >= 0,
+                pix[:, 0] < self.camera_config.width,
+                pix[:, 1] >= 0,
+                pix[:, 1] < self.camera_config.height,
+            ],
+            axis=0,
+        )
         # check if there are any points within the image objective and return result
         return bool(np.any(within_image))
 
@@ -375,6 +416,8 @@ class CrossSection:
                 raise ValueError(
                     "Cross section is not crossed by water level. Check if water level is within the cross section."
                 )
+            # sort the cross_sz points to go from s=0 to s max.
+            cross_sz = sorted(cross_sz, key=lambda p: p.x)
             # find xyz real-world coordinates and turn in to POINT Z list
             cross = [
                 geometry.Point(self.interp_x_from_s(c.xy[0]), self.interp_y_from_s(c.xy[0]), c.xy[1]) for c in cross_sz
@@ -519,7 +562,84 @@ class CrossSection:
         polygons = [geometry.Polygon(coords) for coords in csl_pol_coords]
         return polygons
 
-    def get_bottom_surface(self, length: float = 2.0, offset: float = 0.0, camera: bool = False, swap_y_coords=False):
+    def get_bbox_dry_wet(
+        self,
+        h: float,
+        camera: bool = False,
+        swap_y_coords: bool = False,
+        dry: bool = False,
+        expand_exterior: bool = True,
+        exterior_split: int = 100,
+    ):
+        """Get wet (or dry) part of bounding box, by extending the water line perpendicular to the cross section.
+
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        camera : bool, optional
+            If set, return 2D projected polygon, by default False. Note that any plotting does not provide shading or
+            ray tracing hence plotting a 2D polygon is not recommended.
+        swap_y_coords : bool, optional
+            if set, all y-coordinates are swapped so that they fit on a flipped version of the image. This is useful
+            in case you plot on ascending y-coordinate axis background images (default: False)
+        dry : bool, optional
+            If set, the dry parts will be returned, by default False, thus returning wet.
+        expand_exterior : bool, optional
+            Set to True to expand the corner points to more points. This is particularly useful for plotting purposes.
+        exterior_split : int, optional
+            Amount of subline segments to split bounding box in
+
+        Returns
+        -------
+        shapely.geometry.MultiPolygon
+            multipolygon representing the dry or wet part of the bounding box of the camera config (2d if camera=True,
+            3d if camera=False).
+
+        See Also
+        --------
+        CrossSection.plot_bbox_dry_wet : Plot the dry and wet parts of the bounding box resulting from this method.
+
+
+
+        """
+        if self.camera_config.bbox is None:
+            raise ValueError("CameraConfig must have a bounding box to use this method.")
+        z_water = self.camera_config.h_to_z(h)  # 92.1 is exactly hitting a local peak
+        geom_plan_2d = force_2d(self.get_planar_surface(h=h, length=10000))
+
+        if dry:
+            # dry pols
+            pols = force_3d(self.camera_config.bbox.difference(geom_plan_2d), z=z_water)
+        else:
+            # wet pol(s)
+            pols = force_3d(self.camera_config.bbox.intersection(geom_plan_2d), z=z_water)
+        if isinstance(pols, geometry.MultiPolygon):
+            pols = pols.geoms
+        else:
+            pols = [pols]
+        pols_proj = []
+        for pol in pols:
+            coords = [[*p] for p in pol.exterior.coords]
+            if camera and len(coords) > 0:
+                # also split if required
+                if expand_exterior:
+                    coords_expand = np.zeros((0, 3))
+                    for n in range(0, len(coords) - 1):
+                        new_coords = np.linspace(coords[n], coords[n + 1], exterior_split // 4)
+                        coords_expand = np.r_[coords_expand, new_coords]
+                    # set expanded coords to original variable
+                    coords = coords_expand
+
+                coords_proj = self.camera_config.project_points(coords, swap_y_coords=swap_y_coords, within_image=True)
+                pols_proj.append(geometry.Polygon(coords_proj))
+            else:
+                pols_proj.append(geometry.Polygon(coords))
+        return geometry.MultiPolygon(pols_proj)
+
+    def get_bottom_surface(
+        self, length: float = 2.0, offset: float = 0.0, camera: bool = False, swap_y_coords: bool = False
+    ):
         """Retrieve a bottom surface polygon for the entire cross section, expanded over a length.
 
         Returns a 2D Polygon if camera is True, 3D if False. Useful in particular for 3d situation plots.
@@ -578,7 +698,7 @@ class CrossSection:
 
     def get_planar_surface(
         self, h: float, length: float = 2.0, offset: float = 0.0, camera: bool = False, swap_y_coords=False
-    ) -> geometry.Polygon:
+    ) -> Union[geometry.Polygon, geometry.MultiPolygon]:
         """Retrieve a planar water surface for a given water level, as a geometry.Polygon.
 
         Returns a 2D Polygon if camera is True, 3D if False
@@ -608,10 +728,50 @@ class CrossSection:
         CrossSection.plot_planar_surface : Plot the planar surface resulting from this method.
 
         """
+        # Get the water level crossing points (not camera projected for validation)
+        csl_points = self.get_csl_point(h=h, camera=False)
+        if len(csl_points) < 2:
+            raise ValueError(
+                f"Cross section must have at least two points to estimate a planar surface ({len(csl_points)} found)."
+            )
         wls = self.get_csl_line(h=h, offset=offset, length=length, camera=camera, swap_y_coords=swap_y_coords)
-        if len(wls) != 2:
-            raise ValueError("Amount of water line crossings must be 2 for a planar surface estimate.")
-        return geometry.Polygon(list(wls[0].coords) + list(wls[1].coords[::-1]))
+
+        valid_pairs = []
+        for p1, p2, l1, l2 in zip(csl_points[0:-1], csl_points[1:], wls[0:-1], wls[1:]):
+            # get s-coordinates
+            s1 = self.cs_linestring.project(geometry.Point(p1.x, p1.y))
+            s2 = self.cs_linestring.project(geometry.Point(p2.x, p2.y))
+
+            # check bottom elevation at midpoint
+            s_mid = (s1 + s2) / 2
+            z_bottom_mid = self.interp_z_from_s(s_mid)
+            if z_bottom_mid < p1.z:
+                valid_pairs.append((l1, l2))
+        if len(valid_pairs) == 0:
+            raise ValueError(
+                "No valid water level crossings found. Check if water level is within the cross section and if "
+                "the cross section is crossed by water."
+            )
+
+        # build the polygons
+        polygons = []
+        for l1, l2 in valid_pairs:
+            pol = geometry.Polygon(list(l1.coords) + list(l2.coords[::-1]))
+            if pol.is_valid and not pol.is_empty:
+                polygons.append(pol)
+
+        if len(polygons) == 0:
+            raise ValueError(
+                "No valid polygons found. Check if water level is within the cross section and if "
+                "the cross section is crossed by water."
+            )
+        elif len(polygons) == 1:
+            return polygons[0]
+        else:
+            return geometry.MultiPolygon(polygons)
+        # if len(wls) != 2:
+        #     raise ValueError("Amount of water line crossings must be 2 for a planar surface estimate.")
+        # return geometry.Polygon(list(wls[0].coords) + list(wls[1].coords[::-1]))
 
     def get_wetted_surface_sz(
         self, h: float, perimeter: bool = False
@@ -968,6 +1128,35 @@ class CrossSection:
                 stacklevel=2,
             )
 
+    def plot_bbox_dry_wet(
+        self,
+        h: float,
+        camera: bool = False,
+        ax=None,
+        swap_y_coords: bool = False,
+        kwargs_wet: Optional[Dict] = None,
+        kwargs_dry: Optional[Dict] = None,
+    ):
+        """Plot the bounding box of the dry and wet surfaces for a given water level."""
+        if kwargs_wet is None:
+            kwargs_wet = dict(color="b", label="wet")
+        if kwargs_dry is None:
+            kwargs_dry = dict(color="g", label="dry")
+        if ax is None:
+            if camera:
+                ax = plt.axes()
+            else:
+                ax = plt.axes(projection="3d")
+        dry_pols = self.get_bbox_dry_wet(h=h, dry=True, camera=camera, swap_y_coords=swap_y_coords)
+        wet_pols = self.get_bbox_dry_wet(h=h, dry=False, camera=camera, swap_y_coords=swap_y_coords)
+        if camera:
+            _ = plot_helpers.plot_polygon(wet_pols, ax=ax, **kwargs_wet)
+            p = plot_helpers.plot_polygon(dry_pols, ax=ax, **kwargs_dry)
+        else:
+            _ = plot_helpers.plot_3d_polygon(wet_pols, ax=ax, **kwargs_wet)
+            p = plot_helpers.plot_3d_polygon(dry_pols, ax=ax, **kwargs_dry)
+        return p.axes
+
     def plot_bottom_surface(
         self, length: float = 2.0, offset: float = 0.0, camera: bool = False, ax=None, swap_y_coords=False, **kwargs
     ) -> mpl.axes.Axes:
@@ -1098,6 +1287,73 @@ class CrossSection:
                 x, y, "{:1.3f} m.".format(h), path_effects=PATH_EFFECTS, ha="center", va="bottom", size=12, zorder=2
             )
         return ax
+
+    def rotate_translate(self, angle: Optional[float] = None, xoff: float = 0.0, yoff: float = 0.0, zoff: float = 0.0):
+        """Rotate and translate cross section to match config.
+
+        Parameters
+        ----------
+        angle : float, optional
+            Rotation angle in radians (anti-clockwise) around the center of the bounding box
+        xoff : float, optional
+            Translation distance in x direction in m.
+        yoff : float, optional
+            Translation distance in y direction in m.
+        zoff : float, optional
+            Translation distance in z direction in m.
+
+        Returns
+        -------
+        CrossSection
+            New transformed cross section instance.
+
+        """
+        # Apply rotation if specified
+        if angle is not None:
+            # Get centroid as origin
+            centroid = self.cs_linestring.centroid
+            # Apply rotation around centroid
+            new_line = rotate(
+                self.cs_linestring,
+                angle,
+                origin=centroid,
+                use_radians=True,
+            )
+        else:
+            new_line = copy.deepcopy(self.cs_linestring)
+        # now translate
+        new_line = translate(new_line, xoff=xoff, yoff=yoff, zoff=zoff)
+        # create a new cross section object
+        return CrossSection(self.camera_config, list(new_line.coords))
+
+    def linearize(self):
+        """Snap cross-section points to a best-fit straight line while preserving Z values.
+
+        The points are projected onto the line, maintaining their relative positions along it.
+
+        Returns
+        -------
+        CrossSection
+            New straightened cross section instance.
+
+        """
+        # Fit straight line
+        centroid, direction, angle = _fit_line(self.x, self.y)
+
+        # Project each point onto the line closest-distance
+        coords = np.column_stack([self.x, self.y])
+        coords_centered = coords - centroid
+
+        # Project onto the line direction
+        projections = np.dot(coords_centered, direction)
+
+        # Calculate new coordinates on the line
+        new_x = centroid[0] + projections * direction[0]
+        new_y = centroid[1] + projections * direction[1]
+
+        # Create new geometries with Z preserved
+        new_points = [[_x, _y, _z] for _x, _y, _z in zip(new_x, new_y, self.z)]
+        return CrossSection(self.camera_config, new_points)
 
     def _preprocess_level_range(
         self,

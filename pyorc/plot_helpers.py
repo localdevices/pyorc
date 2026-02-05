@@ -22,7 +22,8 @@ def plot_3d_polygon(polygon, ax=None, **kwargs):
     """Plot a shapely.geometry.Polygon or MultiPolygon on matplotlib 3d ax."""
     if isinstance(polygon, geometry.MultiPolygon):
         for pol in polygon.geoms:
-            p = _plot_3d_pol(pol, ax=ax, **kwargs)
+            label = kwargs.pop("label", None)
+            p = _plot_3d_pol(pol, ax=ax, label=label, **kwargs)
     else:
         p = _plot_3d_pol(polygon, ax=ax, **kwargs)
     return p
@@ -34,7 +35,8 @@ def plot_polygon(polygon, ax=None, **kwargs):
         ax = plt.axes()
     if isinstance(polygon, geometry.MultiPolygon):
         for pol in polygon.geoms:
-            patch = plt.Polygon(pol.exterior.coords, **kwargs)
+            label = kwargs.pop("label", None)
+            patch = plt.Polygon(pol.exterior.coords, label=label, **kwargs)
             p = ax.add_patch(patch)
     else:
         patch = plt.Polygon(polygon.exterior.coords, **kwargs)

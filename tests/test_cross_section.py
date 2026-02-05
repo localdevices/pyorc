@@ -1,6 +1,10 @@
 """Tests for water level functionalities."""
 
 import geopandas as gpd
+
+# import matplotlib as mpl
+#
+# mpl.use("tkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -195,6 +199,29 @@ def test_cs_repr(cs):
     assert isinstance(cs.__repr__(), str)
 
 
+def test_get_bbox_dry_wet(cs):
+    # check also what happens with a double geom in wet part
+    bbox_wet = cs.get_bbox_dry_wet(h=92.09)  # just below local peak of 92.1 in bathymetry
+    bbox_dry = cs.get_bbox_dry_wet(h=92.09, dry=True)
+    assert len(bbox_wet.geoms) == 2
+    assert len(bbox_dry.geoms) == 3
+    bbox_dry = cs.get_bbox_dry_wet(h=93.0, dry=True)
+    bbox_wet = cs.get_bbox_dry_wet(h=93.0)
+    assert isinstance(bbox_wet, geometry.MultiPolygon)
+    assert isinstance(bbox_dry, geometry.MultiPolygon)
+    assert len(bbox_wet.geoms) == 1
+    assert len(bbox_dry.geoms) == 2
+    assert bbox_wet.has_z
+    assert bbox_dry.has_z
+    # now retrieve with camera = True
+    bbox_dry = cs.get_bbox_dry_wet(h=93.0, camera=True, dry=True)
+    bbox_wet = cs.get_bbox_dry_wet(h=93.0, camera=True)
+    assert isinstance(bbox_wet, geometry.MultiPolygon)
+    assert isinstance(bbox_dry, geometry.MultiPolygon)
+    assert bbox_wet.has_z == False
+    assert bbox_dry.has_z == False
+
+
 def test_get_cs_waterlevel(cs):
     line = cs.get_cs_waterlevel(h=93.0)
     assert isinstance(line, geometry.LineString)
@@ -316,7 +343,7 @@ def test_get_planar_surface(cs):
     h3 = 94.9
     _ = cs.get_planar_surface(h=h1, length=10.0)
     __ = cs.get_planar_surface(h=h2, length=5, offset=2.5)
-    with pytest.raises(ValueError, match="must be 2 for"):
+    with pytest.raises(ValueError, match="must have at least two"):
         cs.get_planar_surface(h=h3)
 
 
@@ -358,6 +385,13 @@ def test_get_wetted_surface_sz_perimeter(cs):
     assert isinstance(line2, geometry.MultiLineString)
     assert line2.has_z == False
     assert line2.length > line1.length
+
+
+def test_linearize(cs):
+    cs_straight = cs.linearize()
+    # A straight line simplified to 2 points should have same length
+    simplified = cs_straight.cs_linestring.simplify(tolerance=1e-9)
+    assert len(simplified.coords) == 2
 
 
 def test_detect_wl(cs, img):
@@ -425,4 +459,38 @@ def test_plot_water_level_camera(cs):
 def test_plot_water_level(cs):
     ax = plt.axes(projection="3d")
     cs.plot_water_level(h=93.0, ax=ax, camera=False, color="c", label="water level")
+    # plt.show()
     assert ax.has_data()
+
+
+def test_plot_bbox(cs):
+    ax = plt.axes(projection="3d")
+    cs.plot(ax=ax)
+    cs.plot_bbox_dry_wet(h=92.09, ax=ax)
+    # ax.legend()
+    # plt.show()
+    assert ax.has_data()
+
+
+def test_plot_bbox_camera(cs):
+    ax = plt.axes()
+    cs.plot(ax=ax, camera=True, swap_y_coords=True)
+    cs.plot_bbox_dry_wet(h=92.09, camera=True, ax=ax, swap_y_coords=True)
+    # ax.legend()
+    # plt.show()
+    assert ax.has_data()
+
+
+def test_rotate_translate(cs):
+    cs2 = cs.rotate_translate(angle=0, xoff=10)
+    assert np.allclose(cs.y, cs2.y)  # y-coordinates should not have changed
+    assert not np.allclose(cs.x, cs2.x)
+    cs3 = cs.rotate_translate(angle=20 / 180 * np.pi, xoff=10)
+    # check location of centroid. Should be same as cs2
+    assert np.isclose(cs2.cs_linestring.centroid.x, cs3.cs_linestring.centroid.x)
+    assert np.isclose(cs2.cs_linestring.centroid.y, cs3.cs_linestring.centroid.y)
+    cs4 = cs.rotate_translate(angle=0, zoff=10)
+    assert not np.allclose(cs.z, cs4.z)
+    assert np.allclose(cs.x, cs4.x)
+    assert np.allclose(cs.y, cs4.y)
+    assert np.allclose(cs.z, cs4.z - 10)

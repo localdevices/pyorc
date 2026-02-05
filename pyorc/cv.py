@@ -1163,11 +1163,17 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
             k2 = x[param_nr + 1]
             dist_coeffs_sample[0][0] = k1
             dist_coeffs_sample[1][0] = k2
+            fx = camera_matrix_sample[0, 2]
+            fy = camera_matrix_sample[1, 2]
+            r_max = np.sqrt(fx**2 + fy**2) * camera_matrix_sample[0, 0]
+            penalty_k1k2 = radial_monotonicity_penalty(k1, k2, r_max)
+
         else:
             # take the existing distortion coefficients
             dist_coeffs_sample = dist_coeffs.copy()
             k1 = dist_coeffs_sample[0][0]
             k2 = dist_coeffs_sample[1][0]
+            penalty_k1k2 = 0.0
 
         # initialize error
         err = 100
@@ -1195,7 +1201,17 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
                 cam_err = ((_lens_pos - lens_pos2.flatten()) ** 2).sum() ** 0.5
                 # TODO: for now camera errors are weighted with 10% needs further investigation
             err = float(0.1 * cam_err + gcp_err) if cam_err is not None else gcp_err
+        # penalize non monotonically increasing functions
+        err += 100 * penalty_k1k2
         return err  # assuming gcp pixel distance is about 5 cm
+
+    def radial_monotonicity_penalty(k1, k2, r_max):
+        """Penalty in case radii do not monotonically increase towards the border."""
+        rs = np.linspace(0, r_max, 50)
+        deriv = 1 + 3 * k1 * rs**2 + 5 * k2 * rs**4
+        # penalize negative slope
+        penalty = np.sum(np.clip(-deriv, 0, None))
+        return penalty
 
     # determine optimization bounds
     bounds = []
@@ -1205,8 +1221,8 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
     if camera_matrix is None:
         bounds.append([float(0.25), float(2)])
     if len(dst) > 4 and dist_coeffs is None:
-        bounds.append([-0.9, 0.9])  # k1
-        bounds.append([-0.5, 0.5])  # k2
+        bounds.append([-0.5, 0.5])  # k1
+        bounds.append([-0.1, 0.1])  # k2
     else:
         # set a warning if dist_coeffs is provided without sufficient ground control
         if dist_coeffs:
