@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.cameraconfig &#8212; pyorc 0.8.12 documentation</title>
+    <title>pyorc.api.cameraconfig &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -45,6 +45,7 @@
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyorc/api/cameraconfig';</script>
     <link rel="shortcut icon" href="../../../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -132,7 +133,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -866,6 +867,7 @@ document.write(`
         <span class="n">z_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">within_image</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">expand_exterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">exterior_split</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get bounding box.</span>
 
@@ -892,6 +894,8 @@ document.write(`
 <span class="sd">            Set to True to make an attempt to remove parts of the polygon that lie outside of the image field of view</span>
 <span class="sd">        expand_exterior : bool, optional</span>
 <span class="sd">            Set to True to expand the corner points to more points. This is particularly useful for plotting purposes.</span>
+<span class="sd">        exterior_split : int, optional</span>
+<span class="sd">            Amount of subline segments to split bounding box in</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -923,7 +927,7 @@ document.write(`
             <span class="c1"># distortion on image frame, and to plot partial coverage in the real-world coordinates</span>
             <span class="n">coords_expand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">100</span><span class="p">)</span>
+                <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">exterior_split</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span>
                 <span class="n">coords_expand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">coords_expand</span><span class="p">,</span> <span class="n">new_coords</span><span class="p">]</span>
             <span class="n">coords</span> <span class="o">=</span> <span class="n">coords_expand</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">z_a</span><span class="p">:</span>
@@ -1322,9 +1326,9 @@ document.write(`
 <span class="sd">        angle : float, optional</span>
 <span class="sd">            Rotation angle in radians (anti-clockwise) around the center of the bounding box</span>
 <span class="sd">        xoff : float, optional</span>
-<span class="sd">            Translation distance in x direction in CRS units</span>
+<span class="sd">            Translation distance in x direction in m.</span>
 <span class="sd">        yoff : float, optional</span>
-<span class="sd">            Translation distance in y direction in CRS units</span>
+<span class="sd">            Translation distance in y direction in m.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1342,9 +1346,6 @@ document.write(`
 
         <span class="c1"># Apply rotation if specified</span>
         <span class="k">if</span> <span class="n">angle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
-            <span class="c1"># # Convert to radians</span>
-            <span class="c1"># angle = np.radians(rotation)</span>
             <span class="c1"># Get centroid as origin</span>
             <span class="n">centroid</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">centroid</span>
             <span class="c1"># Apply rotation around centroid</span>
@@ -2074,7 +2075,7 @@ document.write(`
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

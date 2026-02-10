@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.CrossSection.plot &#8212; pyorc 0.8.12 documentation</title>
+    <title>pyorc.CrossSection.plot &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -46,12 +46,13 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CrossSection.plot';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pyorc.CrossSection.plot_cs" href="pyorc.CrossSection.plot_cs.html" />
-    <link rel="prev" title="pyorc.CrossSection.get_line_of_interest" href="pyorc.CrossSection.get_line_of_interest.html" />
+    <link rel="prev" title="pyorc.CrossSection.rotate_translate" href="pyorc.CrossSection.rotate_translate.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -135,7 +136,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -419,6 +420,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface.html">pyorc.CrossSection.get_wetted_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_line_of_interest.html">pyorc.CrossSection.get_line_of_interest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_bbox_dry_wet.html">pyorc.CrossSection.get_bbox_dry_wet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.linearize.html">pyorc.CrossSection.linearize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.rotate_translate.html">pyorc.CrossSection.rotate_translate</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CrossSection.plot</a></li>
@@ -426,6 +432,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_planar_surface.html">pyorc.CrossSection.plot_planar_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bbox_dry_wet.html">pyorc.CrossSection.plot_bbox_dry_wet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
@@ -602,7 +609,7 @@ document.write(`
 <h1>pyorc.CrossSection.plot<a class="headerlink" href="#pyorc-crosssection-plot" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.CrossSection.plot">
-<span class="sig-prename descclassname"><span class="pre">CrossSection.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">h:</span> <span class="pre">~typing.Optional[float]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">length:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">2.0,</span> <span class="pre">offset:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0,</span> <span class="pre">camera:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">ax:</span> <span class="pre">~typing.Optional[~matplotlib.axes._axes.Axes]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">cs_kwargs:</span> <span class="pre">~typing.Optional[~typing.Dict]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">planar=True,</span> <span class="pre">bottom=True,</span> <span class="pre">wetted=True,</span> <span class="pre">swap_y_coords=False,</span> <span class="pre">planar_kwargs:</span> <span class="pre">~typing.Dict</span> <span class="pre">=</span> <span class="pre">{'alpha':</span> <span class="pre">0.5,</span> <span class="pre">'color':</span> <span class="pre">'c'},</span> <span class="pre">bottom_kwargs:</span> <span class="pre">~typing.Dict</span> <span class="pre">=</span> <span class="pre">{'alpha':</span> <span class="pre">0.1,</span> <span class="pre">'color':</span> <span class="pre">'brown'},</span> <span class="pre">wetted_kwargs:</span> <span class="pre">~typing.Dict</span> <span class="pre">=</span> <span class="pre">{'alpha':</span> <span class="pre">0.15,</span> <span class="pre">'edgecolor':</span> <span class="pre">'w',</span> <span class="pre">'facecolor':</span> <span class="pre">'#385895',</span> <span class="pre">'linewidth':</span> <span class="pre">2.0,</span> <span class="pre">'path_effects':</span> <span class="pre">[&lt;matplotlib.patheffects.Stroke</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;matplotlib.patheffects.Normal</span> <span class="pre">object&gt;],</span> <span class="pre">'zorder':</span> <span class="pre">1}</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Axes</span></span></span><a class="reference internal" href="../_modules/pyorc/api/cross_section.html#CrossSection.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CrossSection.plot" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">CrossSection.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">h:</span> <span class="pre">~typing.Optional[float]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">length:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">2.0,</span> <span class="pre">offset:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0,</span> <span class="pre">camera:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">ax:</span> <span class="pre">~typing.Optional[~matplotlib.axes._axes.Axes]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">cs_kwargs:</span> <span class="pre">~typing.Dict</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">planar=True,</span> <span class="pre">bottom=True,</span> <span class="pre">wetted=True,</span> <span class="pre">swap_y_coords=False,</span> <span class="pre">planar_kwargs:</span> <span class="pre">~typing.Dict</span> <span class="pre">=</span> <span class="pre">{'alpha':</span> <span class="pre">0.5,</span> <span class="pre">'color':</span> <span class="pre">'c'},</span> <span class="pre">bottom_kwargs:</span> <span class="pre">~typing.Dict</span> <span class="pre">=</span> <span class="pre">{'alpha':</span> <span class="pre">0.1,</span> <span class="pre">'color':</span> <span class="pre">'brown'},</span> <span class="pre">wetted_kwargs:</span> <span class="pre">~typing.Dict</span> <span class="pre">=</span> <span class="pre">{'alpha':</span> <span class="pre">0.15,</span> <span class="pre">'edgecolor':</span> <span class="pre">'w',</span> <span class="pre">'facecolor':</span> <span class="pre">'#385895',</span> <span class="pre">'linewidth':</span> <span class="pre">2.0,</span> <span class="pre">'path_effects':</span> <span class="pre">[&lt;matplotlib.patheffects.Stroke</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;matplotlib.patheffects.Normal</span> <span class="pre">object&gt;],</span> <span class="pre">'zorder':</span> <span class="pre">1}</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Axes</span></span></span><a class="reference internal" href="../_modules/pyorc/api/cross_section.html#CrossSection.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CrossSection.plot" title="Permalink to this definition">#</a></dt>
 <dd><p>Plot the cross-section situation.</p>
 <p>This will create a plot of the cross section, with some up to downstream length in a 3D axes. It can
 be combined with a plot of the camera configuration, with <cite>cross_section.camera_config.plot(mode=”3d”)</cite>.</p>
@@ -653,12 +660,12 @@ will be used that give a natural look.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pyorc.CrossSection.get_line_of_interest.html"
+       href="pyorc.CrossSection.rotate_translate.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pyorc.CrossSection.get_line_of_interest</p>
+        <p class="prev-next-title">pyorc.CrossSection.rotate_translate</p>
       </div>
     </a>
     <a class="right-next"
@@ -726,7 +733,7 @@ will be used that give a natural look.</p></li>
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

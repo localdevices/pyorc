@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.Frames.get_piv &#8212; pyorc 0.8.12 documentation</title>
+    <title>pyorc.Frames.get_piv &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -46,6 +46,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.Frames.get_piv';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -135,7 +136,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -419,6 +420,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface.html">pyorc.CrossSection.get_wetted_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_line_of_interest.html">pyorc.CrossSection.get_line_of_interest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_bbox_dry_wet.html">pyorc.CrossSection.get_bbox_dry_wet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.linearize.html">pyorc.CrossSection.linearize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.rotate_translate.html">pyorc.CrossSection.rotate_translate</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot.html">pyorc.CrossSection.plot</a></li>
@@ -426,6 +432,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_planar_surface.html">pyorc.CrossSection.plot_planar_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bbox_dry_wet.html">pyorc.CrossSection.plot_bbox_dry_wet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
@@ -613,11 +620,10 @@ interrogation window and s2n [-] for the signal to noise ratio.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>window_size</strong> (<em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – size of interrogation windows in pixels (y, x)</p></li>
 <li><p><strong>overlap</strong> (<em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – amount of overlap between interrogation windows in pixels (y, x)</p></li>
-<li><p><strong>engine</strong> (<em>str</em><em>, </em><em>optional</em>) – select the compute engine, can be “openpiv” (default), “numba”, or “numpy”. “numba” will give the fastest
-performance but is still experimental. It can boost performance by almost an order of magnitude compared
-to openpiv or numpy. both “numba” and “numpy” use the FF-PIV library as back-end.</p></li>
-<li><p><strong>ensemble_corr</strong> (<em>bool</em><em>, </em><em>optional</em>) – only used with <cite>engine=”numba”</cite> or <cite>engine=”numpy”</cite>.
-If True, performs PIV by first averaging cross-correlations across all frames and then deriving velocities.
+<li><p><strong>engine</strong> (<em>str</em><em>, </em><em>optional</em>) – select the compute engine, can be “numba” (default), or “numpy”. “numba” will give the fastest
+performance. It can boost performance by almost an order of magnitude compared
+to numpy. both “numba” and “numpy” use the FF-PIV library as back-end.</p></li>
+<li><p><strong>ensemble_corr</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, performs PIV by first averaging cross-correlations across all frames and then deriving velocities.
 If False, computes velocities for each frame pair separately. Default is True.</p></li>
 <li><p><strong>**kwargs</strong> (<em>dict</em>) – keyword arguments to pass to the piv engine. For “numba” and “numpy” the argument <cite>chunks</cite> can be provided
 with an integer defining in how many batches of work the total velocimetry problem should be subdivided.</p></li>
@@ -632,7 +638,7 @@ with an integer defining in how many batches of work the total velocimetry probl
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OpenPIV</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">FF-PIV</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FF-PIV</span></code></p>
 </div>
 </dd></dl>
 
@@ -722,7 +728,7 @@ with an integer defining in how many batches of work the total velocimetry probl
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>API reference &#8212; pyorc 0.8.12 documentation</title>
+    <title>API reference &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -46,6 +46,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api';</script>
     <link rel="shortcut icon" href="_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
@@ -135,7 +136,7 @@
     <script>document.write(`<img src="_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -419,6 +420,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface.html">pyorc.CrossSection.get_wetted_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_line_of_interest.html">pyorc.CrossSection.get_line_of_interest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.get_bbox_dry_wet.html">pyorc.CrossSection.get_bbox_dry_wet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.linearize.html">pyorc.CrossSection.linearize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.rotate_translate.html">pyorc.CrossSection.rotate_translate</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot.html">pyorc.CrossSection.plot</a></li>
@@ -426,6 +432,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_planar_surface.html">pyorc.CrossSection.plot_planar_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.plot_bbox_dry_wet.html">pyorc.CrossSection.plot_bbox_dry_wet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
@@ -808,6 +815,23 @@ wetted perimeter [m].</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_line_of_interest.html#pyorc.CrossSection.get_line_of_interest" title="pyorc.CrossSection.get_line_of_interest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_line_of_interest</span></code></a>([bank])</p></td>
 <td><p>Retrieve the points of interest within the cross-section for water level detection.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.get_bbox_dry_wet.html#pyorc.CrossSection.get_bbox_dry_wet" title="pyorc.CrossSection.get_bbox_dry_wet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.get_bbox_dry_wet</span></code></a>(h[, camera, ...])</p></td>
+<td><p>Get wet (or dry) part of bounding box, by extending the water line perpendicular to the cross section.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="transform-cross-section-geometries">
+<h3>Transform cross section geometries<a class="headerlink" href="#transform-cross-section-geometries" title="Permalink to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.linearize.html#pyorc.CrossSection.linearize" title="pyorc.CrossSection.linearize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.linearize</span></code></a>()</p></td>
+<td><p>Snap cross-section points to a best-fit straight line while preserving Z values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.rotate_translate.html#pyorc.CrossSection.rotate_translate" title="pyorc.CrossSection.rotate_translate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.rotate_translate</span></code></a>([angle, xoff, ...])</p></td>
+<td><p>Rotate and translate cross section to match config.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -835,6 +859,9 @@ for camera configurations <cite>CameraConfig.plot</cite>.</p>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.plot_wetted_surface.html#pyorc.CrossSection.plot_wetted_surface" title="pyorc.CrossSection.plot_wetted_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.plot_wetted_surface</span></code></a>(h[, ...])</p></td>
 <td><p>Plot the wetted surface for a given water level.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/pyorc.CrossSection.plot_bbox_dry_wet.html#pyorc.CrossSection.plot_bbox_dry_wet" title="pyorc.CrossSection.plot_bbox_dry_wet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossSection.plot_bbox_dry_wet</span></code></a>(h[, camera, ...])</p></td>
+<td><p>Plot the bounding box of the dry and wet surfaces for a given water level.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1303,6 +1330,7 @@ on a full time series and will then mask out grid cells over its full time span 
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crosssection-class">CrossSection class</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Class and properties</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-cross-section-geometries">Getting cross section geometries</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#transform-cross-section-geometries">Transform cross section geometries</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Plotting methods</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#water-level-detection">Water level detection</a></li>
 </ul>
@@ -1374,7 +1402,7 @@ on a full time series and will then mask out grid cells over its full time span 
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

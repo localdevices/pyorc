@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Estimating a water level optically using the camera configuration and a cross section &#8212; pyorc 0.8.12 documentation</title>
+    <title>Estimating a water level optically using the camera configuration and a cross section &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -47,6 +47,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/06_Estimating_water_levels_optically';</script>
@@ -138,7 +139,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -495,7 +496,7 @@ document.write(`
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Scanning video: 100%|██████████| 2/2 [00:00&lt;00:00, 17.68it/s]
+Scanning video: 100%|██████████| 2/2 [00:00&lt;00:00, 17.96it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -521,7 +522,7 @@ LINESTRING Z (642732.4200000002 8304297.063 1182.3, 642732.5810000001 8304297.03
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4502/3994297915.py:1: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4363/3994297915.py:1: UserWarning: No water level is provided. Camera configuration reference water level is used.
   ax = cross_section.plot()
 </pre></div></div>
 </div>
@@ -562,9 +563,9 @@ LINESTRING Z (642732.4200000002 8304297.063 1182.3, 642732.5810000001 8304297.03
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4502/1485782648.py:9: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4363/1485782648.py:9: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(camera=True, ax=ax1, planar=False, bottom_kwargs={&#34;alpha&#34;: 0.6, &#34;color&#34;: &#34;brown&#34;})
-/tmp/ipykernel_4502/1485782648.py:14: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4363/1485782648.py:14: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(ax=ax2)
 </pre></div></div>
 </div>
@@ -591,7 +592,7 @@ LINESTRING Z (642732.4200000002 8304297.063 1182.3, 642732.5810000001 8304297.03
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The optimized water level is 0.05411231210064216 meters
+The optimized water level is 0.05777084020132861 meters
 </pre></div></div>
 </div>
 <p>You should see something near 0.055 meters. As this is from an optmization algorithm the exact value may vary a little bit. Not bad at all as this is only about 5cm from the known water level! We can now also make a plot, that shows the wetted cross section at this level</p>
@@ -621,9 +622,9 @@ The optimized water level is 0.05411231210064216 meters
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4502/1530537871.py:6: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4363/1530537871.py:6: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(camera=True, ax=ax, planar=False, bottom_kwargs={&#34;alpha&#34;: 0.4, &#34;color&#34;: &#34;brown&#34;})
-/tmp/ipykernel_4502/1530537871.py:12: UserWarning: No water level is provided. Camera configuration reference water level is used.
+/tmp/ipykernel_4363/1530537871.py:12: UserWarning: No water level is provided. Camera configuration reference water level is used.
   cross_section.plot(ax=ax2)
 </pre></div></div>
 </div>
@@ -676,284 +677,62 @@ The optimized water level is 0.05411231210064216 meters
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Downloading file &#39;20241010_081717.mp4&#39; from &#39;doi:10.5281/zenodo.15002591/20241010_081717.mp4&#39; to &#39;/home/runner/.cache/pyorc&#39;.
+Downloading file &#39;20241010_081717.mp4&#39; from &#39;https://zenodo.org/api/records/15002591/files/20241010_081717.mp4/content&#39; to &#39;/home/runner/.cache/pyorc&#39;.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "9fd516d910e34a599e78a7c03bbb98a6"}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-Retrieving or providing cached version of dataset from doi:10.5281/zenodo.15002591/20241010_081717.mp4
+Hommerich video is available in /home/runner/.cache/pyorc/20241010_081717.mp4
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;hommerich_20241010_081717_pyorc_data.zip.zip&#39; from &#39;https://zenodo.org/api/records/15002591/files/hommerich_20241010_081717_pyorc_data.zip.zip/content&#39; to &#39;/home/runner/.cache/pyorc&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "c104ce17760c456db0f400a965fb17c6"}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Hommerich video is available in /home/runner/.cache/pyorc/hommerich_20241010_081717_pyorc_data.zip.zip
+Unzipping sample data...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Scanning video: 100%|██████████| 122/122 [00:00&lt;00:00, 255.66it/s]
+/tmp/ipykernel_4363/1198332640.py:24: UserWarning: No water level is provided. Camera configuration reference water level is used.
+  cross_section.plot(ax=ax2)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">TimeoutError</span>                              Traceback (most recent call last)
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/connectionpool.py:534</span>, in <span class="ansi-cyan-fg">HTTPConnectionPool._make_request</span><span class="ansi-blue-fg">(self, conn, method, url, body, headers, retries, timeout, chunked, response_conn, preload_content, decode_content, enforce_content_length)</span>
-<span class="ansi-green-intense-fg ansi-bold">    533</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-<span class="ansi-green-fg">--&gt; 534</span>     response <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">conn</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">getresponse</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    535</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> (BaseSSLError, <span class="ansi-bold" style="color: rgb(215,95,95)">OSError</span>) <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> e:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/connection.py:565</span>, in <span class="ansi-cyan-fg">HTTPConnection.getresponse</span><span class="ansi-blue-fg">(self)</span>
-<span class="ansi-green-intense-fg ansi-bold">    564</span> <span style="color: rgb(95,135,135)"># Get the response from http.client.HTTPConnection</span>
-<span class="ansi-green-fg">--&gt; 565</span> httplib_response <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">super</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">getresponse</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    567</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/http/client.py:1375</span>, in <span class="ansi-cyan-fg">HTTPConnection.getresponse</span><span class="ansi-blue-fg">(self)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1374</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-<span class="ansi-green-fg">-&gt; 1375</span>     <span class="ansi-yellow-bg">response</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">begin</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1376</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ConnectionError</span>:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/http/client.py:318</span>, in <span class="ansi-cyan-fg">HTTPResponse.begin</span><span class="ansi-blue-fg">(self)</span>
-<span class="ansi-green-intense-fg ansi-bold">    317</span> <span class="ansi-bold" style="color: rgb(0,135,0)">while</span> <span class="ansi-bold" style="color: rgb(0,135,0)">True</span>:
-<span class="ansi-green-fg">--&gt; 318</span>     version, status, reason <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_read_status</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    319</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> status <span style="color: rgb(98,98,98)">!=</span> CONTINUE:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/http/client.py:279</span>, in <span class="ansi-cyan-fg">HTTPResponse._read_status</span><span class="ansi-blue-fg">(self)</span>
-<span class="ansi-green-intense-fg ansi-bold">    278</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span style="color: rgb(0,0,255)">_read_status</span>(<span style="color: rgb(0,135,0)">self</span>):
-<span class="ansi-green-fg">--&gt; 279</span>     line <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">str</span>(<span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">fp</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">readline</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">_MAXLINE</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">+</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">1</span><span class="ansi-yellow-bg">)</span>, <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">iso-8859-1</span><span style="color: rgb(175,0,0)">&#34;</span>)
-<span class="ansi-green-intense-fg ansi-bold">    280</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">len</span>(line) <span style="color: rgb(98,98,98)">&gt;</span> _MAXLINE:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/socket.py:717</span>, in <span class="ansi-cyan-fg">SocketIO.readinto</span><span class="ansi-blue-fg">(self, b)</span>
-<span class="ansi-green-intense-fg ansi-bold">    716</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-<span class="ansi-green-fg">--&gt; 717</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_sock</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">recv_into</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">b</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    718</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> timeout:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/ssl.py:1307</span>, in <span class="ansi-cyan-fg">SSLSocket.recv_into</span><span class="ansi-blue-fg">(self, buffer, nbytes, flags)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1304</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(
-<span class="ansi-green-intense-fg ansi-bold">   1305</span>           <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">non-zero flags not allowed in calls to recv_into() on </span><span class="ansi-bold" style="color: rgb(175,95,135)">%s</span><span style="color: rgb(175,0,0)">&#34;</span> <span style="color: rgb(98,98,98)">%</span>
-<span class="ansi-green-intense-fg ansi-bold">   1306</span>           <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span><span style="color: rgb(0,0,135)">__class__</span>)
-<span class="ansi-green-fg">-&gt; 1307</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">read</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">nbytes</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">buffer</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1308</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/ssl.py:1163</span>, in <span class="ansi-cyan-fg">SSLSocket.read</span><span class="ansi-blue-fg">(self, len, buffer)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1162</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> buffer <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
-<span class="ansi-green-fg">-&gt; 1163</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_sslobj</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">read</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">len</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">buffer</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">   1164</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-
-<span class="ansi-red-fg">TimeoutError</span>: The read operation timed out
-
-The above exception was the direct cause of the following exception:
-
-<span class="ansi-red-fg">ReadTimeoutError</span>                          Traceback (most recent call last)
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/adapters.py:644</span>, in <span class="ansi-cyan-fg">HTTPAdapter.send</span><span class="ansi-blue-fg">(self, request, stream, timeout, verify, cert, proxies)</span>
-<span class="ansi-green-intense-fg ansi-bold">    643</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-<span class="ansi-green-fg">--&gt; 644</span>     resp <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">conn</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">urlopen</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">    645</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">request</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    646</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    647</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">body</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">request</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">body</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    648</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">headers</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">request</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">headers</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    649</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">redirect</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    650</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">assert_same_host</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    651</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">preload_content</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    652</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">decode_content</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    653</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">retries</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">max_retries</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    654</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">timeout</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">timeout</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    655</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">chunked</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">chunked</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    656</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    658</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> (ProtocolError, <span class="ansi-bold" style="color: rgb(215,95,95)">OSError</span>) <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> err:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/connectionpool.py:841</span>, in <span class="ansi-cyan-fg">HTTPConnectionPool.urlopen</span><span class="ansi-blue-fg">(self, method, url, body, headers, retries, redirect, assert_same_host, timeout, pool_timeout, release_conn, chunked, body_pos, preload_content, decode_content, **response_kw)</span>
-<span class="ansi-green-intense-fg ansi-bold">    839</span>     new_e <span style="color: rgb(98,98,98)">=</span> ProtocolError(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">Connection aborted.</span><span style="color: rgb(175,0,0)">&#34;</span>, new_e)
-<span class="ansi-green-fg">--&gt; 841</span> retries <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">retries</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">increment</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">    842</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">error</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">new_e</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">_pool</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">_stacktrace</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">sys</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">exc_info</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">2</span><span class="ansi-yellow-bg">]</span>
-<span class="ansi-green-intense-fg ansi-bold">    843</span> <span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    844</span> retries<span style="color: rgb(98,98,98)">.</span>sleep()
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/util/retry.py:474</span>, in <span class="ansi-cyan-fg">Retry.increment</span><span class="ansi-blue-fg">(self, method, url, response, error, _pool, _stacktrace)</span>
-<span class="ansi-green-intense-fg ansi-bold">    473</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> read <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">False</span> <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> method <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_is_method_retryable(method):
-<span class="ansi-green-fg">--&gt; 474</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-yellow-bg">reraise</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">type</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">error</span><span class="ansi-yellow-bg">)</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">error</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">_stacktrace</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    475</span> <span class="ansi-bold" style="color: rgb(0,135,0)">elif</span> read <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/util/util.py:39</span>, in <span class="ansi-cyan-fg">reraise</span><span class="ansi-blue-fg">(tp, value, tb)</span>
-<span class="ansi-green-intense-fg ansi-bold">     38</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> value<span style="color: rgb(98,98,98)">.</span>with_traceback(tb)
-<span class="ansi-green-fg">---&gt; 39</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> value
-<span class="ansi-green-intense-fg ansi-bold">     40</span> <span class="ansi-bold" style="color: rgb(0,135,0)">finally</span>:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/connectionpool.py:787</span>, in <span class="ansi-cyan-fg">HTTPConnectionPool.urlopen</span><span class="ansi-blue-fg">(self, method, url, body, headers, retries, redirect, assert_same_host, timeout, pool_timeout, release_conn, chunked, body_pos, preload_content, decode_content, **response_kw)</span>
-<span class="ansi-green-intense-fg ansi-bold">    786</span> <span style="color: rgb(95,135,135)"># Make the request on the HTTPConnection object</span>
-<span class="ansi-green-fg">--&gt; 787</span> response <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_make_request</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">    788</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">conn</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    789</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    790</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    791</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">timeout</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">timeout_obj</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    792</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">body</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">body</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    793</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">headers</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">headers</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    794</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">chunked</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">chunked</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    795</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">retries</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">retries</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    796</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">response_conn</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">response_conn</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    797</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">preload_content</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">preload_content</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    798</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">decode_content</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">decode_content</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    799</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">response_kw</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    800</span> <span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    802</span> <span style="color: rgb(95,135,135)"># Everything went great!</span>
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/connectionpool.py:536</span>, in <span class="ansi-cyan-fg">HTTPConnectionPool._make_request</span><span class="ansi-blue-fg">(self, conn, method, url, body, headers, retries, timeout, chunked, response_conn, preload_content, decode_content, enforce_content_length)</span>
-<span class="ansi-green-intense-fg ansi-bold">    535</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> (BaseSSLError, <span class="ansi-bold" style="color: rgb(215,95,95)">OSError</span>) <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> e:
-<span class="ansi-green-fg">--&gt; 536</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_raise_timeout</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">err</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">e</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">timeout_value</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">read_timeout</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    537</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span>
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/urllib3/connectionpool.py:367</span>, in <span class="ansi-cyan-fg">HTTPConnectionPool._raise_timeout</span><span class="ansi-blue-fg">(self, err, url, timeout_value)</span>
-<span class="ansi-green-intense-fg ansi-bold">    366</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">isinstance</span>(err, SocketTimeout):
-<span class="ansi-green-fg">--&gt; 367</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> ReadTimeoutError(
-<span class="ansi-green-intense-fg ansi-bold">    368</span>         <span style="color: rgb(0,135,0)">self</span>, url, <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">Read timed out. (read timeout=</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>timeout_value<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">)</span><span style="color: rgb(175,0,0)">&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    369</span>     ) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">err</span>
-<span class="ansi-green-intense-fg ansi-bold">    371</span> <span style="color: rgb(95,135,135)"># See the above comment about EAGAIN in Python 3.</span>
-
-<span class="ansi-red-fg">ReadTimeoutError</span>: HTTPSConnectionPool(host=&#39;zenodo.org&#39;, port=443): Read timed out. (read timeout=30)
-
-During handling of the above exception, another exception occurred:
-
-<span class="ansi-red-fg">ReadTimeout</span>                               Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[7], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> vid_file <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">pyorc</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">sample_data</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">get_hommerich_dataset</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">      2</span> vid_path <span style="color: rgb(98,98,98)">=</span> pyorc<span style="color: rgb(98,98,98)">.</span>sample_data<span style="color: rgb(98,98,98)">.</span>get_hommerich_pyorc_files()
-<span class="ansi-green-intense-fg ansi-bold">      3</span> cam_config_file <span style="color: rgb(98,98,98)">=</span> os<span style="color: rgb(98,98,98)">.</span>path<span style="color: rgb(98,98,98)">.</span>join(vid_path, <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">cam_config_gcp1.json</span><span style="color: rgb(175,0,0)">&#34;</span>)
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/sample_data.py:29</span>, in <span class="ansi-cyan-fg">get_hommerich_dataset</span><span class="ansi-blue-fg">()</span>
-<span class="ansi-green-intense-fg ansi-bold">     20</span> registry <span style="color: rgb(98,98,98)">=</span> pooch<span style="color: rgb(98,98,98)">.</span>create(
-<span class="ansi-green-intense-fg ansi-bold">     21</span>     <span style="color: rgb(95,135,135)"># Define the cache directory</span>
-<span class="ansi-green-intense-fg ansi-bold">     22</span>     path<span style="color: rgb(98,98,98)">=</span>pooch<span style="color: rgb(98,98,98)">.</span>os_cache(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">pyorc</span><span style="color: rgb(175,0,0)">&#34;</span>),
-<span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">     26</span>     registry<span style="color: rgb(98,98,98)">=</span>{filename: <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>},
-<span class="ansi-green-intense-fg ansi-bold">     27</span> )
-<span class="ansi-green-intense-fg ansi-bold">     28</span> <span style="color: rgb(95,135,135)"># Fetch the dataset</span>
-<span class="ansi-green-fg">---&gt; 29</span> file_path <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">registry</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">fetch</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">filename</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">progressbar</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     30</span> <span style="color: rgb(0,135,0)">print</span>(<span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">Hommerich video is available in </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>file_path<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">&#34;</span>)
-<span class="ansi-green-intense-fg ansi-bold">     31</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> file_path
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pooch/core.py:589</span>, in <span class="ansi-cyan-fg">Pooch.fetch</span><span class="ansi-blue-fg">(self, fname, processor, downloader, progressbar)</span>
-<span class="ansi-green-intense-fg ansi-bold">    586</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> downloader <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
-<span class="ansi-green-intense-fg ansi-bold">    587</span>         downloader <span style="color: rgb(98,98,98)">=</span> choose_downloader(url, progressbar<span style="color: rgb(98,98,98)">=</span>progressbar)
-<span class="ansi-green-fg">--&gt; 589</span>     <span class="ansi-yellow-bg">stream_download</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">    590</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    591</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">full_path</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    592</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">known_hash</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    593</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">downloader</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    594</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">pooch</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    595</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">retry_if_failed</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">retry_if_failed</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    596</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    598</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> processor <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
-<span class="ansi-green-intense-fg ansi-bold">    599</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> processor(<span style="color: rgb(0,135,0)">str</span>(full_path), action, <span style="color: rgb(0,135,0)">self</span>)
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pooch/core.py:807</span>, in <span class="ansi-cyan-fg">stream_download</span><span class="ansi-blue-fg">(url, fname, known_hash, downloader, pooch, retry_if_failed)</span>
-<span class="ansi-green-intense-fg ansi-bold">    803</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-<span class="ansi-green-intense-fg ansi-bold">    804</span>     <span style="color: rgb(95,135,135)"># Stream the file to a temporary so that we can safely check its</span>
-<span class="ansi-green-intense-fg ansi-bold">    805</span>     <span style="color: rgb(95,135,135)"># hash before overwriting the original.</span>
-<span class="ansi-green-intense-fg ansi-bold">    806</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">with</span> temporary_file(path<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(0,135,0)">str</span>(fname<span style="color: rgb(98,98,98)">.</span>parent)) <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> tmp:
-<span class="ansi-green-fg">--&gt; 807</span>         <span class="ansi-yellow-bg">downloader</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">tmp</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">pooch</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    808</span>         hash_matches(tmp, known_hash, strict<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">True</span>, source<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(0,135,0)">str</span>(fname<span style="color: rgb(98,98,98)">.</span>name))
-<span class="ansi-green-intense-fg ansi-bold">    809</span>         shutil<span style="color: rgb(98,98,98)">.</span>move(tmp, <span style="color: rgb(0,135,0)">str</span>(fname))
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pooch/downloaders.py:614</span>, in <span class="ansi-cyan-fg">DOIDownloader.__call__</span><span class="ansi-blue-fg">(self, url, output_file, pooch)</span>
-<span class="ansi-green-intense-fg ansi-bold">    594</span> <span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    595</span> <span style="color: rgb(175,0,0)">Download the given DOI URL over HTTP to the given output file.</span>
-<span class="ansi-green-intense-fg ansi-bold">    596</span>
-<span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    610</span>
-<span class="ansi-green-intense-fg ansi-bold">    611</span> <span style="color: rgb(175,0,0)">&#34;&#34;&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">    613</span> parsed_url <span style="color: rgb(98,98,98)">=</span> parse_url(url)
-<span class="ansi-green-fg">--&gt; 614</span> data_repository <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">doi_to_repository</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">parsed_url</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">netloc</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    616</span> <span style="color: rgb(95,135,135)"># Resolve the URL</span>
-<span class="ansi-green-intense-fg ansi-bold">    617</span> file_name <span style="color: rgb(98,98,98)">=</span> parsed_url[<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">path</span><span style="color: rgb(175,0,0)">&#34;</span>]
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pooch/downloaders.py:689</span>, in <span class="ansi-cyan-fg">doi_to_repository</span><span class="ansi-blue-fg">(doi)</span>
-<span class="ansi-green-intense-fg ansi-bold">    682</span> repositories <span style="color: rgb(98,98,98)">=</span> [
-<span class="ansi-green-intense-fg ansi-bold">    683</span>     FigshareRepository,
-<span class="ansi-green-intense-fg ansi-bold">    684</span>     ZenodoRepository,
-<span class="ansi-green-intense-fg ansi-bold">    685</span>     DataverseRepository,
-<span class="ansi-green-intense-fg ansi-bold">    686</span> ]
-<span class="ansi-green-intense-fg ansi-bold">    688</span> <span style="color: rgb(95,135,135)"># Extract the DOI and the repository information</span>
-<span class="ansi-green-fg">--&gt; 689</span> archive_url <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">doi_to_url</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">doi</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    691</span> <span style="color: rgb(95,135,135)"># Try the converters one by one until one of them returned a URL</span>
-<span class="ansi-green-intense-fg ansi-bold">    692</span> data_repository <span style="color: rgb(98,98,98)">=</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pooch/downloaders.py:649</span>, in <span class="ansi-cyan-fg">doi_to_url</span><span class="ansi-blue-fg">(doi)</span>
-<span class="ansi-green-intense-fg ansi-bold">    646</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">requests</span>  <span style="color: rgb(95,135,135)"># pylint: disable=C0415</span>
-<span class="ansi-green-intense-fg ansi-bold">    648</span> <span style="color: rgb(95,135,135)"># Use doi.org to resolve the DOI to the repository website.</span>
-<span class="ansi-green-fg">--&gt; 649</span> response <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">requests</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">get</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">f</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">https://doi.org/</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,95,135)">{</span><span class="ansi-yellow-bg">doi</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,95,135)">}</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">timeout</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">DEFAULT_TIMEOUT</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    650</span> url <span style="color: rgb(98,98,98)">=</span> response<span style="color: rgb(98,98,98)">.</span>url
-<span class="ansi-green-intense-fg ansi-bold">    651</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(98,98,98)">400</span> <span style="color: rgb(98,98,98)">&lt;</span><span style="color: rgb(98,98,98)">=</span> response<span style="color: rgb(98,98,98)">.</span>status_code <span style="color: rgb(98,98,98)">&lt;</span> <span style="color: rgb(98,98,98)">600</span>:
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/api.py:73</span>, in <span class="ansi-cyan-fg">get</span><span class="ansi-blue-fg">(url, params, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">     62</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span style="color: rgb(0,0,255)">get</span>(url, params<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">None</span>, <span style="color: rgb(98,98,98)">*</span><span style="color: rgb(98,98,98)">*</span>kwargs):
-<span class="ansi-green-intense-fg ansi-bold">     63</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">r</span><span style="color: rgb(175,0,0)">&#34;&#34;&#34;Sends a GET request.</span>
-<span class="ansi-green-intense-fg ansi-bold">     64</span>
-<span class="ansi-green-intense-fg ansi-bold">     65</span> <span style="color: rgb(175,0,0)">    :param url: URL for the new :class:`Request` object.</span>
-<span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">     70</span> <span style="color: rgb(175,0,0)">    :rtype: requests.Response</span>
-<span class="ansi-green-intense-fg ansi-bold">     71</span> <span style="color: rgb(175,0,0)">    &#34;&#34;&#34;</span>
-<span class="ansi-green-fg">---&gt; 73</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">request</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">get</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">params</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">params</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/api.py:59</span>, in <span class="ansi-cyan-fg">request</span><span class="ansi-blue-fg">(method, url, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">     55</span> <span style="color: rgb(95,135,135)"># By using the &#39;with&#39; statement we are sure the session is closed, thus we</span>
-<span class="ansi-green-intense-fg ansi-bold">     56</span> <span style="color: rgb(95,135,135)"># avoid leaving sockets open which can trigger a ResourceWarning in some</span>
-<span class="ansi-green-intense-fg ansi-bold">     57</span> <span style="color: rgb(95,135,135)"># cases, and look like a memory leak in others.</span>
-<span class="ansi-green-intense-fg ansi-bold">     58</span> <span class="ansi-bold" style="color: rgb(0,135,0)">with</span> sessions<span style="color: rgb(98,98,98)">.</span>Session() <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> session:
-<span class="ansi-green-fg">---&gt; 59</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">session</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">request</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">method</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">url</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/sessions.py:589</span>, in <span class="ansi-cyan-fg">Session.request</span><span class="ansi-blue-fg">(self, method, url, params, data, headers, cookies, files, auth, timeout, allow_redirects, proxies, hooks, stream, verify, cert, json)</span>
-<span class="ansi-green-intense-fg ansi-bold">    584</span> send_kwargs <span style="color: rgb(98,98,98)">=</span> {
-<span class="ansi-green-intense-fg ansi-bold">    585</span>     <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">timeout</span><span style="color: rgb(175,0,0)">&#34;</span>: timeout,
-<span class="ansi-green-intense-fg ansi-bold">    586</span>     <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">allow_redirects</span><span style="color: rgb(175,0,0)">&#34;</span>: allow_redirects,
-<span class="ansi-green-intense-fg ansi-bold">    587</span> }
-<span class="ansi-green-intense-fg ansi-bold">    588</span> send_kwargs<span style="color: rgb(98,98,98)">.</span>update(settings)
-<span class="ansi-green-fg">--&gt; 589</span> resp <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">send</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">prep</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">send_kwargs</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    591</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> resp
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/sessions.py:724</span>, in <span class="ansi-cyan-fg">Session.send</span><span class="ansi-blue-fg">(self, request, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    721</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> allow_redirects:
-<span class="ansi-green-intense-fg ansi-bold">    722</span>     <span style="color: rgb(95,135,135)"># Redirect resolving generator.</span>
-<span class="ansi-green-intense-fg ansi-bold">    723</span>     gen <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>resolve_redirects(r, request, <span style="color: rgb(98,98,98)">*</span><span style="color: rgb(98,98,98)">*</span>kwargs)
-<span class="ansi-green-fg">--&gt; 724</span>     history <span style="color: rgb(98,98,98)">=</span> [resp <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> resp <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> gen]
-<span class="ansi-green-intense-fg ansi-bold">    725</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-<span class="ansi-green-intense-fg ansi-bold">    726</span>     history <span style="color: rgb(98,98,98)">=</span> []
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/sessions.py:724</span>, in <span class="ansi-cyan-fg">&lt;listcomp&gt;</span><span class="ansi-blue-fg">(.0)</span>
-<span class="ansi-green-intense-fg ansi-bold">    721</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> allow_redirects:
-<span class="ansi-green-intense-fg ansi-bold">    722</span>     <span style="color: rgb(95,135,135)"># Redirect resolving generator.</span>
-<span class="ansi-green-intense-fg ansi-bold">    723</span>     gen <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>resolve_redirects(r, request, <span style="color: rgb(98,98,98)">*</span><span style="color: rgb(98,98,98)">*</span>kwargs)
-<span class="ansi-green-fg">--&gt; 724</span>     history <span style="color: rgb(98,98,98)">=</span> [resp <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> resp <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> gen]
-<span class="ansi-green-intense-fg ansi-bold">    725</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-<span class="ansi-green-intense-fg ansi-bold">    726</span>     history <span style="color: rgb(98,98,98)">=</span> []
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/sessions.py:265</span>, in <span class="ansi-cyan-fg">SessionRedirectMixin.resolve_redirects</span><span class="ansi-blue-fg">(self, resp, req, stream, timeout, verify, cert, proxies, yield_requests, **adapter_kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    263</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">yield</span> req
-<span class="ansi-green-intense-fg ansi-bold">    264</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-<span class="ansi-green-fg">--&gt; 265</span>     resp <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">send</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">    266</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">req</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    267</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">stream</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">stream</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    268</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">timeout</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">timeout</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    269</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">verify</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">verify</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    270</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">cert</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">cert</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    271</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">proxies</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">proxies</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    272</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">allow_redirects</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    273</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">adapter_kwargs</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">    274</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    276</span>     extract_cookies_to_jar(<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>cookies, prepared_request, resp<span style="color: rgb(98,98,98)">.</span>raw)
-<span class="ansi-green-intense-fg ansi-bold">    278</span>     <span style="color: rgb(95,135,135)"># extract redirect url, if any, for the next loop</span>
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/sessions.py:703</span>, in <span class="ansi-cyan-fg">Session.send</span><span class="ansi-blue-fg">(self, request, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    700</span> start <span style="color: rgb(98,98,98)">=</span> preferred_clock()
-<span class="ansi-green-intense-fg ansi-bold">    702</span> <span style="color: rgb(95,135,135)"># Send the request</span>
-<span class="ansi-green-fg">--&gt; 703</span> r <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">adapter</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">send</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">request</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    705</span> <span style="color: rgb(95,135,135)"># Total elapsed time of the request (approximately)</span>
-<span class="ansi-green-intense-fg ansi-bold">    706</span> elapsed <span style="color: rgb(98,98,98)">=</span> preferred_clock() <span style="color: rgb(98,98,98)">-</span> start
-
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/requests/adapters.py:690</span>, in <span class="ansi-cyan-fg">HTTPAdapter.send</span><span class="ansi-blue-fg">(self, request, stream, timeout, verify, cert, proxies)</span>
-<span class="ansi-green-intense-fg ansi-bold">    688</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> SSLError(e, request<span style="color: rgb(98,98,98)">=</span>request)
-<span class="ansi-green-intense-fg ansi-bold">    689</span> <span class="ansi-bold" style="color: rgb(0,135,0)">elif</span> <span style="color: rgb(0,135,0)">isinstance</span>(e, ReadTimeoutError):
-<span class="ansi-green-fg">--&gt; 690</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> ReadTimeout(e, request<span style="color: rgb(98,98,98)">=</span>request)
-<span class="ansi-green-intense-fg ansi-bold">    691</span> <span class="ansi-bold" style="color: rgb(0,135,0)">elif</span> <span style="color: rgb(0,135,0)">isinstance</span>(e, _InvalidHeader):
-<span class="ansi-green-intense-fg ansi-bold">    692</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> InvalidHeader(e, request<span style="color: rgb(98,98,98)">=</span>request)
-
-<span class="ansi-red-fg">ReadTimeout</span>: HTTPSConnectionPool(host=&#39;zenodo.org&#39;, port=443): Read timed out. (read timeout=30)
-</pre></div></div>
+<img alt="../_images/_examples_06_Estimating_water_levels_optically_13_7.png" src="../_images/_examples_06_Estimating_water_levels_optically_13_7.png" />
+</div>
 </div>
 <p>Ok, we have a new dataset, with a video taken during a high flow event. It can clearly be seen that the real wetted cross section (see left) is partly obscured by vegetation that grows over the water in the direction of the camera position. This in fact happens at both sides of the stream. That might become problematic. Let’s see what happens if we extract a grayscale image, and try our best luck.</p>
 <div class="nbinput docutils container">
@@ -980,7 +759,7 @@ File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The optimized water level is 0.05443078913390309 meters
+The optimized water level is 93.0306833997164 meters
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1011,7 +790,9 @@ The optimized water level is 0.05443078913390309 meters
 </pre></div>
 </div>
 </div>
-</section>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"2c71a8adefe4468ba245bbe564f8f536": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "6ca2da188ecc41908c4345fbe44625d4": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "09909b4300374977b256cd153036f990": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_2c71a8adefe4468ba245bbe564f8f536", "max": 1481386.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_6ca2da188ecc41908c4345fbe44625d4", "tabbable": null, "tooltip": null, "value": 1481386.0}}, "ed17293d64fd4ba892ce72c2268c8fd6": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "268a1d884fc44dad982341f670877764": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "e514ee6dc27c40eabea23d67408c7bd9": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_ed17293d64fd4ba892ce72c2268c8fd6", "placeholder": "\u200b", "style": "IPY_MODEL_268a1d884fc44dad982341f670877764", "tabbable": null, "tooltip": null, "value": "100%"}}, "0488bdca0eec4910bae15df4b9e76daa": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "5d4ff5c4c7b94294bc36504559b18420": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "e38a498779c94efab7779e8b13c10f29": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_0488bdca0eec4910bae15df4b9e76daa", "placeholder": "\u200b", "style": "IPY_MODEL_5d4ff5c4c7b94294bc36504559b18420", "tabbable": null, "tooltip": null, "value": "\u20071.48M/1.48M\u2007[00:00&lt;00:00,\u20073.71GB/s]"}}, "a80b9392037e4697bfc61ecb6c720b6f": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "79px"}}, "9fd516d910e34a599e78a7c03bbb98a6": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_e514ee6dc27c40eabea23d67408c7bd9", "IPY_MODEL_09909b4300374977b256cd153036f990", "IPY_MODEL_e38a498779c94efab7779e8b13c10f29"], "layout": "IPY_MODEL_a80b9392037e4697bfc61ecb6c720b6f", "tabbable": null, "tooltip": null}}, "52b7c8aab00244aea257690f36638fba": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "cb06bdc10626445a81a9db5ca51d3c69": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "99d6ecd5b8df4122a9c96788f997e223": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_52b7c8aab00244aea257690f36638fba", "max": 5094.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_cb06bdc10626445a81a9db5ca51d3c69", "tabbable": null, "tooltip": null, "value": 5094.0}}, "fc21915db1d34226abce15600f4ac31d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "b21568fcc96f4505af11cc8e5b8e7254": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "359431d798d94ff981c6d66185cb5704": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_fc21915db1d34226abce15600f4ac31d", "placeholder": "\u200b", "style": "IPY_MODEL_b21568fcc96f4505af11cc8e5b8e7254", "tabbable": null, "tooltip": null, "value": "100%"}}, "d6c0ab260896442394ef2b07b6c3e3b7": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "64e9221f972241239f33e474c4b529ae": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "1dc1a6d8f9e54b5b907997bb85311af2": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_d6c0ab260896442394ef2b07b6c3e3b7", "placeholder": "\u200b", "style": "IPY_MODEL_64e9221f972241239f33e474c4b529ae", "tabbable": null, "tooltip": null, "value": "\u20075.09k/5.09k\u2007[00:00&lt;00:00,\u200752.1MB/s]"}}, "1d95ddd066524c2b9c40abff64874165": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "79px"}}, "c104ce17760c456db0f400a965fb17c6": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_359431d798d94ff981c6d66185cb5704", "IPY_MODEL_99d6ecd5b8df4122a9c96788f997e223", "IPY_MODEL_1dc1a6d8f9e54b5b907997bb85311af2"], "layout": "IPY_MODEL_1d95ddd066524c2b9c40abff64874165", "tabbable": null, "tooltip": null}}}, "version_major": 2, "version_minor": 0}
+</script></section>
 
 
                 </article>
@@ -1085,7 +866,7 @@ The optimized water level is 0.05443078913390309 meters
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

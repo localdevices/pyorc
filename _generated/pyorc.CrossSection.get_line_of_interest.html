@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.CrossSection.get_line_of_interest &#8212; pyorc 0.8.12 documentation</title>
+    <title>pyorc.CrossSection.get_line_of_interest &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -46,11 +46,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_generated/pyorc.CrossSection.get_line_of_interest';</script>
     <link rel="shortcut icon" href="../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyorc.CrossSection.plot" href="pyorc.CrossSection.plot.html" />
+    <link rel="next" title="pyorc.CrossSection.get_bbox_dry_wet" href="pyorc.CrossSection.get_bbox_dry_wet.html" />
     <link rel="prev" title="pyorc.CrossSection.get_wetted_surface_sz" href="pyorc.CrossSection.get_wetted_surface_sz.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -135,7 +136,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -419,6 +420,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface.html">pyorc.CrossSection.get_wetted_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">pyorc.CrossSection.get_line_of_interest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_bbox_dry_wet.html">pyorc.CrossSection.get_bbox_dry_wet</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.linearize.html">pyorc.CrossSection.linearize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.rotate_translate.html">pyorc.CrossSection.rotate_translate</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot.html">pyorc.CrossSection.plot</a></li>
@@ -426,6 +432,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_planar_surface.html">pyorc.CrossSection.plot_planar_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bottom_surface.html">pyorc.CrossSection.plot_bottom_surface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_wetted_surface.html">pyorc.CrossSection.plot_wetted_surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.plot_bbox_dry_wet.html">pyorc.CrossSection.plot_bbox_dry_wet</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.detect_water_level.html">pyorc.CrossSection.detect_water_level</a></li>
@@ -602,7 +609,7 @@ document.write(`
 <h1>pyorc.CrossSection.get_line_of_interest<a class="headerlink" href="#pyorc-crosssection-get-line-of-interest" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyorc.CrossSection.get_line_of_interest">
-<span class="sig-prename descclassname"><span class="pre">CrossSection.</span></span><span class="sig-name descname"><span class="pre">get_line_of_interest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BANK_OPTIONS</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'far'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyorc/api/cross_section.html#CrossSection.get_line_of_interest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CrossSection.get_line_of_interest" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">CrossSection.</span></span><span class="sig-name descname"><span class="pre">get_line_of_interest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">{'far',</span> <span class="pre">'both',</span> <span class="pre">'near'}</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'far'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/pyorc/api/cross_section.html#CrossSection.get_line_of_interest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyorc.CrossSection.get_line_of_interest" title="Permalink to this definition">#</a></dt>
 <dd><p>Retrieve the points of interest within the cross-section for water level detection.</p>
 <p>This may be all points, points only at the far-bank or closest-bank of the camera position.</p>
 <dl class="field-list simple">
@@ -642,11 +649,11 @@ the “nearest”.</p>
       </div>
     </a>
     <a class="right-next"
-       href="pyorc.CrossSection.plot.html"
+       href="pyorc.CrossSection.get_bbox_dry_wet.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyorc.CrossSection.plot</p>
+        <p class="prev-next-title">pyorc.CrossSection.get_bbox_dry_wet</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -706,7 +713,7 @@ the “nearest”.</p>
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

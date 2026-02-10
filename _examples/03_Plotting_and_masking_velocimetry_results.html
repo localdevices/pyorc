@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Immersive plotting and analyzing results &#8212; pyorc 0.8.12 documentation</title>
+    <title>Immersive plotting and analyzing results &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -47,6 +47,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_examples/03_Plotting_and_masking_velocimetry_results';</script>
@@ -138,7 +139,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -512,7 +513,7 @@ this process, the <code class="docutils literal notranslate"><span class="pre">k
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 72.28it/s]
+Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 72.01it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -521,7 +522,7 @@ Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 72
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7fb0e9296410&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fa0e3723800&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -541,7 +542,7 @@ Scanning video: 100%|██████████| 126/126 [00:01&lt;00:00, 72
 <li><p>apply the mask immediately on the dataset (use <code class="docutils literal notranslate"><span class="pre">inplace=True</span></code> on each mask method).</p></li>
 </ul>
 <p>In the last case, you should be aware that applying another mask method after having applied other mask methods makes the results conditional on masks already applied. Therefore in this case the order in which you apply masks will change the results. For instance, if you first mask out velocities that are outside a minimum / maximum velocity range using <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.mask.minmax</span></code>, and only after that mask out based on variance in time (points with a high variance can be masked), the computed
-variance over time for each location will likely already be lower, because you may have excluded outlier velocities. The method <code class="docutils literal notranslate"><span class="pre">ds.velocimetrry.mask.count</span></code> simply counts how many values are found per grid cell, relative to the total amount of time steps available. This method typically requires that you first apply a set of other mask methods, before being applied.</p>
+variance over time for each location will likely already be lower, because you may have excluded outlier velocities. The method <code class="docutils literal notranslate"><span class="pre">ds.velocimetry.mask.count</span></code> simply counts how many values are found per grid cell, relative to the total amount of time steps available. This method typically requires that you first apply a set of other mask methods, before being applied.</p>
 <p>Below, we decided to apply masks in a certain order, and conditional on each other. We start with masks that can typically be applied on individual values, such as the <code class="docutils literal notranslate"><span class="pre">minmax</span></code> and <code class="docutils literal notranslate"><span class="pre">corr</span></code>. And then gradually move to masks that require analysis of all values in time, such as the <code class="docutils literal notranslate"><span class="pre">variance</span></code> method and (see above) the <code class="docutils literal notranslate"><span class="pre">count</span></code> method. This is typically the good practice.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -576,30 +577,19 @@ variance over time for each location will likely already be lower, because you m
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/numpy/lib/nanfunctions.py:1879: RuntimeWarning: Degrees of freedom &lt;= 0 for slice.
-  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
-/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/numpy/lib/nanfunctions.py:1879: RuntimeWarning: Degrees of freedom &lt;= 0 for slice.
-  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7fb0a1c31240&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fa0c134a150&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_03_Plotting_and_masking_velocimetry_results_8_2.png" src="../_images/_examples_03_Plotting_and_masking_velocimetry_results_8_2.png" />
+<img alt="../_images/_examples_03_Plotting_and_masking_velocimetry_results_8_1.png" src="../_images/_examples_03_Plotting_and_masking_velocimetry_results_8_1.png" />
 </div>
 </div>
 <p>Interesting! We see that the velocities become a lot higher on average. Most likely because many spurious velocities are removed. We also see that the velocities seem to be more left-to-right oriented. In part this may be because we applied the <code class="docutils literal notranslate"><span class="pre">.mask.angle</span></code> method. This mask removes velocities that are in a direction, far off from the expected flow direction. The default direction of this mask is always left to right. Therefore take good care of this mask, if you decide to e.g. apply
@@ -641,30 +631,19 @@ mean) is very different, the value at that location will be excluded.</p>
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/numpy/lib/nanfunctions.py:1879: RuntimeWarning: Degrees of freedom &lt;= 0 for slice.
-  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
-/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/numpy/lib/nanfunctions.py:1879: RuntimeWarning: Degrees of freedom &lt;= 0 for slice.
-  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7fb0af1f57b0&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fa0b4e52a50&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_03_Plotting_and_masking_velocimetry_results_10_2.png" src="../_images/_examples_03_Plotting_and_masking_velocimetry_results_10_2.png" />
+<img alt="../_images/_examples_03_Plotting_and_masking_velocimetry_results_10_1.png" src="../_images/_examples_03_Plotting_and_masking_velocimetry_results_10_1.png" />
 </div>
 </div>
 <p>It looks more natural. Check for instance the pattern around the rock on the left side. Now we can also plot in a geographical view.</p>
@@ -736,7 +715,7 @@ mean) is very different, the value at that location will be excluded.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.quiver.Quiver at 0x7fb0e055e560&gt;
+&lt;matplotlib.quiver.Quiver at 0x7fa0e05183b0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -849,7 +828,7 @@ mean) is very different, the value at that location will be excluded.</p>
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Frames &#8212; pyorc 0.8.12 documentation</title>
+    <title>Frames &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -47,6 +47,7 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/frames/frames';</script>
@@ -136,7 +137,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -442,38 +443,37 @@ document.write(`
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">ValueError</span>                                Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[1], line 7</span>
-<span class="ansi-green-intense-fg ansi-bold">      5</span> <span style="color: rgb(95,135,135)"># point to a file containing the camera configuration</span>
-<span class="ansi-green-intense-fg ansi-bold">      6</span> cam_config <span style="color: rgb(98,98,98)">=</span> pyorc<span style="color: rgb(98,98,98)">.</span>load_camera_config(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">../../../examples/ngwerere/ngwerere.json</span><span style="color: rgb(175,0,0)">&#34;</span>)
-<span class="ansi-green-fg">----&gt; 7</span> video <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">pyorc</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">Video</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">      8</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">video_file</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">      9</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">camera_config</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">cam_config</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">     10</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">start_frame</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">0</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">     11</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">end_frame</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">125</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">     12</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">fixed</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">     13</span> <span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     14</span> da_frames <span style="color: rgb(98,98,98)">=</span> video<span style="color: rgb(98,98,98)">.</span>get_frames(method<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">rgb</span><span style="color: rgb(175,0,0)">&#34;</span>)
-<span class="ansi-green-intense-fg ansi-bold">     15</span> da_frames
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[1]</span><span class="ansi-green-fg">, line 7</span>
+<span class="ansi-green-fg">      5</span> <span style="color: rgb(95,135,135)"># point to a file containing the camera configuration</span>
+<span class="ansi-green-fg">      6</span> cam_config = pyorc.load_camera_config(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">../../../examples/ngwerere/ngwerere.json</span><span class="ansi-yellow-fg">&#34;</span>)
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">7</span> video = <span class="ansi-yellow-bg">pyorc</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">Video</span><span class="ansi-yellow-bg">(</span>
+<span class="ansi-green-fg">      8</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">video_file</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">      9</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">camera_config</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">cam_config</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">     10</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">start_frame</span><span class="ansi-yellow-bg">=</span><span class="ansi-green-fg ansi-yellow-bg">0</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">     11</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">end_frame</span><span class="ansi-yellow-bg">=</span><span class="ansi-green-fg ansi-yellow-bg">125</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-fg">     12</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-fg ansi-yellow-bg">&#34;</span><span class="ansi-yellow-fg ansi-yellow-bg">fixed</span><span class="ansi-yellow-fg ansi-yellow-bg">&#34;</span>
+<span class="ansi-green-fg">     13</span> <span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">     14</span> da_frames = video.get_frames(method=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">rgb</span><span class="ansi-yellow-fg">&#34;</span>)
+<span class="ansi-green-fg">     15</span> da_frames
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:144</span>, in <span class="ansi-cyan-fg">Video.__init__</span><span class="ansi-blue-fg">(self, fn, camera_config, h_a, start_frame, end_frame, freq, chunksize, stabilize, lazy, rotation, fps, progress)</span>
-<span class="ansi-green-intense-fg ansi-bold">    141</span> <span style="color: rgb(95,135,135)"># explicitly open file for reading</span>
-<span class="ansi-green-intense-fg ansi-bold">    142</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>stabilize <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
-<span class="ansi-green-intense-fg ansi-bold">    143</span>     <span style="color: rgb(95,135,135)"># set a gridded mask based on the roi points</span>
-<span class="ansi-green-fg">--&gt; 144</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">set_mask_from_exterior</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    145</span> <span style="color: rgb(95,135,135)"># set end and start frame</span>
-<span class="ansi-green-intense-fg ansi-bold">    146</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>frame_count <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">int</span>(cap<span style="color: rgb(98,98,98)">.</span>get(cv2<span style="color: rgb(98,98,98)">.</span>CAP_PROP_FRAME_COUNT)) <span style="color: rgb(98,98,98)">-</span> <span style="color: rgb(98,98,98)">1</span>
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.12/site-packages/pyorc/api/video.py:144</span>, in <span class="ansi-cyan-fg">Video.__init__</span><span class="ansi-blue-fg">(self, fn, camera_config, h_a, start_frame, end_frame, freq, chunksize, stabilize, lazy, rotation, fps, progress)</span>
+<span class="ansi-green-fg">    141</span> <span style="color: rgb(95,135,135)"># explicitly open file for reading</span>
+<span class="ansi-green-fg">    142</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span>.stabilize <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">    143</span>     <span style="color: rgb(95,135,135)"># set a gridded mask based on the roi points</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">144</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">set_mask_from_exterior</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">stabilize</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    145</span> <span style="color: rgb(95,135,135)"># set end and start frame</span>
+<span class="ansi-green-fg">    146</span> <span style="color: rgb(0,135,0)">self</span>.frame_count = <span style="color: rgb(0,135,0)">int</span>(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - <span class="ansi-green-fg">1</span>
 
-File <span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.10/site-packages/pyorc/api/video.py:535</span>, in <span class="ansi-cyan-fg">Video.set_mask_from_exterior</span><span class="ansi-blue-fg">(self, exterior)</span>
-<span class="ansi-green-intense-fg ansi-bold">    521</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span style="color: rgb(0,0,255)">set_mask_from_exterior</span>(<span style="color: rgb(0,135,0)">self</span>, exterior: List[List]):
-<span class="ansi-green-intense-fg ansi-bold">    522</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">&#34;&#34;&#34;Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside.</span>
-<span class="ansi-green-intense-fg ansi-bold">    523</span>
-<span class="ansi-green-intense-fg ansi-bold">    524</span> <span style="color: rgb(175,0,0)">    Parameters</span>
-<span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    533</span>
-<span class="ansi-green-intense-fg ansi-bold">    534</span> <span style="color: rgb(175,0,0)">    &#34;&#34;&#34;</span>
-<span class="ansi-green-fg">--&gt; 535</span>     mask_coords <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">array</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">exterior</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dtype</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">int32</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    536</span>     mask <span style="color: rgb(98,98,98)">=</span> np<span style="color: rgb(98,98,98)">.</span>zeros((<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>height, <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>width), np<span style="color: rgb(98,98,98)">.</span>uint8)
-<span class="ansi-green-intense-fg ansi-bold">    537</span>     mask <span style="color: rgb(98,98,98)">=</span> cv2<span style="color: rgb(98,98,98)">.</span>fillPoly(mask, [mask_coords], <span style="color: rgb(98,98,98)">255</span>)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">/usr/share/miniconda/envs/pyorc-dev/lib/python3.12/site-packages/pyorc/api/video.py:535</span>, in <span class="ansi-cyan-fg">Video.set_mask_from_exterior</span><span class="ansi-blue-fg">(self, exterior)</span>
+<span class="ansi-green-fg">    521</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-fg">set_mask_from_exterior</span>(<span style="color: rgb(0,135,0)">self</span>, exterior: List[List]):
+<span class="ansi-green-fg">    522</span> <span style="color: rgb(188,188,188)">    </span><span class="ansi-yellow-fg">&#34;&#34;&#34;Prepare a mask grid with 255 outside of the stabilization polygon and 0 inside.</span>
+<span class="ansi-green-fg">    523</span>
+<span class="ansi-green-fg">    524</span> <span class="ansi-yellow-fg">    Parameters</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    533</span>
+<span class="ansi-green-fg">    534</span> <span class="ansi-yellow-fg">    &#34;&#34;&#34;</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">535</span>     mask_coords = <span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">array</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">exterior</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dtype</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">np</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">int32</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">    536</span>     mask = np.zeros((<span style="color: rgb(0,135,0)">self</span>.height, <span style="color: rgb(0,135,0)">self</span>.width), np.uint8)
+<span class="ansi-green-fg">    537</span>     mask = cv2.fillPoly(mask, [mask_coords], <span class="ansi-green-fg">255</span>)
 
 <span class="ansi-red-fg">ValueError</span>: invalid literal for int() with base 10: &#39;fixed&#39;
 </pre></div></div>
@@ -503,8 +503,8 @@ arguments, you would not get this. A few things are noteworthy to further explai
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[2], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">da_frames</span><span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>plot()
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[2]</span><span class="ansi-green-fg">, line 1</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> <span class="ansi-yellow-bg">da_frames</span>.frames.plot()
 
 <span class="ansi-red-fg">NameError</span>: name &#39;da_frames&#39; is not defined
 </pre></div></div>
@@ -526,9 +526,9 @@ Cell <span class="ansi-green-fg">In[2], line 1</span>
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[3], line 2</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># only plot time index 0</span>
-<span class="ansi-green-fg">----&gt; 2</span> <span class="ansi-yellow-bg">da_frames</span>[<span style="color: rgb(98,98,98)">0</span>]<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>plot()
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[3]</span><span class="ansi-green-fg">, line 2</span>
+<span class="ansi-green-fg">      1</span> <span style="color: rgb(95,135,135)"># only plot time index 0</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">2</span> <span class="ansi-yellow-bg">da_frames</span>[<span class="ansi-green-fg">0</span>].frames.plot()
 
 <span class="ansi-red-fg">NameError</span>: name &#39;da_frames&#39; is not defined
 </pre></div></div>
@@ -561,10 +561,10 @@ Cell <span class="ansi-green-fg">In[3], line 2</span>
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[4], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> da_grey <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">video</span><span style="color: rgb(98,98,98)">.</span>get_frames()
-<span class="ansi-green-intense-fg ansi-bold">      2</span> da_norm <span style="color: rgb(98,98,98)">=</span> da_grey<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>normalize()
-<span class="ansi-green-intense-fg ansi-bold">      3</span> da_edge <span style="color: rgb(98,98,98)">=</span> da_norm<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>edge_detect(wdw_1<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">6</span>, wdw_2<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[4]</span><span class="ansi-green-fg">, line 1</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> da_grey = <span class="ansi-yellow-bg">video</span>.get_frames()
+<span class="ansi-green-fg">      2</span> da_norm = da_grey.frames.normalize()
+<span class="ansi-green-fg">      3</span> da_edge = da_norm.frames.edge_detect(wdw_1=<span class="ansi-green-fg">6</span>, wdw_2=<span class="ansi-green-fg">10</span>)
 
 <span class="ansi-red-fg">NameError</span>: name &#39;video&#39; is not defined
 </pre></div></div>
@@ -594,11 +594,11 @@ expertise usually sufficient, but dependent on the scale of structure that you m
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[5], line 2</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># let&#39;s retrieve rgb frames</span>
-<span class="ansi-green-fg">----&gt; 2</span> da_rgb <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">video</span><span style="color: rgb(98,98,98)">.</span>get_frames(method<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">rgb</span><span style="color: rgb(175,0,0)">&#34;</span>)
-<span class="ansi-green-intense-fg ansi-bold">      3</span> <span style="color: rgb(95,135,135)"># now reproject</span>
-<span class="ansi-green-intense-fg ansi-bold">      4</span> da_proj <span style="color: rgb(98,98,98)">=</span> da_rgb<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>project()
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[5]</span><span class="ansi-green-fg">, line 2</span>
+<span class="ansi-green-fg">      1</span> <span style="color: rgb(95,135,135)"># let&#39;s retrieve rgb frames</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">2</span> da_rgb = <span class="ansi-yellow-bg">video</span>.get_frames(method=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">rgb</span><span class="ansi-yellow-fg">&#34;</span>)
+<span class="ansi-green-fg">      3</span> <span style="color: rgb(95,135,135)"># now reproject</span>
+<span class="ansi-green-fg">      4</span> da_proj = da_rgb.frames.project()
 
 <span class="ansi-red-fg">NameError</span>: name &#39;video&#39; is not defined
 </pre></div></div>
@@ -629,12 +629,12 @@ Cell <span class="ansi-green-fg">In[5], line 2</span>
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[6], line 3</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># repeat the reprojection, but now with normalizes images, and with greyscale.</span>
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span style="color: rgb(95,135,135)"># let&#39;s retrieve rgb frames</span>
-<span class="ansi-green-fg">----&gt; 3</span> da_grey <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">video</span><span style="color: rgb(98,98,98)">.</span>get_frames()
-<span class="ansi-green-intense-fg ansi-bold">      4</span> <span style="color: rgb(95,135,135)"># normalize first. This can be done in the original objective</span>
-<span class="ansi-green-intense-fg ansi-bold">      5</span> da_norm <span style="color: rgb(98,98,98)">=</span> da_grey<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>normalize()
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[6]</span><span class="ansi-green-fg">, line 3</span>
+<span class="ansi-green-fg">      1</span> <span style="color: rgb(95,135,135)"># repeat the reprojection, but now with normalizes images, and with greyscale.</span>
+<span class="ansi-green-fg">      2</span> <span style="color: rgb(95,135,135)"># let&#39;s retrieve rgb frames</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">3</span> da_grey = <span class="ansi-yellow-bg">video</span>.get_frames()
+<span class="ansi-green-fg">      4</span> <span style="color: rgb(95,135,135)"># normalize first. This can be done in the original objective</span>
+<span class="ansi-green-fg">      5</span> da_norm = da_grey.frames.normalize()
 
 <span class="ansi-red-fg">NameError</span>: name &#39;video&#39; is not defined
 </pre></div></div>
@@ -659,8 +659,8 @@ value <code class="docutils literal notranslate"><span class="pre">geographical<
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[7], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">da_edge</span>
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[7]</span><span class="ansi-green-fg">, line 1</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">1</span> <span class="ansi-yellow-bg">da_edge</span>
 
 <span class="ansi-red-fg">NameError</span>: name &#39;da_edge&#39; is not defined
 </pre></div></div>
@@ -698,13 +698,13 @@ camera’s objective plot are provided below. Note that the <code class="docutil
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[8], line 5</span>
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">cartopy</span><span class="ansi-bold" style="color: rgb(0,0,255)">.</span><span class="ansi-bold" style="color: rgb(0,0,255)">crs</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">as</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,0,255)">ccrs</span>
-<span class="ansi-green-intense-fg ansi-bold">      3</span> <span style="color: rgb(95,135,135)"># when using mode=&#34;geographical&#34; and not supplying an axes, the plot function will make a geogrpahical aware axes</span>
-<span class="ansi-green-intense-fg ansi-bold">      4</span> <span style="color: rgb(95,135,135)"># for you.</span>
-<span class="ansi-green-fg">----&gt; 5</span> p <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">da_edge</span>[<span style="color: rgb(98,98,98)">0</span>]<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>plot(mode<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">geographical</span><span style="color: rgb(175,0,0)">&#34;</span>, vmin<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">10</span>, vmax<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>, cmap<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">RdBu_r</span><span style="color: rgb(175,0,0)">&#34;</span>)
-<span class="ansi-green-intense-fg ansi-bold">      6</span> <span style="color: rgb(95,135,135)"># tiles = cimgt.OSM()</span>
-<span class="ansi-green-intense-fg ansi-bold">      7</span> tiles <span style="color: rgb(98,98,98)">=</span> cimgt<span style="color: rgb(98,98,98)">.</span>GoogleTiles(style<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">satellite</span><span style="color: rgb(175,0,0)">&#34;</span>)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[8]</span><span class="ansi-green-fg">, line 5</span>
+<span class="ansi-green-fg">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">cartopy</span><span class="ansi-blue-intense-fg ansi-bold">.</span><span class="ansi-blue-intense-fg ansi-bold">crs</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">as</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">ccrs</span>
+<span class="ansi-green-fg">      3</span> <span style="color: rgb(95,135,135)"># when using mode=&#34;geographical&#34; and not supplying an axes, the plot function will make a geogrpahical aware axes</span>
+<span class="ansi-green-fg">      4</span> <span style="color: rgb(95,135,135)"># for you.</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">5</span> p = <span class="ansi-yellow-bg">da_edge</span>[<span class="ansi-green-fg">0</span>].frames.plot(mode=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">geographical</span><span class="ansi-yellow-fg">&#34;</span>, vmin=-<span class="ansi-green-fg">10</span>, vmax=<span class="ansi-green-fg">10</span>, cmap=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">RdBu_r</span><span class="ansi-yellow-fg">&#34;</span>)
+<span class="ansi-green-fg">      6</span> <span style="color: rgb(95,135,135)"># tiles = cimgt.OSM()</span>
+<span class="ansi-green-fg">      7</span> tiles = cimgt.GoogleTiles(style=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">satellite</span><span class="ansi-yellow-fg">&#34;</span>)
 
 <span class="ansi-red-fg">NameError</span>: name &#39;da_edge&#39; is not defined
 </pre></div></div>
@@ -742,11 +742,11 @@ Cell <span class="ansi-green-fg">In[8], line 5</span>
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[9], line 2</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># we will only store the first 30 frames</span>
-<span class="ansi-green-fg">----&gt; 2</span> da_sel <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">da_edge</span>[<span style="color: rgb(98,98,98)">0</span>:<span style="color: rgb(98,98,98)">30</span>]
-<span class="ansi-green-intense-fg ansi-bold">      4</span> <span style="color: rgb(95,135,135)"># first with all color control</span>
-<span class="ansi-green-intense-fg ansi-bold">      5</span> da_sel<span style="color: rgb(98,98,98)">.</span>frames<span style="color: rgb(98,98,98)">.</span>to_ani(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">edge_ani.mp4</span><span style="color: rgb(175,0,0)">&#34;</span>, vmin<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">10</span>, vmax<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>, cmap<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">RdBu_r</span><span style="color: rgb(175,0,0)">&#34;</span>)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[9]</span><span class="ansi-green-fg">, line 2</span>
+<span class="ansi-green-fg">      1</span> <span style="color: rgb(95,135,135)"># we will only store the first 30 frames</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">2</span> da_sel = <span class="ansi-yellow-bg">da_edge</span>[<span class="ansi-green-fg">0</span>:<span class="ansi-green-fg">30</span>]
+<span class="ansi-green-fg">      4</span> <span style="color: rgb(95,135,135)"># first with all color control</span>
+<span class="ansi-green-fg">      5</span> da_sel.frames.to_ani(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">edge_ani.mp4</span><span class="ansi-yellow-fg">&#34;</span>, vmin=-<span class="ansi-green-fg">10</span>, vmax=<span class="ansi-green-fg">10</span>, cmap=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">RdBu_r</span><span class="ansi-yellow-fg">&#34;</span>)
 
 <span class="ansi-red-fg">NameError</span>: name &#39;da_edge&#39; is not defined
 </pre></div></div>
@@ -832,7 +832,7 @@ Cell <span class="ansi-green-fg">In[9], line 2</span>
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>

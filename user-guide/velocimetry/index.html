@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Velocimetry &#8212; pyorc 0.8.12 documentation</title>
+    <title>Velocimetry &#8212; pyorc 0.9.3 documentation</title>
   
   
   
@@ -46,6 +46,7 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/design-tabs.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/velocimetry/index';</script>
     <link rel="shortcut icon" href="../../_static/orc_favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -135,7 +136,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.8.12</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
   
 </a></div>
     
@@ -481,10 +482,9 @@ API</label><div class="sd-tab-content docutils">
 </ul>
 </div>
 </div>
-<p>We implemented several engines to compute PIV. The default is <code class="docutils literal notranslate"><span class="pre">openpiv</span></code> which uses the OpenPIV library to
-perform computations. The alternatives are <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code> which use the numba and numpy libraries for
-the computations, as provided in the underlying FF-PIV library. <code class="docutils literal notranslate"><span class="pre">numba</span></code> is by far the fastest option, and is currently
-the default.</p>
+<p>We implemented several engines to compute PIV. These are <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code> which use the numba and numpy libraries
+for the computations, as provided in the underlying FF-PIV library. <code class="docutils literal notranslate"><span class="pre">numba</span></code> is by far the fastest option, and is
+currently the default.</p>
 <p>Naturally, before orthorectification you may decide to apply one or several preprocessing methods as described in
 <a class="reference internal" href="../frames/index.html#frames-ug"><span class="std std-ref">Frames</span></a> to improve the visibility of tracers. We highly recommend that in many cases, as shown in the snippets
 in <a class="reference internal" href="../frames/index.html#frames-ug"><span class="std std-ref">Frames</span></a>.</p>
@@ -926,7 +926,7 @@ is also removed. This is meant to remove isolated values. Also described in <a c
 
   <p class="copyright">
     
-      © Copyright 2025, Rainbow Sensing.
+      © Copyright 2026, Rainbow Sensing.
       <br/>
     
   </p>
