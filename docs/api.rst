@@ -136,6 +136,16 @@ Getting cross section geometries
     CrossSection.get_wetted_surface
     CrossSection.get_wetted_surface_sz
     CrossSection.get_line_of_interest
+    CrossSection.get_bbox_dry_wet
+
+Transform cross section geometries
+----------------------------------
+
+.. autosummary::
+    :toctree: _generated
+
+    CrossSection.linearize
+    CrossSection.rotate_translate
 
 Plotting methods
 ----------------
@@ -154,6 +164,7 @@ for camera configurations `CameraConfig.plot`.
     CrossSection.plot_planar_surface
     CrossSection.plot_bottom_surface
     CrossSection.plot_wetted_surface
+    CrossSection.plot_bbox_dry_wet
 
 Water level detection
 ---------------------

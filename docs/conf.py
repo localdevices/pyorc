@@ -31,27 +31,27 @@ def remove_dir_content(path: str) -> None:
         shutil.rmtree(path)
 
 
-# -- Copy notebooks to include in docs -------
-if os.path.isdir("_examples"):
-    remove_dir_content("_examples")
-os.makedirs("_examples/ngwerere")
-copy_tree("../examples/ngwerere", "_examples/ngwerere")
-copy_tree("../examples/camera_calib", "_examples/camera_calib")
-
-# copy specific notebooks to include in build
-shutil.copy("../examples/01_Camera_Configuration_single_video.ipynb", "_examples")
+# # -- Copy notebooks to include in docs -------
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples/ngwerere")
+# copy_tree("../examples/ngwerere", "_examples/ngwerere")
+# copy_tree("../examples/camera_calib", "_examples/camera_calib")
 #
-# Notebook 02 requires considerable rendering time. Therefore it is not executed unless a final build is done
-shutil.copy("../examples/02_Process_velocimetry.ipynb", "_examples")
-shutil.copy("../examples/03_Plotting_and_masking_velocimetry_results.ipynb", "_examples")
-shutil.copy("../examples/04_Extracting_crosssection_velocities_and_discharge.ipynb", "_examples")
-shutil.copy("../examples/05_Camera_calibration.ipynb", "_examples")
-shutil.copy("../examples/06_Estimating_water_levels_optically.ipynb", "_examples")
+# # copy specific notebooks to include in build
+# shutil.copy("../examples/01_Camera_Configuration_single_video.ipynb", "_examples")
+# #
+# # Notebook 02 requires considerable rendering time. Therefore it is not executed unless a final build is done
+# shutil.copy("../examples/02_Process_velocimetry.ipynb", "_examples")
+# shutil.copy("../examples/03_Plotting_and_masking_velocimetry_results.ipynb", "_examples")
+# shutil.copy("../examples/04_Extracting_crosssection_velocities_and_discharge.ipynb", "_examples")
+# shutil.copy("../examples/05_Camera_calibration.ipynb", "_examples")
+# shutil.copy("../examples/06_Estimating_water_levels_optically.ipynb", "_examples")
 
 # -- Project information -----------------------------------------------------
 
 project = 'pyorc'
-copyright = '2025, Rainbow Sensing'
+copyright = '2026, Rainbow Sensing'
 author = 'Hessel Winsemius'
 
 # The full version, including alpha/beta/rc tags
