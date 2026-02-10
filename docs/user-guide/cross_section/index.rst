@@ -177,7 +177,6 @@ How to work with cross sections
             water_level:
               n_start: 10  # use the 10th frame of the extracted video frames...
               n_end: 20  # ...until the 20th frame. The average of the extracted and preprocessed frames is used.
-              bank: "near"  # in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose "both" for seeking the optimal on both banks
               frames_options:  # we add preprocessing methods from the frames methods. You can extend this similar to the frames section.
                 method: "hue"  # we can extract the hue channel instead of a greyscale image. Hue essentially represents the color of the frame.
                 range: {}  # range (with empty arguments) extracts the difference between min and max in time, revealing moving water, opposed to non-moving land. Better non use with hue channel
@@ -185,7 +184,7 @@ How to work with cross sections
               water_level_options:
                 length: 10  # meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.
                 padding: 1.0  # make the polygons wider than the default 0.5 meters.
-
+                bank: "near"  # in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose "both" for seeking the optimal on both banks
 
         Finally, you can also supply a signal-to-noise threshold (``s2n_thres``) to judge whether the detected water
         level is distinct enough. By default this value is 3.0 meaning that the optimal minimum score must be at least
@@ -205,7 +204,6 @@ How to work with cross sections
             water_level:
               n_start: 10  # use the 10th frame of the extracted video frames...
               n_end: 20  # ...until the 20th frame. The average of the extracted and preprocessed frames is used.
-              bank: "near"  # in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose "both" for seeking the optimal on both banks
               frames_options:  # we add two preprocessing methods. In case 1 fails detection, we try the second.
                 - method: "grayscale"  # low flows are within a small mountainous channel, mostly detectable by intensity changes
                   range: {}
@@ -213,6 +211,7 @@ How to work with cross sections
               water_level_options:
                 length: 10  # meaning we extend the polygon in up-to-downstream direction to 10 meters instead of 2.
                 padding: 1.0  # make the polygons wider than the default 0.5 meters.
+                bank: "near"  # in case the nearest bank offers full visibility, we may choose to look for the water level on the nearest shore to the camera. Choose "both" for seeking the optimal on both banks
 
     .. tab-item:: API
 
@@ -234,14 +233,66 @@ How to work with cross sections
             gdf = gpd.read_file(cs_file)
             cs = pyorc.CrossSection(camera_config=cam_config, cross_section=gdf)
 
-        ``cs`` will contain your cross section object. You can perform powerful plotting with
+        ``cs`` will contain your cross section object. If you want to move your cross section in x- or y-direction
+        or rotate it over a defined angle, you can do so with the ``rotate_translate`` method. For instance, to rotate
+        all coordinates anti-clockwise 10 degrees. and move the cross section 10 meters in the positive y-direction:
 
         .. code-block:: python
 
+           # ...repeat code as before
+           import numpy as np
+
+           angle = 10  # rotation positive is anti-clockwise seen from above
+           angle_rad = 10 / 180 * np.pi  # angle must be provided in radians
+           yoff = 10  # offset in meters y-direction
+           cs_transform = cs.rotate_translate(angle=angle, yoff=yoff)
+
+        In a similar way, ``xoff`` and ``zoff`` can be supplied to move in the x-direction or lower all coordinates.
+
+        While you measure a cross section, you will try to follow a straight line. Nobody is perfect and accessbility
+        can also reduce your ability to traverse from left to right bank exactly in a straight direction. Hence, you can
+        straighten or "linearize" your cross section. With this method, a straight line is fitted through the cross
+        section and all measured x,y,z points of your cross section measurements are snapped to the nearest point in
+        the straight line. This does not necessarily significantly impact on discharge estimates as cross-sectional
+        flow is always calculated with perpendicular vector components over the measured cross section points. However,
+        it will make visual interpretation a lot easier. Apply the method (without any arguments) as follows:
+
+        .. code-block:: python
+
+           # ...repeat code as before until cs =
+           cs_straight = cs.linearize()  # return straightened cross section instance
+
+        A ``CrossSection`` instance basically holds both the cross section coordinates and the information about the
+        camera configuration through the ``CameraConfig`` supplied. Hence we can also extract the wetted or dry parts
+        of the :ref:`bounding box <camera_config_api_bbox>` set in the ``CameraConfig``. This can be done as follows:
+
+        .. code-block:: python
+
+           # ...repeat code as before until cs =
+           get_bbox_dry_wet(
+               h=93.0,
+               camera=False,  # retrieve a 3D coordinate set, if set to False, projected coordinates are returned
+               swap_y_coords=False,  # return projected coordinates directly, for plotting you may have to reverse y-coords
+               dry=False,  # set to True to return wetted parts instead
+               expand_exterior=True,  # when camera=True, expand_exterior will split the line segments of each polygon
+               exterior_split=100  # amount of segments to split polygon lines in.
+
+        This will return a ``MultiPolygon`` geometry, which contains one or more rectangular polygons, made by expanding
+        the cross section shorelines (with provided water level ``h`` in perpendicular direction and finding the
+        crossings with the defined bounding box. ``MultiPolygon`` can contain several geometries, e.g. for the left
+        and right dry bank parts, or for wet parts in case the cross section is quite irregular, and multiple wet
+        patches are found with the provided ``h``.
+
+        You can perform powerful plotting with the cross section instances.
+
+        .. code-block:: python
+
+           # ...repeat code as before until cs =
             cs.plot(h=93.5)  # we plot wetted surface areas and planar surface at a user-provided water level of 93.5.
             plt.show()
 
-        This will make a plot of the cross section in a 3D axis. If you do this on a interactive axes, you can rotate
+        This will make a plot of the cross section in a 3D axis. If you do this on a interactive axes, you can
+        interactively rotate
         the view to gain more insight. The plot contains a bottom profile extended over some length, a wetted surface
         and a planar surface area at the user-provided water level. Naturally this level must be in the same datum as
         all local datum levels, similar as valid for ``h_ref`` in the camera configuration file.
