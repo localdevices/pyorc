@@ -1,4 +1,4 @@
-## [0.9.4] = 2026-xx-xx
+## [0.9.4] = 2026-02-27
 ### Added
 ### Changed
 ### Deprecated
