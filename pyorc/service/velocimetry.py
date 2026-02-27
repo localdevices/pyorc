@@ -65,10 +65,14 @@ def get_water_level(
         h_a, s2n = cross_section.detect_water_level_s2n(img, **water_level_options)
         if s2n > s2n_thres_:
             # high enough signal-to-noise ratio, so return, otherwise continue with next frame treatment set
-            logger.debug(f"Found significant water level at h: {h_a:.3f} m with signal-to-noise: {s2n} > {s2n_thres_}")
+            logger.debug(
+                f"Found significant water level at h: {h_a:.3f} m with signal-to-noise: {s2n:.3f} > {s2n_thres_:.3f}"
+            )
             return h_a
         else:
-            logger.debug(f"Found water level at h: {h_a:.3f} m with too low signal-to-noise: {s2n} < {s2n_thres_}")
+            logger.debug(
+                f"Found water level at h: {h_a:.3f} m with too low signal-to-noise: {s2n:.3f} < {s2n_thres_:.3f}"
+            )
     # if none of frame treatments gives a satisfactory h_a, return None
     return
 
@@ -697,15 +701,16 @@ def velocity_flow(**kwargs):
 
 def velocity_flow_subprocess(
     videofile,
-    recipe,
-    cameraconfig,
-    output,
-    prefix=None,
-    h_a: float = None,
-    cross: str = None,
+    recipe: dict,
+    cameraconfig: dict,
+    output: str,
+    prefix: Optional[str] = None,
+    h_a: Optional[float] = None,
+    cross: Optional[dict] = None,
+    cross_wl: Optional[dict] = None,
     update: bool = False,
-    concurrency=True,
-    logger=logging,
+    concurrency: bool = True,
+    logger: logging.Logger = logging,
 ):
     """Write the requirements to temporary files and run velocimetry from a separate CLI instance.
 
@@ -713,20 +718,22 @@ def velocity_flow_subprocess(
 
     Parameters
     ----------
-    recipe : dict
-        YAML recipe, parsed from CLI
     videofile : str
         path to video
+    recipe : dict
+        YAML recipe, parsed from CLI
     cameraconfig : dict
         camera config as dict (not yet loaded as CamerConfig object)
+    output : str
+        path to output file
     prefix : str
         prefix of produced output files
     h_a : float, optional
         Current water level in meters (default None)
     cross : dict, optional
-        Cross-section profile as geojson dict, to use for optical water level detection if provided and h_a is None,
-    output : str
-        path to output file
+        Cross-section profile as geojson dict, to use for discharge estimation
+    cross_wl : dict, optional
+        Cross-section profile as geojson dict, to use for optical water level detection if provided and h_a is None
     update : bool, optional
         if set, only update components with changed inputs and configurations
     concurrency : bool, optional
@@ -754,13 +761,21 @@ def velocity_flow_subprocess(
     if h_a is not None:
         cmd.append("-h")
         cmd.append(str(h_a))
-    if h_a is None and cross is not None:
+    # if h_a is None and cross is not None:
+    if cross is not None:
         cross_fn = os.path.join(output, "cross.geojson")
         # write cross-section to file
         with open(cross_fn, "w") as f:
             json.dump(cross, f, indent=4)
         cmd.append("--cross")
         cmd.append(cross_fn)
+    if h_a is None and cross_wl is not None:
+        cross_wl_fn = os.path.join(output, "cross_wl.geojson")
+        # write cross-section to file
+        with open(cross_wl_fn, "w") as f:
+            json.dump(cross_wl, f, indent=4)
+        cmd.append("--cross_wl")
+        cmd.append(cross_wl_fn)
     if not concurrency:
         cmd.append("--lowmem")
     if update:
@@ -771,5 +786,5 @@ def velocity_flow_subprocess(
     cmd_suffix = ["-u", "-vvv", output]
     cmd = cmd + cmd_suffix
     # call subprocess
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, cwd=os.path.dirname(output), capture_output=True, text=True)
     return result

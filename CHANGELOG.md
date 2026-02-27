@@ -1,3 +1,13 @@
+## [0.9.4] = 2026-xx-xx
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Documentation updates for cross section implemented.
+- `service.velocity_flow_subprocess` was not complete and missing `cross_wl` as input entirely. This is fixed.
+
+
 ## [0.9.3] = 2026-02-05
 ### Added
 - Cross sections can be linearized with `CrossSection.linearize`, and rotated and translated with

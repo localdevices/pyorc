@@ -842,7 +842,7 @@ class CrossSection:
         #     pol = pol[0]
         return geometry.MultiPolygon(pol)
 
-    def get_wetted_surface(self, h: float, camera: bool = False, swap_y_coords=False) -> geometry.Polygon:
+    def get_wetted_surface(self, h: float, camera: bool = False, swap_y_coords=False) -> geometry.MultiPolygon:
         """Retrieve a wetted surface for a given water level, as a geometry.Polygon.
 
         Parameters
