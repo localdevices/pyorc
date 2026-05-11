@@ -87,7 +87,8 @@ maximum value you wish to show on a color scale. Furthermore, you may add an opt
 a colorbar in the lower left corner. This colorbar will be bounded by the values supplied with ``vmin`` and ``vmax``.
 If you do not supply ``vmin`` and ``vmax``, then a standard colorbar with limits of 0 and 3 with pretty breaks is used.
 Note that any parameter added is not mandatory! If you leave the parameters out, then default values will be used
-instead.
+instead. ``colorbar_loc`` controls the location of the colorbar, ``0`` is lower left, ``1`` lower right,
+``2`` upper right, ``3`` upper left (default: ``0``).
 
 * quiver (default): "quivers" are arrows pointing into the vector direction, with the length and (possibly) color
   representing the scalar value of the velocity. See |quiver|. Especially the ``scale`` parameter is a little counter-
