@@ -412,6 +412,15 @@ class VelocityFlowProcessor(object):
         self.frames(**self.recipe["frames"])
         self.velocimetry(**self.recipe["velocimetry"])
         if "mask" in self.recipe:
+            # check if ensemble_corr is used, if so, several masks with multi time steps will not do anything, warn.
+            if "velocimetry" in self.recipe and self.recipe["velocimetry"].get("get_piv", {}).get(
+                "ensemble_corr", False
+            ):
+                self.logger.warning(
+                    "You are applying masks on an ensemble correlation velocimetry. This means that the velocimetry "
+                    "only contains one single time step. Any mask requiring multiple time steps will "
+                    "not have any effect."
+                )
             self.mask(**self.recipe["mask"])
         else:
             # no masking so use non-masked velocimetry as masked

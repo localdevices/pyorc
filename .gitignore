@@ -105,3 +105,10 @@ env/
 
 # PyCharm
 .idea/
+
+# VS Code
+.vscode/
+
+# examples
+examples/ngwerere/outputs
+examples/*.nc

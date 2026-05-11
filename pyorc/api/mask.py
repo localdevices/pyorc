@@ -5,6 +5,7 @@ import functools
 import warnings
 
 import numpy as np
+import xarray as xr
 
 from pyorc import helpers
 from pyorc.const import corr, s2n, v_x, v_y
@@ -25,7 +26,7 @@ def _base_mask(time_allowed=False, time_required=False, multi_timestep_required=
     ----------
     time_allowed : bool, optional
         If set, the dimension "time" is allowed, if not set, mask method can only be applied on datasets without "time"
-    time_required
+    time_required : bool, optional
         If set, the dimension "time" is required, if not set, mask method does not require dimension "time" in dataset.
     multi_timestep_required : bool, optional
         If set, the masking method requires multiple timesteps in the dataset in order to be applicable.
@@ -48,6 +49,7 @@ def _base_mask(time_allowed=False, time_required=False, multi_timestep_required=
                 ds = ref._obj.mean(dim="time", keep_attrs=True)
             else:
                 ds = ref._obj
+            # check if multiple time steps are required, then also time is required
             if not ds.velocimetry.is_velocimetry:
                 raise AssertionError("Dataset is not a valid velocimetry dataset")
             if time_required:
@@ -57,23 +59,22 @@ def _base_mask(time_allowed=False, time_required=False, multi_timestep_required=
                         'This mask requires dimension "time". The dataset does not contain dimension "time" or you '
                         "have set `reduce_time=True`. Apply this mask without applying any reducers in time."
                     )
-            if time_required:
-                if "time" not in ds:
-                    raise AssertionError(
-                        "This mask requires dimension `time`. The dataset does not contain dimension `time`."
-                        "Apply this mask before applying any reducers in time."
-                    )
                 # only check for this, when time is required
                 if multi_timestep_required:
+                    print("SHOULD REACH THIS POINT")
                     if len(ds.time) < 2:
-                        raise AssertionError(
-                            "This mask requires multiple timesteps in the dataset in order to be applicable. This "
-                            "error typically occurs when applying `Frames.get_piv(ensemble_corr=True)` as this only "
-                            "yields one single time step."
+                        warnings.warn(
+                            "This mask requires multiple timesteps in the dataset in order have an effect. This "
+                            "warning typically occurs when applying `Frames.get_piv(ensemble_corr=True)` as this only "
+                            "yields one single time step.",
+                            stacklevel=2,
                         )
             if not (time_allowed or time_required) and "time" in ds:
                 # function must be applied per time step
                 mask = ds.groupby("time", squeeze=False).map(mask_func, **kwargs)
+            elif multi_timestep_required and len(ds.time) < 2:
+                # just pass Trues everywhere
+                mask = xr.DataArray(True, dims=("y", "x"), coords={"y": ds.y, "x": ds.x})
             else:
                 # apply the wrapped mask function as is
                 mask = mask_func(ds, **kwargs)
@@ -211,6 +212,18 @@ class _Velocimetry_MaskMethods:
 
         """
         return self[corr] > tolerance
+
+    @_base_mask(time_allowed=True)
+    def s2n(self, tolerance=10):
+        """Mask values with too low signal to noise (s2n).
+
+        Parameters
+        ----------
+        tolerance : float (>0)
+            tolerance for s2n value (default: 10). If s2n is lower than tolerance, it is masked
+
+        """
+        return self[s2n] > tolerance
 
     @_base_mask(time_required=True, multi_timestep_required=True)
     def outliers(self, tolerance=1.0, mode="or"):

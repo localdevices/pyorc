@@ -1,3 +1,14 @@
+## [0.9.5] = 2026-xx-xx
+### Added
+### Changed
+- With `ensemble_corr=True`, masks that only apply to multiple time stamps are ignored with a warning to the user
+  instead of raising and exiting. This allows for re-use of recipes with and without ensemble correlation.
+
+### Deprecated
+### Removed
+### Fixed
+
+
 ## [0.9.4] = 2026-02-27
 ### Added
 ### Changed
