@@ -7,6 +7,9 @@
 ### Deprecated
 ### Removed
 ### Fixed
+- Videos that are ungracefully closed during writing do not have proper metadata and caused read errors. This is fixed
+  for reading videos, but only when read with `lazy=False`. With `lazy=True` a clear error is raised that tells the
+  user that the video is not complete and that a new attempt with `lazy=False` may result in success.
 
 
 ## [0.9.4] = 2026-02-27

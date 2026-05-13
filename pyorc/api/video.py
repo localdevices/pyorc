@@ -143,7 +143,23 @@ Camera configuration: {:s}
             # set a gridded mask based on the roi points
             self.set_mask_from_exterior(self.stabilize)
         # set end and start frame
-        self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - 1
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - 1
+        if frame_count <= 0:
+            if lazy:
+                raise IOError(
+                    f"Video file {fn} has no proper metadata compromising reading frames with `lazy=True`."
+                    f"This usually happens with videos that are unexpectedly and ungracefully closed during writing. "
+                    f"I cannot continue with `lazy=True`. You may re-attempt reading this video with `lazy=False`."
+                )
+            warnings.warn(
+                f"Video file {fn} has no proper metadata compromising reading frames. This usually happens with videos "
+                f"that are unexpectedly and ungracefully closed during writing. I will attempt to read the video... ",
+                stacklevel=2,
+            )
+            frame_count = 3600 * 60  # set to a very high number
+        # if frame_count is negative, likely the video is not gracefully closed while writing,
+        # then frame_count = end_frame
+        self.frame_count = frame_count if frame_count > 0 else end_frame
         if start_frame is not None:
             if start_frame > self.frame_count > 0:
                 raise ValueError("Start frame is larger than total amount of frames")
