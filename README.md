@@ -17,10 +17,10 @@ width=100 align="right">
 
 **pyorc**, short for "pyOpenRiverCam" is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for
 computations on the fully open software stack OpenRiverCam. **pyorc** can only be successful if the underlying methods
-are made available openly for all. Currently **pyorc** implements Large-scale Particle Image Velocimetry (LSPIV) based
-flow analysis using the OpenPIV library and reprojections and image pre-processing with OpenCV. We wish to extend this
-to Large-scale Particle Tracking Velocimetry (LSPTV) and Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV using open
-libraries or extensions to this code.
+are made available openly for all. Currently, we use LSPIV as our central velocimetry method, powered by FF-PIV.
+See https://github.com/localdevices/ffpiv. We wish to extend this
+to Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV using open libraries or
+extensions to this code.
 
 ![example_image](https://raw.githubusercontent.com/localdevices/pyorc/main/docs/ngwerere.jpg)
 Image: Example of pyorc velocimetry over Ngwerere river at the Zambezi Road crossing - Lusaka, Zambia.
@@ -183,17 +183,18 @@ The first development of pyorc has been supported by the World Meteorological Or
 ## License
 **pyorc** is licensed under AGPL Version 3 (see [LICENSE](./LICENSE) file).
 
-**pyorc** uses the following important libraries and software with said licenses.
+**pyorc** uses the following important libraries and software with said licenses. We do not actively update version
+numbers in the README. The last update was made on 2026-05-21.
 
-| Package    | Version | License                            |
-|------------|---------|------------------------------------|
-| ffpiv      | 0.1.2   | AGPLv3                             |
-| numpy      | 1.26.4  | BSD License                        |
-| opencv2    | 4.10.0  | MIT License                        |
-| openpiv    | 0.25.3  | GPLv3                              |
-| matplotlib | 3.9.2   | Python Software Foundation License |
-| geopandas  | 1.0.1   | BSD License                        |
-| pandas     | 2.2.2   | BSD License                        |
+| Package    | Version  | License                            |
+|------------|----------|------------------------------------|
+| ffpiv      | 0.2.1    | AGPLv3                             |
+| numpy      | >=2.0.0  | BSD License                        |
+| opencv2    | 4.13.0   | MIT License                        |
+| matplotlib | >3.10.0  | Python Software Foundation License |
+| geopandas  | >=1.0.0  | BSD License                        |
+| pandas     | >3.0.0   | BSD License                        |
+| xarray     | >2026    | Apache 2.0                         |
 
 Project organisation
 --------------------
