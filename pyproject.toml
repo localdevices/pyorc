@@ -16,7 +16,7 @@ dependencies = [
     "cython; platform_machine == 'armv7l'",
     "dask",
     "descartes",
-    "ffpiv>=0.2.0",
+    "ffpiv>=0.2.1",
     "flox",
     "geojson",
     "geopandas",
