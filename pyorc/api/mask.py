@@ -61,7 +61,6 @@ def _base_mask(time_allowed=False, time_required=False, multi_timestep_required=
                     )
                 # only check for this, when time is required
                 if multi_timestep_required:
-                    print("SHOULD REACH THIS POINT")
                     if len(ds.time) < 2:
                         warnings.warn(
                             "This mask requires multiple timesteps in the dataset in order have an effect. This "

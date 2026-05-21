@@ -1,5 +1,9 @@
-## [0.9.5] = 2026-xx-xx
+## [0.9.5] = 2026-05-21
 ### Added
+- PIV interrogation windows can now be pre-masked if they contain too little signal. This can be controlled by
+  the parameter `signal_threshold` in `Frames.get_piv`. Default is 0.2 meaning that if any of the 2 interrogation
+  window in a window pair has only 20% intensities above zero, the window is discarded. This should only be used
+  when frames have been differenced or normalized.
 ### Changed
 - With `ensemble_corr=True`, masks that only apply to multiple time stamps are ignored with a warning to the user
   instead of raising and exiting. This allows for re-use of recipes with and without ensemble correlation.

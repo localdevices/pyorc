@@ -26,7 +26,8 @@ def test_mask_count(piv):
 
 
 def test_mask_count_ens_corr(piv_ens_corr):
-    piv_ens_corr.velocimetry.mask.count(inplace=True, tolerance=0.3)
+    with pytest.warns(UserWarning, match="requires multiple timesteps"):
+        piv_ens_corr.velocimetry.mask.count(inplace=True, tolerance=0.3)
 
 
 def test_mask_rolling(piv):
