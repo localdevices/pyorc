@@ -77,12 +77,21 @@ in :ref:`frames_ug`.
                     engine: numba
 
         Here the ``engine: numba`` ensures that the much faster numba implementation is used (default).
-        ``window_size: 64`` overrides any window size provided in the camera configuration and sets it to 64. When
-        using the engine parameter with ``numba`` or ``numpy``, you can also provide memory safety margins by manually
+        ``window_size: 64`` overrides any window size provided in the camera configuration and sets it to 64.
+        You can also provide memory safety margins by manually
         adjusting the chunk size with the ``chunksize`` parameter. If you notice a memory warning is given, and
         ``chunksize`` is set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we
         hope you never have to touch this parameter at all :-) unless you process very very large videos with very
         large objectives.
+
+        If you have normalized your images, or used differencing in time with thresholding to zero to enhance the
+        visibility of tracers, your image likely contains many zero values leading to interrogation windows with
+        very little signal.This can lead to very noisy results, and also unnecessary computations in areas where only
+        background was visible. To prevent this, you can set a ``signal_threshold`` (default is unset) to filter out
+        windows with little signal. This is computed as the fraction of non-zero pixels in the window stack. This can
+        lead to much better and cleaner results and also speed up the processing by skipping windows with little signal.
+        E.g. 0.2 means that at least 20% of the pixels in the window stack should be non-zero to be included in the
+        correlation processing. This is usually a good default when you use differenced images.
 
         You can also set ``ensemble_corr`` to ``true``.  With this option, cross correlation will be computed for all
         frames, and correlation are averaged per interrogation window, before extracting displacements and estimating
@@ -93,12 +102,14 @@ in :ref:`frames_ug`.
         correlation value after filtering on ``s2n_min`` and ``corr_min``. Any windows that yield lower amounts are
         set to missing and will not yield any velocity. Default for this value is 0.2.
 
+
         .. note::
 
             It seems a little superfluous to have a section called ``velocimetry``, then a subsection ``get_piv`` and then
             the flags used in ``get_piv``, however, we wish to keep the option open to add other velocimetry methods here.
             Perhaps in the near future we may offer a method ``get_ptv`` to use Particle Tracking Velocimetry
-            instead of Partical Image Velocimetry. This method follows particles instead of using cross correlation.
+            instead of Particle Image Velocimetry. Or `get_stiv` to retrieve velocities over lines using
+            Space-Time Image Velocimetry (STIV).
 
     .. tab-item:: API
 
@@ -124,7 +135,9 @@ in :ref:`frames_ug`.
         You may also set ``memory_factor`` to a higher amount than the default (2). ``memory_factor``
         decides on the fraction of the memory reserved for one entire chunk of computation. E.g. by setting it to 4 only
         1/4th of the available memory is assumed to be available. In practice, for large problems, more temporary
-        memory storage is needed within the subprocessing. Passing ``ensemble_corr=True`` uses ensemble correlation
+        memory storage is needed within the subprocessing. Use ``signal_threshold`` to remove windows with little signal
+        after preprocessing. E.g. 0.2 will remove windows with less than 20% non-zero pixels. Passing
+        ``ensemble_corr=True`` uses ensemble correlation
         averaging. This provides additional control for tuning of the signal-to-noise ratio with ``corr_min``
         (default: 0.3) which is the minimum correlation value accepted, and ``s2n_min`` (default=3) which controls
         the minimum signal-to-noise ratio accepted. Finally a ``count_min`` (default=0.2) can be provided, which

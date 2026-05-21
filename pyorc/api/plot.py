@@ -54,6 +54,7 @@ def _base_plot(plot_func):
         mode="local",
         ax=None,
         add_colorbar=False,
+        colorbar_loc=0,
         add_cross_section=True,
         add_text=False,
         text_prefix="",
@@ -75,6 +76,8 @@ def _base_plot(plot_func):
             If None (default), use the current axes. Not applicable when using facets.
         add_colorbar : boolean, optional
             if True, a colorbar is added to axes (default: False)
+        colorbar_loc : int, optional
+            location of colorbar, 0 is lower left, 1 lower right, 2 upper right, 3 upper left (default: 0)
         add_cross_section : boolean, optional
             if True, and a transect is plotted, the transect coordinates are plotted (default: True)
         add_text : boolean, optional
@@ -169,7 +172,7 @@ def _base_plot(plot_func):
         else:
             primitive = plot_func("", x, y, s, ax, **kwargs)
         if add_colorbar:
-            cbar(ax, primitive)
+            cbar(ax, primitive, loc=colorbar_loc)
         if mode == "local":
             ax.set_aspect("equal")
         if is_transect:
@@ -692,7 +695,7 @@ def pcolormesh(_, x, y, s=None, ax=None, **kwargs):
     return primitive
 
 
-def cbar(ax, p, size=12, **kwargs):
+def cbar(ax, p, size=12, loc=0, **kwargs):
     """Add colorbar to existing axes.
 
     In case camera mode is used, the colorbar will get a bespoke layout and will be placed inside the axes object.
@@ -705,6 +708,8 @@ def cbar(ax, p, size=12, **kwargs):
         used to define colorbar
     size : float, optional
         fontsize, used for colorbar title
+    loc : int, optional
+        location of colorbar, 0 is lower left, 1 lower right, 2 upper right, 3 upper left (default: 0)
     **kwargs :
         dict, additional settings passed to plt.colorbar
 
@@ -719,7 +724,14 @@ def cbar(ax, p, size=12, **kwargs):
         patheffects.Stroke(linewidth=2, foreground="w"),
         patheffects.Normal(),
     ]
-    cax = ax.inset_axes([0.05, 0.05, 0.02, 0.25])
+    if loc == 1:
+        cax = ax.inset_axes([0.9, 0.05, 0.02, 0.25])
+    elif loc == 2:
+        cax = ax.inset_axes([0.9, 0.7, 0.02, 0.25])
+    elif loc == 3:
+        cax = ax.inset_axes([0.05, 0.7, 0.02, 0.25])
+    else:
+        cax = ax.inset_axes([0.05, 0.05, 0.02, 0.25])
     cb = ax.figure.colorbar(p, cax=cax, **kwargs)
     ticks_loc = cb.get_ticks().tolist()
     cb.set_ticks(mticker.FixedLocator(ticks_loc))

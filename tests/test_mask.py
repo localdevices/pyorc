@@ -25,6 +25,11 @@ def test_mask_count(piv):
     piv.velocimetry.mask.count(inplace=True)
 
 
+def test_mask_count_ens_corr(piv_ens_corr):
+    with pytest.warns(UserWarning, match="requires multiple timesteps"):
+        piv_ens_corr.velocimetry.mask.count(inplace=True, tolerance=0.3)
+
+
 def test_mask_rolling(piv):
     # check if the method runs
     piv.velocimetry.mask.rolling(inplace=True, tolerance=0.4)
@@ -74,5 +79,6 @@ def test_error_no_time(piv):
 def test_error_single_time_step(piv):
     piv_sel = piv.isel(time=slice(0, 1))
     # now test if an error is raised when no time is present
-    with pytest.raises(AssertionError, match="This mask requires multiple timesteps"):
-        piv_sel.velocimetry.mask.variance()
+    with pytest.warns(UserWarning, match="This mask requires multiple timesteps"):
+        mask = piv_sel.velocimetry.mask.variance()
+    assert bool(mask.all())

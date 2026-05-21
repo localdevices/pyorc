@@ -50,7 +50,7 @@ def _check_valid_frames(cap, frame_number):
     n = -1
     while ret is False:
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number[n])
-        ret, img = cap.read()
+        ret, _ = cap.read()
         if not (ret):
             last_valid_idx = n
         n -= 1
@@ -957,7 +957,7 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, progress=T
     while ret:
         if n > end_frame:
             break
-        if not lazy:
+        if not lazy and frames is not None:
             frames.append(img)
         t1 = cap.get(cv2.CAP_PROP_POS_MSEC)
         time.append(n * 1000.0 / fps) if fps is not None else time.append(t1)
@@ -972,13 +972,14 @@ def get_time_frames(cap, start_frame, end_frame, lazy=True, fps=None, progress=T
             # invalid time difference, stop reading.
             break
     # do a final check if the last frame(s) are readable by direct seek and read. Sometimes this results in not being
-    # able to r
-    last_valid_idx = _check_valid_frames(cap, frame_number)
-    if last_valid_idx is not None:
-        time = time[:last_valid_idx]
-        frame_number = frame_number[:last_valid_idx]
-        if not lazy:
-            frames = frames[:last_valid_idx]
+    # able to read frames at the end, e.g. caused by a corrupt video
+    if lazy:
+        last_valid_idx = _check_valid_frames(cap, frame_number)
+        if last_valid_idx is not None:
+            time = time[:last_valid_idx]
+            frame_number = frame_number[:last_valid_idx]
+            # if not lazy and frames is not None:
+            #     frames = frames[:last_valid_idx]
     return time, frame_number, frames
 
 

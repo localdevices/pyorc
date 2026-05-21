@@ -41,8 +41,8 @@ def camera_config(
     # open video for dimensions
     video = Video(video_file, start_frame=frame_sample, end_frame=frame_sample + 1, rotation=rotation)
     # extract first frame
-    img = video.get_frame(frame_sample)
-    img_rgb = video.get_frame(frame_sample, method="rgb")
+    img = video.get_frame(0)
+    img_rgb = video.get_frame(0, method="rgb")
     kwargs["height"], kwargs["width"] = img.shape
     # prepare camera config
     cam_config = CameraConfig(rotation=rotation, **kwargs)

@@ -1,3 +1,21 @@
+## [0.9.5] = 2026-05-21
+### Added
+- PIV interrogation windows can now be pre-masked if they contain too little signal. This can be controlled by
+  the parameter `signal_threshold` in `Frames.get_piv`. Default is 0.2 meaning that if any of the 2 interrogation
+  window in a window pair has only 20% intensities above zero, the window is discarded. This should only be used
+  when frames have been differenced or normalized.
+### Changed
+- With `ensemble_corr=True`, masks that only apply to multiple time stamps are ignored with a warning to the user
+  instead of raising and exiting. This allows for re-use of recipes with and without ensemble correlation.
+
+### Deprecated
+### Removed
+### Fixed
+- Videos that are ungracefully closed during writing do not have proper metadata and caused read errors. This is fixed
+  for reading videos, but only when read with `lazy=False`. With `lazy=True` a clear error is raised that tells the
+  user that the video is not complete and that a new attempt with `lazy=False` may result in success.
+
+
 ## [0.9.4] = 2026-02-27
 ### Added
 ### Changed

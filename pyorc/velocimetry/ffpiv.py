@@ -38,6 +38,7 @@ def get_ffpiv(
     corr_min: float = 0.2,
     s2n_min: float = 3,
     count_min: float = 0.2,
+    signal_threshold: Optional[float] = None,
 ):
     """Compute time-resolved Particle Image Velocimetry (PIV) using Fast Fourier Transform (FFT) within FF-PIV.
 
@@ -89,6 +90,11 @@ def get_ffpiv(
     count_min : float, optional
         Minimum amount of frame pairs that result in accepted correlation values after filtering on `corr_min` and
         `s2n_min`. Default 0.2. If less frame pairs are available, the velocity is filtered out.
+    signal_threshold : float, optional
+        The threshold for the signal score, which is the fraction of non-zero pixels in the window stack. Windows
+        with a signal score below this threshold will be set to NaN in the correlation array to prevent noisy velocity
+        estimates. Default is None. With noisy data, you may want to increase to filter out windows with little signal.
+        An additional advantage of this is that it can speed up the processing by skipping windows with little signal.
 
     Returns
     -------
@@ -152,10 +158,23 @@ def get_ffpiv(
             corr_min,
             s2n_min,
             count_min,
+            signal_threshold,
         )
     else:
         ds = _get_ffpiv_timestep(
-            frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine
+            frames_chunks,
+            y,
+            x,
+            dt,
+            res_y,
+            res_x,
+            n_cols,
+            n_rows,
+            window_size,
+            overlap,
+            search_area_size,
+            engine,
+            signal_threshold,
         )
     return ds
 
@@ -176,6 +195,7 @@ def _get_ffpiv_mean(
     corr_min,
     s2n_min,
     count_min,
+    signal_threshold,
 ):
     def process_frame_chunk(frame_chunk, corr_min, s2n_min):
         """Process a single frame chunk to compute correlation and signal-to-noise.
@@ -206,6 +226,7 @@ def _get_ffpiv_mean(
             search_area_size=search_area_size,
             normalize=False,
             engine=engine,
+            signal_threshold=signal_threshold,
             verbose=False,
         )
         # Suppress RuntimeWarnings and calculate required metrics
@@ -355,7 +376,20 @@ def _get_ffpiv_mean(
 
 
 def _get_ffpiv_timestep(
-    frames_chunks, y, x, dt, res_y, res_x, n_cols, n_rows, window_size, overlap, search_area_size, engine, **kwargs
+    frames_chunks,
+    y,
+    x,
+    dt,
+    res_y,
+    res_x,
+    n_cols,
+    n_rows,
+    window_size,
+    overlap,
+    search_area_size,
+    engine,
+    signal_threshold,
+    **kwargs,
 ):
     # make progress bar
     pbar = tqdm(range(len(frames_chunks)), position=0, leave=True)
@@ -370,7 +404,15 @@ def _get_ffpiv_timestep(
         # we need at least one image-pair to do PIV
         if len(da) >= 2:
             u, v, corr_max, s2n = _get_uv_timestep(
-                frames_chunks[n], n_cols, n_rows, window_size, overlap, search_area_size, engine=engine, **kwargs
+                frames_chunks[n],
+                n_cols,
+                n_rows,
+                window_size,
+                overlap,
+                search_area_size,
+                engine=engine,
+                signal_threshold=signal_threshold,
+                **kwargs,
             )
             u = (u * res_x / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
             v = (v * res_y / np.expand_dims(dt_chunk, (1, 2))).astype(np.float32)
@@ -400,7 +442,9 @@ def _get_ffpiv_timestep(
     return ds
 
 
-def _get_uv_timestep(da, n_cols, n_rows, window_size, overlap, search_area_size, engine="numba"):
+def _get_uv_timestep(
+    da, n_cols, n_rows, window_size, overlap, search_area_size, engine="numba", signal_threshold=None, **kwargs
+):
     # perform cross correlation analysis yielding correlations for each interrogation window
     x_, y_, corr = cross_corr(
         da.values,
@@ -409,6 +453,7 @@ def _get_uv_timestep(da, n_cols, n_rows, window_size, overlap, search_area_size,
         search_area_size=search_area_size,
         normalize=False,
         engine=engine,
+        signal_threshold=signal_threshold,
         verbose=False,
     )
 

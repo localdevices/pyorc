@@ -3,7 +3,7 @@ import json
 import os
 import sys
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from shapely import wkt
 import pyorc
 
 # suppress output of plots
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 EXAMPLE_DATA_DIR = os.path.join(os.path.split(__file__)[0], "..", "examples")
 
@@ -390,6 +390,12 @@ def ani_mp4():
 def piv(frames_proj):
     # provide a short piv object
     return frames_proj.frames.get_piv()
+
+
+@pytest.fixture()
+def piv_ens_corr(frames_proj):
+    # provide a short piv object
+    return frames_proj.frames.get_piv(ensemble_corr=True)
 
 
 @pytest.fixture()
