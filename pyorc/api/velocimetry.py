@@ -220,8 +220,7 @@ class Velocimetry(ORCBase):
             "long_name": "Angle of river flow in radians from North",
             "units": "rad",
         }
-        # convert to a Transect object
-        ds_points = xr.Dataset(ds_points, attrs=ds_points.attrs)
+        # add quantiles and rolling if set
         if rolling is not None:
             ds_points = ds_points.rolling(time=rolling, min_periods=1).mean()
         with warnings.catch_warnings():
