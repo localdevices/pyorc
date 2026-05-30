@@ -160,6 +160,26 @@ def test_to_ani(frames, ani_mp4, request):
     frames.frames.to_ani(ani_mp4, progress_bar=False)
 
 
+def test_to_geotiff_no_projection(tmp_path, frames_grayscale):
+    """Test failure with an Exception, because geotiff export requires projection information."""
+    fn = str(tmp_path / "out.tif")
+    with pytest.raises(ValueError, match="must contain 'xs' and 'ys' coordinates"):
+        frames_grayscale.frames.to_geotiff(fn=fn, frame=0)
+
+
+def test_to_geotiff_too_high_frame(tmp_path, frames_proj):
+    """Test failure with an Exception, because frame number is above available nr of frames."""
+    fn = str(tmp_path / "out.tif")
+    with pytest.raises(ValueError, match="out of bounds"):
+        frames_proj.frames.to_geotiff(fn=fn, frame=9999999)
+
+
+def test_to_geotiff(tmp_path, frames_proj, monkeypatch):
+    monkeypatch.setattr("pyorc.api.frames.helpers.to_geotiff", lambda *args, **kwargs: None, raising=False)
+    fn = str(tmp_path / "out.tif")
+    frames_proj.frames.to_geotiff(fn=fn, frame=0)
+
+
 @pytest.mark.parametrize(
     "frames",
     [

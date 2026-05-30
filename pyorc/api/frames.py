@@ -513,6 +513,32 @@ class Frames(ORCBase):
         anim = FuncAnimation(f, animate, init_func=init, frames=frames, **anim_kwargs)
         anim.save(fn, **video_kwargs)
 
+    def to_geotiff(self, fn, frame):
+        """Export a single GeoTIFF file, using the geospatial coordinates.
+
+        This can only be used on a projected frames object, containing geographical coordinates.
+
+        Parameters
+        ----------
+        fn : str
+            Path to the output GeoTIFF file.
+        frame : int
+            Index of the frame to export.
+
+        """
+        if not all(coord in self._obj.coords for coord in ["xs", "ys"]):
+            raise ValueError("The frames object must contain 'xs' and 'ys' coordinates to export as GeoTIFF.")
+        if frame < 0 or frame >= len(self._obj):
+            raise ValueError(f"Frame index {frame} is out of bounds for frames object with length {len(self._obj)}.")
+        # get the raw frame to export
+        data = self._obj.isel(time=frame).values
+        # get the transform for the GeoTIFF
+        cc = self.camera_config
+        crs = getattr(cc, "crs", None)
+        transform = cc.transform
+        # write the GeoTIFF using rasterio
+        helpers.to_geotiff(fn=fn, data=data, transform=transform, crs=crs)
+
     def to_video(self, fn, video_format=None, fps=None, progress=True):
         """Write frames to a video file without any layout.
 

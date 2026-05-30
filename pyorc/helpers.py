@@ -3,11 +3,13 @@
 import copy
 import importlib.util
 import json
+from typing import Optional, Union
 
 import cv2
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
+import rasterio
 import xarray as xr
 from pyproj import Transformer
 from rasterio import fill, warp
@@ -711,6 +713,31 @@ def staggered_index(start=0, end=100):
         idx_sort = np.array(idx_order)
         idx_sort.sort()
     return idx_order
+
+
+def to_geotiff(
+    fn: str, data: np.ndarray, transform: Affine, crs: Optional[Union[CRS, str]] = None, compress: Optional[str] = None
+):
+    """Write a geotiff file with rasterio."""
+    # make at least 3D
+    data = np.atleast_3d(data)
+    if isinstance(crs, str):
+        crs = CRS.from_user_input(crs)
+    with rasterio.open(
+        fn,
+        "w",
+        driver="GTiff",
+        height=data.shape[0],
+        width=data.shape[1],
+        count=data.shape[2],
+        dtype=data.dtype,
+        crs=crs.to_proj4() if crs is not None else None,
+        transform=transform,
+        compress=compress,
+    ) as dst:
+        # rasterio expects (bands, rows, cols), but we have (rows, cols, bands)
+        data = np.transpose(data, (2, 0, 1))
+        dst.write(data)
 
 
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):
