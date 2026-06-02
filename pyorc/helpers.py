@@ -3,12 +3,14 @@
 import copy
 import importlib.util
 import json
-from typing import Optional, Union
+import time
+from typing import Dict, Optional, Union
 
 import cv2
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
+import pyproj
 import rasterio
 import xarray as xr
 from pyproj import Transformer
@@ -20,12 +22,123 @@ from scipy.ndimage import binary_fill_holes
 from scipy.optimize import differential_evolution
 from scipy.signal import convolve2d, fftconvolve
 
+from pyorc import __version__ as pyorc_version
+
+UGRID_GLOBAL_ATTRS = {
+    "source": "pyOpenRiverCam v" + pyorc_version,
+    "date_created": time.ctime(),
+    "Conventions": "CF-1.8 UGRID-1.0",
+}
+
+
+# fixed mesh2d structure for UGRID
+UGRID_MESH2D = xr.DataArray(
+    np.int32(0),
+    attrs={
+        "cf_role": "mesh_topology",
+        "long_name": "Topology data of 2D mesh",
+        "topology_dimension": np.int32(2),
+        "node_coordinates": "mesh2d_node_x mesh2d_node_y",
+        "max_face_nodes_dimension": "mesh2d_nMax_face_nodes",
+        "face_node_connectivity": "mesh2d_face_nodes",
+        "face_dimension": "mesh2d_nFaces",
+        "face_coordinates": "mesh2d_face_x mesh2d_face_y",
+    },
+)
+
+UGRID_FACE_NODES_ATTRS = {
+    "cf_role": "face_node_connectivity",
+    "mesh": "mesh2d",
+    "location": "face",
+    "long_name": "Mapping from every face to its corner nodes (counterclockwise)",
+    "start_index": np.int32(0),
+    "coordinates": "mesh2d_face_x mesh2d_face_y",
+}
+
+UGRID_VAR_ATTRS = var_attrs = {
+    "v_x": {
+        "mesh": "mesh2d",
+        "location": "face",
+        "standard_name": "sea_water_x_velocity",
+        # 'long_name': 'Flow element center velocity vector, x-component',
+        "long_name": "velocity, x-component",
+        "units": "m s-1",
+        # '_FillValue': -999.,
+        "grid_mapping": "projected_coordinate_system",
+        "coordinates": "mesh2d_face_x mesh2d_face_y",
+    },
+    "v_y": {
+        "mesh": "mesh2d",
+        "location": "face",
+        "standard_name": "sea_water_y_velocity",
+        "long_name": "velocity, y-component",
+        # 'long_name': 'Flow element center velocity vector, y-component',
+        "units": "m s-1",
+        # '_FillValue': -999.,
+        "grid_mapping": "projected_coordinate_system",
+        "coordinates": "mesh2d_face_x mesh2d_face_y",
+    },
+    "v_s": {
+        "mesh": "mesh2d",
+        "location": "face",
+        "standard_name": "sea_water_speed",
+        "long_name": "velocity magnitude",
+        "units": "m s-1",
+        # '_FillValue': -999.,
+        "grid_mapping": "projected_coordinate_system",
+        "coordinates": "mesh2d_face_x mesh2d_face_y",
+    },
+    "s2n": {
+        "mesh": "mesh2d",
+        "location": "face",
+        "standard_name": "noise",
+        "long_name": "Signal to noise ratio",
+        "units": "-",
+        # '_FillValue': -999.,
+        "grid_mapping": "projected_coordinate_system",
+        "coordinates": "mesh2d_face_x mesh2d_face_y",
+    },
+    "corr": {
+        "mesh": "mesh2d",
+        "location": "face",
+        "standard_name": "correlation",
+        "long_name": "Correlation value",
+        "units": "-",
+        # '_FillValue': -999.,
+        "grid_mapping": "projected_coordinate_system",
+        "coordinates": "mesh2d_face_x mesh2d_face_y",
+    },
+}
+
 
 def _check_cartopy_installed():
     if importlib.util.find_spec("cartopy") is None:
         raise ModuleNotFoundError(
             'Geographic plotting requires cartopy. Please install it with "conda install cartopy" and try again.'
         )
+
+
+def _get_mesh_face_nodes(aff, x, y):
+    """Get the face nodes for a mesh based on the affine transform and row and column lists counts."""
+    # get a set of columns and rows for the nodes, so we need 1 more row and column than the amount of faces
+    coli, rowi = np.meshgrid(np.arange(len(x) + 1), np.arange(len(y) + 1))
+    # use super fast pixel to map function
+    node_x, node_y = pixel_to_map(coli, rowi, aff)
+    # # get the face nodes by taking the average of the corner nodes
+    # face_x = (node_x[0:-1, 0:-1] + node_x[0:-1, 1:] + node_x[1:, 1:] + node_x[1:, 0:-1]) / 4
+    # face_y = (node_y[0:-1, 0:-1] + node_y[0:-1, 1:] + node_y[1:, 1:] + node_y[1:, 0:-1]) / 4
+    nr_cells = len(node_x.flatten())
+    node_idx = np.arange(nr_cells).reshape(*node_x.shape)
+    mesh_face_nodes = np.array(
+        [
+            node_idx[0:-1, 0:-1].flatten(),
+            node_idx[0:-1, 1:].flatten(),
+            node_idx[1:, 1:].flatten(),
+            node_idx[1:, 0:-1].flatten(),
+        ]
+    ).swapaxes(0, 1)
+    mesh_face_nodes = [list(n) for n in mesh_face_nodes]
+    return mesh_face_nodes
 
 
 def _import_cartopy_modules():
@@ -716,7 +829,7 @@ def staggered_index(start=0, end=100):
 
 
 def to_geotiff(
-    fn: str, data: np.ndarray, transform: Affine, crs: Optional[Union[CRS, str]] = None, compress: Optional[str] = None
+    data: np.ndarray, fn: str, transform: Affine, crs: Optional[Union[CRS, str]] = None, compress: Optional[str] = None
 ):
     """Write a geotiff file with rasterio."""
     # make at least 3D
@@ -738,6 +851,134 @@ def to_geotiff(
         # rasterio expects (bands, rows, cols), but we have (rows, cols, bands)
         data = np.transpose(data, (2, 0, 1))
         dst.write(data)
+
+
+def to_ugrid(
+    data_vars: Dict[str, np.ndarray],
+    x: np.ndarray,
+    y: np.ndarray,
+    fn: str,
+    aff: Affine,
+    crs: Optional[Union[CRS, str]] = None,
+):
+    """Write a ugrid file with xarray."""
+    # make at least 3D
+    for d in data_vars:
+        if d not in UGRID_VAR_ATTRS:
+            raise ValueError(f"Variable {d} is not in known variable keys {list(UGRID_VAR_ATTRS.keys())}")
+        # make at least 3d
+        data_vars[d] = np.atleast_3d(data_vars[d])
+    if isinstance(crs, str):
+        crs = CRS.from_user_input(crs)
+    elif isinstance(crs, CRS):
+        pass
+    else:
+        crs = None
+    # get the mesh face nodes from the data, assuming that the first two dimensions are rows and columns
+    mesh_face_nodes = _get_mesh_face_nodes(aff, x, y)
+    # create a start for a variables dict, with mesh2d and projected coordinate system
+    variables = {
+        "mesh2d": UGRID_MESH2D,
+        "mesh2d_face_nodes": (
+            ["mesh2d_nFaces", "mesh2d_nMax_face_nodes"],
+            np.int32(np.array(mesh_face_nodes)),
+            UGRID_FACE_NODES_ATTRS,
+        ),
+        # "projected_coordinate_system": ds2.projected_coordinate_system
+    }
+    if crs:
+        variables["projected_coordinate_system"] = (
+            (),
+            np.int32(0),
+            {"wkt": crs.to_wkt(pretty=True, version=pyproj.enums.WktVersion.WKT1_GDAL)},
+        )
+    # make a mask with zeros and ones, getting the edge to be zero and internal part one
+    mask = np.zeros(data_vars[list(data_vars.keys())[0]].shape)
+    mask[1:-1, 1:-1] = 1
+
+    # for var in ds.data_vars:
+    for var in data_vars:
+        data_var = data_vars[var]  # .mean(dim="time")
+        # data_var = data_var.rio.write_nodata(-9999)  # TODO replace by normal xarray instead of rioxarray
+        # data_var = data_var.rio.write_crs(27700)  # # TODO replace by normal xarray instead of rioxarray
+        # data_var = data_var.rio.interpolate_na()
+
+        # apply mask
+        data_var *= mask
+        # flatten
+        data_var = np.expand_dims(data_var.flatten().astype(np.float64), axis=0)  # TODO: also try with np,float32.
+        # data_var = data_var.flatten().astype(np.float64).reshape(1, len(face_x.flatten()))
+        # make internal value zero
+        # data[np.isnan(data)] = 0
+        variables[var] = (["time", "mesh2d_nFaces"], data_var, var_attrs[var])
+
+    # ds_ugrid = xr.Dataset(
+    #     variables,
+    #     coords={
+    #         "mesh2d_node_x": (
+    #             ["mesh2d_nNodes"],
+    #             np.array(node_x).flatten(),
+    #             {
+    #                 "mesh": "mesh2d",
+    #                 "location": "node",
+    #                 "_FillValue": -999.0,
+    #                 "long_name": "x-coordinate of mesh nodes",
+    #                 "standard_name": "projection_x_coordinate",
+    #                 "units": "m",
+    #             },
+    #         ),
+    #         "mesh2d_node_y": (
+    #             ["mesh2d_nNodes"],
+    #             np.array(node_y).flatten(),
+    #             {
+    #                 "mesh": "mesh2d",
+    #                 "location": "node",
+    #                 "_FillValue": -999.0,
+    #                 "long_name": "y-coordinate of mesh nodes",
+    #                 "standard_name": "projection_y_coordinate",
+    #                 "units": "m",
+    #             },
+    #         ),
+    #         "mesh2d_face_x": (
+    #             ["mesh2d_nFaces"],
+    #             np.array(face_x).flatten(),
+    #             {
+    #                 "mesh": "mesh2d",
+    #                 "location": "face",
+    #                 "_FillValue": -999.0,
+    #                 "long_name": "x-coordinate of mesh faces",
+    #                 "standard_name": "projection_x_coordinate",
+    #                 "units": "m",
+    #             },
+    #         ),
+    #         "mesh2d_face_y": (
+    #             ["mesh2d_nFaces"],
+    #             np.array(face_y).flatten(),
+    #             {
+    #                 "mesh": "mesh2d",
+    #                 "location": "face",
+    #                 "_FillValue": -999.0,
+    #                 "long_name": "y-coordinate of mesh faces",
+    #                 "standard_name": "projection_y_coordinate",
+    #                 "units": "m",
+    #             },
+    #         ),
+    #         "time": (["time"], np.array([0]), {}),
+    #     },
+    #     attrs=UGRID_GLOBAL_ATTRS,
+    # )
+    # ENCODING_PARAMS = {
+    #     "zlib": True,
+    #     "_FillValue": -9999.0,
+    # }
+
+    # # set encoding pars
+    # for k in ["v_x", "v_y", "s2n", "corr"]:
+    #     ds_ugrid[k].encoding = ENCODING_PARAMS
+
+    # ds_ugrid["mesh2d_face_nodes"].encoding = {"_FillValue": -999}
+
+    # ds_ugrid = ds_ugrid.rename({"v_x": "mesh2d_ucx", "v_y": "mesh2d_ucy"})
 
 
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):

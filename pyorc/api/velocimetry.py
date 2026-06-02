@@ -9,7 +9,7 @@ from pyproj import CRS
 from scipy.interpolate import interp1d
 from xarray.core import utils
 
-from pyorc import const, helpers
+from pyorc import const, cv, helpers
 from pyorc.api.mask import _Velocimetry_MaskMethods
 from pyorc.api.orcbase import ORCBase
 from pyorc.api.plot import _Velocimetry_PlotMethods
@@ -249,3 +249,35 @@ class Velocimetry(ORCBase):
         """
         for k in const.ENCODE_VARS:
             self._obj[k].encoding = enc_pars
+
+    def to_ugrid(self, fn: str, **kwargs):
+        """Write the dataset to a UGRID compliant netCDF file.
+
+        Parameters
+        ----------
+        fn : str
+            filename to write to
+        x_dim : str, optional
+            name of x dimension (default: "x")
+        y_dim : str, optional
+            name of y dimension (default: "y")
+        z_dim : str, optional
+            name of z dimension (default: "z")
+        time_dim : str, optional
+            name of time dimension (default: "time")
+        **kwargs:
+            additional keyword arguments to pass to xarray.Dataset.to_netcdf
+
+        """
+        # rotate v_x and v_y using rotation from transform of the velocimetry results
+        resolution = np.float64(self._obj.x.diff(dim="x").mean().values)
+        # get the affine of the velocimetry results
+        aff = cv._get_transform(self.camera_config.bbox, resolution)
+        # compute rotation
+        theta = np.arctan2(aff.d, aff.a)
+        # rotate the results to the projected coordinate system
+        v_x, v_y = helpers.rotate_u_v(self._obj["v_x"], self._obj["v_y"], theta)
+
+        # TODO implement helper functions for UGRID generation
+
+        return None
