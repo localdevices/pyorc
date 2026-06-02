@@ -10,7 +10,6 @@ import cv2
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
-import pyproj
 import rasterio
 import xarray as xr
 from pyproj import Transformer
@@ -119,16 +118,10 @@ def _check_cartopy_installed():
 
 
 def _get_mesh_face_nodes(aff, x, y):
-    """Get the face nodes for a mesh based on the affine transform and row and column lists counts."""
+    """Get the face nodes and expected indexes of noides around each face."""
     # get a set of columns and rows for the nodes, so we need 1 more row and column than the amount of faces
-    coli, rowi = np.meshgrid(np.arange(len(x) + 1), np.arange(len(y) + 1))
-    # use super fast pixel to map function
-    node_x, node_y = pixel_to_map(coli, rowi, aff)
-    # # get the face nodes by taking the average of the corner nodes
-    # face_x = (node_x[0:-1, 0:-1] + node_x[0:-1, 1:] + node_x[1:, 1:] + node_x[1:, 0:-1]) / 4
-    # face_y = (node_y[0:-1, 0:-1] + node_y[0:-1, 1:] + node_y[1:, 1:] + node_y[1:, 0:-1]) / 4
-    nr_cells = len(node_x.flatten())
-    node_idx = np.arange(nr_cells).reshape(*node_x.shape)
+    nr_nodes = (len(x) + 1) * (len(y) + 1)
+    node_idx = np.arange(nr_nodes).reshape(len(y) + 1, len(x) + 1)
     mesh_face_nodes = np.array(
         [
             node_idx[0:-1, 0:-1].flatten(),
@@ -139,6 +132,25 @@ def _get_mesh_face_nodes(aff, x, y):
     ).swapaxes(0, 1)
     mesh_face_nodes = [list(n) for n in mesh_face_nodes]
     return mesh_face_nodes
+
+
+def _get_mesh_faces(aff, x, y):
+    """Get the faces for a mesh based on the affine transform and row and column lists counts."""
+    # get a set of columns and rows for the nodes, so we need 1 more row and column than the amount of faces
+    coli, rowi = np.meshgrid(np.arange(len(x)), np.arange(len(y)))
+    # use super fast pixel to map function
+    face_x, face_y = pixel_to_map(coli, rowi, aff)
+    # get the face nodes by taking the average of the corner nodes
+    return face_x.flatten(), face_y.flatten()
+
+
+def _get_mesh_nodes(aff, x, y):
+    """Get nodes of a rectangular mesh based on the affine transform and row and column lists counts."""
+    # get a set of columns and rows for the nodes, so we need 1 more row and column than the amount of faces
+    coli, rowi = np.meshgrid(np.arange(len(x) + 1), np.arange(len(y) + 1))
+    # use super fast pixel to map function
+    node_x, node_y = pixel_to_map(coli, rowi, aff)
+    return node_x.flatten(), node_y.flatten()
 
 
 def _import_cartopy_modules():
@@ -857,7 +869,7 @@ def to_ugrid(
     data_vars: Dict[str, np.ndarray],
     x: np.ndarray,
     y: np.ndarray,
-    fn: str,
+    time: np.ndarray,
     aff: Affine,
     crs: Optional[Union[CRS, str]] = None,
 ):
@@ -876,6 +888,9 @@ def to_ugrid(
         crs = None
     # get the mesh face nodes from the data, assuming that the first two dimensions are rows and columns
     mesh_face_nodes = _get_mesh_face_nodes(aff, x, y)
+    face_x, face_y = _get_mesh_faces(aff, x, y)
+    node_x, node_y = _get_mesh_nodes(aff, x, y)
+
     # create a start for a variables dict, with mesh2d and projected coordinate system
     variables = {
         "mesh2d": UGRID_MESH2D,
@@ -886,12 +901,18 @@ def to_ugrid(
         ),
         # "projected_coordinate_system": ds2.projected_coordinate_system
     }
+    grid_map_attrs = {}
     if crs:
-        variables["projected_coordinate_system"] = (
-            (),
-            np.int32(0),
-            {"wkt": crs.to_wkt(pretty=True, version=pyproj.enums.WktVersion.WKT1_GDAL)},
-        )
+        crs_wkt = crs.to_wkt()  # for QGIS / GDAL compatibility
+        grid_map_attrs["spatial_ref"] = crs_wkt
+        grid_map_attrs["crs_wkt"] = crs_wkt
+        if aff is not None:
+            grid_map_attrs["GeoTransform"] = " ".join([str(item) for item in aff.to_gdal()])
+    #     variables["projected_coordinate_system"] = (
+    #         (),
+    #         np.int32(0),
+    #         {"wkt": crs.to_wkt(pretty=True, version=pyproj.enums.WktVersion.WKT1_GDAL)},
+    #     )
     # make a mask with zeros and ones, getting the edge to be zero and internal part one
     mask = np.zeros(data_vars[list(data_vars.keys())[0]].shape)
     mask[1:-1, 1:-1] = 1
@@ -900,7 +921,6 @@ def to_ugrid(
     for var in data_vars:
         data_var = data_vars[var]  # .mean(dim="time")
         # data_var = data_var.rio.write_nodata(-9999)  # TODO replace by normal xarray instead of rioxarray
-        # data_var = data_var.rio.write_crs(27700)  # # TODO replace by normal xarray instead of rioxarray
         # data_var = data_var.rio.interpolate_na()
 
         # apply mask
@@ -912,73 +932,72 @@ def to_ugrid(
         # data[np.isnan(data)] = 0
         variables[var] = (["time", "mesh2d_nFaces"], data_var, var_attrs[var])
 
-    # ds_ugrid = xr.Dataset(
-    #     variables,
-    #     coords={
-    #         "mesh2d_node_x": (
-    #             ["mesh2d_nNodes"],
-    #             np.array(node_x).flatten(),
-    #             {
-    #                 "mesh": "mesh2d",
-    #                 "location": "node",
-    #                 "_FillValue": -999.0,
-    #                 "long_name": "x-coordinate of mesh nodes",
-    #                 "standard_name": "projection_x_coordinate",
-    #                 "units": "m",
-    #             },
-    #         ),
-    #         "mesh2d_node_y": (
-    #             ["mesh2d_nNodes"],
-    #             np.array(node_y).flatten(),
-    #             {
-    #                 "mesh": "mesh2d",
-    #                 "location": "node",
-    #                 "_FillValue": -999.0,
-    #                 "long_name": "y-coordinate of mesh nodes",
-    #                 "standard_name": "projection_y_coordinate",
-    #                 "units": "m",
-    #             },
-    #         ),
-    #         "mesh2d_face_x": (
-    #             ["mesh2d_nFaces"],
-    #             np.array(face_x).flatten(),
-    #             {
-    #                 "mesh": "mesh2d",
-    #                 "location": "face",
-    #                 "_FillValue": -999.0,
-    #                 "long_name": "x-coordinate of mesh faces",
-    #                 "standard_name": "projection_x_coordinate",
-    #                 "units": "m",
-    #             },
-    #         ),
-    #         "mesh2d_face_y": (
-    #             ["mesh2d_nFaces"],
-    #             np.array(face_y).flatten(),
-    #             {
-    #                 "mesh": "mesh2d",
-    #                 "location": "face",
-    #                 "_FillValue": -999.0,
-    #                 "long_name": "y-coordinate of mesh faces",
-    #                 "standard_name": "projection_y_coordinate",
-    #                 "units": "m",
-    #             },
-    #         ),
-    #         "time": (["time"], np.array([0]), {}),
-    #     },
-    #     attrs=UGRID_GLOBAL_ATTRS,
-    # )
-    # ENCODING_PARAMS = {
-    #     "zlib": True,
-    #     "_FillValue": -9999.0,
-    # }
+    ds_ugrid = xr.Dataset(
+        variables,
+        coords={
+            "mesh2d_node_x": (
+                ["mesh2d_nNodes"],
+                np.array(node_x).flatten(),
+                {
+                    "mesh": "mesh2d",
+                    "location": "node",
+                    "_FillValue": -999.0,
+                    "long_name": "x-coordinate of mesh nodes",
+                    "standard_name": "projection_x_coordinate",
+                    "units": "m",
+                },
+            ),
+            "mesh2d_node_y": (
+                ["mesh2d_nNodes"],
+                np.array(node_y).flatten(),
+                {
+                    "mesh": "mesh2d",
+                    "location": "node",
+                    "_FillValue": -999.0,
+                    "long_name": "y-coordinate of mesh nodes",
+                    "standard_name": "projection_y_coordinate",
+                    "units": "m",
+                },
+            ),
+            "mesh2d_face_x": (
+                ["mesh2d_nFaces"],
+                np.array(face_x).flatten(),
+                {
+                    "mesh": "mesh2d",
+                    "location": "face",
+                    "_FillValue": -999.0,
+                    "long_name": "x-coordinate of mesh faces",
+                    "standard_name": "projection_x_coordinate",
+                    "units": "m",
+                },
+            ),
+            "mesh2d_face_y": (
+                ["mesh2d_nFaces"],
+                np.array(face_y).flatten(),
+                {
+                    "mesh": "mesh2d",
+                    "location": "face",
+                    "_FillValue": -999.0,
+                    "long_name": "y-coordinate of mesh faces",
+                    "standard_name": "projection_y_coordinate",
+                    "units": "m",
+                },
+            ),
+            "time": (["time"], time, {}),
+        },
+        attrs=UGRID_GLOBAL_ATTRS,
+    )
+    ENCODING_PARAMS = {
+        "zlib": True,
+        "_FillValue": -9999.0,
+    }
 
-    # # set encoding pars
-    # for k in ["v_x", "v_y", "s2n", "corr"]:
-    #     ds_ugrid[k].encoding = ENCODING_PARAMS
+    # set encoding pars
+    for k in data_vars:
+        ds_ugrid[k].encoding = ENCODING_PARAMS
+        ds_ugrid[k] = ds_ugrid[k].rio.write_crs(27700)  # # TODO replace by normal xarray instead of rioxarray
 
-    # ds_ugrid["mesh2d_face_nodes"].encoding = {"_FillValue": -999}
-
-    # ds_ugrid = ds_ugrid.rename({"v_x": "mesh2d_ucx", "v_y": "mesh2d_ucy"})
+    ds_ugrid["mesh2d_face_nodes"].encoding = {"_FillValue": -999}
 
 
 def velocity_log_fit(v, depth, dist_shore, dim="quantile"):

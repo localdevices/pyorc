@@ -278,6 +278,16 @@ class Velocimetry(ORCBase):
         # rotate the results to the projected coordinate system
         v_x, v_y = helpers.rotate_u_v(self._obj["v_x"], self._obj["v_y"], theta)
 
+        # create data_vars dict for the ugrid dataset
+        data_vars = {
+            "mesh2d_ucx": v_x,
+            "mesh2d_ucy": v_y,
+            "s2n": self._obj["s2n"].values,
+            "corr": self._obj["corr"].values,
+        }
+        ds_ugrid = helpers.to_ugrid(
+            data_vars=data_vars, x=self._obj["x"].values, y=self._obj["y"].values, time=self._obj["time"].values
+        )
         # TODO implement helper functions for UGRID generation
 
-        return None
+        return ds_ugrid
