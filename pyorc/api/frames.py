@@ -35,6 +35,11 @@ class Frames(ORCBase):
         """
         super(Frames, self).__init__(xarray_obj)
 
+    @property
+    def is_projected(self) -> bool:
+        """Check if the frames are projected."""
+        return all(coord in self._obj.coords for coord in ["xs", "ys"])
+
     def get_piv_coords(
         self, window_size: tuple[int, int], search_area_size: tuple[int, int], overlap: tuple[int, int]
     ) -> tuple[dict, dict]:
@@ -526,8 +531,8 @@ class Frames(ORCBase):
             Index of the frame to export.
 
         """
-        if not all(coord in self._obj.coords for coord in ["xs", "ys"]):
-            raise ValueError("The frames object must contain 'xs' and 'ys' coordinates to export as GeoTIFF.")
+        if not self.is_projected:
+            raise ValueError("The frames object must be projected to export as GeoTIFF.")
         if frame < 0 or frame >= len(self._obj):
             raise ValueError(f"Frame index {frame} is out of bounds for frames object with length {len(self._obj)}.")
         # get the raw frame to export
@@ -537,7 +542,7 @@ class Frames(ORCBase):
         crs = getattr(cc, "crs", None)
         transform = cc.transform
         # write the GeoTIFF using rasterio
-        helpers.to_geotiff(fn=fn, data=data, transform=transform, crs=crs)
+        helpers.to_geotiff(data=data, fn=fn, transform=transform, crs=crs)
 
     def to_video(self, fn, video_format=None, fps=None, progress=True):
         """Write frames to a video file without any layout.
