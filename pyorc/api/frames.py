@@ -429,10 +429,7 @@ class Frames(ORCBase):
         """
         frames_diff = self._obj.astype(np.float32).diff(dim="time")
         frames_diff = frames_diff.where(frames_diff > thres)
-
-        # frames_diff = frames_diff.where(np.abs(frames_diff) > thres)
         frames_diff.attrs = self._obj.attrs
-        # frames_diff -= frames_diff.min(dim=["x", "y"])
         frames_diff = frames_diff.fillna(0.0)
         if abs:
             return np.abs(frames_diff)
