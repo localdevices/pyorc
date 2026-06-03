@@ -237,7 +237,8 @@ def _get_ffpiv_mean(
         # Apply thresholds
         masks = (corr_max >= corr_min) & (s2n >= s2n_min) & (np.isfinite(corr_max))
         corr[~masks] = 0.0
-        corr_max[~masks] = s2n[~masks] = 0.0
+        corr_max[~masks] = 0.0
+        s2n[~masks] = 0.0
 
         return corr, corr_max, s2n
 
