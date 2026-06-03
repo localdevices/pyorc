@@ -1,10 +1,14 @@
 .. _camera_config_cli_bbox:
 
-In the command-line interface there are two options to establish a bounding box to the camera configuration:
+In the command-line interface there are three options to establish a bounding box to the camera configuration:
 
 * use the option ``--corners`` and supply a JSON-formatted list of 4 column, row pairs, similar to the approach
   used for supplying ``--src``.
 * use an interactive point-and-click view to click the points into your camera objective.
+* skip providing corners, and then *pyorc* will assume that the entire view is relevant. **This is strictly only
+  possible with nadir drone videos** as in these cases, it may be assumed that no horizon is visible, and the
+  area shown is limited. In the CLI this is detected by the amount of control points provided. If you have only
+  provided two points, the assumption is that the video is nadir.
 
 The ``--corners`` options works in exactly the same way as ``--src``. *pyorc* uses the 4 corners to draw a geographical
 best-fitting rectangular box automatically and add this to the camera configuration.

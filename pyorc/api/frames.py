@@ -37,7 +37,11 @@ class Frames(ORCBase):
 
     @property
     def is_projected(self) -> bool:
-        """Check if the frames are projected."""
+        """Check if the frames are projected.
+
+        If not you should first apply `Frames.project` on the frames before applying anything related to
+        projected frames.
+        """
         return all(coord in self._obj.coords for coord in ["xs", "ys"])
 
     def get_piv_coords(

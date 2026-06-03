@@ -20,7 +20,9 @@ To setup a camera configuration, you will at minimum need to provide the followi
   view.
 * 4 corner points that approximately indicate the bounding box of your area of interest. These must be provided in
   the order *upstream-left*, *downstream-left*, *downstream-right*, *upstream-right*, where left is the left-bank
-  as seen while looking in downstream direction.
+  as seen while looking in downstream direction. An exception is when you have a nadir drone video. In this case,
+  it may be assumed that the entire view is relevant. In the Command-Line interface you can then skip providing corner
+  points.
 * If you wish to use the video only from a selected frame (for instance if the first frames/seconds are bad quality, or
   moving) then you must also provide the frame number from which you would like to start the analysis and provide the
   camera configuration information. This is done with the ``-f`` or ``--frame-sample`` option. In the interactive

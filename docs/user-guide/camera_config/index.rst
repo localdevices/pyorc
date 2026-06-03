@@ -396,6 +396,9 @@ used for processing videos into velocimetry.
         names for this have the same name as <OUTPUT> but with the suffixes ``_geo.jpg`` for the planar view and
         ``_cam.jpg`` for the camera FOV perspective.
 
+        After the configuration is stored, the CLI will ask if you want to receive a GeoTIFF of the projected
+        frame. If you select "Yes", this will be provided side-by-side with the camera configuration file.
+
     .. tab-item:: API
 
         Storing a camera configuration within the API is as simple as calling ``to_file``. Camera configurations can

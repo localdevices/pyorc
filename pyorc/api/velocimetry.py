@@ -270,6 +270,13 @@ class Velocimetry(ORCBase):
         fill_na : float, optional
             if set, all np.nan values in the data variables are replaced with this value before parsing ugrid dataset
 
+        Returns
+        -------
+        ds_ugrid : xr.Dataset
+            dataset in UGRID format, with variables "mesh2d_ucx" and "mesh2d_ucy" for the velocity components,
+            and "s2n" and "corr" for the remaining variables. This can be opened in QGIS and also holds QGIS-compatible
+            metadata of the CRS if the camera configuration has a CRS.
+
         """
         # rotate v_x and v_y using rotation from transform of the velocimetry results
         resolution = np.float64(self._obj.x.diff(dim="x").mean().values)
