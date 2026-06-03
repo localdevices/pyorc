@@ -163,7 +163,7 @@ def test_to_ani(frames, ani_mp4, request):
 def test_to_geotiff_no_projection(tmp_path, frames_grayscale):
     """Test failure with an Exception, because geotiff export requires projection information."""
     fn = str(tmp_path / "out.tif")
-    with pytest.raises(ValueError, match="must contain 'xs' and 'ys' coordinates"):
+    with pytest.raises(ValueError, match="must be projected"):
         frames_grayscale.frames.to_geotiff(fn=fn, frame=0)
 
 

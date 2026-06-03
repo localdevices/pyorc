@@ -263,7 +263,7 @@ def camera_config(
         cam_config_file=output,
         gcps=gcps,
         crs=crs,
-        frame_sample=frame_sample,
+        frame_sample=frame_sample if frame_sample is not None else 0,
         resolution=resolution,
         window_size=window_size,
         lens_position=lens_position,
@@ -274,6 +274,15 @@ def camera_config(
         rotation=rotation,
     )
     logger.info(f"Camera configuration created and stored in {output}")
+    if click.confirm("Do you want to create a GeoTIFF from the selected frame for display in GIS?", default=True):
+        fn_geotiff = os.path.splitext(output)[0] + "_gis.tif"
+        cli_utils.parse_geotiff(
+            videofile,
+            cam_config_file=output,
+            fn_geotiff=fn_geotiff,
+            frame_sample=frame_sample if frame_sample is not None else 0,
+            logger=logger,
+        )
 
 
 # VELOCIMETRY

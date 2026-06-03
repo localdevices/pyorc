@@ -4,7 +4,7 @@ import rasterio
 from rasterio.crs import CRS
 from rasterio.transform import Affine
 
-from pyorc.helpers import to_geotiff
+from pyorc.io import to_geotiff
 
 
 @pytest.fixture()

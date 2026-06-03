@@ -1,6 +1,8 @@
 """Velocimetry functionalities that can be applied on `xarray.Dataset`."""
 
 import warnings
+from datetime import datetime
+from typing import Optional
 
 import numpy as np
 import rasterio
@@ -9,7 +11,7 @@ from pyproj import CRS
 from scipy.interpolate import interp1d
 from xarray.core import utils
 
-from pyorc import const, cv, helpers
+from pyorc import const, cv, helpers, io
 from pyorc.api.mask import _Velocimetry_MaskMethods
 from pyorc.api.orcbase import ORCBase
 from pyorc.api.plot import _Velocimetry_PlotMethods
@@ -250,23 +252,23 @@ class Velocimetry(ORCBase):
         for k in const.ENCODE_VARS:
             self._obj[k].encoding = enc_pars
 
-    def to_ugrid(self, fn: str, **kwargs):
-        """Write the dataset to a UGRID compliant netCDF file.
+    def to_ugrid(
+        self, time0: Optional[datetime] = None, title: Optional[str] = None, fill_na: Optional[float] = None
+    ) -> xr.Dataset:
+        """Show the dataset as a UGRID compliant mesh.
+
+        This is also compatible with QGIS. Store as netCDF as follows:
+
+        >>> ds_ugrid = ds_orig.velocimetry.ugrid.to_netcdf("velocimetry_ugrid.nc")
 
         Parameters
         ----------
-        fn : str
-            filename to write to
-        x_dim : str, optional
-            name of x dimension (default: "x")
-        y_dim : str, optional
-            name of y dimension (default: "y")
-        z_dim : str, optional
-            name of z dimension (default: "z")
-        time_dim : str, optional
-            name of time dimension (default: "time")
-        **kwargs:
-            additional keyword arguments to pass to xarray.Dataset.to_netcdf
+        time0 : datetime, optional
+            reference time to store in the ugrid dataset (default: None)
+        title : str, optional
+            title to store in the ugrid dataset (default: None)
+        fill_na : float, optional
+            if set, all np.nan values in the data variables are replaced with this value before parsing ugrid dataset
 
         """
         # rotate v_x and v_y using rotation from transform of the velocimetry results
@@ -275,19 +277,27 @@ class Velocimetry(ORCBase):
         aff = cv._get_transform(self.camera_config.bbox, resolution)
         # compute rotation
         theta = np.arctan2(aff.d, aff.a)
-        # rotate the results to the projected coordinate system
-        v_x, v_y = helpers.rotate_u_v(self._obj["v_x"], self._obj["v_y"], theta)
-
+        # rotate the results to the projected coordinate system. y-definition of UGRID is opposite to the y-definition
+        # of matplotlib, so v_y is multiplied by -1 before rotation.
+        ucx, ucy = helpers.rotate_u_v(self._obj["v_x"], -self._obj["v_y"], theta)
+        # get the CRS from the camera config if it exists
+        crs = getattr(self.camera_config, "crs", None)
         # create data_vars dict for the ugrid dataset
         data_vars = {
-            "mesh2d_ucx": v_x,
-            "mesh2d_ucy": v_y,
+            "mesh2d_ucx": ucx,
+            "mesh2d_ucy": ucy,
             "s2n": self._obj["s2n"].values,
             "corr": self._obj["corr"].values,
         }
-        ds_ugrid = helpers.to_ugrid(
-            data_vars=data_vars, x=self._obj["x"].values, y=self._obj["y"].values, time=self._obj["time"].values
+        ds_ugrid = io.to_ugrid(
+            data_vars=data_vars,
+            x=self._obj["x"].values,
+            y=self._obj["y"].values,
+            time=self._obj["time"].values,
+            aff=aff,
+            crs=crs,
+            time0=time0,
+            title=title,
+            fill_na=fill_na,
         )
-        # TODO implement helper functions for UGRID generation
-
         return ds_ugrid

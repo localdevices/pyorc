@@ -35,6 +35,7 @@ dependencies = [
     "pyyaml",
     "rasterio<1.4.0; python_version <= '3.12'",
     "rasterio; python_version > '3.12'",
+    "requests",
     "scipy",
     "shapely",
     "tqdm",
@@ -55,7 +56,9 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14"
 ]
 dynamic = ['version', 'description']
 

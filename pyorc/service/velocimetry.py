@@ -486,12 +486,26 @@ class VelocityFlowProcessor(object):
                 kwargs["project"] = {}
             # iterate over steps in processing
             self.da_frames = apply_methods(
-                self.da_frames, "frames", logger=self.logger, skip_args=["to_video"], **kwargs
+                self.da_frames, "frames", logger=self.logger, skip_args=["to_video", "to_geotiff"], **kwargs
             )
             if "to_video" in kwargs:
                 kwargs_video = kwargs["to_video"]
+                if "fn" not in kwargs_video:
+                    kwargs_video["fn"] = os.path.join(self.output, self.prefix + "processed_frames.mp4")
                 self.logger.info(f"Writing video of processed frames to {kwargs_video['fn']}")
                 self.da_frames.frames.to_video(**kwargs_video)
+            if "to_geotiff" in kwargs:
+                kwargs_geotiff = kwargs["to_geotiff"]
+                if "frame" not in kwargs_geotiff:
+                    kwargs_geotiff["frame"] = 0
+                if "fn" not in kwargs_geotiff:
+                    kwargs_geotiff["fn"] = os.path.join(
+                        self.output, self.prefix + "frame_{:04d}.tif".format(kwargs_geotiff["frame"])
+                    )
+                self.logger.info(
+                    f"Writing geotiff of projected frame {kwargs_geotiff['frame']} to {kwargs_geotiff['fn']}"
+                )
+                self.da_frames.frames.to_geotiff(**kwargs_geotiff)
             self.logger.info("Frames retrieved and preprocessed.")
         except Exception as e:
             self.logger.error(f"Could not extract frames from video. Error: {e}")
@@ -504,7 +518,7 @@ class VelocityFlowProcessor(object):
         configs=["video", "frames", "velocimetry"],
         outputs=["fn_piv"],
     )
-    def velocimetry(self, method="get_piv", write=False, **kwargs):
+    def velocimetry(self, method="get_piv", write=False, write_ugrid=False, fill_na=None, **kwargs):
         self.logger.debug(f"Performing velocimetry with {method}.")
         try:
             if len(kwargs) > 1:
@@ -524,6 +538,14 @@ class VelocityFlowProcessor(object):
                 # Load the velocimetry into memory to prevent re-writes in next steps
                 delattr(self, "velocimetry_obj")
                 self.velocimetry_obj = xr.open_dataset(self.fn_piv)
+            if write_ugrid:
+                fn_piv_ugrid = self.fn_piv.replace(".nc", "_ugrid.nc")
+                ds_ugrid = self.velocimetry_obj.velocimetry.to_ugrid(fill_na=fill_na)
+                delayed_obj = ds_ugrid.to_netcdf(fn_piv_ugrid, compute=False)
+                with ProgressBar():
+                    delayed_obj.compute()
+                del delayed_obj
+                self.logger.info(f"Velocimetry ugrid written to {fn_piv_ugrid}")
             self.logger.info("Velocimetry successfully derived.")
         except Exception as e:
             self.logger.error(f"Could not derive velocimetry from frames. Error: {e}")
@@ -536,7 +558,7 @@ class VelocityFlowProcessor(object):
         configs=["video", "frames", "velocimetry", "mask"],
         outputs=["fn_piv_mask"],
     )
-    def mask(self, write=False, **kwargs):
+    def mask(self, write=False, write_ugrid=False, fill_na=None, **kwargs):
         try:
             self.logger.debug("Applying masks to velocimetry.")
             self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
@@ -554,6 +576,17 @@ class VelocityFlowProcessor(object):
                 with ProgressBar():
                     delayed_obj.compute()
                 del delayed_obj
+                self.logger.info(f"Velocimetry masked written to {self.fn_piv_mask}")
+
+            if write_ugrid:
+                fn_piv_mask_ugrid = self.fn_piv_mask.replace(".nc", "_ugrid.nc")
+                ds_ugrid = self.velocimetry_mask_obj.velocimetry.to_ugrid(fill_na=fill_na)
+                delayed_obj = ds_ugrid.to_netcdf(fn_piv_mask_ugrid, compute=False)
+                with ProgressBar():
+                    delayed_obj.compute()
+                del delayed_obj
+                self.logger.info(f"Velocimetry masked ugrid written to {fn_piv_mask_ugrid}")
+
             self.logger.info(f"Velocimetry masked written to {self.fn_piv_mask}.")
         except Exception as e:
             self.logger.error(f"Could not apply masks to velocimetry. Error: {e}")
