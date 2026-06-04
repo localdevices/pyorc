@@ -122,7 +122,6 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2.0, camera_matrix=None, d
         _dst = np.c_[np.array(dst), np.zeros(4)]
     else:
         _dst = np.array(dst)
-    print(camera_matrix)
     camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
         src, _dst, height, width, c=c, lens_position=lens_position, camera_matrix=camera_matrix, dist_coeffs=dist_coeffs
     )

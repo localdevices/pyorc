@@ -25,6 +25,48 @@ __all__ = ["velocity_flow", "velocity_flow_subprocess"]
 logger = logging.getLogger(__name__)
 
 
+def _check_file_integrity(ref, func_name, inputs, outputs, path_out):
+    """Check if all input and output files are present and unchanged since last run by checking their hashes.
+
+    If not, then return True to indicate a (re)run is needed, otherwise return False.
+    """
+    for i in inputs + outputs:
+        fn = getattr(ref, i)
+        fn_hash = os.path.join(path_out, f"{os.path.basename(getattr(ref, i))}.hash")
+        if not (os.path.isfile(fn)):
+            return True
+        else:
+            # also check if hash file exists
+            if not (os.path.isfile(fn_hash)):
+                return True
+            else:
+                hash256 = cli_utils.get_file_hash(fn)
+                with open(fn_hash, "r") as f:
+                    hash256_ancient = f.read()
+                if hash256.hexdigest() != hash256_ancient:
+                    ref.logger.debug(f"File integrity of {fn} has changed, requiring rerun of {func_name}")
+                    return True
+    return False
+
+
+def _compare_configs(func_name, fn_ancient_recipe, recipe, relevant_configs, logger=logger):
+    """Compare if yaml file content of relevant config components with previous run.
+
+    If not, then return True to indicate a (re)run is needed, otherwise return False.
+    """
+    # construct part of recipe that is relevant for the current function
+    recipe_part = {c: recipe[c] for c in relevant_configs if c in recipe}
+    # open the recipe part that was written with an earlier run
+    with open(fn_ancient_recipe, "r") as f:
+        cfg_ancient = f.read()
+    cfg = yaml.dump(recipe_part, default_flow_style=False, sort_keys=False)
+    if cfg != cfg_ancient:
+        # config has changed
+        logger.debug(f'Configuration of "{func_name}" has changed, requiring rerun')
+        return True
+    return False
+
+
 def get_water_level(
     video: Video,
     cross_section: CrossSection,
@@ -163,37 +205,47 @@ def run_func_hash_io(
                 if not (os.path.isfile(fn_recipe)):
                     run = True
                 else:
-                    recipe_part = {c: ref.recipe[c] for c in configs if c in ref.recipe}
-                    with open(fn_recipe, "r") as f:
-                        cfg_ancient = f.read()
-                    cfg = yaml.dump(recipe_part, default_flow_style=False, sort_keys=False)
-                    if cfg != cfg_ancient:
-                        # config has changed
-                        ref.logger.debug(f'Configuration of "{func_name}" has changed, requiring rerun')
-                        run = True
+                    run = _compare_configs(
+                        func_name,
+                        fn_ancient_recipe=fn_recipe,
+                        recipe=ref.recipe,
+                        relevant_configs=configs,
+                        logger=ref.logger,
+                    )
+                    # # construct part of recipe that is relevant for the current function
+                    # recipe_part = {c: ref.recipe[c] for c in configs if c in ref.recipe}
+                    # # open the recipe part that was written with an earlier run
+                    # with open(fn_recipe, "r") as f:
+                    #     cfg_ancient = f.read()
+                    # cfg = yaml.dump(recipe_part, default_flow_style=False, sort_keys=False)
+                    # if cfg != cfg_ancient:
+                    #     # config has changed
+                    #     ref.logger.debug(f'Configuration of "{func_name}" has changed, requiring rerun')
+                    #     run = True
                 if not (run):
                     # if configs are not changed, then go to the file integrity checks
-                    for i in inputs + outputs:
-                        fn = getattr(ref, i)
-                        fn_hash = os.path.join(path_out, f"{os.path.basename(getattr(ref, i))}.hash")
-                        if not (os.path.isfile(fn)):
-                            run = True
-                            break
-                        else:
-                            # also check if hash file exists
-                            if not (os.path.isfile(fn_hash)):
-                                run = True
-                                break
-                            else:
-                                hash256 = cli_utils.get_file_hash(fn)
-                                with open(fn_hash, "r") as f:
-                                    hash256_ancient = f.read()
-                                if hash256.hexdigest() != hash256_ancient:
-                                    ref.logger.debug(
-                                        f"File integrity of {fn} has changed, requiring rerun of {func_name}"
-                                    )
-                                    run = True
-                                    break
+                    run = _check_file_integrity(ref, func_name, inputs, outputs, path_out)
+                    # for i in inputs + outputs:
+                    #     fn = getattr(ref, i)
+                    #     fn_hash = os.path.join(path_out, f"{os.path.basename(getattr(ref, i))}.hash")
+                    #     if not (os.path.isfile(fn)):
+                    #         run = True
+                    #         break
+                    #     else:
+                    #         # also check if hash file exists
+                    #         if not (os.path.isfile(fn_hash)):
+                    #             run = True
+                    #             break
+                    #         else:
+                    #             hash256 = cli_utils.get_file_hash(fn)
+                    #             with open(fn_hash, "r") as f:
+                    #                 hash256_ancient = f.read()
+                    #             if hash256.hexdigest() != hash256_ancient:
+                    #                 ref.logger.debug(
+                    #                     f"File integrity of {fn} has changed, requiring rerun of {func_name}"
+                    #                 )
+                    #                 run = True
+                    #                 break
             if run:
                 # apply the wrapped processor function
                 ref.logger.info(f"Running {func_name}")

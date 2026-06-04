@@ -45,7 +45,6 @@ def test_plot(piv, mode, method):
 
 def test_to_ugrid(piv, tmp_path):
     fn = tmp_path / "velocimetry_ugrid.nc"
-    fn = "velocimetry_ugrid.nc"
     ds_ugrid = piv.velocimetry.to_ugrid()
     ds_ugrid.to_netcdf(fn)
-    # assert fn.exists()
+    assert fn.exists()
