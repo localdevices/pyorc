@@ -41,3 +41,10 @@ def test_plot(piv, mode, method):
     if plot:
         piv.mean(dim="time", keep_attrs=True).velocimetry.plot(method=method, mode=mode, add_colorbar=True)
     plt.close("all")
+
+
+def test_to_ugrid(piv, tmp_path):
+    fn = tmp_path / "velocimetry_ugrid.nc"
+    ds_ugrid = piv.velocimetry.to_ugrid()
+    ds_ugrid.to_netcdf(fn)
+    assert fn.exists()

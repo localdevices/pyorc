@@ -122,7 +122,6 @@ def get_gcps_optimized_fit(src, dst, height, width, c=2.0, camera_matrix=None, d
         _dst = np.c_[np.array(dst), np.zeros(4)]
     else:
         _dst = np.array(dst)
-    print(camera_matrix)
     camera_matrix, dist_coeffs, err = cv.optimize_intrinsic(
         src, _dst, height, width, c=c, lens_position=lens_position, camera_matrix=camera_matrix, dist_coeffs=dist_coeffs
     )
@@ -278,7 +277,10 @@ def parse_src(ctx, param, value):
     value = parse_json(ctx, param, value)
     if value is not None:
         # check if at least 4 of 2
-        assert len(value) >= 4, "--src must contain a list of lists [column, row] with at least 4 points"
+        assert len(value) >= 6 or len(value) in [
+            2,
+            4,
+        ], "--src must contain a list of lists [column, row] of 2, 4 or >6 points"
         for n, val in enumerate(value):
             assert isinstance(val, list), f"--src value {n} is not a list {val}"
             assert (
@@ -316,6 +318,21 @@ def parse_cross_section_gdf(ctx, param, value):
     except Exception:
         raise click.FileError(f"There is a problem with the cross section file {value}")
     return value
+
+
+def parse_geotiff(videofile, cam_config_file, fn_geotiff, frame_sample=0, logger=logging):
+    """Sample a geotiff for display purposes."""
+    try:
+        # read video with camera configuration, but only one frame
+        vid = Video(videofile, start_frame=frame_sample, end_frame=frame_sample + 1, camera_config=cam_config_file)
+        # retrieve RGB
+        frames = vid.get_frames(method="rgb")
+        # project to cam config coordinates and write geotiff
+        frames_proj = frames.frames.project()
+        frames_proj.frames.to_geotiff(fn=fn_geotiff, frame=0)
+        logger.info(f"Sample geotiff written to {fn_geotiff}")
+    except Exception as e:
+        logger.error(f"Could not create sample geotiff. Error: {e}")
 
 
 def read_shape_as_gdf(fn=None, geojson=None, gdf=None):

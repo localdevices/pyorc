@@ -1,9 +1,13 @@
+import hashlib
 import json
+import logging
 import os.path
+from unittest.mock import Mock
 
 import click
 import matplotlib.pyplot as plt
 import pytest
+import yaml
 from matplotlib import backend_bases
 
 import pyorc.service
@@ -11,6 +15,7 @@ from pyorc.cli import cli_utils
 from pyorc.cli.cli_elements import AoiSelect, GcpSelect, StabilizeSelect
 from pyorc.cli.main import cli
 from pyorc.helpers import xyz_transform
+from pyorc.service.velocimetry import _check_file_integrity, _compare_configs
 
 from .conftest import EXAMPLE_DATA_DIR
 
@@ -36,6 +41,27 @@ def recipe_no_waterlevel(recipe_yml):
         ],
     }
     return r
+
+
+@pytest.fixture()
+def ref_obj():
+    """Create a mock ref object with a logger."""
+    ref = Mock()
+    ref.logger = logging.getLogger(__name__)
+    return ref
+
+
+# helpers for checking files and hash integrity
+def _create_test_file(path, content=b"test content"):
+    """Create a test file with content."""
+    with open(path, "wb") as f:
+        f.write(content)
+
+
+def _create_hash_file(hash_file_path, content_hash):
+    """Create a hash file with the given content hash."""
+    with open(hash_file_path, "w") as f:
+        f.write(content_hash)
 
 
 def test_cli_info(cli_obj):
@@ -187,6 +213,15 @@ def test_gcps_interact(gcps_dst, frame_rgb, monkeypatch):
     plt.close("all")
 
 
+def test_get_gcps_optimized_fit(gcps_src, gcps_dst, camera_matrix, dist_coeffs):
+    result = cli_utils.get_gcps_optimized_fit(
+        gcps_src, gcps_dst, 1080, 1920, c=2.0, camera_matrix=camera_matrix, dist_coeffs=dist_coeffs, lens_position=None
+    )
+    # as camera matrix is already known, this should return err = None
+    err = result[-1]
+    assert err is None
+
+
 def test_aoi_interact(frame_rgb, cam_config_without_aoi, monkeypatch):
     # convert dst to
     # del cam_config_without_aoi.crs
@@ -253,3 +288,138 @@ def test_parse_cross_section_file_missing():
 def test_parse_cross_section(gcps_fn):
     fn = cli_utils.parse_cross_section_gdf("", "", gcps_fn)
     assert os.path.isfile(fn)
+
+
+def test_file_missing(tmp_path, ref_obj):
+    """Case A: Input file does not exist -> should return True (needs rerun)."""
+    # Setup
+    path_out = tmp_path / "output"
+    path_out.mkdir()
+
+    # Create mock ref object
+    # Set non-existent file paths
+    missing_file = str(tmp_path / "missing_input.txt")
+    ref_obj.input_file = missing_file
+
+    inputs = ["input_file"]
+    outputs = []
+
+    # Execute and assert
+    result = _check_file_integrity(ref_obj, "test_func", inputs, outputs, str(path_out))
+    assert result is True
+
+
+def test_hash_file_missing(tmp_path, ref_obj):
+    """Input file exists but hash file not -> should return True (needs rerun)."""
+    # Setup
+    path_out = tmp_path / "output"
+    path_out.mkdir()
+
+    # Create input file
+    input_file = tmp_path / "input.txt"
+    _create_test_file(input_file, b"input content")
+
+    # Create mock ref object
+    ref_obj.input_file = str(input_file)
+
+    inputs = ["input_file"]
+    outputs = []
+
+    # Execute and assert
+    result = _check_file_integrity(ref_obj, "test_func", inputs, outputs, str(path_out))
+    assert result is True
+
+
+def test_hash_mismatch(tmp_path, ref_obj):
+    """Case B: Hash file exists but content hash doesn't match -> should return True (needs rerun)."""
+    # Setup
+    path_out = tmp_path / "output"
+    path_out.mkdir()
+
+    # Create input file
+    input_file = tmp_path / "input.txt"
+    _create_test_file(input_file, b"new content")
+
+    # Create hash file with different hash
+    old_hash = "old_hash_value_that_does_not_match"
+    hash_file_path = path_out / f"{input_file.name}.hash"
+    _create_hash_file(hash_file_path, old_hash)
+
+    ref_obj.input_file = str(input_file)
+
+    inputs = ["input_file"]
+    outputs = []
+
+    # Execute and assert
+    result = _check_file_integrity(ref_obj, "test_func", inputs, outputs, str(path_out))
+    assert result is True
+
+
+def test_hash_match(tmp_path, ref_obj):
+    """Case C: Hash file exists and hash matches -> should return False (no rerun needed)."""
+    # Setup
+    path_out = tmp_path / "output"
+    path_out.mkdir()
+
+    # Create input file
+    input_file = tmp_path / "input.txt"
+    content = b"test content"
+    _create_test_file(input_file, content)
+
+    # Calculate hash and create hash file
+    hash_obj = hashlib.sha256(content)
+    hash_file_path = path_out / f"{input_file.name}.hash"
+    _create_hash_file(hash_file_path, hash_obj.hexdigest())
+
+    # Create mock ref object
+    ref_obj.input_file = str(input_file)
+
+    inputs = ["input_file"]
+    outputs = []
+
+    # Execute and assert
+    result = _check_file_integrity(ref_obj, "test_func", inputs, outputs, str(path_out))
+    assert result is False
+
+
+def test_configs_identical(tmp_path, recipe):
+    """Check if configs are identical -> should return False (no rerun needed)."""
+    # Create relevant config subset from recipe
+    relevant_configs = ["video", "frames", "velocimetry"]
+    recipe_part = {c: recipe[c] for c in relevant_configs if c in recipe}
+
+    # Write config to file
+    fn_ancient_recipe = tmp_path / "ancient_recipe.yml"
+    with open(fn_ancient_recipe, "w") as f:
+        yaml.dump(recipe_part, f, default_flow_style=False, sort_keys=False)
+
+    # Execute with the same recipe
+    result = _compare_configs(
+        "test_func",
+        str(fn_ancient_recipe),
+        recipe,
+        relevant_configs,
+    )
+    # Assert
+    assert result is False
+
+
+def test_configs_different(tmp_path, recipe):
+    """Check if configs differ (resolution changed) -> should return True (rerun needed)."""
+    # Create relevant config subset from original recipe
+    relevant_configs = ["video", "frames", "velocimetry"]
+    recipe_part_old = {c: recipe[c] for c in relevant_configs if c in recipe}
+
+    # Write old config to file
+    fn_ancient_recipe = tmp_path / "ancient_recipe.yml"
+    with open(fn_ancient_recipe, "w") as f:
+        yaml.dump(recipe_part_old, f, default_flow_style=False, sort_keys=False)
+
+    # # Create modified recipe with different resolution
+    # recipe_modified = {c: recipe[c] for c in relevant_configs if c in recipe}
+    recipe["frames"]["resolution"] = 0.011  # Different resolution
+
+    # Execute with modified recipe
+    result = _compare_configs("test_func", str(fn_ancient_recipe), recipe, relevant_configs)
+    # Assert
+    assert result is True

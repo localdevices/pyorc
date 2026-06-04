@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 import click
 from typeguard import typechecked
 
-from pyorc import __version__, service
+from pyorc import Video, __version__, service
 from pyorc.cli import cli_utils, log
 
 
@@ -179,8 +179,6 @@ def camera_config(
 
     if src is not None:
         logger.info("Source points found and validated")
-    if dst is not None:
-        logger.info("Destination points found and validated")
     if z_0 is None:
         z_0: float = click.prompt("--z_0 not provided, please enter a number, or Enter for default", default=0.0)
     if h_ref is None:
@@ -203,6 +201,7 @@ def camera_config(
                 f"Shapefile {shapefile} not used, because --dst was provided explicitly and overrules the use of "
                 f"--shapefile."
             )
+    frame_sample = frame_sample if frame_sample is not None else 0
     if dst is not None:
         logger.info("Destination points found and validated")
     else:
@@ -210,11 +209,24 @@ def camera_config(
             "No destination control points for found, either provide a list of points with --dst or provide a "
             "shapefile with --shapefile"
         )
+    if len(dst) == 2:
+        # nadir found, make sure user is aware this is the assumption.
+        logger.warning(
+            "Only 2 destination coordinates for ground control points provided, meaning that I will assume your video "
+            "is a drone video taken at nadir (looking straight down). If this is not the case, then stop (Ctrl+C) and "
+            "provide 4 or more control points."
+        )
+        nadir = True
+    else:
+        nadir = False
+
     if not src:
         logger.warning(
-            "No source control points provided. No problem, you can interactively click them in your objective"
+            "No source ground control points provided. No problem, you can interactively click them in your objective"
         )
-        if click.confirm("Do you want to continue and provide source points interactively?", default=True):
+        if click.confirm(
+            "Do you want to continue and provide source ground controlpoints interactively?", default=True
+        ):
             src, camera_matrix, dist_coeffs = cli_utils.get_gcps_interactive(
                 videofile,
                 dst,
@@ -237,7 +249,14 @@ def camera_config(
         logger.warning(
             "No corner points for projection provided. No problem, you can interactively click them in your objective"
         )
-        if click.confirm("Do you want to continue and provide corners interactively?", default=True):
+        question = "Do you want to continue and provide corners interactively?"
+        if nadir:
+            logger.info(
+                "Your video is at nadir, I can select the entire video frame as corners for you, but you can "
+                "also select them interactively if you want."
+            )
+            question += " I will use the entire area if you choose 'No'."
+        if click.confirm(question, default=True):
             corners = cli_utils.get_corners_interactive(
                 videofile,
                 gcps,
@@ -249,6 +268,15 @@ def camera_config(
                 rotation=rotation,
                 logger=logger,
             )
+        else:
+            if not nadir:
+                raise click.UsageError(
+                    "No corners provided for non-nadir video, please provide them with --corners or select"
+                    "them interactively."
+                )
+            # open video just for the height and width
+            vid = Video(videofile, start_frame=frame_sample, end_frame=frame_sample + 1, rotation=rotation)
+            corners = [[0, 0], [vid.width, 0], [vid.width, vid.height], [0, vid.height]]
     if stabilize:
         stabilize_pol = cli_utils.get_stabilize_pol(
             videofile,
@@ -274,6 +302,15 @@ def camera_config(
         rotation=rotation,
     )
     logger.info(f"Camera configuration created and stored in {output}")
+    if click.confirm("Do you want to create a GeoTIFF from the selected frame for display in GIS?", default=True):
+        fn_geotiff = os.path.splitext(output)[0] + "_gis.tif"
+        cli_utils.parse_geotiff(
+            videofile,
+            cam_config_file=output,
+            fn_geotiff=fn_geotiff,
+            frame_sample=frame_sample,
+            logger=logger,
+        )
 
 
 # VELOCIMETRY

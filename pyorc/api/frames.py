@@ -11,7 +11,7 @@ from ffpiv import window
 from matplotlib.animation import FuncAnimation
 from tqdm import tqdm
 
-from pyorc import const, cv, helpers, project
+from pyorc import const, cv, helpers, io, project
 from pyorc.velocimetry import ffpiv
 
 from .orcbase import ORCBase
@@ -34,6 +34,15 @@ class Frames(ORCBase):
 
         """
         super(Frames, self).__init__(xarray_obj)
+
+    @property
+    def is_projected(self) -> bool:
+        """Check if the frames are projected.
+
+        If not you should first apply `Frames.project` on the frames before applying anything related to
+        projected frames.
+        """
+        return all(coord in self._obj.coords for coord in ["xs", "ys"])
 
     def get_piv_coords(
         self, window_size: tuple[int, int], search_area_size: tuple[int, int], overlap: tuple[int, int]
@@ -397,7 +406,7 @@ class Frames(ORCBase):
         frames_norm = frames_norm.where(roll_mean != 0, 0)
         return frames_norm
 
-    def time_diff(self, thres=2, abs=False):
+    def time_diff(self, thres=0.0, abs=False):
         """Apply a difference over time.
 
         Method subtracts frame 1 from frame 2, frame 2 from frame 3, etcetera.
@@ -407,8 +416,8 @@ class Frames(ORCBase):
         Parameters
         ----------
         thres : float, optional
-            obsolute value intensity threshold to set values to zero when intensity is lower than this threshold
-            default: 2.
+            absolute value intensity threshold to set values to zero when intensity is lower than this threshold
+            default: 0.0.
         abs : boolean, optional
             if set to True (default: False) apply absolute value on result
 
@@ -419,9 +428,8 @@ class Frames(ORCBase):
 
         """
         frames_diff = self._obj.astype(np.float32).diff(dim="time")
-        frames_diff = frames_diff.where(np.abs(frames_diff) > thres)
+        frames_diff = frames_diff.where(frames_diff > thres)
         frames_diff.attrs = self._obj.attrs
-        # frames_diff -= frames_diff.min(dim=["x", "y"])
         frames_diff = frames_diff.fillna(0.0)
         if abs:
             return np.abs(frames_diff)
@@ -512,6 +520,82 @@ class Frames(ORCBase):
             frames = range(len(self._obj))
         anim = FuncAnimation(f, animate, init_func=init, frames=frames, **anim_kwargs)
         anim.save(fn, **video_kwargs)
+
+    def to_geotiff(self, fn, frame):
+        """Export a single GeoTIFF file, using the geospatial coordinates.
+
+        This can only be used on a projected frames object, containing geographical coordinates.
+
+        Parameters
+        ----------
+        fn : str
+            Path to the output GeoTIFF file.
+        frame : int
+            Index of the frame to export.
+
+        """
+        if not self.is_projected:
+            raise ValueError("The frames object must be projected to export as GeoTIFF.")
+        if frame < 0 or frame >= len(self._obj):
+            raise ValueError(f"Frame index {frame} is out of bounds for frames object with length {len(self._obj)}.")
+        # get the raw frame to export
+        data = self._obj.isel(time=frame).values
+        # get the transform for the GeoTIFF
+        cc = self.camera_config
+        crs = getattr(cc, "crs", None)
+        transform = cc.transform
+        # write the GeoTIFF using rasterio
+        io.to_geotiff(data=data, fn=fn, transform=transform, crs=crs)
+
+    def to_geotiffs(
+        self,
+        prefix: str,
+        start_frame: Optional[int] = None,
+        end_frame: Optional[int] = None,
+        stride=1,
+        suffix=".tif",
+        progress_bar: bool = True,
+    ):
+        """Export multiple frames as individual GeoTIFF files.
+
+        This can only be used on a projected frames object, containing geographical coordinates.
+
+        Parameters
+        ----------
+        prefix : str
+            Prefix for the output GeoTIFF files.
+        start_frame : int, optional
+            Index of the first frame to export. If not specified, defaults to 0.
+        end_frame : int, optional
+            Index of the last frame to export. If not specified, defaults to the length of the frames object.
+        stride : int, optional
+            Step size between frames to export. Default is 1 (export every frame).
+        suffix : str, optional
+            Suffix for the output GeoTIFF files. Default is ".tif".
+        progress_bar : bool, optional
+            Display a progress bar while exporting frames. Default is True.
+
+        """
+        fns = []
+        if not self.is_projected:
+            raise ValueError("The frames object must be projected to export as GeoTIFFs.")
+        if start_frame is None:
+            start_frame = 0
+        if end_frame is None:
+            end_frame = len(self._obj)
+        if start_frame < 0 or end_frame > len(self._obj) or start_frame >= end_frame:
+            raise ValueError(
+                f"Invalid frame range: start_frame={start_frame}, end_frame={end_frame}, length={len(self._obj)}."
+            )
+        if progress_bar:
+            frame_range = tqdm(range(start_frame, end_frame, stride), position=0, leave=True)
+        else:
+            frame_range = range(start_frame, end_frame, stride)
+
+        for frame in frame_range:
+            fn = f"{prefix}_{frame:04d}{suffix}"
+            self.to_geotiff(fn=fn, frame=frame)
+            fns.append(fn)
 
     def to_video(self, fn, video_format=None, fps=None, progress=True):
         """Write frames to a video file without any layout.

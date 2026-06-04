@@ -51,6 +51,12 @@ def test_project(frames, resolution, method, dims, shape, kwargs, request):
     ), f"Projected frames shape {frames_proj.isel(time=0).shape} do not have expected shape {shape}"
 
 
+def test_time_diff(frames_grayscale):
+    time_diff = frames_grayscale.frames.time_diff()
+    # shape should be less than orginal by 1, because it is the difference in time
+    assert time_diff.shape[0] == frames_grayscale.shape[0] - 1
+
+
 @pytest.mark.parametrize(
     ("frames", "samples"),
     [
@@ -158,6 +164,41 @@ def test_get_piv(frames_proj, window_size, engine, ensemble_corr, result):
 def test_to_ani(frames, ani_mp4, request):
     frames = request.getfixturevalue(frames)
     frames.frames.to_ani(ani_mp4, progress_bar=False)
+
+
+def test_to_geotiff_no_projection(tmp_path, frames_grayscale):
+    """Test failure with an Exception, because geotiff export requires projection information."""
+    fn = str(tmp_path / "out.tif")
+    with pytest.raises(ValueError, match="must be projected"):
+        frames_grayscale.frames.to_geotiff(fn=fn, frame=0)
+
+
+def test_to_geotiff_too_high_frame(tmp_path, frames_proj):
+    """Test failure with an Exception, because frame number is above available nr of frames."""
+    fn = str(tmp_path / "out.tif")
+    with pytest.raises(ValueError, match="out of bounds"):
+        frames_proj.frames.to_geotiff(fn=fn, frame=9999999)
+
+
+def test_to_geotiff(tmp_path, frames_proj, monkeypatch):
+    monkeypatch.setattr("pyorc.api.frames.helpers.to_geotiff", lambda *args, **kwargs: None, raising=False)
+    fn = str(tmp_path / "out.tif")
+    frames_proj.frames.to_geotiff(fn=fn, frame=0)
+
+
+def test_to_geotiffs(tmp_path, frames_proj, monkeypatch):
+    """Test exporting a list of frames of length one to geotiffs. Mock actual export."""
+    monkeypatch.setattr("pyorc.api.frames.helpers.to_geotiff", lambda *args, **kwargs: None, raising=False)
+    fn = str(tmp_path / "out_")
+    frames_proj.frames.to_geotiffs(prefix=fn, start_frame=0, end_frame=2)
+
+
+def test_to_geotiffs_too_high_end_frame(tmp_path, frames_proj, monkeypatch):
+    """Test exporting a list of frames of length one to geotiffs. Mock actual export."""
+    monkeypatch.setattr("pyorc.api.frames.helpers.to_geotiff", lambda *args, **kwargs: None, raising=False)
+    fn = str(tmp_path / "out_")
+    with pytest.raises(ValueError, match="Invalid frame range"):
+        frames_proj.frames.to_geotiffs(prefix=fn, start_frame=0, end_frame=4)
 
 
 @pytest.mark.parametrize(

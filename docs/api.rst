@@ -238,6 +238,7 @@ Class and properties
     Frames.camera_config
     Frames.camera_shape
     Frames.h_a
+    Frames.is_projected
 
 Enhancing frames
 ----------------
@@ -268,8 +269,12 @@ Retrieving surface velocities from frames
 
     Frames.get_piv
 
-Visualizing frames
-------------------
+Visualizing and exporting frames
+--------------------------------
+
+The GeoTIFF export writes a frame to a georeferenced GeoTIFF file, which can be opened in GIS software such as QGIS.
+You require a geographical coordinate reference system (CRS) to do this, which can be provided within the camera
+configuration.
 
 .. autosummary::
     :toctree: _generated
@@ -277,6 +282,7 @@ Visualizing frames
     Frames.plot
     Frames.to_ani
     Frames.to_video
+    Frames.to_geotiff
 
 .. _velocimetry:
 
@@ -351,6 +357,19 @@ Getting data over transects
 
     Velocimetry.get_transect
     Velocimetry.set_encoding
+
+Exporting data
+--------------
+Data is exported with the regular xarray export methods such as ``to_netcdf`` and ``to_zarr``. You can also export
+a UGRID-compatible mesh for visualization in QGIS. This is done with the ``to_ugrid`` method.
+The result of this method can be stored with ``to_netcdf``.
+
+.. autosummary::
+    :toctree: _generated
+
+    Velocimetry.to_ugrid
+
+
 
 Plotting methods
 ----------------
