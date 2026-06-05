@@ -7,7 +7,12 @@
 - `Velocimetry.to_ugrid` converts a 2D velocimetry result into a QGIS mesh-compatible UGRID with CF conventions.
   Load your results in QGIS for further analysis, combination with your own datasets and creation of vector or
   trace animations.
-  
+- `CameraConfig.rotate`. Allow you to apply a slight rotation to the existing camera configuration in case a camera was
+  accidentally rotated, but not moved in terms of its location. The user can provide two sets of fixed, easy to
+  recognize points as [col, row] in a frame containing the old pose, and the new pose of the camera. The method returns
+  a new `CameraConfig` instance with the estimated rotation applied, and normalized pixel error estimates.
+  At least 2 points must be provided.
+
 ### Changed
 ### Deprecated
 ### Removed
