@@ -90,6 +90,19 @@ Plotting methods
     CameraConfig.plot
     CameraConfig.plot_bbox
 
+Modify camera configuration
+---------------------------
+
+Sometimes, you may want to create a new camera configuration based on an existing one, but with some modifications.
+For instance, a camera may have slightly rotated between two videos, and you want to use the same camera configuration
+but with a slightly different rotation.
+
+.. autosummary::
+    :toctree: _generated
+
+    CameraConfig.rotate
+
+
 .. _cross_section:
 
 CrossSection class
@@ -137,6 +150,7 @@ Getting cross section geometries
     CrossSection.get_wetted_surface_sz
     CrossSection.get_line_of_interest
     CrossSection.get_bbox_dry_wet
+    CrossSection.get_bbox
 
 Transform cross section geometries
 ----------------------------------

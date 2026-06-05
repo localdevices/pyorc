@@ -723,7 +723,7 @@ def pose_world_to_camera(rvec, tvec):
     return rvec, tvec
 
 
-def distort_points(points, camera_matrix, dist_coeffs):
+def distort_points(points, camera_matrix, dist_coeffs, norm=False):
     """Distort x, y point locations with provided lens parameters.
 
     Points can be back projected on original (distorted) frame positions.
@@ -738,6 +738,9 @@ def distort_points(points, camera_matrix, dist_coeffs):
         camera matrix
     dist_coeffs : array-like [4]
         distortion coefficients
+    norm : bool, optional
+        If set, the input points are expected to be in normalized form (default: False). If True, the function will
+        convert the normalized points to pixel coordinates before applying distortion.
 
     Returns
     -------
@@ -746,17 +749,21 @@ def distort_points(points, camera_matrix, dist_coeffs):
 
     """
     points = np.array(points, dtype=np.float64)
+    # if norm:
+    #     # if points are normalized, we need to convert them to pixel coordinates first
+    #     points = cv2.convertPointsFromHomogeneous(points.reshape(-1, 1, 2))[:, 0]
     # ptsTemp = np.array([], dtype='float32')
     # make empty rotation and translation vectors (we are only undistorting)
     rtemp = ttemp = np.array([0, 0, 0], dtype="float32")
     # normalize the points to be independent of the camera matrix using undistortPoints with no distortion matrix
-    ptsOut = cv2.undistortPoints(points, camera_matrix, None)
+    if not norm:
+        ptsOut = cv2.undistortPoints(points, camera_matrix, None)
+    else:
+        ptsOut = points
     # convert points to 3d points
     ptsTemp = cv2.convertPointsToHomogeneous(ptsOut)
     # project them back to image space using the distortion matrix
-    return np.int32(
-        np.round(cv2.projectPoints(ptsTemp, rtemp, ttemp, camera_matrix, dist_coeffs, ptsOut)[0][:, 0])
-    ).tolist()
+    return np.float32(cv2.projectPoints(ptsTemp, rtemp, ttemp, camera_matrix, dist_coeffs, ptsOut)[0][:, 0]).tolist()
 
 
 def get_M_2D(src, dst, reverse=False):
@@ -1266,6 +1273,93 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
     return camera_matrix, dist_coeffs, opt.fun
 
 
+def find_rotation_points(src, dst, camera_matrix, dist_coeffs=None):
+    """Find the incremental rotation vector based on point pairs in a given set of src and dst points.
+
+    This is used to be able to correct poses for small rotation errors based on point correspondences.
+
+    Parameters
+    ----------
+    src : array_like
+        Source points in the original 3D space to be projected.
+    dst : array_like
+        Destination points in the 2D image space, serving as the target for
+        projecting the source points.
+    camera_matrix : array_like
+        camera matrix [3x3]
+    dist_coeffs : array_like, optional
+        distortion coefficients
+
+    Returns
+    -------
+    rvec : np.ndarray (3x1)
+        rotation vector representing the incremental rotation from src to dst
+    error : np.ndarray
+        array of reprojection errors (measured in normalized coordinate space) for each point pair
+
+    """
+    # undistort points to normalized coordinates
+    norm_old = undistort_points(src, camera_matrix, dist_coeffs, norm=True)
+    norm_new = undistort_points(dst, camera_matrix, dist_coeffs, norm=True)
+    # create a short ray vector for each point
+    rays_old = np.hstack([np.array(norm_old).reshape(-1, 2), np.ones((len(norm_old), 1))])
+
+    rays_new = np.hstack([np.array(norm_new).reshape(-1, 2), np.ones((len(norm_new), 1))])
+    H = rays_old.T @ rays_new
+
+    U, S, Vt = np.linalg.svd(H)
+
+    R_delta = Vt.T @ U.T
+    # if the determinant is negative, we have found the reflection which is one part of the orthogonal group
+    # we are looking for the rotation. We can fix this by flipping the sign of the last column of Vt
+    if np.linalg.det(R_delta) < 0:
+        Vt[-1, :] *= -1
+        R_delta = Vt.T @ U.T
+    predicted = (R_delta @ rays_old.T).T
+    # predicted
+    error = np.linalg.norm(predicted - rays_new, axis=1)
+    # provide rvec and errors
+    return cv2.Rodrigues(R_delta)[0], error
+
+
+def rotate_pose(rvec, tvec, delta_rvec):
+    """Apply an incremental rotation to a given pose.
+
+    the rvec and tvec must be given in OpenCV form. tvec also changes because rvec and tvec in OpenCV form
+    are not independent when the rotation changes.
+
+    Parameters
+    ----------
+    rvec : vector (3)
+        rotation vector representing the original pose.
+    tvec : vector (3)
+        translation vector representing the original pose.
+    delta_rvec : vector (3)
+        rotation vector representing the incremental rotation to be applied.
+
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - rvec (vector): representing the new rotation vector after applying the incremental rotation.
+        - tvec (vector): representing the new translation vector after applying the incremental rotation.
+
+    """
+    R_old, _ = cv2.Rodrigues(np.array(rvec))
+    R_delta, _ = cv2.Rodrigues(np.array(delta_rvec))
+    R_new = R_delta @ R_old
+
+    rvec_new, _ = cv2.Rodrigues(R_new)
+    rvec_new.flatten()
+
+    # look up tvec with new rotation
+    _, tvec_cam = pose_world_to_camera(np.array(rvec), np.array(tvec))
+    # now lookup the new tvec
+    rvec_new, tvec_new = pose_world_to_camera(-rvec_new, tvec_cam)
+    return rvec_new.flatten().tolist(), tvec_new.flatten().tolist()
+
+
 def transform_to_bbox(coords, bbox, resolution):
     """Transform coordinates defined in crs of bbox, into cv2 compatible pixel coordinates.
 
@@ -1375,7 +1469,7 @@ def unproject_points(src, z, rvec, tvec, camera_matrix, dist_coeffs):
     return dst
 
 
-def undistort_points(points, camera_matrix, dist_coeffs, reverse=False):
+def undistort_points(points, camera_matrix, dist_coeffs, reverse=False, norm=False) -> list[list[float]]:
     """Undistort x, y point locations with provided lens parameters.
 
     points can be undistorted together with images from that lens.
@@ -1386,11 +1480,13 @@ def undistort_points(points, camera_matrix, dist_coeffs, reverse=False):
         points [x, y], provided as float
     camera_matrix : array-like [3x3]
         camera matrix
-    dist_coeffs : array-like [4]
+    dist_coeffs : array-like [5]
         distortion coefficients
     reverse : bool, optional
         if set, the distortion will be undone, so that points can be back projected on original (distorted) frame
         positions.
+    norm : bool, optional
+        if set, the output points will be normalized by the camera matrix (default: False)
 
     Returns
     -------
@@ -1398,14 +1494,16 @@ def undistort_points(points, camera_matrix, dist_coeffs, reverse=False):
         undistorted point coordinates [x, y] as floats
 
     """
+    if dist_coeffs is None:
+        dist_coeffs = np.zeros((1, 5))
     camera_matrix = np.array(camera_matrix)
     dist_coeffs = np.array(dist_coeffs)
+    # do not use camera matrix in undistort, when norm is set, so that normalized coordinates are returned
     if reverse:
-        return distort_points(points, camera_matrix, dist_coeffs)
+        return distort_points(points, camera_matrix, dist_coeffs, norm=norm)
 
-    points_undistort = cv2.undistortPoints(
-        np.expand_dims(np.float64(points), axis=1), camera_matrix, dist_coeffs, P=camera_matrix
-    )
+    P = None if norm else camera_matrix
+    points_undistort = cv2.undistortPoints(np.expand_dims(np.float64(points), axis=1), camera_matrix, dist_coeffs, P=P)
     return points_undistort[:, 0].tolist()
 
 

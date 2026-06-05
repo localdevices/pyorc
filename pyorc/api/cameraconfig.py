@@ -910,6 +910,49 @@ class CameraConfig:
         bbox = cv.get_aoi(points_xyz, resolution=self.resolution, method="width_length")
         self.bbox = bbox
 
+    def rotate(self, pts_old, pts_new) -> tuple["CameraConfig", np.ndarray]:
+        """Rotate the entire camera configuration based on two sets of points.
+
+        The selected sets of points represent the same in the real world, but are different in the camera perspective.
+        This method can be used to correct a camera pose in cases where the camera was accidentally rotated e.g.
+        during maintenance work. This method only works when the camera has not significantly changed in horizontal or
+        vertical position (a few cm are ok, but not tens of cms).
+
+        Parameters
+        ----------
+        pts_old : list of lists (2 or more)
+             [col, row] coordinates in original camera perspective without any undistortion applied, representing the
+             same real-world points as pts_new
+        pts_new : list of lists (2 or more)
+             [col, row] coordinates in changed camera perspective without any undistortion applied, representing the
+             same real-world points as pts_old
+
+
+        Returns
+        -------
+        CameraConfig
+            New CameraConfig instance with rotated camera configuration. Also the [col, row] points in gcps["src"] are
+            updated to reflect the new camera perspective.
+        error : np.ndarray
+            Reprojection error of the rotation increment, which can be used to assess the quality of the rotation.
+            The errors are measured in normalized pixels. E.g. an error of 0.001 means that the points are off by 0.001
+            times the focal length of the camera, which is typically around 1 pixel for a focal length of 1000 pixels.
+
+        """
+        # compute rotation increment from old and new points
+        rvec_increment, error = cv.find_rotation_points(pts_old, pts_new, self.camera_matrix, self.dist_coeffs)
+        # impose rotation increment on current rvec and tvec
+        rvec_new, tvec_new = cv.rotate_pose(self.rvec, self.tvec, rvec_increment)
+        # modify camera configuration with new rvec and tvec, and compute new src points from dst
+        new_config = copy.deepcopy(self)
+        new_config.rvec = rvec_new
+        new_config.tvec = tvec_new
+        # compute new src points from dst
+        dst = new_config.gcps["dst"]
+        src_new = new_config.project_points(dst)
+        new_config.gcps["src"] = src_new
+        return new_config, error
+
     def rotate_translate_bbox(self, angle: float = None, xoff: float = None, yoff: float = None):
         """Rotate and translate the bounding box.
 

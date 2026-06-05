@@ -180,6 +180,19 @@ def test_set_bbox_from_corners(cur_cam_config, cur_corners, cur_bbox, request):
     assert np.allclose(cur_cam_config.bbox.bounds, cur_bbox.bounds)
 
 
+@pytest.mark.parametrize(
+    ("old_pts", "new_pts"),
+    [([[0, 0], [100, 0]], [[1, 0], [101, 0.0]]), ([[0, 0], [100, 0], [0, 100]], [[1, 0], [101, 0.5], [1.0, 100.5]])],
+)
+def test_rotate(cam_config_6gcps, old_pts, new_pts):
+    cam_config, error = cam_config_6gcps.rotate(old_pts, new_pts)
+    assert isinstance(cam_config, pyorc.CameraConfig)
+    # in this case, we have a pure rotation and the error should be very small
+    assert len(error) == len(old_pts)
+    # error in normalized coordinates should not be superlarge
+    assert np.allclose(error, 0, atol=0.005)
+
+
 def test_rotate_translate_bbox(cam_config_6gcps):
     bbox_rotated = cam_config_6gcps.rotate_translate_bbox(angle=0.25 * np.pi, xoff=10, yoff=10).bbox
     # assert if the surface remains equal
@@ -265,14 +278,15 @@ def test_plot_geo(cam_config, vid):
     _ = cam_config.plot(mode="geographical")
 
 
-def test_cv_undistort_points(cam_config):
+@pytest.mark.parametrize("norm", [True])
+def test_cv_undistort_points(cam_config, norm):
     # let's fake a distortion
     cam_config.dist_coeffs[0][0] = -3e-3
     src = cam_config.gcps["src"]
     mtx = cam_config.camera_matrix
     dist = cam_config.dist_coeffs
-    _ = cv.undistort_points(src, mtx, dist)
-    src_back_dist = cv.undistort_points(src, mtx, dist, reverse=True)
+    _ = cv.undistort_points(src, mtx, dist, norm=norm)
+    src_back_dist = cv.undistort_points(_, mtx, dist, reverse=True, norm=norm)
     # check if points are back to originals after back adn forth undistortion and distortion
     assert np.allclose(src, src_back_dist)
 

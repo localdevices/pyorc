@@ -199,6 +199,11 @@ def test_cs_repr(cs):
     assert isinstance(cs.__repr__(), str)
 
 
+def test_get_bbox(cs):
+    bbox = cs.get_bbox(h=92.09)
+    assert isinstance(bbox, geometry.Polygon)
+    assert not bbox.has_z
+
 def test_get_bbox_dry_wet(cs):
     # check also what happens with a double geom in wet part
     bbox_wet = cs.get_bbox_dry_wet(h=92.09)  # just below local peak of 92.1 in bathymetry
