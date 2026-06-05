@@ -15,7 +15,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import differential_evolution
 from shapely import affinity, force_2d, force_3d, geometry
 from shapely.affinity import rotate, translate
-from shapely.ops import polygonize, split
+from shapely.ops import polygonize, split, transform
 
 from .cameraconfig import CameraConfig, cv, plot_helpers
 
@@ -328,7 +328,7 @@ class CrossSection:
         Returns
         -------
         geometry.LineString
-            horizontal line at water level (2d if `sz`=True, 3d if `yz`=False)
+            horizontal line at water level (2d if sz==True, 3d if sz==False)
 
         """
         # get water level in camera config vertical datum
@@ -561,6 +561,44 @@ class CrossSection:
             csl_pol_coords = [coords[np.isfinite(coords[:, 0])] for coords in csl_pol_coords]
         polygons = [geometry.Polygon(coords) for coords in csl_pol_coords]
         return polygons
+
+    def get_bbox(self, h: float, length: float = 2.0, offset: float = 0.0) -> geometry.Polygon:
+        """Create a closed single bounding box for the cross section for use in the CameraConfig.
+
+        Parameters
+        ----------
+        h : float
+            water level [m]
+        length : float, optional
+            length of the cross-section lateral expansion (from up to downstream) [m], by default 2.0.
+        offset : float, optional
+            perpendicular offset of the expanded cross section from the original cross section coordinates [m],
+            by default 0.0.
+
+        Returns
+        -------
+        shapely.geometry.Polygon
+            polygon representing the bounding box of the camera config.
+
+        See Also
+        --------
+        CrossSection.get_planar_surface : this function retrieves separate polygons if the water crosses land multiple
+            times
+
+        """
+        csl = self.get_csl_line(h=h, length=length, offset=offset, camera=False)  # get water line(s) in 3D
+        # only use most extreme lines in case multiple crossings occur
+        if len(csl) < 2:
+            raise ValueError("Bounding box cannot be created, as water line does not cross land at least twice.")
+        csl_2d = [transform(lambda *args: args[:2], line) for line in csl]  # make 2D for bounding box creation
+        line1 = csl_2d[0]
+        line2 = csl_2d[-1]
+        # combine
+        lines = geometry.MultiLineString([line1, line2])
+
+        # return minimum rotated bbox
+        return lines.minimum_rotated_rectangle
+        
 
     def get_bbox_dry_wet(
         self,

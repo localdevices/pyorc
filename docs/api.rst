@@ -137,6 +137,7 @@ Getting cross section geometries
     CrossSection.get_wetted_surface_sz
     CrossSection.get_line_of_interest
     CrossSection.get_bbox_dry_wet
+    CrossSection.get_bbox
 
 Transform cross section geometries
 ----------------------------------

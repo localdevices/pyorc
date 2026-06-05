@@ -1,3 +1,18 @@
+## [0.9.6] = 2026-XX-XX
+### Added
+- `CrossSection.create_bbox` create a `CameraConfig` compatible bounding box over a user-selected length upstream
+  and downstream, which fits nicely around the chosen cross section.
+- `Frames.to_geotiff` writes a GeoTIFF for the selected frame. In the command-line interface `camera-config` allows
+  for writing the sample frame to an RGB GeoTIFF using this method.
+- `Velocimetry.to_ugrid` converts a 2D velocimetry result into a QGIS mesh-compatible UGRID with CF conventions.
+  Load your results in QGIS for further analysis, combination with your own datasets and creation of vector or
+  trace animations.
+  
+### Changed
+### Deprecated
+### Removed
+### Fixed
+
 ## [0.9.5] = 2026-05-21
 ### Added
 - PIV interrogation windows can now be pre-masked if they contain too little signal. This can be controlled by
