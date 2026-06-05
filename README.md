@@ -15,10 +15,10 @@ width=100 align="right">
 [![License](https://img.shields.io/github/license/localdevices/pyorc?style=flat)](https://github.com/localdevices/pyorc/blob/main/LICENSE)
 [![downloads](https://img.shields.io/pypi/dm/pyopenrivercam)](https://pypi.org/project/pyopenrivercam/)
 
-**pyorc**, short for "pyOpenRiverCam" is a fully Open Source library for performing image-based river flow analysis. It is the underlying library for
-computations on the fully open software stack OpenRiverCam. **pyorc** can only be successful if the underlying methods
-are made available openly for all. Currently, we use LSPIV as our central velocimetry method, powered by FF-PIV.
-See https://github.com/localdevices/ffpiv. We wish to extend this
+**pyorc**, short for "pyOpenRiverCam" is a fully Open Source library for performing image-based river flow analysis. It 
+is the underlying library for computations on the fully open software stack OpenRiverCam. **pyorc** can only be 
+successful if the underlying methods are made available openly for all. Currently, we use LSPIV as our central 
+velocimetry method, powered by FF-PIV. See https://github.com/localdevices/ffpiv. We wish to extend this
 to Space-Time Image Velocimetry (STIV) for conditions that are less favourable for LSPIV using open libraries or
 extensions to this code.
 
@@ -35,9 +35,8 @@ We use the well-known **xarray** data models and computation pipelines (with das
 guarantee an easy interoperability with other tools and methods, and allow for lazy computing.
 
 We are seeking funding for the following frequently requested functionalities:
-* Exports to simple text formats and GIS-compatible layers
 * Exports to augmented reality videos
-* Implementation of additional processing algorithms (STIV and LSPTV)
+* Implementation of additional processing algorithms (STIV)
 * Improved nighttime / poor weather conditions processing through learning approaches
 
 If you wish to fund this or other work on features, please contact us at info@rainbowsensing.com.
@@ -95,15 +94,10 @@ set up of a camera configuration with RTK-GPS measured control points.
 > [!NOTE]
 >
 > Most of the heavy lifting is done while deriving cross-correlations for estimation of velocity vectors with Particle
-> Image Velocimetry. You can speed up this process (x2) by installing `rocket-fft`. With `python <= 3.12` this
-> is automatically included. With higher versions, you need, for the moment, to install it separately as follows:
+> Image Velocimetry. This is very fast thanks to the dependency `rocket-fft`. This dependency is now available up to
+> python=3.14 and does not require a separate installation instruction anymore. 
+> This gives python compatibility from 3.9 up to 3.14.
 >
-> ```shell
-> pip install git+https://github.com/localdevices/rocket-fft.git
-> ```
->
-> Once rocket-fft gets updated in PyPi you will no longer need this separate installation procedure.
-
 ### Upgrading from pypi with pip
 
 Did you read about a new version and you want to upgrade? Simply activate your virtual environment, type
@@ -174,8 +168,8 @@ pre-commit install
 ```
 
 ## Using pyorc
-To use **pyorc**, you can use the API for processing. A command-line interface is forthcoming pending funding.
-A manual is also still in the making.
+To use **pyorc**, you can use the API for processing. We also have a command-line interface.
+Please read our full documentation for further explanation, API description and command-line interfacing.
 
 ## Acknowledgement
 The first development of pyorc has been supported by the World Meteorological Organisation - HydroHub.
