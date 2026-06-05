@@ -90,6 +90,19 @@ Plotting methods
     CameraConfig.plot
     CameraConfig.plot_bbox
 
+Modify camera configuration
+---------------------------
+
+Sometimes, you may want to create a new camera configuration based on an existing one, but with some modifications.
+For instance, a camera may have slightly rotated between two videos, and you want to use the same camera configuration
+but with a slightly different rotation.
+
+.. autosummary::
+    :toctree: _generated
+
+    CameraConfig.rotate
+
+
 .. _cross_section:
 
 CrossSection class
