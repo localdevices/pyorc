@@ -1,4 +1,4 @@
-## [0.9.6] = 2026-XX-XX
+## [0.9.6] = 2026-06-06
 ### Added
 - `CrossSection.create_bbox` create a `CameraConfig` compatible bounding box over a user-selected length upstream
   and downstream, which fits nicely around the chosen cross section.
