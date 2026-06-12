@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.velocimetry &#8212; pyorc 0.9.3 documentation</title>
+    <title>pyorc.api.velocimetry &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -133,7 +133,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -409,6 +409,8 @@ document.write(`
 <span></span><span class="sd">&quot;&quot;&quot;Velocimetry functionalities that can be applied on `xarray.Dataset`.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
@@ -417,7 +419,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">helpers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.api.mask</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Velocimetry_MaskMethods</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.api.orcbase</span><span class="w"> </span><span class="kn">import</span> <span class="n">ORCBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.api.plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Velocimetry_PlotMethods</span>
@@ -628,8 +630,7 @@ document.write(`
             <span class="s2">&quot;long_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Angle of river flow in radians from North&quot;</span><span class="p">,</span>
             <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;rad&quot;</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="c1"># convert to a Transect object</span>
-        <span class="n">ds_points</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">ds_points</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">ds_points</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="c1"># add quantiles and rolling if set</span>
         <span class="k">if</span> <span class="n">rolling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ds_points</span> <span class="o">=</span> <span class="n">ds_points</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">rolling</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
@@ -657,7 +658,64 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">const</span><span class="o">.</span><span class="n">ENCODE_VARS</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">enc_pars</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">enc_pars</span></div>
+
+<div class="viewcode-block" id="Velocimetry.to_ugrid"><a class="viewcode-back" href="../../../_generated/pyorc.Velocimetry.to_ugrid.html#pyorc.Velocimetry.to_ugrid">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_ugrid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">time0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fill_na</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show the dataset as a UGRID compliant mesh.</span>
+
+<span class="sd">        This is also compatible with QGIS. Store as netCDF as follows:</span>
+
+<span class="sd">        &gt;&gt;&gt; ds_ugrid = ds_orig.velocimetry.ugrid.to_netcdf(&quot;velocimetry_ugrid.nc&quot;)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        time0 : datetime, optional</span>
+<span class="sd">            reference time to store in the ugrid dataset (default: None)</span>
+<span class="sd">        title : str, optional</span>
+<span class="sd">            title to store in the ugrid dataset (default: None)</span>
+<span class="sd">        fill_na : float, optional</span>
+<span class="sd">            if set, all np.nan values in the data variables are replaced with this value before parsing ugrid dataset</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ds_ugrid : xr.Dataset</span>
+<span class="sd">            dataset in UGRID format, with variables &quot;mesh2d_ucx&quot; and &quot;mesh2d_ucy&quot; for the velocity components,</span>
+<span class="sd">            and &quot;s2n&quot; and &quot;corr&quot; for the remaining variables. This can be opened in QGIS and also holds QGIS-compatible</span>
+<span class="sd">            metadata of the CRS if the camera configuration has a CRS.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># rotate v_x and v_y using rotation from transform of the velocimetry results</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="c1"># get the affine of the velocimetry results</span>
+        <span class="n">aff</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">_get_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="c1"># compute rotation</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">aff</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="n">aff</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+        <span class="c1"># rotate the results to the projected coordinate system. y-definition of UGRID is opposite to the y-definition</span>
+        <span class="c1"># of matplotlib, so v_y is multiplied by -1 before rotation.</span>
+        <span class="n">ucx</span><span class="p">,</span> <span class="n">ucy</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">rotate_u_v</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;v_x&quot;</span><span class="p">],</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;v_y&quot;</span><span class="p">],</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="c1"># get the CRS from the camera config if it exists</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># create data_vars dict for the ugrid dataset</span>
+        <span class="n">data_vars</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;mesh2d_ucx&quot;</span><span class="p">:</span> <span class="n">ucx</span><span class="p">,</span>
+            <span class="s2">&quot;mesh2d_ucy&quot;</span><span class="p">:</span> <span class="n">ucy</span><span class="p">,</span>
+            <span class="s2">&quot;s2n&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;s2n&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="s2">&quot;corr&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">ds_ugrid</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">to_ugrid</span><span class="p">(</span>
+            <span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">aff</span><span class="o">=</span><span class="n">aff</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">time0</span><span class="o">=</span><span class="n">time0</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">fill_na</span><span class="o">=</span><span class="n">fill_na</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ds_ugrid</span></div></div>
 </pre></div>
 
                 </article>

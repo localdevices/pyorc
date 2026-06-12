@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.cross_section &#8212; pyorc 0.9.3 documentation</title>
+    <title>pyorc.api.cross_section &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -133,7 +133,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -423,7 +423,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">differential_evolution</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">affinity</span><span class="p">,</span> <span class="n">force_2d</span><span class="p">,</span> <span class="n">force_3d</span><span class="p">,</span> <span class="n">geometry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.affinity</span><span class="w"> </span><span class="kn">import</span> <span class="n">rotate</span><span class="p">,</span> <span class="n">translate</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">polygonize</span><span class="p">,</span> <span class="n">split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">polygonize</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">transform</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.cameraconfig</span><span class="w"> </span><span class="kn">import</span> <span class="n">CameraConfig</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">plot_helpers</span>
 
@@ -736,7 +736,7 @@ document.write(`
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        geometry.LineString</span>
-<span class="sd">            horizontal line at water level (2d if `sz`=True, 3d if `yz`=False)</span>
+<span class="sd">            horizontal line at water level (2d if sz==True, 3d if sz==False)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># get water level in camera config vertical datum</span>
@@ -969,6 +969,44 @@ document.write(`
             <span class="n">csl_pol_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">coords</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])]</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="n">csl_pol_coords</span><span class="p">]</span>
         <span class="n">polygons</span> <span class="o">=</span> <span class="p">[</span><span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="n">csl_pol_coords</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">polygons</span></div>
+
+<div class="viewcode-block" id="CrossSection.get_bbox"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.get_bbox.html#pyorc.CrossSection.get_bbox">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a closed single bounding box for the cross section for use in the CameraConfig.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h : float</span>
+<span class="sd">            water level [m]</span>
+<span class="sd">        length : float, optional</span>
+<span class="sd">            length of the cross-section lateral expansion (from up to downstream) [m], by default 2.0.</span>
+<span class="sd">        offset : float, optional</span>
+<span class="sd">            perpendicular offset of the expanded cross section from the original cross section coordinates [m],</span>
+<span class="sd">            by default 0.0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        shapely.geometry.Polygon</span>
+<span class="sd">            polygon representing the bounding box of the camera config.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        CrossSection.get_planar_surface : this function retrieves separate polygons if the water crosses land multiple</span>
+<span class="sd">            times</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">csl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_csl_line</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># get water line(s) in 3D</span>
+        <span class="c1"># only use most extreme lines in case multiple crossings occur</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">csl</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bounding box cannot be created, as water line does not cross land at least twice.&quot;</span><span class="p">)</span>
+        <span class="n">csl_2d</span> <span class="o">=</span> <span class="p">[</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">args</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">csl</span><span class="p">]</span>  <span class="c1"># make 2D for bounding box creation</span>
+        <span class="n">line1</span> <span class="o">=</span> <span class="n">csl_2d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">line2</span> <span class="o">=</span> <span class="n">csl_2d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># combine</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">MultiLineString</span><span class="p">([</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">])</span>
+
+        <span class="c1"># return minimum rotated bbox</span>
+        <span class="k">return</span> <span class="n">lines</span><span class="o">.</span><span class="n">minimum_rotated_rectangle</span></div>
+        
 
 <div class="viewcode-block" id="CrossSection.get_bbox_dry_wet"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.get_bbox_dry_wet.html#pyorc.CrossSection.get_bbox_dry_wet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_bbox_dry_wet</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1250,7 +1288,7 @@ document.write(`
         <span class="c1">#     pol = pol[0]</span>
         <span class="k">return</span> <span class="n">geometry</span><span class="o">.</span><span class="n">MultiPolygon</span><span class="p">(</span><span class="n">pol</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CrossSection.get_wetted_surface"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.get_wetted_surface.html#pyorc.CrossSection.get_wetted_surface">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_wetted_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">camera</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">swap_y_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
+<div class="viewcode-block" id="CrossSection.get_wetted_surface"><a class="viewcode-back" href="../../../_generated/pyorc.CrossSection.get_wetted_surface.html#pyorc.CrossSection.get_wetted_surface">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_wetted_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">camera</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">swap_y_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">MultiPolygon</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve a wetted surface for a given water level, as a geometry.Polygon.</span>
 
 <span class="sd">        Parameters</span>

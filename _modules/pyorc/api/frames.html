@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.frames &#8212; pyorc 0.9.3 documentation</title>
+    <title>pyorc.api.frames &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -133,7 +133,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -419,7 +419,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.animation</span><span class="w"> </span><span class="kn">import</span> <span class="n">FuncAnimation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">project</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyorc</span><span class="w"> </span><span class="kn">import</span> <span class="n">const</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">project</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyorc.velocimetry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ffpiv</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.orcbase</span><span class="w"> </span><span class="kn">import</span> <span class="n">ORCBase</span>
@@ -442,6 +442,15 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Frames</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xarray_obj</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_projected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the frames are projected.</span>
+
+<span class="sd">        If not you should first apply `Frames.project` on the frames before applying anything related to</span>
+<span class="sd">        projected frames.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;xs&quot;</span><span class="p">,</span> <span class="s2">&quot;ys&quot;</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_piv_coords</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">window_size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">search_area_size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">overlap</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
@@ -805,7 +814,7 @@ document.write(`
         <span class="n">frames_norm</span> <span class="o">=</span> <span class="n">frames_norm</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">roll_mean</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">frames_norm</span></div>
 
-<div class="viewcode-block" id="Frames.time_diff"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.time_diff.html#pyorc.Frames.time_diff">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">time_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thres</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Frames.time_diff"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.time_diff.html#pyorc.Frames.time_diff">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">time_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thres</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a difference over time.</span>
 
 <span class="sd">        Method subtracts frame 1 from frame 2, frame 2 from frame 3, etcetera.</span>
@@ -815,8 +824,8 @@ document.write(`
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        thres : float, optional</span>
-<span class="sd">            obsolute value intensity threshold to set values to zero when intensity is lower than this threshold</span>
-<span class="sd">            default: 2.</span>
+<span class="sd">            absolute value intensity threshold to set values to zero when intensity is lower than this threshold</span>
+<span class="sd">            default: 0.0.</span>
 <span class="sd">        abs : boolean, optional</span>
 <span class="sd">            if set to True (default: False) apply absolute value on result</span>
 
@@ -827,9 +836,8 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">frames_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
-        <span class="n">frames_diff</span> <span class="o">=</span> <span class="n">frames_diff</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">frames_diff</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">thres</span><span class="p">)</span>
+        <span class="n">frames_diff</span> <span class="o">=</span> <span class="n">frames_diff</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">frames_diff</span> <span class="o">&gt;</span> <span class="n">thres</span><span class="p">)</span>
         <span class="n">frames_diff</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span>
-        <span class="c1"># frames_diff -= frames_diff.min(dim=[&quot;x&quot;, &quot;y&quot;])</span>
         <span class="n">frames_diff</span> <span class="o">=</span> <span class="n">frames_diff</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">frames_diff</span><span class="p">)</span>
@@ -920,6 +928,82 @@ document.write(`
             <span class="n">frames</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">))</span>
         <span class="n">anim</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">animate</span><span class="p">,</span> <span class="n">init_func</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="n">frames</span><span class="p">,</span> <span class="o">**</span><span class="n">anim_kwargs</span><span class="p">)</span>
         <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">**</span><span class="n">video_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Frames.to_geotiff"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_geotiff.html#pyorc.Frames.to_geotiff">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_geotiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export a single GeoTIFF file, using the geospatial coordinates.</span>
+
+<span class="sd">        This can only be used on a projected frames object, containing geographical coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fn : str</span>
+<span class="sd">            Path to the output GeoTIFF file.</span>
+<span class="sd">        frame : int</span>
+<span class="sd">            Index of the frame to export.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_projected</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The frames object must be projected to export as GeoTIFF.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">frame</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">frame</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Frame index </span><span class="si">{</span><span class="n">frame</span><span class="si">}</span><span class="s2"> is out of bounds for frames object with length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="c1"># get the raw frame to export</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">frame</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># get the transform for the GeoTIFF</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cc</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">transform</span>
+        <span class="c1"># write the GeoTIFF using rasterio</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">to_geotiff</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_geotiffs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">start_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_frame</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.tif&quot;</span><span class="p">,</span>
+        <span class="n">progress_bar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export multiple frames as individual GeoTIFF files.</span>
+
+<span class="sd">        This can only be used on a projected frames object, containing geographical coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prefix : str</span>
+<span class="sd">            Prefix for the output GeoTIFF files.</span>
+<span class="sd">        start_frame : int, optional</span>
+<span class="sd">            Index of the first frame to export. If not specified, defaults to 0.</span>
+<span class="sd">        end_frame : int, optional</span>
+<span class="sd">            Index of the last frame to export. If not specified, defaults to the length of the frames object.</span>
+<span class="sd">        stride : int, optional</span>
+<span class="sd">            Step size between frames to export. Default is 1 (export every frame).</span>
+<span class="sd">        suffix : str, optional</span>
+<span class="sd">            Suffix for the output GeoTIFF files. Default is &quot;.tif&quot;.</span>
+<span class="sd">        progress_bar : bool, optional</span>
+<span class="sd">            Display a progress bar while exporting frames. Default is True.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_projected</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The frames object must be projected to export as GeoTIFFs.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_frame</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">end_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_frame</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_frame</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">end_frame</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span> <span class="ow">or</span> <span class="n">start_frame</span> <span class="o">&gt;=</span> <span class="n">end_frame</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid frame range: start_frame=</span><span class="si">{</span><span class="n">start_frame</span><span class="si">}</span><span class="s2">, end_frame=</span><span class="si">{</span><span class="n">end_frame</span><span class="si">}</span><span class="s2">, length=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">progress_bar</span><span class="p">:</span>
+            <span class="n">frame_range</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start_frame</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">,</span> <span class="n">stride</span><span class="p">),</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">frame_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_frame</span><span class="p">,</span> <span class="n">end_frame</span><span class="p">,</span> <span class="n">stride</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frame_range</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">frame</span><span class="si">:</span><span class="s2">04d</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_geotiff</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">)</span>
+            <span class="n">fns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Frames.to_video"><a class="viewcode-back" href="../../../_generated/pyorc.Frames.to_video.html#pyorc.Frames.to_video">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">video_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write frames to a video file without any layout.</span>

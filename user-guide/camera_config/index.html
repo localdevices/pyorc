@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Camera configurations &#8212; pyorc 0.9.3 documentation</title>
+    <title>Camera configurations &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -136,7 +136,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -513,7 +513,9 @@ row coordinate is, and do this for several locations, the field of view of the c
 view.</p></li>
 <li><p>4 corner points that approximately indicate the bounding box of your area of interest. These must be provided in
 the order <em>upstream-left</em>, <em>downstream-left</em>, <em>downstream-right</em>, <em>upstream-right</em>, where left is the left-bank
-as seen while looking in downstream direction.</p></li>
+as seen while looking in downstream direction. An exception is when you have a nadir drone video. In this case,
+it may be assumed that the entire view is relevant. In the Command-Line interface you can then skip providing corner
+points.</p></li>
 <li><p>If you wish to use the video only from a selected frame (for instance if the first frames/seconds are bad quality, or
 moving) then you must also provide the frame number from which you would like to start the analysis and provide the
 camera configuration information. This is done with the <code class="docutils literal notranslate"><span class="pre">-f</span></code> or <code class="docutils literal notranslate"><span class="pre">--frame-sample</span></code> option. In the interactive
@@ -647,6 +649,10 @@ interest.</p>
 </pre></div>
 </div>
 <p>The dots represent additional required to make a full camera configuration.</p>
+<p>If you provide a list of real-world ground control points in the command-line interface, and you supply <code class="docutils literal notranslate"><span class="pre">--crs</span></code>,
+then the real-world coordinates will be assumed to have the CRS WGS84 lat-lon. If this is not the case, then
+you MUST provide the CRS of the real-world coordinates with the option <code class="docutils literal notranslate"><span class="pre">--gcps_crs</span></code>. This will then be used to
+transform the coordinates provided to the CRS provided with <code class="docutils literal notranslate"><span class="pre">--crs</span></code>. If you do not provide <code class="docutils literal notranslate"><span class="pre">--gcps_crs</span></code>.</p>
 </div>
 <input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-3">
@@ -1101,11 +1107,15 @@ unexpected direction more easily, and without tuning of masking parameters.</p>
 <input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-10">
 Command-line</label><div class="sd-tab-content docutils">
-<p id="camera-config-cli-bbox">In the command-line interface there are two options to establish a bounding box to the camera configuration:</p>
+<p id="camera-config-cli-bbox">In the command-line interface there are three options to establish a bounding box to the camera configuration:</p>
 <ul class="simple">
 <li><p>use the option <code class="docutils literal notranslate"><span class="pre">--corners</span></code> and supply a JSON-formatted list of 4 column, row pairs, similar to the approach
 used for supplying <code class="docutils literal notranslate"><span class="pre">--src</span></code>.</p></li>
 <li><p>use an interactive point-and-click view to click the points into your camera objective.</p></li>
+<li><p>skip providing corners, and then <em>pyorc</em> will assume that the entire view is relevant. <strong>This is strictly only
+possible with nadir drone videos</strong> as in these cases, it may be assumed that no horizon is visible, and the
+area shown is limited. In the CLI this is detected by the amount of control points provided. If you have only
+provided two points, the assumption is that the video is nadir.</p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">--corners</span></code> options works in exactly the same way as <code class="docutils literal notranslate"><span class="pre">--src</span></code>. <em>pyorc</em> uses the 4 corners to draw a geographical
 best-fitting rectangular box automatically and add this to the camera configuration.</p>
@@ -1252,6 +1262,8 @@ interactively on the command line.</p>
 in both planar view (with a satellite background if a CRS has been used) and in the camera perspective. The file
 names for this have the same name as &lt;OUTPUT&gt; but with the suffixes <code class="docutils literal notranslate"><span class="pre">_geo.jpg</span></code> for the planar view and
 <code class="docutils literal notranslate"><span class="pre">_cam.jpg</span></code> for the camera FOV perspective.</p>
+<p>After the configuration is stored, the CLI will ask if you want to receive a GeoTIFF of the projected
+frame. If you select “Yes”, this will be provided side-by-side with the camera configuration file.</p>
 </div>
 <input id="sd-tab-item-15" name="sd-tab-set-7" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-15">

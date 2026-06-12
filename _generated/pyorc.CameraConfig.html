@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>pyorc.CameraConfig &#8212; pyorc 0.9.3 documentation</title>
+    <title>pyorc.CameraConfig &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -136,7 +136,7 @@
     <script>document.write(`<img src="../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -401,6 +401,9 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.plot_bbox.html">pyorc.CameraConfig.plot_bbox</a></li>
 </ul>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CameraConfig.rotate.html">pyorc.CameraConfig.rotate</a></li>
+</ul>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.html">pyorc.CrossSection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_points.html">pyorc.CrossSection.cs_points</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.cs_points_sz.html">pyorc.CrossSection.cs_points_sz</a></li>
@@ -421,6 +424,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_wetted_surface_sz.html">pyorc.CrossSection.get_wetted_surface_sz</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_line_of_interest.html">pyorc.CrossSection.get_line_of_interest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_bbox_dry_wet.html">pyorc.CrossSection.get_bbox_dry_wet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.get_bbox.html">pyorc.CrossSection.get_bbox</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.CrossSection.linearize.html">pyorc.CrossSection.linearize</a></li>
@@ -467,6 +471,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.camera_config.html">pyorc.Frames.camera_config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.camera_shape.html">pyorc.Frames.camera_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.h_a.html">pyorc.Frames.h_a</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.is_projected.html">pyorc.Frames.is_projected</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.edge_detect.html">pyorc.Frames.edge_detect</a></li>
@@ -487,6 +492,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.plot.html">pyorc.Frames.plot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.to_ani.html">pyorc.Frames.to_ani</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.to_video.html">pyorc.Frames.to_video</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Frames.to_geotiff.html">pyorc.Frames.to_geotiff</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.html">pyorc.Velocimetry</a></li>
@@ -514,6 +520,9 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.get_transect.html">pyorc.Velocimetry.get_transect</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.set_encoding.html">pyorc.Velocimetry.set_encoding</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.to_ugrid.html">pyorc.Velocimetry.to_ugrid</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pyorc.Velocimetry.plot.html">pyorc.Velocimetry.plot</a></li>
@@ -753,40 +762,43 @@ gcps are available.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.project_points.html#pyorc.CameraConfig.project_points" title="pyorc.CameraConfig.project_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_points</span></code></a>(points[, within_image, ...])</p></td>
 <td><p>Project real world x, y, z coordinates into col, row coordinates on image.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_translate_bbox</span></code>([angle, xoff, yoff])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.rotate.html#pyorc.CameraConfig.rotate" title="pyorc.CameraConfig.rotate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate</span></code></a>(pts_old, pts_new)</p></td>
+<td><p>Rotate the entire camera configuration based on two sets of points.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_translate_bbox</span></code>([angle, xoff, yoff])</p></td>
 <td><p>Rotate and translate the bounding box.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners" title="pyorc.CameraConfig.set_bbox_from_corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bbox_from_corners</span></code></a>(corners)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_corners.html#pyorc.CameraConfig.set_bbox_from_corners" title="pyorc.CameraConfig.set_bbox_from_corners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bbox_from_corners</span></code></a>(corners)</p></td>
 <td><p>Establish bbox based on a set of camera perspective corner points.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_width_length.html#pyorc.CameraConfig.set_bbox_from_width_length" title="pyorc.CameraConfig.set_bbox_from_width_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bbox_from_width_length</span></code></a>(points)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_bbox_from_width_length.html#pyorc.CameraConfig.set_bbox_from_width_length" title="pyorc.CameraConfig.set_bbox_from_width_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bbox_from_width_length</span></code></a>(points)</p></td>
 <td><p>Establish bbox based on three provided points.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_gcps</span></code>(src, dst, z_0[, h_ref, crs])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_gcps</span></code>(src, dst, z_0[, h_ref, crs])</p></td>
 <td><p>Set ground control points for the given CameraConfig.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html#pyorc.CameraConfig.set_lens_calibration" title="pyorc.CameraConfig.set_lens_calibration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_lens_calibration</span></code></a>(fn[, chessboard_size, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_lens_calibration.html#pyorc.CameraConfig.set_lens_calibration" title="pyorc.CameraConfig.set_lens_calibration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_lens_calibration</span></code></a>(fn[, chessboard_size, ...])</p></td>
 <td><p>Calibrate and set the properties <cite>camera_matrix</cite> and <cite>dist_coeffs</cite> using a video of a chessboard pattern.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html#pyorc.CameraConfig.set_lens_position" title="pyorc.CameraConfig.set_lens_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_lens_position</span></code></a>(x, y, z[, crs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.set_lens_position.html#pyorc.CameraConfig.set_lens_position" title="pyorc.CameraConfig.set_lens_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_lens_position</span></code></a>(x, y, z[, crs])</p></td>
 <td><p>Set the geographical position of the lens of current CameraConfig.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict" title="pyorc.CameraConfig.to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_dict.html#pyorc.CameraConfig.to_dict" title="pyorc.CameraConfig.to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict</span></code></a>()</p></td>
 <td><p>Return the CameraConfig object as dictionary.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_dict_str.html#pyorc.CameraConfig.to_dict_str" title="pyorc.CameraConfig.to_dict_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict_str</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_dict_str.html#pyorc.CameraConfig.to_dict_str" title="pyorc.CameraConfig.to_dict_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict_str</span></code></a>()</p></td>
 <td><p>Convert the current instance to a dictionary with all values converted to strings.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_file.html#pyorc.CameraConfig.to_file" title="pyorc.CameraConfig.to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_file</span></code></a>(fn)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_file.html#pyorc.CameraConfig.to_file" title="pyorc.CameraConfig.to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_file</span></code></a>(fn)</p></td>
 <td><p>Write the CameraConfig object to json structure.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_json.html#pyorc.CameraConfig.to_json" title="pyorc.CameraConfig.to_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.to_json.html#pyorc.CameraConfig.to_json" title="pyorc.CameraConfig.to_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json</span></code></a>()</p></td>
 <td><p>Convert CameraConfig object to string.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.unproject_points.html#pyorc.CameraConfig.unproject_points" title="pyorc.CameraConfig.unproject_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unproject_points</span></code></a>(points, zs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.unproject_points.html#pyorc.CameraConfig.unproject_points" title="pyorc.CameraConfig.unproject_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unproject_points</span></code></a>(points, zs)</p></td>
 <td><p>Reverse projects points in [column, row] space to [x, y, z] real world.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyorc.CameraConfig.z_to_h.html#pyorc.CameraConfig.z_to_h" title="pyorc.CameraConfig.z_to_h"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_to_h</span></code></a>(z)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyorc.CameraConfig.z_to_h.html#pyorc.CameraConfig.z_to_h" title="pyorc.CameraConfig.z_to_h"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_to_h</span></code></a>(z)</p></td>
 <td><p>Convert z coordinates of bathymetry to height coordinates in local reference (e.g.</p></td>
 </tr>
 </tbody>

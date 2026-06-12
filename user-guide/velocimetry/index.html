@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Velocimetry &#8212; pyorc 0.9.3 documentation</title>
+    <title>Velocimetry &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -136,7 +136,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -503,12 +503,20 @@ supply an extra section in the recipe as follows:</p>
 </pre></div>
 </div>
 <p>Here the <code class="docutils literal notranslate"><span class="pre">engine:</span> <span class="pre">numba</span></code> ensures that the much faster numba implementation is used (default).
-<code class="docutils literal notranslate"><span class="pre">window_size:</span> <span class="pre">64</span></code> overrides any window size provided in the camera configuration and sets it to 64. When
-using the engine parameter with <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, you can also provide memory safety margins by manually
+<code class="docutils literal notranslate"><span class="pre">window_size:</span> <span class="pre">64</span></code> overrides any window size provided in the camera configuration and sets it to 64.
+You can also provide memory safety margins by manually
 adjusting the chunk size with the <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> parameter. If you notice a memory warning is given, and
 <code class="docutils literal notranslate"><span class="pre">chunksize</span></code> is set to 5, try manually setting it to e.g. 3 or 2. The default should be reasonably safe, so we
 hope you never have to touch this parameter at all :-) unless you process very very large videos with very
 large objectives.</p>
+<p>If you have normalized your images, or used differencing in time with thresholding to zero to enhance the
+visibility of tracers, your image likely contains many zero values leading to interrogation windows with
+very little signal.This can lead to very noisy results, and also unnecessary computations in areas where only
+background was visible. To prevent this, you can set a <code class="docutils literal notranslate"><span class="pre">signal_threshold</span></code> (default is unset) to filter out
+windows with little signal. This is computed as the fraction of non-zero pixels in the window stack. This can
+lead to much better and cleaner results and also speed up the processing by skipping windows with little signal.
+E.g. 0.2 means that at least 20% of the pixels in the window stack should be non-zero to be included in the
+correlation processing. This is usually a good default when you use differenced images.</p>
 <p>You can also set <code class="docutils literal notranslate"><span class="pre">ensemble_corr</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code>.  With this option, cross correlation will be computed for all
 frames, and correlation are averaged per interrogation window, before extracting displacements and estimating
 velocity. You can control that certain frame-to-frame correlation estimates are discarded by adding
@@ -522,7 +530,8 @@ set to missing and will not yield any velocity. Default for this value is 0.2.</
 <p>It seems a little superfluous to have a section called <code class="docutils literal notranslate"><span class="pre">velocimetry</span></code>, then a subsection <code class="docutils literal notranslate"><span class="pre">get_piv</span></code> and then
 the flags used in <code class="docutils literal notranslate"><span class="pre">get_piv</span></code>, however, we wish to keep the option open to add other velocimetry methods here.
 Perhaps in the near future we may offer a method <code class="docutils literal notranslate"><span class="pre">get_ptv</span></code> to use Particle Tracking Velocimetry
-instead of Partical Image Velocimetry. This method follows particles instead of using cross correlation.</p>
+instead of Particle Image Velocimetry. Or <cite>get_stiv</cite> to retrieve velocities over lines using
+Space-Time Image Velocimetry (STIV).</p>
 </div>
 </div>
 <input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
@@ -546,7 +555,9 @@ override automatically computed chunk amounts by setting <code class="docutils l
 You may also set <code class="docutils literal notranslate"><span class="pre">memory_factor</span></code> to a higher amount than the default (2). <code class="docutils literal notranslate"><span class="pre">memory_factor</span></code>
 decides on the fraction of the memory reserved for one entire chunk of computation. E.g. by setting it to 4 only
 1/4th of the available memory is assumed to be available. In practice, for large problems, more temporary
-memory storage is needed within the subprocessing. Passing <code class="docutils literal notranslate"><span class="pre">ensemble_corr=True</span></code> uses ensemble correlation
+memory storage is needed within the subprocessing. Use <code class="docutils literal notranslate"><span class="pre">signal_threshold</span></code> to remove windows with little signal
+after preprocessing. E.g. 0.2 will remove windows with less than 20% non-zero pixels. Passing
+<code class="docutils literal notranslate"><span class="pre">ensemble_corr=True</span></code> uses ensemble correlation
 averaging. This provides additional control for tuning of the signal-to-noise ratio with <code class="docutils literal notranslate"><span class="pre">corr_min</span></code>
 (default: 0.3) which is the minimum correlation value accepted, and <code class="docutils literal notranslate"><span class="pre">s2n_min</span></code> (default=3) which controls
 the minimum signal-to-noise ratio accepted. Finally a <code class="docutils literal notranslate"><span class="pre">count_min</span></code> (default=0.2) can be provided, which

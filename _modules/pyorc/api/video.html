@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.video &#8212; pyorc 0.9.3 documentation</title>
+    <title>pyorc.api.video &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -133,7 +133,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -551,7 +551,23 @@ document.write(`
             <span class="c1"># set a gridded mask based on the roi points</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_mask_from_exterior</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stabilize</span><span class="p">)</span>
         <span class="c1"># set end and start frame</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_COUNT</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_COUNT</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">frame_count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">lazy</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Video file </span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2"> has no proper metadata compromising reading frames with `lazy=True`.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;This usually happens with videos that are unexpectedly and ungracefully closed during writing. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;I cannot continue with `lazy=True`. You may re-attempt reading this video with `lazy=False`.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Video file </span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2"> has no proper metadata compromising reading frames. This usually happens with videos &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;that are unexpectedly and ungracefully closed during writing. I will attempt to read the video... &quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">frame_count</span> <span class="o">=</span> <span class="mi">3600</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># set to a very high number</span>
+        <span class="c1"># if frame_count is negative, likely the video is not gracefully closed while writing,</span>
+        <span class="c1"># then frame_count = end_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">=</span> <span class="n">frame_count</span> <span class="k">if</span> <span class="n">frame_count</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">end_frame</span>
         <span class="k">if</span> <span class="n">start_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">start_frame</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start frame is larger than total amount of frames&quot;</span><span class="p">)</span>

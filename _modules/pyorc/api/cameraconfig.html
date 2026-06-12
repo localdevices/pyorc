@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyorc.api.cameraconfig &#8212; pyorc 0.9.3 documentation</title>
+    <title>pyorc.api.cameraconfig &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -133,7 +133,7 @@
     <script>document.write(`<img src="../../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -1317,6 +1317,49 @@ document.write(`
         <span class="n">points_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unproject_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;z_0&quot;</span><span class="p">])</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">get_aoi</span><span class="p">(</span><span class="n">points_xyz</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;width_length&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span></div>
+
+<div class="viewcode-block" id="CameraConfig.rotate"><a class="viewcode-back" href="../../../_generated/pyorc.CameraConfig.rotate.html#pyorc.CameraConfig.rotate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pts_old</span><span class="p">,</span> <span class="n">pts_new</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;CameraConfig&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rotate the entire camera configuration based on two sets of points.</span>
+
+<span class="sd">        The selected sets of points represent the same in the real world, but are different in the camera perspective.</span>
+<span class="sd">        This method can be used to correct a camera pose in cases where the camera was accidentally rotated e.g.</span>
+<span class="sd">        during maintenance work. This method only works when the camera has not significantly changed in horizontal or</span>
+<span class="sd">        vertical position (a few cm are ok, but not tens of cms).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pts_old : list of lists (2 or more)</span>
+<span class="sd">             [col, row] coordinates in original camera perspective without any undistortion applied, representing the</span>
+<span class="sd">             same real-world points as pts_new</span>
+<span class="sd">        pts_new : list of lists (2 or more)</span>
+<span class="sd">             [col, row] coordinates in changed camera perspective without any undistortion applied, representing the</span>
+<span class="sd">             same real-world points as pts_old</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        CameraConfig</span>
+<span class="sd">            New CameraConfig instance with rotated camera configuration. Also the [col, row] points in gcps[&quot;src&quot;] are</span>
+<span class="sd">            updated to reflect the new camera perspective.</span>
+<span class="sd">        error : np.ndarray</span>
+<span class="sd">            Reprojection error of the rotation increment, which can be used to assess the quality of the rotation.</span>
+<span class="sd">            The errors are measured in normalized pixels. E.g. an error of 0.001 means that the points are off by 0.001</span>
+<span class="sd">            times the focal length of the camera, which is typically around 1 pixel for a focal length of 1000 pixels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># compute rotation increment from old and new points</span>
+        <span class="n">rvec_increment</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">find_rotation_points</span><span class="p">(</span><span class="n">pts_old</span><span class="p">,</span> <span class="n">pts_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_coeffs</span><span class="p">)</span>
+        <span class="c1"># impose rotation increment on current rvec and tvec</span>
+        <span class="n">rvec_new</span><span class="p">,</span> <span class="n">tvec_new</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">rotate_pose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rvec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tvec</span><span class="p">,</span> <span class="n">rvec_increment</span><span class="p">)</span>
+        <span class="c1"># modify camera configuration with new rvec and tvec, and compute new src points from dst</span>
+        <span class="n">new_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">new_config</span><span class="o">.</span><span class="n">rvec</span> <span class="o">=</span> <span class="n">rvec_new</span>
+        <span class="n">new_config</span><span class="o">.</span><span class="n">tvec</span> <span class="o">=</span> <span class="n">tvec_new</span>
+        <span class="c1"># compute new src points from dst</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="n">new_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;dst&quot;</span><span class="p">]</span>
+        <span class="n">src_new</span> <span class="o">=</span> <span class="n">new_config</span><span class="o">.</span><span class="n">project_points</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+        <span class="n">new_config</span><span class="o">.</span><span class="n">gcps</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_new</span>
+        <span class="k">return</span> <span class="n">new_config</span><span class="p">,</span> <span class="n">error</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">rotate_translate_bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">xoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">yoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rotate and translate the bounding box.</span>

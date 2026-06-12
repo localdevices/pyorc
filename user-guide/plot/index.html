@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting &#8212; pyorc 0.9.3 documentation</title>
+    <title>Plotting &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -136,7 +136,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -591,7 +591,8 @@ maximum value you wish to show on a color scale. Furthermore, you may add an opt
 a colorbar in the lower left corner. This colorbar will be bounded by the values supplied with <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>.
 If you do not supply <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code>, then a standard colorbar with limits of 0 and 3 with pretty breaks is used.
 Note that any parameter added is not mandatory! If you leave the parameters out, then default values will be used
-instead.</p>
+instead. <code class="docutils literal notranslate"><span class="pre">colorbar_loc</span></code> controls the location of the colorbar, <code class="docutils literal notranslate"><span class="pre">0</span></code> is lower left, <code class="docutils literal notranslate"><span class="pre">1</span></code> lower right,
+<code class="docutils literal notranslate"><span class="pre">2</span></code> upper right, <code class="docutils literal notranslate"><span class="pre">3</span></code> upper left (default: <code class="docutils literal notranslate"><span class="pre">0</span></code>).</p>
 <ul class="simple">
 <li><p>quiver (default): “quivers” are arrows pointing into the vector direction, with the length and (possibly) color
 representing the scalar value of the velocity. See <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.quiver.html" target="_blank">this page</a>. Especially the <code class="docutils literal notranslate"><span class="pre">scale</span></code> parameter is a little counter-

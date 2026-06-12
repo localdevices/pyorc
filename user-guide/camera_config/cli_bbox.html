@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>&lt;no title&gt; &#8212; pyorc 0.9.3 documentation</title>
+    <title>&lt;no title&gt; &#8212; pyorc 0.9.6 documentation</title>
   
   
   
@@ -134,7 +134,7 @@
     <script>document.write(`<img src="../../_static/orc_logo_color.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
-    <p class="title logo__title">pyOpenRiverCam 0.9.3</p>
+    <p class="title logo__title">pyOpenRiverCam 0.9.6</p>
   
 </a></div>
     
@@ -407,11 +407,15 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p id="camera-config-cli-bbox">In the command-line interface there are two options to establish a bounding box to the camera configuration:</p>
+  <p id="camera-config-cli-bbox">In the command-line interface there are three options to establish a bounding box to the camera configuration:</p>
 <ul class="simple">
 <li><p>use the option <code class="docutils literal notranslate"><span class="pre">--corners</span></code> and supply a JSON-formatted list of 4 column, row pairs, similar to the approach
 used for supplying <code class="docutils literal notranslate"><span class="pre">--src</span></code>.</p></li>
 <li><p>use an interactive point-and-click view to click the points into your camera objective.</p></li>
+<li><p>skip providing corners, and then <em>pyorc</em> will assume that the entire view is relevant. <strong>This is strictly only
+possible with nadir drone videos</strong> as in these cases, it may be assumed that no horizon is visible, and the
+area shown is limited. In the CLI this is detected by the amount of control points provided. If you have only
+provided two points, the assumption is that the video is nadir.</p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">--corners</span></code> options works in exactly the same way as <code class="docutils literal notranslate"><span class="pre">--src</span></code>. <em>pyorc</em> uses the 4 corners to draw a geographical
 best-fitting rectangular box automatically and add this to the camera configuration.</p>
