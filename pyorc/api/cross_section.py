@@ -649,11 +649,6 @@ class CrossSection:
         ]
         bbox = cv.get_aoi(dst_corners, resolution=None, method="width_length")
         return bbox
-        # # combine
-        # lines = geometry.MultiLineString([line1, line2])
-
-        # # return minimum rotated bbox
-        # return lines.minimum_rotated_rectangle
 
     def get_bbox_dry_wet(
         self,
