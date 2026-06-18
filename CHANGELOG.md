@@ -1,4 +1,4 @@
-## [0.9.7] = xxxx-xx-xx
+## [0.9.7] = 2026-06-18
 ### Added
 ### Changed
 - `CameraConfig.rotate_translate_bbox` can now also handle parameter `x_add` and `y_add` to increase the up/downstream
