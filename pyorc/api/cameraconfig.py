@@ -953,7 +953,9 @@ class CameraConfig:
         new_config.gcps["src"] = src_new
         return new_config, error
 
-    def rotate_translate_bbox(self, angle: float = None, xoff: float = None, yoff: float = None):
+    def rotate_translate_bbox(
+        self, angle: float = None, xoff: float = None, yoff: float = None, x_add: float = None, y_add: float = None
+    ) -> "CameraConfig":
         """Rotate and translate the bounding box.
 
         Parameters
@@ -964,6 +966,10 @@ class CameraConfig:
             Translation distance in x direction in m.
         yoff : float, optional
             Translation distance in y direction in m.
+        x_add : float, optional
+            Additional length to grow the bounding box in the up-to-downstream direction in m.
+        y_add : float, optional
+            Additional length to grow the bounding box in the cross-stream direction in m.
 
         Returns
         -------
@@ -1013,6 +1019,37 @@ class CameraConfig:
 
         # Apply translation
         bbox = shapely.affinity.translate(bbox, xoff=dx, yoff=dy)
+
+        # Grow bbox with x_add in x direction
+        if x_add is not None:
+            # get new coordinates from bbox after rotation and translation
+            coords = list(bbox.exterior.coords)
+            # make linestrings of up-to-downstream edges
+            l1 = LineString(coords[0:2])
+            l2 = LineString(coords[2:4])
+            # scale
+            fact = (l1.length + x_add) / l1.length
+            print(fact)
+            l1_scaled = shapely.affinity.scale(l1, xfact=fact, yfact=fact, origin="center")
+            l2_scaled = shapely.affinity.scale(l2, xfact=fact, yfact=fact, origin="center")
+            new_coords = list(l1_scaled.coords) + list(l2_scaled.coords)
+            bbox = Polygon(new_coords)
+        # Grow bbox with y_add in y-direction
+        if y_add is not None:
+            # get new coordinates from bbox after rotation and translation
+            coords = list(bbox.exterior.coords)
+            # make linestrings of cross-stream edges
+            l1 = LineString([coords[0], coords[3]])
+            l2 = LineString([coords[1], coords[2]])
+            # scale
+            fact = (l1.length + y_add) / l1.length
+            print(fact)
+            l1_scaled = shapely.affinity.scale(l1, xfact=fact, yfact=fact, origin="center")
+            l2_scaled = shapely.affinity.scale(l2, xfact=fact, yfact=fact, origin="center")
+            new_coords = list(l1_scaled.coords) + list(l2_scaled.coords)
+            # bring back original order of coordinates, this is needed to ensure that the bbox is in the right direction
+            new_coords = [new_coords[0], new_coords[2], new_coords[3], new_coords[1]]
+            bbox = Polygon(new_coords)
         new_config.bbox = bbox
         return new_config
 

@@ -200,9 +200,12 @@ def test_cs_repr(cs):
 
 
 def test_get_bbox(cs):
-    bbox = cs.get_bbox(h=92.09)
+    z = min(cs.z[0], cs.z[-1]) - 0.05
+    h = cs.camera_config.z_to_h(z)
+    bbox = cs.get_bbox(h=h)
     assert isinstance(bbox, geometry.Polygon)
     assert not bbox.has_z
+
 
 def test_get_bbox_dry_wet(cs):
     # check also what happens with a double geom in wet part

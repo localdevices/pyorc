@@ -199,6 +199,12 @@ def test_rotate_translate_bbox(cam_config_6gcps):
     assert np.isclose(bbox_rotated.area, cam_config_6gcps.bbox.area)
 
 
+def test_rotate_translate_bbox_add(cam_config_6gcps):
+    bbox_growth = cam_config_6gcps.rotate_translate_bbox(x_add=None, y_add=2).bbox
+    # assert if the surface is larger than the original one
+    assert bbox_growth.area > cam_config_6gcps.bbox.area
+
+
 def test_set_bbox_from_3points(cam_config_6gcps, corners_length_width, bbox_length_width):
     """Test if defining bbox from 3 points works as expected."""
     cam_config_6gcps.set_bbox_from_width_length(corners_length_width)
