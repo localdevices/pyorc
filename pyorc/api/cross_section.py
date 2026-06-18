@@ -122,6 +122,37 @@ def _histogram_union(edges, hist1, hist2):
     return 2 - union
 
 
+def _find_infinite_intersection(line1, line2):
+    """Find the intersection point of two lines, even if they do not intersect within the line segments."""
+    # Extract coordinates
+    x1, y1 = line1.coords[0]
+    x2, y2 = line1.coords[1]
+    x3, y3 = line2.coords[0]
+    x4, y4 = line2.coords[1]
+
+    # Line 1 as: a1*x + b1*y = c1
+    a1 = y2 - y1
+    b1 = x1 - x2
+    c1 = a1 * x1 + b1 * y1
+
+    # Line 2 as: a2*x + b2*y = c2
+    a2 = y4 - y3
+    b2 = x3 - x4
+    c2 = a2 * x3 + b2 * y3
+
+    # Determinant
+    determinant = a1 * b2 - a2 * b1
+
+    if determinant == 0:
+        return None  # Lines are parallel and will never intersect
+
+    # Solve for intersection point
+    x = (b2 * c1 - b1 * c2) / determinant
+    y = (a1 * c2 - a2 * c1) / determinant
+
+    return geometry.Point(x, y)
+
+
 class CrossSection:
     """Water Level functionality."""
 
@@ -565,6 +596,9 @@ class CrossSection:
     def get_bbox(self, h: float, length: float = 2.0, offset: float = 0.0) -> geometry.Polygon:
         """Create a closed single bounding box for the cross section for use in the CameraConfig.
 
+        The bounding box coordinate order is from upstream-left, to downstream-left, to downstream-right, to
+        upstream-right, and back to upstream-left. This is computed with geometrical operations.
+
         Parameters
         ----------
         h : float
@@ -593,12 +627,33 @@ class CrossSection:
         csl_2d = [transform(lambda *args: args[:2], line) for line in csl]  # make 2D for bounding box creation
         line1 = csl_2d[0]
         line2 = csl_2d[-1]
-        # combine
-        lines = geometry.MultiLineString([line1, line2])
 
-        # return minimum rotated bbox
-        return lines.minimum_rotated_rectangle
-        
+        diff_coord = (np.array(line1.centroid.coords[0]) - np.array(line2.centroid.coords[0])) / 2
+
+        # move l2 to centroid
+        line_middle = affinity.translate(line2, xoff=diff_coord[0], yoff=diff_coord[1])
+        # make line the right required length
+        fact = length / line_middle.length
+        line_middle = affinity.scale(line_middle, xfact=fact, yfact=fact)
+        # make a line that crosses the left and right line so that we can find the crossings with the left and right
+        # bank. This line is the geometric center between the left and right line.
+        line_cross = affinity.rotate(line_middle, 90, origin=line_middle.centroid)
+        # find the crossings in order line1 - line2 so that we can keep the coordinate order of the bbox in control
+        p_cross1 = _find_infinite_intersection(line1, line_cross)
+        p_cross2 = _find_infinite_intersection(line2, line_cross)
+        p_length = geometry.Point(*line_middle.coords[0])
+        dst_corners = [
+            np.array(p_cross1.xy).flatten().tolist(),
+            np.array(p_cross2.xy).flatten().tolist(),
+            np.array(p_length.xy).flatten().tolist(),
+        ]
+        bbox = cv.get_aoi(dst_corners, resolution=None, method="width_length")
+        return bbox
+        # # combine
+        # lines = geometry.MultiLineString([line1, line2])
+
+        # # return minimum rotated bbox
+        # return lines.minimum_rotated_rectangle
 
     def get_bbox_dry_wet(
         self,
