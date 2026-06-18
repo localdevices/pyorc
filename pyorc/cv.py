@@ -116,7 +116,7 @@ def _get_aoi_corners(dst_corners, resolution=None):
 
 
 def _get_aoi_width_length(dst_corners):
-    points = [Point(x, y) for x, y, _ in dst_corners]
+    points = [Point(x, y) for x, y in np.array(dst_corners)[:, 0:2]]  # make sure Z is skipped
     linecross = LineString([points[0], points[1]])
     # linecross = LineString(dst_corners[0:2])
     length = np.abs(_get_perpendicular_distance(points[-1], linecross))

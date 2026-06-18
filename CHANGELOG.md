@@ -1,6 +1,19 @@
+## [0.9.7] = xxxx-xx-xx
+### Added
+### Changed
+- `CameraConfig.rotate_translate_bbox` can now also handle parameter `x_add` and `y_add` to increase the up/downstream
+  and left-right bank distance of the bounding box.
+
+### Deprecated
+### Removed
+### Fixed
+- `CrossSection.get_bbox` returned bounding box coordinates that were not following a predictable order. Function has been
+  recreated to ensure the first corner is upstream-left.
+
+
 ## [0.9.6] = 2026-06-06
 ### Added
-- `CrossSection.create_bbox` create a `CameraConfig` compatible bounding box over a user-selected length upstream
+- `CrossSection.get_bbox` creates a `CameraConfig` compatible bounding box over a user-selected length upstream
   and downstream, which fits nicely around the chosen cross section.
 - `Frames.to_geotiff` writes a GeoTIFF for the selected frame. In the command-line interface `camera-config` allows
   for writing the sample frame to an RGB GeoTIFF using this method.
