@@ -328,7 +328,7 @@ def parse_geotiff(videofile, cam_config_file, fn_geotiff, frame_sample=0, logger
         # retrieve RGB
         frames = vid.get_frames(method="rgb")
         # project to cam config coordinates and write geotiff
-        frames_proj = frames.frames.project()
+        frames_proj = frames.frames.project(reducer="nearest")
         frames_proj.frames.to_geotiff(fn=fn_geotiff, frame=0)
         logger.info(f"Sample geotiff written to {fn_geotiff}")
     except Exception as e:

@@ -32,7 +32,7 @@ def get_ffpiv(
     res_y: float,
     res_x: float,
     chunksize: Optional[int] = None,
-    memory_factor: float = 2,
+    memory_factor: float = 4,
     engine: Literal["numba", "numpy", "openpiv"] = "numba",
     ensemble_corr: bool = False,
     corr_min: float = 0.2,
