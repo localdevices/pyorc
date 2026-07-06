@@ -1,3 +1,14 @@
+## [0.9.8] = 2026-07-06
+### Added
+### Changed
+- Default CLI maximum memory consumption is set to 1/4th of total available memory (was 1/2) for added stability
+- GeoTIFF preview is resampled with "nearest neighbour" to reduce interpolation memory usage.
+
+### Deprecated
+### Removed
+### Fixed
+
+
 ## [0.9.7] = 2026-06-18
 ### Added
 ### Changed
