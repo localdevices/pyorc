@@ -1231,7 +1231,7 @@ def optimize_intrinsic(src, dst, height, width, c=2.0, lens_position=None, camer
     if len(dst) > 4 and dist_coeffs is None:
         bounds.append([-0.5, 0.5])  # k1
         bounds.append([-0.1, 0.1])  # k2
-    else:
+    elif len(dst) <= 4:
         # set a warning if dist_coeffs is provided without sufficient ground control
         if dist_coeffs:
             warnings.warn(
