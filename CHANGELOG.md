@@ -1,3 +1,11 @@
+## [0.9.9] = 2026-xx-xx
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- bug in optimize_instrinsic. Case where distortion coefficients were already known and 6 or more GCPs were provided, were re-constraining the distortion coefficient.
+
 ## [0.9.8] = 2026-07-06
 ### Added
 ### Changed
