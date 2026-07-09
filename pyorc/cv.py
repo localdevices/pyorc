@@ -654,8 +654,20 @@ def calibrate_camera(
     # remove badly performing images and recalibrate
     errs = []
     for i in range(len(obj_pts)):
-        img_pts2, _ = cv2.projectPoints(obj_pts[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
-        errs.append(cv2.norm(img_pts[i], img_pts2, cv2.NORM_L2) / len(img_pts2))
+        img_pts2, _ = cv2.projectPoints(
+                obj_pts[i],
+                rvecs[i],
+                tvecs[i],
+                camera_matrix,
+                dist_coeffs
+        )
+        
+        img1 = img_pts[i].reshape(-1, 2)
+        img2 = img_pts2.reshape(-1, 2)
+
+        errs.append(
+             cv2.norm(img1, img2, cv2.NORM_L2) / len(img2)
+        )
 
     if tolerance is not None:
         # remove high error
