@@ -654,8 +654,20 @@ def calibrate_camera(
     # remove badly performing images and recalibrate
     errs = []
     for i in range(len(obj_pts)):
-        img_pts2, _ = cv2.projectPoints(obj_pts[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
-        errs.append(cv2.norm(img_pts[i], img_pts2, cv2.NORM_L2) / len(img_pts2))
+        img_pts2, _ = cv2.projectPoints(
+                obj_pts[i],
+                rvecs[i],
+                tvecs[i],
+                camera_matrix,
+                dist_coeffs
+        )
+
+        img1 = img_pts[i].reshape(-1, 2)
+        img2 = img_pts2.reshape(-1, 2)
+
+        errs.append(
+             cv2.norm(img1, img2, cv2.NORM_L2) / len(img2)
+        )
 
     if tolerance is not None:
         # remove high error
@@ -666,8 +678,20 @@ def calibrate_camera(
         ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(obj_pts, img_pts, frame_size, None, None)
         errs = []
         for i in range(len(obj_pts)):
-            img_pts2, _ = cv2.projectPoints(obj_pts[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
-            errs.append(cv2.norm(img_pts[i], img_pts2, cv2.NORM_L2) / len(img_pts2))
+            img_pts2, _ = cv2.projectPoints(
+                obj_pts[i],
+                rvecs[i],
+                tvecs[i],
+                camera_matrix,
+                dist_coeffs
+            )
+            # Normalize point array shapes before computing the reprojection error.
+            # OpenCV 5 requires matching array layouts for cv2.norm().
+            detected_pts = img_pts[i].reshape(-1, 2)
+            reprojected_pts = img_pts2.reshape(-1, 2)
+
+            error = cv2.norm(detected_pts, reprojected_pts, cv2.NORM_L2)
+            errs.append(error / len(reprojected_pts))
     print(f"Average error on point reconstruction is {np.array(errs).mean()}")
     return camera_matrix, dist_coeffs
 
