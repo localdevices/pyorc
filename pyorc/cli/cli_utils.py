@@ -57,6 +57,12 @@ def get_corners_interactive(
     # setup a cam_config without
 
 
+def _check_src_dst_length(src, dst):
+    """Check if src and dst have the same length."""
+    if len(src) != len(dst):
+        raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
+
+
 def get_gcps_interactive(
     fn,
     dst,
@@ -95,9 +101,11 @@ def get_gcps_interactive(
         )
         plt.show(block=True)
         src = selector.src
+        _check_src_dst_length(src, dst)
         camera_matrix = selector.camera_matrix
         dist_coeffs = selector.dist_coeffs
     else:
+        _check_src_dst_length(src, dst)
         _, _, camera_matrix, dist_coeffs, _, _, _ = get_gcps_optimized_fit(
             src,
             dst,
@@ -108,8 +116,8 @@ def get_gcps_interactive(
             dist_coeffs=dist_coeffs,
             lens_position=lens_position,
         )
-    if len(src) != len(dst):
-        raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
+    # if len(src) != len(dst):
+    #     raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
 
     return src, camera_matrix, dist_coeffs
 
