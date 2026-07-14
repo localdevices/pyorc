@@ -57,9 +57,16 @@ def get_corners_interactive(
     # setup a cam_config without
 
 
+def _check_src_dst_length(src, dst):
+    """Check if src and dst have the same length."""
+    if len(src) != len(dst):
+        raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
+
+
 def get_gcps_interactive(
     fn,
     dst,
+    src=None,
     crs=None,
     crs_gcps=None,
     frame_sample=0,
@@ -82,17 +89,37 @@ def get_gcps_interactive(
 
     if crs_gcps is not None:
         dst = helpers.xyz_transform(dst, crs_from=crs_gcps, crs_to=4326)
-    selector = GcpSelect(
-        frame,
-        dst,
-        crs=crs,
-        camera_matrix=camera_matrix,
-        dist_coeffs=dist_coeffs,
-        lens_position=lens_position,
-        logger=logger,
-    )
-    plt.show(block=True)
-    return selector.src, selector.camera_matrix, selector.dist_coeffs
+    if src is None:
+        selector = GcpSelect(
+            frame,
+            dst,
+            crs=crs,
+            camera_matrix=camera_matrix,
+            dist_coeffs=dist_coeffs,
+            lens_position=lens_position,
+            logger=logger,
+        )
+        plt.show(block=True)
+        src = selector.src
+        _check_src_dst_length(src, dst)
+        camera_matrix = selector.camera_matrix
+        dist_coeffs = selector.dist_coeffs
+    else:
+        _check_src_dst_length(src, dst)
+        _, _, camera_matrix, dist_coeffs, _, _, _ = get_gcps_optimized_fit(
+            src,
+            dst,
+            frame.shape[0],
+            frame.shape[1],
+            c=2.0,
+            camera_matrix=camera_matrix,
+            dist_coeffs=dist_coeffs,
+            lens_position=lens_position,
+        )
+    # if len(src) != len(dst):
+    #     raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
+
+    return src, camera_matrix, dist_coeffs
 
 
 def get_stabilize_pol(fn, frame_sample=0, rotation=None, logger=logging):

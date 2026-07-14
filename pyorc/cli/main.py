@@ -111,7 +111,9 @@ def cli(ctx, info, license):
     help="Second lens radial distortion coefficient k2 [-]. See also https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html",
 )
 @click.option(
-    "--window_size", type=int, help="Target window size [px] for interrogation window for Particle Image Velocimetry"
+    "--window_size",
+    type=int,
+    help="Target window size [px] for interrogation window for Particle Image Velocimetry",
 )
 @click.option(
     "--shapefile",
@@ -189,7 +191,7 @@ def camera_config(
         )
     if window_size is None:
         window_size: int = click.prompt(
-            "--window_size not provided, please enter a number, or Enter for default", default=10
+            "--window_size not provided, please enter a number, or Enter for default", default=64
         )
     if shapefile is not None:
         if dst is None:
@@ -220,28 +222,28 @@ def camera_config(
     else:
         nadir = False
 
-    if not src:
-        logger.warning(
-            "No source ground control points provided. No problem, you can interactively click them in your objective"
-        )
-        if click.confirm(
-            "Do you want to continue and provide source ground controlpoints interactively?", default=True
-        ):
-            src, camera_matrix, dist_coeffs = cli_utils.get_gcps_interactive(
-                videofile,
-                dst,
-                crs=crs,
-                crs_gcps=crs_gcps,
-                frame_sample=frame_sample,
-                focal_length=focal_length,
-                k1=k1,
-                k2=k2,
-                lens_position=lens_position,
-                rotation=rotation,
-                logger=logger,
-            )
-            if len(src) != len(dst):
-                raise click.UsageError(f"You have not provided enough source points {len(src)}/{len(dst)} available")
+    # if not src:
+    #     logger.warning(
+    #         "No source ground control points provided. No problem, you can interactively click them in your objective"
+    #     )
+    #     if click.confirm(
+    #         "Do you want to continue and provide source ground controlpoints interactively?", default=True
+    #     ):
+    src, camera_matrix, dist_coeffs = cli_utils.get_gcps_interactive(
+        videofile,
+        dst,
+        src=src,
+        crs=crs,
+        crs_gcps=crs_gcps,
+        frame_sample=frame_sample,
+        focal_length=focal_length,
+        k1=k1,
+        k2=k2,
+        lens_position=lens_position,
+        rotation=rotation,
+        logger=logger,
+    )
+
     if crs is None and crs_gcps is not None:
         raise click.UsageError(f"--crs is None while --crs_gcps is {crs_gcps}, please supply --crs.")
     gcps = {"src": src, "dst": dst, "z_0": z_0, "h_ref": h_ref, "crs": crs_gcps}

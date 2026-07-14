@@ -5,6 +5,8 @@
 ### Removed
 ### Fixed
 - bug in optimize_instrinsic. Case where distortion coefficients were already known and 6 or more GCPs were provided, were re-constraining the distortion coefficient.
+- bug in command-line interface. With --src and --dst provided on CLI, code would crash. This is now solved, and user is no longer asked to provide --src interactively
+  as this is always required in any case.
 
 ## [0.9.8] = 2026-07-06
 ### Added
