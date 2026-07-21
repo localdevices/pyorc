@@ -426,7 +426,7 @@ class CameraConfig:
         max_imgs : int, optional
             maximum amount of images to use for calibration (default: 30).
         tolerance : float, optional
-            error tolerance alowed for reprojection of corner points (default: 0.1, if set to None, no filtering will
+            error tolerance allowed for reprojection of corner points (default: 0.1, if set to None, no filtering will
             be done). images that exceed the tolerance are excluded from calibration. This is to remove images with
             spuriously defined points, or blurry images.
         plot : bool, optional
