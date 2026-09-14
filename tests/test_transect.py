@@ -61,11 +61,14 @@ def test_get_cross_section(piv_transect):
     "method",
     [
         "quiver",
-        # "scatter",
     ],
 )
-def test_plot(piv_transect, mode, method):
+@pytest.mark.parametrize(
+    "units",
+    ["metric", "imperial"],
+)
+def test_plot(piv_transect, mode, method, units):
     if mode == "geographical" and not CARTOPY_AVAILABLE:
         pytest.importorskip("cartopy", "Cartopy is required for geographical plotting")
     piv_transect.transect.get_q()
-    piv_transect.isel(quantile=2).transect.plot(method=method, mode=mode, add_text=True)
+    piv_transect.isel(quantile=2).transect.plot(method=method, mode=mode, add_text=True, units=units)
