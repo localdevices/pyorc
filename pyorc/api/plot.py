@@ -170,14 +170,11 @@ def _base_plot(plot_func):
             x = ref._obj["xp"].values
             y = ref._obj["yp"].values
             u, v, s = ref.get_uv_camera()
-            print("XMIN: ", x.min(), "XMAX: ", x.max(), "YMIN: ", y.min(), "YMAX: ", y.max())
         # now create the figure and axes object
         if x.max() - x.min() > y.max() - y.min():
             portrait = False
-            print("LANDSCAPE")
         else:
             portrait = True
-            print("PORTRAIT")
         ax = _prepare_axes(ax=ax, mode=mode, portrait=portrait)
         # update ax
 
@@ -290,14 +287,11 @@ def _frames_plot(ref, ax=None, mode="local", **kwargs):
                 f'Object contains dimension "time" with length {len(ref._obj.time)}. Reduce dataset by selecting'
                 "one time step or taking a median, mean or other statistic."
             )
-    if mode == "camera":
-        rotation = ref.camera_config.rotation
-    else:
-        rotation = None
-    ax = _prepare_axes(ax=ax, mode=mode, rotation=rotation)
     if mode == "local":
         x = "x"
         y = "y"
+        xrange = ref._obj["x"].max().item() - ref._obj["x"].min().item()
+        yrange = ref._obj["y"].max().item() - ref._obj["y"].min().item()
     elif mode == "geographical":
         # import some additional packages
         import cartopy.crs as ccrs
@@ -306,12 +300,22 @@ def _frames_plot(ref, ax=None, mode="local", **kwargs):
         kwargs["transform"] = ccrs.PlateCarree()
         x = "lon"
         y = "lat"
+        xrange = ref._obj["lon"].max().item() - ref._obj["lon"].min().item()
+        yrange = ref._obj["lat"].max().item() - ref._obj["lat"].min().item()
+
     else:
         # mode is camera
         x = "xp"
         y = "yp"
+        xrange = ref.camera_config.width
+        yrange = ref.camera_config.height
         # turn off axis as coordinates are not relevant to user
+    # check for orientation requirements
+    portrait = False if xrange > yrange else True
+    ax = _prepare_axes(ax=ax, mode=mode, portrait=portrait)
+    if mode == "camera":
         ax.axis("off")
+
     assert all(v in ref._obj.coords for v in [x, y]), f'required coordinates "{x}" and/or "{y}" are not available'
     if x == "x":
         # use a simple imshow, much faster
@@ -786,14 +790,16 @@ def plot_text(ax, ds, prefix, suffix, units="metric"):
     string = prefix
     if units == "imperial":
         h = h * 3.28084  # convert m to ft
-        Q = Q * 35.3147  # convert m3/s to ft3/s
+        Q_plot = Q * 35.3147  # convert m3/s to ft3/s
         v_surf = v_surf * 3.28084  # convert m/s to ft/s
         v_bulk = v_bulk * 3.28084  # convert m/s to ft/s
+    else:
+        Q_plot = Q
     string += (
         f"$h_a$: {h:1.2f} {'m' if units == 'metric' else 'ft'} | "
         f"$v_{{surf}}$: {v_surf.values:1.2f} {'m/s' if units == 'metric' else 'ft/s'} | "
         f"$\\overline{{v}}$: {v_bulk.values:1.2f} {'m/s' if units == 'metric' else 'ft/s'}\n"
-        f"$Q$: {Q.values:1.2f} {'m3/s' if units == 'metric' else 'ft3/s'}"
+        f"$Q$: {Q_plot.values:1.2f} {'m3/s' if units == 'metric' else 'ft3/s'}"
     )
 
     if "q_nofill" in ds:
@@ -815,7 +821,7 @@ def plot_text(ax, ds, prefix, suffix, units="metric"):
     )
 
 
-def _prepare_axes(ax=None, mode="local", rotation=None, portrait=True):
+def _prepare_axes(ax=None, mode="local", portrait=True):
     """Prepare the axes, needed to plot results, called from `pyorc.api.plot`.
 
     Parameters
@@ -826,8 +832,6 @@ def _prepare_axes(ax=None, mode="local", rotation=None, portrait=True):
         if not provided (default), a new axes is prepared (default: None)
     mode : str, optional
         mode to plot, can be "local" (default), "geographical" or "camera".
-    rotation : Int[0, 90, 180, 270], optional
-        Rotation of image (if vertically oriented, axis sizes are also rotated).
     portrait : bool, optional
         plot in portrait mode if set to True (default), otherwise landscape mode is used.
 
@@ -846,10 +850,8 @@ def _prepare_axes(ax=None, mode="local", rotation=None, portrait=True):
                 ax, GeoAxesSubplot
             ), "For mode=geographical, the provided axes must be a cartopy GeoAxesSubplot"
         return ax
-
     # make a screen filling figure with black edges and faces
     if portrait:
-        # if rotation in [90, 270]:
         f = plt.figure(figsize=(9, 16), frameon=False, facecolor="k")
         f.set_size_inches(9, 16, True)
     else:
