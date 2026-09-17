@@ -825,7 +825,7 @@ class CameraConfig:
         # mapping of pixels from image to ortho
         coli, rowi = np.meshgrid(np.arange(self.width), np.arange(self.height))
         # first exclude pixels not within the area of interest, can save a lot of time
-        poly = self.get_bbox(mode="camera", z_a=z)
+        poly = self.get_bbox(mode="camera", z_a=z, within_image=True)
         mask = rasterize([poly], out_shape=(self.height, self.width)) == 1
         src_pix = list(zip(coli[mask], rowi[mask]))
 
