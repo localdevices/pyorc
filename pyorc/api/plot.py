@@ -84,11 +84,14 @@ def _base_plot(plot_func):
         add_text : boolean, optional
             if True, add a text label in the axes displaying information about the video's transect
         units : str, optional
-            units to use for the plot. Can be "metric" or "imperial" (default: "metric")
+            units to use for the plot. Can be "metric" or "imperial" (default: "metric"). Only used if `add_text=True`
+            and when plotting a transect.
         text_prefix : str, optional
-            string to add in front of standard text on transect plot. Only used if `add_text=True`
+            string to add in front of standard text on transect plot. Only used if `add_text=True` and when plotting a
+            transect.
         text_suffix : str, optional
-            String to add after standard text on transect plot. Only used if `add_text=True`
+            String to add after standard text on transect plot. Only used if `add_text=True` and when plotting a
+            transect.
         kwargs_line : dict, optional
             additional keyword arguments passed to matplotlib.pyplot.plot for plotting cross-section.
             (Default value = {})

@@ -1,3 +1,17 @@
+
+## [0.9.10] = 2026-07-13
+### Added
+### Changed
+- plotting of result text from transect results on plots can be done with imperial units. This will give water level
+  in ft, velocities in ft/s and discharge in ft3/s. Imperial can be added with `units="imperial"` during calling of
+  `Transect.plot` with `add_text=True`.
+### Deprecated
+### Removed
+### Fixed
+- Fixed bug in plotting causing portrait videos to be extruded as if they are landscape
+- Fixed bug with reprojection failing, when all corners of bounding boxes fall outside field of view.
+
+
 ## [0.9.9] = 2026-07-13
 ### Added
 ### Changed
