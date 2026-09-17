@@ -7,9 +7,6 @@ name = "pyopenrivercam"
 authors = [
   { name = "Hessel Winsemius", email = "winsemius@rainbowsensing.com" },
 ]
-packages = [
-    { include = "pyorc" }
-]
 
 dependencies = [
     "click",
