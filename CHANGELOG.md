@@ -1,5 +1,5 @@
 
-## [0.9.10] = 2026-07-13
+## [0.9.10] = 2026-09-17
 ### Added
 ### Changed
 - plotting of result text from transect results on plots can be done with imperial units. This will give water level
