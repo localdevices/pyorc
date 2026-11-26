@@ -3,6 +3,7 @@
 from .cameraconfig import CameraConfig, get_camera_config, load_camera_config
 from .cross_section import CrossSection
 from .frames import Frames
+from .multi_transect import MultiTransect
 from .transect import Transect
 from .velocimetry import Velocimetry
 from .video import Video
@@ -16,4 +17,5 @@ __all__ = [
     "Frames",
     "Velocimetry",
     "Transect",
+    "MultiTransect",
 ]

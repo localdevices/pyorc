@@ -1,3 +1,12 @@
+## [0.9.11] = 2026-11-XX
+### Added
+### Changed
+- Slight modification in memory cleanup in velocity processing with command line
+
+### Deprecated
+### Removed
+### Fixed
+
 
 ## [0.9.10] = 2026-09-17
 ### Added
