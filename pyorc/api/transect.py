@@ -243,7 +243,7 @@ class Transect(ORCBase):
              (Default value = "river_flow")
 
         """
-        if "q" not in self._obj:
+        if q_name not in self._obj:
             raise ValueError(
                 f'Dataset must contain variable "{q_name}", which is the depth-integrated velocity [m2 s-1], '
                 "perpendicular to cross-section. Create this with ds.transect.get_q"

@@ -598,7 +598,15 @@ class CameraConfig:
         z_dry = depth <= 0
         z_dry[[0, -1]] = True
         # compute distance to nearest dry points with Pythagoras
-        dist_shore = np.array([(((x[z_dry] - _x) ** 2 + (y[z_dry] - _y) ** 2) ** 0.5).min() for _x, _y in zip(x, y)])
+        # Vectorized approach using broadcasting for efficiency
+        x_arr = np.asarray(x)
+        y_arr = np.asarray(y)
+        x_dry = x_arr[z_dry]
+        y_dry = y_arr[z_dry]
+
+        # Broadcasting: (n_points, 1) - (n_dry_points,) = (n_points, n_dry_points)
+        distances = np.sqrt((x_arr[:, np.newaxis] - x_dry) ** 2 + (y_arr[:, np.newaxis] - y_dry) ** 2)
+        dist_shore = distances.min(axis=1)
         return dist_shore
 
     def get_dist_wall(self, x: List[float], y: List[float], z: List[float], h_a: Optional[float] = None) -> List[float]:
