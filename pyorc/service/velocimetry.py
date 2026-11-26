@@ -2,6 +2,7 @@
 
 import copy
 import functools
+import gc
 import json
 import logging
 import os.path
@@ -462,7 +463,13 @@ class VelocityFlowProcessor(object):
         if self.cross_section_wl is not None:
             self.water_level(**self.recipe["water_level"])
         self.frames(**self.recipe["frames"])
+        gc.collect()
+        self.logger.debug("Garbage collection after frames step")
+
         self.velocimetry(**self.recipe["velocimetry"])
+        gc.collect()
+        self.logger.debug("Garbage collection after velocimetry step")
+
         if "mask" in self.recipe:
             # check if ensemble_corr is used, if so, several masks with multi time steps will not do anything, warn.
             if "velocimetry" in self.recipe and self.recipe["velocimetry"].get("get_piv", {}).get(
@@ -474,16 +481,25 @@ class VelocityFlowProcessor(object):
                     "not have any effect."
                 )
             self.mask(**self.recipe["mask"])
+            gc.collect()
+            self.logger.debug("Garbage collection after mask step")
         else:
             # no masking so use non-masked velocimetry as masked
             self.velocimetry_mask_obj = self.velocimetry_obj
+
         if "transect" in self.recipe:
             if self.cross_section_fn is not None:
                 # ensure that the cross section is available for transect measurements
                 self.recipe["transect"]["transect_1"]["shapefile"] = self.cross_section_fn
             self.transect(**self.recipe["transect"])
+            gc.collect()
+            self.logger.debug("Garbage collection after transect step")
+
         if "plot" in self.recipe:
             self.plot(**self.recipe["plot"])
+            gc.collect()
+            self.logger.debug("Garbage collection after plot step")
+
         # remove all potentially memory consumptive attributes
         self.da_frames.close()
         self.velocimetry_mask_obj.close()
@@ -492,6 +508,7 @@ class VelocityFlowProcessor(object):
         delattr(self, "velocimetry_obj")
         delattr(self, "velocimetry_mask_obj")
         delattr(self, "da_frames")
+        gc.collect()
         self.logger.info("Velocimetry processing pipeline completed :-)")
         return None
         # TODO .get_transect and check if it contains data,
@@ -559,6 +576,7 @@ class VelocityFlowProcessor(object):
                 )
                 self.da_frames.frames.to_geotiff(**kwargs_geotiff)
             self.logger.info("Frames retrieved and preprocessed.")
+            gc.collect()
         except Exception as e:
             self.logger.error(f"Could not extract frames from video. Error: {e}")
             raise Exception(f"Could not extract frames from video. Error: {e}")
@@ -586,6 +604,7 @@ class VelocityFlowProcessor(object):
                 with ProgressBar():
                     delayed_obj.compute()
                 del delayed_obj
+                gc.collect()
                 self.logger.info(f"Velocimetry written to {self.fn_piv}")
                 # Load the velocimetry into memory to prevent re-writes in next steps
                 delattr(self, "velocimetry_obj")
@@ -597,8 +616,12 @@ class VelocityFlowProcessor(object):
                 with ProgressBar():
                     delayed_obj.compute()
                 del delayed_obj
+                ds_ugrid.close()
+                del ds_ugrid
+                gc.collect()
                 self.logger.info(f"Velocimetry ugrid written to {fn_piv_ugrid}")
             self.logger.info("Velocimetry successfully derived.")
+            gc.collect()
         except Exception as e:
             self.logger.error(f"Could not derive velocimetry from frames. Error: {e}")
             raise Exception(f"Could not derive velocimetry from frames. Error: {e}")
@@ -613,12 +636,14 @@ class VelocityFlowProcessor(object):
     def mask(self, write=False, write_ugrid=False, fill_na=None, **kwargs):
         try:
             self.logger.debug("Applying masks to velocimetry.")
-            self.velocimetry_mask_obj = copy.deepcopy(self.velocimetry_obj)
+            self.velocimetry_mask_obj = self.velocimetry_obj.copy(deep=True)
             for mask_name, mask_grp in kwargs.items():
                 self.logger.debug(f'Applying "{mask_name}" with parameters {mask_grp}')
                 masks = get_masks(self.velocimetry_mask_obj, **mask_grp)
                 # apply found masks on velocimetry object
                 self.velocimetry_mask_obj.velocimetry.mask(masks, inplace=True)
+                del masks
+                gc.collect()
             self.logger.info("Velocimetry masks applied")
             # set the encoding to a good compression level
             self.velocimetry_mask_obj.velocimetry.set_encoding()
@@ -628,6 +653,7 @@ class VelocityFlowProcessor(object):
                 with ProgressBar():
                     delayed_obj.compute()
                 del delayed_obj
+                gc.collect()
                 self.logger.info(f"Velocimetry masked written to {self.fn_piv_mask}")
 
             if write_ugrid:
@@ -637,9 +663,13 @@ class VelocityFlowProcessor(object):
                 with ProgressBar():
                     delayed_obj.compute()
                 del delayed_obj
+                ds_ugrid.close()
+                del ds_ugrid
+                gc.collect()
                 self.logger.info(f"Velocimetry masked ugrid written to {fn_piv_mask_ugrid}")
 
             self.logger.info(f"Velocimetry masked written to {self.fn_piv_mask}.")
+            gc.collect()
         except Exception as e:
             self.logger.error(f"Could not apply masks to velocimetry. Error: {e}")
             raise Exception(f"Could not apply masks to velocimetry. Error: {e}")
@@ -722,6 +752,8 @@ class VelocityFlowProcessor(object):
     )
     def plot(self, **plot_recipes):
         try:
+            import matplotlib.pyplot as plt
+
             self.logger.debug("Plotting velocimetry.")
             _plot_recipes = copy.deepcopy(plot_recipes)
             for name, plot_params in _plot_recipes.items():
@@ -744,6 +776,8 @@ class VelocityFlowProcessor(object):
                     p = f.frames.plot(ax=ax, mode=mode, **opts)
                     # continue with axes of p
                     ax = p.axes
+                    del f
+                    gc.collect()
                 if "velocimetry" in plot_params:
                     opts = plot_params["velocimetry"]
                     opts = vmin_vmax_to_norm(opts)
@@ -757,6 +791,7 @@ class VelocityFlowProcessor(object):
                     p = velocimetry_reduced.velocimetry.plot(ax=ax, mode=mode, **opts)
                     ax = p.axes
                     del velocimetry_reduced
+                    gc.collect()
                 if "transect" in plot_params:
                     for transect_name, opts in plot_params["transect"].items():
                         opts = vmin_vmax_to_norm(opts)
@@ -770,15 +805,23 @@ class VelocityFlowProcessor(object):
                         p = ds_trans_q.transect.plot(ax=ax, mode=mode, **opts)
                         ax = p.axes
                         # done with transect, remove from memory
+                        ds_trans_q.close()
                         ds_trans.close()
+                        del ds_trans_q
                         del ds_trans
+                        gc.collect()
                 # if mode == "camera":
                 #     ax.axis("equal")
                 write_pars = plot_params["write_pars"] if "write_pars" in plot_params else {}
                 self.logger.debug(f'Writing plot "{name}" to {fn_jpg}')
-                ax.figure.savefig(fn_jpg, **write_pars)
+                if ax is not None:
+                    ax.figure.savefig(fn_jpg, **write_pars)
+                    plt.close(ax.figure)
+                    del ax
+                    gc.collect()
                 self.logger.info(f'Plot "{name}" written to {fn_jpg}')
             self.logger.info("Plot procedure done.")
+            gc.collect()
         except Exception as e:
             self.logger.error(f"Could not plot velocimetry. Error: {e}")
             raise Exception(f"Could not plot velocimetry. Error: {e}")
